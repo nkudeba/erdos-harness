@@ -1,0 +1,14 @@
+| proof | PASS | compiles | sorry | banned | axioms | first error |
+|---|---|---|---|---|---|---|
+| Erdos1193 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos198 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos316 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos363 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos370 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos397 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos399 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos493 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos532 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos645 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos674 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+regress: 11 passed, 0 failed

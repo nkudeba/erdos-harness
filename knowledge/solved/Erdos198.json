@@ -1,0 +1,12 @@
+{
+  "problem": "198",
+  "run": "20260908-121335-144445-erdos198",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_198 :\n    \u2203 A : Set \u2115,\n      (\u2200 a \u2208 A, \u2200 b \u2208 A, \u2200 c \u2208 A, \u2200 d \u2208 A,\n          a + b = c + d \u2192 (a = c \u2227 b = d) \u2228 (a = d \u2227 b = c)) \u2227\n      (\u2200 a d : \u2115, 0 < d \u2192 \u2203 t : \u2115, a + t * d \u2208 A) := by\n  sorry",
+  "verified_at": "2026-09-08T16:24:44Z"
+}

@@ -1,0 +1,12 @@
+{
+  "problem": "316",
+  "run": "20260907-195619-erdos316",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "-- IMPORTS: Mathlib.Algebra.Order.Field.Rat\ntheorem erdos_316 :\n    \u2203 A : Finset \u2115, (\u2200 n \u2208 A, 2 \u2264 n) \u2227 (\u2211 n \u2208 A, (1 : \u211a) / n) < 2 \u2227\n      \u2200 A\u2081 A\u2082 : Finset \u2115, A\u2081 \u222a A\u2082 = A \u2192 Disjoint A\u2081 A\u2082 \u2192\n        \u00ac ((\u2211 n \u2208 A\u2081, (1 : \u211a) / n) < 1 \u2227 (\u2211 n \u2208 A\u2082, (1 : \u211a) / n) < 1) := by\n  sorry",
+  "verified_at": "2026-09-08T00:31:53Z"
+}

@@ -1,0 +1,7 @@
+{
+  "id": "350",
+  "statement": "If $A\\subset\\mathbb{N}$ is a finite set of integers which is dissociated (that is, all of the subset sums are distinct) then\\[\\sum_{n\\in A}\\frac{1}{n}<2.\\]",
+  "status": "PROVED (LEAN) — erdosproblems.com: 'This has been solved in the affirmative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE AFFIRMATIVE: for every finite set A of natural numbers all of whose subset sums are distinct (any two different subsets of A have different sums), the sum of the reciprocals of the elements of A is strictly less than 2. Formalize the affirmative assertion. Note that distinct subset sums already forces 0 ∉ A (the empty set and {0} would have the same sum), so all elements are positive. From the site: This was proved by Ryavec, who did not appear to ever publish the proof. Ryavec's proof is reproduced in [BeEr74]. More generally, Ryavec's proof delivers that Σ_{n∈A} 1/n ≤ 2 − 2^{1−|A|}, with equality if and only if A = {1, 2, ..., 2^k}. The stronger statement that, for all s ≥ 0, Σ_{n∈A} 1/n^s < 1/(1 − 2^{−s}), was proved by Hanson, Steele, and Stenger [HSS77].",
+  "url": "https://www.erdosproblems.com/350"
+}

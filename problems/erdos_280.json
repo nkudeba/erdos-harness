@@ -1,0 +1,7 @@
+{
+  "id": "280",
+  "statement": "Let $n_1<n_2<\\cdots$ be an infinite sequence of integers with associated $a_k\\pmod{n_k}$, such that for some $\\epsilon>0$ we have $n_k>(1+\\epsilon)k\\log k$ for all $k$. Then $\\#\\{ m<n_k : m\\not\\equiv a_i\\pmod{n_i} \\textrm{ for }1\\leq i\\leq k\\}\\neq o(k)$.",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: formalize the negation, i.e. there exist a strictly increasing sequence n_k (k >= 1) with residues a_k mod n_k and some epsilon > 0 with n_k > (1+epsilon) k log k for all k >= 1, such that the count #{m < n_k : m is not congruent to a_i mod n_i for all 1 <= i <= k} IS o(k) (tends to 0 after dividing by k). From the site: Erdős and Graham [ErGr80] suggest this 'may have to await improvements in current sieve methods'. Note that since the kth prime is ~ k log k the lower bound n_k > (1+epsilon) k log k is best possible here. Cambie has observed that this question has a trivial negative answer, since taking n_k = 2^k and a_k = 2^{k-1} + 1 for k >= 1 implies the only m not in any congruence class is 1, so the count is actually 1!",
+  "url": "https://www.erdosproblems.com/280"
+}

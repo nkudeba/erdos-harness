@@ -1,0 +1,24 @@
+{
+  "fingerprint": "ff8e32cffa50c99dbbc5ee31f13c18a9c610ae472227a249bde3970e3830c6db",
+  "module": "Formal.Campaigns.R95c2c757175e1cf1720b4a2f.Proof",
+  "declaration": "Formal.Campaigns.R95c2c757175e1cf1720b4a2f.result",
+  "type": "(\u27e80, 0, 0, -1, 0\u27e9 : WeierstrassCurve \u211a).\u0394 = 64",
+  "scope": "infrastructure",
+  "axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "at": "2026-09-09T06:11:38Z",
+  "files": {
+    "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/R95c2c757175e1cf1720b4a2f/Contract.lean": "0c715827bd893caa40b726930bfbff6229644062ead3323718d52e4a73f2686f",
+    "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/R95c2c757175e1cf1720b4a2f/Contract.olean": "f8e6f9cf091fa194ae92b62faa63a4eb09a8ef0a4203487042650e22b3657e69",
+    "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/R95c2c757175e1cf1720b4a2f/Proof.lean": "ad2fd0874c0845e5aff056c0b62a033acabbb649c89bab70d286468a298eff77",
+    "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/R95c2c757175e1cf1720b4a2f/Proof.olean": "a7e9a60b9ec4c9a24dab718df411d029c9686cc8975778a6d5d33a84b4d73d81",
+    "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/R95c2c757175e1cf1720b4a2f/Audit.lean": "7107c5ff7accfff98fc1cbe1a87936d94157e1e56fb9b2fee78b4a6e8a260ec7",
+    "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/R95c2c757175e1cf1720b4a2f/Audit.olean": "8443f9a6e10ab3d4769973b2748d4af1d120370d92d36c63fa78956acb5a1aeb"
+  },
+  "attempt": "/Users/nicolas.kudeba/workspace/erdos-harness/campaigns/bsd/work/attempts/discriminant/ba56d42e0d804f388f67ff7e374560cd",
+  "dependencies": {},
+  "certificate_hash": "2cd846c08b010309d7555137c5243b4a1c6ede02eaaf7c6bfef1686b7fd54d4e"
+}

@@ -1,0 +1,7 @@
+{
+  "id": "1193",
+  "statement": "Let $A\\subset \\mathbb{N}$ and let $g(n)$ be a non-decreasing function of $n$ which is always $>0$. Is the lower density of $\\{ n : 1_A\\ast 1_A(n)=g(n)\\}$ always $0$? Is the upper density always $<c$ for some constant $c<1$?",
+  "status": "SOLVED (LEAN) — erdosproblems.com: 'This has been resolved in some other way than a proof or disproof, and that resolution verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE (both questions): formalize the negation of the FIRST question, i.e. there exist A and a non-decreasing everywhere-positive g such that the set {n : 1_A*1_A(n) = g(n)} does NOT have lower density 0. Here 1_A*1_A(n) is the additive convolution: the number of ordered pairs (a,b) with a,b in A and a+b = n (so over N with 0 in N, for A = N it equals n+1). Lower density of a set S of naturals is liminf_{N->infinity} |S ∩ [0,N)| / N (any standard equivalent definition is fine, but it must be a genuine density, not a stand-in). From the site: Erdős writes the upper density can be positive, but he believes it is bounded away from 1. The answer is trivially no to both questions: indeed if A = N (assuming 0 in N) then 1_A*1_A(n) = n+1 for all n. Presumably Erdős had some additional restrictions on either g or A in mind, but these are not recorded in [Er80].",
+  "url": "https://www.erdosproblems.com/1193"
+}

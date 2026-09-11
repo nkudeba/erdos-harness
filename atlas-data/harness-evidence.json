@@ -1,0 +1,544 @@
+{
+  "242": {
+    "runs": 2,
+    "verified": 0,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "universal",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "Verified for all n \u2264 10^18 (reduces to primes); true unless n \u2261 one of 198 bad classes mod 120120 (Terzi); exceptions in [1,x] \u2264 x\u00b7exp(-c(log x)^{2/3}) (Vaughan)",
+        "routes": [
+          "Reduce to prime n via scaling 4/p = 1/x+1/y+1/z \u21d2 4/(mp) = 1/(mx)+1/(my)+1/(mz)",
+          "Parametric identities for n even, n \u2261 3 mod 4, n \u2261 2 mod 3, n \u2261 0 mod 3 via field_simp; ring, splitting 1/a = 1/(a+1)+1/(a(a+1)) for distinctness",
+          "Obl\u00e1th: n+1 divisible by a prime \u2261 3 mod 4 gives a solution; Mordell's identities cover all but {1,121,169,289,361,529} mod 840",
+          "Full conjecture (residues like n \u2261 1 mod 24) has no known proof; negation is false up to 10^18 so no counterexample search is viable"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "This is the open Erd\u0151s\u2013Straus conjecture: a universal statement unprovable in full by current mathematics and with no findable counterexample (verified to 10^18), so only partial residue-class results are formalizable and budget should be minimal."
+      },
+      {
+        "shape": "universal",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "Verified for all n \u2264 10^18 (MiDu25); true unless n \u2261 {1,121,169,289,361,529} mod 840 (Mordell); exceptions \u2264 x\u00b7exp(-c(log x)^{2/3}) (Vaughan)",
+        "routes": [
+          "Reduce to primes via scaling 4/p = 1/x+1/y+1/z \u21d2 4/(mp) = 1/(mx)+1/(my)+1/(mz); only partial cases provable",
+          "Parametric identities: n even (1/m+1/(m+1)+1/(m(m+1))), n\u22613 mod 4, n\u22612 mod 3, n\u22610 mod 3, verified by field_simp; ring",
+          "Obl\u00e1th criterion: n+1 divisible by a prime \u2261 3 mod 4",
+          "Residue class n \u2261 1 mod 24 / Mordell's bad classes mod 840 remain genuinely open \u2014 full statement not provable"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "This is the full Erd\u0151s\u2013Straus conjecture, open for 75+ years and verified to 10^18, so neither the statement nor its negation is provable; only partial residue-class results are attainable and the harness should not spend budget on a full proof."
+      }
+    ],
+    "failures": []
+  },
+  "399": {
+    "runs": 6,
+    "verified": 5,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Barfield counterexample 10! = 48^4 - 36^4; Erd\u0151s\u2013Obl\u00e1th proved non-existence for gcd(x,y)=1, k\u22604",
+        "routes": [
+          "refine \u27e810, 48, 36, 4, by norm_num, by norm_num, Or.inr ?_\u27e9 then decide / rfl (3628800 + 1679616 = 5308416)",
+          "same witness with norm_num [Nat.factorial] to evaluate 10! and the powers",
+          "same witness with simp only [Nat.factorial] followed by norm_num if decide is slow"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "The target is an existential in \u2115 with a known explicit small witness (n=10, x=48, y=36, k=4) that closes by kernel computation."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Explicit counterexample 10! = 48^4 - 36^4 (Barfield); Erd\u0151s\u2013Obl\u00e1th proved non-existence for gcd(x,y)=1, k\u22604",
+        "routes": [
+          "refine \u27e810, 48, 36, 4, by norm_num, by norm_num, Or.inr ?_\u27e9 then decide (closed \u2115 arithmetic, 3628800 + 1679616 = 5308416)",
+          "Same witness with norm_num [Nat.factorial] to evaluate 10! and the powers",
+          "Same witness with rfl / Nat.decEq kernel evaluation of the equation"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "The target is an existence statement with a known small explicit witness (n=10, x=48, y=36, k=4) that closes by decide/norm_num."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Barfield: 10! = 48^4 - 36^4 (Erd\u0151s\u2013Obl\u00e1th proved nonexistence for gcd(x,y)=1, k\u22604)",
+        "routes": [
+          "Instantiate \u27e810, 48, 36, 4\u27e9 with Or.inr and close 10! + 36^4 = 48^4 by norm_num [Nat.factorial]",
+          "Same witness closed by decide or rfl (kernel GMP arithmetic)",
+          "Same witness closed by simp [Nat.factorial] then norm_num"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "Explicit known counterexample; the frozen statement's second disjunct (n! + y^k = x^k) is exactly the Barfield identity, so a single anonymous-constructor term plus numeric evaluation suffices."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Barfield: 10! = 48^4 - 36^4 (Erd\u0151s\u2013Obl\u00e1th: no solutions when gcd(x,y)=1, k\u22604; Pollack\u2013Shapiro: none for n! = x^4 - 1)",
+        "routes": [
+          "Instantiate \u27e810, 48, 36, 4\u27e9, side conditions by norm_num, take Or.inr and close 3628800 + 1679616 = 5308416 via norm_num [Nat.factorial] or decide/rfl",
+          "Fallback: refine \u27e810,48,36,4,?_,?_,Or.inr ?_\u27e9 then simp [Nat.factorial] / rfl on each goal",
+          "Fallback: rewrite 10! as 3628800 via `show` or `Nat.factorial_succ` unfolding, then norm_num"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "Explicit known counterexample (10! + 36^4 = 48^4) makes the target a one-line existential instantiation closed by numeric evaluation."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Barfield: 10! = 48^4 - 36^4 (minus branch, gcd(48,36)=12); Erd\u0151s\u2013Obl\u00e1th proved no solutions when gcd(x,y)=1 and k\u22604",
+        "routes": [
+          "Instantiate \u27e810, 48, 36, 4\u27e9, Or.inr, close 10! + 36^4 = 48^4 by norm_num [Nat.factorial] or decide/rfl",
+          "Same witness with simp [Nat.factorial] then norm_num for the arithmetic",
+          "Kernel evaluation: `exact \u27e810, 48, 36, 4, by norm_num, by norm_num, Or.inr rfl\u27e9` (GMP-accelerated Nat)"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "The target is an existential with a known explicit witness (10! + 36^4 = 48^4 = 5308416) matching the second disjunct exactly, so it is a one-line numeric check."
+      }
+    ],
+    "failures": []
+  },
+  "370": {
+    "runs": 3,
+    "verified": 2,
+    "partial": false,
+    "assessments": [],
+    "failures": []
+  },
+  "532": {
+    "runs": 12,
+    "verified": 1,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "universal",
+        "status": "resolved",
+        "depth": "medium",
+        "computable": false,
+        "known_bound": "Hindman's theorem (1974): holds for any finite number of colours; Mathlib has Hindman.exists_FS_of_finite_cover via idempotent ultrafilters",
+        "routes": [
+          "Apply Hindman.exists_FS_of_finite_cover in \u2115+ to the cover {n | c n = i}, get a stream a with FS a \u2286 colour class; extract strictly increasing block-sum stream b with FS b \u2286 FS a; take A = range of b and show every nonempty finite subset sum of A lies in FS b",
+          "Same start, but extract a strictly increasing subsequence of FS-values via Hindman.FS.add / FS_iter_tail_sub_FS recursively instead of block grouping",
+          "Direct Galvin\u2013Glazer proof via an idempotent ultrafilter on \u2115+ (Hindman.FS_partition_regular packaging), then same set-extraction step"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "M",
+        "rationale": "The core theorem is already in Mathlib (Hindman), so the work is a nontrivial but routine transfer from streams/FS to an infinite set of positive integers with all nonempty finite subset sums monochromatic."
+      }
+    ],
+    "failures": []
+  },
+  "499": {
+    "runs": 2,
+    "verified": 0,
+    "partial": false,
+    "assessments": [],
+    "failures": []
+  },
+  "493": {
+    "runs": 3,
+    "verified": 2,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "k = 2, N = 0 works: 2*(n+2) - (2 + (n+2)) = n for all n >= 0 (Seamans)",
+        "routes": [
+          "refine \u27e82, 0, fun n hn => \u27e8![2, n + 2], ?_, ?_\u27e9\u27e9; bounds via Fin.forall_fin_two + omega; equation via simp [Fin.prod_univ_two, Fin.sum_univ_two] then ring/omega",
+          "intro i; fin_cases i <;> simp <;> omega for the bound goal if Fin.forall_fin_two does not fire",
+          "Fallback: Fin.prod_univ_succ / Fin.sum_univ_succ unfolding, then Matrix.cons_val_zero/one simp lemmas, then linarith"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "The frozen statement lets us choose k, so the explicit witness k=2, N=0, a=![2, n+2] closes it in a few tactic lines."
+      }
+    ],
+    "failures": []
+  },
+  "364": {
+    "runs": 3,
+    "verified": 0,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "universal",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "No triple with n < 7.38e28 (OEIS A076445); abc conjecture implies finitely many; Chan [Ch25]/She [Sh25] exclude special cube-middle shapes; no quadruples trivially (mod 4).",
+        "routes": [
+          "Full statement is open: neither the conjecture nor its negation is provable; do not attempt.",
+          "Provable satellites: no four consecutive powerful numbers via mod-4 argument with p = 2 (Nat.prime_two).",
+          "Structural constraints on hypothetical triple: middle term n+1 \u2261 0 mod 4, exactly one term divisible by 9.",
+          "A witness for the negation would need n > 7.38e28; any bounded search is hopeless."
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "Erd\u0151s #364 is a genuinely open universal Diophantine conjecture (abc-conditional only), so the harness should record it as unproven and at most prove elementary satellite lemmas."
+      },
+      {
+        "shape": "universal",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "No triple with n < 7.38e28 (OEIS A076445); abc conjecture implies finitely many; Chan [Ch25] and She [Sh25] exclude special cube-middle shapes; quadruples trivially impossible via mod 4.",
+        "routes": [
+          "Full statement is the open Erd\u0151s\u2013Mollin\u2013Walsh conjecture; no proof route available (abc-conditional only)",
+          "Provable satellites: no four consecutive powerful numbers via m \u2261 2 mod 4 case split with p = 2",
+          "Structural constraints on a hypothetical triple: middle term \u2261 0 mod 4, exactly one term divisible by 9",
+          "Bounded search for a witness (negation) is hopeless below 7.38e28; finite check cannot decide either direction"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "The target is exactly the open conjecture (no consecutive powerful triple), unprovable in either direction with current mathematics, so only satellite lemmas (quadruple impossibility, mod-4/mod-9 constraints) should be attempted and the main theorem left open."
+      }
+    ],
+    "failures": []
+  },
+  "674": {
+    "runs": 6,
+    "verified": 4,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Ko 1940: infinitely many solutions; smallest x=2^12*3^6, y=2^8*3^8, z=2^11*3^7",
+        "routes": [
+          "Exhibit Ko's witness x=2^12*3^6, y=2^8*3^8, z=2^11*3^7 and prove an abstract lemma (a^12 b^6)^x (a^8 b^8)^y = (a^11 b^7)^z from linear exponent identities 12x+8y=11z, 6x+8y=7z via mul_pow/pow_mul/pow_add",
+          "Write x=16k, y=9k, z=24k with k=2^8*3^6 and reduce to exponent arithmetic with norm_num on ~5e7-sized numbers only",
+          "Separate `have`s for each of the three (a*b)^n expansions, then rw and close with pow_add and the two linear identities"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "S",
+        "rationale": "Existence claim with a known explicit witness; the only difficulty is avoiding kernel evaluation of the astronomically large powers, handled by keeping exponents symbolic until the final exact."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Ko 1940: infinitely many solutions; e.g. x=2^12*3^6, y=2^8*3^8, z=2^11*3^7",
+        "routes": [
+          "Parametric lemma: (2^a*3^b)^x*(2^c*3^d)^y=(2^e*3^f)^z from a*x+c*y=e*z and b*x+d*y=f*z via mul_pow, \u2190 pow_mul, mul_mul_mul_comm, \u2190 pow_add; instantiate with a,b,c,d,e,f = 12,6,8,8,11,7 and let unification fill x,y,z",
+          "Same reduction via simp only [mul_pow, \u2190 pow_mul, \u2190 pow_add] then rw with the two norm_num-proved exponent identities",
+          "Reduce to congrArg on exponents after rewriting to 2^(..)*3^(..) form; never evaluate x^x with concrete x"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "Explicit Ko-type witness is known and the proof is a short structural rewrite on exponents, provided no tactic tries to evaluate the astronomically large powers."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "Ko 1940: infinitely many solutions, e.g. x=2^12*3^6, y=2^8*3^8, z=2^11*3^7",
+        "routes": [
+          "Parametric lemma: (2^a*3^b)^x*(2^c*3^d)^y=(2^e*3^f)^z from a*x+c*y=e*z and b*x+d*y=f*z via mul_pow/pow_mul/pow_add/mul_mul_mul_comm, then instantiate with a,b,c,d,e,f=12,6,8,8,11,7 leaving bases unevaluated",
+          "Same structure but reduce with simp only [mul_pow, \u2190 pow_mul, \u2190 pow_add] then rw the two exponent identities proved by norm_num",
+          "Prove via congrArg on exponents after commuting powers with pow_right_comm; 1<x goals by norm_num on the literal products"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "Explicit witness is known and the only risk is accidental evaluation of huge powers, avoided by a symbolic exponent lemma."
+      }
+    ],
+    "failures": []
+  },
+  "645": {
+    "runs": 2,
+    "verified": 1,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "universal",
+        "status": "resolved",
+        "depth": "elementary",
+        "computable": true,
+        "known_bound": "Brown\u2013Landman 1999: monochromatic 3-AP with d > f(x) for any increasing f; Alweiss short argument (eventual constancy)",
+        "routes": [
+          "Alweiss argument: WLOG c 1 = red; AP (1,3,5) forces 3 or 5 blue; Case 3 blue: for n\u22656 red n \u21d2 2n\u22121 blue \u21d2 n+1 red, so c eventually constant on [N,\u221e), witness (N, N+1); Case 5 blue: for n\u22659 red n \u21d2 n+2 red, so c eventually constant on odd numbers \u2265 N, witness (N, 2N) with N odd",
+          "Handle WLOG by proving a lemma for arbitrary c under hypothesis c 1 = true, then apply to c and to fun n => !c n",
+          "Compactness/finite route: find minimal M such that every 2-colouring of {1..M} has such a 3-AP (small backtracking search), then decide over Fin M \u2192 Bool via decide/native_decide and lift to \u2115 by restriction",
+          "Induction bookkeeping via Nat.le_induction and omega for all AP arithmetic; avoid \u2115 subtraction by writing third term as 1 + 2*(n-1) or reparametrising n = k+1"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "M",
+        "rationale": "Resolved for-all statement with a known short case-analysis proof (Alweiss) that is directly formalizable with Nat.le_induction and omega, plus a finite decide fallback."
+      }
+    ],
+    "failures": []
+  },
+  "198": {
+    "runs": 2,
+    "verified": 1,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "elementary",
+        "computable": false,
+        "known_bound": "Disproved: A = {(n+1)! + n : n \u2265 0} is Sidon and meets every infinite AP (Baumgartner 1975 implicit; AlphaProof explicit witness, Lean-verified)",
+        "routes": [
+          "Explicit witness A = range (fun n => (n+1)! + n): Sidon via 2\u00b7f(i) < f(j) for i<j (lacunary), AP-hitting via d \u2223 (a+d+1)! with n = a+d and t = (a+d+1)!/d + 1",
+          "Lacunary principle: any strictly increasing f with f(n+1) > 2 f(n) gives a Sidon range; prove growth lemma with Nat.factorial_succ + nlinarith, injectivity via strictMono_nat_of_lt_succ",
+          "Sidon case analysis: rcases lt_trichotomy on max indices j vs l, close impossible cases by omega/linarith using the auxiliary doubling inequality, then cancel and use injectivity",
+          "Alternative witness {\u230ax^n\u230b} (Dutta) or greedy Baumgartner enumeration \u2014 harder to formalize, avoid"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "M",
+        "rationale": "Resolved disproof with a known explicit factorial witness; the formalization is elementary but needs careful handling of the Sidon case split and factorial divisibility, so a construct-mode medium budget suffices."
+      }
+    ],
+    "failures": []
+  },
+  "316": {
+    "runs": 3,
+    "verified": 2,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "S\u00e1ndor 1997: proper divisors of 120 (excl. 1) are a counterexample, reciprocal sum 239/120 < 2; minimal counterexample {2,3,4,5,6,7,10,11,13,14,15} (Stobart)",
+        "routes": [
+          "Witness A = divisors of 120 in [2,60]; scale by 120: each subset's reciprocal sum \u00d7120 is a natural number, so <1 forces \u2264119; but total is 239 > 238, contradiction via omega",
+          "Prove lemma (\u2211 n\u2208B, 1/n)*120 = (\u2211 n\u2208B, 120/n : \u2115) for B \u2286 A pointwise, then Finset.sum_sdiff to split total 239 and finish with Nat.cast_lt + omega",
+          "Brute force: witness Stobart's 11-element set and decide over all 2^11 subsets in \u211a \u2014 heavier for kernel, fallback only"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "S",
+        "rationale": "Disproved problem with an explicit 14-element witness whose verification reduces to an integer parity/counting argument (239 \u2264 238 impossible) needing no subset enumeration."
+      },
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "S\u00e1ndor 1997: proper divisors of 120 (14 elements) are a counterexample; minimal counterexample {2,3,4,5,6,7,10,11,13,14,15} (Stobart)",
+        "routes": [
+          "Witness A = proper divisors of 120 minus {1}; sum = 239/120 < 2; integrality: 120*sum over any subset is a natural number, so each part < 1 forces 120*part <= 119, total <= 238 < 239, contradiction",
+          "Witness Stobart set {2,3,4,5,6,7,10,11,13,14,15}; exhaustive 2^11 subset check over \u211a via decide/native_decide that no subset sum lies in the window making both parts < 1",
+          "Hybrid: use the 120 witness but discharge the subset-sum contradiction by decide over 2^14 subsets (heavier; prefer integrality argument)"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "S",
+        "rationale": "Explicit known counterexample with a one-paragraph integrality proof (all reciprocals are multiples of 1/120), so only witness construction plus routine casting/sum-splitting lemmas are needed."
+      }
+    ],
+    "failures": []
+  },
+  "397": {
+    "runs": 2,
+    "verified": 1,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "infinitude",
+        "status": "resolved",
+        "depth": "elementary",
+        "computable": false,
+        "known_bound": "Explicit infinite family (Somani): for a>=2, c=8a^2+8a+1, cb(a)cb(2a+2)cb(c)=cb(a+1)cb(2a)cb(c+1)",
+        "routes": [
+          "Witness family a \u21a6 ({a,2a+2,c},{a+1,2a,c+1}) with c=8a^2+8a+1; prove membership via Nat.succ_mul_centralBinom_succ applied at a,2a,2a+1,c, clear K=(a+1)(2a+1)(2a+2)(c+1) and cancel with Nat.centralBinom_pos",
+          "Infinitude via Set.infinite_of_injective_forall_mem with the map a+2 \u21a6 pair (injective since a is the min of the first finset / omega on Finset ext), or via Set.infinite_of_not_bddAbove on an image",
+          "Finset.prod_insert with non-membership discharged by simp+omega; disjointness via Finset.disjoint_left+omega; polynomial identities (4a+1)(4a+3)=2c+1 and c+1=2(2a+1)^2 by ring/nlinarith after zify"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "M",
+        "rationale": "Known explicit infinite family with a straightforward but fiddly Lean proof (Finset literal products, ratio lemma four times, cancellation, injectivity), so a construct-mode medium budget suffices."
+      }
+    ],
+    "failures": []
+  },
+  "363": {
+    "runs": 2,
+    "verified": 1,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "infinitude",
+        "status": "resolved",
+        "depth": "medium",
+        "computable": false,
+        "known_bound": "Disproved: infinitely many collections with all |I_i|=4 for every n=3 and n>=4 (Ulas 2005, Bauer\u2013Bennett 2007); also |I_i|=5, n>=5 (Bennett\u2013van Luijk 2012).",
+        "routes": [
+          "Erd\u0151s-style pigeonhole: for fixed N take blocks [x,x+3] with x\u22611 mod 4, N<x\u22644m; map subsets S to the parity vector of the factorization of \u220ff(x) over primes <4m+4; when |X|>\u03c0'(4m+4) (bound \u03c0' via Nat.primeCounting'_add_le with a=210, \u03c6(210)=48) two subsets collide and S\u25b3T \u2260 \u2205 has square product, all starts >N \u21d2 infinitely many collections",
+          "Same pigeonhole but avoid prime counting: use the coarser bound that the number of primes below 4m+4 is at most the number of odd numbers plus 1 and take blocks of length 4 starting at x\u22611 mod 4 in a range whose size exceeds that \u2014 density check fails (1/4 < 1/2), so needs at least the mod-210 sieve or a smarter block choice (e.g. only blocks whose entries are all composite-heavy) \u2014 fallback only",
+          "Explicit Pell/elliptic-curve families (Ulas; Bauer\u2013Bennett) \u2014 infinite parametric solutions to (A\u00b2\u22121)(B\u00b2\u22121)=\u25a1 realized as x\u00b2+3x+1 \u2014 hard to formalize, not recommended",
+          "Reduce infinitude of the Finset-of-Finsets set to a min-start-exceeds-N statement via Set.infinite_of_not_bddAbove-style argument on sup of the starts, or by injecting an infinite family of pairwise distinct collections"
+        ],
+        "recommended_mode": "construct",
+        "budget_tier": "L",
+        "rationale": "The negation is a genuine infinite-family statement with no bounded computation; the elementary pigeonhole-on-parity-vectors route is provable in Mathlib but requires nontrivial bookkeeping (factorization parity, prime-counting bound via \u03c6(210)=48, disjointness, and translating to Set.Infinite of Finset (Finset \u2115))."
+      }
+    ],
+    "failures": []
+  },
+  "1193": {
+    "runs": 3,
+    "verified": 1,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "witness",
+        "status": "resolved",
+        "depth": "trivial",
+        "computable": true,
+        "known_bound": "A = \u2115, g(n) = n+1 gives the set = \u2115, lower and upper density both 1",
+        "routes": [
+          "Witness A = Set.univ, g n = n+1; show Nat.card {p : univ \u00d7 univ // p.1+p.2 = n} = n+1 via equivalence with Finset.Nat.antidiagonal n (card_antidiagonal), so the defining set is all of \u2115",
+          "Then {n \u2208 Iio N \u2227 ...} = Iio N, ncard = N, ratio eventually equals 1 for N \u2265 1; conclude liminf = 1 via Tendsto.liminf_eq (tendsto_const_nhds.congr') and 0 < 1",
+          "Alternative: use Filter.liminf_congr with an EventuallyEq to constant 1 plus Filter.liminf_const, avoiding Tendsto machinery",
+          "If the Nat.card of the subtype is awkward, build the Equiv {p : univ\u00d7univ // ...} \u2243 Fin (n+1) directly via p \u21a6 p.1 and Nat.card_eq_fintype_card / Fintype.card_fin"
+        ],
+        "recommended_mode": "fast",
+        "budget_tier": "S",
+        "rationale": "Trivial explicit counterexample (A = \u2115, g = n+1) already noted on the site; the only work is Lean plumbing for Nat.card of the antidiagonal subtype and the eventually-constant liminf."
+      }
+    ],
+    "failures": []
+  },
+  "424": {
+    "runs": 3,
+    "verified": 0,
+    "partial": true,
+    "assessments": [
+      {
+        "shape": "density-asymptotic",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "Set is infinite (contains 2^k+1 for all k\u22651, so count \u2265 log\u2082 x); no element \u2261 1 mod 3, so upper density \u2264 2/3; positive lower density unproven.",
+        "routes": [
+          "Only scaffolding is realistic: prove hofSet \u2286 {n : n%3 \u2260 1} by closure-set induction (choose T = {n | 2 \u2264 n \u2227 n%3 \u2260 1}) giving upper density \u2264 2/3",
+          "Prove 2^k+1 \u2208 hofSet via chain 2\u00b7a\u22121 for logarithmic lower bound on the counting function",
+          "Neither the conjectured positive lower density nor its negation is provable with known mathematics; do not spend budget on a full proof",
+          "If an attempt is forced, the conjectured direction would need a self-replicating structure argument (e.g. showing a residue-class-covering family of arithmetic progressions in the set), which is not known"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "Genuinely open Hofstadter/Erd\u0151s density question with only trivial partial results (mod-3 exclusion, logarithmic infinitude), so the harness should formalize both directions and only prove scaffolding lemmas."
+      },
+      {
+        "shape": "density-asymptotic",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "Set is infinite (contains 2^k+1 for all k\u22651, so count \u2265 log\u2082 x); no element \u2261 1 mod 3, so upper density \u2264 2/3; positive lower density unproven.",
+        "routes": [
+          "Only scaffolding is realistic: prove hofSet \u2286 {n : n%3 \u2260 1} by closure-set induction (choose T = {n | 2 \u2264 n \u2227 n%3 \u2260 1}) giving upper density \u2264 2/3",
+          "Prove 2^k+1 \u2208 hofSet via chain 2\u00b7a\u22121 for logarithmic lower bound on the counting function",
+          "Neither the conjectured positive lower density nor its negation is provable with known mathematics; do not spend budget on a full proof",
+          "If an attempt is forced, the conjectured direction would need a self-replicating structure argument (e.g. showing a residue-class-covering family of arithmetic progressions in the set), which is not known"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "Genuinely open Hofstadter/Erd\u0151s density question with only trivial partial results (mod-3 exclusion, logarithmic infinitude), so the harness should formalize both directions and only prove scaffolding lemmas."
+      },
+      {
+        "shape": "density-asymptotic",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "Set is infinite (contains 2^k+1 for all k\u22651, so count \u2265 log\u2082 x); no element \u2261 1 mod 3, so upper density \u2264 2/3; positive lower density unproven.",
+        "routes": [
+          "Only scaffolding is realistic: prove hofSet \u2286 {n : n%3 \u2260 1} by closure-set induction (choose T = {n | 2 \u2264 n \u2227 n%3 \u2260 1}) giving upper density \u2264 2/3",
+          "Prove 2^k+1 \u2208 hofSet via chain 2\u00b7a\u22121 for logarithmic lower bound on the counting function",
+          "Neither the conjectured positive lower density nor its negation is provable with known mathematics; do not spend budget on a full proof",
+          "If an attempt is forced, the conjectured direction would need a self-replicating structure argument (e.g. showing a residue-class-covering family of arithmetic progressions in the set), which is not known"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "Genuinely open Hofstadter/Erd\u0151s density question with only trivial partial results (mod-3 exclusion, logarithmic infinitude), so the harness should formalize both directions and only prove scaffolding lemmas."
+      }
+    ],
+    "failures": [
+      "mode=fast: 2 proof round(s) (5 attempts) and 2 refinement round(s) exhausted without a sorry-free proof",
+      "mode=fast: 2 proof round(s) (5 attempts) and 2 refinement round(s) exhausted without a sorry-free proof"
+    ]
+  },
+  "201": {
+    "runs": 1,
+    "verified": 0,
+    "partial": false,
+    "assessments": [
+      {
+        "shape": "density-asymptotic",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "G_k(N) \u2264 R_k(N) trivially, with strict inequality possible (G_3(5)=3<4=R_3(5)); Koml\u00f3s\u2013Sulyok\u2013Szemer\u00e9di: R_k(N) \u2264 C_k\u00b7G_k(N); limit R_3/G_3 \u2192 1 unknown in both directions",
+        "routes": [
+          "Trivial upper bound G_3(N) \u2264 R_3(N): instantiate the infimum at A = range N (shifted) and rewrite addRothNumber via rothNumberNat",
+          "Finite strictness witness at N=5: A={0,2,3,4,6} has addRothNumber 3 (decide over 4-subsets) while rothNumberNat 5 = 4, giving G_3(5) < R_3(5)",
+          "KSS-type constant-factor lower bound via random dilation mod p pulling back a dense 3-AP-free set \u2014 heavy averaging argument, only yields R_3 \u226a G_3, not the limit",
+          "Limit statement itself: formalize both directions and the negation only; no proof attempt expected"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "The frozen target is the open asymptotic limit R_3(N)/G_3(N)\u21921, which neither direction of current knowledge (KSS constant-factor bound) can settle; only side results (trivial inequality, N=5 witness) are provable, so spend minimal budget on the main goal."
+      }
+    ],
+    "failures": []
+  },
+  "172": {
+    "runs": 1,
+    "verified": 0,
+    "partial": true,
+    "assessments": [
+      {
+        "shape": "universal",
+        "status": "open",
+        "depth": "research",
+        "computable": false,
+        "known_bound": "Moreira 2017: monochromatic {x, x+y, xy} in any finite colouring of \u2115; Bowen 2022: {x,y,x+y,xy} for 2 colours of \u2115; Alweiss 2023: full statement over \u211a\u2216{0}; infinite-A version false (Hindman, 7 colours)",
+        "routes": [
+          "Only degenerate cases are provable: r = 0 (Fin 0 empty, so c 0 gives False) and k \u2264 1 (take A = {1} or A = \u2205); the general statement is an open problem in both directions",
+          "Formalize the conjectured direction as frozen; do not attempt full proof \u2014 even |A| = 2 with 3 colours over \u2115 is open",
+          "Negation cannot be witnessed: no colouring is known defeating |A| = 2 for any number of colours, and a finite search cannot certify a colouring of all of \u2115",
+          "If a checkpoint is required, prove the r = 0 / k \u2264 1 specializations as separate lemmas and report OPEN"
+        ],
+        "recommended_mode": "research",
+        "budget_tier": "S",
+        "rationale": "The target is exactly the open Hindman\u2013Erd\u0151s finite sums-and-products conjecture over \u2115 (Alweiss's proof works only over \u211a), so neither it nor its negation is provable by the harness; only trivial degenerate cases (r = 0, k \u2264 1) can be discharged."
+      }
+    ],
+    "failures": [
+      "research program cycles finished (see programs/erdos_172/REVIEW.md)"
+    ]
+  }
+}

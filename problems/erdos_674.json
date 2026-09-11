@@ -1,0 +1,13 @@
+{
+  "id": "674",
+  "statement": "Are there any integer solutions to x^x * y^y = z^z with x, y, z > 1?",
+  "status": "solved (affirmative), Ko (Chao Ko) 1940; erdosproblems.com marks it PROVED (LEAN)",
+  "notes": "RESOLVED IN THE AFFIRMATIVE: yes, solutions exist (Ko 1940 found infinitely many). Formalize the affirmative assertion: there exist natural numbers x, y, z all > 1 with x^x * y^y = z^z. WARNING for proving: any witness has astronomically large x^x, so `decide`/`norm_num` on the raw equation will never terminate — the proof must work with the structure of the witness (e.g. writing x, y, z as products of prime powers and comparing exponents via pow_mul / mul_pow style rewriting), reducing the equation to small linear identities on exponents.",
+  "url": "https://www.erdosproblems.com/674",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin"
+  ]
+}

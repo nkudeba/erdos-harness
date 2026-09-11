@@ -1,0 +1,17 @@
+{
+  "id": "273",
+  "statement": "Is there a covering system all of whose moduli are of the form $p-1$ for some primes $p\\geq 5$?",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN — This is open, and cannot be resolved with a finite computation.'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): Selfridge has found an example using divisors of $360$ if $p=3$ is allowed.\n\nCONVENTION (not a hint, a disambiguation): 'covering system' here is Erdos-Graham's [ErGr80] notion, which requires DISTINCT moduli, each $>1$. This is how google-deepmind/formal-conjectures formalises this exact problem: `∃ c : StrictCoveringSystem ℤ, ∀ i, ∃ p, p.Prime ∧ 5 ≤ p ∧ c.moduli i = Ideal.span {↑(p-1)}`, where `StrictCoveringSystem` adds `injective_moduli` to `CoveringSystem` and its docstring says this is 'the notion of a covering system that Erdos was using in [ErGr80]'. Without distinctness the question is trivially YES (residues 0,1,2,3 mod 4, and 4 = 5-1). Any formalisation that drops distinctness is unfaithful.\n\nThe affirmative direction is a FINITE CERTIFICATE: a concrete finite list of (residue, modulus) pairs with distinct moduli of the form p-1, p>=5 prime, covering every integer. The negative direction requires a general impossibility theorem.",
+  "url": "https://www.erdosproblems.com/273",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "number theory",
+    "covering systems"
+  ],
+  "comments": 1,
+  "flags": [],
+  "search_floor": 55440.0,
+  "search_floor_kind": "screen"
+}

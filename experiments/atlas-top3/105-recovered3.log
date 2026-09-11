@@ -1,0 +1,35 @@
+[2026-09-10T15:33:53Z] run/start {'problem': '105', 'backend': 'file', 'resume': True}
+[2026-09-10T15:35:46Z] lean/closed_goal_branch_repair {'name': 'recover-proof-r2-g0'}
+[2026-09-10T15:37:20Z] lean/check {'name': 'recover-proof-r2-g0', 'ok': False, 'sorries': False, 'n_errors': 1, 'first_error': 'line 58:6: No goals to be solved'}
+[2026-09-10T15:38:31Z] run/fatal {'error': 'KeyboardInterrupt()'}
+Traceback (most recent call last):
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 3749, in <module>
+    
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 3745, in main
+    if args.cmd == "scout":
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 2732, in run
+    self.log.event("run", "end", stopped_after="search", search=self.state.get("search", {}).get("status"))
+                                                                               ^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 2182, in stage_prove
+    if hole_count(candidate) or not contains_frozen(candidate, frozen) or has_banned(candidate):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 1787, in check
+    res = self.lean.check(src, self.run_dir / "attempts" / f"{name}.lean")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 354, in check
+    r = subprocess.run(["lake", "env", "lean", str(dest)],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 2108, in _communicate
+    ready = selector.select(timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

@@ -1,0 +1,12 @@
+{
+  "problem": "674",
+  "run": "20260908-051236-281669-erdos674",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin"
+  ],
+  "statement": "theorem erdos_674 : \u2203 x y z : \u2115, 1 < x \u2227 1 < y \u2227 1 < z \u2227 x ^ x * y ^ y = z ^ z := by\n  sorry",
+  "verified_at": "2026-09-08T09:17:46Z"
+}

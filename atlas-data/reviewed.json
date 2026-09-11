@@ -1,0 +1,867 @@
+{
+  "2": {
+    "rationale": [
+      "The bound on the smallest covering modulus is a major covering-systems theorem; a small statement and an external Lean result do not make reconstruction routine."
+    ],
+    "requirements": [
+      "Audit the prerequisites of the Hough or later covering-system argument and decompose the proof."
+    ],
+    "score": 31
+  },
+  "7": {
+    "rationale": [
+      "The odd-covering-system question remains hard despite its finite-certificate label and known restrictions on moduli."
+    ],
+    "requirements": [
+      "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it."
+    ],
+    "score": 7
+  },
+  "8": {
+    "rationale": [
+      "The short counterexample description depends on the deep minimum-modulus theorem for covering systems. A finite colouring alone is not a cheap certificate."
+    ],
+    "requirements": [
+      "Provide a verified minimum-modulus bound first, then derive the colouring counterexample."
+    ],
+    "score": 35
+  },
+  "20": {
+    "assessed": "2026-09-11",
+    "rationale": [
+      "A public Lean 4 repo (SamMausberg/lean-formalizations, FormalConjectures/Problems/Erdos/E20) formalizes the conjecture statement and certifies base cases f(1,3)=2 through f(6,3)=19."
+    ],
+    "requirements": [
+      "Extend the certified base cases beyond f(6,3) using a SAT encoding; do not attempt the full exponential sunflower conjecture, which carries a $1000 prize and is polymath-hard."
+    ],
+    "sources": [
+      "atlas-data/forum/20.json"
+    ]
+  },
+  "34": {
+    "rationale": [
+      "The disproof needs a family of permutations with quadratically many consecutive sums. One unusually good finite permutation does not refute little-o."
+    ],
+    "requirements": [
+      "Build and count an explicit permutation family; preserve the asymptotic quantifier."
+    ],
+    "score": 52
+  },
+  "95": {
+    "rationale": [
+      "The bound comes from the Guth–Katz incidence machinery. A trivial pair count is far weaker than the requested estimate."
+    ],
+    "requirements": [
+      "Formalize the incidence theorem and its distance-energy reduction."
+    ],
+    "score": 21
+  },
+  "105": {
+    "rationale": [
+      "Three explicit finite geometric counterexamples are reported. Certifying fixed coordinates is more promising than proving a general incidence theorem."
+    ],
+    "requirements": [
+      "Obtain exact coordinates and certify every line-incidence, distinctness and cardinality condition."
+    ],
+    "score": 73
+  },
+  "164": {
+    "rationale": [
+      "The primitive-set maximum theorem is a substantial analytic result even though a simpler proof is now reported."
+    ],
+    "requirements": [
+      "Reconstruct the weighted primitive-set inequality and convergence machinery; do not infer simplicity from the word “simpler”."
+    ],
+    "score": 31
+  },
+  "171": {
+    "rationale": [
+      "Density Hales–Jewett is a major theorem. An elementary published proof is still a long research-level argument."
+    ],
+    "requirements": [
+      "Build the multidimensional density-increment/iteration infrastructure or locate an exact reusable theorem."
+    ],
+    "score": 22
+  },
+  "172": {
+    "rationale": [
+      "The latest program run certified several basic sublemmas, including degenerate cases. None resolves arbitrary large monochromatic sum-product sets over the naturals."
+    ],
+    "requirements": [
+      "Bridge additive and multiplicative structure for arbitrary size; rational-number results and k≤1 cases are insufficient."
+    ],
+    "score": 9
+  },
+  "175": {
+    "rationale": [
+      "Binary valuation handles most n, but powers of two are the difficult exception. The full theorem cannot be replaced by the easy majority case."
+    ],
+    "requirements": [
+      "Provide a certified argument for powers of two as well as the Kummer/valuation reduction."
+    ],
+    "score": 42
+  },
+  "176": {
+    "assessed": "2026-09-11",
+    "partial": 60,
+    "rationale": [
+      "Exact values of N(k,2) for odd k <= 11 were obtained by exhaustive enumeration and SAT, with every satisfiable case backed by an explicit witness - the class this harness's CaDiCaL path is built for."
+    ],
+    "requirements": [
+      "Re-derive and certify the published N(k,2) values by SAT, then push one case further and record the range actually decided."
+    ],
+    "sources": [
+      "atlas-data/forum/176.json"
+    ]
+  },
+  "185": {
+    "rationale": [
+      "The source derives this from density Hales–Jewett. The visible finite grid does not make exhaustive search uniform in dimension."
+    ],
+    "requirements": [
+      "Verify the reduction and provide the full density Hales–Jewett dependency."
+    ],
+    "score": 25
+  },
+  "189": {
+    "rationale": [
+      "A concrete 25-colour counterexample to an area-one rectangle is available. The colouring is explicit, but the ambient plane is infinite."
+    ],
+    "requirements": [
+      "Encode the colouring and prove the universal area obstruction with exact real arithmetic."
+    ],
+    "score": 68
+  },
+  "198": {
+    "rationale": [
+      "The harness already verified a factorial-based Sidon construction meeting every infinite arithmetic progression."
+    ],
+    "requirements": [
+      "Retain the construction and its progression-hit and uniqueness lemmas."
+    ],
+    "score": 99
+  },
+  "201": {
+    "rationale": [
+      "The harness found and an assistant certified a finite strict-gap example, but such examples are already in the source. The full problem asks for growth and a limiting ratio."
+    ],
+    "requirements": [
+      "Prove the asymptotic relationship between G_k and R_k. Do not promote the N=14 construction into a solution of the full entry."
+    ],
+    "score": 10
+  },
+  "204": {
+    "rationale": [
+      "The known nonexistence theorem concerns all divisor-based covering systems. There is no single finite counterexample that proves this negative existence claim."
+    ],
+    "requirements": [
+      "Formalize the covering and pairwise-intersection conditions, then reconstruct the nonexistence argument."
+    ],
+    "score": 45
+  },
+  "205": {
+    "rationale": [
+      "The negative answer uses infinitely many integers with uniformly many prime factors after subtracting any admissible power of two. Small searches cannot establish it."
+    ],
+    "requirements": [
+      "Verify the construction and its uniform factor-count lower bound; separate the still-open odd-integer variant."
+    ],
+    "score": 42
+  },
+  "242": {
+    "rationale": [
+      "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier."
+    ],
+    "requirements": [
+      "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches."
+    ],
+    "score": 3
+  },
+  "264": {
+    "assessed": "2026-09-11",
+    "rationale": [
+      "The Formal Conjectures project carries a faithful formalized statement with an open sorry, and Aristotle has already settled two sub-cases directly from it (2^n is not an irrationality sequence, 2^{2^n} is); the n! case is explicitly open and a documented Aristotle attempt failed.",
+      "Beyond the generic formalization signal: the gap here is one specific open sorry in the public Formal Conjectures statement, and Aristotle has already used that same statement to settle two adjacent sub-cases (2^n is not an irrationality sequence, 2^{2^n} is). The workflow is documented in-thread. That is more actionable than the presence of an artifact alone, which is all the mechanical signal can see."
+    ],
+    "requirements": [
+      "Clone google-deepmind/formal-conjectures, import the existing statement, and target the n! sorry; reproducing the 2^n / 2^{2^n} results is certified value on its own."
+    ],
+    "sources": [
+      "atlas-data/forum/264.json"
+    ],
+    "partial": 70
+  },
+  "273": {
+    "assessed": "2026-09-11",
+    "partial": 64,
+    "rationale": [
+      "Statement disambiguation: the site's bare wording omits 'distinct'. Erdos-Graham [ErGr80] and google-deepmind/formal-conjectures (StrictCoveringSystem, injective_moduli) both require DISTINCT moduli; without that the problem is trivially YES (0,1,2,3 mod 4, and 4=5-1). Any formalisation without injective moduli is unfaithful.",
+      "Parity reduction (self-derived, verified numerically): every allowed modulus p-1 is even, so a congruence class with even residue lies wholly in the evens and one with odd residue wholly in the odds. Halving turns the problem into: find TWO DISJOINT distinct-modulus covering systems with moduli drawn from H = {m>=2 : 2m+1 prime}.",
+      "Self-verified lcm floor: if L' is the lcm of the halved moduli then f(L') = sum over d|L', 2d+1 prime, of 1/d must be >= 2 (each of the two disjoint families needs reciprocal sum >= 1). A divisor sieve to 3e6 gives min{L' : f(L') >= 2} = 27720, so the lcm of the original moduli is at least 55440, and only 29 candidate values of L' are <= 200000.",
+      "Exhaustive elimination of the 29 candidate lcms below 200000 by DFS (residues forced by covering the least uncovered point, pruned on combined remaining density vs unused reciprocal budget) is INCONCLUSIVE: the tree exceeds 3e6 nodes per candidate. Neither found nor eliminated by this route.",
+      "Constructive search is not close. Randomized reciprocal-balanced splits of the divisor pool followed by a greedy ascending build, on the three richest candidates (L'=3603600/2162160/3243240, budgets 2.30/2.29/2.28, 230-343 restarts each), leave 11.7-12.3 percent of the two cyclic groups uncovered at best. A SINGLE covering system from H is easy to build greedily; the obstruction is entirely the disjointness, because the density sits in the small moduli 2,3,5,6,8,9,11 that only one of the two families can hold.",
+      "Open, and both directions resist. The parity reduction (all moduli p-1 are even, so residues split by parity) makes it exactly TWO DISJOINT covering systems with distinct moduli drawn from H={m>=2 : 2m+1 prime}; the reciprocal budget over any smooth lcm below 4e6 tops out at 2.30, leaving ~0.15 slack per system, so a witness is cramped but not excluded. A harness run reached only lcm<=55439, which is one below the first numerically viable candidate (55440=2*27720) - i.e. it stopped exactly where the search starts being hard.",
+      "stage_reduce found and CHECKED three structural reductions, two of them new to us: (a) the parity decomposition - all moduli p-1 are even, so a solution is exactly TWO covering systems with disjoint moduli drawn from H2={(p-1)/2}; (b) no admissible modulus is 2 mod 6, since m=2 mod 3 forces 3|p, so 8,14,20,26,... are excluded and the standard 2,4,8,16 doubling chain is blocked at its second step; (c) any solution needs at least 18 congruences, because the 17 smallest elements of H2 have reciprocal sum 1.99835 < 2, which also gives a mid-search rejection filter (sum of 2/m must reach 2, not sum of 1/m reach 1).",
+      "CORRECTION (2026-09-11): previously scored 6, below #677's 7, which contradicted the assessment. On the axis score actually measures - is a COMPLETE proof mechanically reachable - #273 is the stronger of the two: its affirmative side is a finite certificate at a reachable size (29 candidate lcms up to 393120), so a solver returning SAT at any one of them resolves the problem outright. #677 has no reachable route in either direction. The earlier 6-vs-7 reflected #677's already-banked partial value, which belongs on the partial axis, not this one.",
+      "Candidate ordering matters more than candidate size. slack(L) = sum of 1/m over admissible divisors minus 1 bounds the unused reciprocal weight, so every modulus with 1/m > slack is FORCED. L=55440 is the smallest of the 29 candidates but among the loosest (slack 0.0437, only 7 of 43 forced); three attempts were spent on it for that reason alone. L=100800 is the uniquely collapsible one: slack 0.000089, 45 of 50 forced, 5 free, overlap budget 9 points, and only 12 of 32 free subsets reach coverage. Two of those 12 have overlap exactly 0 and are excluded by Mirsky-Newman/Davenport-Rado (a disjoint covering system must repeat its largest modulus, so distinct moduli admit no exact cover) - the first cases on this problem eliminated by a theorem rather than a timer.",
+      "The generating-function condition is now derived and validated, not a hunch. For every divisibility-maximal modulus m in the chosen set, L/m <= overlap - because at a primitive m-th root of unity only that term has a pole, giving |sum over the excess multiset of zeta^r| = L/m exactly. Checked to 1e-15 on a known cover with two maximal moduli. It subsumes Mirsky-Newman (overlap 0 demands L/m <= 0) and cuts L=100800's 12 coverage-reaching subsets to 7 in milliseconds, where a SAT encoding of ONE subset did not decide in 37 minutes. Standard argument, no novelty claimed."
+    ],
+    "requirements": [
+      "An affirmative resolution is a finite certificate but must exhibit two disjoint distinct-modulus covering systems over H; a bounded search is only worth running above lcm 55440, and the reciprocal budget is razor thin (best smooth L' <= 4e6 gives f = 2.30, i.e. 0.30 of total slack across both families).",
+      "Any serious attempt has to beat the budget split, not just search harder: prove an impossibility theorem for two disjoint distinct-modulus coverings over H, or find a construction that gives the second family enough density without the small moduli.",
+      "Either exhibit two disjoint covering systems with distinct moduli from H (finite, certifiable - this resolves it affirmatively), or prove the reciprocal/parity budget cannot be met. Bounded search below lcm 55440 is now provably futile; the 29 candidate lcms up to 393120 that pass the reciprocal screen are the real search space and were NOT eliminated here.",
+      "A finite-certificate search should encode the halved two-system form, enumerate only moduli 0 or 4 mod 6, and reject any candidate with fewer than 18 congruences; moduli must be allowed up to at least 70.",
+      "Encode the halved two-system form for a SAT solver and decide the 29 candidates in order. The reduction stage's checked facts cut the space hard: moduli must be 0 or 4 mod 6, and any solution needs at least 18 congruences.",
+      "Attack candidates in slack order, not numeric order, and decompose each into forced moduli + a free-subset enumeration before encoding; the subset choice does not belong in the SAT. The 10 surviving subsets at L=100800 fix the modulus set (exactly-one residue per modulus) but remain ~440k vars and CaDiCaL did not decide even the first in 37 min. Four solver attempts have now timed out. Untried next lever: the Mirsky-Newman generating-function argument survives as a CONDITION for overlap k>0, constraining which residues the <=9 overlap points may occupy - unverified, see knowledge/reductions/273/STRUCTURE.md.",
+      "Use the condition as a screen before any solver call. For the 7 survivors at L=100800 (6 of which contain the modulus 100800, making the inequality vacuous) the remaining handle is the exact equality |sum_E zeta^r| = 1 at every primitive 100800-th root of unity, which is severe and untried."
+    ],
+    "score": 12,
+    "search_floor": 55440.0,
+    "search_floor_kind": "screen",
+    "sources": [
+      "scratchpad probe p273_floor.py (divisor sieve to 3e6)",
+      "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/273.lean",
+      "experiments/open-atlas-top2/273-notes.md",
+      "knowledge/partial/273/20260910-213413-537244-erdos273-pos/report.md",
+      "knowledge/reductions/273/live-2026-09-11.md",
+      "knowledge/reductions/273/STRUCTURE.md"
+    ]
+  },
+  "275": {
+    "rationale": [
+      "This is a finite-to-global covering lemma with a known simpler proof. Congruence periodicity and induction offer reusable intermediate goals."
+    ],
+    "requirements": [
+      "Translate the known proof into period/covering lemmas; merely testing one period for a chosen system is not the universal theorem."
+    ],
+    "score": 70
+  },
+  "280": {
+    "rationale": [
+      "The source gives an explicit powers-of-two covering construction. Its advertised difficulty disappears for the literal formulation, although the growth and counting estimates still need proofs."
+    ],
+    "requirements": [
+      "Formalize the residue-class construction, its uncovered count and the required growth inequality; review the intended index convention."
+    ],
+    "score": 78
+  },
+  "287": {
+    "assessed": "2026-09-10",
+    "rationale": [
+      "A counterexample would be a finite exact rational certificate, but the obvious representation only shows sharpness of the conjectured gap three.",
+      "Assessed 2026-09-10: the falsifiable label is misleading. Published good-prime chain certificates, independently re-verified, put any counterexample above n_1 = 3.9e19 with at least 6.9e19 terms, so no finite search can exhibit one and no Lean certificate could state one.",
+      "The proof direction is gated on a Sophie-Germain-type prime-pair statement (for large N a prime p in [N,2N] with (p+1)/2 prime), which is twin-prime-class difficulty. There is no tractable middle.",
+      "Exhaustive enumeration confirms the conjecture for all 248,164 representations with k <= 7 (counts match OEIS A006585); it is exactly tight at k=3 via 1 = 1/2 + 1/3 + 1/6."
+    ],
+    "requirements": [
+      "Search increasing denominator chains with gaps at most two using exact pruning; a failure to find one is not a proof.",
+      "Do NOT route to search-first: the reachable region (n_1 <= 12 in 90s) is certified empty and only re-derives a published forum search.",
+      "The one real gap is a Lean proof of the good-prime chain obstruction: harmonic window bound, p-adic valuation lemma, q-adic case, Pocklington primality for 66 numbers up to 1.5e20. Estimated 1500-3000 lines, a research/campaign target.",
+      "Published state of the art already covers max denominator up to 4e9 with no sorry and no native_decide; a k <= 18 result exists but depends on native_decide, which this harness bans."
+    ],
+    "score": 8,
+    "search_floor": 4e+19,
+    "sources": [
+      "experiments/open-top3/287-assessment.md"
+    ]
+  },
+  "303": {
+    "rationale": [
+      "An existing partition theorem is the natural route. The expression looks like a rational witness problem, but the universal colouring quantifier is essential."
+    ],
+    "requirements": [
+      "Find or formalize the Brown–Rödl partition result and preserve distinctness; numerical denominator search alone cannot solve it."
+    ],
+    "score": 62
+  },
+  "306": {
+    "assessed": "2026-09-11",
+    "rationale": [
+      "The main theorem is already formalized sorry-free in Lean 4 / Mathlib and archived with the arXiv source (anc/lean/), leaving a stated axiom boundary of two explicit analytic inputs."
+    ],
+    "requirements": [
+      "Discharge one of the two boundary axioms against Mathlib rather than reproving the main theorem."
+    ],
+    "sources": [
+      "atlas-data/forum/306.json"
+    ]
+  },
+  "307": {
+    "rationale": [
+      "Any prime-set witness needs at least sixty primes in its union, according to the source. Small subset searches and examples using 1 solve only a weakened variant."
+    ],
+    "requirements": [
+      "Use structured exact subset-sum search with the disjointness/size obstruction and certify primality of every denominator."
+    ],
+    "score": 12
+  },
+  "309": {
+    "rationale": [
+      "The goal is asymptotic growth of representable integers. A handful of unit-fraction representations does not refute o(log N)."
+    ],
+    "requirements": [
+      "Prove a logarithmic-size family of represented integers with denominator control."
+    ],
+    "score": 39
+  },
+  "316": {
+    "rationale": [
+      "A finite rational counterexample has a saved verified proof."
+    ],
+    "requirements": [
+      "Certify exact sums and the obstruction to every two-part partition."
+    ],
+    "score": 99
+  },
+  "331": {
+    "rationale": [
+      "The binary-digit construction separates even and odd digit positions. It fits constructive arithmetic but still needs a square-root counting bound."
+    ],
+    "requirements": [
+      "Prove unique binary decomposition, uniqueness of sums and both growth estimates."
+    ],
+    "score": 67
+  },
+  "363": {
+    "rationale": [
+      "The successful proof needed substantial compiler-guided Finset and factorization work."
+    ],
+    "requirements": [
+      "Use verified combinatorial/factorization helpers instead of restarting a one-shot proof."
+    ],
+    "score": 99
+  },
+  "364": {
+    "assessed": "2026-09-11",
+    "partial": 62,
+    "rationale": [
+      "The source records searches beyond 10^28 without a triple of consecutive powerful numbers. Generic bounded search is an especially poor full-solution bet.",
+      "Two self-contained formalizable facts sit in the thread: no four consecutive powerful integers (one is 2 mod 4), and the pair-doubling construction (n,n+1) -> (4n(n+1),(2n+1)^2)."
+    ],
+    "requirements": [
+      "Find a structural impossibility theorem or a genuinely new construction; the Pell-equation result for pairs is insufficient.",
+      "Formalize the quadruple exclusion and the doubling construction; the consecutive-triple question itself stays open."
+    ],
+    "score": 5,
+    "sources": [
+      "atlas-data/forum/364.json"
+    ]
+  },
+  "366": {
+    "assessed": "2026-09-11",
+    "partial": 62,
+    "rationale": [
+      "The thread carries a complete conditional argument that abc implies finitely many solutions, with an explicit bound n <= K_eps^{6/(1-5eps)}.",
+      "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing."
+    ],
+    "requirements": [
+      "Formalize the implication with abc as an explicit hypothesis; do not assert the unconditional finiteness.",
+      "A bounded search is futile below 10^22. Value here is the conditional finiteness argument or a certified special case, not enumeration."
+    ],
+    "sources": [
+      "atlas-data/forum/366.json"
+    ],
+    "search_floor": 1e+22,
+    "search_floor_kind": "published"
+  },
+  "370": {
+    "rationale": [
+      "A polynomial infinite family yielded a verified proof after repairing prime-factor bounds."
+    ],
+    "requirements": [
+      "Preserve the explicit family and the positivity/square bounds."
+    ],
+    "score": 99
+  },
+  "375": {
+    "rationale": [
+      "Grimm’s conjecture would imply a major prime-gap improvement. A finite bipartite matching formulation does not remove the number-theoretic obstacle."
+    ],
+    "requirements": [
+      "Establish a uniform Hall-type condition using new information about prime divisors of composite blocks."
+    ],
+    "score": 3
+  },
+  "379": {
+    "rationale": [
+      "The source reports simpler explicit prime-power families and an external Lean proof. The main difficulty is uniform binomial valuations."
+    ],
+    "requirements": [
+      "Recover the prime-power construction and prove a valuation bound for every intermediate binomial coefficient."
+    ],
+    "score": 65
+  },
+  "385": {
+    "rationale": [
+      "The apparent finite sequence statistic hides a uniform prime-pattern problem and two eventual assertions."
+    ],
+    "requirements": [
+      "Prove both eventual positivity and the claimed divergence rather than extrapolating computed values."
+    ],
+    "score": 7
+  },
+  "397": {
+    "rationale": [
+      "A saved full proof verifies the construction on the frozen problem statement."
+    ],
+    "requirements": [
+      "Reuse its combinatorial identity and audit all finiteness/nonempty conditions."
+    ],
+    "score": 99
+  },
+  "398": {
+    "assessed": "2026-09-11",
+    "partial": 50,
+    "rationale": [
+      "Brocard-Ramanujan; Erdos and Graham call it 'intractable at present', the only conditional finiteness is Overholt under weak abc, and the finite-counterexample direction has long been computationally exhausted."
+    ],
+    "requirements": [
+      "Formalize Overholt's conditional finiteness under an explicit abc hypothesis; do not budget a counterexample search."
+    ],
+    "sources": [
+      "atlas-data/forum/398.json"
+    ]
+  },
+  "399": {
+    "rationale": [
+      "Exact small factorial witness search and direct arithmetic certification have already succeeded cheaply."
+    ],
+    "requirements": [
+      "Retain the n=10 fourth-power witness and all nontriviality conditions."
+    ],
+    "score": 99
+  },
+  "424": {
+    "rationale": [
+      "A modulo-three invariant gives an easy density upper bound and refutes an older almost-all formulation. It does not prove or disprove positive density."
+    ],
+    "requirements": [
+      "Develop a positive lower-density construction or a zero-density obstruction for the closure process; preserve the current positive-density question."
+    ],
+    "score": 18
+  },
+  "429": {
+    "rationale": [
+      "A known arbitrarily sparse infinite counterexample must avoid every shift into the primes while remaining locally admissible."
+    ],
+    "requirements": [
+      "Formalize the recursive sparse construction and both its local congruence and global shift properties."
+    ],
+    "score": 48
+  },
+  "440": {
+    "rationale": [
+      "The source distinguishes a simple square-root upper bound from the sharp limiting constant. The entry asks about both."
+    ],
+    "requirements": [
+      "Separate the easy bound, the liminf extremum and the sharp constant; do not count the first part as full completion."
+    ],
+    "score": 49
+  },
+  "442": {
+    "rationale": [
+      "The disproof involves delicate harmonic-sum growth and least-common-multiple energy estimates. Its external formal status overstates immediate fresh-run tractability."
+    ],
+    "requirements": [
+      "Develop the analytic bounds and a verified counterexample family before attempting the limiting ratio."
+    ],
+    "score": 29
+  },
+  "448": {
+    "rationale": [
+      "The question concerns almost-all integers and a distribution of divisor ratios, not a finite inequality that one bad n can refute."
+    ],
+    "requirements": [
+      "Supply a positive-density family violating the claimed limit; keep distribution estimates separate from examples."
+    ],
+    "score": 28
+  },
+  "450": {
+    "rationale": [
+      "The source explicitly leaves the quantifier on x unclear. Solving one convenient interpretation would not establish the intended problem."
+    ],
+    "requirements": [
+      "Resolve the quantifier and regime of epsilon and n before treating any derived bound as a full solution."
+    ],
+    "score": 10
+  },
+  "453": {
+    "rationale": [
+      "The source supplies a short convex-hull argument applied to log prime numbers. It is conceptually compact but requires geometric/analytic infrastructure."
+    ],
+    "requirements": [
+      "Prove the abstract sequence lemma and the sublinear growth of log p_n, then transfer it to the prime inequality."
+    ],
+    "score": 50
+  },
+  "458": {
+    "rationale": [
+      "The source explicitly connects the obstacle to prime gaps and Legendre’s conjecture. The compact LCM inequality is misleading."
+    ],
+    "requirements": [
+      "Prove the required uniform control on prime powers between consecutive primes."
+    ],
+    "score": 4
+  },
+  "471": {
+    "rationale": [
+      "The simple closure argument depends on a strong three-primes theorem. Iterating a small set experimentally does not prove unbounded growth."
+    ],
+    "requirements": [
+      "Verify the analytic prime-representation theorem and then prove the closure induction."
+    ],
+    "score": 34
+  },
+  "475": {
+    "rationale": [
+      "The source reports a large-prime resolution assembled from several deep ranges, leaving finite exceptions. Generic permutation enumeration does not supply an effective global cutoff."
+    ],
+    "requirements": [
+      "Extract effective thresholds and combine the four range theorems with certified finite checks."
+    ],
+    "score": 18
+  },
+  "481": {
+    "rationale": [
+      "The iteration repeats a finite multiset under affine maps. A reusable growth-versus-counting argument is plausible, but no existing harness proof is recorded."
+    ],
+    "requirements": [
+      "Formalize sequence multiplicities and the collision argument using the reciprocal-coefficient condition."
+    ],
+    "score": 53
+  },
+  "488": {
+    "assessed": "2026-09-10",
+    "rationale": [
+      "There is a plausible finite counting/counterexample workflow, but the easy counterexamples in the discussion concern the alternate non-divisibility typo.",
+      "Assessed 2026-09-10: a bounded search over ~1.2e13 (A,n,m) triples across 13,870 sets found zero violations, and every near-miss comes from families already PROVED safe (singletons give exactly 2 - 1/a, pairs and min(A)=2 likewise).",
+      "This makes proximity-to-threshold ranking actively misleading here: a search walks up a closed provably-safe family reporting 1.997, 1.9999, 1.999999 while proving nothing. In the genuinely open regime (primitive, |A|>=3) the margin GROWS with |A|: 0.08 at |A|=3, 0.19 at 4, 0.37 at 5.",
+      "Expert signal against tractability: Tao states the problem stays hard after four simultaneous weakenings; a contributor reports 13 natural approaches killed by explicit counterexamples; one clean inclusion-exclusion reduction was refuted.",
+      "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled."
+    ],
+    "requirements": [
+      "Use the divisibility definition as printed; certify the full finite counts for A, n and m with n at least max(A).",
+      "Verify the third-party refutation claim before any attempt; it may make the whole target moot.",
+      "Do not run as a search target. Exhaustive reach is max(A) ~ 12-14; the claimed counterexample uses 257-smooth numbers in (T, 256T] with T non-explicit, unreachable by enumeration in principle.",
+      "Available value is formalizing the proved special cases (|A| <= 2, min(A) = 2) and the closed form F(x) = sum over nonempty I of (-1)^(|I|+1) floor(x / lcm I). DeepMind's formal-conjectures already has a faithful statement, so there is no novelty in the statement step."
+    ],
+    "score": 8,
+    "sources": [
+      "experiments/open-top3/488-assessment.md"
+    ]
+  },
+  "493": {
+    "rationale": [
+      "The literal problem is solved by a short two-variable algebraic construction."
+    ],
+    "requirements": [
+      "Keep the lower bounds on the variables and the eventual quantifier."
+    ],
+    "score": 99
+  },
+  "532": {
+    "rationale": [
+      "A successful proof transfers an existing Mathlib Hindman theorem into the finite-subset-sum formulation."
+    ],
+    "requirements": [
+      "Reuse the exact stream-to-set bridge and verify positivity and infinitude."
+    ],
+    "score": 99
+  },
+  "537": {
+    "rationale": [
+      "The final prime-ratio contradiction is short, but proving positive density of the specially separated squarefree products is a substantial missing input."
+    ],
+    "requirements": [
+      "Certify the positive-density construction as a separate dependency before using the final contradiction."
+    ],
+    "score": 43
+  },
+  "617": {
+    "assessed": "2026-09-11",
+    "partial": 62,
+    "rationale": [
+      "Each fixed r is a finite, SAT-encodable decision problem; r=3 and r=4 are published (Erdos-Gyarfas) and the claims page carries verification programs for r=5,7,8,9."
+    ],
+    "requirements": [
+      "Formalize the published r=3 or r=4 case, or decide a fixed r by SAT; graph-theory library fit in Mathlib is weak, so budget encoding work."
+    ],
+    "sources": [
+      "atlas-data/forum/617.json"
+    ]
+  },
+  "645": {
+    "rationale": [
+      "A saved full proof remains in the passing regression corpus."
+    ],
+    "requirements": [
+      "Keep the verified statement and its imported arithmetic lemmas stable."
+    ],
+    "score": 99
+  },
+  "647": {
+    "rationale": [
+      "A witness would certify finitely many divisor inequalities, but the source ties the existence problem to much harder prime-pattern questions.",
+      "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground."
+    ],
+    "requirements": [
+      "Use a sieve-backed search beyond the known example 24, retaining a compact certificate for every m below the witness.",
+      "Enumeration is futile below ~9e18. The live routes are the modular/prime-chain reductions or formalising the density-zero bounds, not search."
+    ],
+    "score": 18,
+    "search_floor": 9.17e+18,
+    "search_floor_kind": "published",
+    "assessed": "2026-09-11"
+  },
+  "649": {
+    "rationale": [
+      "The literal question is refuted by p=2 and q=7: powers of two never equal −1 modulo seven. This is unusually close to our arithmetic/finite-residue strengths."
+    ],
+    "requirements": [
+      "Prove that greatest prime factor two forces a power of two, then certify the residue obstruction; do not silently switch to the harder odd-prime variant."
+    ],
+    "score": 87
+  },
+  "672": {
+    "rationale": [
+      "Many low lengths are already excluded by deep Diophantine results. A negative-integer example does not satisfy the positive-integer contract."
+    ],
+    "requirements": [
+      "Handle arbitrary progression length and exponents with positivity and coprimality intact."
+    ],
+    "score": 6
+  },
+  "674": {
+    "rationale": [
+      "An explicit powers-of-two-and-three identity supports a fully verified construction; the scripted repair test also passed."
+    ],
+    "requirements": [
+      "Keep the exponent identity separate from the large numerical side conditions."
+    ],
+    "score": 99
+  },
+  "677": {
+    "assessed": "2026-09-11",
+    "partial": 60,
+    "rationale": [
+      "Quantifier reading: formal-conjectures states this as forall m n k, k>0 -> m >= n+k -> lcmInterval m k != lcmInterval n k. The two solutions Erdos knew (M(4,3)=M(13,2), M(3,4)=M(19,2)) use l != k and are NOT counterexamples to this statement.",
+      "Self-verified counterexample floor: exhaustive same-k scan found no (n,k,m) with m >= n+k and M(n,k)=M(m,k) for n,m < 4e5 (k<=3), < 2e5 (k<=6) and < 8e4 (7<=k<=20).",
+      "Structural finding from the same scan: same-k lcm collisions DO occur, but every one found has OVERLAPPING intervals with a tiny gap - max m-n observed is 1 (k=3,4,5,7), 2 (k=6,8), 3 (k=10,12,16), 4 (k=20) - against the m-n >= k the conjecture needs, and all of them sit at small n (n <= 16). So the negative direction has no cheap witness and a bounded search is close to futile.",
+      "Bounded-divisor reduction (this session, rigorous): d_k(n) = P_k(n)/M(n,k) is PERIODIC in n with period dividing prod_{p<=k} p^{floor(log_p(k-1))+1} (12, 36, 360, 1800, 12600, 88200, 176400 for k=3..9), verified over three periods each, so its value set is exhaustive. Hence M(n,k)=M(m,k) forces P_k(m)/P_k(n) = d_k(m)/d_k(n), a ratio from an explicit finite list.",
+      "PROVED for k=1 and k=2: d_k is identically 1 there, so M(n,k)=P_k(n) is strictly increasing and m>n already gives M(m,k)!=M(n,k). These are the two lemmas most worth certifying in Lean.",
+      "Because the ratio list is exhaustive, sweeping n rules out EVERY m (unbounded), not just m in a window: no counterexample for k=3 or k=4 with n < 1e8, k=5 or k=6 with n < 1e6, k=7 or k=8 with n < 2e5. For k=3 the whole question is the single equation (x-1)x(x+1)=2(y-1)y(y+1), whose only solution with x>y below 1e8 is (5,4) = the overlapping pair (n,m)=(2,3).",
+      "Smoothness obstruction: if M(n,k)=M(m,k) with m>=n+k then every prime p>k dividing any of m+1..m+k satisfies p <= (m-n)+(k-1), because p divides some n+i and m+j>n+i. So all of m+1..m+k are max(k, m-n+k-1)-smooth.",
+      "Open. The negative direction (find n,k,m with m>=n+k and lcm(n+1..n+k)=lcm(m+1..m+k)) is a finite certificate but no counterexample exists in any reachable range: verified none for k<=12 with n,m<=2e5, and k=3 reduces to the single cubic x^3-x=2(y^3-y), exhaustive to y<1e9 with only the degenerate y=4,x=5 (that is n=2,m=3, where m-n=1<k, which the hypothesis allows). The positive direction is Erdos's conjecture and needs new mathematics: k<=2 is elementary, k=3 is already a Thue-Siegel/elliptic-type Diophantine problem.",
+      "CORRECTION (2026-09-11): previously scored 7. Lowered because no route to a COMPLETE proof is reachable: the counterexample side is exhausted to 1e9 with only the allowed overlapping case, Thue-Siegel makes any survivor finite-but-unreachable, and the positive side is already deep at k=3. The banked k<=2 proof and 12 lemmas are real value but they are PARTIAL value, now recorded on the partial axis where they belong."
+    ],
+    "requirements": [
+      "A disproof needs one explicit triple (n,k,m); a proof needs a general theorem - Thue-Siegel only gives finiteness for each fixed k, so an affirmative resolution must be uniform in k.",
+      "Certifiable now: the k<=2 cases, the periodicity of d_k, and the smoothness lemma. A resolution still needs either an effective Thue/elliptic argument uniform in k, or a counterexample outside the swept ranges.",
+      "Certified partial value is the realistic target: the k<=2 case is proved sorry-free (lcm{n+1}=n+1 injective; lcm{n+1,n+2}=(n+1)(n+2) strictly increasing). Anything at k>=3 needs the Thue-Siegel machinery, so do not spend a bounded search there."
+    ],
+    "score": 5,
+    "search_floor": 1000000000.0,
+    "search_floor_kind": "exhaustive",
+    "sources": [
+      "scratchpad probes p677_big.py / p677_gaps.py",
+      "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/677.lean",
+      "experiments/open-atlas-top2/677-notes.md",
+      "knowledge/partial/677/"
+    ]
+  },
+  "678": {
+    "rationale": [
+      "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it."
+    ],
+    "requirements": [
+      "Freeze the intended quantifiers and reconstruct the uniform large-k construction."
+    ],
+    "score": 46
+  },
+  "699": {
+    "rationale": [
+      "Some parameter regions are settled, and a fixed pair i,j leaves only finitely many possible exceptions. This suggests a structured search, not an unrestricted proof."
+    ],
+    "requirements": [
+      "Exploit the fixed-parameter bounds and certify any gcd/prime-factor witness; do not confuse the stronger p>i variant with p≥i."
+    ],
+    "score": 20
+  },
+  "723": {
+    "assessed": "2026-09-11",
+    "partial": 47,
+    "rationale": [
+      "The prime-power-order conjecture for finite projective planes is a major open problem, already difficult at order twelve.",
+      "The finite direction promises an object that is not reachable: order 10 required the Lam computer search and order 12 is a famous open computation, so the explicit-object and reachable-finite signals overstate it. The genuine partial value is Bruck-Ryser."
+    ],
+    "requirements": [
+      "Use specialized incidence/SAT certificates and structural theorems; a generic finite enumerator is not competitive.",
+      "Formalize Bruck-Ryser (n = 1,2 mod 4 implies n is a sum of two squares); do not budget a search for a projective plane of order 12."
+    ],
+    "score": 3,
+    "sources": [
+      "atlas-data/forum/723.json"
+    ]
+  },
+  "779": {
+    "rationale": [
+      "The search interval is enormous, known small cases are checked, and heuristic failure is extremely unlikely. Finding a counterexample is not an attractive generic-search plan."
+    ],
+    "requirements": [
+      "Prove a prime-pair existence theorem uniform in the primorial, or certify an unexpected failure exhaustively."
+    ],
+    "score": 7
+  },
+  "824": {
+    "rationale": [
+      "The proved divergence of h(x)/x is much weaker than the requested nearly quadratic lower bound."
+    ],
+    "requirements": [
+      "Build a large distinct coprime-pair construction with sufficient growth and control duplicate representations."
+    ],
+    "score": 9
+  },
+  "835": {
+    "assessed": "2026-09-11",
+    "rationale": [
+      "AlphaProof proved J(18,9) != 10 and that proof is in a PR to formal-conjectures; the problem reduces to Johnson-graph chromatic numbers, with k=4 known via chi(J(6,3))=6.",
+      "Equivalent to asking whether chi(J(2k,k)) = k+1 for some k>2 (Johnson graph). Published chromatic-number tables already settle 3<=k<=8 NEGATIVELY, and Ma-Tang proved chi > k+1 for every k>2 not of the form p-1 with p prime. So the open frontier is k in {10,12,16,18,22,...}, and the smallest, k=10, is a chromatic-number question on J(20,10) with 184,756 vertices and 167,960 rainbow constraints - not a small SAT instance. The 'finite example' label is real but the reachable cases are all decided."
+    ],
+    "requirements": [
+      "Reuse the existing formal-conjectures material on Johnson graphs; the k+1 prime cases are the documented obstruction.",
+      "Do not encode k<=8; it re-derives published results. Any attempt must start at k=10 and handle a ~2M-variable colouring instance, or exploit the Johnson-graph structure and the Ma-Tang restriction to k=p-1."
+    ],
+    "sources": [
+      "atlas-data/forum/835.json"
+    ],
+    "score": 6,
+    "search_floor": 8.0,
+    "search_floor_kind": "published"
+  },
+  "848": {
+    "assessed": "2026-09-11",
+    "partial": 45,
+    "rationale": [
+      "The source reports the conjectured structure for sufficiently large N. Remaining finite cases offer a concrete route, but only if an effective threshold is available.",
+      "Assessed 2026-09-10: the mathematics is finished (Sawhney proved it for all sufficiently large N) and only a finite check below the explicit threshold remains. That threshold is 2.64e17 after four months of collaborative tightening, reported as the wall of the current proof structure.",
+      "Independent exact max-clique computation confirms the conjecture is tight at every N up to 60,006, and the margin GROWS linearly: any valid set containing an element outside +/-7 mod 25 reaches only ~0.376 of the optimum at N=20006 and falling. No near-miss structure exists to chase.",
+      "The feasible exact-check ceiling is N ~ 1e6 (dense adjacency is 1.4 GB at 1e6, 137 GB at 1e7), leaving an eleven-order-of-magnitude gap. Closing it needs a large sieve for square moduli that Tao, Sawhney and several frontier models have failed to make applicable.",
+      "Useful find: greedy colouring meets the clique number exactly at every N tested, so a proper colouring is a small kernel-checkable certificate for the upper bound. Not remarked on in the forum thread.",
+      "Sawhney has resolved the conjecture for all sufficiently large n, so the remaining work is making that bound explicit; the one Lean artifact on the claims page is disputed in-thread as likely incorrect and needs 32GiB and 75 cache shards to replay."
+    ],
+    "requirements": [
+      "Extract an explicit large-N threshold or find a finite exception; prove every pair condition including a=b.",
+      "Do not treat as solvable by search. Any computational range must be reported as 'verified, no counterexample, N <= X', never as progress; the thread's one C++ claim to N=1e7 was rebutted as likely incorrect.",
+      "Lean cost measured: certifying squarefreeness needs ~1.07N factorization facts at 0.1-0.3 s each (decide via Nat.minSqFac was killed after 7 minutes on one 7-digit number). That is ~3.6 h of Lean for N=60006 alone.",
+      "Read the Sawhney resolution first. Any attempt is an explicit-n_0 extraction, not an open-problem attack."
+    ],
+    "score": 8,
+    "search_floor": 2.64e+17,
+    "sources": [
+      "experiments/open-top3/848-assessment.md",
+      "atlas-data/forum/848.json"
+    ]
+  },
+  "871": {
+    "rationale": [
+      "The counterexample modifies a construction of additive bases with growing representation counts. It is an infinite construction, not a finite partition witness."
+    ],
+    "requirements": [
+      "Verify the basis property, divergence of representation counts and failure of every two-part partition."
+    ],
+    "score": 43
+  },
+  "929": {
+    "rationale": [
+      "The source’s square-root lower bound is far below the requested near-linear one; this is a sieve/prime-gap frontier."
+    ],
+    "requirements": [
+      "Establish a much stronger uniform lower bound, not merely exhibit a smooth consecutive block."
+    ],
+    "score": 7
+  },
+  "942": {
+    "assessed": "2026-09-11",
+    "partial": 48,
+    "rationale": [
+      "The De Koninck-Luca-Shparlinski primorial construction is written out explicitly in the thread and is formalizable, but the upper-bound side is heavy analytic number theory."
+    ],
+    "requirements": [
+      "Target the explicit lower-bound construction only; the (log n)^{1+o(1)} upper bound remains open."
+    ],
+    "sources": [
+      "atlas-data/forum/942.json"
+    ]
+  },
+  "999": {
+    "rationale": [
+      "The full Duffin–Schaeffer theorem is a deep metric-number-theory result; the easy implication is only half the equivalence."
+    ],
+    "requirements": [
+      "Provide the hard divergence direction with its measure-theoretic and arithmetic prerequisites."
+    ],
+    "score": 15
+  },
+  "1039": {
+    "assessed": "2026-09-11",
+    "rationale": [
+      "An explicit partial result (rho_n >= c/n) is stated with its proof route (Koebe quarter theorem plus a Fekete energy bound) and a declared axiom boundary.",
+      "The mechanical library-fit prior (-8 for analysis) correctly reflects Mathlib's complex-analysis gaps but understates reachability here: the partial result rho_n >= c/n has a written proof route (Koebe quarter theorem plus a Fekete energy bound) and a declared axiom boundary, so the work is scoped even though the library is thin."
+    ],
+    "requirements": [
+      "Check which of Koebe 1/4 and Hadamard are actually in Mathlib before committing; the lemniscate-component and conformal-factorization axioms are genuine library gaps."
+    ],
+    "sources": [
+      "atlas-data/forum/1039.json"
+    ],
+    "partial": 50
+  },
+  "1054": {
+    "assessed": "2026-09-11",
+    "rationale": [
+      "A Lean formalization of the claim exists and isolates its Mathlib gap precisely: a quantitative Mertens product estimate not yet available."
+    ],
+    "requirements": [
+      "Formalize quantitative Mertens as a reusable Mathlib-style lemma; it unblocks this and other analytic problems."
+    ],
+    "sources": [
+      "atlas-data/forum/1054.json"
+    ]
+  },
+  "1136": {
+    "rationale": [
+      "An explicit dyadic residue-class construction achieves density one half, above the requested one third. This is a plausible reusable construction proof."
+    ],
+    "requirements": [
+      "Prove sum avoidance and the density of the union of disjoint dyadic residue classes."
+    ],
+    "score": 65
+  },
+  "1148": {
+    "rationale": [
+      "The known solution uses a form of Duke’s theorem. The simple-looking three-square equation masks a deep equidistribution dependency."
+    ],
+    "requirements": [
+      "Supply the relevant verified equidistribution theorem or discover a genuinely elementary replacement respecting the square-size bound."
+    ],
+    "score": 26
+  },
+  "1187": {
+    "rationale": [
+      "This entry asks two questions: the prime-difference part has an easy modular disproof, while the prime-progression part uses Green–Tao."
+    ],
+    "requirements": [
+      "Track both subquestions. Certifying the easy colouring alone is only a partial result."
+    ],
+    "score": 24
+  },
+  "1193": {
+    "rationale": [
+      "The literal formulation has a simple A=N counterexample, but its liminf/cardinality encoding required agentic repair."
+    ],
+    "requirements": [
+      "Preserve the intended natural-number convention and both density questions."
+    ],
+    "score": 99
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "problem": "350",
+  "run": "20260910-163946-437499-erdos350",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_350 (A : Finset \u2115)\n    (hdis : \u2200 S \u2286 A, \u2200 T \u2286 A, \u2211 n \u2208 S, n = \u2211 n \u2208 T, n \u2192 S = T) :\n    \u2211 n \u2208 A, (1 : \u211d) / (n : \u211d) < 2 := by\n  sorry",
+  "verified_at": "2026-09-10T21:20:11Z"
+}

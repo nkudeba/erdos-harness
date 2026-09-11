@@ -1,0 +1,29 @@
+{
+  "verified": true,
+  "certificate": {
+    "fingerprint": "4e8882a685d5a536e7f55347c13cb10ce29d2242c02d18f0dd4e0552aa696e3d",
+    "module": "Formal.Campaigns.R8ac22eb6fd1d8b0440a6dbdc.Proof",
+    "declaration": "Formal.Campaigns.R8ac22eb6fd1d8b0440a6dbdc.result",
+    "type": "(\u27e80, 0, 0, -1, 0\u27e9 : WeierstrassCurve \u211a).\u0394 \u2260 0",
+    "scope": "special_case",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "at": "2026-09-09T06:24:39Z",
+    "files": {
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/R8ac22eb6fd1d8b0440a6dbdc/Contract.lean": "e3e8a29dcd13908cfb99a461bfdd371db9c5184d5ad76ebd069f57c8a19edee7",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/R8ac22eb6fd1d8b0440a6dbdc/Contract.olean": "84a59464c79155f5c92ec4d9db81220fb270a1baec7666a50f42ab78cf656b03",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/R8ac22eb6fd1d8b0440a6dbdc/Proof.lean": "1a1eb58319ed1ba6e3413df413e2bd2268ad23d6a8a3a0c2428cfbd49bc39471",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/R8ac22eb6fd1d8b0440a6dbdc/Proof.olean": "32a61a5af6c028cf31aa59a8488b2dfa1cd181e3379ecf773cbd49a0571844ff",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/R8ac22eb6fd1d8b0440a6dbdc/Audit.lean": "f30a339863a0684858c86508ae2e6f1af084ee2830e45f72ec5fc50c6bf301a1",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/R8ac22eb6fd1d8b0440a6dbdc/Audit.olean": "298b4b6070e3719e520eddcadcb70396b2e63cf940970342cf34298ba9a2fb7c"
+    },
+    "attempt": "/Users/nicolas.kudeba/workspace/erdos-harness/campaigns/bsd/work/attempts/nonsingular/a7d55b44c7694ebe94e340b482970e35",
+    "dependencies": {
+      "discriminant": "8579cdf01ee4f42881d706a5016d204fb9e1d648e686139265dc5c5cb6b00647"
+    },
+    "certificate_hash": "d39c26e1cfd4ff6646860ed5554a6245c7d6ab3b7c5384483851205110ec651f"
+  }
+}

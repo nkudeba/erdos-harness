@@ -1,0 +1,12 @@
+{
+  "problem": "1193",
+  "run": "20260908-163600-000000-erdos1193-agentic",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "-- CHECK: Nat.card Set.ncard Filter.liminf\ntheorem erdos_1193 :\n    \u2203 (A : Set \u2115) (g : \u2115 \u2192 \u2115), Monotone g \u2227 (\u2200 n, 0 < g n) \u2227\n      0 < Filter.liminf\n        (fun N : \u2115 =>\n          ((Set.ncard {n : \u2115 | n \u2208 Set.Iio N \u2227\n              Nat.card {p : A \u00d7 A // (p.1 : \u2115) + (p.2 : \u2115) = n} = g n} : \u211d) / N))\n        Filter.atTop := by\n  sorry",
+  "verified_at": "2026-09-08T20:46:41Z"
+}

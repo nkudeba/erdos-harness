@@ -1,0 +1,50 @@
+{
+  "publisherSeenAt": "2026-09-10T15:46:16.076Z",
+  "runs": [
+    {
+      "id": "615cfb2016803882dd41e8492b4a47b09260f84ec6b993e84b6dc54be5f2ceb2",
+      "problem": 105,
+      "revision": "01789055149974794671",
+      "updatedAt": "2026-09-10T15:45:49.974Z",
+      "outcome": "proved",
+      "phase": "run/end",
+      "direction": "",
+      "stage": "mechanically_verified",
+      "mechanical": true,
+      "faithful": true,
+      "claimEligible": false,
+      "partial": false,
+      "artifact": "f443417d5db03887eb0863dac541c6fb33df992eb71de97b2d6f2a8541ed1aee"
+    },
+    {
+      "id": "b6952ae0aa85754c4cdea8ed4feb09d9e64bbd5b64c5ddcb87609e64ab290ccb",
+      "problem": 275,
+      "revision": "01789054057006836315",
+      "updatedAt": "2026-09-10T15:27:37.006Z",
+      "outcome": "proved",
+      "phase": "run/end",
+      "direction": "",
+      "stage": "mechanically_verified",
+      "mechanical": true,
+      "faithful": true,
+      "claimEligible": false,
+      "partial": false,
+      "artifact": "d68e8feeb16af4927bb3533160ac0dfbd015cd6cd76c1243ca0821482eda4562"
+    },
+    {
+      "id": "55f30c494844b50ef05f4322ee00b93a82e966a4e0f8f9010e22f27e0952d121",
+      "problem": 649,
+      "revision": "01789054058757903868",
+      "updatedAt": "2026-09-10T15:27:38.757Z",
+      "outcome": "proved",
+      "phase": "run/end",
+      "direction": "",
+      "stage": "mechanically_verified",
+      "mechanical": true,
+      "faithful": true,
+      "claimEligible": false,
+      "partial": false,
+      "artifact": "706e82b8430aa71894de682c0ede90e479bf7e84ad4dd172f8a981c20e9c8da8"
+    }
+  ]
+}

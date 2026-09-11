@@ -1,0 +1,7 @@
+{
+  "id": "397",
+  "statement": "Are there only finitely many solutions to $\\prod_i \\binom{2m_i}{m_i}=\\prod_j \\binom{2n_j}{n_j}$ with the $m_i,n_j$ distinct?",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: there are infinitely many solutions, so formalize the negation of finiteness (the set of solutions is infinite). 'Distinct' means all the m_i and n_j together are pairwise distinct (the two index sets are disjoint and each has no repeats). From the site: Somani, using ChatGPT, has given a negative answer. In fact, for any a >= 2, if c = 8a^2 + 8a + 1, then binom(2a,a) * binom(4a+4,2a+2) * binom(2c,c) = binom(2a+2,a+1) * binom(4a,2a) * binom(2c+2,c+1). Further families of solutions are given in the comments by SharkyKesa. This was earlier asked about in a MathOverflow question, in response to which Elkies also gave an alternative construction.",
+  "url": "https://www.erdosproblems.com/397"
+}

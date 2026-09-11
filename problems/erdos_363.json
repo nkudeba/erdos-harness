@@ -1,0 +1,7 @@
+{
+  "id": "363",
+  "statement": "Is it true that there are only finitely many collections of disjoint intervals $I_1,\\ldots,I_n$ of size $\\lvert I_i\\rvert \\geq 4$ for $1\\leq i\\leq n$ such that $\\prod_{1\\leq i\\leq n}\\prod_{m\\in I_i}m$ is a square?",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: there are infinitely many such collections, so formalize the negation of finiteness: the set of collections of pairwise disjoint intervals of positive integers, each of size >= 4, whose total product is a perfect square, is infinite (any faithful encoding of 'collection of intervals' is acceptable, e.g. a list/finset of intervals given by endpoints). Intervals are sets of consecutive positive integers. From the site: Erdős and Selfridge have proved that the product of consecutive integers is never a power. The condition |I_i| >= 4 is necessary here, since Pomerance has observed that the product of (2^{n-1}-1)2^{n-1}(2^{n-1}+1), (2^n-1)2^n(2^n+1), (2^{2n-1}-2)(2^{2n-1}-1)2^{2n-1}, and (2^{2n}-2)(2^{2n}-1)2^{2n} is always a square. This is false: Ulas [Ul05] has proved there are infinitely many solutions when n = 4 or n >= 6 and |I_i| = 4 for all i. Bauer and Bennett [BaBe07] proved there are infinitely many solutions when n = 3 or n = 5 and |I_i| = 4. Bennett and Van Luijk [BeVL12] found infinitely many solutions when n >= 5 and |I_i| = 5.",
+  "url": "https://www.erdosproblems.com/363"
+}

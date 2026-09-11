@@ -1,0 +1,13 @@
+{
+  "snapshot": "2026-09-09",
+  "catalogue_problems": 1217,
+  "catalogue_status_agreement": 1217,
+  "automated_test_groups_passed": 4,
+  "typescript": "passed",
+  "production_build": "passed",
+  "katex_expressions_parsed": 7495,
+  "katex_errors": 0,
+  "browser_integration": "not exercised",
+  "new_solve_attempts": 0,
+  "manual_reviews": 66
+}

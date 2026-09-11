@@ -1,0 +1,7 @@
+{
+  "id": "399",
+  "statement": "Is it true that there are no solutions to $n! = x^k \\pm y^k$ with $x,y,n \\in \\mathbb{N}$, with $xy>1$ and $k>2$?",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: solutions DO exist, so formalize the negation of the conjectured non-existence, i.e. the existence of n, x, y, k in N with xy > 1 and k > 2 and n! = x^k + y^k or n! = x^k - y^k (equivalently n! + y^k = x^k). From the site: Erdős and Obláth [ErOb37] proved this is true when (x,y)=1 and k != 4. Pollack and Shapiro [PoSh73] proved there are no solutions to n! = x^4 - 1. The known methods break down without the condition (x,y)=1. Jonas Barfield has found the solution 10! = 48^4 - 36^4 = 12^4 * 175. This is discussed in problem D2 of Guy's collection [Gu04].",
+  "url": "https://www.erdosproblems.com/399"
+}

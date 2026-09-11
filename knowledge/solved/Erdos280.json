@@ -1,0 +1,13 @@
+{
+  "problem": "280",
+  "run": "20260909-144054-129103-erdos280",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic",
+    "Mathlib.Analysis.Complex.ExponentialBounds"
+  ],
+  "statement": "-- Zero-based indexing: term k of the sequence is n_{k+1}. Congruence spelled out via `%`.\n-- o(k) expressed with Asymptotics.IsLittleO.\ntheorem erdos_280 :\n    \u2203 (n a : \u2115 \u2192 \u2115) (\u03b5 : \u211d), 0 < \u03b5 \u2227 StrictMono n \u2227\n      (\u2200 k : \u2115, (1 + \u03b5) * ((k : \u211d) + 1) * Real.log ((k : \u211d) + 1) < (n k : \u211d)) \u2227\n      Asymptotics.IsLittleO Filter.atTop\n        (fun k : \u2115 =>\n          (((Finset.range (n k)).filter\n              (fun m => \u2200 i \u2264 k, m % n i \u2260 a i % n i)).card : \u211d))\n        (fun k : \u2115 => (k : \u211d) + 1) := by\n  sorry",
+  "verified_at": "2026-09-09T19:01:26Z"
+}

@@ -1,0 +1,12 @@
+{
+  "problem": "649",
+  "run": "20260909-153409-855978-erdos649",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "def IsGreatestPrimeFactor649 (n p : \u2115) : Prop :=\n  2 \u2264 n \u2227\n  Nat.Prime p \u2227\n  p \u2223 n \u2227\n  \u2200 r : \u2115, Nat.Prime r \u2192 r \u2223 n \u2192 r \u2264 p\n\ntheorem erdos_649 :\n    \u00ac (\u2200 p q : \u2115, Nat.Prime p \u2192 Nat.Prime q \u2192\n      \u2203 n : \u2115,\n        IsGreatestPrimeFactor649 n p \u2227\n        IsGreatestPrimeFactor649 (n + 1) q) := by\n  sorry",
+  "verified_at": "2026-09-10T15:27:38Z"
+}

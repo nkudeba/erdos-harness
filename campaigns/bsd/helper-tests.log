@@ -1,0 +1,7 @@
+ok   test_statement_prefix_stops_at_by_sorry
+ok   test_contains_frozen_ignores_comments_and_whitespace
+ok   test_has_banned_word_boundaries_and_comments
+ok   test_extract_directive_imports_and_compose
+ok   test_lean_blocks_and_json_block
+ok   test_lean_message_parsing_multiline
+ok   test_lean_message_parsing_with_diagnostic_codes

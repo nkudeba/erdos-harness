@@ -1,0 +1,13 @@
+{
+  "problem": "645",
+  "run": "20260907-193935-erdos645",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic"
+  ],
+  "statement": "theorem erdos_645 (c : \u2115 \u2192 Bool) :\n    \u2203 x d : \u2115, 0 < x \u2227 x < d \u2227 c x = c (x + d) \u2227 c (x + d) = c (x + 2 * d) := by\n  sorry",
+  "verified_at": ""
+}

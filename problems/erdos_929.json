@@ -1,0 +1,16 @@
+{
+  "id": "929",
+  "statement": "Let $k\\geq 2$ be large and let $S(k)$ be the minimal $x$ such that there is a positive density set of $n$ where\\[n+1,n+2,\\ldots,n+k\\]are all divisible by primes $\\leq x$. Estimate $S(k)$ - in particular, is it true that $S(k)\\geq k^{1-o(1)}$?",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): It follows from Rosser's sieve that $S(k)> k^{1/2-o(1)}$.\nIt is trivial that $S(k)\\leq k+1$ since, for example, one can take $n\\equiv 1\\pmod{(k+1)!}$. The best bound on large gaps between primes due to Ford, Green, Konyagin, Maynard, and Tao [FGKMT18] (see [4]) implies\\[S(k) \\ll k \\frac{\\log\\log\\log k}{\\log\\log k\\log\\log\\log\\log k}.\\]",
+  "url": "https://www.erdosproblems.com/929",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "number theory"
+  ],
+  "comments": 1,
+  "flags": [
+    "trivial"
+  ]
+}

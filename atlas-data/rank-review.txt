@@ -1,0 +1,114 @@
+Counter({'Unsolved': 639, 'Solved': 574, 'Independent': 4})
+Counter({'Frontier': 473, 'Difficult': 290, 'Research': 275, 'Plausible': 164, 'Demonstrated': 11, 'Promising': 4})
+Top new targets:
+12 649 87 Solved ['number theory'] Let $P(m)$ denote the greatest prime factor of $m$. Is it true that, for any two primes $p,q$, there exists some integer $n$ such that $P(n)=p$ and $P(n+1)=q$?
+13 280 78 Solved ['number theory', 'covering systems'] Let $n_1<n_2<\cdots $ be an infinite sequence of integers with associated $a_k\pmod{n_k}$, such that for some $\epsilon>0$ we have $n_k>(1+\epsilon)k\log k$ for
+14 105 73 Solved ['geometry'] Let $A,B\subset \mathbb{R}^2$ be disjoint sets of size $n$ and $n-3$ respectively, with not all of $A$ contained on a single line. Is there a line which contain
+15 275 70 Solved ['number theory', 'covering systems'] If a finite system of $r$ congruences $\{ a_i\pmod{n_i} : 1\leq i\leq r\}$ (the $n_i$ are not necessarily distinct) covers $2^r$ consecutive integers then it co
+16 189 68 Solved ['geometry', 'ramsey theory'] If $\mathbb{R}^2$ is finitely coloured then must there exist some colour class which contains the vertices of a rectangle of every area?
+17 331 67 Solved ['number theory', 'additive combinatorics'] Let $A,B\subseteq \mathbb{N}$ such that for all large $N$\[\lvert A\cap \{1,\ldots,N\}\rvert \gg N^{1/2}\]and\[\lvert B\cap \{1,\ldots,N\}\rvert \gg N^{1/2}.\]I
+18 56 66 Solved ['number theory', 'intersecting family'] Let $N\geq p_k$ where $p_k$ is the $k$th prime. Suppose $A\subseteq \{1,\ldots,N\}$ is such that there are no $k+1$ elements of $A$ which are relatively prime. 
+19 194 66 Solved ['arithmetic progressions'] Let $k\geq 3$. Must any ordering of $\mathbb{R}$ contain a monotone $k$-term arithmetic progression, that is, some $x_1<\cdots<x_k$ which forms an increasing or
+20 231 66 Solved ['combinatorics'] Let $S$ be a string of length $2^k-1$ formed from an alphabet of $k$ characters. Must $S$ contain an abelian square: two consecutive blocks $x$ and $y$ such tha
+21 246 66 Solved ['number theory'] Let $(a,b)=1$. The set $\{a^kb^l: k,l\geq 0\}$ is complete - that is, every large integer is the sum of distinct integers of the form $a^kb^l$ with $k,l\geq 0$.
+22 250 66 Solved ['number theory', 'irrationality'] Is\[\sum \frac{\sigma(n)}{2^n}\]irrational? (Here $\sigma(n)$ is the sum of divisors function.)
+23 277 66 Solved ['number theory', 'covering systems'] Is it true that, for every $c$, there exists an $n$ such that $\sigma(n)>cn$ but there is no covering system whose moduli all distinct divisors of $n$ (which ar
+24 384 66 Solved ['number theory', 'binomial coefficients'] If $1<k<n-1$ then $\binom{n}{k}$ is divisible by a prime $p<n/2$ (except $\binom{7}{3}=5\cdot 7$).
+25 403 66 Solved ['number theory', 'factorials'] Does the equation\[2^m=a_1!+\cdots+a_k!\]with $a_1<a_2<\cdots <a_k$ have only finitely many solutions?
+26 419 66 Solved ['number theory', 'factorials'] If $\tau(n)$ counts the number of divisors of $n$, then what is the set of limit points of\[\frac{\tau((n+1)!)}{\tau(n!)}?\]
+27 427 66 Solved ['number theory', 'primes'] Is it true that, for every $n$ and $d$, there exists $k$ such that\[d \mid p_{n+1}+\cdots+p_{n+k},\]where $p_r$ denotes the $r$th prime?
+28 728 66 Solved ['number theory', 'factorials'] Let $C>0$ and $\epsilon>0$ be sufficiently small. Are there infinitely many integers $a,b,n$ with $a\geq \epsilon n$ and $b\geq \epsilon n$ such that\[a! b! \mi
+29 379 65 Solved ['number theory', 'binomial coefficients'] Let $S(n)$ denote the largest integer such that, for all $1\leq k<n$, the binomial coefficient $\binom{n}{k}$ is divisible by $p^{S(n)}$ for some prime $p$ (dep
+30 707 65 Solved ['additive combinatorics', 'sidon sets'] Let $A\subset \mathbb{N}$ be a finite Sidon set. Is there some set $B$ with $A\subseteq B$ which is perfect difference set modulo $p^2+p+1$ for some prime $p$?
+31 825 65 Solved ['number theory', 'divisors', 'unit fractions'] Is there an absolute constant $C>0$ such that every integer $n$ with $\sigma(n)>Cn$ is the distinct sum of proper divisors of $n$?
+32 1136 65 Solved ['number theory'] Does there exist $A\subset \mathbb{N}$ with lower density $>1/3$ such that $a+b\neq 2^k$ for any $a,b\in A$ and $k\geq 0$?
+33 47 64 Solved ['number theory', 'unit fractions'] If $\delta>0$ and $N$ is sufficiently large in terms of $\delta$, and $A\subseteq\{1,\ldots,N\}$ is such that $\sum_{a\in A}\frac{1}{a}>\delta \log N$ then must
+34 123 64 Solved ['number theory'] Let $a,b,c> 1$ be three integers which are pairwise coprime. Is every large integer the sum of distinct integers of the form $a^kb^lc^m$ ($k,l,m\geq 0$), none o
+35 290 64 Solved ['number theory', 'unit fractions'] Let $a\geq 1$. Must there exist some $b>a$ such that\[\sum_{a\leq n\leq b}\frac{1}{n}=\frac{r_1}{s_1}\textrm{ and }\sum_{a\leq n\leq b+1}\frac{1}{n}=\frac{r_2}{
+36 310 64 Solved ['number theory', 'unit fractions'] Let $\alpha >0$ and $N\geq 1$. Is it true that for any $A\subseteq \{1,\ldots,N\}$ with $\lvert A\rvert \geq \alpha N$ there exists some $S\subseteq A$ such tha
+37 351 64 Solved ['number theory', 'complete sequences'] Let $p(x)\in \mathbb{Q}[x]$ with positive leading coefficient. Is it true that\[A=\{ p(n)+1/n : n\in \mathbb{N}\}\]is strongly complete, in the sense that, for 
+38 355 64 Solved ['number theory', 'unit fractions'] Is there a lacunary sequence $A\subseteq \mathbb{N}$ (so that $A=\{a_1<a_2<\cdots\}$ and there exists some $\lambda>1$ such that $a_{n+1}/a_n\geq \lambda$ for a
+39 392 64 Solved ['number theory', 'factorials'] Let $A(n)$ denote the least value of $t$ such that\[n!=a_1\cdots a_t\]with $a_1\leq \cdots \leq a_t\leq n^2$. Is it true that\[A(n)=\frac{n}{2}-\frac{n}{2\log n
+40 434 64 Solved ['number theory'] Let $k\leq n$. What choice of $A\subseteq \{1,\ldots,n\}$ (with $\mathrm{gcd}(A)=1$) of size $\lvert A\rvert=k$ maximises the number of integers not representab
+41 464 64 Solved ['number theory'] Let $A=\{n_1<n_2<\cdots\}\subset \mathbb{N}$ be a lacunary sequence (so there exists some $\epsilon>0$ with $n_{k+1}\geq (1+\epsilon)n_k$ for all $k$). Must the
+42 548 64 Solved ['graph theory'] Let $n\geq k+1$. Every graph on $n$ vertices with at least $\frac{k-1}{2}n+1$ edges contains every tree on $k+1$ vertices.
+43 947 64 Solved ['number theory', 'covering systems'] There is no exact covering system - that is, a finite collection of congruence classes $a_i\pmod{n_i}$ with distinct $n_i$ such that every integer satisfies exa
+44 328 63 Solved ['number theory', 'additive combinatorics'] Suppose $A\subseteq\mathbb{N}$ and $C>0$ is such that $1_A\ast 1_A(n)\leq C$ for all $n\in\mathbb{N}$. Can $A$ be partitioned into $t$ many subsets $A_1,\ldots,
+45 405 63 Solved ['number theory', 'factorials'] Let $p$ be an odd prime. Is it true that the equation\[(p-1)!+a^{p-1}=p^k\]has only finitely many solutions?
+46 469 63 Solved ['number theory', 'divisors'] Let $A$ be the set of all $n$ such that $n=d_1+\cdots+d_k$ with $d_i$ distinct proper divisors of $n$, but this is not true for any $m\mid n$ with $m<n$. Does\[
+47 303 62 Solved ['number theory', 'unit fractions'] Is it true that in any finite colouring of the integers there exists a monochromatic solution to\[\frac{1}{a}=\frac{1}{b}+\frac{1}{c}\]with distinct $a,b,c$?
+48 6 61 Solved ['number theory', 'primes'] Let $d_n=p_{n+1}-p_n$. Are there infinitely many $n$ such that $d_n<d_{n+1}<d_{n+2}$?
+49 48 61 Solved ['number theory'] Are there infinitely many integers $n,m$ such that $\phi(n)=\sigma(m)$?
+50 152 61 Solved ['sidon sets'] For any $M\geq 1$, if $A\subset \mathbb{N}$ is a sufficiently large finite Sidon set then there are at least $M$ many $a\in A+A$ such that $a+1,a-1\not\in A+A$.
+51 259 61 Solved ['irrationality'] Is the sum\[\sum_{n} \mu(n)^2\frac{n}{2^n}\]irrational?
+52 300 61 Solved ['number theory', 'unit fractions'] Let $A(N)$ denote the maximal cardinality of $A\subseteq \{1,\ldots,N\}$ such that $\sum_{n\in S}\frac{1}{n}\neq 1$ for all $S\subseteq A$. Estimate $A(N)$.
+53 418 61 Solved ['number theory'] Are there infinitely many positive integers not of the form $n-\phi(n)$?
+54 457 61 Solved ['number theory'] Is there some $\epsilon>0$ such that there are infinitely many $n$ where all primes $p\leq (2+\epsilon)\log n$ divide\[\prod_{1\leq i\leq \log n}(n+i)?\]
+55 608 61 Solved ['graph theory'] Let $G$ be a graph with $n$ vertices and $>n^2/4$ many edges. Are there at least $\frac{2}{9}n^2$ edges of $G$ which are contained in a $C_5$?
+56 646 61 Solved ['number theory', 'factorials'] Let $p_1,\ldots,p_k$ be distinct primes. Are there infinitely many $n$ such that $n!$ is divisible by an even power of each of the $p_i$?
+57 888 61 Solved ['number theory', 'squares'] What is the size of the largest $A\subseteq \{1,\ldots,n\}$ such that if $a\leq b\leq c\leq d\in A$ are such that $abcd$ is a square then $ad=bc$?
+58 1141 61 Solved ['number theory', 'primes'] Are there infinitely many $n$ such that $n-k^2$ is prime for all $k$ with $(n,k)=1$ and $k^2<n$?
+59 83 59 Solved ['combinatorics'] Suppose that we have a family $\mathcal{F}$ of subsets of $[4n]$ such that $\lvert A\rvert=2n$ for all $A\in\mathcal{F}$ and for every $A,B\in \mathcal{F}$ we h
+60 356 59 Solved ['number theory'] Is there some $c>0$ such that, for all sufficiently large $n$, there exist integers $a_1<\cdots<a_k\leq n$ such that there are at least $cn^2$ distinct integers
+61 435 59 Solved ['number theory'] Let $n\in\mathbb{N}$ with $n\neq p^k$ for any prime $p$ and $k\geq 0$. What is the largest integer not of the form\[\sum_{1\leq i<n}c_i\binom{n}{i}\]where the $
+62 499 59 Solved ['combinatorics'] Let $M=(a_{ij})$ be a real $n\times n$ doubly stochastic matrix (i.e. the entries are non-negative and each column and row sums to $1$). Does there exist some $
+63 648 59 Solved ['number theory'] Let $g(n)$ denote the largest $t$ such that there exist integers $2\leq a_1<a_2<\cdots <a_t <n$ such that\[P(a_1)>P(a_2)>\cdots >P(a_t)\]where $P(m)$ is the gre
+64 694 59 Solved ['number theory'] Let $f_{\max}(n)$ be the largest $m$ such that $\phi(m)=n$, and $f_{\min}(n)$ be the smallest such $m$, where $\phi$ is Euler's totient function. Investigate\[\
+65 753 59 Solved ['graph theory', 'chromatic number'] The list chromatic number $\chi_L(G)$ is defined to be the minimal $k$ such that for any assignment of a list of $k$ colours to each vertex of $G$ (perhaps diff
+66 844 59 Solved ['number theory', 'intersecting family'] Let $A\subseteq \{1,\ldots,N\}$ be such that, for all $a,b\in A$, the product $ab$ is not squarefree. Is the maximum size of such an $A$ achieved by taking $A$ 
+67 1037 59 Solved ['graph theory'] Let $G$ be a graph on $n$ vertices in which every degree occurs at most twice, and the number of distinct degree is $>(\frac{1}{2}+\epsilon)n$. Must $G$ contain
+68 1080 59 Solved ['graph theory'] Let $G$ be a bipartite graph on $n$ vertices such that one part has $\lfloor n^{2/3}\rfloor$ vertices. Is there a constant $c>0$ such that if $G$ has at least $
+69 1102 59 Solved ['number theory'] We say that $A\subseteq \mathbb{N}$ has property $P$ if, for all $n\geq 1$, there are only finitely many $a\in A$ such that $n+a$ is squarefree. We say that $A$
+70 1190 59 Solved ['number theory', 'covering systems'] Let\[\epsilon_m=\max \sum \frac{1}{n_i}\]where the maximum is taken over all finite sequences $m<n_1<\cdots<n_k$ for which there exist congruences $a_i\pmod{n_i
+71 350 58 Solved ['number theory', 'additive combinatorics'] If $A\subset\mathbb{N}$ is a finite set of integers which is dissociated (that is, all of the subset sums are distinct) then\[\sum_{n\in A}\frac{1}{n}<2.\]
+OPEN:
+464 848 30 Is the maximum size of a set $A\subseteq \{1,\ldots,N\}$ such that $ab+1$ is never squarefree (for all $a,b\in A$) achieved by taking those $n\equiv 7\pmod{25}$?
+481 488 28 Let $A$ be a finite set and\[B=\{ n \geq 1 : a\mid n\textrm{ for some }a\in A\}.\]Is it true that, for every $m>n\geq \max(A)$,\[\frac{\lvert B\cap [1,m]\rvert }{m}< 2\frac{\lvert 
+515 10 25 Is there some $k$ such that every large integer is the sum of a prime and at most $k$ powers of 2?
+516 11 25 Is every large odd integer $n$ the sum of a squarefree number and a power of 2?
+517 68 25 Is\[\sum_{n\geq 2}\frac{1}{n!-1}\]irrational?
+519 137 25 We say that $N$ is powerful if whenever $p\mid N$ we also have $p^2\mid N$. Let $k\geq 3$. Can the product of any $k$ consecutive positive integers ever be powerful?
+522 249 25 Is\[\sum_n \frac{\phi(n)}{2^n}\]irrational? Here $\phi$ is the Euler totient function .
+523 251 25 Is\[\sum \frac{p_n}{2^n}\]irrational? (Here $p_n$ is the $n$th prime.)
+524 252 25 Let $k\geq 1$ and $\sigma_k(n)=\sum_{d\mid n}d^k$. Is\[\sum \frac{\sigma_k(n)}{n!}\]irrational?
+525 273 25 Is there a covering system all of whose moduli are of the form $p-1$ for some primes $p\geq 5$?
+526 288 25 Is it true that there are only finitely many pairs of intervals $I_1,I_2$ such that\[\sum_{n_1\in I_1}\frac{1}{n_1}+\sum_{n_2\in I_2}\frac{1}{n_2}\in \mathbb{N}?\]
+527 324 25 Does there exist a polynomial $f(x)\in\mathbb{Z}[x]$ such that all the sums $f(a)+f(b)$ with $a<b$ nonnegative integers are distinct?
+528 377 25 Is there some absolute constant $C>0$ such that\[\sum_{p\leq n}1_{p\nmid \binom{2n}{n}}\frac{1}{p}\leq C\]for all $n$ (where the summation is restricted to primes $p\leq n$)?
+529 389 25 Is it true that for every $n\geq 1$ there is a $k$ such that\[n(n+1)\cdots(n+k-1)\mid (n+k)\cdots (n+2k-1)?\]
+530 396 25 Is it true that for every $k$ there exists $n$ such that\[\prod_{0\leq i\leq k}(n-i) \mid \binom{2n}{n}?\]
+531 406 25 Is it true that there are only finitely many powers of $2$ which have only the digits $0$ and $1$ when written in base $3$?
+532 445 25 Is it true that, for any $c>1/2$, if $p$ is a sufficiently large prime then, for any $n\geq 0$, there exist $a,b\in(n,n+p^c)$ such that $ab\equiv 1\pmod{p}$?
+533 677 25 Let $M(n,k)=[n+1,\ldots,n+k]$ be the least common multiple of $\{n+1,\ldots,n+k\}$. Is it true that for all $m\geq n+k$\[M(n,k) \neq M(m,k)?\]
+534 681 25 Is it true that for all large $n$ there exists $k$ such that $n+k$ is composite and\[p(n+k)>k^2,\]where $p(m)$ is the least prime factor of $m$?
+535 686 25 Can every integer $N\geq 2$ be written as\[N=\frac{\prod_{1\leq i\leq k}(m+i)}{\prod_{1\leq i\leq k}(n+i)}\]for some $k\geq 2$ and $m\geq n+k$?
+537 849 25 Is it true that, for every integer $t\geq 1$, there is some integer $a$ such that\[\binom{n}{k}=a\](with $1\leq k\leq n/2$) has exactly $t$ solutions?
+538 855 25 If $\pi(x)$ counts the number of primes in $[1,x]$ then is it true that (for large $x$ and $y$)\[\pi(x+y) \leq \pi(x)+\pi(y)?\]
+540 1056 25 Let $k\geq 2$. Does there exist a prime $p$ and consecutive intervals $I_1,\ldots,I_k$ such that\[\prod_{n\in I_i}n \equiv 1\pmod{p}\]for all $1\leq i\leq k$?
+541 1094 25 For all $n\geq 2k$ the least prime factor of $\binom{n}{k}$ is $\leq \max(n/k,k)$, with only finitely many exceptions.
+548 886 24 Let $\epsilon>0$. Is it true that, for all large $n$, the number of divisors of $n$ in $(n^{1/2},n^{1/2}+n^{1/2-\epsilon})$ is $O_\epsilon(1)$?
+549 887 24 Is there an absolute constant $K$ such that, for every $C>0$, if $n$ is sufficiently large then $n$ has at most $K$ divisors in $(n^{1/2},n^{1/2}+C n^{1/4})$.
+550 893 24 If $\tau(n)$ counts the divisors of $n$ then let\[f(n)=\sum_{1\leq k\leq n}\tau(2^k-1).\]Does $f(2n)/f(n)$ tend to a limit?
+556 124 23 For any $d\geq 1$ and $k\geq 0$ let $P(d,k)$ be the set of integers which are the sum of distinct powers $d^i$ with $i\geq k$. Let $3\leq d_1<d_2<\cdots <d_r$ be integers such that
+557 238 23 Let $c_1,c_2>0$. Is it true that, for any sufficiently large $x$, there exist more than $c_1\log x$ many consecutive primes $\leq x$ such that the difference between any two is $>c
+558 279 23 Let $k\geq 3$. Is there a choice of congruence classes $a_p\pmod{p}$ for every prime $p$ such that all sufficiently large integers can be written as $a_p+tp$ for some prime $p$ and
+559 287 23 Let $k\geq 2$. Is it true that, for any distinct integers $1<n_1<\cdots <n_k$ such that\[1=\frac{1}{n_1}+\cdots+\frac{1}{n_k}\]we must have $\max(n_{i+1}-n_i)\geq 3$?
+560 306 23 Let $a/b\in \mathbb{Q}_{>0}$ with $b$ squarefree. Are there integers $1<n_1<\cdots<n_k$, each the product of two distinct primes, such that\[\frac{a}{b}=\frac{1}{n_1}+\cdots+\frac{
+561 312 23 Does there exist some $c>0$ such that, for any $K>1$, whenever $A$ is a sufficiently large finite multiset of positive integers with $\sum_{n\in A}\frac{1}{n}>K$ there exists some 
+562 317 23 Is there some constant $c>0$ such that for every $n\geq 1$ there exists some $\delta_k\in \{-1,0,1\}$ for $1\leq k\leq n$ with\[0< \left\lvert \sum_{1\leq k\leq n}\frac{\delta_k}{k
+563 348 23 For what values of $0\leq m<n$ is there a complete sequence $A=\{a_1\leq a_2\leq \cdots\}$ of integers such that $A$ remains complete after removing any $m$ elements, but $A$ is no
+564 354 23 Let $\alpha,\beta\in \mathbb{R}_{>0}$ such that $\alpha/\beta$ is irrational. Is the multiset\[\{ \lfloor \alpha\rfloor,\lfloor 2\alpha\rfloor,\lfloor 4\alpha\rfloor,\ldots\}\cup \
+565 412 23 Let $\sigma_1(n)=\sigma(n)$, the sum of divisors function, and $\sigma_k(n)=\sigma(\sigma_{k-1}(n))$. Is it true that, for every $m,n\geq 2$, there exist some $i,j$ such that $\sig
+566 414 23 Let $h_1(n)=h(n)=n+\tau(n)$ (where $\tau(n)$ counts the number of divisors of $n$) and $h_k(n)=h(h_{k-1}(n))$. Is it true, for any $m,n$, there exist $i$ and $j$ such that $h_i(m)=
+569 689 23 Let $n$ be sufficiently large. Is there some choice of congruence class $a_p$ for all primes $2\leq p\leq n$ such that every integer in $[1,n]$ satisfies at least two of the congru
+574 872 23 Consider the two-player game in which players alternately choose integers from $\{2,3,\ldots,n\}$ to be included in some set $A$ (the same set for both players) such that no $a\mid
+575 930 23 Is it true that, for every $r$, there is a $k$ such that if $I_1,\ldots,I_r$ are disjoint intervals of consecutive integers, all of length at least $k$, then\[\prod_{1\leq i\leq r}
+576 938 23 Let $A=\{n_1<n_2<\cdots\}$ be the sequence of powerful numbers  (if $p\mid n$ then $p^2\mid n$). Are there only finitely many three-term progressions of consecutive terms $n_k,n_{k
+577 1004 23 Let $c>0$. If $x$ is sufficiently large then does there exist $n\leq x$ such that the values of $\phi(n+k)$ are all distinct for $1\leq k\leq (\log x)^c$, where $\phi$ is the Euler
+578 1107 23 Let $r\geq 2$. A number $n$ is $r$-powerful if for every prime $p$ which divides $n$ we have $p^r\mid n$. Is every large integer the sum of at most $r+1$ many $r$-powerful numbers?
+579 1108 23 Let\[A = \left\{ \sum_{n\in S}n! : S\subset \mathbb{N}\textrm{ finite}\right\}.\]If $k\geq 2$, then does $A$ contain only finitely many $k$th powers? Does it contain only finitely 
+580 1113 23 A positive odd integer $m$ such that none of $2^km+1$ are prime for $k\geq 0$ is called a Sierpinski number . We say that a set of primes $P$ is a covering set for $m$ if every $2^
+581 23 22 Can every triangle-free graph on $5n$ vertices be made bipartite by deleting at most $n^2$ edges?
+584 334 22 Find the best function $f(n)$ such that every $n$ can be written as $n=a+b$ where both $a,b$ are $f(n)$-smooth (that is, are not divisible by any prime $p>f(n)$.)
+585 388 22 Can one classify all solutions of\[\prod_{1\leq i\leq k_1}(m_1+i)=\prod_{1\leq j\leq k_2}(m_2+j)\]where $k_1,k_2>3$ and $m_1+k_1\leq m_2$? Are there only finitely many solutions?
+586 411 22 Let $g_1=g(n)=n+\phi(n)$ and $g_k(n)=g(g_{k-1}(n))$. For which $n$ and $r$ is it true that $g_{k+r}(n)=2g_k(n)$ for all large $k$?

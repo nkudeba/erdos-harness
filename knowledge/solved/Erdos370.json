@@ -1,0 +1,12 @@
+{
+  "problem": "370",
+  "run": "20260908-164643-021947-erdos370",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_370 :\n    Set.Infinite {n : \u2115 | 2 \u2264 n \u2227 (\u2200 p \u2208 n.primeFactors, p ^ 2 < n) \u2227\n      (\u2200 p \u2208 (n + 1).primeFactors, p ^ 2 < n + 1)} := by\n  sorry",
+  "verified_at": "2026-09-08T21:11:19Z"
+}

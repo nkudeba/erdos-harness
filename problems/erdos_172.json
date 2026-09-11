@@ -1,0 +1,17 @@
+{
+  "id": "172",
+  "statement": "Is it true that in any finite colouring of $\\mathbb{N}$ there exist arbitrarily large finite $A$ such that all sums and products of distinct elements in $A$ are the same colour?",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): First asked by Hindman. Hindman [Hi80] has proved this is false (with 7 colours) if we ask for an infinite $A$. In [Er77c] Erdős asks about the case for an infinite $A$ with just $2$ colours (see [1198]).\nMoreira [Mo17] has proved that in any finite colouring of $\\mathbb{N}$ there exist $x,y$ such that $\\{x,x+y,xy\\}$ are all the same colour.\nAlweiss [Al23] has proved that in any finite colouring of $\\mathbb{Q}\\backslash \\{0\\}$ there exist arbitrarily large finite $A$ such that all sums and products of distinct elements in $A$ are the same colour. Bowen and Sabok [BoSa22] had proved this earlier for the first non-trivial case of $\\lvert A\\rvert=2$.",
+  "url": "https://www.erdosproblems.com/172",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "additive combinatorics",
+    "ramsey theory"
+  ],
+  "comments": 0,
+  "flags": [
+    "trivial"
+  ]
+}

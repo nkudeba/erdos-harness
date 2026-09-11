@@ -1,0 +1,12 @@
+{
+  "problem": "532",
+  "run": "20260908-171122-041469-erdos532",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_532 (c : \u2115 \u2192 Fin 2) :\n    \u2203 A : Set \u2115, A.Infinite \u2227 (\u2200 n \u2208 A, 0 < n) \u2227\n      \u2203 i : Fin 2, \u2200 S : Finset \u2115, S.Nonempty \u2192 (\u2191S : Set \u2115) \u2286 A \u2192\n        c (\u2211 n \u2208 S, n) = i := by\n  sorry",
+  "verified_at": "2026-09-09T03:09:30Z"
+}

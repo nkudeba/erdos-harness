@@ -1,0 +1,12 @@
+{
+  "problem": "105",
+  "run": "20260909-153410-884155-erdos105",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "-- IMPORTS: Mathlib.Data.Real.Basic\ntheorem erdos_105 :\n    \u2203 (n : \u2115) (A B : Finset (\u211d \u00d7 \u211d)),\n      A.card = n \u2227\n      B.card = n - 3 \u2227\n      Disjoint A B \u2227\n      (\u00ac \u2203 a b c : \u211d,\n        (a \u2260 0 \u2228 b \u2260 0) \u2227\n        \u2200 p \u2208 A, a * p.1 + b * p.2 = c) \u2227\n      (\u2200 a b c : \u211d,\n        (a \u2260 0 \u2228 b \u2260 0) \u2192\n        (\u2203 p \u2208 A, \u2203 q \u2208 A,\n          p \u2260 q \u2227\n          a * p.1 + b * p.2 = c \u2227\n          a * q.1 + b * q.2 = c) \u2192\n        \u2203 r \u2208 B, a * r.1 + b * r.2 = c) := by\n  sorry",
+  "verified_at": "2026-09-10T15:45:49Z"
+}

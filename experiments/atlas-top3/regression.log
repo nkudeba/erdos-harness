@@ -1,0 +1,36 @@
+[2026-09-10T01:02:22Z] regression/start {}
+[2026-09-10T01:02:22Z] regression/start {}
+[2026-09-10T01:02:22Z] regression/start {}
+[2026-09-10T01:06:16Z] regression/passed {}
+[2026-09-10T01:06:16Z] regression/passed {}
+[2026-09-10T01:06:16Z] regression/start {}
+[2026-09-10T01:06:16Z] regression/start {}
+[2026-09-10T01:06:18Z] regression/passed {}
+[2026-09-10T01:06:18Z] regression/start {}
+[2026-09-10T01:07:15Z] regression/passed {}
+[2026-09-10T01:07:15Z] regression/start {}
+[2026-09-10T01:08:56Z] regression/passed {}
+[2026-09-10T01:08:56Z] regression/start {}
+[2026-09-10T01:08:56Z] regression/passed {}
+[2026-09-10T01:08:56Z] regression/start {}
+[2026-09-10T01:09:33Z] regression/passed {}
+[2026-09-10T01:09:33Z] regression/start {}
+[2026-09-10T01:09:34Z] regression/passed {}
+[2026-09-10T01:09:34Z] regression/start {}
+[2026-09-10T01:09:53Z] regression/passed {}
+[2026-09-10T01:09:54Z] regression/passed {}
+[2026-09-10T01:10:05Z] regression/passed {}
+| proof | PASS | compiles | sorry | banned | axioms | first error |
+|---|---|---|---|---|---|---|
+| Erdos1193 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos198 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos316 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos363 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos370 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos397 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos399 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos493 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos532 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos645 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+| Erdos674 | ✅ | True | False | None | Classical.choice,Quot.sound,propext |  |
+regress: 11 passed, 0 failed

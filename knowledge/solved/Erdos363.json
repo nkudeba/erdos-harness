@@ -1,0 +1,12 @@
+{
+  "problem": "363",
+  "run": "20260908-051747-300268-erdos363",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_363 :\n    Set.Infinite {\ud835\udcd8 : Finset (Finset \u2115) |\n      (\u2200 I \u2208 \ud835\udcd8, 4 \u2264 I.card \u2227 0 \u2209 I \u2227 \u2203 a b : \u2115, I = Finset.Icc a b) \u2227\n      (\ud835\udcd8 : Set (Finset \u2115)).PairwiseDisjoint id \u2227\n      IsSquare (\u220f I \u2208 \ud835\udcd8, \u220f m \u2208 I, m)} := by\n  sorry",
+  "verified_at": "2026-09-08T16:13:33Z"
+}

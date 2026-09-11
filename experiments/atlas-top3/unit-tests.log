@@ -1,0 +1,50 @@
+..[2026-09-10T15:42:09Z] backend/retry purpose=t attempt=1/3 in 45s: None:
+[2026-09-10T15:42:09Z] backend/retry purpose=t attempt=2/3 in 90s: None:
+[2026-09-10T15:42:09Z] backend/retry purpose=t attempt=3/3 in 180s: None:
+...[2026-09-10T15:42:09Z] backend/retry purpose=t attempt=1/3 in 45s: success: API Error: Can't reach the API server (ENOTFOUND)
+.........sssssssssss.................[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": true}, "promoted": true, "saved_proofs_pass": true, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpx8s437kc/runs/learning-7d344a024913/candidate-1"}
+[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": false}, "promoted": false, "saved_proofs_pass": true, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpelzqukxi/runs/learning-bd3d9ca2e90e/candidate-1"}
+[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": true}, "promoted": false, "saved_proofs_pass": false, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpfarx7_ou/runs/learning-4c73fdaacdf8/candidate-1"}
+[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": null}, "promoted": false, "saved_proofs_pass": true, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmph3_iod9x/runs/learning-ee532d12fb09/candidate-1"}
+.[2026-09-10T15:42:11Z] llm/request {'purpose': 'literature-web', 'chars': 1183}
+[2026-09-10T15:42:11Z] llm/response_failed {'purpose': 'literature-web', 'cost_usd': 2.6, 'tokens': None, 'subtype': 'error_max_budget_usd', 'secs': 0.0}
+[2026-09-10T15:42:11Z] literature/source_notes_fallback {'reason': 'error_max_budget_usd'}
+.[2026-09-10T15:42:11Z] llm/request {'purpose': 'literature-web', 'chars': 1183}
+[2026-09-10T15:42:11Z] llm/response_failed {'purpose': 'literature-web', 'cost_usd': 2.6, 'tokens': None, 'subtype': 'Spend limit reached', 'secs': 0.0}
+.[2026-09-10T15:42:11Z] literature/operator_context {'sha256': '96b2a4bc0c73a1191e4676e284ae1b26a2d49a9a4a0518555a6990b4dbd0869b', 'chars': 28}
+..[2026-09-10T15:42:11Z] llm/request {'purpose': 'literature-web', 'chars': 1183}
+[2026-09-10T15:42:11Z] llm/response_failed {'purpose': 'literature-web', 'cost_usd': 2.6, 'tokens': None, 'subtype': 'error_max_budget_usd', 'secs': 0.0}
+[2026-09-10T15:42:11Z] run/budget_exhausted {'after': 'literature-web', 'spent_usd': 2.6, 'budget': 2}
+.[2026-09-10T15:42:11Z] llm/request {'purpose': 'literature-web', 'chars': 1154}
+[2026-09-10T15:42:11Z] llm/response_failed {'purpose': 'literature-web', 'cost_usd': 2.6, 'tokens': None, 'subtype': 'error_max_budget_usd', 'secs': 0.0}
+.[2026-09-10T15:42:11Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+[2026-09-10T15:42:11Z] run/end {'proved': True, 'outcome': 'proved_unverified', 'all_clear': False, 'spent_usd': 0}
+[2026-09-10T15:42:11Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+[2026-09-10T15:42:11Z] run/end {'proved': True, 'outcome': 'proved_unverified', 'all_clear': None, 'spent_usd': 0}
+[2026-09-10T15:42:11Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+[2026-09-10T15:42:11Z] run/end {'proved': True, 'outcome': 'proved_unverified', 'all_clear': 'false', 'spent_usd': 0}
+[2026-09-10T15:42:11Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+[2026-09-10T15:42:11Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0}
+.[2026-09-10T15:42:11Z] verify/done {'compiles': True, 'sorry_free': True, 'banned': None, 'frozen_match': False, 'axioms': [], 'axioms_clean': True, 'faithful': {'faithful': False, 'issues': ['mechanical verification failed; semantic judge skipped']}, 'all_clear': False, 'artifact_sha256': '02cf9dc95e9c20455361aebcf533499e11f83025e687fe555a440b7c05a544f6'}
+.....[2026-09-10T15:42:11Z] decompose/skeleton_accepted {'sorries': 2}
+[2026-09-10T15:42:11Z] decompose/progress {'sorries_left': 1}
+.[2026-09-10T15:42:11Z] run/start {'problem': '1', 'backend': 'file', 'resume': True}
+[2026-09-10T15:42:11Z] run/escalating_to_decompose {}
+[2026-09-10T15:42:11Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0}
+...............................
+----------------------------------------------------------------------
+Ran 87 tests in 2.166s
+
+OK (skipped=11)

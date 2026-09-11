@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "timeout": false,
+  "errors": [],
+  "warnings": [
+    "line 246:22: `Set.Infinite.diff` has been deprecated: Use `Set.Infinite.sdiff` instead\n'erdos_532' depends on axioms: [propext, Classical.choice, Quot.sound]"
+  ],
+  "infos": [],
+  "sorries": false,
+  "raw": "'Erdos532.erdos_532' depends on axioms: [propext, Classical.choice, Quot.sound]\n/Users/nicolas.kudeba/workspace/erdos-harness/runs/adhoc/Erdos532.lean:246:22: warning: `Set.Infinite.diff` has been deprecated: Use `Set.Infinite.sdiff` instead\n'erdos_532' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+}

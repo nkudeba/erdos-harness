@@ -1,0 +1,13 @@
+{
+  "id": "493",
+  "statement": "Does there exist a k such that every sufficiently large integer can be written in the form \\prod_{i=1}^{k} a_i - \\sum_{i=1}^{k} a_i for some integers a_i >= 2?",
+  "status": "solved (affirmative); erdosproblems.com marks it PROVED (LEAN)",
+  "notes": "The problem is RESOLVED IN THE AFFIRMATIVE: yes, such a k exists — in fact a small fixed k already works for every sufficiently large integer (indeed for all integers, with the right threshold), via a simple explicit construction observed by Eli Seamans. Formalize the affirmative assertion (existence of k and of the threshold N). The a_i need not be distinct. 'Integer' here can be taken as n ranging over integers (or naturals) that are sufficiently large; each a_i is an integer >= 2. Beware: over the naturals, subtraction truncates — prefer stating the equation over the integers to keep the subtraction honest.",
+  "url": "https://www.erdosproblems.com/493",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin"
+  ]
+}

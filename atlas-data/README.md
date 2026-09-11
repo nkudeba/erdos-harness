@@ -1,0 +1,11 @@
+# Erdős Atlas — 9 September 2026
+
+Complete snapshot: 1,217 statements, 574 solved, 639 unsolved, 4 independent. The full range page and upstream YAML agree on every status. Sources and SHA-256 hashes are embedded in rankings.json. All statements and discussion text were extracted before scoring.
+
+These ranks prioritize the current arithmetic-heavy Lean harness under a bounded search/repair budget. They are heuristic estimates, not success probabilities or a measured autonomous solve rate. Every problem has an individual automated assessment; 66 received additional manual review, concentrated on existing harness evidence, leading candidates, and misleading finite-certificate signals. This is not 1,217 expert manual feasibility studies. Equal scores are ordered by problem number for stability, not meaningful distinctions in likelihood.
+
+The scorer combines known resolution, external formalization, library fit, quantifier burden, asymptotic/optimality requirements, contextual proof/dependency signals and reviewed overrides. All score contributions are exposed. An externally solved problem still requires a complete faithful proof; a partial construction, verified sublemma or provider interruption is not a full solve. The 11 demonstrated entries refer to saved proofs checked in the prior local regression, not new runs during this ranking task. Open targets require new mathematics. Independence is distinct from ordinary unsolved status.
+
+Reproduce from the harness root with `python3 atlas-data/rank_problems.py` (PyYAML required). It reads retained source snapshots and reviewed.json, then regenerates JSON, CSV and the private site's data. Local run evidence can change on a later execution. No paid model calls are made. The ranking should next be calibrated using fixed-budget held-out attempts and repeated runs; do not optimize weights on the same benchmark used to report improvement.
+
+Website tests cover complete ID coverage, score arithmetic, ordering, status counts, evidence separation, combined filters and invalid tool inputs. Production build and TypeScript checks are also run. Browser/WebMCP integration was not exercised; the optional tools share the tested filter implementation and feature-detect browser support.

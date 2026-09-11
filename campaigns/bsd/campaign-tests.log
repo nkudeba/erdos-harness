@@ -1,0 +1,24 @@
+test_dependency_change_invalidates_fingerprint (test_campaign.CampaignTests.test_dependency_change_invalidates_fingerprint) ... ok
+test_evidence_does_not_discharge_contract (test_campaign.CampaignTests.test_evidence_does_not_discharge_contract) ... ok
+test_malformed_certificate_is_not_fresh (test_campaign.CampaignTests.test_malformed_certificate_is_not_fresh) ... ok
+test_pending_budget_survives_restart (test_campaign.CampaignTests.test_pending_budget_survives_restart) ... ok
+test_reject_axiom_and_extra_commands (test_campaign.CampaignTests.test_reject_axiom_and_extra_commands) ... ok
+test_reject_bad_graphs (test_campaign.CampaignTests.test_reject_bad_graphs) ... ok
+test_settlement_returns_unused_allowance (test_campaign.CampaignTests.test_settlement_returns_unused_allowance) ... ok
+test_unformalized_gap_cannot_run (test_campaign.CampaignTests.test_unformalized_gap_cannot_run) ... ok
+test_contract_and_dependency_audit (test_campaign.LeanCampaignTests.test_contract_and_dependency_audit) ... ok
+test_dependency_change_invalidates_fingerprint (test_campaign.LeanCampaignTests.test_dependency_change_invalidates_fingerprint) ... ok
+test_evidence_does_not_discharge_contract (test_campaign.LeanCampaignTests.test_evidence_does_not_discharge_contract) ... ok
+test_malformed_certificate_is_not_fresh (test_campaign.LeanCampaignTests.test_malformed_certificate_is_not_fresh) ... ok
+test_model_repair_consumes_exact_errors (test_campaign.LeanCampaignTests.test_model_repair_consumes_exact_errors) ... ok
+test_pending_budget_survives_restart (test_campaign.LeanCampaignTests.test_pending_budget_survives_restart) ... ok
+test_reject_axiom_and_extra_commands (test_campaign.LeanCampaignTests.test_reject_axiom_and_extra_commands) ... ok
+test_reject_bad_graphs (test_campaign.LeanCampaignTests.test_reject_bad_graphs) ... ok
+test_settlement_returns_unused_allowance (test_campaign.LeanCampaignTests.test_settlement_returns_unused_allowance) ... ok
+test_unformalized_gap_cannot_run (test_campaign.LeanCampaignTests.test_unformalized_gap_cannot_run) ... ok
+test_wrong_type_and_added_assumption_fail (test_campaign.LeanCampaignTests.test_wrong_type_and_added_assumption_fail) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 152.235s
+
+OK

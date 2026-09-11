@@ -1,0 +1,7 @@
+{
+  "id": "16",
+  "statement": "Is the set of odd integers not of the form $2^k+p$ the union of an infinite arithmetic progression and a set of density $0$?",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: the answer is NO. Let U be the set of odd positive integers n that are NOT of the form n = 2^k + p with k ≥ 0 an integer and p a prime. Formalize the negation of the question: there do NOT exist an infinite arithmetic progression A = {a + m·d : m ≥ 0} (with d ≥ 1) and a set B ⊆ ℕ of (natural) density 0 such that U = A ∪ B. Density 0 means #{b ∈ B : b ≤ x} / x → 0 as x → ∞. (Whether k = 0 is allowed only affects whether 3 = 2^0 + 2 counts as being of the form; it does not change the answer.) From the site: Erdős called this conjecture 'rather silly'. Romanoff [Ro34] showed that the set of odd integers of this form has positive density. Using covering congruences Erdős [Er50] proved that the set of odd integers which are not of this form contains an infinite arithmetic progression. Chen [Ch23] has proved the answer is no.",
+  "url": "https://www.erdosproblems.com/16"
+}

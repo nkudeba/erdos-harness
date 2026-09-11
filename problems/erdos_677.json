@@ -1,0 +1,16 @@
+{
+  "id": "677",
+  "statement": "Let $M(n,k)=[n+1,\\ldots,n+k]$ be the least common multiple of $\\{n+1,\\ldots,n+k\\}$. Is it true that for all $m\\geq n+k$\\[M(n,k) \\neq M(m,k)?\\]",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN — This is open, and cannot be resolved with a finite computation.'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): The Thue-Siegel theorem implies that, for fixed $k$, there are only finitely many $m,n$ such that $m\\geq n+k$ and $M(n,k)=M(m,k)$.\nIn general, how many solutions does $M(n,k)=M(m,l)$ have when $m\\geq n+k$ and $l>1$? Erdos expects very few (and none when $l\\geq k$).\nThe only solutions Erdos knew were $M(4,3)=M(13,2)$ and $M(3,4)=M(19,2)$.\nIn [Er79d] Erdos conjectures the stronger fact that (aside from a finite number of exceptions) if $k>2$ and $m\\geq n+k$ then $\\prod_{i\\leq k}(n+i)$ and $\\prod_{i\\leq k}(m+i)$ cannot have the same set of prime factors.\nSee also [678], [686], and [850]. This is discussed in problem B35 of Guy's collection [Gu04].\n\nQUANTIFIER READING (not a hint, a disambiguation): google-deepmind/formal-conjectures formalises this exact problem as `∀ (m n k : ℕ), k > 0 → m ≥ n + k → lcmInterval m k ≠ lcmInterval n k`, where `lcmInterval n k` is the lcm of {n+1,...,n+k}. The two solutions Erdos knew use l ≠ k and so are NOT counterexamples to this statement.\n\nThe NEGATIVE direction is a FINITE CERTIFICATE: one explicit triple (n,k,m) with k>0, m>=n+k and M(n,k)=M(m,k). The affirmative direction requires a general theorem.",
+  "url": "https://www.erdosproblems.com/677",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "number theory"
+  ],
+  "comments": 8,
+  "flags": [],
+  "search_floor": 1000000000.0,
+  "search_floor_kind": "exhaustive"
+}

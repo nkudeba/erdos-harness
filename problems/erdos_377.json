@@ -1,0 +1,17 @@
+{
+  "id": "377",
+  "statement": "Is there some absolute constant $C>0$ such that\\[\\sum_{p\\leq n}1_{p\\nmid \\binom{2n}{n}}\\frac{1}{p}\\leq C\\]for all $n$ (where the summation is restricted to primes $p\\leq n$)?",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): A question of Erdős, Graham, Ruzsa, and Straus [EGRS75], who proved that if $f(n)$ is the sum in question then\\[\\lim_{x\\to \\infty}\\frac{1}{x}\\sum_{n\\leq x}f(n) = \\sum_{k=2}^\\infty \\frac{\\log k}{2^k}=\\gamma_0\\]and\\[\\lim_{x\\to \\infty}\\frac{1}{x}\\sum_{n\\leq x}f(n)^2 = \\gamma_0^2,\\]so that for almost all integers $f(m)=\\gamma_0+o(1)$. They also prove that, for all large $n$,\\[f(n) \\leq c\\log\\log n\\]for some constant $c<1$. (It is trivial from Mertens estimates that $f(n)\\leq (1+o(1))\\log\\log n$.)\nA positive answer would imply that\\[\\sum_{p\\leq n}1_{p\\mid \\binom{2n}{n}}\\frac{1}{p}=(1-o(1))\\log\\log n,\\]and Erdős, Graham, Ruzsa, and Straus say there is 'no doubt' this latter claim is true.\nThis is mentioned in problem B33 of Guy's collection [Gu04].",
+  "url": "https://www.erdosproblems.com/377",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "binomial coefficients",
+    "number theory"
+  ],
+  "comments": 1,
+  "flags": [
+    "trivial"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "verified": true,
+  "certificate": {
+    "fingerprint": "e78f383001141bacfc59f01226f9738ae8531ca3d210764fde01c19278fade4a",
+    "module": "Formal.Campaigns.Rc235b45e135427af9a0fde57.Proof",
+    "declaration": "Formal.Campaigns.Rc235b45e135427af9a0fde57.result",
+    "type": "(Finset.univ.filter (fun xy : Fin 5 \u00d7 Fin 5 => (xy.2.val ^ 2) % 5 = (xy.1.val ^ 3 + 5 - xy.1.val) % 5)).card = 7",
+    "scope": "infrastructure",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "at": "2026-09-09T06:26:19Z",
+    "files": {
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/Rc235b45e135427af9a0fde57/Contract.lean": "4328b7bbde73d127437b1f2fc4b302ce6b597ffc0a43d45cd44d82928ff03387",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/Rc235b45e135427af9a0fde57/Contract.olean": "e1b083233925afafa55d0c67d22e988a60d4d8293ad60406f05e1dfc3de60d87",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/Rc235b45e135427af9a0fde57/Proof.lean": "b67d42fc35f37d8ca470dd18d43b7c1df3f0b831d6b3db9a6e8ed1e73c3938d7",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/Rc235b45e135427af9a0fde57/Proof.olean": "f26082c2395cac0a10704efca8756d6d1ed17c0ab4983968648013aeadad488c",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/Formal/Campaigns/Rc235b45e135427af9a0fde57/Audit.lean": "57fd55dfb4cfc26474ae97cf7384162a59b52e4d0391c4e0df5a58e65b5b5137",
+      "/Users/nicolas.kudeba/workspace/erdos-harness/formal/.lake/build/lib/lean/Formal/Campaigns/Rc235b45e135427af9a0fde57/Audit.olean": "f5c8cc54a6097e9d5b1d340705bf6deea04756d58eb8e14afeb22c9ddfcebd58"
+    },
+    "attempt": "/Users/nicolas.kudeba/workspace/erdos-harness/campaigns/bsd/work/attempts/affine_count_mod5/3d86d71fe16948c08ca38d01f0c47298",
+    "dependencies": {},
+    "certificate_hash": "586c042fc4184d63897c3a3a75d1aede7eb93d8301a396e5707c3a7ef7d7e427"
+  }
+}

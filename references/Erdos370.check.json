@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "timeout": false,
+  "errors": [],
+  "warnings": [],
+  "infos": [],
+  "sorries": false,
+  "raw": "'erdos_370' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+}

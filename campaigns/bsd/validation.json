@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-09",
+  "unit_suite": {
+    "passed": 41,
+    "skipped_opt_in_lean": 11,
+    "log": "unit-tests.log"
+  },
+  "helper_tests": {
+    "passed": 7,
+    "log": "helper-tests.log"
+  },
+  "campaign_suite_real_lean_enabled": {
+    "passed": 19,
+    "note": "Includes eight inherited unit checks repeated; three distinct real-Lean integration tests.",
+    "log": "campaign-tests.log"
+  },
+  "erdos_saved_proofs": {
+    "passed": 11,
+    "failed": 0,
+    "problems": [
+      1193,
+      198,
+      316,
+      363,
+      370,
+      397,
+      399,
+      493,
+      532,
+      645,
+      674
+    ],
+    "log": "erdos-regression.log",
+    "meaning": "Recompilation and axiom checks, not fresh autonomous solves."
+  },
+  "erdos_674_scripted_pipeline": {
+    "passed": true,
+    "log": "erdos-pipeline-mock.log",
+    "note": "Deterministic fake LLM, real Lean; any dollar figures in that log are simulated."
+  },
+  "campaign_fixtures": {
+    "rank-squeeze-check": true,
+    "affine-count-check": true,
+    "discriminant-check": true,
+    "nonsingular-check": true,
+    "control-389-check": true
+  },
+  "campaign_model_calls": 0,
+  "formal_targets_verified": false,
+  "paid_comparison_status": "Incomplete; no new provider calls in this pass."
+}

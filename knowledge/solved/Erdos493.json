@@ -1,0 +1,12 @@
+{
+  "problem": "493",
+  "run": "20260908-003100-946285-erdos493",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin"
+  ],
+  "statement": "theorem erdos_493 :\n    \u2203 k N : \u2115, \u2200 n : \u2124, (N : \u2124) \u2264 n \u2192\n      \u2203 a : Fin k \u2192 \u2124, (\u2200 i, 2 \u2264 a i) \u2227 (\u220f i, a i) - (\u2211 i, a i) = n := by\n  sorry",
+  "verified_at": "2026-09-08T04:43:23Z"
+}

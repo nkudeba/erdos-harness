@@ -1,0 +1,4 @@
+{
+  "verified": false,
+  "error": "node is not ready; resolve its contract/dependencies first"
+}

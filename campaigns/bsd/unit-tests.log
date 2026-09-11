@@ -1,0 +1,106 @@
+test_effort_and_budget_follow_purpose (test_backend_retry.EffortTuning.test_effort_and_budget_follow_purpose) ... ok
+test_helper_named_like_main_theorem_is_kept (test_backend_retry.Harvest.test_helper_named_like_main_theorem_is_kept) ... ok
+test_empty_failure_retried_then_gives_up (test_backend_retry.Retry.test_empty_failure_retried_then_gives_up) ... [2026-09-09T06:18:03Z] backend/retry purpose=t attempt=1/3 in 45s: None:
+[2026-09-09T06:18:03Z] backend/retry purpose=t attempt=2/3 in 90s: None:
+[2026-09-09T06:18:03Z] backend/retry purpose=t attempt=3/3 in 180s: None:
+ok
+test_hard_error_not_retried (test_backend_retry.Retry.test_hard_error_not_retried) ... ok
+test_record_carries_harness_notes (test_backend_retry.Retry.test_record_carries_harness_notes) ... ok
+test_transient_error_then_success (test_backend_retry.Retry.test_transient_error_then_success) ... [2026-09-09T06:18:03Z] backend/retry purpose=t attempt=1/3 in 45s: success: API Error: Can't reach the API server (ENOTFOUND)
+ok
+test_dependency_change_invalidates_fingerprint (test_campaign.CampaignTests.test_dependency_change_invalidates_fingerprint) ... ok
+test_evidence_does_not_discharge_contract (test_campaign.CampaignTests.test_evidence_does_not_discharge_contract) ... ok
+test_malformed_certificate_is_not_fresh (test_campaign.CampaignTests.test_malformed_certificate_is_not_fresh) ... ok
+test_pending_budget_survives_restart (test_campaign.CampaignTests.test_pending_budget_survives_restart) ... ok
+test_reject_axiom_and_extra_commands (test_campaign.CampaignTests.test_reject_axiom_and_extra_commands) ... ok
+test_reject_bad_graphs (test_campaign.CampaignTests.test_reject_bad_graphs) ... ok
+test_settlement_returns_unused_allowance (test_campaign.CampaignTests.test_settlement_returns_unused_allowance) ... ok
+test_unformalized_gap_cannot_run (test_campaign.CampaignTests.test_unformalized_gap_cannot_run) ... ok
+test_contract_and_dependency_audit (test_campaign.LeanCampaignTests.test_contract_and_dependency_audit) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_dependency_change_invalidates_fingerprint (test_campaign.LeanCampaignTests.test_dependency_change_invalidates_fingerprint) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_evidence_does_not_discharge_contract (test_campaign.LeanCampaignTests.test_evidence_does_not_discharge_contract) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_malformed_certificate_is_not_fresh (test_campaign.LeanCampaignTests.test_malformed_certificate_is_not_fresh) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_model_repair_consumes_exact_errors (test_campaign.LeanCampaignTests.test_model_repair_consumes_exact_errors) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_pending_budget_survives_restart (test_campaign.LeanCampaignTests.test_pending_budget_survives_restart) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_reject_axiom_and_extra_commands (test_campaign.LeanCampaignTests.test_reject_axiom_and_extra_commands) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_reject_bad_graphs (test_campaign.LeanCampaignTests.test_reject_bad_graphs) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_settlement_returns_unused_allowance (test_campaign.LeanCampaignTests.test_settlement_returns_unused_allowance) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_unformalized_gap_cannot_run (test_campaign.LeanCampaignTests.test_unformalized_gap_cannot_run) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_wrong_type_and_added_assumption_fail (test_campaign.LeanCampaignTests.test_wrong_type_and_added_assumption_fail) ... skipped 'set CAMPAIGN_LEAN_TESTS=1 for real Lean checks'
+test_driver_finds_objects_and_certificates (test_construct_driver.Driver.test_driver_finds_objects_and_certificates) ... ok
+test_toy_program_passes_safety_screen (test_construct_driver.Driver.test_toy_program_passes_safety_screen) ... ok
+test_promotion_gate (test_learning.LearningTests.test_promotion_gate) ... ok
+test_workflow_stages_and_promotes_only_on_gain (test_learning.LearningTests.test_workflow_stages_and_promotes_only_on_gain) ... [learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": true}, "promoted": true, "saved_proofs_pass": true, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpmsgnwirt/runs/learning-9f381daa02ec/candidate-1"}
+[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": false}, "promoted": false, "saved_proofs_pass": true, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmparoz_ejg/runs/learning-35b7184a8fb3/candidate-1"}
+[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": true}, "promoted": false, "saved_proofs_pass": false, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmp_nv28bkd/runs/learning-1898218a05d4/candidate-1"}
+[learn] cycle1-before-erdos2
+[learn] cycle1-train-erdos1
+[learn] cycle1-after-erdos2
+{"cycle": 1, "before": {"2": false}, "after": {"2": null}, "promoted": false, "saved_proofs_pass": true, "backend": "codex-cli", "model": null, "candidate": "/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpenevq3ih/runs/learning-75b68277ccc9/candidate-1"}
+ok
+test_failed_judge_cannot_exit_success (test_outcomes.Outcomes.test_failed_judge_cannot_exit_success) ... [2026-09-09T06:18:05Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+/Users/nicolas.kudeba/workspace/erdos-harness/harness.py:1662: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpp8gr8je5/log.jsonl' mode='r' encoding='UTF-8'>
+  return sum(float(json.loads(l).get("cost_usd") or 0) for l in open(self.log.path) if '"response"' in l)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[2026-09-09T06:18:05Z] run/end {'proved': True, 'outcome': 'proved_unverified', 'all_clear': False, 'spent_usd': 0}
+[2026-09-09T06:18:05Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+/Users/nicolas.kudeba/workspace/erdos-harness/harness.py:1662: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmp1j0256xm/log.jsonl' mode='r' encoding='UTF-8'>
+  return sum(float(json.loads(l).get("cost_usd") or 0) for l in open(self.log.path) if '"response"' in l)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[2026-09-09T06:18:05Z] run/end {'proved': True, 'outcome': 'proved_unverified', 'all_clear': None, 'spent_usd': 0}
+[2026-09-09T06:18:05Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+/Users/nicolas.kudeba/workspace/erdos-harness/harness.py:1662: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpjuc4kolv/log.jsonl' mode='r' encoding='UTF-8'>
+  return sum(float(json.loads(l).get("cost_usd") or 0) for l in open(self.log.path) if '"response"' in l)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[2026-09-09T06:18:05Z] run/end {'proved': True, 'outcome': 'proved_unverified', 'all_clear': 'false', 'spent_usd': 0}
+[2026-09-09T06:18:05Z] run/start {'problem': '1', 'backend': 'file', 'resume': False}
+/Users/nicolas.kudeba/workspace/erdos-harness/harness.py:1662: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpytp4zred/log.jsonl' mode='r' encoding='UTF-8'>
+  return sum(float(json.loads(l).get("cost_usd") or 0) for l in open(self.log.path) if '"response"' in l)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[2026-09-09T06:18:05Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0}
+ok
+test_final_guard_runs_even_for_resumed_proof (test_outcomes.Outcomes.test_final_guard_runs_even_for_resumed_proof) ... [2026-09-09T06:18:05Z] verify/done {'compiles': True, 'sorry_free': True, 'banned': None, 'frozen_match': False, 'axioms': [], 'axioms_clean': True, 'faithful': {'faithful': False, 'issues': ['mechanical verification failed; semantic judge skipped']}, 'all_clear': False}
+ok
+test_frozen_statement_in_comment_or_string_is_rejected (test_outcomes.Outcomes.test_frozen_statement_in_comment_or_string_is_rejected) ... ok
+test_holes_exclude_comments_strings_and_identifier_substrings (test_outcomes.Outcomes.test_holes_exclude_comments_strings_and_identifier_substrings) ... ok
+test_partial_proof_is_retained_but_explicit_sorry_axiom_is_banned (test_outcomes.Outcomes.test_partial_proof_is_retained_but_explicit_sorry_axiom_is_banned) ... ok
+test_provider_error_with_text_is_not_completion (test_outcomes.Outcomes.test_provider_error_with_text_is_not_completion) ... ok
+test_refinement_progress_survives_provider_failure (test_outcomes.Outcomes.test_refinement_progress_survives_provider_failure) ... [2026-09-09T06:18:05Z] decompose/skeleton_accepted {'sorries': 2}
+[2026-09-09T06:18:05Z] decompose/progress {'sorries_left': 1}
+ok
+test_resume_goes_directly_to_saved_decomposition (test_outcomes.Outcomes.test_resume_goes_directly_to_saved_decomposition) ... [2026-09-09T06:18:05Z] run/start {'problem': '1', 'backend': 'file', 'resume': True}
+[2026-09-09T06:18:05Z] run/escalating_to_decompose {}
+/Users/nicolas.kudeba/workspace/erdos-harness/harness.py:1662: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/tmpgi9vpo59/log.jsonl' mode='r' encoding='UTF-8'>
+  return sum(float(json.loads(l).get("cost_usd") or 0) for l in open(self.log.path) if '"response"' in l)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[2026-09-09T06:18:05Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0}
+ok
+test_source_retrieval_is_bounded_to_mathlib (test_outcomes.Outcomes.test_source_retrieval_is_bounded_to_mathlib) ... ok
+test_claude_retains_its_restricted_shell_contract (test_repair_checkpoint.AgenticContractTests.test_claude_retains_its_restricted_shell_contract) ... ok
+test_codex_can_inspect_sources_without_claude_only_tools (test_repair_checkpoint.AgenticContractTests.test_codex_can_inspect_sources_without_claude_only_tools) ... ok
+test_complete_failure_can_seed_repair_without_generating_outline (test_repair_checkpoint.NoOutlineRepairTests.test_complete_failure_can_seed_repair_without_generating_outline) ... ok
+test_failed_candidate_and_errors_survive_resume (test_repair_checkpoint.RepairCheckpointTests.test_failed_candidate_and_errors_survive_resume) ... ok
+test_feedback_tracks_failed_candidate_within_run (test_repair_checkpoint.RepairCheckpointTests.test_feedback_tracks_failed_candidate_within_run) ... ok
+test_complete_candidate_is_not_truncated (test_repair_checkpoint.SearchContinuityTests.test_complete_candidate_is_not_truncated) ... ok
+test_decomposition_receives_prove_evidence_and_failed_candidate (test_repair_checkpoint.SearchContinuityTests.test_decomposition_receives_prove_evidence_and_failed_candidate) ... ok
+test_near_complete_candidate_beats_trivial_outline (test_repair_checkpoint.SearchContinuityTests.test_near_complete_candidate_beats_trivial_outline) ... ok
+test_retrieval_is_accumulated_deduplicated_and_bounded (test_repair_checkpoint.SearchContinuityTests.test_retrieval_is_accumulated_deduplicated_and_bounded) ... ok
+test_parse_1193_flags (test_triage.PageParse.test_parse_1193_flags) ... ok
+test_parse_399 (test_triage.PageParse.test_parse_399) ... ok
+test_rules (test_triage.Routing.test_rules) ... ok
+test_python_screen (test_triage.Safety.test_python_screen) ... ok
+test_shapes (test_triage.Shape.test_shapes) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 2.840s
+
+OK (skipped=11)

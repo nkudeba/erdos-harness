@@ -1,0 +1,29 @@
+# Publisher credentials and acknowledgements (docs/live-results.md: never commit)
+.result-feed/
+
+# Lean toolchain + Mathlib oleans — 7.2 GB, rebuilt by `lake build`
+formal/.lake/
+formal/lake-manifest.json.bak
+
+# Node
+erdos-atlas/node_modules/
+erdos-atlas/dist/
+erdos-atlas/.next/
+erdos-atlas/tsconfig.tsbuildinfo
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Run output: 76 MB and growing, regenerable, churns on every run.
+# NOTE: knowledge/solved/ is NOT ignored — verified proofs are the durable artifact.
+runs/
+programs/
+tmp/
+
+# macOS
+.DS_Store
+
+# The Atlas site is its own repository (github.com/nkudeba/erdos-atlas),
+# checked out here so the ranker can write app/data.json in place.
+erdos-atlas/

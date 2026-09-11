@@ -1,0 +1,21 @@
+[2026-09-09T19:34:12Z] run/start {'problem': '275', 'backend': 'claude-cli', 'resume': False}
+[2026-09-09T19:34:12Z] llm/request {'purpose': 'literature-web', 'chars': 1565}
+[2026-09-09T19:34:35Z] run/fatal {'error': "RuntimeError('claude -p returned an error result (literature): error_max_budget_usd:')"}
+Traceback (most recent call last):
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 3600, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 3596, in main
+    return Harness(args).run()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 2562, in run
+    self.stage_literature()
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 1804, in stage_literature
+    text = self.llm.complete_web("literature", prompt, budget_usd=getattr(self.args, "web_budget", 3.0))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 242, in complete_web
+    return self._run(purpose, prompt, ["--tools", "WebSearch", "WebFetch", "--allowedTools", "WebSearch", "WebFetch",
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 213, in _run
+    raise RuntimeError(f"claude -p returned an error result ({purpose}): {last_err[:600]}")
+RuntimeError: claude -p returned an error result (literature): error_max_budget_usd:

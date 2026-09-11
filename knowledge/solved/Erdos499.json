@@ -1,0 +1,14 @@
+{
+  "problem": "499",
+  "run": "20260909-150127-544940-erdos499",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic",
+    "Mathlib.Analysis.Convex.Birkhoff",
+    "Mathlib.Analysis.Convex.DoublyStochasticMatrix"
+  ],
+  "statement": "theorem erdos_499 (n : \u2115) (hn : 1 \u2264 n) (a : Fin n \u2192 Fin n \u2192 \u211d)\n    (h0 : \u2200 i j, 0 \u2264 a i j)\n    (hrow : \u2200 i, \u2211 j, a i j = 1)\n    (hcol : \u2200 j, \u2211 i, a i j = 1) :\n    \u2203 \u03c3 : Equiv.Perm (Fin n), (n : \u211d) ^ (-(n : \u2124)) \u2264 \u220f i, a i (\u03c3 i) := by\n  sorry",
+  "verified_at": "2026-09-10T20:39:45Z"
+}

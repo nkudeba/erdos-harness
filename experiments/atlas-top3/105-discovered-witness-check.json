@@ -1,0 +1,7 @@
+{
+  "exact_rational_check": true,
+  "blue": 9,
+  "red": 6,
+  "pairs_checked": 36,
+  "source": "harness-generated search witness; independently checked without borrowing a Lean proof"
+}

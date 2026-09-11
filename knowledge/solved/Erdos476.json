@@ -1,0 +1,12 @@
+{
+  "problem": "476",
+  "run": "20260910-183459-634192-erdos476",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_476 (p : \u2115) (hp : Nat.Prime p) (A : Finset (ZMod p)) :\n    min (2 * (A.card : \u2124) - 3) (p : \u2124) \u2264\n      ((((A \u00d7\u02e2 A).filter (fun q : ZMod p \u00d7 ZMod p => q.1 \u2260 q.2)).image\n          (fun q : ZMod p \u00d7 ZMod p => q.1 + q.2)).card : \u2124) := by\n  sorry",
+  "verified_at": "2026-09-10T23:11:28Z"
+}

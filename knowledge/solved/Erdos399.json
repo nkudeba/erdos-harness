@@ -1,0 +1,12 @@
+{
+  "problem": "399",
+  "run": "search-399b",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "statement": "theorem erdos_399 :\n    \u2203 n x y k : \u2115, 1 < x * y \u2227 2 < k \u2227\n      (Nat.factorial n = x ^ k + y ^ k \u2228 Nat.factorial n + y ^ k = x ^ k) := by\n  sorry",
+  "verified_at": "2026-09-09T03:14:18Z"
+}

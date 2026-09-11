@@ -1,0 +1,7 @@
+{
+  "id": "198",
+  "statement": "If $A\\subset \\mathbb{N}$ is a Sidon set then must the complement of $A$ contain an infinite arithmetic progression?",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: formalize the negation, i.e. there exists a Sidon set A of natural numbers whose complement contains no infinite arithmetic progression (equivalently A meets every infinite arithmetic progression {a + t d : t in N} with d >= 1). A Sidon set is a set in which all pairwise sums a + b (a <= b, a, b in A) are distinct. From the site: The answer is no; Erdős and Graham report this was proved by Baumgartner, presumably referring to [Ba75], which does not state this exactly, but the following simple construction is implicit in [Ba75]: enumerate all infinite arithmetic progressions P_1, P_2, ... and choose a_n in P_n with a_n > 2 a_{n-1}; the lacunary set A = {a_1 < a_2 < ...} meets every infinite AP and is Sidon. AlphaProof has found the following explicit construction: A = {(n+1)! + n : n >= 0}. This is a Sidon set, and intersects every arithmetic progression, since for any a, d in N, (a+d+1)! + (a+d) is in A, and d divides (a+d+1)! + d. In the comments Dutta notes that {floor(x^n) : n >= 1} is also an example for uncountably many real x.",
+  "url": "https://www.erdosproblems.com/198"
+}

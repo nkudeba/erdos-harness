@@ -1,0 +1,7 @@
+{
+  "id": "499",
+  "statement": "Let $M=(a_{ij})$ be a real $n\\times n$ doubly stochastic matrix (i.e. the entries are non-negative and each column and row sums to $1$). Does there exist some $\\sigma\\in S_n$ such that $\\prod_{1\\leq i\\leq n}a_{i\\sigma(i)}\\geq n^{-n}$?",
+  "status": "PROVED (LEAN) — erdosproblems.com: 'This has been solved in the affirmative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE AFFIRMATIVE: for every n >= 1 and every real n x n doubly stochastic matrix there is a permutation sigma with prod_i a_{i sigma(i)} >= n^{-n}. Formalize the affirmative assertion. From the site: A weaker form of the conjecture of van der Waerden, which states that perm(M) = sum_{sigma in S_n} prod_i a_{i sigma(i)} >= n^{-n} n! with equality if and only if a_{ij} = 1/n for all i, j. This conjecture is true, and was proved by Marcus and Minc [MaMi62]. Erdős also conjectured the even weaker fact that there exists some sigma in S_n such that a_{i sigma(i)} != 0 for all i and sum_i a_{i sigma(i)} >= 1. This weaker statement was proved by Marcus and Ree [MaRe59]. van der Waerden's conjecture itself was proved by Gyires [Gy80], Egorychev [Eg81], and Falikman [Fa81].",
+  "url": "https://www.erdosproblems.com/499"
+}

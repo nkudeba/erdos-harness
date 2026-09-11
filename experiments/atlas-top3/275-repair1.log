@@ -1,0 +1,25 @@
+[2026-09-10T01:01:08Z] run/start {'problem': '275', 'backend': 'claude-cli', 'resume': True}
+[2026-09-10T01:01:08Z] llm/request {'purpose': 'formalize', 'chars': 4559}
+[2026-09-10T01:01:13Z] llm/response_failed {'purpose': 'formalize', 'cost_usd': 0.0, 'tokens': {'in': 0, 'out': 0, 'cache_read': 0, 'cache_write': 0}, 'subtype': 'success'}
+[2026-09-10T01:01:13Z] run/fatal {'error': 'RuntimeError("claude -p returned an error result (formalize): success: You\'ve hit your monthly spend limit. Switch to another model, or manage usage credits at …'}
+Traceback (most recent call last):
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 3630, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 3626, in main
+    return Harness(args).run()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 2593, in run
+    self.stage_formalize()
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 1870, in stage_formalize
+    resp = self.ask("formalize", formalize_prompt(self.problem, self.args.samples + 1,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 1775, in ask
+    text = self.llm.complete(purpose, prompt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 226, in complete
+    return self._run(purpose, prompt, ["--tools", "", "--system-prompt", self.TEXT_SYSTEM_PROMPT], None,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 213, in _run
+    raise RuntimeError(f"claude -p returned an error result ({purpose}): {last_err[:600]}")
+RuntimeError: claude -p returned an error result (formalize): success: You've hit your monthly spend limit. Switch to another model, or manage usage credits at claude.ai/admin-settings/usage, to continue.

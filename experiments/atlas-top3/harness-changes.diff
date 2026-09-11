@@ -1,0 +1,337 @@
+--- harness-before.py
++++ harness.py
+@@ -144,7 +144,7 @@
+     BACKOFF_S = (45, 90, 180)
+     # Hard failures: never retried, never treated as a failed proof attempt — the run stops (resumable).
+     HARD_RE = re.compile(r"spend limit|usage limit|hit your (?:org's )?(?:monthly|weekly|daily)?\s*(?:spend|usage)|"
+-                         r"usage-credits|not logged in|unauthori[sz]ed|invalid api key|authentication", re.I)
++                         r"out of credits|insufficient credits|usage-credits|not logged in|unauthori[sz]ed|invalid api key|authentication", re.I)
+ 
+     def _tuning(self, purpose: str) -> tuple[str | None, float]:
+         if purpose in self.TRIAGE_PURPOSES:
+@@ -370,7 +370,7 @@
+         return {
+             "ok": r.returncode == 0 and not errors,
+             "timeout": False,
+-            "errors": [fmt(m, 700) for m in errors],
++            "errors": list(dict.fromkeys(fmt(m, 700) for m in errors)),
+             "warnings": [fmt(m, 300) for m in warnings],
+             "infos": [fmt(m, 600) for m in infos],
+             "sorries": sorries,
+@@ -830,7 +830,7 @@
+     return "Imports already provided by the harness: " + ", ".join(imports)
+ 
+ 
+-def formalize_prompt(problem: dict, k: int, retrieval: list[str], imports: list[str]) -> str:
++def formalize_prompt(problem: dict, k: int, retrieval: list[str], imports: list[str], literature: str = "") -> str:
+     ret = "\n".join(retrieval) if retrieval else "(none)"
+     return f"""You are the autoformalization stage of a Lean 4 harness for Erdős problems.
+ {imports_note(imports)}
+@@ -840,6 +840,9 @@
+ 
+ Context/notes (may inform encoding choices; do NOT weaken the statement):
+ {problem.get('notes', '(none)')}
++
++Retrieved informal proof route (encoding guidance only; never weaken the original target):
++{literature or '(none)'}
+ 
+ Possibly relevant Mathlib declarations:
+ {ret}
+@@ -1600,6 +1603,55 @@
+     return norm_ws(strip_comment_lines(frozen_prefix)) in norm_ws(strip_comment_lines(attempt))
+ 
+ 
++def normalize_helper_layout(attempt: str, frozen: str) -> str:
++    """Hoist interleaved private lemmas, without editing the frozen text.
++    This is only a layout repair; the existing guard and Lean verifier still run.
++    """
++    if contains_frozen(attempt, frozen):
++        return attempt
++    main = re.search(r"(?m)^theorem\s+erdos_\d+\b", frozen)
++    if not main:
++        return attempt
++    prelude, target = frozen[:main.start()].strip(), frozen[main.start():].strip()
++    if not prelude or not re.search(r"(?m)^(?:noncomputable )?def\s", prelude):
++        return attempt
++    start = attempt.find(prelude)
++    end = attempt.find(target, start + len(prelude)) if start >= 0 else -1
++    if end < 0:
++        return attempt
++    helpers = attempt[start + len(prelude):end].strip()
++    masked = strip_comment_lines(helpers).strip()
++    if not re.match(r"private lemma\s", masked):
++        return attempt
++    if re.search(r"(?m)^\s*(?:(?:namespace|section|end|open|variable|variables|attribute|local|scoped|notation|macro|syntax|instance|def|noncomputable|set_option)\b|#)", masked):
++        return attempt
++    candidate = attempt[:start] + helpers + "\n\n" + prelude + "\n\n" + attempt[end:]
++    return candidate if contains_frozen(candidate, frozen) else attempt
++
++
++def repair_closed_goal_branches(body: str, errors: list[str]) -> str:
++    """Narrow syntax repair: run branch tactics on remaining goals, allowing zero goals."""
++    harmless = ("No goals to be solved", "`simp` made no progress")
++    if not errors or any(not any(message in e for message in harmless) for e in errors):
++        return body
++    if any("`simp` made no progress" in e for e in errors):
++        return re.sub(r"(?m)^(\s*)simp only\b", r"\1try simp only", body)
++    pattern = r"(?m)^(\s*\|\s*\((?:(?:left|right);\s*)+linarith\)\s*)$"
++    repaired = re.sub(pattern, lambda m: m.group(0).replace(";", " <;>"), body)
++    # Multi-location normalization may close a contradictory case while processing
++    # its hypotheses. Normalize the whole context, tolerating already-closed cases.
++    repaired = re.sub(
++        r"(?m)^(\s*)norm_num at (?:[A-Za-z_][\w']*\s+){2,}⊢[ \t]*$",
++        r"\1try norm_num at *", repaired,
++    )
++    # A preceding simplifier can also close the goal before this branch search.
++    # Restrict the wrapper to the same left/right/linarith branch pattern.
++    return re.sub(
++        r"(?m)^(\s*)first(?=\n\s*\|\s*\((?:left|right) <;>)",
++        r"\1all_goals first", repaired,
++    )
++
++
+ BANNED_RES = [
+     (re.compile(r"\bsorry\b"), "sorry"),
+     (re.compile(r"\bsorryAx\b"), "sorryAx"),
+@@ -1678,7 +1730,10 @@
+     def spent_usd(self) -> float:
+         """Total logged spend of this run (all invocations, survives --resume)."""
+         try:
+-            return sum(float(json.loads(l).get("cost_usd") or 0) for l in open(self.log.path) if '"response"' in l)
++            with open(self.log.path) as stream:
++                records = (json.loads(line) for line in stream)
++                return sum(float(r.get("cost_usd") or 0) for r in records
++                           if r.get("stage") == "llm" and r.get("event") in ("response", "response_failed"))
+         except Exception:
+             return getattr(self.llm, "total_cost_usd", 0.0)
+ 
+@@ -1711,11 +1766,12 @@
+         export_run(self.state_path.parent)
+ 
+     def check(self, body: str, name: str) -> dict:
+-        """Compile `body` with the current import header. Two automatic repairs happen here so the LLM
++        """Compile `body` with the current import header. Automatic repairs happen here so the LLM
+         never has to spend a round on them:
+           1. `-- IMPORTS:` directives naming non-existent modules are dropped (with a note in errors).
+           2. `unknown identifier/constant 'X'` errors are resolved by grepping Mathlib for X; if X lives in
+              a module we don't import yet, the module is added (for this run) and the file re-checked once.
++          3. Outside final verification, narrowly recognized redundant finite-case tactics are repaired.
+         """
+         with self._lock:
+             self.checks += 1
+@@ -1755,6 +1811,19 @@
+                 res = self.lean.check(src, self.run_dir / "attempts" / f"{name}.lean")
+         # Notes are not compiler errors (they stay out of `errors`), but they are feedback the prover needs
+         # ("`Foo` is not a known declaration; similar: ..."), so they travel with the attempt record too.
++        # Final verification must check the stored artifact without silently repairing it.
++        for repair_round in range(2):
++            repaired = repair_closed_goal_branches(body, res["errors"]) if not res["ok"] and name != "final-verify" else body
++            if repaired == body:
++                break
++            self.log.event("lean", "closed_goal_branch_repair", name=name, repair_round=repair_round)
++            retry = self.lean.check(compose(repaired, self.imports), self.run_dir / "attempts" / f"{name}-branch-repair-{repair_round}.lean")
++            self.log.event("lean", "closed_goal_branch_repair_result", name=name,
++                           ok=retry["ok"], errors=retry["errors"][:8])
++            if retry["ok"] or (not retry.get("timeout") and len(retry["errors"]) <= len(res["errors"])):
++                body, res = repaired, retry
++            else:
++                break
+         res["notes"] = [f"harness note: {n}" for n in notes]
+         if notes:
+             res["infos"] = res["infos"] + res["notes"]
+@@ -1766,11 +1835,16 @@
+     PROOF_PURPOSES = {"prove", "refine", "decompose", "prove-agentic"}
+ 
+     def ask(self, purpose: str, prompt: str) -> str:
++        self._check_run_budget(purpose)
+         self.log.event("llm", "request", purpose=purpose, chars=len(prompt))
+         t0 = time.time()
+         try:
+             text = self.llm.complete(purpose, prompt)
+         except RuntimeError as e:
++            failed_meta = getattr(self.llm, "last_meta", {}) or {}
++            self.log.event("llm", "response_failed", purpose=purpose, cost_usd=failed_meta.get("cost_usd"),
++                           tokens=failed_meta.get("tokens"), subtype=failed_meta.get("subtype"))
++            self._check_run_budget(purpose)
+             # A per-call budget overrun on a NON-proof stage (formalize, judge, triage, …) is retried once at a
+             # lower effort with a slightly larger cap; proof stages have their own escalation in stage_prove.
+             if purpose in self.PROOF_PURPOSES or not re.search(r"budget", str(e), re.I) or not hasattr(self.llm, "_tuning"):
+@@ -1778,7 +1852,13 @@
+             effort, budget = self.llm._tuning(purpose)
+             lower = "low" if effort in ("medium", "low") else "medium"
+             self.log.event("llm", "budget_retry", purpose=purpose, effort=lower, budget=round(budget * 1.5, 2))
+-            text = self.llm.complete(purpose, prompt, effort_override=lower, budget_override=budget * 1.5)
++            try:
++                text = self.llm.complete(purpose, prompt, effort_override=lower, budget_override=budget * 1.5)
++            except RuntimeError:
++                retry_meta = getattr(self.llm, "last_meta", {}) or {}
++                self.log.event("llm", "response_failed", purpose=purpose, cost_usd=retry_meta.get("cost_usd"),
++                               tokens=retry_meta.get("tokens"), subtype=retry_meta.get("subtype"))
++                raise
+         meta = getattr(self.llm, "last_meta", {}) or {}
+         self.log.event("llm", "response", purpose=purpose, chars=len(text), secs=round(time.time() - t0, 1),
+                        cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"))
+@@ -1801,7 +1881,27 @@
+             prompt = literature_prompt(self.problem) + WEB_LITERATURE_ADDENDUM.format(pid=self.problem["id"])
+             self.log.event("llm", "request", purpose="literature-web", chars=len(prompt))
+             t0 = time.time()
+-            text = self.llm.complete_web("literature", prompt, budget_usd=getattr(self.args, "web_budget", 3.0))
++            try:
++                text = self.llm.complete_web("literature", prompt, budget_usd=getattr(self.args, "web_budget", 3.0))
++            except RuntimeError as error:
++                meta = getattr(self.llm, "last_meta", {}) or {}
++                self.log.event("llm", "response_failed", purpose="literature-web",
++                               cost_usd=meta.get("cost_usd"), tokens=meta.get("tokens"),
++                               subtype=meta.get("subtype"), secs=round(time.time()-t0, 1))
++                # A bounded research call can fail without invalidating the supplied problem.
++                # Account limits/authentication still stop the run; do not spend into a hard failure.
++                if "error_max_budget_usd" not in str(error) and "error_max_turns" not in str(error):
++                    raise
++                self._check_run_budget("literature-web")
++                notes = self.problem.get("notes", "").strip()
++                if not notes:
++                    raise
++                self.state["literature"] = "SOURCE NOTES ONLY (bounded web lookup did not finish):\n" + notes
++                self.state["literature_provenance"] = {"mode": "source_notes_fallback", "reason": meta.get("subtype"),
++                                                         "url": self.problem.get("url")}
++                self.save()
++                self.log.event("literature", "source_notes_fallback", reason=meta.get("subtype"))
++                return
+             meta = getattr(self.llm, "last_meta", {}) or {}
+             self.log.event("llm", "response", purpose="literature-web", chars=len(text), secs=round(time.time() - t0, 1),
+                            cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"))
+@@ -1823,6 +1923,24 @@
+         self.state["literature"] = self.ask("literature", literature_prompt(self.problem)).strip()
+         self.save()
+ 
++    def stage_informal_context(self):
++        for filename in getattr(self.args, "informal_context", None) or []:
++            path = Path(filename)
++            raw = path.read_bytes()
++            if len(raw) > 100_000:
++                raise ValueError("informal context exceeds 100 KB")
++            text = raw.decode("utf-8")
++            if path.suffix == ".lean" or "```lean" in text:
++                raise ValueError("informal context must not contain external Lean proof code")
++            digest = hashlib.sha256(raw).hexdigest()
++            sources = self.state.setdefault("operator_context", [])
++            if any(s["sha256"] == digest for s in sources):
++                continue
++            sources.append({"sha256": digest, "path": str(path.resolve()), "assistance": "operator_supplied_informal_context"})
++            self.state["literature"] = self.state.get("literature", "") + "\n\nOPERATOR-SUPPLIED INFORMAL CONTEXT (not a verified proof):\n" + text
++            self.save()
++            self.log.event("literature", "operator_context", sha256=digest, chars=len(text))
++
+     def initial_retrieval(self) -> list[str]:
+         """Seed retrieval: Mathlib's own Erdős-named theorems plus a verified-name check of every
+         declaration the literature stage / problem notes mention. (The old version also ran loogle on the
+@@ -1841,7 +1959,7 @@
+         candidates, notes = [], ""
+         for attempt in range(1, 4):  # up to 3 tries to get >=2 compiling candidates
+             resp = self.ask("formalize", formalize_prompt(self.problem, self.args.samples + 1,
+-                                                          retrieval, self.imports))
++                                                          retrieval, self.imports, self.state.get("literature", "")))
+             notes = resp
+             blocks = [(i, "\n".join(l for l in b.splitlines()
+                                     if not l.strip().lower().startswith("-- candidate")).strip())
+@@ -2061,6 +2179,25 @@
+         statement = self.state["statement"]
+         frozen = statement_prefix(statement)
+         attempts = self.state.get("attempts", [])
++        if getattr(self.args, "resume", None):
++            for path in sorted((self.run_dir / "sandbox").glob("*/Attempt.lean"), reverse=True):
++                if not (path.parent / "SUMMARY.md").exists():
++                    continue  # A still-running agent is not a recovery checkpoint.
++                source = path.read_text()
++                candidate = "\n".join(f"-- IMPORTS: {m}" for m in import_lines(source)) + "\n" + strip_imports(source)
++                candidate = normalize_helper_layout(candidate, frozen)
++                if hole_count(candidate) or not contains_frozen(candidate, frozen) or has_banned(candidate):
++                    continue
++                result = self.check(candidate, "recover-" + path.parent.name)
++                self._record(attempts, "recover-" + path.parent.name, "saved sandbox recovery", 0, result.get("body", candidate), result)
++                self.state["attempts"] = attempts
++                if result["ok"] and not result["sorries"]:
++                    self.state["proof"] = result.get("body", candidate)
++                    self.state["proof_recovery"] = {"sandbox": str(path.parent), "mechanical_repair_only": True}
++                    self.save()
++                    self.log.event("prove", "SUCCESS", name="recovered-sandbox", round=0)
++                    return True
++                self.save()
+         retrieval = merge_retrieval(self.state.get("proof_retrieval", []), self.initial_retrieval())
+         verified = self._verified_block()
+         playbook = self.playbook_block()
+@@ -2129,6 +2266,14 @@
+                         cands.append((name, plan, blocks[-1]))
+                     if final_file and (not blocks or norm_ws(strip_comment_lines(final_file)) != norm_ws(strip_comment_lines(blocks[-1]))):
+                         cands.append((name + "-file", plan + " [sandbox file]", final_file))
++            # Repair only placement of unchanged private helpers; never relax the contract guard.
++            normalized = []
++            for name, plan, block in cands:
++                repaired = normalize_helper_layout(block, frozen)
++                if repaired != block:
++                    self.log.event("prove", "helper_layout_normalized", name=name)
++                normalized.append((name, plan, repaired))
++            cands = normalized
+             # cheap pre-screen, then compile survivors in parallel
+             to_compile = [(n, p, b) for (n, p, b) in cands if self._screen(attempts, n, p, rnd, b, frozen)]
+             if to_compile:
+@@ -2436,6 +2581,14 @@
+         frozen_match = contains_frozen(proof, statement_prefix(self.state["statement"]))
+         clean = res["ok"] and not res["sorries"] and axioms <= STD_AXIOMS and bool(axline) and not banned and frozen_match
+ 
++        self.state['direction'] = getattr(self, 'direction', self.state.get('direction'))
++        self.state["verify"] = {
++            "compiles": res["ok"], "sorry_free": not res["sorries"], "banned": banned,
++            "frozen_match": frozen_match, "axioms": sorted(axioms), "axioms_clean": axioms <= STD_AXIOMS,
++            "faithful": {"faithful": None, "issues": ["semantic audit pending"]}, "all_clear": False,
++            "artifact_sha256": fingerprint(self.problem, self.state, getattr(self, "imports", []), environment_snapshot(FORMAL)),
++        }
++        self.save()
+         if clean and getattr(self, "direction", None) == "program":
+             # research-program sub-statement: it is a lemma, never claimed to be the problem, so the semantic judge
+             # (which compares against the ORIGINAL problem) does not apply; mechanical verification is the whole bar.
+@@ -2495,11 +2648,11 @@
+         compiled = sum(1 for e in events if e.get("event") == "check"
+                        and str(e.get("name", "")).startswith(("proof-", "refine-", "skeleton")))
+         n_attempts = rejected + compiled
+-        cost = sum(float(e.get("cost_usd") or 0) for e in events if e.get("event") == "response")
+-        cost_known = all(e.get("cost_usd") is not None for e in events if e.get("event") == "response")
++        cost = sum(float(e.get("cost_usd") or 0) for e in events if e.get("event") in ("response", "response_failed"))
++        cost_known = all(e.get("cost_usd") is not None for e in events if e.get("event") in ("response", "response_failed"))
+         cost_label = f"${cost:.2f}" if cost_known else f"unavailable (reported subtotal ${cost:.2f})"
+-        llm_calls = sum(1 for e in events if e.get("event") == "response")
+-        llm_secs = sum(float(e.get("secs") or 0) for e in events if e.get("event") == "response")
++        llm_calls = sum(1 for e in events if e.get("event") in ("response", "response_failed"))
++        llm_secs = sum(float(e.get("secs") or 0) for e in events if e.get("event") in ("response", "response_failed"))
+         wall = None
+         try:
+             ts = [datetime.strptime(e["ts"], "%Y-%m-%dT%H:%M:%SZ") for e in events if e.get("event") in ("start", "end") and e.get("stage") == "run"]
+@@ -2557,9 +2710,11 @@
+         self.log.event("run", "start", problem=pid, backend=self.args.backend,
+                        resume=bool(self.args.resume))
+         proved, outcome = False, "not_proved"
++        self.save()  # Make early provider failures visible and resumable.
+         try:
+             try:
+                 self.stage_literature()
++                self.stage_informal_context()
+                 if getattr(self.args, "open", False):
+                     return self.run_open()
+                 self.stage_formalize()
+@@ -2616,6 +2771,8 @@
+             return 0 if outcome == "proved" else 3 if "partial" in outcome else 2
+         except BaseException as e:
+             self.log.event("run", "fatal", error=repr(e)[:500])
++            self.state["outcome"] = "infrastructure_error"
++            self.save()
+             (self.run_dir / "DONE").write_text(json.dumps({"proved": False, "fatal": repr(e)[:200]}))
+             raise
+ 
+@@ -3502,6 +3659,7 @@
+     runp.add_argument("--rounds", type=int, default=6, help="max proving rounds before decomposition")
+     runp.add_argument("--decompose-rounds", type=int, default=10, help="refinement budget after decomposition")
+     runp.add_argument("--skip-literature", action="store_true")
++    runp.add_argument("--informal-context", action="append", help="UTF-8 informal research notes or exact witness JSON; assistance is recorded")
+     runp.add_argument("--resume", default=None, help="existing run dir to resume")
+     runp.add_argument("--lean-timeout", type=int, default=420)
+     runp.add_argument("--llm-timeout", type=int, default=3600)

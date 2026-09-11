@@ -1,0 +1,16 @@
+{
+  "id": "824",
+  "statement": "Let $h(x)$ count the number of integers $1\\leq a<b<x$ such that $(a,b)=1$ and $\\sigma(a)=\\sigma(b)$, where $\\sigma$ is the sum of divisors function. Is it true that $h(x)>x^{2-o(1)}$?",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): Erdős [Er74b] proved that $\\limsup h(x)/x= \\infty$, and claimed a similar proof for this problem. A complete proof that $h(x)/x\\to \\infty$ was provided by Pollack and Pomerance [PoPo16].\nA similar question can be asked if we replace the condition $(a,b)=1$ with the condition that $a$ and $b$ are squarefree. Weisenberg suggests another variant, with the condition that there are no proper factors $u\\mid a$ and $v\\mid b$ such that $\\sigma(u)=\\sigma(v)$ and $(u,a/u)=(v,b/v)=1$, which is the weakest restriction one can impose that is still strong enough to eliminate trivial duplicates.",
+  "url": "https://www.erdosproblems.com/824",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "number theory"
+  ],
+  "comments": 2,
+  "flags": [
+    "trivial"
+  ]
+}

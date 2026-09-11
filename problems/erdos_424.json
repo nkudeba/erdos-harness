@@ -1,0 +1,17 @@
+{
+  "id": "424",
+  "statement": "Let $a_1=2$ and $a_2=3$ and continue the sequence by appending to $a_1,\\ldots,a_n$ all possible values of $a_ia_j-1$ with $i\\neq j$. Is it true that the set of integers which eventually appear has positive density?",
+  "status": "OPEN (open; class open)",
+  "notes": "OPEN problem (site class: open; status line: 'OPEN'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): Asked by Hofstadter. The sequence begins $2,3,5,9,14,17,26,\\ldots$ and is A005244 in the OEIS. This problem is also discussed in section E31 of Guy's book Unsolved Problems in Number Theory.\nIn [ErGr80] (and in Guy's book) this problem as written is asking for whether almost all integers appear in this sequence, but the answer to this is trivially no (as pointed out to me by Steinerberger): no integer $\\equiv 1\\pmod{3}$ is ever in the sequence, so the set of integers which appear has density at most $2/3$. This is easily seen by induction, and the fact that if $a,b\\in \\{0,2\\}\\pmod{3}$ then $ab-1\\in \\{0,2\\}\\pmod{3}$.\nPresumably it is the weaker question of whether a positive density of integers appear (as correctly asked in [Er77c]) that was also intended in [ErGr80]. As with many of Erdős' questions, by 'positive density' he most likely meant 'positive lower density' - in other words, does there exist $c>0$ such that for all large $x$ the number of values of $a_i$ in $[1,x]$ is at least $cx$?\nSee also Problem 63 of Green's open problems list.",
+  "url": "https://www.erdosproblems.com/424",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "number theory"
+  ],
+  "comments": 0,
+  "flags": [
+    "presumably",
+    "trivial"
+  ]
+}

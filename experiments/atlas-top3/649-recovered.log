@@ -1,0 +1,11 @@
+[2026-09-10T15:23:12Z] run/start {'problem': '649', 'backend': 'file', 'resume': True}
+[2026-09-10T15:24:43Z] lean/check {'name': 'recover-proof-r2-g0', 'ok': True, 'sorries': False, 'n_errors': 0, 'first_error': ''}
+[2026-09-10T15:24:43Z] prove/SUCCESS {'name': 'recovered-sandbox', 'round': 0}
+[2026-09-10T15:25:30Z] lean/check {'name': 'final-verify', 'ok': True, 'sorries': False, 'n_errors': 0, 'first_error': ''}
+[2026-09-10T15:25:30Z] llm/request {'purpose': 'backtranslate', 'chars': 528}
+[2026-09-10T15:27:04Z] llm/response {'purpose': 'backtranslate', 'chars': 329, 'secs': 94.2, 'cost_usd': None, 'turns': None, 'tokens': None}
+[2026-09-10T15:27:04Z] llm/request {'purpose': 'faithful', 'chars': 3307}
+[2026-09-10T15:27:38Z] llm/response {'purpose': 'faithful', 'chars': 537, 'secs': 34.0, 'cost_usd': None, 'turns': None, 'tokens': None}
+[2026-09-10T15:27:38Z] verify/done {'compiles': True, 'sorry_free': True, 'banned': None, 'frozen_match': True, 'axioms': ['Classical.choice', 'Quot.sound', 'propext'], 'axioms_clean': True, 'faithful': {'faithful': True, 'issues': ['Uses the positive-integer domain implicit in the supplied resolution notes: P is defined only for n >= 2. If the word integer were instead interpreted to allow negative n and P(abs(n)), this proof would not resolve that different formulation (n=-8 realizes p=2,q=7). Independent statement review should explicitly confirm the intended positive domain.'], 'verdict': 'Faithful to the positive-integer problem resolved by the supplied notes, with the domain interpretation explicitly qualified.'}, 'all_clear': True, 'artifact_sha256': '706e82b8430aa71894de682c0ede90e479bf7e84ad4dd172f8a981c20e9c8da8'}
+[2026-09-10T15:27:38Z] knowledge/harvested {'lemmas': 2}
+[2026-09-10T15:27:38Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0.0}

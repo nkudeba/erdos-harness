@@ -1,0 +1,11 @@
+[2026-09-10T15:41:51Z] run/start {'problem': '105', 'backend': 'file', 'resume': True}
+[2026-09-10T15:43:30Z] lean/check {'name': 'recover-proof-r3-mechanical', 'ok': True, 'sorries': False, 'n_errors': 0, 'first_error': ''}
+[2026-09-10T15:43:30Z] prove/SUCCESS {'name': 'recovered-sandbox', 'round': 0}
+[2026-09-10T15:44:59Z] lean/check {'name': 'final-verify', 'ok': True, 'sorries': False, 'n_errors': 0, 'first_error': ''}
+[2026-09-10T15:44:59Z] llm/request {'purpose': 'backtranslate', 'chars': 686}
+[2026-09-10T15:45:24Z] llm/response {'purpose': 'backtranslate', 'chars': 391, 'secs': 25.0, 'cost_usd': None, 'turns': None, 'tokens': None}
+[2026-09-10T15:45:24Z] llm/request {'purpose': 'faithful', 'chars': 1783}
+[2026-09-10T15:45:49Z] llm/response {'purpose': 'faithful', 'chars': 314, 'secs': 25.0, 'cost_usd': None, 'turns': None, 'tokens': None}
+[2026-09-10T15:45:49Z] verify/done {'compiles': True, 'sorry_free': True, 'banned': None, 'frozen_match': True, 'axioms': ['Classical.choice', 'Quot.sound', 'propext'], 'axioms_clean': True, 'faithful': {'faithful': True, 'issues': ['Natural-number subtraction is truncated, but the noncollinearity condition excludes n below 3; the actual witness uses n=9.'], 'verdict': 'This is precisely a counterexample to the asserted ordinary-line property, matching the disproof recorded in the resolution notes.'}, 'all_clear': True, 'artifact_sha256': 'f443417d5db03887eb0863dac541c6fb33df992eb71de97b2d6f2a8541ed1aee'}
+[2026-09-10T15:45:49Z] knowledge/harvested {'lemmas': 0}
+[2026-09-10T15:45:49Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0.0}

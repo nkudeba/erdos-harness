@@ -1,0 +1,15 @@
+{
+  "problem": "397",
+  "run": "20260907-194946-erdos397",
+  "statement": "-- IMPORTS: Mathlib.Data.Nat.Choose.Central\ntheorem erdos_397 :\n    Set.Infinite {p : Finset \u2115 \u00d7 Finset \u2115 |\n      Disjoint p.1 p.2 \u2227 p.1.Nonempty \u2227 p.2.Nonempty \u2227\n      (\u2200 m \u2208 p.1, 0 < m) \u2227 (\u2200 n \u2208 p.2, 0 < n) \u2227\n      \u220f m \u2208 p.1, Nat.centralBinom m = \u220f n \u2208 p.2, Nat.centralBinom n} := by\n  sorry",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Choose.Central",
+    "Mathlib.Data.Set.Finite.Basic",
+    "Mathlib.Data.Finset.Lattice.Fold"
+  ]
+}

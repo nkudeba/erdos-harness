@@ -1,0 +1,7 @@
+{
+  "id": "316",
+  "statement": "Is it true that if $A\\subset \\mathbb{N}\\backslash\\{1\\}$ is a finite set with $\\sum_{n\\in A}\\frac{1}{n}<2$ then there is a partition $A=A_1\\sqcup A_2$ such that $\\sum_{n\\in A_i}\\frac{1}{n}<1$ for $i=1,2$?",
+  "status": "DISPROVED (LEAN) — erdosproblems.com: 'This has been solved in the negative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE NEGATIVE: formalize the negation, i.e. there exists a finite set A of integers >= 2 with reciprocal sum < 2 that admits no partition into two parts each with reciprocal sum < 1. From the site: This is not true if A is a multiset, for example 2,3,3,5,5,5,5. This is not true in general, as shown by Sándor [Sa97], who observed that the proper divisors of 120 form a counterexample. More generally, Sándor shows that for any n >= 2 there exists a finite set A of integers >= 2 with reciprocal sum < n and no partition into n parts each of which has reciprocal sum < 1. The minimal counterexample is {2,3,4,5,6,7,10,11,13,14,15}, found by Tom Stobart.",
+  "url": "https://www.erdosproblems.com/316"
+}

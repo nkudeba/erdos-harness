@@ -1,0 +1,42 @@
+[2026-09-09T06:18:05Z] run/start {'problem': '674', 'backend': 'file', 'resume': True}
+[2026-09-09T06:18:05Z] llm/request {'purpose': 'literature', 'chars': 1401}
+[2026-09-09T06:18:05Z] llm/response {'purpose': 'literature', 'chars': 152, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:18:06Z] llm/request {'purpose': 'formalize', 'chars': 5104}
+[2026-09-09T06:18:06Z] llm/response {'purpose': 'formalize', 'chars': 265, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:18:55Z] lean/check {'name': 'cand-1-1', 'ok': True, 'sorries': True, 'n_errors': 0, 'first_error': ''}
+[2026-09-09T06:18:55Z] lean/check {'name': 'cand-1-0', 'ok': True, 'sorries': True, 'n_errors': 0, 'first_error': ''}
+[2026-09-09T06:18:55Z] formalize/candidates_compiled {'n': 2}
+[2026-09-09T06:18:55Z] llm/request {'purpose': 'crosscheck', 'chars': 1873}
+[2026-09-09T06:18:55Z] llm/response {'purpose': 'crosscheck', 'chars': 81, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:18:55Z] formalize/frozen {'statement': 'theorem erdos_674 : ∃ x y z : ℕ, 1 < x ∧ 1 < y ∧ 1 < z ∧ x ^ x * y ^ y = z ^ z := by\n  sorry'}
+[2026-09-09T06:18:55Z] llm/request {'purpose': 'assess', 'chars': 2419}
+[2026-09-09T06:18:55Z] llm/response {'purpose': 'assess', 'chars': 225, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:18:55Z] assess/routed {'mode': 'fast', 'reason': 'resolved + trivial/elementary', 'shape': 'witness', 'status': 'resolved', 'depth': 'trivial', 'computable': True, 'tier': 'S'}
+[2026-09-09T06:18:56Z] llm/request {'purpose': 'prove', 'chars': 8081}
+[2026-09-09T06:18:56Z] llm/response {'purpose': 'prove', 'chars': 273, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:19:39Z] lean/auto_import {'name': 'proof-r1-a0', 'modules': ['Mathlib.Algebra.Polynomial.Basic']}
+[2026-09-09T06:21:05Z] lean/check {'name': 'proof-r1-a0', 'ok': False, 'sorries': False, 'n_errors': 1, 'first_error': 'line 12:82: unsolved goals\n⊢ False'}
+[2026-09-09T06:21:05Z] llm/request {'purpose': 'prove', 'chars': 9041}
+[2026-09-09T06:21:05Z] llm/response {'purpose': 'prove', 'chars': 711, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:22:35Z] lean/check {'name': 'proof-r2-a0', 'ok': True, 'sorries': False, 'n_errors': 0, 'first_error': ''}
+[2026-09-09T06:22:35Z] prove/SUCCESS {'name': 'proof-r2-a0', 'round': 2, 'agentic': False}
+[2026-09-09T06:23:47Z] lean/check {'name': 'final-verify', 'ok': True, 'sorries': False, 'n_errors': 0, 'first_error': ''}
+[2026-09-09T06:23:47Z] llm/request {'purpose': 'backtranslate', 'chars': 318}
+[2026-09-09T06:23:47Z] llm/response {'purpose': 'backtranslate', 'chars': 54, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:23:47Z] llm/request {'purpose': 'faithful', 'chars': 1348}
+[2026-09-09T06:23:47Z] llm/response {'purpose': 'faithful', 'chars': 63, 'secs': 0.0, 'cost_usd': 0.01, 'turns': 1, 'tokens': None}
+[2026-09-09T06:23:47Z] verify/done {'compiles': True, 'sorry_free': True, 'banned': None, 'frozen_match': True, 'axioms': ['Classical.choice', 'Quot.sound', 'propext'], 'axioms_clean': True, 'faithful': {'faithful': True, 'issues': [], 'verdict': 'same'}, 'all_clear': True}
+[2026-09-09T06:23:47Z] knowledge/harvested {'lemmas': 1}
+[2026-09-09T06:23:47Z] run/end {'proved': True, 'outcome': 'proved', 'all_clear': True, 'spent_usd': 0.08}
+PIPELINE MOCK TEST PASSED; run dir: /var/folders/lm/gmf1q7wx3q79h93h5vw6nwhm0000gp/T/erdos-mock-vkt7ee8w
+prove attempts recorded: [('proof-r1-a0', False, 3), ('proof-r2-a0', True, 0)]
+report head:
+# Harness run report — Erdős problem #674
+
+- **Status:** PROVED & VERIFIED
+- **Problem:** Are there any integer solutions to x^x * y^y = z^z with x, y, z > 1?
+- **Source:** https://www.erdosproblems.com/674
+- **Lean checks run:** 5; proof attempts: 2
+- **LLM calls:** 8; LLM time: 0.0 min; cost: $0.08; wall-clock: None min
+- **Imports:** Mathlib.Tactic.NormNum.Basic, Mathlib.Tactic.Ring, Mathlib.Tactic.Linarith, Mathlib.Algebra.BigOperators.Fin, Mathlib.Algebra.Polynomial.Basic (auto-added: Mathlib.Algebra.Polynomial.Basic)
+

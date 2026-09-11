@@ -1,0 +1,7 @@
+{
+  "id": "532",
+  "statement": "If $\\mathbb{N}$ is 2-coloured then is there some infinite set $A\\subseteq \\mathbb{N}$ such that all finite subset sums $\\sum_{n\\in S}n$ (as $S$ ranges over all non-empty finite subsets of $A$) are monochromatic?",
+  "status": "PROVED (LEAN) — erdosproblems.com: 'This has been solved in the affirmative and the proof verified in Lean.'",
+  "notes": "RESOLVED IN THE AFFIRMATIVE: for every 2-colouring of the positive integers there is an infinite set A all of whose non-empty finite subset sums have the same colour. Formalize the affirmative assertion (the elements of A should be positive integers, or at least the sums should range over non-empty finite subsets of A, so that the statement is not trivialized by 0). From the site: In other words, must some colour class be an IP set. Asked by Graham and Rothschild. Proved by Hindman [Hi74] (for any number of colours).",
+  "url": "https://www.erdosproblems.com/532"
+}

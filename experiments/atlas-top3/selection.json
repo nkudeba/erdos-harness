@@ -1,0 +1,13 @@
+{
+  "problems": [
+    649,
+    105,
+    275
+  ],
+  "excluded_previously_attempted": [
+    280
+  ],
+  "harness_sha256": "b5b3e393bb74c7cc5b1a254e997a7c609d8a06c9764642e09d8d9b4b2cd61169",
+  "run_budget_usd_each": 12,
+  "external_lean_proof_supplied": false
+}

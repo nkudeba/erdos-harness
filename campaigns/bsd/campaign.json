@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "id": "BSD_Q",
+  "targets": [
+    "bsd_rank",
+    "bsd_leading_term"
+  ],
+  "budget": {
+    "model_calls": 12,
+    "lean_checks": 60,
+    "wall_seconds": 7200
+  },
+  "sources": [
+    {
+      "url": "https://www.claymath.org/millennium/birch-and-swinnerton-dyer-conjecture/",
+      "role": "official target description"
+    },
+    {
+      "url": "https://leanprover-community.github.io/mathlib4_docs/Mathlib/AlgebraicGeometry/EllipticCurve/LFunction.html",
+      "role": "API reference; installed source is authoritative for this checkout"
+    },
+    {
+      "url": "https://chatgpt.com/share/e/6aa0f51f-131c-83ea-9d76-b87f314caecc",
+      "role": "user-supplied assessment",
+      "access": "reviewed from user-supplied PDF",
+      "local_source": "/Users/nicolas.kudeba/Downloads/Validate a Math Solution.pdf",
+      "sha256": "6013cdcbd5b505337c0eb70306d49d5866a356b994fc0534bd270a675d9a7d31"
+    },
+    {
+      "url": "https://arxiv.org/html/2204.09608v3",
+      "role": "Castella Theorem B; literature only until formalized with all hypotheses"
+    },
+    {
+      "url": "https://arxiv.org/html/1910.07404v2",
+      "role": "BKS: distinct derivative construction; audit Sha finiteness assumptions"
+    },
+    {
+      "url": "https://www.lmfdb.org/EllipticCurve/Q/389/a/1",
+      "role": "non-CM rank-two control; database evidence is not a Lean certificate"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "discriminant",
+      "kind": "lemma",
+      "scope": "infrastructure",
+      "claim": "The curve y²=x³−x has discriminant 64.",
+      "depends_on": [],
+      "priority": 10,
+      "type": "(⟨0, 0, 0, -1, 0⟩ : WeierstrassCurve ℚ).Δ = 64",
+      "imports": [
+        "Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass",
+        "Mathlib.Tactic.NormNum"
+      ]
+    },
+    {
+      "id": "nonsingular",
+      "kind": "lemma",
+      "scope": "special_case",
+      "claim": "This particular rational Weierstrass equation is nonsingular; this is not BSD for the curve.",
+      "depends_on": [
+        "discriminant"
+      ],
+      "priority": 9,
+      "type": "(⟨0, 0, 0, -1, 0⟩ : WeierstrassCurve ℚ).Δ ≠ 0",
+      "imports": [
+        "Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass",
+        "Mathlib.Tactic.NormNum"
+      ]
+    },
+    {
+      "id": "affine_count_mod5",
+      "kind": "lemma",
+      "scope": "infrastructure",
+      "claim": "Exactly seven affine coordinate pairs solve y²=x³−x over F₅.",
+      "depends_on": [],
+      "priority": 8,
+      "type": "(Finset.univ.filter (fun xy : Fin 5 × Fin 5 => (xy.2.val ^ 2) % 5 = (xy.1.val ^ 3 + 5 - xy.1.val) % 5)).card = 7",
+      "imports": [
+        "Mathlib.Data.Finset.Card",
+        "Mathlib.Data.Fintype.Prod",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "id": "point_count_bridge",
+      "kind": "gap",
+      "scope": "infrastructure",
+      "claim": "Relate the coordinate enumeration to Mathlib elliptic-curve points, including the point at infinity and good reduction.",
+      "depends_on": [
+        "affine_count_mod5",
+        "nonsingular"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "rank_interface",
+      "kind": "gap",
+      "scope": "infrastructure",
+      "claim": "Pin a Mordell–Weil rank definition for E(Q) and audit its bridge to the group of rational points.",
+      "depends_on": [],
+      "priority": 0
+    },
+    {
+      "id": "analytic_interface",
+      "kind": "gap",
+      "scope": "infrastructure",
+      "claim": "Connect the Hasse–Weil Dirichlet series to its analytic continuation near s=1; convergence-domain values alone do not define analytic rank.",
+      "depends_on": [],
+      "priority": 0
+    },
+    {
+      "id": "bsd_contract",
+      "kind": "gap",
+      "scope": "general",
+      "claim": "Review and freeze the precise rational-elliptic-curve BSD rank statement, quantifiers, curve hypotheses, and normalization.",
+      "depends_on": [
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "rank_zero_benchmark",
+      "kind": "gap",
+      "scope": "special_case",
+      "claim": "Choose a known rank-zero example with independent algebraic and analytic certificates; neither finite point counts nor numerically small L-values suffice.",
+      "depends_on": [
+        "nonsingular",
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "rank_one_benchmark",
+      "kind": "gap",
+      "scope": "special_case",
+      "claim": "Reproduce a known rank-one case with an exact theorem-level certificate.",
+      "depends_on": [
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "higher_rank_obstruction",
+      "kind": "gap",
+      "scope": "general",
+      "claim": "Identify an explicit missing theorem for the chosen higher-rank route; state every hypothesis instead of assuming the desired equality.",
+      "depends_on": [
+        "bsd_contract"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "leading_term_interface",
+      "kind": "gap",
+      "scope": "general",
+      "claim": "Define periods, regulator, Tamagawa factors, rational torsion, and Tate–Shafarevich order with compatible normalization; make finiteness obligations explicit.",
+      "depends_on": [],
+      "priority": 0
+    },
+    {
+      "id": "bsd_rank",
+      "kind": "target",
+      "scope": "general",
+      "claim": "For every elliptic curve over Q, Mordell–Weil rank equals the order of vanishing at s=1 of its analytically continued Hasse–Weil L-function.",
+      "depends_on": [
+        "bsd_contract",
+        "higher_rank_obstruction"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "bsd_leading_term",
+      "kind": "target",
+      "scope": "general",
+      "claim": "The full BSD leading-coefficient formula over Q, including the required Tate–Shafarevich finiteness assertion.",
+      "depends_on": [
+        "bsd_rank",
+        "leading_term_interface"
+      ],
+      "priority": 0
+    },
+    {
+      "id": "numerical_exploration",
+      "kind": "experiment",
+      "scope": "infrastructure",
+      "claim": "Numerical ranks, L-values and local counts guide hypotheses; they do not discharge proof obligations.",
+      "depends_on": [],
+      "evidence_for": [
+        "rank_zero_benchmark",
+        "rank_one_benchmark",
+        "higher_rank_obstruction"
+      ]
+    },
+    {
+      "id": "cm_hypotheses",
+      "claim": "Freeze the CM family, good ordinary prime p >= 5, Hecke characters and every hypothesis of Castella Theorem B, including (1.5) and Theorem A (i)-(ii). No abstract-only theorem import.",
+      "depends_on": [],
+      "scope": "conditional",
+      "kind": "gap"
+    },
+    {
+      "id": "selmer_interface",
+      "claim": "Define the precise p-adic Selmer group and its exact sequence with rational points and the Tate module of Sha.",
+      "depends_on": [
+        "rank_interface"
+      ],
+      "scope": "infrastructure",
+      "kind": "gap"
+    },
+    {
+      "id": "complex_padic_bridge",
+      "claim": "Prove any needed comparison of complex leading terms and p-adic derivatives; do not equate their vanishing orders by convention.",
+      "depends_on": [
+        "analytic_interface",
+        "cm_hypotheses"
+      ],
+      "scope": "conditional",
+      "kind": "gap"
+    },
+    {
+      "id": "kato_nonvanishing",
+      "claim": "Missing implication: complex analytic rank two implies nonzero generalised Kato class for the frozen CM family.",
+      "depends_on": [
+        "complex_padic_bridge"
+      ],
+      "scope": "conditional",
+      "kind": "gap"
+    },
+    {
+      "id": "kato_selmer_theorem",
+      "claim": "Formalize Castella Theorem B: nonzero generalised Kato class implies Selmer dimension two, with its exact hypotheses.",
+      "depends_on": [
+        "cm_hypotheses",
+        "selmer_interface"
+      ],
+      "scope": "conditional",
+      "kind": "gap"
+    },
+    {
+      "id": "rational_rank_lower_bound",
+      "claim": "Produce two independent rational points, or another unconditional rank lower bound. Selmer dimension two alone does not give this.",
+      "depends_on": [
+        "rank_interface",
+        "cm_hypotheses"
+      ],
+      "scope": "conditional",
+      "kind": "gap"
+    },
+    {
+      "id": "cm_rank_two",
+      "claim": "Establish rank two for the restricted CM family using nonvanishing, the Selmer bound and the independent rational rank lower bound.",
+      "depends_on": [
+        "kato_nonvanishing",
+        "kato_selmer_theorem",
+        "rational_rank_lower_bound"
+      ],
+      "scope": "special_case",
+      "kind": "gap"
+    },
+    {
+      "id": "kato_construction_comparison",
+      "claim": "If using BKS derivatives to prove generalised Kato-class nonvanishing, supply an explicit comparison theorem and discharge Sha assumptions.",
+      "depends_on": [
+        "cm_hypotheses"
+      ],
+      "scope": "conditional",
+      "kind": "gap",
+      "evidence_for": [
+        "kato_nonvanishing"
+      ]
+    },
+    {
+      "id": "control_389_coordinates",
+      "claim": "The proposed P=(0,0) and Q=(1,0) lie on y²+y=x³+x²−2x. This does not prove independence or rank; 389.a1 is non-CM.",
+      "depends_on": [],
+      "scope": "infrastructure",
+      "kind": "lemma",
+      "type": "((0 : ℚ)^2 + 0 = 0^3 + 0^2 - 2*0) ∧ ((0 : ℚ)^2 + 0 = 1^3 + 1^2 - 2*1)",
+      "imports": [
+        "Mathlib.Tactic.NormNum"
+      ]
+    },
+    {
+      "id": "control_389_rank",
+      "claim": "Reproduce independent exact algebraic and analytic rank-two certificates for the non-CM control 389.a1. Never use it as a CM-family example.",
+      "depends_on": [
+        "control_389_coordinates",
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "scope": "special_case",
+      "kind": "gap"
+    },
+    {
+      "id": "rank_squeeze",
+      "claim": "Elementary closing step only: given rank lower bound two and Selmer upper bound two, rank is two. All mathematical input remains in the hypotheses.",
+      "depends_on": [],
+      "scope": "conditional",
+      "kind": "lemma",
+      "type": "∀ rank selmer : ℕ, 2 ≤ rank → rank ≤ selmer → selmer = 2 → rank = 2",
+      "imports": [
+        "Mathlib.Tactic"
+      ]
+    }
+  ]
+}

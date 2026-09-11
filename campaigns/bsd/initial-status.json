@@ -1,0 +1,145 @@
+{
+  "campaign": "BSD_Q",
+  "target_verified": false,
+  "nodes": [
+    {
+      "id": "discriminant",
+      "status": "ready",
+      "scope": "infrastructure",
+      "blocked_by": [],
+      "priority": 10,
+      "claim": "The curve y\u00b2=x\u00b3\u2212x has discriminant 64."
+    },
+    {
+      "id": "nonsingular",
+      "status": "blocked",
+      "scope": "special_case",
+      "blocked_by": [
+        "discriminant"
+      ],
+      "priority": 9,
+      "claim": "This particular rational Weierstrass equation is nonsingular; this is not BSD for the curve."
+    },
+    {
+      "id": "affine_count_mod5",
+      "status": "ready",
+      "scope": "infrastructure",
+      "blocked_by": [],
+      "priority": 8,
+      "claim": "Exactly seven affine coordinate pairs solve y\u00b2=x\u00b3\u2212x over F\u2085."
+    },
+    {
+      "id": "point_count_bridge",
+      "status": "needs_formalization",
+      "scope": "infrastructure",
+      "blocked_by": [
+        "affine_count_mod5",
+        "nonsingular"
+      ],
+      "priority": 0,
+      "claim": "Relate the coordinate enumeration to Mathlib elliptic-curve points, including the point at infinity and good reduction."
+    },
+    {
+      "id": "rank_interface",
+      "status": "needs_formalization",
+      "scope": "infrastructure",
+      "blocked_by": [],
+      "priority": 0,
+      "claim": "Pin a Mordell\u2013Weil rank definition for E(Q) and audit its bridge to the group of rational points."
+    },
+    {
+      "id": "analytic_interface",
+      "status": "needs_formalization",
+      "scope": "infrastructure",
+      "blocked_by": [],
+      "priority": 0,
+      "claim": "Connect the Hasse\u2013Weil Dirichlet series to its analytic continuation near s=1; convergence-domain values alone do not define analytic rank."
+    },
+    {
+      "id": "bsd_contract",
+      "status": "needs_formalization",
+      "scope": "general",
+      "blocked_by": [
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "priority": 0,
+      "claim": "Review and freeze the precise rational-elliptic-curve BSD rank statement, quantifiers, curve hypotheses, and normalization."
+    },
+    {
+      "id": "rank_zero_benchmark",
+      "status": "needs_formalization",
+      "scope": "special_case",
+      "blocked_by": [
+        "nonsingular",
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "priority": 0,
+      "claim": "Choose a known rank-zero example with independent algebraic and analytic certificates; neither finite point counts nor numerically small L-values suffice."
+    },
+    {
+      "id": "rank_one_benchmark",
+      "status": "needs_formalization",
+      "scope": "special_case",
+      "blocked_by": [
+        "rank_interface",
+        "analytic_interface"
+      ],
+      "priority": 0,
+      "claim": "Reproduce a known rank-one case with an exact theorem-level certificate."
+    },
+    {
+      "id": "higher_rank_obstruction",
+      "status": "needs_formalization",
+      "scope": "general",
+      "blocked_by": [
+        "bsd_contract"
+      ],
+      "priority": 0,
+      "claim": "Identify an explicit missing theorem for the chosen higher-rank route; state every hypothesis instead of assuming the desired equality."
+    },
+    {
+      "id": "leading_term_interface",
+      "status": "needs_formalization",
+      "scope": "general",
+      "blocked_by": [],
+      "priority": 0,
+      "claim": "Define periods, regulator, Tamagawa factors, rational torsion, and Tate\u2013Shafarevich order with compatible normalization; make finiteness obligations explicit."
+    },
+    {
+      "id": "bsd_rank",
+      "status": "needs_formalization",
+      "scope": "general",
+      "blocked_by": [
+        "bsd_contract",
+        "higher_rank_obstruction"
+      ],
+      "priority": 0,
+      "claim": "For every elliptic curve over Q, Mordell\u2013Weil rank equals the order of vanishing at s=1 of its analytically continued Hasse\u2013Weil L-function."
+    },
+    {
+      "id": "bsd_leading_term",
+      "status": "needs_formalization",
+      "scope": "general",
+      "blocked_by": [
+        "bsd_rank",
+        "leading_term_interface"
+      ],
+      "priority": 0,
+      "claim": "The full BSD leading-coefficient formula over Q, including the required Tate\u2013Shafarevich finiteness assertion."
+    },
+    {
+      "id": "numerical_exploration",
+      "status": "evidence_only",
+      "scope": "infrastructure",
+      "blocked_by": [],
+      "priority": 0,
+      "claim": "Numerical ranks, L-values and local counts guide hypotheses; they do not discharge proof obligations."
+    }
+  ],
+  "model_calls": 0,
+  "lean_checks": 0,
+  "charged_seconds": 0,
+  "evidence_records": 0
+}

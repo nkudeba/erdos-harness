@@ -1,0 +1,121 @@
+{
+  "completed_at": "2026-09-10T15:46:18.510491+00:00",
+  "experiment": "selected favorable known-solved candidates, assisted recovery",
+  "autonomous_solve_rate_established": false,
+  "external_lean_proofs_supplied": false,
+  "cost_usd": null,
+  "cost_note": "Provider cost reporting and initial failed-call logs incomplete.",
+  "unit_tests": {
+    "total": 87,
+    "passed": 76,
+    "skipped": 11,
+    "failed": 0
+  },
+  "old_proof_regression": {
+    "passed": 11,
+    "failed": 0,
+    "note": "Lean replay preceded final recovery/checkpoint edits; unit suite rerun after edits."
+  },
+  "results": [
+    {
+      "problem": 649,
+      "run": "runs/20260909-153409-855978-erdos649",
+      "outcome": "proved",
+      "known_solved_problem": true,
+      "repair": "Private helper layout normalization; unchanged mathematical proof.",
+      "verify": {
+        "compiles": true,
+        "sorry_free": true,
+        "banned": null,
+        "frozen_match": true,
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "axioms_clean": true,
+        "backtranslation": "It is false that every ordered pair of prime natural numbers p and q occurs as the greatest prime factors of consecutive natural numbers n and n+1 with n at least 2. Equivalently, some ordered pair of primes has no such n. A greatest prime factor here means a prime divisor at least as large as every prime divisor of the number.",
+        "faithful": {
+          "faithful": true,
+          "issues": [
+            "Uses the positive-integer domain implicit in the supplied resolution notes: P is defined only for n >= 2. If the word integer were instead interpreted to allow negative n and P(abs(n)), this proof would not resolve that different formulation (n=-8 realizes p=2,q=7). Independent statement review should explicitly confirm the intended positive domain."
+          ],
+          "verdict": "Faithful to the positive-integer problem resolved by the supplied notes, with the domain interpretation explicitly qualified."
+        },
+        "all_clear": true,
+        "artifact_sha256": "706e82b8430aa71894de682c0ede90e479bf7e84ad4dd172f8a981c20e9c8da8"
+      },
+      "review_stage": "mechanically_verified",
+      "claim_eligible": false,
+      "final_proof": "runs/20260909-153409-855978-erdos649/final/Erdos649.lean",
+      "final_file_sha256": "04f2abf609c5e25cc9bc20a958f6ebca5701af083ec1416276d39c517f9f6793",
+      "semantic_audit_provenance": "runs/20260909-153409-855978-erdos649/audit-provenance.json"
+    },
+    {
+      "problem": 105,
+      "run": "runs/20260909-153410-884155-erdos105",
+      "outcome": "proved",
+      "known_solved_problem": true,
+      "repair": "Redundant finite-case normalization and simplification repairs; unchanged nine-blue/six-red witness.",
+      "verify": {
+        "compiles": true,
+        "sorry_free": true,
+        "banned": null,
+        "frozen_match": true,
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "axioms_clean": true,
+        "backtranslation": "There exist a nonnegative integer n and disjoint finite sets A and B of points in the real plane, with exactly n points in A and max(n-3, 0) points in B. The set A is not contained in any straight line. Every straight line containing two distinct points of A contains at least one point of B. Lines are represented by equations ax+by=c with real coefficients and at least one of a,b nonzero.",
+        "faithful": {
+          "faithful": true,
+          "issues": [
+            "Natural-number subtraction is truncated, but the noncollinearity condition excludes n below 3; the actual witness uses n=9."
+          ],
+          "verdict": "This is precisely a counterexample to the asserted ordinary-line property, matching the disproof recorded in the resolution notes."
+        },
+        "all_clear": true,
+        "artifact_sha256": "f443417d5db03887eb0863dac541c6fb33df992eb71de97b2d6f2a8541ed1aee"
+      },
+      "review_stage": "mechanically_verified",
+      "claim_eligible": false,
+      "final_proof": "runs/20260909-153410-884155-erdos105/final/Erdos105.lean",
+      "final_file_sha256": "d2cae304adc15118ee4ff23b833eb0b59f7ba0c4d8cec08e340e04d3624b6d16",
+      "semantic_audit_provenance": "runs/20260909-153410-884155-erdos105/audit-provenance.json"
+    },
+    {
+      "problem": 275,
+      "run": "runs/20260909-153410-529683-erdos275",
+      "outcome": "proved",
+      "known_solved_problem": true,
+      "repair": "Original Codex proof recovered unchanged; mechanical checkpoint and semantic audit resumed.",
+      "verify": {
+        "compiles": true,
+        "sorry_free": true,
+        "banned": null,
+        "frozen_match": true,
+        "axioms": [
+          "Classical.choice",
+          "Quot.sound",
+          "propext"
+        ],
+        "axioms_clean": true,
+        "backtranslation": "Let r be a nonnegative integer, and consider r congruence classes with integer residues and positive integer moduli. If their union contains all 2^r integers s, s+1, ..., s+2^r-1 for some integer s, then their union contains every integer. Repeated moduli and residues are allowed.",
+        "faithful": {
+          "faithful": true,
+          "issues": [],
+          "verdict": "The theorem proves the full stated covering implication for positive moduli, allowing repetitions and all integer starting points and targets."
+        },
+        "all_clear": true,
+        "artifact_sha256": "d68e8feeb16af4927bb3533160ac0dfbd015cd6cd76c1243ca0821482eda4562"
+      },
+      "review_stage": "mechanically_verified",
+      "claim_eligible": false,
+      "final_proof": "runs/20260909-153410-529683-erdos275/final/Erdos275.lean",
+      "final_file_sha256": "785c8d1d92a7fddf57d7b5fbba111b4b62511edf01d00463d562f453f383b764",
+      "semantic_audit_provenance": "runs/20260909-153410-529683-erdos275/audit-provenance.json"
+    }
+  ]
+}
