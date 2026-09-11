@@ -1,0 +1,17 @@
+{
+  "id": "7",
+  "statement": "Is there a distinct covering system all of whose moduli are odd?",
+  "status": "Open, but could be proved with a finite example. ($25 prize; open; class verifiable)",
+  "notes": "OPEN problem (site class: verifiable; status line: 'VERIFIABLE'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): Asked by Erdős and Selfridge (sometimes also with Schinzel). They also asked whether there can be a covering system such that all the moduli are odd and squarefree. The answer to this stronger question is no, proved by Balister, Bollobás, Morris, Sahasrabudhe, and Tiba [BBMST22].\nHough and Nielsen [HoNi19] proved that at least one modulus must be divisible by either $2$ or $3$. A simpler proof of this fact was provided by Balister, Bollobás, Morris, Sahasrabudhe, and Tiba [BBMST22], who also prove that if an odd covering system exists then the least common multiple of its moduli must be divisible by $9$ or $15$.\nSelfridge has shown (as reported in [Sc67]) that such a covering system exists if a covering system exists with moduli $n_1,\\ldots,n_k$ such that no $n_i$ divides any other $n_j$ (but the latter has been shown not to exist, see [586]).\nFilaseta, Ford, and Konyagin [FFK00] report that Erdős, 'convinced that an odd covering does exist, offered \\$25 for a proof that no odd covering exists; Selfridge, convinced (at that point) that no odd covering exists, offered \\$300 for the first explicit example...no award was promised to someone who gave a non-constructive proof that an odd covering of the integers exists...Selfridge (private communication) has informed us that he is now increasing his award to \\$2000.'\n\nCONVENTION (not a hint, a disambiguation): 'distinct covering system' is the Erdos-Graham notion — finitely many congruence classes a_i mod m_i with DISTINCT moduli, each m_i > 1, whose union is all of Z. Without distinctness the odd question is trivially YES (0,1,2 mod 3). 'Odd' constrains every modulus to be odd.\n\nSEARCH IS EXCLUDED, NOT UNTRIED: a published (unrefereed preprint, NOT rerun here) floor of 11,486,475 on the lcm is recorded in atlas-data/reviewed.json; the bounded search stage cannot reach it. The reachable partial value is formalizing known structure (BBMST22 odd-squarefree, Hough-Nielsen), not a search.",
+  "url": "https://www.erdosproblems.com/7",
+  "open": true,
+  "class": "verifiable",
+  "tags": [
+    "number theory",
+    "covering systems"
+  ],
+  "comments": 22,
+  "flags": [],
+  "search_floor": 11486475.0,
+  "search_floor_kind": "published"
+}

@@ -1502,12 +1502,40 @@ def known_search_floor(text: str) -> float | None:
     return best
 
 
+def atlas_search_floor(pid: str | int | None) -> tuple[float, str] | None:
+    """The search floor the Atlas recorded for this problem, or None.
+
+    `record_finding.py` stamps `problems/erdos_<n>.json` only when that file already exists, and it
+    exists only for problems the harness has actually attacked — 42 of 1,217. For every other problem a
+    recorded floor lived in `atlas-data/reviewed.json` and nowhere the harness could see it, so the
+    feedback loop the Atlas is supposed to close was open for 96% of the catalogue: #366 (1e22), #287
+    (4e19), #647 (9.2e18) and #848 (2.6e17) were all recorded and inert, every one still free to spend a
+    search stage re-deriving a known check. Read the Atlas directly so a finding recorded by hand reaches
+    the triage gate on the very next run, with no problem file and no model call.
+    """
+    if pid is None:
+        return None
+    try:
+        entry = json.loads((ROOT / "atlas-data" / "reviewed.json").read_text()).get(str(pid))
+    except (OSError, ValueError):
+        return None
+    floor = (entry or {}).get("search_floor")
+    if not isinstance(floor, (int, float)) or floor <= 0:
+        return None
+    return float(floor), f"Atlas ({(entry or {}).get('search_floor_kind') or 'unrecorded'})"
+
+
 def search_futility(a: dict, problem: dict | None = None, literature: str = "") -> tuple[bool, str]:
     """Is a bounded counterexample/witness search provably pointless for this target?
 
-    Two independent signals, both optional; the larger floor wins:
+    Independent signals, all optional; the larger floor wins:
+      * a floor filed on the problem file or recorded in the Atlas's `reviewed.json`,
       * the triage model's own `search_floor` (smallest size a witness could still have), and
       * a scan of the site notes + literature for published exhaustive checks.
+
+    A floor must be filed in units this can compare: SEARCH_REACH counts enumerable objects, so a floor
+    filed in the problem's own parameter (`n = 32` vertices) reads as a cheap search and lets the stage
+    run. See the floor section in CLAUDE.md.
     """
     floors: list[tuple[float, str]] = []
     # A floor recorded on the problem file itself (written by the Atlas feedback loop) is the most reliable
@@ -1515,6 +1543,10 @@ def search_futility(a: dict, problem: dict | None = None, literature: str = "") 
     filed = (problem or {}).get("search_floor")
     if isinstance(filed, (int, float)) and filed > 0:
         floors.append((float(filed), "problem file"))
+    # Same loop, for the 96% of problems that have no problem file yet.
+    from_atlas = atlas_search_floor((problem or {}).get("id"))
+    if from_atlas:
+        floors.append(from_atlas)
     model_floor = (a or {}).get("search_floor")
     if isinstance(model_floor, (int, float)) and model_floor > 0:
         floors.append((float(model_floor), "triage"))

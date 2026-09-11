@@ -12,6 +12,6 @@
   ],
   "comments": 1,
   "flags": [],
-  "search_floor": 55440.0,
-  "search_floor_kind": "screen"
+  "search_floor": 110880.0,
+  "search_floor_kind": "exhaustive"
 }

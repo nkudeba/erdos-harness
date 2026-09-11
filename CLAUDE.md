@@ -34,7 +34,9 @@ pass one, and regenerates `rankings.json`, `rankings.csv` and the private site's
 no cost. Scores are heuristic feasibility estimates, never probabilities.
 
 A recorded `search_floor` closes the loop back into the harness: `search_futility` in `harness.py` reads it
-from the problem file at triage time and skips a futile search stage without spending a model call.
+at triage time — from `problems/erdos_<n>.json` when that file exists, and otherwise straight from
+`reviewed.json` via `atlas_search_floor` — and skips a futile search stage without spending a model call.
+File it in enumerable-object units, not the problem's own parameter; see the floor section below.
 
 **The live site picks these up on its own.** Revised scores ride the same 30-second channel as run evidence:
 `result_feed.py` publishes every reviewed problem's score, reasons and requirements to `/api/results`, and
@@ -43,6 +45,42 @@ is the whole job — no rebuild, no redeploy. `.result-feed/status.json` shows `
 `pending_scores` (queued). If `pending_scores` stays non-zero, the deployed build predates live rankings and
 the site needs one redeploy; the publisher keeps run evidence flowing meanwhile and starts sending scores by
 itself once the new build is up.
+
+## The scores are not probabilities, and there is now a way to get some
+
+`score` is a sum of hand-assigned points; `partial` likewise. Neither has ever been checked against an
+outcome, so neither is a probability — score 12 does not mean 12%. `rankings.json` says so in its own
+metadata. Read them as an ordering device and as tiers (`≥70` Promising, `≥50` Plausible, `≥30`
+Difficult, `≥15` Research, below that Frontier).
+
+To get real probabilities you need predictions recorded BEFORE outcomes. The project had 26 settled
+attempts and zero predictions, making all of that evidence unusable for calibration. Now:
+
+```bash
+python3 atlas-data/predict.py estimate --problem 273    # decomposed ceiling, no model calls
+python3 atlas-data/predict.py estimate --all --nonzero  # whole catalogue, ~0.2 s, still free
+python3 atlas-data/predict.py record --problem N --p-resolve 0.001 --basis "why"
+python3 atlas-data/predict.py score                     # Brier + calibration bins, once outcomes land
+```
+
+`stage_assess` logs a prediction to `atlas-data/predictions.jsonl` on every run, so the log fills by
+itself. Calibration stays impossible until outcomes accumulate, and `score` reports that honestly
+instead of printing a flattering Brier.
+
+**The estimate is a decomposition, not an opinion:**
+`P(resolve) = reachability × class base rate`. Reachability is *arithmetic* — a recorded search floor
+past the bounded-search reach (`10^9`) pins it to 0 whatever else is true — which is why the whole
+catalogue costs nothing to triage. The class rate comes from observed outcomes under a Jeffreys prior,
+so `0/7` gives a small positive number rather than a false zero.
+
+Two refusals are deliberate. Nothing is ever labelled `calibrated`. And an **already-solved problem
+nobody has attempted gets no estimate at all**: the 19/19 reconstruction rate was earned on targets
+chosen for being reconstructable, and applying it to an untouched problem would launder that selection
+into a prediction.
+
+**What it says today:** of 639 open problems, **602 pin to exactly 0** by reachability alone, and 37
+survive — all at the same 0.0625 class rate, differing only in `partial`. That is the honest picture:
+the ceiling barely discriminates, so `partial` remains the axis that decides where budget goes.
 
 ## Two axes, not one
 
@@ -221,7 +259,37 @@ did not happen.
 `exhaustive` (every candidate tested, including a solver UNSAT) / `screen` (excluded by a cheap arithmetic
 filter) / `published` (third-party, not rerun) / `unrecorded`. The search script must return `kind` in its
 `SEARCHED:` payload; `record_finding.py` takes `--floor-kind`. A screen reported as a search is a false claim
-of progress: #273's `exhaustive_to: 55439` is a screen, and is one below where the real work starts.
+of progress: #273's old `exhaustive_to: 55439` was a screen, one below where the real work starts. It is now
+`110880` / `exhaustive`, by algebra rather than enumeration — see `knowledge/reductions/273/`.
+
+**And it must be filed in units the gate can compare.** `search_futility` measures a floor against
+`SEARCH_REACH = 1e9`, which counts *objects a bounded search can enumerate*. A floor filed in the problem's
+own parameter — `n = 32` vertices, `n = 12`, `62` — reads as a trivially cheap search and lets the stage run,
+which is exactly backwards: #993's `n <= 32` is 1.1e11 trees and #743's `n <= 12` is 1.07e10 tree families.
+File the object count and say so in the rationale. Where no object count is meaningful because each candidate
+is itself a hard decision (#273 and #7 file an lcm), the floor will not trip the gate at all — put the reason
+in a `--requirement` instead of inflating the number.
+
+**The loop only closes if the harness can see the floor.** `record_finding.py` stamps
+`problems/erdos_<n>.json` only when that file already exists, which is true for the ~40 problems the harness
+has attacked. `search_futility` therefore also reads `atlas-data/reviewed.json` directly
+(`atlas_search_floor`), because it previously read the problem file alone — leaving #366 (1e22), #287 (4e19),
+#647 (9.2e18) and #848 (2.6e17) recorded and *inert*, every one of them still free to spend a search stage
+re-deriving a known check. Covered by `tests/test_atlas_floor_loop.py`.
+
+## Prefer a cheap necessary condition to a solver call
+
+A residue-free algebraic test can decide in milliseconds what a SAT encoding does not decide in 37 minutes.
+#273: the fibre/Fourier condition — group ℤ/L by residue mod `d`, note that moduli not divisible by `d`
+cancel, so the imbalance must be paid out of the overlap `k` — eliminated **20 of the 29** candidate lcm
+values, including both candidates that had absorbed five attempts and four solver timeouts. Ask what the
+structure forces before asking a solver to search.
+
+Two riders, both learned the same day. **Check the forum first anyway**: the identical test transferred
+verbatim to #7 and reproduced a floor ~3,300× weaker than one already posted there, so it banked nothing.
+And **the algebra eats exactly the candidates a search wants**: it bites when slack is tiny, which is the
+same property that makes a candidate look attackable, so success here can leave the target *less* tractable
+than before — say so plainly rather than reporting the eliminations alone.
 
 ## Gotchas
 

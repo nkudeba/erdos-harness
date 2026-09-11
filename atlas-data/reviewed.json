@@ -10,12 +10,24 @@
   },
   "7": {
     "rationale": [
-      "The odd-covering-system question remains hard despite its finite-certificate label and known restrictions on moduli."
+      "The odd-covering-system question remains hard despite its finite-certificate label and known restrictions on moduli.",
+      "PUBLISHED SEARCH FLOOR (recorded 2026-09-11, NOT rerun by us): a preprint linked from the #7 forum thread (egeozturk, 18 Aug 2026, 'Closed-form nonexistence certificates for odd covering systems') claims no covering system with distinct odd moduli > 1 has lcm below 11,486,475, by a search-free hierarchy of closed-form certificates in exact rational arithmetic - extending an earlier search-based 2e6 computation. UNREFEREED preprint, self-described as undergraduate work, not verified by us. Its own stated stopping point is the strongly abundant smooth moduli, first uncertified case 11486475 = 3^3*5^2*7*11*13*17.",
+      "Our fibre/Fourier test (see #273, knowledge/reductions/273/) transfers to #7 verbatim - every divisor m>1 of odd L is admissible, the reciprocal screen becomes 'L is ODD ABUNDANT' (smallest 945), and the condition collapses to: max over n|L, n<L of (2n - sigma(n)) <= sigma(L) - 2L. It eliminates 191 of the 391 candidates below 200,000 (including 945: 58 > 30 at n=189) and gives a floor of 3,465. That is roughly 3,300x WEAKER than the floor already on the forum, so the transfer is superseded on arrival and banks nothing for #7.",
+      "A full resolution claim on the thread (jinooklee, 02 May 2026: Erdos-Selfridge via sieve monotonicity, Lean 4 + three BBMST axioms) was REFUTED in-thread - a commenter gives decisive evidence that the assumed axiom bbmst_sf_lt_1 is false, and Thomas Bloom states he assumes the proof is flawed absent expert vouching or an axiom-free formalisation. #7 is open. Related published theorems: BBMST22 settles the odd SQUAREFREE case negatively; Hough-Nielsen prove some modulus is divisible by 2 or 3; BBMST prove the lcm must be divisible by 9 or 15. Prizes: Erdos $25 for nonexistence, Selfridge $2000 for an explicit example."
     ],
     "requirements": [
-      "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it."
+      "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it.",
+      "Do not run a bounded lcm search on #7: the recorded floor of 11,486,475 already exceeds anything the harness would reach, and certificate methods of this family are documented to stop exactly at the strongly abundant smooth moduli where the hard core lives.",
+      "If #7 is attempted, the reachable partial value is formalizing BBMST22 (odd squarefree case) or Hough-Nielsen, not a search. Any use of the 11,486,475 floor must carry the caveat that it rests on an unrefereed preprint we did not rerun."
     ],
-    "score": 7
+    "score": 7,
+    "sources": [
+      "atlas-data/forum/7.json",
+      "knowledge/reductions/273/fourier_transfer_erdos7.py"
+    ],
+    "search_floor": 11486475.0,
+    "search_floor_kind": "published",
+    "assessed": "2026-09-11"
   },
   "8": {
     "rationale": [
@@ -46,6 +58,22 @@
       "Build and count an explicit permutation family; preserve the asymptotic quantifier."
     ],
     "score": 52
+  },
+  "64": {
+    "rationale": [
+      "SEARCH FLOOR IS IN VERTEX COUNT, and the reachable subclasses are swept (recorded 2026-09-11 from the forum thread, NOT rerun by us). Markstrom [Ma04]: a cubic counterexample needs >= 30 vertices; Nowbandegani-Esfandiari [NoEs11]: a bipartite one >= 32; Tranquilli arXiv:2608.02675 covers cubic bipartite n <= 58; a thread contributor extends that to n <= 62 (1.85e10 search-tree nodes, 1.22e10 at n=62 alone) - but reports that their general cubic search reached only n <= 34, and that beyond n=28 exhaustiveness rests on one unverified generator.",
+      "Solved in the affirmative for minimum degree above an absolute constant by Liu-Montgomery [LiMo20], which disproves the stronger Erdos-Gyarfas conjecture; what remains open is the small-degree regime. $1000 prize, five users listed as currently working on it.",
+      "FLOOR UNIT (corrected 2026-09-11): recorded as 1.85e10 ENUMERABLE OBJECTS - the search-tree nodes the contributor reports for cubic bipartite n <= 62, 1.22e10 of them at n=62 alone - not as the parameter 62 vertices. Note the floor covers the CUBIC BIPARTITE subclass only; a counterexample need not be cubic, and the general cubic search reached just n <= 34."
+    ],
+    "requirements": [
+      "Do not run a generic graph search on #64: the cubic and cubic-bipartite subclasses are already cleared past anything the harness would enumerate, and a counterexample need not be cubic. Reachable partial value is formalizing Liu-Montgomery or one of the confirmed families."
+    ],
+    "sources": [
+      "atlas-data/forum/64.json"
+    ],
+    "search_floor": 18500000000.0,
+    "search_floor_kind": "exhaustive",
+    "assessed": "2026-09-11"
   },
   "95": {
     "rationale": [
@@ -204,7 +232,13 @@
       "stage_reduce found and CHECKED three structural reductions, two of them new to us: (a) the parity decomposition - all moduli p-1 are even, so a solution is exactly TWO covering systems with disjoint moduli drawn from H2={(p-1)/2}; (b) no admissible modulus is 2 mod 6, since m=2 mod 3 forces 3|p, so 8,14,20,26,... are excluded and the standard 2,4,8,16 doubling chain is blocked at its second step; (c) any solution needs at least 18 congruences, because the 17 smallest elements of H2 have reciprocal sum 1.99835 < 2, which also gives a mid-search rejection filter (sum of 2/m must reach 2, not sum of 1/m reach 1).",
       "CORRECTION (2026-09-11): previously scored 6, below #677's 7, which contradicted the assessment. On the axis score actually measures - is a COMPLETE proof mechanically reachable - #273 is the stronger of the two: its affirmative side is a finite certificate at a reachable size (29 candidate lcms up to 393120), so a solver returning SAT at any one of them resolves the problem outright. #677 has no reachable route in either direction. The earlier 6-vs-7 reflected #677's already-banked partial value, which belongs on the partial axis, not this one.",
       "Candidate ordering matters more than candidate size. slack(L) = sum of 1/m over admissible divisors minus 1 bounds the unused reciprocal weight, so every modulus with 1/m > slack is FORCED. L=55440 is the smallest of the 29 candidates but among the loosest (slack 0.0437, only 7 of 43 forced); three attempts were spent on it for that reason alone. L=100800 is the uniquely collapsible one: slack 0.000089, 45 of 50 forced, 5 free, overlap budget 9 points, and only 12 of 32 free subsets reach coverage. Two of those 12 have overlap exactly 0 and are excluded by Mirsky-Newman/Davenport-Rado (a disjoint covering system must repeat its largest modulus, so distinct moduli admit no exact cover) - the first cases on this problem eliminated by a theorem rather than a timer.",
-      "The generating-function condition is now derived and validated, not a hunch. For every divisibility-maximal modulus m in the chosen set, L/m <= overlap - because at a primitive m-th root of unity only that term has a pole, giving |sum over the excess multiset of zeta^r| = L/m exactly. Checked to 1e-15 on a known cover with two maximal moduli. It subsumes Mirsky-Newman (overlap 0 demands L/m <= 0) and cuts L=100800's 12 coverage-reaching subsets to 7 in milliseconds, where a SAT encoding of ONE subset did not decide in 37 minutes. Standard argument, no novelty claimed."
+      "The generating-function condition is now derived and validated, not a hunch. For every divisibility-maximal modulus m in the chosen set, L/m <= overlap - because at a primitive m-th root of unity only that term has a pole, giving |sum over the excess multiset of zeta^r| = L/m exactly. Checked to 1e-15 on a known cover with two maximal moduli. It subsumes Mirsky-Newman (overlap 0 demands L/m <= 0) and cuts L=100800's 12 coverage-reaching subsets to 7 in milliseconds, where a SAT encoding of ONE subset did not decide in 37 minutes. Standard argument, no novelty claimed.",
+      "FIBRE/FOURIER ELIMINATION (2026-09-11, $0, no model calls): for every d|L and primitive d-th root of unity zeta, sum over m in U with d|m of (L/m)zeta^{a_m} equals the zeta-transform of the excess, so its modulus is at most k = sum L/m - L. Reverse triangle inequality gives a residue-free screen 2*max(W)-sum(W) > k. This ELIMINATES 20 of the 29 candidate lcm values below 400000, including BOTH candidates that consumed every previous attempt: L=55440 (three attempts, margin 2437 vs k<=2421) and L=100800 (two attempts, 1903 vs k<=9). Four solver runs timed out on those two; the test decides both in under a millisecond.",
+      "Search floor advances from a SCREEN at 55440 to EXHAUSTIVE at 110880 - every candidate below that is now excluded by proof. Surviving candidates below 400000: 110880, 166320, 221760, 262080, 277200, 302400, 332640, 388080, 393120, all loose (slack 0.02-0.08, k in the thousands) where the inequality has no bite. The 400000 cap is compute, not a theorem.",
+      "The test bites hardest exactly where a candidate looks most attractive: k <= slack*L, so the tiny-slack candidates chosen for being nearly determined have almost no excess budget. m=16 does most of the work (17 prime, so 16 is admissible and forced) while the other admissible multiples of 16 are too sparse to cancel its weight. Standard Mirsky-Newman style argument applied at every d rather than only the largest modulus; no novelty of technique claimed.",
+      "FOLLOW-UP (2026-09-11): the fibre/Fourier family is now provably EXHAUSTED, by decision rather than by search. Every d-constraint is implied by the constraint at mu = min{m in U : d|m}, so the family collapses to: for every mu in U, L/mu - sum_{m in U, mu|m, m!=mu} L/m <= k_U. That form is monotone in U, so a mu violating it under the maximal admissible set violates under every subset containing it and can be deleted outright; iterating to a fixed point is COMPLETE in polynomial time. No 2^47 enumeration is needed.",
+      "Propagation eliminates exactly the same 20 candidates and deletes ZERO moduli at all nine survivors - the full admissible set already satisfies every constraint there, so no subset search can improve on it. The survivors fall short by 1944 to 19326; the closest, L=302400, misses by 1944 against a budget of 6700 (a 29 percent gap), versus 55440 which is over by only 16. Regression: 3130 genuine covering systems built across L=12..720, zero false kills.",
+      "The reason is intrinsic: k <= slack*L, so the inequality bites exactly when slack is tiny. The 20 eliminated are the tight candidates; the nine survivors all have slack 0.02-0.08 and thousands of units of excess to absorb any imbalance. Tightness is both what makes a candidate look attackable AND what this test needs, so the algebra consumed exactly the candidates a search would have preferred and left the ones that are loose for both."
     ],
     "requirements": [
       "An affirmative resolution is a finite certificate but must exhibit two disjoint distinct-modulus covering systems over H; a bounded search is only worth running above lcm 55440, and the reciprocal budget is razor thin (best smooth L' <= 4e6 gives f = 2.30, i.e. 0.30 of total slack across both families).",
@@ -213,19 +247,27 @@
       "A finite-certificate search should encode the halved two-system form, enumerate only moduli 0 or 4 mod 6, and reject any candidate with fewer than 18 congruences; moduli must be allowed up to at least 70.",
       "Encode the halved two-system form for a SAT solver and decide the 29 candidates in order. The reduction stage's checked facts cut the space hard: moduli must be 0 or 4 mod 6, and any solution needs at least 18 congruences.",
       "Attack candidates in slack order, not numeric order, and decompose each into forced moduli + a free-subset enumeration before encoding; the subset choice does not belong in the SAT. The 10 surviving subsets at L=100800 fix the modulus set (exactly-one residue per modulus) but remain ~440k vars and CaDiCaL did not decide even the first in 37 min. Four solver attempts have now timed out. Untried next lever: the Mirsky-Newman generating-function argument survives as a CONDITION for overlap k>0, constraining which residues the <=9 overlap points may occupy - unverified, see knowledge/reductions/273/STRUCTURE.md.",
-      "Use the condition as a screen before any solver call. For the 7 survivors at L=100800 (6 of which contain the modulus 100800, making the inequality vacuous) the remaining handle is the exact equality |sum_E zeta^r| = 1 at every primitive 100800-th root of unity, which is severe and untried."
+      "Use the condition as a screen before any solver call. For the 7 survivors at L=100800 (6 of which contain the modulus 100800, making the inequality vacuous) the remaining handle is the exact equality |sum_E zeta^r| = 1 at every primitive 100800-th root of unity, which is severe and untried.",
+      "Do not spend solver time on L=55440 or L=100800; both are eliminated by algebra. Run the fibre/Fourier screen at every d BEFORE any SAT encoding - it is free and it killed 20 of 29 candidates that four solver runs could not.",
+      "The nine surviving candidates need a genuinely different lever: the residue-free bound has no bite when slack is large. Either strengthen to an exact minimum over d-th roots of unity, combine several d simultaneously, or encode those nine for SAT.",
+      "Do not attempt subset branch-and-bound on the nine survivors: the propagation decision is complete and returns nothing. They need SAT or new mathematics, and they are WORSE SAT targets than the ones already tried - larger (L=110k-393k, |A|=52-72) and looser (more residue freedom) than L=100800, which did not decide in 37 minutes."
     ],
     "score": 12,
-    "search_floor": 55440.0,
-    "search_floor_kind": "screen",
+    "search_floor": 110880.0,
+    "search_floor_kind": "exhaustive",
     "sources": [
       "scratchpad probe p273_floor.py (divisor sieve to 3e6)",
       "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/273.lean",
       "experiments/open-atlas-top2/273-notes.md",
       "knowledge/partial/273/20260910-213413-537244-erdos273-pos/report.md",
       "knowledge/reductions/273/live-2026-09-11.md",
-      "knowledge/reductions/273/STRUCTURE.md"
-    ]
+      "knowledge/reductions/273/STRUCTURE.md",
+      "knowledge/reductions/273/FOURIER-ELIMINATION.md",
+      "knowledge/reductions/273/fourier_sweep.py",
+      "knowledge/reductions/273/fourier_regression.py",
+      "knowledge/reductions/273/fourier_propagate.py"
+    ],
+    "brief_updated": "2026-09-11"
   },
   "275": {
     "rationale": [
@@ -581,10 +623,14 @@
     "assessed": "2026-09-11",
     "partial": 62,
     "rationale": [
-      "Each fixed r is a finite, SAT-encodable decision problem; r=3 and r=4 are published (Erdos-Gyarfas) and the claims page carries verification programs for r=5,7,8,9."
+      "Each fixed r is a finite, SAT-encodable decision problem; r=3 and r=4 are published (Erdos-Gyarfas) and the claims page carries verification programs for r=5,7,8,9.",
+      "EVERY REACHABLE FIXED CASE IS ALREADY CLAIMED (recorded 2026-09-11 from the proof-claims page, claims NOT verified by us). Seven proof claims filed in July 2026, all AI-assisted and all partial: r=5 independently four times (Winter, Rose, Silverstein, Sneiderman - with 458 DRAT-verified SAT leaves, twelve UNSAT formulas, and Kang-Pikhurko equality routes), plus r=6 (K_37), r=7 (K_50), r=8 (K_65, 862 LRAT-checked instances) and r=9 (K_82, 50 LRAT certificates). Erdos-Gyarfas published r=3 and r=4. So the first UNCLAIMED fixed case is r=10 (K_101, 5050 edges), and the universal statement over all r is what remains genuinely open.",
+      "The thread identifies the problem as equivalent to R^r_{r-1}(K_{r+1}) <= r^2+1, a named quantity in the weakened-Ramsey and complementary-Ramsey literatures (Chung-Liu 1978 Theorem 3.6 gives R^3_2(K_4,K_4,K_4)=10, i.e. the r=3 case, 21 years before [ErGy99]; Harborth-Moller 1999; Munemasa-Shinohara). Equality holds whenever the affine plane of order r exists - which for r=10 it does NOT (Lam-Thiel-Swiercz), so r=10 may behave differently from the prime-power ladder.",
+      "Crowded: seven users listed as currently working on it. A harness run would be competing for the one remaining reachable case against teams that produced four independent r=5 proofs in a week."
     ],
     "requirements": [
-      "Formalize the published r=3 or r=4 case, or decide a fixed r by SAT; graph-theory library fit in Mathlib is weak, so budget encoding work."
+      "Formalize the published r=3 or r=4 case, or decide a fixed r by SAT; graph-theory library fit in Mathlib is weak, so budget encoding work.",
+      "Do not attempt r <= 9; all are claimed. An attempt means r=10 (K_101, no affine plane of order 10) or a uniform argument over all r - and the fixed-case ladder to date is ad hoc counting plus large certified SAT, which does not obviously generalise."
     ],
     "sources": [
       "atlas-data/forum/617.json"
@@ -703,6 +749,22 @@
       "atlas-data/forum/723.json"
     ]
   },
+  "743": {
+    "rationale": [
+      "EXHAUSTIVELY VERIFIED TO n=12 (recorded 2026-09-11 from the forum thread, NOT rerun by us). Fishburn's n<=9 is not the frontier: Guichard-Massman 1990 [GuMa90] published n<=11, and a thread contributor checked n=12 in September 2026 - all sequences (T_2..T_12) pack into K_12, about 220 CORE-HOURS across 551 independent jobs with nauty canonical-form memoisation, largest job 6.3 million memoised classes. The author explicitly states n=12 rests on one implementation, cross-checked against a second only up to n=9, and should not be called independently verified.",
+      "The cost curve rules out the frontier: n=12 took 220 core-hours and n=13 multiplies both the number of tree families and the packing search. This is a falsifiable label whose first open case is not reachable on our budget.",
+      "FLOOR UNIT (corrected 2026-09-11): recorded as 1.07e10 ENUMERABLE OBJECTS - the 10,663,373,160 tree sequences (T_2,...,T_12) covered by the n=12 verification - not as the parameter n=12, which would read to the triage gate as a trivially cheap search. Verification is exhaustive for n <= 12."
+    ],
+    "requirements": [
+      "Do not attempt n<=12; it is done. An attempt at n=13 needs a fundamentally cheaper packing decision, not more cores. Independently reproducing the n=12 computation would be a real contribution the author asked for, but it is a verification task, not a resolution."
+    ],
+    "sources": [
+      "atlas-data/forum/743.json"
+    ],
+    "search_floor": 10700000000.0,
+    "search_floor_kind": "exhaustive",
+    "assessed": "2026-09-11"
+  },
   "779": {
     "rationale": [
       "The search interval is enormous, known small cases are checked, and heuristic failure is extremely unlikely. Finding a counterexample is not an attractive generic-search plan."
@@ -792,6 +854,22 @@
     "sources": [
       "atlas-data/forum/942.json"
     ]
+  },
+  "993": {
+    "rationale": [
+      "EXHAUSTIVELY VERIFIED TO n=32 by third parties (recorded 2026-09-11 from the forum thread, NOT rerun by us). All 109,972,410,221 free trees on 32 vertices checked with nauty/gentreeg plus an exact integer in/out subtree DP, zero unimodality failures, per-order counts matching OEIS A000055 end-to-end; n=30 and n=31 (14.8e9 and 40.3e9 trees) were done by two independent implementations in full agreement. A bounded tree search re-derives known ground - n=33 is ~300 billion trees.",
+      "The structural frontier is also moving: every spider has a strongly log-concave independence polynomial (Li-Li-Yang-Zhang), and a thread contributor extends this to every tree with at most two vertices of degree >= 3, so any counterexample needs at least three such vertices. For the 'or forest' half, Hoggar's theorem means a forest can only fail if a tree component is already non-log-concave, and the smallest such tree has 26 vertices (Kadrawi-Levit).",
+      "FLOOR UNIT (corrected 2026-09-11): recorded as 1.1e11 ENUMERABLE OBJECTS - the 109,972,410,221 free trees on 32 vertices actually checked - not as the parameter n=32. A floor is compared against SEARCH_REACH, which counts objects a bounded search can enumerate, so a floor filed in parameter units (32) would read as 'cheap' and let the gate run a search that is in fact 11 orders of magnitude out of reach. Cumulative verification is n <= 32."
+    ],
+    "requirements": [
+      "Do not run a bounded tree enumeration on #993. The reachable partial value is formalizing a published structural theorem (spiders, or the two-branch-vertex extension), not a search."
+    ],
+    "sources": [
+      "atlas-data/forum/993.json"
+    ],
+    "search_floor": 110000000000.0,
+    "search_floor_kind": "exhaustive",
+    "assessed": "2026-09-11"
   },
   "999": {
     "rationale": [

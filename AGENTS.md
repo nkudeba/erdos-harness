@@ -51,7 +51,13 @@ that as the problem's outcome would claim an open problem was solved.
 - For "does a finite object exist?", encode it for `pysat` (available, on the allowlist) instead of writing a
   backtracking loop. UNSAT is a proof of non-existence in the encoded range; a timed-out DFS proves nothing.
 - Every search floor carries a `kind`: `exhaustive` / `screen` / `published` / `unrecorded`. Never report a
-  screen as a search.
+  screen as a search. File it in **enumerable-object units** (#993's `n <= 32` is 1.1e11 trees), not the
+  problem's own parameter, or the triage gate reads an unreachable check as a cheap one and runs it anyway.
+- `search_futility` reads a recorded floor from `problems/erdos_<n>.json` **or** from `atlas-data/reviewed.json`
+  (`atlas_search_floor`). It used to read the problem file alone, which exists for ~40 of 1,217 problems, so
+  floors recorded for the rest were inert.
+- Before a solver call, ask what the structure forces. A residue-free algebraic necessary condition eliminated
+  20 of 29 candidates on #273 in milliseconds, including the two that had absorbed four solver timeouts.
 
 ## Reductions, escalation, readings
 
@@ -69,3 +75,7 @@ that as the problem's outcome would claim an open problem was solved.
   whatever that condition forces. #273 spent three attempts on its smallest candidate, which was among its
   loosest; the tightest one collapses to 12 enumerable cases. A search that enumerates cases must print
   `CANDIDATES: {"order_by": ..., "cases": [...]}` in attack order.
+- `score` and `partial` are NOT probabilities — sums of hand-assigned points, never checked against an
+  outcome. For estimates use `python3 atlas-data/predict.py estimate --problem N` (free, no model calls);
+  it returns a reference-class ceiling, never a calibrated number. Every run logs a prediction to
+  `atlas-data/predictions.jsonl`; `predict.py score` reports Brier and calibration once outcomes land.

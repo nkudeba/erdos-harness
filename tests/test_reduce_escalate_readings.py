@@ -299,13 +299,22 @@ class SameDefectsAuditedAcrossEveryNewPath(unittest.TestCase):
 
     def test_a_recorded_floor_kind_reaches_the_problem_file(self):
         """known_floor_note reads the PROBLEM file, so a kind recorded only in reviewed.json never gets
-        to the next search -- which is the whole point of typing floors."""
+        to the next search -- which is the whole point of typing floors.
+
+        Asserts the round-trip, not a literal: #273's kind was `screen` and became `exhaustive` when the
+        candidate lcms were eliminated algebraically, and a test pinned to the value fails on a correct
+        data update while still not checking that the kind actually propagates."""
         import json as _json, pathlib as _p
         prob = _json.loads(_p.Path("problems/erdos_273.json").read_text())
-        self.assertEqual(prob.get("search_floor_kind"), "screen")
+        kind = prob.get("search_floor_kind")
+        self.assertIn(kind, ("screen", "exhaustive", "published"), "a filed floor must carry a typed kind")
+        atlas = _json.loads(_p.Path("atlas-data/reviewed.json").read_text())["273"]
+        self.assertEqual(kind, atlas.get("search_floor_kind"),
+                         "the problem file and the Atlas must not disagree about how the floor was obtained")
+        self.assertEqual(float(prob["search_floor"]), float(atlas["search_floor"]))
         h = H.Harness.__new__(H.Harness)
         h.problem, h.state = prob, {}
-        self.assertIn("screen", h.known_floor_note())
+        self.assertIn(kind, h.known_floor_note())
 
 
 class EveryRetryPromptActuallyRenders(unittest.TestCase):
@@ -325,7 +334,8 @@ class EveryRetryPromptActuallyRenders(unittest.TestCase):
             kind="witness", pid="1", statement="s", statement_en="e", tail="t",
             solver_line="sl", cap_seconds=900, modules="math")), 100)
         self.assertGreater(len(H.REDUCE_PROMPT.format(
-            pid="1", statement_en="e", notes="n", statement="s", check_seconds=45, modules="math")), 100)
+            pid="1", statement_en="e", notes="n", statement="s", check_seconds=45, modules="math",
+            library="")), 100)
         self.assertGreater(len(H.READINGS_PROMPT.format(
             pid="1", statement_en="e", notes="n", statement="s")), 100)
 
