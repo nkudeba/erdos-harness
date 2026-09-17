@@ -39,6 +39,15 @@ a tail") for progress. Those belong to a separate track. This document is about 
    exposes recurring structure, not a stray option in the plan prompt.
 5. **Prover strength**, measured on the benchmark set: elementary hypotheses discharged per dollar.
 
+## Status after the funded #275 rerun (2026-09-17)
+
+Step 1 of the path below is done, and the answer is the good one: funded children prove elementary and moderate
+hypotheses ($3.45, $4.53). Every stall in the run traced to the harness (a frozen guard too strict for skeletons and
+helpers, an uncapped call, a rejected skeleton that fed nothing forward), all fixed. The residual for masked #275
+is now the all-odd core alone, with a sub-residual plan (pigeonhole + lcm periodicity + a normalised diagonal core)
+waiting for a resume. Next: resume this run (~$10) to see whether depth closes or refines the all-odd core, then
+step 2.
+
 ## The path, in order
 
 1. Build (1) and (2): failure feedback and recursive residuals.

@@ -2151,6 +2151,26 @@ def statement_prefix(statement: str) -> str:
 
 
 def contains_frozen(attempt: str, frozen_prefix: str) -> bool:
+    """The frozen statement must appear verbatim (modulo whitespace and comments) in the attempt.
+
+    When the frozen text is several declarations -- the `def`s a residual skeleton introduces plus the
+    hypothesis theorem, which is what every research child freezes -- each declaration must appear verbatim,
+    but helper lemmas may sit between them. Requiring the whole prefix as one contiguous block rejected
+    every attempt on the masked #275 run's descent lemma (three attempts, $4.53, none compiled) for placing a
+    helper between the `def`s and the theorem. Each `def` appearing verbatim pins its meaning as well as
+    contiguity did (a second definition of the same name is a Lean error), and the theorem header is still
+    required verbatim, so the guard loses no strength."""
+    if contains_frozen_contiguous(attempt, frozen_prefix):
+        return True
+    body = norm_ws(strip_comment_lines(attempt))
+    parts = [norm_ws(strip_comment_lines(d)) for d in split_decls(frozen_prefix)]
+    parts = [q for q in parts if q]
+    return len(parts) >= 2 and all(q in body for q in parts)
+
+
+def contains_frozen_contiguous(attempt: str, frozen_prefix: str) -> bool:
+    """The original one-block form; `normalize_helper_layout` still uses it to decide whether to hoist
+    interleaved private helpers above the prelude (a layout repair kept for saved-proof stability)."""
     return norm_ws(strip_comment_lines(frozen_prefix)) in norm_ws(strip_comment_lines(attempt))
 
 
@@ -2158,7 +2178,7 @@ def normalize_helper_layout(attempt: str, frozen: str) -> str:
     """Hoist interleaved private lemmas, without editing the frozen text.
     This is only a layout repair; the existing guard and Lean verifier still run.
     """
-    if contains_frozen(attempt, frozen):
+    if contains_frozen_contiguous(attempt, frozen):
         return attempt
     main = re.search(r"(?m)^theorem\s+erdos_\d+\b", frozen)
     if not main:
@@ -2541,6 +2561,20 @@ class Harness:
         # chasing an expensive stage.
         tune = getattr(self.llm, "_tuning", None)
         eff_r, bud_r = tune(purpose) if callable(tune) else (None, None)
+        # A single call may not spend what the RUN no longer has. The per-call cap (--call-budget, default $8)
+        # used to apply unchanged when $3 of a $15 run remained, so one prove call could overshoot the run cap
+        # by several dollars (masked #275: a $4.53 call against a $4.06 share). Cap the call at what is left,
+        # never below $0.50 so a call can still return something.
+        run_budget = getattr(getattr(self, "args", None), "run_budget", None)
+        if run_budget:
+            try:
+                left = max(0.5, float(run_budget) - self.spent_usd())
+            except Exception:                              # noqa: BLE001 - stubs without a log
+                left = None
+            if left is not None:
+                cap = budget if budget is not None else (bud_r if bud_r is not None else getattr(self.llm, "call_budget_usd", None))
+                if cap is None or left < float(cap):
+                    budget = round(left, 2)
         self.log.event("llm", "request", purpose=purpose, chars=len(prompt),
                        effort=effort or eff_r, budget=budget or bud_r, effort_override=effort is not None)
         t0 = time.time()
@@ -2801,9 +2835,16 @@ class Harness:
     def _screen(self, attempts, name, plan, rnd, block, frozen) -> bool:
         """Pre-compile checks; returns True if the block may be compiled."""
         if not contains_frozen(block, frozen):
-            attempts.append({"name": name, "plan": plan, "round": rnd, "rejected": True,
-                             "errors": ["attempt altered the frozen theorem statement — rejected without compiling"]})
-            self.log.event("prove", "frozen_violation", name=name)
+            # Keep the code and say WHICH frozen declaration is missing: a rejected attempt with no code left the
+            # masked #275 failure digest saying "3 attempts" and nothing else, and hid for a run that the guard
+            # itself was the failure (helpers placed between the frozen defs and the theorem).
+            body = norm_ws(strip_comment_lines(block))
+            missing = [norm_ws(strip_comment_lines(d))[:160] for d in split_decls(frozen)
+                       if norm_ws(strip_comment_lines(d)) and norm_ws(strip_comment_lines(d)) not in body]
+            attempts.append({"name": name, "plan": plan, "round": rnd, "rejected": True, "code": block,
+                             "errors": ["attempt altered the frozen theorem statement — rejected without compiling"
+                                        + (": missing verbatim " + " || ".join(missing) if missing else "")]})
+            self.log.event("prove", "frozen_violation", name=name, missing=len(missing))
             return False
         # Compile partial proofs so decomposition can reuse checked progress.
         # Success still requires no sorry and a clean final axiom audit.
@@ -4690,6 +4731,17 @@ for the SAT solver instead of enumerating it.
                     verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main)
                     self.log.event("program", "skeleton", cycle=cycle, adopted=bool(verdict.get("adopted")),
                                    reason=verdict.get("reason"), metric=(verdict.get("parsed") or {}).get("metric"))
+                    if not verdict.get("adopted") and not str(verdict.get("reason", "")).startswith("no improvement"):
+                        # The planner's own output failing is a failure too: a skeleton that does not compile (masked
+                        # #275's all-odd sub-residual died on an unknown identifier in its glue) must reach the next
+                        # plan as PROOF FAILURES, or the same skeleton is re-proposed with the same error.
+                        (cdir / "skeleton.rejected.lean").write_text(cand)
+                        record_failure(pdir, {"cycle": cycle, "name": "(skeleton)", "kind": "skeleton", "statement": "",
+                                              "exit": None, "stop_reason": f"skeleton rejected: {verdict.get('reason')}",
+                                              "attempts": 1, "rejected_attempts": 0,
+                                              "best_attempts": [{"name": f"skeleton-c{cycle}", "compiled": False, "sorries": None,
+                                                                 "errors": [str(verdict.get("reason"))[:220]]}],
+                                              "unsolved_goals": [], "decomposition_errors": [], "diagnosis": None, "at": now()})
                     if verdict.get("adopted"):
                         skeleton, parsed, meta = verdict["skeleton"], verdict["parsed"], new_meta
                         residual_path.write_text(skeleton)
@@ -5837,6 +5889,12 @@ def failure_digest(child_state: dict, name: str, statement: str, cycle: int, exi
     def score(a):   # compiled-with-sorries first, then fewest errors
         return (0 if a.get("compiled") else 1, len(a.get("errors") or []), -(a.get("n_sorries") or 0))
     best = sorted([a for a in attempts if not a.get("rejected")], key=score)[:2]
+    # An attempt rejected before compiling (frozen statement altered, banned construct) is still a failure with
+    # a cause; when every attempt was rejected the digest must say so, or it reads as "3 attempts, nothing known".
+    rejected = [{"name": a.get("name"), "rejected": True, "compiled": False, "sorries": None,
+                 "errors": [str(e)[:220] for e in (a.get("errors") or [])[:1]]} for a in attempts if a.get("rejected")]
+    if not best:
+        best = rejected[:2]
     goals = []
     for a in attempts:
         for e in a.get("errors") or []:
@@ -5848,7 +5906,7 @@ def failure_digest(child_state: dict, name: str, statement: str, cycle: int, exi
     dec = child_state.get("decomposition") or {}
     return {"cycle": cycle, "name": name, "statement": statement[:400], "exit": exit_code,
             "stop_reason": str(child_state.get("stop_reason") or "")[:200],
-            "attempts": len(attempts),
+            "attempts": len(attempts), "rejected_attempts": len(rejected),
             "best_attempts": [{"name": a.get("name"), "compiled": bool(a.get("compiled")), "sorries": a.get("n_sorries"),
                                "errors": [str(e)[:220] for e in (a.get("errors") or [])[:3]]} for a in best],
             "unsolved_goals": list(dict.fromkeys(goals))[:4],
@@ -5872,6 +5930,8 @@ def load_failures(pdir: Path) -> list[dict]:
 def failure_counts(pdir: Path) -> dict:
     out: dict[str, int] = {}
     for f in load_failures(pdir):
+        if f.get("kind") == "skeleton":
+            continue
         out[f.get("name", "")] = out.get(f.get("name", ""), 0) + 1
     return out
 
@@ -5882,6 +5942,10 @@ def failures_context(pdir: Path, limit: int = 6) -> str:
         return "(none yet)"
     lines = []
     for f in fs[-limit:]:
+        if f.get("kind") == "skeleton":
+            lines.append(f"- YOUR OWN SKELETON was rejected in cycle {f.get('cycle')}: {f.get('stop_reason')} -- fix that "
+                         f"before anything else; the same skeleton with the same error is not a new plan")
+            continue
         lines.append(f"- {f.get('name')} (cycle {f.get('cycle')}, exit {f.get('exit')}, {f.get('attempts')} attempt(s)): "
                      f"{f.get('stop_reason') or 'no stop reason'}")
         for g in f.get("unsolved_goals") or []:

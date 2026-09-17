@@ -53,7 +53,8 @@ cases are not deductive benchmarks; the search stage owns them.
 python3 benchmarks/deductive/prepare.py --problem 645 --launch
 ```
 
-Defaults: `--run-budget 8`, two cycles, three hypotheses per cycle, `--model claude-opus-5` (the CLI default
+Defaults: `--run-budget 8` (too little for a three-hypothesis problem: budget ~$4 setup + ~$4 per hypothesis + ~$5 per
+sub-residual, so ~$20; see RESULTS.md), two cycles, three hypotheses per cycle, `--model claude-opus-5` (the CLI default
 model hits its usage limit early, see `CLAUDE.md`). One lane at a time; `prepare.py --launch` refuses to start
 if a `harness.py run` is live. Results land in `runs/<ts>-bench-erdos<n>/` and `programs/erdos_<n>/`; the
 `RUN-SUMMARY` line carries `residual=open:k,published:p,certified:c`.

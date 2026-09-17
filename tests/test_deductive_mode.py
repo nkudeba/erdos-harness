@@ -169,7 +169,11 @@ class FailureFeedback(unittest.TestCase):
             "stop_reason": "rounds exhausted", "decomposition": {"errors": ["omega failed"]}}
         d = H.failure_digest(state, "erdos_99_hyp_a", "∀ n, P n", 1, 2)
         self.assertEqual(d["attempts"], 3)
+        self.assertEqual(d["rejected_attempts"], 1)
         self.assertEqual(d["best_attempts"][0]["name"], "proof-r1-a1")     # compiled-with-sorries ranks first
+        only_rejected = {"attempts": [{"name": "bad", "rejected": True, "errors": ["attempt altered the frozen theorem statement"]}]}
+        d2 = H.failure_digest(only_rejected, "erdos_99_hyp_a", "∀ n, P n", 1, 2)
+        self.assertEqual(d2["best_attempts"][0]["errors"], ["attempt altered the frozen theorem statement"])
         self.assertEqual(d["unsolved_goals"], ["⊢ 2 ∣ q a"])
         self.assertIn("halving lemma", d["diagnosis"])
         self.assertIn("needs a lemma", d["diagnosis"])
@@ -564,6 +568,78 @@ class Refinement(unittest.TestCase):
         self.assertIn("Proof failures", (pdir / "RESIDUAL.md").read_text())
 
 
+class FrozenGuardWithDefinitions(unittest.TestCase):
+    """A hypothesis frozen as defs + theorem must accept helpers between the defs and the theorem."""
+
+    FROZEN = ("def Cov (m : ℕ) (z : ℤ) : Prop := z = z\n\n"
+              "theorem erdos_99_hyp_step : ∀ m : ℕ, ∀ z : ℤ, Cov m z := by\n  sorry")
+
+    def test_helper_between_def_and_theorem_is_accepted(self):
+        frozen = H.statement_prefix(self.FROZEN)
+        attempt = ("def Cov (m : ℕ) (z : ℤ) : Prop := z = z\n\n"
+                   "lemma helper (z : ℤ) : z = z := rfl\n\n"
+                   "theorem erdos_99_hyp_step : ∀ m : ℕ, ∀ z : ℤ, Cov m z := by\n  intro m z\n  exact helper z")
+        self.assertTrue(H.contains_frozen(attempt, frozen))
+
+    def test_altered_header_or_missing_def_is_still_rejected(self):
+        frozen = H.statement_prefix(self.FROZEN)
+        altered = ("def Cov (m : ℕ) (z : ℤ) : Prop := z = z\n\n"
+                   "theorem erdos_99_hyp_step : ∀ m : ℕ, ∀ z : ℤ, m = m → Cov m z := by\n  sorry")
+        self.assertFalse(H.contains_frozen(altered, frozen))
+        missing_def = "theorem erdos_99_hyp_step : ∀ m : ℕ, ∀ z : ℤ, Cov m z := by\n  sorry"
+        self.assertFalse(H.contains_frozen(missing_def, frozen))
+        changed_def = ("def Cov (m : ℕ) (z : ℤ) : Prop := True\n\n"
+                       "theorem erdos_99_hyp_step : ∀ m : ℕ, ∀ z : ℤ, Cov m z := by\n  sorry")
+        self.assertFalse(H.contains_frozen(changed_def, frozen))
+
+    def test_single_theorem_behaviour_unchanged(self):
+        frozen = H.statement_prefix(FROZEN)
+        self.assertTrue(H.contains_frozen("theorem erdos_99 : ∀ n : ℕ, foo n := by\n  intro n\n  rfl", frozen))
+        self.assertFalse(H.contains_frozen("theorem erdos_99 : ∀ n : ℕ, n = n := by\n  intro n\n  rfl", frozen))
+
+
+class RejectedAttemptsKeepTheirCode(unittest.TestCase):
+    def test_screen_records_code_and_the_missing_declaration(self):
+        h = H.Harness.__new__(H.Harness)
+        h.log = Log()
+        frozen = H.statement_prefix("def Cov (z : ℤ) : Prop := z = z\n\ntheorem erdos_99_hyp_s : ∀ z : ℤ, Cov z := by\n  sorry")
+        attempts = []
+        altered = "def Cov (z : ℤ) : Prop := z = z\n\ntheorem erdos_99_hyp_s : ∀ z : ℤ, z = z → Cov z := by\n  intro z _\n  rfl"
+        ok = h._screen(attempts, "proof-r1-a0", "plan", 1, altered, frozen)
+        self.assertFalse(ok)
+        self.assertEqual(attempts[0]["code"], altered)
+        self.assertIn("missing verbatim theorem erdos_99_hyp_s", attempts[0]["errors"][0])
+        self.assertNotIn("def Cov", attempts[0]["errors"][0])          # the def WAS present; only the header changed
+
+
+class SkeletonRejectionFeedsForward(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def test_rejected_skeleton_reaches_the_next_plan(self):
+        h = _stub(self.root / "run")
+        h.args.research_cycles = 2
+        bad = SKELETON.replace("  intro n\n  exact erdos_99_hyp_a n", "  sorry")      # a sorry in the glue
+        prompts = []
+        h.ask = lambda purpose, prompt, **kw: prompts.append(prompt) or ("```lean\n" + bad + "\n```\n```json\n{}\n```\n")
+        h._install_lemmas_module = lambda pdir: None
+        rc = h.run_program()
+        self.assertEqual(rc, 2)                                            # nothing adopted, nothing certified
+        pdir = self.root / "programs" / "erdos_99"
+        fs = [json.loads(l) for l in (pdir / "failures.jsonl").read_text().splitlines()]
+        self.assertEqual(fs[0]["kind"], "skeleton")
+        self.assertIn("glue", fs[0]["stop_reason"])
+        self.assertIn("YOUR OWN SKELETON was rejected", prompts[1])         # cycle 2 saw cycle 1's rejection
+        self.assertEqual(H.failure_counts(pdir), {})                       # skeleton entries are not hypotheses
+
+
 class SubResidualIsolation(unittest.TestCase):
     def test_sub_residuals_get_their_own_directory_and_module(self):
         import types
@@ -578,6 +654,33 @@ class SubResidualIsolation(unittest.TestCase):
                 self.assertTrue(r._program_module_suffix().startswith("Sub") and r._program_module_suffix().isalnum())
             finally:
                 H.ROOT = old
+
+
+class PerCallCap(unittest.TestCase):
+    """One call may not spend what the run no longer has."""
+
+    def test_call_budget_is_capped_at_the_remaining_run_budget(self):
+        seen = {}
+        class Backend:
+            call_budget_usd = 8.0
+            def _tuning(self, purpose):
+                return ("medium", 8.0)
+            def complete(self, purpose, prompt, effort_override=None, budget_override=None):
+                seen["budget"] = budget_override; self.last_meta = {}; return "ok"
+        with tempfile.TemporaryDirectory() as tmp:
+            h = H.Harness.__new__(H.Harness)
+            h.llm, h.log, h.problem = Backend(), Log(), {"id": "99"}
+            h.args = argparse.Namespace(run_budget=15.0, masked=False)
+            h.run_dir = Path(tmp)
+            h.spent_usd = lambda: 11.4
+            h.ask("prove", "p")
+            self.assertEqual(seen["budget"], 3.6)                   # $15 - $11.40 left, below the $8 per-call cap
+            h.spent_usd = lambda: 2.0
+            h.ask("prove", "p")
+            self.assertIsNone(seen["budget"])                        # plenty left: the tuned cap stands
+            h.spent_usd = lambda: 14.9
+            h.ask("prove", "p")
+            self.assertEqual(seen["budget"], 0.5)                    # never below the floor
 
 
 class SummaryAndFacts(unittest.TestCase):

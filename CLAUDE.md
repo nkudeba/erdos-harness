@@ -154,6 +154,11 @@ Covered by `tests/test_budget_accounting.py`.
 Practical: `--open` halves the budget per direction, and each direction then runs its own research
 program. Budget the whole thing, not one lane, and check `harness.py summary --problem N` mid-run.
 
+The cap is enforced BEFORE every model call, never right after one (a paid response was being thrown away
+uncompiled), and **each call is capped at what the run has left**: the per-call cap (`--call-budget`, $8) used to
+apply unchanged with $4 remaining, so one prove call overshot a $15 run to $16.11. A call is never capped below
+$0.50.
+
 ## Every run writes a plain-language brief — that is how the Atlas explains itself
 
 `stage_brief` runs at the end of EVERY run (proved, partial, not proved, or crashed) and writes
@@ -406,6 +411,14 @@ proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE
    certifies `hypothesis <= sub-hypotheses` without closing them is spliced in as a REFINEMENT, so the
    parent's frontier becomes the simpler pieces. Invariant extraction is derive-first: the script prints a
    `DERIVATION:` before each `INVARIANT:`, and a pattern it cannot derive is `OBSERVED:`, never a hypothesis.
+   **The frozen guard matches each frozen declaration separately.** A research child freezes `def`s + a
+   hypothesis theorem, and a skeleton puts hypothesis lemmas between its `def`s and the target, so a guard that
+   demanded the frozen text as ONE contiguous block rejected every proof with a helper between the defs and the
+   theorem and every sub-residual skeleton. On the funded masked #275 run it threw away two sorry-free,
+   standard-axiom proofs of the descent lemma unread ($4.53) — `contains_frozen` now requires every frozen
+   declaration verbatim but not contiguous (`contains_frozen_contiguous` remains for the layout repair), rejected
+   attempts keep their code and name the missing declaration, and a rejected skeleton is itself a `skeleton`
+   failure the next plan must fix first.
 6. **Render.** `RESIDUAL.md` (hypotheses by kind, refuted list, proof failures and the moves made),
    `campaign.json` (the argument as a DAG:
    `conjecture` nodes the target is `conditional_on`; `harness.py campaign residual --manifest …` reports

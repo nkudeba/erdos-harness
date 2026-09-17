@@ -211,3 +211,17 @@ ends. Result row: `benchmarks/deductive/RESULTS.md`.
 - **Ratings survive**: a plan's ratings for hypotheses already in force are merged even when its skeleton is not
   adopted.
 - **Prover calibration**: the masked #275 rerun at ~$15 with these features is the test; see RESULTS.md.
+
+### Benchmark note (2026-09-17, funded masked #275 rerun with failure feedback and depth)
+
+The calibration question — do elementary hypotheses discharge when funded? — is answered yes: `hyp_odd_all`
+(elementary) proved for $3.45 and `hyp_step` (moderate) proved in its first round for $4.53. The second was
+invisible to the run: `contains_frozen` required the frozen defs and theorem as one contiguous block and rejected
+all three attempts unread for placing a helper between them. The same guard rejected the all-odd sub-residual's
+skeleton before it could reach the compiler (where it would have failed honestly on `le_or_lt`). Fixes: per-
+declaration frozen matching; rejected attempts keep their code and name the missing declaration; the per-call
+budget is capped at what the run has left; a rejected skeleton is a `skeleton` failure fed to the next plan.
+The two discarded proofs were recovered after the run with the harness's own checks and spliced, so the
+program's residual is `open:1` (the all-odd core); the run's own summary line still says `open:2`, as it should.
+The four failure moves worked as designed on this run: `define` introduced `Cov`/`Good`, `split` dissolved the
+two parity cases into one descent lemma plus an elementary fact, `defer` kept the hard core.

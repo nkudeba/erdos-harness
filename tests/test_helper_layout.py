@@ -5,7 +5,10 @@ class HelperLayout(unittest.TestCase):
   self.frozen='def targetDef : Nat := 2\n\ntheorem erdos_1 : targetDef = 2 :='
  def test_hoists_private_helper_without_changing_contract(self):
   code=self.frozen.replace('\n\ntheorem','\n\nprivate lemma helper : True := by trivial\n\ntheorem')+' by rfl'
-  self.assertFalse(H.contains_frozen(code,self.frozen))
+  # Since 2026-09-17 the guard matches each frozen declaration separately, so a helper between the defs and the
+  # theorem is accepted (every def and the header still appear verbatim); only the contiguous form drives hoisting.
+  self.assertTrue(H.contains_frozen(code,self.frozen))
+  self.assertFalse(H.contains_frozen_contiguous(code,self.frozen))
   repaired=H.normalize_helper_layout(code,self.frozen)
   self.assertTrue(H.contains_frozen(repaired,self.frozen));self.assertTrue(repaired.startswith('private lemma'))
  def test_changed_definition_or_theorem_not_repaired(self):
