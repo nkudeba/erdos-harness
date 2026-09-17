@@ -1561,7 +1561,10 @@ Record the move in the JSON block under "failure_responses".
 
 Produce, in this order:
 
-(1) ONE ```lean block: the RESIDUAL SKELETON.
+(1) ONE ```lean block containing the WHOLE residual skeleton — every `def`, every hypothesis and the frozen
+    theorem in that one block, in that order. Do not split it across two blocks and do not write a block that
+    continues another: each block is compiled on its own, so a `def` left behind in an earlier block becomes an
+    unknown identifier and the skeleton is thrown away.
     - Zero or more `def`s you need. New definitions are welcome when they make the residual statable WITHOUT the
       original objects (name the concept, then state hypotheses about it).
     - One or more HYPOTHESIS lemmas, each a CLOSED proposition (no free variables; quantify inside), named
@@ -4722,15 +4725,31 @@ for the SAT solver instead of enumerating it.
                     f.write(f"\n\n## Cycle {cycle} ({now()})\n\n" + (pm.group(1).strip() if pm else "")
                             + (f"\n\nRoute: {new_meta.get('route')}" if new_meta.get("route") else "") + "\n")
                 main_re = rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])"
-                cand = next((b for b in lean_blocks(resp) if re.search(main_re, b) and HYP_RE.search("\n" + b)), None)
-                if cand is None:      # a block with no hypothesis at all would be a full proof; consider it too
-                    cand = next((b for b in lean_blocks(resp) if re.search(main_re, b)), None)
-                if cand is None:
+                blocks = lean_blocks(resp)
+                # A plan may split its skeleton across several fenced blocks ("continuation: this block concatenates
+                # directly after the previous one"), leaving the `def`s in one block and the theorem in the next.
+                # Taking only the block with the main theorem then loses the definitions and Lean rejects it for an
+                # unknown identifier, which reads as a mathematical failure and is not one (masked #275, cycle 1
+                # after resume). Try the single block first, then the concatenation of all of them.
+                cands = [b for b in blocks if re.search(main_re, b) and HYP_RE.search("\n" + b)]
+                cands += [b for b in blocks if re.search(main_re, b) and b not in cands]
+                if len(blocks) > 1:
+                    joined = "\n\n".join(blocks)
+                    if re.search(main_re, joined) and joined not in cands:
+                        cands.append(joined)
+                verdict = None
+                for k, cand in enumerate(cands):
+                    verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main)
+                    if verdict.get("adopted"):
+                        break
+                    self.log.event("program", "skeleton_candidate_rejected", cycle=cycle, candidate=k + 1,
+                                   of=len(cands), reason=str(verdict.get("reason"))[:200])
+                if verdict is None:
                     self.log.event("program", "skeleton", cycle=cycle, adopted=False, reason="no skeleton block in the plan")
                 else:
-                    verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main)
                     self.log.event("program", "skeleton", cycle=cycle, adopted=bool(verdict.get("adopted")),
-                                   reason=verdict.get("reason"), metric=(verdict.get("parsed") or {}).get("metric"))
+                                   reason=verdict.get("reason"), candidates=len(cands),
+                                   metric=(verdict.get("parsed") or {}).get("metric"))
                     if not verdict.get("adopted") and not str(verdict.get("reason", "")).startswith("no improvement"):
                         # The planner's own output failing is a failure too: a skeleton that does not compile (masked
                         # #275's all-odd sub-residual died on an unknown identifier in its glue) must reach the next

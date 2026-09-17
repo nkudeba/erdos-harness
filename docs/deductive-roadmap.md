@@ -44,9 +44,10 @@ a tail") for progress. Those belong to a separate track. This document is about 
 Step 1 of the path below is done, and the answer is the good one: funded children prove elementary and moderate
 hypotheses ($3.45, $4.53). Every stall in the run traced to the harness (a frozen guard too strict for skeletons and
 helpers, an uncapped call, a rejected skeleton that fed nothing forward), all fixed. The residual for masked #275
-is now the all-odd core alone, with a sub-residual plan (pigeonhole + lcm periodicity + a normalised diagonal core)
-waiting for a resume. Next: resume this run (~$10) to see whether depth closes or refines the all-odd core, then
-step 2.
+was the all-odd core alone; the resume then SPLIT it at depth 2 and spliced the sub-residual back, so the
+frontier is now a deletion lemma and an essentiality lemma about a least counterexample (`open:2, certified:3`,
+$27.46 for the problem). Depth works end to end. Next: step 2 — the remaining masked benchmarks, with a
+prediction recorded before each, to get derivation-based base rates.
 
 ## The path, in order
 

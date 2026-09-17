@@ -612,6 +612,49 @@ class RejectedAttemptsKeepTheirCode(unittest.TestCase):
         self.assertNotIn("def Cov", attempts[0]["errors"][0])          # the def WAS present; only the header changed
 
 
+class SplitSkeletonBlocks(unittest.TestCase):
+    """A plan that splits its skeleton across fenced blocks must still be considered whole."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def test_definitions_in_an_earlier_block_are_not_lost(self):
+        h = _stub(self.root / "run")
+        defs, rest = SKELETON.split("\n\n", 1)
+        self.assertIn("def foo", defs)
+        seen = []
+        def check(body, name):
+            seen.append(body)
+            ok = "def foo" in body                      # a block without the def would not compile
+            return {"ok": ok, "sorries": ["s"] if H.hole_count(body) else [], "infos": [],
+                    "errors": [] if ok else ["unknown identifier `foo`"], "body": body}
+        h.check = check
+        plan = ("```lean\n" + defs + "\n```\n\n-- continuation\n\n```lean\n" + rest + "\n```\n```json\n{}\n```\n")
+        h.ask = lambda purpose, prompt, **kw: plan
+        h._install_lemmas_module = lambda pdir: None
+        h._attack_substatement = lambda *a, **k: (2, argparse.Namespace(state={}))
+        rc = h.run_program()
+        self.assertEqual(rc, 3)                                          # a skeleton is in force
+        self.assertEqual(h.state["residual"]["open"], 1)
+        self.assertTrue(any(e[1] == "skeleton_candidate_rejected" for e in h.log.events))
+        adopted = [e for e in h.log.events if e[1] == "skeleton"][0]
+        self.assertTrue(adopted[2]["adopted"])
+        self.assertEqual(adopted[2]["candidates"], 2)
+
+    def test_plan_prompt_forbids_split_skeletons(self):
+        text = H.PLAN_PROMPT.format(pid="99", statement_en="s", statement="t", literature="l", library="",
+                                    lemmas="", residual="", experiments="", refuted="", ledger="", cycle=1,
+                                    hyp_prefix="erdos_99_hyp_", failures="(none yet)")
+        self.assertIn("Do not split it across two blocks", text)
+
+
 class SkeletonRejectionFeedsForward(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

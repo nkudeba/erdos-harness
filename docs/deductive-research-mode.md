@@ -225,3 +225,12 @@ The two discarded proofs were recovered after the run with the harness's own che
 program's residual is `open:1` (the all-odd core); the run's own summary line still says `open:2`, as it should.
 The four failure moves worked as designed on this run: `define` introduced `Cov`/`Good`, `split` dissolved the
 two parity cases into one descent lemma plus an elementary fact, `defer` kept the hard core.
+
+### Depth closed its loop (2026-09-17, masked #275 resume)
+
+The all-odd core was rated hard, attacked as a sub-residual at depth 2, and its own skeleton — all-odd from a
+deletion lemma plus an essentiality lemma — was spliced back into the parent as a refinement. The parent's
+frontier is now those two statements and the core itself is certified. That is the intended behaviour of
+`--residual-depth` end to end: a hypothesis nobody could prove became a shorter conditional theorem instead of
+a dead child. Final state: `open:2, certified:3`, $27.46 for the problem, no shared machinery with the
+reference proof.
