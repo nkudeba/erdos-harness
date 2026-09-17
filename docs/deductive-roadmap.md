@@ -1,5 +1,8 @@
 # Deductive roadmap — from two benchmark runs to open problems (2026-09-17, revised the same day)
 
+**Current next steps and the exact commands live in `docs/HANDOVER-2026-09-17.md`.** This file is the
+strategy; that one is the queue.
+
 Written after the first two deductive benchmark runs (`benchmarks/deductive/RESULTS.md`), then revised after
 an operator correction: the first draft let the Atlas's resolution axis ("can this be closed by any means")
 leak into the deductive program, as a SAT-closed hybrid for #273 and as search vocabulary ("finite check plus
