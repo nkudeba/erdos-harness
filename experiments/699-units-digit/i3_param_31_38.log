@@ -1,0 +1,9 @@
+r=31  covers all n with v2(n)=31; largest candidate n=   775651766304768  candidates   67166  survivors []  (98s)
+r=32  covers all n with v2(n)=32; largest candidate n=  2193873589764096  candidates   94985  survivors []  (150s)
+r=33  covers all n with v2(n)=33; largest candidate n=  6205188360634368  candidates  134329  survivors []  (238s)
+r=34  covers all n with v2(n)=34; largest candidate n= 17551040257720320  candidates  189971  survivors []  (361s)
+r=35  covers all n with v2(n)=35; largest candidate n= 49641816122720256  candidates  268659  survivors []  (520s)
+r=36  covers all n with v2(n)=36; largest candidate n=140407703586471936  candidates  379940  survivors []  (740s)
+r=37  covers all n with v2(n)=37; largest candidate n=397133292031180800  candidates  537317  survivors []  (1097s)
+r=38  covers all n with v2(n)=38; largest candidate n=1123265751860379648  candidates  759882  survivors []  (1669s)
+DONE 31 38

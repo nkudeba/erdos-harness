@@ -1,0 +1,23 @@
+'Formal.Library.BinomialCoefficients.erdos_699_sub1_1_ns.erdos_699_sub1_1' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Formal.Library.BinomialCoefficients.erdos_699_sub2_1_ns.erdos_699_sub2_1' depends on axioms: [propext, Quot.sound]
+'Formal.Library.BinomialCoefficients.erdos_699_sub3_1_ns.erdos_699_sub3_1' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Formal.Library.BinomialCoefficients.erdos_699_sub4_1_ns.erdos_699_sub4_1' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Formal.Library.BinomialCoefficients.erdos_699_sub5_1_ns.erdos_699_sub5_1' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Formal.Library.BinomialCoefficients.digit_carry' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formal.Library.BinomialCoefficients.small_index_carry' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formal.Library.BinomialCoefficients.block_prime' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formal.Library.BinomialCoefficients.counterexample_forces_smooth_block' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Formal.Library.BinomialCoefficients.residue_route_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Formal.Library.BinomialCoefficients.same_example_satisfies_target' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

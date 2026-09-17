@@ -1,0 +1,9 @@
+../experiments/699-continuation/Continuation.lean:47:2: warning: 'norm_num at hg' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+'Erdos699Continuation.digit_carry' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos699Continuation.small_index_carry' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos699Continuation.block_prime' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos699Continuation.counterexample_forces_smooth_block' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos699Continuation.residue_route_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos699Continuation.same_example_satisfies_target' depends on axioms: [propext, Classical.choice, Quot.sound]

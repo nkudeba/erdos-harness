@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 82,
+    "manually_reviewed": 86,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "f7c213532c1aaf61a0a07e8058d1a2769b556c0130fd61218c84db03994e3587",
-    "scorer_sha256": "dc41ddc24ad669e68a519b0fbe29a18bb607721924138f548b07bbc3a63c6f4d",
-    "manual_reviews_sha256": "377f809885434c640df0af696633633b8bab0d402e261314d0282b5a6c44c1eb"
+    "harness_sha256": "3517d6f1d3ef822a8797cc4874d0ee5989e8124fc98812b844033ac470234e81",
+    "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
+    "manual_reviews_sha256": "a90f00c918e158d614fb5377ab210a7169580938e3e5fca3daf870052348ca5b"
   },
   "problems": [
     {
@@ -26781,25 +26781,62 @@
         "binomial coefficients"
       ],
       "score": 20,
-      "harness": "Untried",
+      "harness": "Partial result",
       "rationale": [
         "Some parameter regions are settled, and a fixed pair i,j leaves only finitely many possible exceptions. This suggests a structured search, not an unrestricted proof.",
+        "Live forum checked 2026-09-11: still open. Cong reports the official p>=i statement tested through n=10^7, with targeted power families through about 1.3e8; not independently rerun. A generic bounded search would repeat known ground. The April full proof was explicitly rejected by Bloom on 11 May; its Lean code did not formalize this statement.",
+        "Accepted partial proof covers j<=3i/2 and n=2j. Van Doorn/Rocca claim a further reduction to i=3 or an ineffective finite exceptional set with 4<=i<=1475; this is an unverified partial claim, not a full solution or an executable finite cutoff. Preferred next proof-oriented candidate among the reviewed shortlist, with low confidence of full resolution.",
+        "Read the current Van Doorn/Rocca Overleaf source on 2026-09-11. It differs from the forum summary: binomial determinant lower bound G>exp(-2i)(n/i)^(i/4), asymptotic large-i theorem, an asserted i>=1000 explicit cutoff whose calculation is omitted, and ineffective fixed-i finiteness for i>=4. It explicitly leaves i=3 (G a power of two) unresolved. External proposed proof read but not independently validated; no full resolution.",
+        "Search floor filed in enumerable-object units, as the triage gate requires: Cong's open-sourced Rust search (github.com/conglu1997/erdos_699_rust) tested EVERY n <= 10^7, i.e. every candidate triple (n,i,j) with 1<=i<j<=n/2 below that n, which is sum_{n<=1e7} C(floor(n/2),2) = 4.17e19 triples -- 4.2e10 times the harness's bounded-search reach of 1e9. Targeted families beyond it (n=2^k, k<=27; n=3^m+1, m<=17) add ~5.3e15 more. Filing the problem's own parameter (n=1e7) instead would have read as a trivially cheap search and let a futile search stage run. Not rerun here; kind=published.",
+        "Four public forum reductions re-verified in exact integer arithmetic on 2026-09-11 BEFORE the first paid run (knowledge/reductions/699/pre-run-checks.md): the Erdos-Szekeres identity C(n,i)C(n-i,j-i)=C(n,j)C(j,i) (all i<j<=n/2, n<=160); its three-factor form used by the Van Doorn/Rocca determinant (n<=90, all h); the Kummer bound U_i(n)<=n^pi(i-1) (n<=900); and the prime-window step p|C(n,k) <=> n mod p < k for p>n/2 (n<=1200). All clean. Operator-executed checks, not stage_reduce output, and not REDUCTION-OK validated; evidence, not proof.",
+        "The binding constraint is arithmetic, not size: a prime in (n-i,n] divides both binomials, so any counterexample triple needs a prime-free window (n-i,n] (10.8M (n,i,p) combinations checked clean, n<=1200). All nine known failures of the STRICT p>i variant have a prime-free window, and for i=3 and i=5 the known n (10 and 28) is the SMALLEST n at which the window argument fails at all. This is the axis past the j<=3i/2 ceiling of size arguments, per Marco Del Pin's comment.",
+        "First harness attempt 2026-09-11 (runs/20260911-180317-544808-erdos699, mode=fast, --open, $18.61): NOT resolved. Both directions ended budget_exhausted with the main theorem still sorry. The frozen statement used the correct non-strict reading in both directions -- 'Nat.Prime p AND i <= p' -- so the p>i trap was avoided. The recorded floor did its job: triage logged 'search skipped: a witness is already excluded below ~4.17e19 ... so the search stage could only re-derive a known check', spending no model call on a futile search.",
+        "Certified partial value is thin: exactly two lemmas compiled sorry-free, both elementary stepping stones rather than progress on the obstruction -- quot_gcd_dvd_choose' (n/gcd(n,j) divides C(n,j)) and dvd_descFactorial' (p | n-t implies p | descFactorial n i for t<i). The lemma that matters, the Kummer single-digit step dvd_choose_of_mod_lt behind the prime-window reduction, was drafted but never certified: its containing attempt failed to compile. Mechanically verified lemmas only; claimEligible=false, no resolution claim.",
+        "Sharp obstruction derived and checked 2026-09-11 (knowledge/reductions/699 addendum): if a prime p>j divides any of n,n-1,...,n-i+1 then n mod p = t < i < j, so the single-digit Kummer lemma applies twice and p divides BOTH binomials with p>j>i. Hence a counterexample forces the descending product n(n-1)...(n-i+1) to be j-SMOOTH. Confirmed over 2,559,266 (n,i,j,p) witnesses for n<400. Strictly stronger than the known 'no prime in (n-i,n]' form, which is just the case where n-t is itself prime.",
+        "i=2 is settled outright and elementarily: pi(1)=0 gives V_2(n)=C(n,2), so a counterexample would force C(n,2) | C(j,2) hence n<=j, contradicting 2j<=n. The three known i=2 entries are failures of the strict p>i variant only. For i>=3 the size bound n<=j^(i/(i-pi(i-1))) closes nothing on its own -- the region is an infinite family -- so what must become effective is the smoothness condition, which is precisely the Bugeaud-Evertse-Gyory input the Van Doorn/Rocca manuscript uses ineffectively.",
+        "Second attempt 2026-09-11, research mode (runs/20260911-195529-727426-erdos699, --open, $30.54 of a $35 cap, 101m): NOT resolved, but 10 lemmas certified -- the most any run in this harness has produced on an open problem. Stopped by the Claude account usage limit, not by the budget (pos:infrastructure_error, neg:partial); the run is resumable. Certified: the Erdos-Szekeres identity C(n,j)C(j,i)=C(n,i)C(n-i,j-i), strict monotonicity C(j,i)<C(n,i), the weak Erdos-Szekeres result (some shared prime, no size constraint), the i=1 case, and the prime-window lemma (a prime in (n-i,n] has p>=i and divides both binomials).",
+        "IMPORTANT LIMITATION found by Codex on continuation and independently reconfirmed: the residue/Kummer route is SUFFICIENT but NOT NECESSARY, so it cannot prove #699 on its own. A proposed strengthening ('Conjecture D': some prime p>=i with n mod p < i mod p and n mod p < j mod p) is FALSE at (n,i,j)=(10,3,5): gcd(C(10,3),C(10,5))=12=2^2*3, the only shared prime >=3 is p=3, and 3 mod 3 = 0 so no strict residue inequality can hold -- yet the triple satisfies #699 via that same p=3, which divides through a carry at a HIGHER base-p digit. Do not spend a research cycle proving D. Any full proof must separately handle primes in [i,j], including p=i.",
+        "THE CERTIFIED REDUCTION EXISTS (verified independently 2026-09-12, not taken from a report). Compiling experiments/699-continuation/Continuation.lean and printing axioms: digit_carry, small_index_carry (=F4, the Lucas units-digit step), block_prime, counterexample_forces_smooth_block (=F5) and same_example_satisfies_target all depend only on [propext, Classical.choice, Quot.sound] -- sorry-free. So 'a counterexample to #699 forces every prime factor of every n-t (t<i) to be at most j' is now MECHANICALLY VERIFIED. That is a certified reduction of #699 to a smoothness statement about products of consecutive integers; it is one-way and yields no finite cutoff, and #699 remains open.",
+        "One claim in that same file did NOT verify and the report asserting it was wrong: residue_route_fails (the Lean refutation of Conjecture D) came back depending on sorryAx, with 9 'No goals to be solved' errors -- 'interval_cases p <;> norm_num at hp hi hj' closes each goal from hp and then keeps going with nothing left. The REPORT.md cited a verification.log that was never written. The underlying mathematics is correct (reconfirmed numerically: at (10,3,5) no prime p>=3 satisfies the residue condition, yet p=3 divides both binomials), but the proof was repaired, not accepted. Lesson: a continuation report's claim of a Lean proof is not evidence; print the axioms.",
+        "Banked as a reusable cluster library 2026-09-12: Formal.Library.BinomialCoefficients now holds all 11 certified declarations (the 5 from the research run plus the 6 Lucas/smoothness ones), builds clean, and every declaration prints [propext, Classical.choice, Quot.sound] with no sorryAx. Registered in CLUSTER_LIBRARIES under the 'binomial coefficients' tag, which 22 catalogue problems carry (#175, #376-379, #384, #386, #387, #396, #397, #683-685, #698-700, #730, #731, #849, #1093-1095) -- the same cluster size as covering systems. A later run on any of them gets the reduction chain by name instead of re-deriving it. Covered by tests/test_cluster_library.py.",
+        "Operator-assisted continuation: the Lucas carry lemma and counterexample-implies-j-smooth-block reduction are mechanically verified; this supersedes earlier notes saying they were only drafts. Conjecture D, the proposed universal units-digit criterion, fails at (10,3,5), which satisfies the actual target with p=3. The general digit test can use i<p<=j (16,3,7,p=5); only the narrower block argument requires p>j. No resolution and no new search floor.",
+        "Operator-assisted i=3 localization argument (written proof, not formalized end to end): odd n is excluded. For even n, n=2^r*a (a odd), c=2^r*gcd(a,3), e=gcd(n-1,3); coprime cancellation forces 4(n-1)<=e*c^2<=9*4^r. This is a finite bound only for fixed v2(n), not a full resolution. Exact-integer checks validate the intermediate implications for even n<=800; no new search floor or novelty claim.",
+        "2026-09-16 operator assessment (Claude, no paid run; experiments/699-units-digit/REPORT.md): a counterexample at i=3 implies the UNITS-DIGIT system (U3) A'|j, B'|j(j-1), C'|j(j-1)(j-2), where A',B',C' are the odd parts of n,n-1,n-2 with a single factor 3 removed when 3 exactly divides. (U3) uses no Lucas digit above the p^e block and has NO solution for any n with v_2(n)<=30, hence none below 2^31 (parametrised exact search, i3_param2.py; direct brute force to 3e5 agrees). So Conjecture U(3) -- (U3) is unsatisfiable -- would settle i=3; it is a statement about three consecutive integers with no binomial coefficients in it. Written argument plus exact-integer checks; NOT Lean-certified; no new search floor recorded because it is conditional and covers i=3 only.",
+        "Sharper localization (written, each step checked exactly on 22,986 (n,k) pairs to n=6000): any solution of (U3) has 4|n, j<n/2 (the j=n/2 pattern of the strict-variant near-misses is impossible), and with h=n/(2A') the bound A'^2 < 4.5h+2.25, i.e. A'^3 < 2.25n+2.25A': the power of 2 dividing n is at least about n^(2/3)/4. This supersedes the 2026-09-13 bound n<=(9/4)4^r+1 (exponent 1/2 -> 2/3) and is what 'bring n-2 into the constraints' yields. It is still not an absolute cutoff: n=2^r survives every size bound. Residual system: h^2-d^2=B'l, C'|d*l, eB'=2e'C'+1; for n=2^r this is (2^r-1)/e | k(k-1) and (2^(r-1)-1)/e' | (k(k-1)e/(2^r-1))(k-2) -- an exponential-Diophantine coincidence with no visible algebraic obstruction. That is the honest hard core of i=3.",
+        "The same phenomenon holds for larger i: the general units-digit system U(i) (for every t<i and p^e || n-t with p>=i, and e>=2 when p=i, j mod p^e <= t) has no solution for i=4..8 up to n=60,000 (ui_general.py). Empirically the higher Lucas digits are never needed to EXCLUDE a counterexample, even though they are needed to EXHIBIT a witness prime (refuted Conjecture D, (10,3,5)). #699 <= for all i U(i). Heuristic solution count of U(3) is sum polylog/(2^r a^2), dominated by small n (all checked); tail below 1e-4. Disproof is not a target.",
+        "2026-09-16 extension of the same assessment: the parametrised exact search of (U3) was completed for r = 2..38 with zero solutions (i3_param_31_38.log), so Conjecture U(3) holds for every n with 2 <= v_2(n) <= 38 and in particular for every n < 2^39 ≈ 5.5e11; the largest candidate actually tested was 1.1e18. The general system U(i) has no solution for i = 4..10 up to n = 10^6 (ui_general_1e6.log). Both are exact-integer computations resting on the WRITTEN reduction in experiments/699-units-digit/REPORT.md; not Lean-certified, not an Atlas search floor.",
+        "Deductive-loop candidate, rank 1 (2026-09-16; atlas-data/deductive_candidates.py fit 89): the binomial cluster library, the certified Lucas/smoothness chain and the hand-derived residual '#699 <= for all i, U(i)' make this the acceptance test for the deductive research mode (docs/deductive-research-mode.md section 6). The loop should re-derive in Lean, unaided, counterexample => j-smooth block => units-digit system U(i) => (i=3) n even, 4|n, j<n/2, A'^2 < 4.5h+2.25, ending with a certified skeleton whose single open hypothesis is U.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Exploit the fixed-parameter bounds and certify any gcd/prime-factor witness; do not confuse the stronger p>i variant with p≥i.",
+        "Audit the Van Doorn/Rocca manuscript before using its reduction. Seek an arithmetic obstruction in the remaining region j>3i/2 and n>2j; merely extending a range or formalizing accepted cases does not meet a full-resolution objective. Do not start generic enumeration below the reported n=10^7 floor.",
+        "Audit the determinant lemma and explicit cutoff separately. Focus the first full-resolution attempt on simultaneous valuation constraints, especially i=3; do not treat ineffective finiteness as an enumerable residual.",
+        "A bounded counterexample search is pointless and must be skipped: the negative direction is a finite certificate but not a reachable one. Any claimed counterexample must first be checked against the nine known failures of the STRICT p>i variant (n=10,16,28,28,244,512,2048,2188,1594324), recomputed exactly on 2026-09-11; in all nine the largest shared prime is exactly i, so they satisfy this target and refute only the strict variant.",
+        "Freeze p >= i, never p > i. The nine known strict-variant failures (n=10,16,28,28,244,512,2048,2188,1594324) all have largest shared prime exactly i, so they satisfy this target; a run that 'refutes' 699 by producing one of them has formalized the wrong statement. The guard list is in problems/erdos_699.json.",
+        "Next attempt should target the Kummer single-digit lemma (p prime, i<p, n mod p < i => p | C(n,i)) as a standalone certified result first -- it is the checked prime-window reduction in knowledge/reductions/699/pre-run-checks.md and the drafted proof already exists in the run's partial.lean. Budget it above $12: this run's single agentic round of 3 parallel samples cost $8.79 uncapped, so a 3-sample round needs headroom before the cap or it overshoots and kills stage_brief.",
+        "The honest target is a CERTIFIED REDUCTION, not a resolution: certify the single-digit Kummer lemma, then the smoothness reduction, giving 'counterexample implies j-smooth descending product'. That reduces #699 to an effective smoothness statement about products of consecutive integers and is worth more than scattered lemmas. Resolution additionally requires making that smoothness statement effective, which is open research, not a harness gap.",
+        "Mode evidence, for target selection: research mode is the ONLY mode that has produced certified lemmas on an open problem in this harness (699: 10, 677: 9); six fast/search-first runs on open problems produced zero. Both research runs were killed before finishing -- 677 by the unenforceable budget cap, 699 by the account usage limit -- so research mode has still never completed a run. Resume with --resume rather than starting fresh: Lemmas.lean persists and later attempts import it by name.",
+        "A next attempt starts from a strictly better position than either run so far: the module is imported automatically, so the identity, monotonicity, the weak Erdos-Szekeres result, the i=1 case, the prime-window lemma, Lucas's units-digit step and the smoothness reduction are all available by name. The open work is NOT to re-derive those. It is (a) primes in [i,j] including p=i, which the residue route provably cannot reach, and (b) making the smoothness condition effective. Both are research-grade.",
+        "Reuse Formal.Library.BinomialCoefficients. Do not attempt Conjecture D or infer a contradiction from smoothness alone. Retain p=i and higher-digit carries in the remaining proof obligation.",
+        "The i=3 localization bound leaves arbitrarily large v2(n); do not report it as an absolute finite cutoff. Any inference that 4096 divides an i=3 counterexample is conditional on the recorded third-party n<=10^7 search. The i>=4 range remains outside this argument.",
+        "Current execution order: (1) audit and formally verify the unverified i=3 localization bound; (2) add n-2 to the n and n-1 constraints, retaining prime-power and higher-digit information; (3) prove a contradiction uniform in v2(n), or an absolute cutoff with a feasible exhaustive certificate. Record the exact failed step if the route stalls. Follow atlas-data/research-guidance/699.md, now automatically included in research and proof prompts on fresh and resumed runs.",
+        "Certify in Lean, on top of Formal.Library.BinomialCoefficients: the prime-power units-digit lemma (p prime, p^e | n-t, t<p, j mod p^e > t => p | C(n,j); induction over digit_carry), then 'counterexample at i=3 => (U3)', then the reduction steps odd-n impossible, n=2 mod 4 impossible, j<n/2, A'^2<4.5h+2.25. Elementary; a research-mode target. Do not re-derive the weaker 2026-09-13 bound or re-prove the carry lemmas.",
+        "Do not launch a proof run at 'prove #699 for i=3': the target is Conjecture U(3) and no route uniform in r is known here or on the forum. Highest-leverage move is a forum post with the U(3) reformulation, the n^(2/3) localization and the verified range, so the people already working on #699 (Del Pin, Van Doorn, Rocca) get a cleaner target. Follow atlas-data/research-guidance/699.md (rewritten 2026-09-16).",
+        "Run with --mode research --allow-research --research-loop deductive (default) and judge the run by RESIDUAL.md, not lemmas=: success means one open conjecture hypothesis (U, or an equivalent) and everything else discharged. Do not count a run that certifies stepping-stone lemmas and leaves the residual at the frozen target.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -26875,10 +26912,32 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": null,
-        "sources": [],
-        "searchFloor": null
+        "on": "2026-09-16",
+        "sources": [
+          "https://www.erdosproblems.com/forum/thread/699",
+          "https://www.erdosproblems.com/forum/thread/699/proof-claims",
+          "experiments/699-first-attack/CONTEXT.md",
+          "https://github.com/conglu1997/erdos_699_rust",
+          "problems/erdos_699.json",
+          "knowledge/reductions/699/pre-run-checks.md",
+          "runs/20260911-180317-544808-erdos699/SUMMARY.line",
+          "runs/20260911-195529-727426-erdos699/SUMMARY.line",
+          "experiments/699-continuation/REPORT.md",
+          "experiments/699-continuation/Continuation.lean",
+          "formal/Formal/Library/BinomialCoefficients.lean",
+          "experiments/699-higher-carries/REPORT.md",
+          "atlas-data/research-guidance/699.md",
+          "experiments/699-units-digit/REPORT.md",
+          "experiments/699-units-digit/i3_param2.py",
+          "experiments/699-units-digit/verify_algebra.py",
+          "experiments/699-units-digit/ui_general.py",
+          "experiments/699-units-digit/i3_param_31_38.log",
+          "experiments/699-units-digit/ui_general_1e6.log",
+          "atlas-data/deductive-candidates.md"
+        ],
+        "searchFloor": 4.17e+19
       },
+      "brief": "---\nproblem: 699\nupdated: 2026-09-12\nrun: 20260911-195529-727426-erdos699\noutcome: partial\nsolved: false\ncertified: 10\nsearch_floor: 4.17e+19\ncost_usd: 30.54\n---\n\n## What the problem asks\n\nFor any n and positions 1 ≤ i < j ≤ n/2, must the two binomial coefficients C(n,i) and C(n,j) share a prime factor at least i? A binomial coefficient counts choices of a given size. The prime is allowed to equal i. The full statement remains unproved here.\n\n## What we tried\n\nThe inherited research run ended with a session-limit failure in the positive direction and partial results in the negative direction. Its aggregate records contain 10 certified declaration names, 54 model calls, 83 Lean checks, and $30.54 spend. Those counts describe the harness run, not the later operator-assisted continuation. No additional paid harness calls were launched by Codex; Codex session cost is unavailable. The existing published search floor of roughly 4.17 × 10^19 candidate triples was preserved; it was not rerun.\n\nCodex continued directly in Lean using Mathlib's Lucas theorem. Claude repaired one failed proof tactic and moved the results into a shared binomial-coefficient library. This was assisted work, not an autonomous resolution.\n\n## What we found\n\nThe carry lemma and the stronger reduction are mechanically verified: if any number among n,n−1,…,n−i+1 has a prime factor greater than j, that prime divides both binomial coefficients. Therefore a counterexample would force every prime factor of every number in that block to be at most j. This property is called j-smoothness. It is a necessary condition for a counterexample, not a proof that counterexamples are impossible.\n\nThe proposed next route, Conjecture D, is false at (10,3,5). These binomial coefficients are 120 and 252; the shared prime 3 satisfies #699 but is missed by the proposed units-digit test. The test remains useful as a sufficient condition. It can also find primes between i and j, as p=5 at (16,3,7) demonstrates; only the narrower block-prime argument requires p>j.\n\nA later direct argument for i=3 rules out odd n and gives n ≤ (9/4)·4^r+1 for even n, where r counts factors of two in n. Its intermediate numerical checks passed, but it is a written argument for review, not a new Lean-certified result: the separate formal check timed out. It leaves r unbounded and does not address i≥4. Details are in experiments/699-higher-carries/REPORT.md.\n\n## What would move it\n\nFirst audit and finish formalizing the written i=3 localization argument; the prior Lean check timed out. Next bring n−2 into the simultaneous constraints from n and n−1, retaining higher-digit carries and the prime p=i=3. Seek a contradiction valid for every r=v₂(n), or prove an absolute cutoff with a feasible exhaustive check. If this route fails, record the exact obstruction before another research run. A bounded check of r cannot settle the unbounded argument; completing i=3 still leaves i≥4.\n\nThe harness automatically includes these next steps from atlas-data/research-guidance/699.md in its research and proof prompts, including resumed runs. Reuse the certified BinomialCoefficients library, reject the refuted Conjecture D, and preserve the published search floor. Full details and the distinction between certified results and drafts are in the linked research guidance and experiment reports.\n",
       "rank": 556,
       "tier": "Research"
     },
@@ -27427,6 +27486,7 @@
       "harness": "Untried",
       "rationale": [
         "The source reports a large-prime resolution assembled from several deep ranges, leaving finite exceptions. Generic permutation enumeration does not supply an effective global cutoff.",
+        "Live site 2026-09-16: DECIDABLE ('resolved up to a finite check'). Per the thread (alpm, 24 Feb 2026; Alfaiz, 23 Feb and 03 Mar 2026), the resolution for all sufficiently large p spans four papers with different techniques: BeKr24 (small sets), PhSa25/26 (medium sets, and a complete resolution for large p), BBKMM25 (dense, t >= p^(1-c)), MuPo25 (ultra-dense, t >= (1-o(1))p); CoFi26 improves the small-set range to t <= exp((log p)^(1/3)). No explicit threshold p_0 is stated on the thread; an arXiv lookup from this session returned nothing, so effectiveness is unconfirmed.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Finite set machinery is available; global additive structure can demand deep theorems.",
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
@@ -27434,12 +27494,13 @@
       ],
       "requirements": [
         "Extract effective thresholds and combine the four range theorems with certified finite checks.",
+        "Not a full-solution target for the harness: even an explicit p_0 leaves a check over all 2^(p-1) subsets of F_p^* for every p < p_0, and formalising four deep papers is out of scope. Partial value only, e.g. certifying sequenceability of every subset for a few small p.",
         "Identify whether an explicit finite construction settles the full quantifiers.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -27503,8 +27564,11 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": null,
-        "sources": [],
+        "on": "2026-09-16",
+        "sources": [
+          "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+          "https://www.erdosproblems.com/forum/thread/475"
+        ],
         "searchFloor": null
       },
       "rank": 565,
@@ -28717,88 +28781,6 @@
       "tier": "Research"
     },
     {
-      "id": 1056,
-      "statement": "Let $k\\geq 2$. Does there exist a prime $p$ and consecutive intervals $I_1,\\ldots,I_k$ such that\\[\\prod_{n\\in I_i}n \\equiv 1\\pmod{p}\\]for all $1\\leq i\\leq k$?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "number theory"
-      ],
-      "score": 17,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
-      ],
-      "requirements": [
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        }
-      ],
-      "partial": {
-        "score": 55,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Public formalization artifact (1 kind)",
-            "points": 4
-          },
-          {
-            "label": "Library fit",
-            "points": 5
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
-          "Reachable partial results still need the relevant Mathlib development."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/1056",
-      "manual": false,
-      "prize": "no",
-      "rank": 582,
-      "tier": "Research"
-    },
-    {
       "id": 1094,
       "statement": "For all $n\\geq 2k$ the least prime factor of $\\binom{n}{k}$ is $\\leq \\max(n/k,k)$, with only finitely many exceptions.",
       "status": "Unsolved",
@@ -28878,7 +28860,7 @@
       "url": "https://www.erdosproblems.com/1094",
       "manual": false,
       "prize": "no",
-      "rank": 583,
+      "rank": 582,
       "tier": "Research"
     },
     {
@@ -28926,7 +28908,7 @@
       "url": "https://www.erdosproblems.com/1115",
       "manual": false,
       "prize": "no",
-      "rank": 584,
+      "rank": 583,
       "tier": "Research"
     },
     {
@@ -28974,7 +28956,7 @@
       "url": "https://www.erdosproblems.com/1118",
       "manual": false,
       "prize": "no",
-      "rank": 585,
+      "rank": 584,
       "tier": "Research"
     },
     {
@@ -29023,7 +29005,7 @@
       "url": "https://www.erdosproblems.com/603",
       "manual": false,
       "prize": "no",
-      "rank": 586,
+      "rank": 585,
       "tier": "Research"
     },
     {
@@ -29106,7 +29088,7 @@
       "url": "https://www.erdosproblems.com/886",
       "manual": false,
       "prize": "no",
-      "rank": 587,
+      "rank": 586,
       "tier": "Research"
     },
     {
@@ -29189,7 +29171,7 @@
       "url": "https://www.erdosproblems.com/893",
       "manual": false,
       "prize": "no",
-      "rank": 588,
+      "rank": 587,
       "tier": "Research"
     },
     {
@@ -29205,6 +29187,8 @@
       "harness": "Untried",
       "rationale": [
         "The main theorem is already formalized sorry-free in Lean 4 / Mathlib and archived with the arXiv source (anc/lean/), leaving a stated axiom boundary of two explicit analytic inputs.",
+        "Live check 2026-09-16: still OPEN on the site (10 comments, 0 proof claims, 'Working on formalising: Yuren_Tang'). Two distinct Lean developments exist and the earlier Atlas note conflated them. (1) Yuren Tang, Zenodo 10.5281/zenodo.20767390 v0.0.3 (19 Jun 2026; github.com/Yuren-Tang/erdos-306): claims a COMPLETE sorry-free proof of the formal-conjectures statement erdos_306 (every q > 0 with squarefree denominator), with #print axioms = propext, Classical.choice, Quot.sound plus two named axioms transcribing Rosser-Schoenfeld 1962 - Corollary 3 (3x/(5 log x) < pi(2x) - pi(x) for x >= 20.5) and Theorem 5 (Mertens' prime-reciprocal sum within 1/(2 log^2 x) of log log x + B). Toolchain v4.28.0, CI rebuilds and audits the axiom set. Nat Sothanaphan ran a screening check and reports it 'could be correct'; no informal manuscript yet; NOT verified here and not accepted by Bloom. (2) Shisheng Li, arXiv:2606.15159 (18 Jun 2026): PARTIAL - all rationals for omega >= 3, and for omega = 2 only a/b above a threshold T(r) <= 1/5; uses native_decide plus Olson's theorem and a Rosser-type bound as inputs.",
+        "Mathlib v4.32.0-rc1 (local checkout) has theta(x) <= log 4 * x, Bertrand, and asymptotic Chebyshev/PNT-adjacent statements (eventually_primeCounting_le, primeCounting_sub_theta_div_log_isBigO) but no explicit Rosser-Schoenfeld bounds and no explicit Mertens error term, so Tang's two axioms are a genuine formalisation gap, not a lookup.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -29212,11 +29196,12 @@
       ],
       "requirements": [
         "Discharge one of the two boundary axioms against Mathlib rather than reproving the main theorem.",
+        "Not a harness solve target: the mathematics is Tang's. The harness-shaped contribution is independent verification (clean rebuild, #print axioms, statement-faithfulness audit against formal-conjectures) and, if the proof has slack, discharging the two analytic axioms against Mathlib with weaker explicit Chebyshev-type bounds. Record any such result as verification of a third-party proof, never as a resolution.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -29271,13 +29256,16 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-09-16",
         "sources": [
-          "atlas-data/forum/306.json"
+          "atlas-data/forum/306.json",
+          "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+          "https://github.com/Yuren-Tang/erdos-306",
+          "https://www.erdosproblems.com/forum/thread/306"
         ],
         "searchFloor": null
       },
-      "rank": 589,
+      "rank": 588,
       "tier": "Research"
     },
     {
@@ -29356,7 +29344,7 @@
       "url": "https://www.erdosproblems.com/317",
       "manual": false,
       "prize": "no",
-      "rank": 590,
+      "rank": 589,
       "tier": "Research"
     },
     {
@@ -29435,7 +29423,7 @@
       "url": "https://www.erdosproblems.com/348",
       "manual": false,
       "prize": "no",
-      "rank": 591,
+      "rank": 590,
       "tier": "Research"
     },
     {
@@ -29509,7 +29497,7 @@
       "url": "https://www.erdosproblems.com/412",
       "manual": false,
       "prize": "no",
-      "rank": 592,
+      "rank": 591,
       "tier": "Research"
     },
     {
@@ -29583,7 +29571,7 @@
       "url": "https://www.erdosproblems.com/414",
       "manual": false,
       "prize": "no",
-      "rank": 593,
+      "rank": 592,
       "tier": "Research"
     },
     {
@@ -29656,7 +29644,7 @@
       "url": "https://www.erdosproblems.com/930",
       "manual": false,
       "prize": "no",
-      "rank": 594,
+      "rank": 593,
       "tier": "Research"
     },
     {
@@ -29735,7 +29723,7 @@
       "url": "https://www.erdosproblems.com/938",
       "manual": false,
       "prize": "no",
-      "rank": 595,
+      "rank": 594,
       "tier": "Research"
     },
     {
@@ -29783,7 +29771,7 @@
       "url": "https://www.erdosproblems.com/994",
       "manual": false,
       "prize": "no",
-      "rank": 596,
+      "rank": 595,
       "tier": "Research"
     },
     {
@@ -29843,7 +29831,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 597,
+      "rank": 596,
       "tier": "Research"
     },
     {
@@ -29921,7 +29909,7 @@
       "url": "https://www.erdosproblems.com/1004",
       "manual": false,
       "prize": "no",
-      "rank": 598,
+      "rank": 597,
       "tier": "Research"
     },
     {
@@ -30000,7 +29988,7 @@
       "url": "https://www.erdosproblems.com/1107",
       "manual": false,
       "prize": "no",
-      "rank": 599,
+      "rank": 598,
       "tier": "Research"
     },
     {
@@ -30074,7 +30062,7 @@
       "url": "https://www.erdosproblems.com/1108",
       "manual": false,
       "prize": "no",
-      "rank": 600,
+      "rank": 599,
       "tier": "Research"
     },
     {
@@ -30153,7 +30141,7 @@
       "url": "https://www.erdosproblems.com/1113",
       "manual": false,
       "prize": "no",
-      "rank": 601,
+      "rank": 600,
       "tier": "Research"
     },
     {
@@ -30247,7 +30235,7 @@
       "url": "https://www.erdosproblems.com/11",
       "manual": false,
       "prize": "no",
-      "rank": 602,
+      "rank": 601,
       "tier": "Frontier"
     },
     {
@@ -30335,7 +30323,7 @@
       "url": "https://www.erdosproblems.com/23",
       "manual": false,
       "prize": "no",
-      "rank": 603,
+      "rank": 602,
       "tier": "Frontier"
     },
     {
@@ -30425,7 +30413,7 @@
       "url": "https://www.erdosproblems.com/324",
       "manual": false,
       "prize": "no",
-      "rank": 604,
+      "rank": 603,
       "tier": "Frontier"
     },
     {
@@ -30497,7 +30485,7 @@
       "url": "https://www.erdosproblems.com/334",
       "manual": false,
       "prize": "no",
-      "rank": 605,
+      "rank": 604,
       "tier": "Frontier"
     },
     {
@@ -30565,7 +30553,7 @@
       "url": "https://www.erdosproblems.com/411",
       "manual": false,
       "prize": "no",
-      "rank": 606,
+      "rank": 605,
       "tier": "Frontier"
     },
     {
@@ -30619,7 +30607,7 @@
       "url": "https://www.erdosproblems.com/559",
       "manual": false,
       "prize": "no",
-      "rank": 607,
+      "rank": 606,
       "tier": "Frontier"
     },
     {
@@ -30633,6 +30621,7 @@
       "score": 14,
       "harness": "Untried",
       "rationale": [
+        "The 31 August forum report claims exhaustive verification of all connected graphs through 11 vertices, including 1,006,700,565 at n=11; not independently rerun. At n=12 the sweep leaves 35,633,639 undecided graphs and establishes no floor there. Small generic enumeration is therefore not a promising route to a full solution.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
@@ -30640,12 +30629,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Any computational attack must target unresolved structure beyond the reported n<=11 check, using a decision procedure for simple paths rather than trails; a bounded extension alone cannot prove the conjecture.",
         "Build reusable graph encodings and isolate finite certificates from general graph theorems.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -30710,107 +30700,16 @@
         ]
       },
       "url": "https://www.erdosproblems.com/583",
-      "manual": false,
+      "manual": true,
       "prize": "no",
-      "rank": 608,
-      "tier": "Frontier"
-    },
-    {
-      "id": 686,
-      "statement": "Can every integer $N\\geq 2$ be written as\\[N=\\frac{\\prod_{1\\leq i\\leq k}(m+i)}{\\prod_{1\\leq i\\leq k}(n+i)}\\]for some $k\\geq 2$ and $m\\geq n+k$?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "number theory"
-      ],
-      "score": 14,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
-      ],
-      "requirements": [
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
-        "Freeze the corrected statement and record the scope choice."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
-          "label": "Statement-interpretation risk",
-          "points": -3
-        }
-      ],
-      "partial": {
-        "score": 63,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Explicit object to certify",
-            "points": 10
-          },
-          {
-            "label": "Public formalization artifact (3 kinds)",
-            "points": 8
-          },
-          {
-            "label": "Library fit",
-            "points": 5
-          },
-          {
-            "label": "Asymptotic core",
-            "points": -6
-          }
+      "assessed": {
+        "on": "2026-09-11",
+        "sources": [
+          "https://www.erdosproblems.com/forum/thread/583"
         ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "The discussion points at an explicit construction or finite object; certifying one in Lean is small and self-contained.",
-          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
-          "Reachable partial results still need the relevant Mathlib development.",
-          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
-        ]
+        "searchFloor": 1006700565.0
       },
-      "url": "https://www.erdosproblems.com/686",
-      "manual": false,
-      "prize": "no",
-      "rank": 609,
+      "rank": 607,
       "tier": "Frontier"
     },
     {
@@ -30908,7 +30807,7 @@
       "url": "https://www.erdosproblems.com/742",
       "manual": false,
       "prize": "no",
-      "rank": 610,
+      "rank": 608,
       "tier": "Frontier"
     },
     {
@@ -30987,7 +30886,7 @@
       "url": "https://www.erdosproblems.com/885",
       "manual": false,
       "prize": "no",
-      "rank": 611,
+      "rank": 609,
       "tier": "Frontier"
     },
     {
@@ -31094,7 +30993,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 612,
+      "rank": 610,
       "tier": "Frontier"
     },
     {
@@ -31178,7 +31077,7 @@
       "url": "https://www.erdosproblems.com/17",
       "manual": false,
       "prize": "no",
-      "rank": 613,
+      "rank": 611,
       "tier": "Frontier"
     },
     {
@@ -31249,7 +31148,7 @@
       "url": "https://www.erdosproblems.com/197",
       "manual": false,
       "prize": "no",
-      "rank": 614,
+      "rank": 612,
       "tier": "Frontier"
     },
     {
@@ -31326,7 +31225,7 @@
       "url": "https://www.erdosproblems.com/203",
       "manual": false,
       "prize": "no",
-      "rank": 615,
+      "rank": 613,
       "tier": "Frontier"
     },
     {
@@ -31395,7 +31294,7 @@
       "url": "https://www.erdosproblems.com/222",
       "manual": false,
       "prize": "no",
-      "rank": 616,
+      "rank": 614,
       "tier": "Frontier"
     },
     {
@@ -31449,7 +31348,7 @@
       "url": "https://www.erdosproblems.com/232",
       "manual": false,
       "prize": "no",
-      "rank": 617,
+      "rank": 615,
       "tier": "Frontier"
     },
     {
@@ -31480,6 +31379,8 @@
         "FOLLOW-UP (2026-09-11): the fibre/Fourier family is now provably EXHAUSTED, by decision rather than by search. Every d-constraint is implied by the constraint at mu = min{m in U : d|m}, so the family collapses to: for every mu in U, L/mu - sum_{m in U, mu|m, m!=mu} L/m <= k_U. That form is monotone in U, so a mu violating it under the maximal admissible set violates under every subset containing it and can be deleted outright; iterating to a fixed point is COMPLETE in polynomial time. No 2^47 enumeration is needed.",
         "Propagation eliminates exactly the same 20 candidates and deletes ZERO moduli at all nine survivors - the full admissible set already satisfies every constraint there, so no subset search can improve on it. The survivors fall short by 1944 to 19326; the closest, L=302400, misses by 1944 against a budget of 6700 (a 29 percent gap), versus 55440 which is over by only 16. Regression: 3130 genuine covering systems built across L=12..720, zero false kills.",
         "The reason is intrinsic: k <= slack*L, so the inequality bites exactly when slack is tiny. The 20 eliminated are the tight candidates; the nine survivors all have slack 0.02-0.08 and thousands of units of excess to absorb any imbalance. Tightness is both what makes a candidate look attackable AND what this test needs, so the algebra consumed exactly the candidates a search would have preferred and left the ones that are loose for both.",
+        "Viability assessment 2026-09-16 (operator session, no paid run; experiments/open-viability-2026-09-16/ASSESSMENT.md): of the 639 open problems, #273 is the only one whose FULL resolution can be a finite certificate at a plausibly reachable size - two disjoint distinct-modulus covering systems over H2, lcm likely 1e5-1e7, 50-100 congruences. Every other finite-certificate open problem is either a believed-true conjecture whose certificate would be a counterexample (#742, #23, #583, #628; #617 fixed cases do not resolve the universal statement) or has a witness floor far past reach (#7 lcm 1.15e7, #366 1e22, #647 9.2e18, #364 >1e28); #835's first open case is a ~2M-variable colouring of J(20,10) after k=4 and k=6, also with k+1 prime, failed.",
+        "Third-party claims on the live thread and claims page, NOT verified here: ideal_ombrer (12 Jul 2026, AI-assisted, repo paper_273) claims the 149 moduli with p <= 877 cannot cover Z on their own via the BBMST distortion sieve with an exact rational certificate, so any covering uses some modulus p-1 with p > 877, and that sum 1/(p-1) >= 1 + exp(-3.36e21) follows from Filaseta-Kalogirou (arXiv:2407.15280) because the 3-smooth (Pierpont) moduli sum to about 0.706 < 11/12. Zeraoulia (proof-claims page, 27 Jul 2026, GPT-5.6) claims L >= 393120 by a parity-capacity argument plus forced-residue CRT density; our own exhaustive floor is 110880 and our nine Fourier survivors below 400000 include 393120, so the two are not in conflict but neither confirms the other.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -31497,11 +31398,12 @@
         "Do not spend solver time on L=55440 or L=100800; both are eliminated by algebra. Run the fibre/Fourier screen at every d BEFORE any SAT encoding - it is free and it killed 20 of 29 candidates that four solver runs could not.",
         "The nine surviving candidates need a genuinely different lever: the residue-free bound has no bite when slack is large. Either strengthen to an exact minimum over d-th roots of unity, combine several d simultaneously, or encode those nine for SAT.",
         "Do not attempt subset branch-and-bound on the nine survivors: the propagation decision is complete and returns nothing. They need SAT or new mathematics, and they are WORSE SAT targets than the ones already tried - larger (L=110k-393k, |A|=52-72) and looser (more residue freedom) than L=100800, which did not decide in 37 minutes.",
+        "Expansion needed for the affirmative side, in order: (a) a constructive exact-cover/SAT search in the halved two-system form that fixes forced moduli, enumerates free subsets outside the solver, adds the fibre/Fourier inequalities and the Mirsky-Newman condition as constraints, breaks residue-translation symmetry, and extends candidate lcms past the 400000 compute cap (screen and propagation cost milliseconds per L); (b) a Lean certificate format for a found covering system that the kernel checks without enumerating L residues (CRT/tree certificate or Bool-reflected checker), since kernel decide timed out at 420 s on 3003 cases and native_decide is banned. Neither helps the negative side, which needs a distortion-type nonexistence theorem for the p-1 pool: research, not engineering. Treat the p > 877 and L >= 393120 claims as unverified until rerun.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -31563,7 +31465,7 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-09-16",
         "sources": [
           "scratchpad probe p273_floor.py (divisor sieve to 3e6)",
           "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/273.lean",
@@ -31574,12 +31476,15 @@
           "knowledge/reductions/273/FOURIER-ELIMINATION.md",
           "knowledge/reductions/273/fourier_sweep.py",
           "knowledge/reductions/273/fourier_regression.py",
-          "knowledge/reductions/273/fourier_propagate.py"
+          "knowledge/reductions/273/fourier_propagate.py",
+          "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+          "https://www.erdosproblems.com/forum/thread/273",
+          "https://www.erdosproblems.com/forum/thread/273/proof-claims"
         ],
         "searchFloor": 110880.0
       },
       "brief": "---\nproblem: 273\nupdated: 2026-09-11\nrun: 20260911-105339-682432-erdos273\noutcome: not_proved\nsolved: false\ncertified: 0\nsearch_floor: 110880.0\nsearch_floor_kind: exhaustive\ncandidates_below_400000: 29\ncandidates_eliminated: 20\ncandidates_surviving: 9\ncost_usd: 12.84\n---\n\n## What the problem asks\n\nA \"covering system\" is a finite list of rules like \"numbers that leave remainder 3 when divided by 8\". Each rule has a divisor, called its modulus, and a remainder. The list covers if every whole number, positive or negative, obeys at least one rule. The question asks whether such a list exists when every modulus is one less than a prime number of at least 5 — so the allowed moduli are 4, 6, 10, 12, 16, 18, and so on. The moduli must all be different; reusing a modulus with a new remainder is not allowed. This problem is open on the published catalogue. Nobody knows the answer, yes or no.\n\n## What we tried\n\nOne automated run in search-first mode, costing $12.84, which found nothing and produced no certified results. Three earlier attempts had all attacked the same candidate size and all timed out. After that run, a hand analysis costing nothing — no model calls, milliseconds of computation — replaced the search with an algebraic test. Every modulus in such a list must divide one number, the least common multiple, and only 29 values of that number below 400,000 are even arithmetically possible. The test asks, for each one, whether the rules could fit together at all, without ever choosing remainders.\n\n## What we found\n\n**Twenty of the 29 possible sizes are impossible.** The argument counts how much the rules overlap. Sort the whole numbers into groups by their remainder when divided by some number `d`. A rule whose modulus is a multiple of `d` sits inside a single group; every other rule spreads evenly across groups and cancels out when you weigh the groups against each other. So the imbalance between groups has to be paid for entirely out of the overlap — the amount by which the rules double-cover. When the arithmetic is tight, there is almost no overlap to spend, and one heavy rule cannot be balanced.\n\nThe two sizes that had consumed all five previous attempts, 55,440 and 100,800, both fail this way in under a millisecond. For 100,800 the overlap can be at most 9, while the imbalance is at least 1,903. Four solver runs had previously failed to settle these two, one of them running 37 minutes without an answer.\n\n**So no such list exists with least common multiple below 110,880** — and that is now settled by proof rather than by a filter, which is what the previous record at 55,440 was.\n\nThe test is also provably finished. Its tightest form can be decided completely, without trying combinations, and on the nine remaining sizes it rules out nothing at all: those sizes have loose arithmetic, leaving thousands of units of overlap to absorb any imbalance. The nearest miss, 302,400, falls short by 1,944. This is not a matter of searching harder.\n\nThe same test was checked against 3,130 genuine covering systems built by hand and never wrongly rejected one, and the two closest calls were recomputed in exact fractions rather than decimals.\n\n## What would move it\n\nOnly a witness, or an argument that works for all sizes at once. The nine remaining candidates need a satisfiability solver — software that decides whether a set of constraints can be met — and they are harder targets than the ones already tried, being both larger and looser. The list of 29 stops at 400,000 because that is where the computation stopped, not because of any theorem, so a covering system could exist at a far larger size. **This work removed candidates; it did not answer the question, and it made the remaining ones look worse rather than better.**\n\n*Written by hand on 2026-09-11 from `knowledge/reductions/273/FOURIER-ELIMINATION.md`, replacing the brief generated at the end of run `20260911-105339-682432-erdos273`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 618,
+      "rank": 616,
       "tier": "Frontier"
     },
     {
@@ -31670,7 +31575,7 @@
       "url": "https://www.erdosproblems.com/279",
       "manual": false,
       "prize": "no",
-      "rank": 619,
+      "rank": 617,
       "tier": "Frontier"
     },
     {
@@ -31764,7 +31669,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 620,
+      "rank": 618,
       "tier": "Frontier"
     },
     {
@@ -31849,7 +31754,7 @@
       "url": "https://www.erdosproblems.com/312",
       "manual": false,
       "prize": "no",
-      "rank": 621,
+      "rank": 619,
       "tier": "Frontier"
     },
     {
@@ -31933,7 +31838,7 @@
       "url": "https://www.erdosproblems.com/313",
       "manual": false,
       "prize": "no",
-      "rank": 622,
+      "rank": 620,
       "tier": "Frontier"
     },
     {
@@ -32002,7 +31907,7 @@
       "url": "https://www.erdosproblems.com/338",
       "manual": false,
       "prize": "no",
-      "rank": 623,
+      "rank": 621,
       "tier": "Frontier"
     },
     {
@@ -32018,6 +31923,7 @@
       "score": 12,
       "harness": "Untried",
       "rationale": [
+        "Deductive-loop candidate, rank 4 (2026-09-16; fit 63): by Kummer, C(2n,n) is coprime to a prime p exactly when adding n+n in base p carries nowhere, i.e. every base-p digit of n is at most (p-1)/2. So the frozen target is EQUIVALENT to 'infinitely many n whose base-3 digits lie in {0,1}, base-5 digits in {0,1,2} and base-7 digits in {0,1,2,3}' - a statement with no binomial coefficient in it, provable as a certified reduction from Formal.Library.BinomialCoefficients (digit_carry) and Mathlib's Kummer theorem. Erdos-Graham-Ruzsa-Straus (1975) proved the two-prime case (coprime to 15); three primes is the open core.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -32025,12 +31931,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "A deductive run should certify the Kummer equivalence and adopt the digit statement as the residual; the two-prime theorem may enter as a published premise. The digit statement itself is research-grade (simultaneous digit restrictions in three bases); do not expect it to close, and do not run a bounded search - infinitude cannot be exhibited.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -32090,9 +31997,16 @@
         ]
       },
       "url": "https://www.erdosproblems.com/376",
-      "manual": false,
+      "manual": true,
       "prize": "no",
-      "rank": 624,
+      "assessed": {
+        "on": "2026-09-16",
+        "sources": [
+          "atlas-data/deductive-candidates.md"
+        ],
+        "searchFloor": null
+      },
+      "rank": 622,
       "tier": "Frontier"
     },
     {
@@ -32180,7 +32094,7 @@
       "url": "https://www.erdosproblems.com/422",
       "manual": false,
       "prize": "no",
-      "rank": 625,
+      "rank": 623,
       "tier": "Frontier"
     },
     {
@@ -32248,7 +32162,7 @@
       "url": "https://www.erdosproblems.com/430",
       "manual": false,
       "prize": "no",
-      "rank": 626,
+      "rank": 624,
       "tier": "Frontier"
     },
     {
@@ -32332,7 +32246,7 @@
       "url": "https://www.erdosproblems.com/431",
       "manual": false,
       "prize": "no",
-      "rank": 627,
+      "rank": 625,
       "tier": "Frontier"
     },
     {
@@ -32420,7 +32334,7 @@
       "url": "https://www.erdosproblems.com/452",
       "manual": false,
       "prize": "no",
-      "rank": 628,
+      "rank": 626,
       "tier": "Frontier"
     },
     {
@@ -32503,7 +32417,7 @@
       "url": "https://www.erdosproblems.com/479",
       "manual": false,
       "prize": "no",
-      "rank": 629,
+      "rank": 627,
       "tier": "Frontier"
     },
     {
@@ -32557,7 +32471,7 @@
       "url": "https://www.erdosproblems.com/527",
       "manual": false,
       "prize": "no",
-      "rank": 630,
+      "rank": 628,
       "tier": "Frontier"
     },
     {
@@ -32610,7 +32524,7 @@
       "url": "https://www.erdosproblems.com/607",
       "manual": false,
       "prize": "$250",
-      "rank": 631,
+      "rank": 629,
       "tier": "Frontier"
     },
     {
@@ -32710,7 +32624,7 @@
       "url": "https://www.erdosproblems.com/628",
       "manual": false,
       "prize": "no",
-      "rank": 632,
+      "rank": 630,
       "tier": "Frontier"
     },
     {
@@ -32799,7 +32713,7 @@
       "url": "https://www.erdosproblems.com/727",
       "manual": false,
       "prize": "no",
-      "rank": 633,
+      "rank": 631,
       "tier": "Frontier"
     },
     {
@@ -32887,7 +32801,7 @@
       "url": "https://www.erdosproblems.com/821",
       "manual": false,
       "prize": "no",
-      "rank": 634,
+      "rank": 632,
       "tier": "Frontier"
     },
     {
@@ -32970,7 +32884,7 @@
       "url": "https://www.erdosproblems.com/828",
       "manual": false,
       "prize": "no",
-      "rank": 635,
+      "rank": 633,
       "tier": "Frontier"
     },
     {
@@ -33039,7 +32953,7 @@
       "url": "https://www.erdosproblems.com/870",
       "manual": false,
       "prize": "no",
-      "rank": 636,
+      "rank": 634,
       "tier": "Frontier"
     },
     {
@@ -33134,7 +33048,7 @@
       "url": "https://www.erdosproblems.com/872",
       "manual": false,
       "prize": "no",
-      "rank": 637,
+      "rank": 635,
       "tier": "Frontier"
     },
     {
@@ -33222,7 +33136,7 @@
       "url": "https://www.erdosproblems.com/913",
       "manual": false,
       "prize": "no",
-      "rank": 638,
+      "rank": 636,
       "tier": "Frontier"
     },
     {
@@ -33311,7 +33225,7 @@
       "url": "https://www.erdosproblems.com/931",
       "manual": false,
       "prize": "no",
-      "rank": 639,
+      "rank": 637,
       "tier": "Frontier"
     },
     {
@@ -33404,7 +33318,7 @@
       "url": "https://www.erdosproblems.com/932",
       "manual": false,
       "prize": "no",
-      "rank": 640,
+      "rank": 638,
       "tier": "Frontier"
     },
     {
@@ -33498,7 +33412,7 @@
       "url": "https://www.erdosproblems.com/951",
       "manual": false,
       "prize": "no",
-      "rank": 641,
+      "rank": 639,
       "tier": "Frontier"
     },
     {
@@ -33591,7 +33505,7 @@
       "url": "https://www.erdosproblems.com/961",
       "manual": false,
       "prize": "no",
-      "rank": 642,
+      "rank": 640,
       "tier": "Frontier"
     },
     {
@@ -33679,7 +33593,7 @@
       "url": "https://www.erdosproblems.com/972",
       "manual": false,
       "prize": "no",
-      "rank": 643,
+      "rank": 641,
       "tier": "Frontier"
     },
     {
@@ -33764,7 +33678,7 @@
       "url": "https://www.erdosproblems.com/1020",
       "manual": false,
       "prize": "no",
-      "rank": 644,
+      "rank": 642,
       "tier": "Frontier"
     },
     {
@@ -33848,7 +33762,7 @@
       "url": "https://www.erdosproblems.com/1059",
       "manual": false,
       "prize": "no",
-      "rank": 645,
+      "rank": 643,
       "tier": "Frontier"
     },
     {
@@ -33936,7 +33850,7 @@
       "url": "https://www.erdosproblems.com/1063",
       "manual": false,
       "prize": "no",
-      "rank": 646,
+      "rank": 644,
       "tier": "Frontier"
     },
     {
@@ -34019,7 +33933,7 @@
       "url": "https://www.erdosproblems.com/1065",
       "manual": false,
       "prize": "no",
-      "rank": 647,
+      "rank": 645,
       "tier": "Frontier"
     },
     {
@@ -34113,7 +34027,7 @@
       "url": "https://www.erdosproblems.com/1095",
       "manual": false,
       "prize": "no",
-      "rank": 648,
+      "rank": 646,
       "tier": "Frontier"
     },
     {
@@ -34202,7 +34116,7 @@
       "url": "https://www.erdosproblems.com/1142",
       "manual": false,
       "prize": "no",
-      "rank": 649,
+      "rank": 647,
       "tier": "Frontier"
     },
     {
@@ -34270,7 +34184,7 @@
       "url": "https://www.erdosproblems.com/1181",
       "manual": false,
       "prize": "no",
-      "rank": 650,
+      "rank": 648,
       "tier": "Frontier"
     },
     {
@@ -34334,7 +34248,7 @@
       "url": "https://www.erdosproblems.com/1200",
       "manual": false,
       "prize": "no",
-      "rank": 651,
+      "rank": 649,
       "tier": "Frontier"
     },
     {
@@ -34417,7 +34331,7 @@
       "url": "https://www.erdosproblems.com/167",
       "manual": false,
       "prize": "no",
-      "rank": 652,
+      "rank": 650,
       "tier": "Frontier"
     },
     {
@@ -34533,7 +34447,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 653,
+      "rank": 651,
       "tier": "Frontier"
     },
     {
@@ -34627,7 +34541,7 @@
         ],
         "searchFloor": 10700000000.0
       },
-      "rank": 654,
+      "rank": 652,
       "tier": "Frontier"
     },
     {
@@ -34721,7 +34635,7 @@
       "url": "https://www.erdosproblems.com/855",
       "manual": false,
       "prize": "no",
-      "rank": 655,
+      "rank": 653,
       "tier": "Frontier"
     },
     {
@@ -34799,7 +34713,7 @@
       "url": "https://www.erdosproblems.com/1052",
       "manual": false,
       "prize": "$10",
-      "rank": 656,
+      "rank": 654,
       "tier": "Frontier"
     },
     {
@@ -34876,7 +34790,7 @@
       "url": "https://www.erdosproblems.com/196",
       "manual": false,
       "prize": "no",
-      "rank": 657,
+      "rank": 655,
       "tier": "Frontier"
     },
     {
@@ -34978,7 +34892,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 658,
+      "rank": 656,
       "tier": "Frontier"
     },
     {
@@ -35058,7 +34972,7 @@
       "url": "https://www.erdosproblems.com/276",
       "manual": false,
       "prize": "no",
-      "rank": 659,
+      "rank": 657,
       "tier": "Frontier"
     },
     {
@@ -35143,7 +35057,7 @@
       "url": "https://www.erdosproblems.com/282",
       "manual": false,
       "prize": "no",
-      "rank": 660,
+      "rank": 658,
       "tier": "Frontier"
     },
     {
@@ -35233,7 +35147,7 @@
       "url": "https://www.erdosproblems.com/289",
       "manual": false,
       "prize": "no",
-      "rank": 661,
+      "rank": 659,
       "tier": "Frontier"
     },
     {
@@ -35318,7 +35232,7 @@
       "url": "https://www.erdosproblems.com/322",
       "manual": false,
       "prize": "no",
-      "rank": 662,
+      "rank": 660,
       "tier": "Frontier"
     },
     {
@@ -35397,7 +35311,7 @@
       "url": "https://www.erdosproblems.com/341",
       "manual": false,
       "prize": "no",
-      "rank": 663,
+      "rank": 661,
       "tier": "Frontier"
     },
     {
@@ -35481,7 +35395,7 @@
       "url": "https://www.erdosproblems.com/361",
       "manual": false,
       "prize": "no",
-      "rank": 664,
+      "rank": 662,
       "tier": "Frontier"
     },
     {
@@ -35582,7 +35496,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 665,
+      "rank": 663,
       "tier": "Frontier"
     },
     {
@@ -35661,7 +35575,7 @@
       "url": "https://www.erdosproblems.com/538",
       "manual": false,
       "prize": "no",
-      "rank": 666,
+      "rank": 664,
       "tier": "Frontier"
     },
     {
@@ -35746,7 +35660,7 @@
       "url": "https://www.erdosproblems.com/680",
       "manual": false,
       "prize": "no",
-      "rank": 667,
+      "rank": 665,
       "tier": "Frontier"
     },
     {
@@ -35825,7 +35739,7 @@
       "url": "https://www.erdosproblems.com/701",
       "manual": false,
       "prize": "no",
-      "rank": 668,
+      "rank": 666,
       "tier": "Frontier"
     },
     {
@@ -35910,7 +35824,7 @@
       "url": "https://www.erdosproblems.com/881",
       "manual": false,
       "prize": "no",
-      "rank": 669,
+      "rank": 667,
       "tier": "Frontier"
     },
     {
@@ -35994,7 +35908,7 @@
       "url": "https://www.erdosproblems.com/891",
       "manual": false,
       "prize": "no",
-      "rank": 670,
+      "rank": 668,
       "tier": "Frontier"
     },
     {
@@ -36089,7 +36003,7 @@
       "url": "https://www.erdosproblems.com/982",
       "manual": false,
       "prize": "no",
-      "rank": 671,
+      "rank": 669,
       "tier": "Frontier"
     },
     {
@@ -36174,7 +36088,103 @@
       "url": "https://www.erdosproblems.com/1055",
       "manual": false,
       "prize": "no",
-      "rank": 672,
+      "rank": 670,
+      "tier": "Frontier"
+    },
+    {
+      "id": 1056,
+      "statement": "Let $k\\geq 2$. Does there exist a prime $p$ and consecutive intervals $I_1,\\ldots,I_k$ such that\\[\\prod_{n\\in I_i}n \\equiv 1\\pmod{p}\\]for all $1\\leq i\\leq k$?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "number theory"
+      ],
+      "score": 10,
+      "harness": "Untried",
+      "rationale": [
+        "Assessed 2026-09-16 from the thread: YES for every 2 <= k <= 14 with explicit witnesses (OEIS A060427 and its b-file; KentaKitamura, 21 Jun 2026, lists the k=14 witness p=10428007 with fifteen factorials sharing residue 8978998, so fourteen adjacent intervals have product 1 mod p). Hernandez Santiago and octavioalberto (03 Jun 2026) give infinitely many primes with four equal factorial residues via Wilson reflection - q = 1 mod 6, p | q!-1, residues at 1, q, p-1-q, p-2 - with a Lean formalisation at github.com/octavioalberto/tetrads (third party, not verified here; the construction is Hardy-Subbarao's). Arbitrary k is the Noll-Simmons question; the site says it cannot be resolved by finite computation, and the reflection trick caps at four residues, so no route uniform in k is known.",
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+      ],
+      "requirements": [
+        "Full resolution needs k+1 equal factorial residues mod some prime for EVERY k, or a proof that some k has none - new mathematics either way; not a harness target. Certifiable partial value: the small-k witnesses (k <= 5 have primes small enough for a direct modular-product check) and the Wilson-reflection lemma k!(p-1-k)! = (-1)^(k+1) mod p.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Unverified resolution claim on the site",
+          "points": -8
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -7
+        }
+      ],
+      "partial": {
+        "score": 55,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Public formalization artifact (1 kind)",
+            "points": 4
+          },
+          {
+            "label": "Library fit",
+            "points": 5
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
+          "Reachable partial results still need the relevant Mathlib development."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/1056",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-16",
+        "sources": [
+          "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+          "https://www.erdosproblems.com/forum/thread/1056"
+        ],
+        "searchFloor": null
+      },
+      "rank": 671,
       "tier": "Frontier"
     },
     {
@@ -36253,7 +36263,7 @@
       "url": "https://www.erdosproblems.com/148",
       "manual": false,
       "prize": "no",
-      "rank": 673,
+      "rank": 672,
       "tier": "Frontier"
     },
     {
@@ -36364,7 +36374,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 674,
+      "rank": 673,
       "tier": "Frontier"
     },
     {
@@ -36442,7 +36452,7 @@
       "url": "https://www.erdosproblems.com/432",
       "manual": false,
       "prize": "no",
-      "rank": 675,
+      "rank": 674,
       "tier": "Frontier"
     },
     {
@@ -36520,7 +36530,7 @@
       "url": "https://www.erdosproblems.com/451",
       "manual": false,
       "prize": "no",
-      "rank": 676,
+      "rank": 675,
       "tier": "Frontier"
     },
     {
@@ -36589,7 +36599,7 @@
       "url": "https://www.erdosproblems.com/467",
       "manual": false,
       "prize": "no",
-      "rank": 677,
+      "rank": 676,
       "tier": "Frontier"
     },
     {
@@ -36678,7 +36688,7 @@
       "url": "https://www.erdosproblems.com/551",
       "manual": false,
       "prize": "no",
-      "rank": 678,
+      "rank": 677,
       "tier": "Frontier"
     },
     {
@@ -36763,7 +36773,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 679,
+      "rank": 678,
       "tier": "Frontier"
     },
     {
@@ -36863,7 +36873,7 @@
         ],
         "searchFloor": 110000000000.0
       },
-      "rank": 680,
+      "rank": 679,
       "tier": "Frontier"
     },
     {
@@ -36952,7 +36962,7 @@
       "url": "https://www.erdosproblems.com/1003",
       "manual": false,
       "prize": "no",
-      "rank": 681,
+      "rank": 680,
       "tier": "Frontier"
     },
     {
@@ -37042,7 +37052,7 @@
       "url": "https://www.erdosproblems.com/9",
       "manual": false,
       "prize": "no",
-      "rank": 682,
+      "rank": 681,
       "tier": "Frontier"
     },
     {
@@ -37131,7 +37141,7 @@
       "url": "https://www.erdosproblems.com/234",
       "manual": false,
       "prize": "no",
-      "rank": 683,
+      "rank": 682,
       "tier": "Frontier"
     },
     {
@@ -37263,7 +37273,7 @@
         ],
         "searchFloor": 4e+19
       },
-      "rank": 684,
+      "rank": 683,
       "tier": "Frontier"
     },
     {
@@ -37352,7 +37362,7 @@
       "url": "https://www.erdosproblems.com/354",
       "manual": false,
       "prize": "no",
-      "rank": 685,
+      "rank": 684,
       "tier": "Frontier"
     },
     {
@@ -37441,7 +37451,7 @@
       "url": "https://www.erdosproblems.com/390",
       "manual": false,
       "prize": "no",
-      "rank": 686,
+      "rank": 685,
       "tier": "Frontier"
     },
     {
@@ -37529,7 +37539,7 @@
       "url": "https://www.erdosproblems.com/416",
       "manual": false,
       "prize": "no",
-      "rank": 687,
+      "rank": 686,
       "tier": "Frontier"
     },
     {
@@ -37617,7 +37627,7 @@
       "url": "https://www.erdosproblems.com/417",
       "manual": false,
       "prize": "no",
-      "rank": 688,
+      "rank": 687,
       "tier": "Frontier"
     },
     {
@@ -37706,7 +37716,7 @@
       "url": "https://www.erdosproblems.com/454",
       "manual": false,
       "prize": "no",
-      "rank": 689,
+      "rank": 688,
       "tier": "Frontier"
     },
     {
@@ -37794,7 +37804,7 @@
       "url": "https://www.erdosproblems.com/455",
       "manual": false,
       "prize": "no",
-      "rank": 690,
+      "rank": 689,
       "tier": "Frontier"
     },
     {
@@ -37883,7 +37893,7 @@
       "url": "https://www.erdosproblems.com/478",
       "manual": false,
       "prize": "no",
-      "rank": 691,
+      "rank": 690,
       "tier": "Frontier"
     },
     {
@@ -38014,7 +38024,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 692,
+      "rank": 691,
       "tier": "Frontier"
     },
     {
@@ -38103,7 +38113,7 @@
       "url": "https://www.erdosproblems.com/495",
       "manual": false,
       "prize": "no",
-      "rank": 693,
+      "rank": 692,
       "tier": "Frontier"
     },
     {
@@ -38191,6 +38201,118 @@
       "url": "https://www.erdosproblems.com/681",
       "manual": false,
       "prize": "no",
+      "rank": 693,
+      "tier": "Frontier"
+    },
+    {
+      "id": 686,
+      "statement": "Can every integer $N\\geq 2$ be written as\\[N=\\frac{\\prod_{1\\leq i\\leq k}(m+i)}{\\prod_{1\\leq i\\leq k}(n+i)}\\]for some $k\\geq 2$ and $m\\geq n+k$?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "number theory"
+      ],
+      "score": 8,
+      "harness": "Untried",
+      "rationale": [
+        "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4.",
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Unverified resolution claim on the site",
+          "points": -8
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -6
+        }
+      ],
+      "partial": {
+        "score": 63,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Explicit object to certify",
+            "points": 10
+          },
+          {
+            "label": "Public formalization artifact (3 kinds)",
+            "points": 8
+          },
+          {
+            "label": "Library fit",
+            "points": 5
+          },
+          {
+            "label": "Asymptotic core",
+            "points": -6
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "The discussion points at an explicit construction or finite object; certifying one in Lean is small and self-contained.",
+          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
+          "Reachable partial results still need the relevant Mathlib development.",
+          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/686",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-16",
+        "sources": [
+          "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+          "https://www.erdosproblems.com/forum/thread/686"
+        ],
+        "searchFloor": null
+      },
       "rank": 694,
       "tier": "Frontier"
     },
@@ -38881,7 +39003,7 @@
         "covering systems"
       ],
       "score": 7,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The odd-covering-system question remains hard despite its finite-certificate label and known restrictions on moduli.",
         "PUBLISHED SEARCH FLOOR (recorded 2026-09-11, NOT rerun by us): a preprint linked from the #7 forum thread (egeozturk, 18 Aug 2026, 'Closed-form nonexistence certificates for odd covering systems') claims no covering system with distinct odd moduli > 1 has lcm below 11,486,475, by a search-free hierarchy of closed-form certificates in exact rational arithmetic - extending an earlier search-based 2e6 computation. UNREFEREED preprint, self-described as undergraduate work, not verified by us. Its own stated stopping point is the strongly abundant smooth moduli, first uncertified case 11486475 = 3^3*5^2*7*11*13*17.",
@@ -38890,7 +39012,8 @@
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget."
+        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it.",
@@ -43221,6 +43344,7 @@
         "Smoothness obstruction: if M(n,k)=M(m,k) with m>=n+k then every prime p>k dividing any of m+1..m+k satisfies p <= (m-n)+(k-1), because p divides some n+i and m+j>n+i. So all of m+1..m+k are max(k, m-n+k-1)-smooth.",
         "Open. The negative direction (find n,k,m with m>=n+k and lcm(n+1..n+k)=lcm(m+1..m+k)) is a finite certificate but no counterexample exists in any reachable range: verified none for k<=12 with n,m<=2e5, and k=3 reduces to the single cubic x^3-x=2(y^3-y), exhaustive to y<1e9 with only the degenerate y=4,x=5 (that is n=2,m=3, where m-n=1<k, which the hypothesis allows). The positive direction is Erdos's conjecture and needs new mathematics: k<=2 is elementary, k=3 is already a Thue-Siegel/elliptic-type Diophantine problem.",
         "CORRECTION (2026-09-11): previously scored 7. Lowered because no route to a COMPLETE proof is reachable: the counterexample side is exhausted to 1e9 with only the allowed overlapping case, Thue-Siegel makes any survivor finite-but-unreachable, and the positive side is already deep at k=3. The banked k<=2 proof and 12 lemmas are real value but they are PARTIAL value, now recorded on the partial axis where they belong.",
+        "Deductive-loop candidate, rank 3 (2026-09-16; fit 62): the k<=2 case is proved, d_k is periodic (certified), and for each fixed k the statement reduces to a Diophantine equation - k=3 is x^3-x = 2(y^3-y), swept to y<1e9 with only the allowed overlapping pair. The natural skeleton is '#677 <= (for every k>=3 the k-th equation has no admissible solution)', with the k<=2 lemmas discharged and, for k=3, an effective Thue bound (Baker-type) entering as a PUBLISHED premise. The residual is uniform-in-k finiteness, which is research-grade; the loop can make that explicit and certify the reductions.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -43231,11 +43355,12 @@
         "A disproof needs one explicit triple (n,k,m); a proof needs a general theorem - Thue-Siegel only gives finiteness for each fixed k, so an affirmative resolution must be uniform in k.",
         "Certifiable now: the k<=2 cases, the periodicity of d_k, and the smoothness lemma. A resolution still needs either an effective Thue/elliptic argument uniform in k, or a counterexample outside the swept ranges.",
         "Certified partial value is the realistic target: the k<=2 case is proved sorry-free (lcm{n+1}=n+1 injective; lcm{n+1,n+2}=(n+1)(n+2) strictly increasing). Anything at k>=3 needs the Thue-Siegel machinery, so do not spend a bounded search there.",
+        "Success for a deductive run is a certified reduction of the frozen target to per-k Diophantine hypotheses with k<=2 discharged, not a proof. Tag any Thue/Baker input as published with its citation; never as an axiom.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -43302,12 +43427,13 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-09-16",
         "sources": [
           "scratchpad probes p677_big.py / p677_gaps.py",
           "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/677.lean",
           "experiments/open-atlas-top2/677-notes.md",
-          "knowledge/partial/677/"
+          "knowledge/partial/677/",
+          "atlas-data/deductive-candidates.md"
         ],
         "searchFloor": 1000000000.0
       },
@@ -45777,6 +45903,7 @@
       "harness": "Attempted",
       "rationale": [
         "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier.",
+        "Deductive-loop candidate, rank 2 (2026-09-16; fit 72): Erdos-Straus is the textbook case of shrinking a residual by certified reductions. Mordell's classical identities give 4/n = 1/x+1/y+1/z for every n outside six residue classes mod 840 (n congruent to 1, 11^2, 13^2, 17^2, 19^2, 23^2), and it suffices to treat primes; each identity is elementary algebra a child run can certify, so the first skeleton should read '#242 <= (every prime p in those classes has a representation)' with the identities as discharged hypotheses. The remaining classes are the genuinely open core (verified numerically far past 1e14 in the literature; not rerun here) and stay a conjecture hypothesis.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -45788,13 +45915,14 @@
       ],
       "requirements": [
         "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches.",
+        "Judge a deductive run by whether the residual shrinks from 'all n>2' to the six Mordell classes with the identities certified and spliced; that is real, checkable partial value. Do not spend the budget on a counterexample search (falsifiable class, but the recorded literature checks make it futile) and do not expect the residual classes to close: that is the open problem.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Do not budget a counterexample search. Target a proved special case or a certificate route instead.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -45883,8 +46011,10 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": null,
-        "sources": [],
+        "on": "2026-09-16",
+        "sources": [
+          "atlas-data/deductive-candidates.md"
+        ],
         "searchFloor": null
       },
       "rank": 780,

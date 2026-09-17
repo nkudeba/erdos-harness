@@ -66,6 +66,20 @@ DEFAULT_IMPORTS = [
     "Mathlib.Data.Nat.Prime.Basic",
 ]
 IMPORT_RE = re.compile(r"^Mathlib(\.[A-Za-z0-9'!?]+)+$")
+# Compounding libraries, one per problem CLUSTER. The catalogue clusters hard (22 covering-system
+# problems, 67 Ramsey, 22 Sidon), and until now each run started from near zero: only Lean tactics
+# accumulated. A problem carrying the tag gets the module added to its import header and NAMED (names
+# only, never bodies) in the reduce/prove prompts, so the second run in a cluster starts from the
+# first one's certified machinery. Add an entry only for a module that builds sorry-free.
+CLUSTER_LIBRARIES = {
+    "covering systems": "Formal.Library.CoveringSystems",
+    "binomial coefficients": "Formal.Library.BinomialCoefficients",
+}
+LIBRARY_IMPORT_RE = re.compile(r"^Formal(\.[A-Za-z0-9'!?]+)+$")
+DECL_RE = re.compile(r"^(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                     r"(theorem|lemma|def|abbrev|structure|instance)\s+([A-Za-z_][A-Za-z0-9_'!?]*)")
+NAMESPACE_RE = re.compile(r"^namespace\s+([A-Za-z_][A-Za-z0-9_'!?.]*)\s*$")
+END_RE = re.compile(r"^end\s+([A-Za-z_][A-Za-z0-9_'!?.]*)\s*$")
 BANNED_IN_PROOFS = ["sorry", "admit", "native_decide", "\naxiom ", "unsafe ", "sorryAx"]
 COMPILE_WORKERS = int(os.environ.get("ERDOS_COMPILE_WORKERS", "3"))
 MATHLIB_SRC = FORMAL / ".lake" / "packages" / "mathlib" / "Mathlib"
@@ -916,7 +930,7 @@ PROVE_STRATEGIES = [
 
 def prove_prompt(problem: dict, statement: str, literature: str, retrieval: list[str],
                  history: str, round_i: int, m: int, imports: list[str], repair: str = "",
-                 verified: str = "", playbook: str = "", reductions: str = "") -> str:
+                 verified: str = "", playbook: str = "", reductions: str = "", library: str = "") -> str:
     strat = PROVE_STRATEGIES[(round_i - 1) % len(PROVE_STRATEGIES)]
     ret = "\n".join(retrieval) if retrieval else "(none)"
     return f"""You are the proof-search stage of a Lean 4 harness (round {round_i}).
@@ -935,6 +949,8 @@ you may add `private lemma` helpers ABOVE it in the same block, but must not alt
 ```
 
 {verified}
+
+{library}
 
 Retrieval results:
 {ret}
@@ -959,7 +975,7 @@ isolated helper lemma is worth more than a from-scratch attempt that does not co
 
 def agentic_prompt(problem: dict, statement: str, literature: str, repair: str, verified: str,
                    imports: list[str], max_turns: int, playbook: str = "", tool_backend: str = "claude-cli",
-                   previous: str = "", critic: str = "", search: str = "") -> str:
+                   previous: str = "", critic: str = "", search: str = "", library: str = "") -> str:
     previous_block = ("PREVIOUS SESSION — this sandbox CONTINUES from the best earlier session (its Attempt.lean and scratch "
                       "files are here); its final summary:\n" + previous.strip()) if previous.strip() else ""
     if tool_backend == "codex-cli":
@@ -998,6 +1014,8 @@ FROZEN THEOREM (do not change its name, binders, or goal; helpers go ABOVE it):
 ```
 
 {verified}
+
+{library}
 
 {playbook}
 
@@ -1169,6 +1187,8 @@ FROZEN FORMAL STATEMENT:
 {statement}
 ```
 
+{library}
+
 What counts as a reduction here — something that makes the problem SMALLER or SHARPER, not a proof strategy:
 - **parity / congruence**: every object is forced into a residue class, so the problem splits or halves.
   (Real example, problem #273: every admissible modulus `p-1` with `p>=5` prime is EVEN, so each congruence
@@ -1203,6 +1223,10 @@ Return ONE ```json block:
                    indicators)', 'WLOG the residue of the smallest used modulus is 0 (translation)'.
                    Say it as something to assert, not as background. Omit if the reduction implies no
                    directly assertable constraint.",
+    "lean": "OPTIONAL but valuable: the claim as a CLOSED Lean 4 theorem statement,
+             `theorem reduction_<k> : <Prop> := by\n  sorry` (no free variables; only Mathlib and the library
+             names above). A reduction that is also PROVED in Lean may replace the working target; one that is
+             only checked numerically is carried as a hypothesis, never as fact.",
     "check": "python source that prints REDUCTION-OK or REDUCTION-FAIL <why>"}}
 ]}}"""
 
@@ -1372,7 +1396,7 @@ print("ARCHIVE:" + json.dumps(archive[:5]))
 '''
 
 
-EXPERIMENTS_PROMPT = """You are the numerical-experiments stage of a research program on an OPEN Erdős problem (#{pid}).
+EXPERIMENTS_PROMPT_LEMMA = """You are the numerical-experiments stage of a research program on an OPEN Erdős problem (#{pid}).
 
 ENGLISH PROBLEM:
 {statement_en}
@@ -1394,7 +1418,7 @@ that tests 2-3 concrete conjectures or special cases relevant to the plan numeri
 total; print ≤ 20 informative lines, each starting with `EXP:`). State each tested conjecture in a comment above its code."""
 
 
-PLAN_PROMPT = """You are the planning stage of a research program on an OPEN Erdős problem (#{pid}), cycle {cycle}.
+PLAN_PROMPT_LEMMA = """You are the planning stage of a research program on an OPEN Erdős problem (#{pid}), cycle {cycle}.
 
 ENGLISH PROBLEM:
 {statement_en}
@@ -1422,6 +1446,156 @@ cases done, sub-goals with priorities and why each moves toward the target; (2) 
 as separate ```lean blocks, each `theorem erdos_{pid}_sub<k>_<i> ... := by\n  sorry`, self-contained (own `def`s if
 needed, no `import` lines; `-- IMPORTS:` directives allowed), individually provable by elementary means or from the
 certified lemmas — small special cases (n ≤ k), weaker bounds, structural lemmas. Do not restate proved lemmas.
+
+""" + HOUSE_RULES
+
+
+
+# --- deductive research loop -----------------------------------------------------------------------
+# The legacy loop above (`--research-loop lemma`) asks for conjectures with a *support* percentage and
+# counts certified lemmas. On #699 it adopted Conjecture D at "99.824% of pairs" and the refutation sat in
+# the unexamined 0.2%; nine of its ten certified lemmas were library stepping stones that left the residual
+# untouched. The deductive loop below makes the CONDITIONAL THEOREM the unit of progress: the frozen target
+# proved by certified glue from named hypotheses, each tagged conjecture / published / certified. Progress is
+# the open hypotheses getting fewer or more elementary (docs/deductive-research-mode.md).
+
+EXPERIMENTS_PROMPT = """You are the refutation stage of a DEDUCTIVE research program on an OPEN Erdős problem (#{pid}).
+Your job is to try to BREAK statements, never to "support" them. A percentage of cases is not a status.
+
+ENGLISH PROBLEM:
+{statement_en}
+
+FROZEN FORMAL TARGET:
+```lean
+{statement}
+```
+
+LITERATURE:
+{literature}
+
+CURRENT RESIDUAL — the open hypotheses the current conditional theorem rests on (`name : Lean statement`). The
+target follows from these by certified glue, so if any one is false the whole route is dead; test them hardest:
+{hypotheses}
+
+ALREADY REFUTED (do not retest; listed so you know the near-miss families):
+{refuted}
+
+Write ONE ```python script (standard library only: math, itertools, functools, collections, fractions, random, heapq,
+bisect, json, re; NO sys/os/files/network — do not import `sys` even for the recursion limit; use iteration) that
+runs in ≤ 60 s and does two things:
+
+1. REFUTE FIRST. For every hypothesis above, search for a counterexample: smallest parameters first, then every
+   structured near-miss family the problem is known for (name each family in a comment). For each hypothesis
+   print exactly one line, either
+     REFUTED: {{"hypothesis": "<name>", "witness": {{"<bound variable>": <value>, ...}}}}
+   with the SMALLEST witness found — re-verify it with exact integer arithmetic before printing — or
+     CLEAR: {{"hypothesis": "<name>", "checked_to": <number>, "parameter": "<what that number bounds>"}}
+   giving the largest bound below which EVERY case was tested. Never print a percentage.
+2. NECESSARY CONDITIONS — DERIVE FIRST, CHECK SECOND. Ask what the definitions FORCE on a hypothetical
+   counterexample to the TARGET (a residue class, a smoothness bound, a forced factor, an equality) and write
+   the argument down before you compute anything. For each condition print two lines, in this order:
+     DERIVATION: <one paragraph: why every counterexample must satisfy it, from the definitions or from a
+                  named theorem; say which step is not yet rigorous if any>
+     INVARIANT: <one precise sentence, stated so it could become a Lean hypothesis; include the range checked>
+   and print the INVARIANT line only if the check you then run confirms it on EVERY case. A pattern you noticed
+   in the data but cannot derive is printed as
+     OBSERVED: <sentence, with the range>
+   instead; an observation is never a hypothesis until someone derives it. The check confirms a derivation; it
+   does not replace one.
+
+Print at most 30 lines in total, each starting with REFUTED:, CLEAR:, DERIVATION:, INVARIANT:, OBSERVED: or EXP:."""
+
+
+PLAN_PROMPT = """You are the planning stage of a DEDUCTIVE research program on an OPEN Erdős problem (#{pid}), cycle {cycle}.
+The unit of progress is a CONDITIONAL THEOREM: the frozen target proved, by certified glue, from explicitly named
+hypotheses. Progress means the open hypotheses get fewer or more elementary. A certified lemma that does not
+shorten the route to the target counts for nothing.
+
+ENGLISH PROBLEM:
+{statement_en}
+
+FROZEN FORMAL TARGET (name, binders and goal are immutable; it must appear VERBATIM at the end of your skeleton):
+```lean
+{statement}
+```
+
+LITERATURE: {literature}
+
+{library}
+
+CERTIFIED LEMMAS SO FAR (Lemmas.lean, importable as a module by every attempt — use them BY NAME, never restate):
+```lean
+{lemmas}
+```
+
+CURRENT RESIDUAL SKELETON (the conditional theorem in force; empty on the first cycle):
+```lean
+{residual}
+```
+
+REFUTATION / NECESSARY-CONDITION OUTPUT THIS CYCLE (a REFUTED line kills that hypothesis; INVARIANT lines are
+candidate hypotheses about a counterexample):
+{experiments}
+
+REFUTED STATEMENTS — refuted by an exact witness. NEVER propose these again, in any disguise:
+{refuted}
+
+PROOF FAILURES — hypotheses that were attacked and NOT proved, with what broke (unsolved goals, the prover's
+own diagnosis, the last compiler errors). Analyse each one before planning; a failure is information about
+the argument, not noise:
+{failures}
+
+LEDGER (what was attempted and how it ended): {ledger}
+
+MOVES AFTER A FAILURE — for every hypothesis listed under PROOF FAILURES you must choose exactly one:
+  lemma  — the proof needed a fact it could not establish: state that fact as a NEW hypothesis lemma, keep the
+           old one, and let the glue derive the old from the new.
+  split  — the hypothesis was too strong or too coarse: replace it by weaker or case-split hypotheses whose
+           conjunction still closes the target.
+  define — the failure shows the same structure recurring (a residue pattern, a smoothness property, a block,
+           a forced factor): NAME it with a `def`, restate the hypotheses in terms of it, and prove the
+           connecting lemma in the glue. This is how a new concept enters the argument — from a failed proof,
+           not from taste.
+  defer  — the hypothesis is the genuinely hard core: keep it, rate it `hard`, and say why.
+Record the move in the JSON block under "failure_responses".
+
+Produce, in this order:
+
+(1) ONE ```lean block: the RESIDUAL SKELETON.
+    - Zero or more `def`s you need. New definitions are welcome when they make the residual statable WITHOUT the
+      original objects (name the concept, then state hypotheses about it).
+    - One or more HYPOTHESIS lemmas, each a CLOSED proposition (no free variables; quantify inside), named
+      `theorem {hyp_prefix}<short_name> : <Prop> := by\n  sorry`
+      Each is one of: (a) a CONJECTURE you DERIVED — say in a `--` comment directly above it what it should follow
+      from, or why a counterexample must satisfy it; never "holds in 99% of cases"; (b) a PUBLISHED theorem you rely
+      on, stated faithfully, with `-- PUBLISHED: <authors, year, theorem number>` directly above it. That is how
+      real mathematics enters this program: as a hypothesis, never as an `axiom`.
+    - The FROZEN THEOREM, verbatim, proved from the hypotheses and the certified lemmas (by name) with NO `sorry` in
+      its own proof: `:= by` followed by glue tactics. The only `sorry`s in the block are the hypothesis bodies.
+    Prefer the WEAKEST hypotheses that still close the target. A good hypothesis is strictly more elementary than
+    the target: fewer quantifier alternations; none of the target's heavy objects (binomial coefficients, covering
+    systems, colourings) if you can avoid them; a finite check plus a tail; a statement about one integer rather
+    than a family. If you cannot improve the current skeleton, return it unchanged and say so in (2).
+
+(2) ONE ```json block:
+    {{"hypotheses": [{{"name": "{hyp_prefix}<short_name>", "kind": "conjecture" | "published",
+                      "derivation": "why it should be true / what it follows from, or the citation",
+                      "use": "what it contributes to the glue",
+                      "source": "citation for published, else null",
+                      "difficulty": "elementary" | "moderate" | "hard",
+                      "refutation_tried": "the smallest-case check you would run first"}}, ...],
+     "conjectures": [{{"statement": "...", "status": "proved" | "refuted" | "conditional" | "open",
+                       "witness": <json or null>, "note": "..."}}, ...],
+     "definitions": ["<name>: <one-line meaning>", ...],
+     "failure_responses": [{{"hypothesis": "<name>", "move": "lemma" | "split" | "define" | "defer",
+                            "detail": "what you changed and why the failure implied it"}}, ...],
+     "route": "two or three sentences: how the glue works and what would finish the job"}}
+    Statuses are exactly proved / refuted / conditional / open. Never a percentage. `difficulty` is your honest
+    estimate of the Lean effort to discharge the hypothesis (elementary = a page of undergraduate mathematics;
+    hard = the genuinely open core); the harness attacks elementary hypotheses first and leaves hard ones for
+    later cycles, so a wrong rating wastes budget.
+
+(3) Optionally ONE ```markdown block with notes for the human reviewer.
 
 """ + HOUSE_RULES
 
@@ -1893,6 +2067,65 @@ def extract_directive_imports(body: str) -> list[str]:
     return out
 
 
+def library_module_path(module: str) -> Path:
+    """Source file of an in-project Lean module name (`Formal.Library.X` -> formal/Formal/Library/X.lean)."""
+    return FORMAL.joinpath(*module.split(".")).with_suffix(".lean")
+
+
+def cluster_libraries(problem: dict) -> list[str]:
+    """Formalised library modules this problem's tags make available.
+
+    Only modules whose source actually exists are returned, so a stale table cannot break a run's
+    import header (an `import` of a missing module is a hard Lean error, not a warning).
+    """
+    tags = {str(t).strip().lower() for t in (problem.get("tags") or [])}
+    return [m for tag, m in CLUSTER_LIBRARIES.items()
+            if tag in tags and library_module_path(m).exists()]
+
+
+def library_declarations(module: str) -> list[str]:
+    """Fully-qualified declaration NAMES exported by a library module.
+
+    Names only: the module is IMPORTED, so pasting its statements into a prompt would pay for the
+    same text on every call and invite the model to restate instead of reuse.
+    """
+    path = library_module_path(module)
+    try:
+        src = path.read_text()
+    except OSError:
+        return []
+    names, stack = [], []
+    for line in strip_comment_lines(src).splitlines():
+        line = line.rstrip()
+        if m := NAMESPACE_RE.match(line):
+            stack.append(m.group(1))
+            continue
+        if m := END_RE.match(line):
+            if stack and stack[-1] == m.group(1):
+                stack.pop()
+            continue
+        if (m := DECL_RE.match(line)) and m.group(1) != "instance":
+            if line.startswith("private ") or line.startswith("protected "):
+                continue
+            names.append(".".join(stack + [m.group(2)]))
+    return names
+
+
+def library_note(modules: list[str]) -> str:
+    """Prompt block naming the cluster libraries already in the import header."""
+    if not modules:
+        return ""
+    out = ["ALREADY-FORMALISED CLUSTER LIBRARY. These modules are sorry-free, are ALREADY in your import",
+           "header, and are shared by every problem in this cluster. Use these results BY NAME; do not",
+           "restate or re-prove them. Their statements are not reproduced here -- run `#check <name>` (or",
+           "`-- CHECK: <name>`) to see a signature. Declarations available:"]
+    for m in modules:
+        decls = library_declarations(m)
+        out.append(f"  import {m}")
+        out += [f"    {n}" for n in decls]
+    return "\n".join(out)
+
+
 def compose(body: str, imports: list[str]) -> str:
     extra = explicit_imports(body)
     body = strip_imports(body)
@@ -1992,6 +2225,47 @@ def has_banned(body: str, allow_sorry: bool = False) -> str | None:
 
 # --------------------------------------------------------------------------- the harness
 
+MASK_SUBS = [
+    (re.compile(r"erdosproblems\.com(?:/[A-Za-z0-9_/\-]*)?"), "the problem catalogue"),
+    (re.compile(r"(?<![A-Za-z0-9_])Erd[őo]s(?:['’]s)?\s+[Pp]roblems(?![A-Za-z0-9_.])"), "problems"),
+    (re.compile(r"(?<![A-Za-z0-9_])Erd[őo]s(?:['’]s)?\s+[Pp]roblem(?![A-Za-z0-9_.])"), "problem"),
+    (re.compile(r"(?<![A-Za-z0-9_])Erd[őo]s(?:['’]s)?(?![A-Za-z0-9_.])"), "the catalogue's"),
+]
+
+
+def mask_prompt(text: str) -> str:
+    """Scrub the problem's identity from prose (benchmarks/deductive masked mode).
+
+    The recall cue a model needs is the name: "Erdős problem #645" retrieves the public solution, an
+    unattributed statement about colourings may not. Identifiers are left alone -- `erdos_80317` is the
+    frozen theorem's name and `Erdos273` a library declaration -- so only the capitalised word and the
+    site's domain are rewritten, and never when followed by a letter, digit, underscore or dot."""
+    for rex, sub in MASK_SUBS:
+        text = rex.sub(sub, text)
+    return text
+
+
+class MaskedBackend:
+    """Wraps a backend so EVERY outbound prompt is masked -- `ask`, the agentic prover and any direct
+    `complete` call alike -- while attributes (`last_meta`, tuning, costs) pass straight through."""
+
+    def __init__(self, inner):
+        object.__setattr__(self, "_inner", inner)
+
+    def complete(self, purpose, prompt, *a, **k):
+        return self._inner.complete(purpose, mask_prompt(prompt), *a, **k)
+
+    def __getattr__(self, name):
+        attr = getattr(self._inner, name)          # raises AttributeError like the real backend would
+        if name in ("complete_web", "complete_agentic") and callable(attr):
+            # only exists when the inner backend has it, so `hasattr(llm, "complete_web")` stays truthful
+            return lambda purpose, prompt, *a, **k: attr(purpose, mask_prompt(prompt), *a, **k)
+        return attr
+
+    def __setattr__(self, name, value):
+        setattr(self._inner, name, value)
+
+
 class Harness:
     def __init__(self, args):
         self.problem = json.loads(Path(args.problem).read_text())
@@ -2012,6 +2286,8 @@ class Harness:
         if previous_problem is not None and previous_problem != self.problem:
             raise ValueError("resume problem differs from the checkpoint; start a new run")
         self.state["problem_input"] = self.problem
+        if getattr(args, "benchmark", False):
+            self.state["benchmark"] = True
         self.state.setdefault("invocations", []).append({
             "at": now(), "backend": args.backend, "model": args.model,
             "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -2030,11 +2306,20 @@ class Harness:
             self.llm = CodexCliBackend(args.model, args.llm_timeout)
         else:
             self.llm = FileBackend(self.run_dir, args.llm_timeout)
+        if getattr(args, "masked", False):
+            self.llm = MaskedBackend(self.llm)
+            self.state["masked"] = True
         self.args = args
         self.checks = 0
         self.imports = list(self.problem.get("imports", DEFAULT_IMPORTS))
         # imports auto-added in an earlier (resumed) invocation stay in force
         self.imports = list(dict.fromkeys(self.imports + self.state.get("auto_imports", [])))
+        # Cluster libraries (priority 02, "compounding libraries per cluster"): a problem tagged e.g.
+        # `covering systems` gets the cluster's formalised module in its import header and named in the
+        # reduce/prove prompts, so a later run reuses certified machinery instead of re-deriving it.
+        self.libraries = [m for m in cluster_libraries(self.problem) if self._ensure_library(m)]
+        if self.libraries:
+            self.imports = list(dict.fromkeys(self.imports + self.libraries))
         self._lock = threading.Lock()
         self.t0 = time.time()
         self.thm_name = f"erdos_{pid}"      # `erdos_N_neg` for the negation child in --open mode
@@ -2087,6 +2372,16 @@ class Harness:
             total += cost(path, since=start if pdir in path.parents or path.is_relative_to(pdir) else None)
         return total
 
+    def _note_budget(self, purpose: str):
+        """Log that the cap is reached without raising; the next spend attempt raises. Best effort: a partially
+        constructed harness (tests stub stages) has no args or log to consult."""
+        try:
+            budget = getattr(getattr(self, "args", None), "run_budget", None)
+            if budget and self.spent_usd() >= budget:
+                self.log.event("run", "budget_reached", after=purpose, spent_usd=round(self.spent_usd(), 2), budget=budget)
+        except Exception:                                   # noqa: BLE001
+            return
+
     def _check_run_budget(self, purpose: str):
         budget = getattr(self.args, "run_budget", None)
         if budget and self.spent_usd() >= budget:
@@ -2111,7 +2406,11 @@ class Harness:
     def playbook_block(self, extra_text: str = "") -> str:
         """Relevant entries from knowledge/playbook.md and knowledge/lemmas.jsonl (accumulated lessons)."""
         q = self.problem["statement"] + "\n" + self.state.get("statement", "") + "\n" + extra_text
-        parts = [p for p in (playbook_for(q), lemmas_for(q)) if p]
+        # knowledge/lemmas.jsonl is harvested from every verified proof, so on a benchmark it would hand the
+        # prover the reference proof it is supposed to re-derive. It did, on the first #645 run: `no_mono`
+        # and the whole `key` lemma arrived as "helper fragments". Benchmarks get the playbook only.
+        fragments = "" if getattr(self.args, "benchmark", False) else lemmas_for(q)
+        parts = [p for p in (playbook_for(q), fragments) if p]
         return "\n\n".join(parts)
 
     # -- infrastructure
@@ -2199,8 +2498,44 @@ class Harness:
 
     PROOF_PURPOSES = {"prove", "refine", "decompose", "prove-agentic"}
 
+    RESEARCH_GUIDANCE_PURPOSES = {
+        "assess", "reduce", "experiments", "plan", "prove", "refine",
+        "decompose", "prove-agentic", "critic", "search", "construct",
+    }
+
+    def _with_research_guidance(self, purpose: str, prompt: str) -> str:
+        """Load current operator guidance even for old checkpoints and research children.
+
+        Keep it separate from the frozen problem and blind verification prompts.
+        The actual prompt is preserved in transcripts or the agentic TASK.md.
+        """
+        pid = str((getattr(self, "problem", None) or {}).get("id", ""))
+        if purpose not in self.RESEARCH_GUIDANCE_PURPOSES or not pid.isdecimal():
+            return prompt
+        source = ROOT / "atlas-data" / "research-guidance" / f"{pid}.md"
+        try:
+            guidance = source.read_text().strip()
+        except FileNotFoundError:
+            return prompt
+        if not guidance:
+            return prompt
+        digest = hashlib.sha256(guidance.encode()).hexdigest()
+        self.log.event("research", "operator_guidance", purpose=purpose,
+                       source=str(source.relative_to(ROOT)), sha256=digest)
+        return (prompt + "\n\nCURRENT OPERATOR RESEARCH GUIDANCE (not a verified proof):\n"
+                "Use this to prioritize work over older plans. Audit unverified claims; "
+                "do not alter the frozen target or assume a proposed reduction.\n"
+                + guidance)
+
+    def _outbound(self, prompt: str) -> str:
+        """Every prompt passes here on its way out. In masked mode the identity scrub is applied HERE, so the
+        transcript, the agentic TASK.md and the backend all see the same text; the MaskedBackend proxy is a
+        second line of defence, not the primary one (a proxy cannot reach a file the harness writes itself)."""
+        return mask_prompt(prompt) if getattr(getattr(self, "args", None), "masked", False) else prompt
+
     def ask(self, purpose: str, prompt: str, effort: str | None = None, budget: float | None = None) -> str:
         self._check_run_budget(purpose)
+        prompt = self._outbound(self._with_research_guidance(purpose, prompt))
         # Log what will actually be spent, not just the override. `effort=None` used to read as "no effort
         # cap" when the per-purpose tuning was in fact applying one — misleading exactly when you are
         # chasing an expensive stage.
@@ -2233,7 +2568,10 @@ class Harness:
         meta = getattr(self.llm, "last_meta", {}) or {}
         self.log.event("llm", "response", purpose=purpose, chars=len(text), secs=round(time.time() - t0, 1),
                        cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"))
-        self._check_run_budget(purpose)
+        # The cap is enforced BEFORE every model call (top of this method, and before each agentic round), never
+        # after one: raising here threw away a response that was already paid for. On the masked #275 benchmark
+        # two hypothesis children each received a $1.3-$2.7 proof text and died before compiling a line of it.
+        self._note_budget(purpose)
         (self.run_dir / "transcripts").mkdir(exist_ok=True)
         n = len(list((self.run_dir / "transcripts").glob("*.md"))) + 1
         (self.run_dir / "transcripts" / f"{n:03d}-{purpose}.md").write_text(
@@ -2249,7 +2587,7 @@ class Harness:
         if "literature" in self.state:
             return
         if getattr(self.args, "literature_web", False) and hasattr(self.llm, "complete_web"):
-            prompt = literature_prompt(self.problem) + WEB_LITERATURE_ADDENDUM.format(pid=self.problem["id"])
+            prompt = self._outbound(literature_prompt(self.problem) + WEB_LITERATURE_ADDENDUM.format(pid=self.problem["id"]))
             self.log.event("llm", "request", purpose="literature-web", chars=len(prompt))
             t0 = time.time()
             try:
@@ -2507,6 +2845,7 @@ echo "exit=${{PIPESTATUS[0]}}"
     def _agentic_attempt(self, name: str, seed_body: str, prompt: str, seed_dir=None, model: str | None = None
                          ) -> tuple[str, str, str]:
         """Run one sandboxed agentic attempt; returns (response_text, final Attempt.lean body, sandbox dir)."""
+        prompt = self._outbound(self._with_research_guidance("prove-agentic", prompt))
         sb = self._sandbox(name, seed_body, seed_dir)
         (sb / "TASK.md").write_text(prompt)
         try:
@@ -2637,7 +2976,7 @@ echo "exit=${{PIPESTATUS[0]}}"
                     resp = self.ask("prove", prove_prompt(
                         self.problem, statement, literature, retrieval, self._history_digest(attempts),
                         rnd, self.args.samples, self.imports, repair=repair, verified=verified, playbook=playbook,
-                        reductions=self.reduction_context()),
+                        reductions=self.reduction_context(), library=self.library_context()),
                         effort=PLAN_ROUND_EFFORT if plan_only else None,
                         budget=min(PLAN_ROUND_BUDGET, self.args.call_budget) if plan_only else None)
                 except RuntimeError as e:
@@ -2676,12 +3015,28 @@ echo "exit=${{PIPESTATUS[0]}}"
                 models = self._round_models(rnd, samples)
                 prompt = agentic_prompt(self.problem, statement, literature, repair, verified,
                                         self.imports, self.args.agentic_turns, playbook, tool_backend=self.args.backend,
-                                        previous=previous, critic=critic, search=self.search_block())
+                                        previous=previous, critic=critic, search=self.search_block(),
+                                        library=self.library_context())
                 jobs = [(f"proof-r{rnd}-g{i}", seed_bodies[i % len(seed_bodies)], models[i]) for i in range(samples)]
                 self.log.event("llm", "request", purpose="prove-agentic", n=len(jobs), chars=len(prompt),
                                models=[m or "default" for m in models], seed_dir=seed_dir)
-                with ThreadPoolExecutor(max_workers=max(1, min(len(jobs), COMPILE_WORKERS))) as ex:
-                    outs = list(ex.map(lambda j: self._agentic_attempt(j[0], j[1], prompt, seed_dir=seed_dir, model=j[2]), jobs))
+                # A round of `samples` parallel agentic attempts is the most expensive thing the harness
+                # does, and the run budget used to be checked only AFTER the whole round -- so one round
+                # could overshoot by samples x --call-budget (3 x $8 = $24 against a $6 per-direction cap).
+                # That is exactly what happened on #699: a single round cost $8.79 against $6 and then left
+                # nothing for stage_brief, which is supposed to run on EVERY run. Check before the round as
+                # well as after, and clamp each attempt so the whole round fits in what is left.
+                self._check_run_budget("prove-agentic-round")
+                prev_call_budget = getattr(self.llm, "call_budget_usd", None)
+                if getattr(self.args, "run_budget", None) and prev_call_budget is not None:
+                    remaining = self.args.run_budget - self.spent_usd()
+                    self.llm.call_budget_usd = max(0.5, min(prev_call_budget, remaining / max(1, len(jobs))))
+                try:
+                    with ThreadPoolExecutor(max_workers=max(1, min(len(jobs), COMPILE_WORKERS))) as ex:
+                        outs = list(ex.map(lambda j: self._agentic_attempt(j[0], j[1], prompt, seed_dir=seed_dir, model=j[2]), jobs))
+                finally:
+                    if prev_call_budget is not None:
+                        self.llm.call_budget_usd = prev_call_budget
                 self._check_run_budget("prove-agentic")
                 for (name, _, model), (text, final_file, sb) in zip(jobs, outs):
                     blocks = lean_blocks(text)
@@ -3048,7 +3403,11 @@ echo "exit=${{PIPESTATUS[0]}}"
             out = self.run_dir / "final" / f"Erdos{self.problem['id']}.lean"
             out.parent.mkdir(exist_ok=True)
             out.write_text(compose(proof, self.imports))
-            if verdict["all_clear"] and not getattr(self, "direction", None) and not self.problem.get("open"):
+            if getattr(self.args, "benchmark", False):
+                # A blind re-derivation of an already-solved problem is an evaluation of the harness, not new
+                # knowledge: it must never overwrite the saved reference proof or feed the lemma store.
+                self.log.event("knowledge", "benchmark_not_saved", problem=self.problem["id"])
+            elif verdict["all_clear"] and not getattr(self, "direction", None) and not self.problem.get("open"):
                 # feed the knowledge base: the verified proof becomes a regression case and a lemma source
                 # (open-problem directions are reported under knowledge/open/, never as regression cases)
                 solved = KNOWLEDGE / "solved"
@@ -3116,6 +3475,9 @@ echo "exit=${{PIPESTATUS[0]}}"
                if self.state.get("assessment") else ""),
             f"- **Search:** {json.dumps(self.state.get('search'))[:400]}" if self.state.get("search") else "- **Search:** not run",
             f"- **Partial results:** {self.state['partial']}" if self.state.get("partial") else "",
+            (f"- **Residual (conditional theorem):** open conjectures {self.state['residual'].get('open')}, "
+             f"published premises {self.state['residual'].get('published')}, discharged {self.state['residual'].get('certified')}"
+             if isinstance(self.state.get("residual"), dict) else ""),
             f"- **Tokens:** " + json.dumps({k: sum(int((json.loads(l).get('tokens') or {}).get(k) or 0) for l in open(self.log.path) if '\"response\"' in l) for k in ('in', 'out', 'cache_read', 'cache_write')}),
             "",
             "## Frozen formal statement",
@@ -3229,6 +3591,7 @@ echo "exit=${{PIPESTATUS[0]}}"
         mode, reason = decide_mode(a, self.args, self.problem, self.state.get("literature") or "")
         self.state["assessment"], self.state["mode"], self.state["mode_reason"] = a, mode, reason
         self.save()
+        self.record_prediction(a)
         futile, futile_why = search_futility(a, self.problem, self.state.get("literature") or "")
         if futile:
             self.state["search_futility"] = futile_why
@@ -3236,6 +3599,34 @@ echo "exit=${{PIPESTATUS[0]}}"
         self.log.event("assess", "routed", mode=mode, reason=reason, shape=a.get("shape"), status=a.get("status"),
                        depth=a.get("depth"), computable=a.get("computable"), tier=a.get("budget_tier"),
                        search_floor=a.get("search_floor"), search_futile=futile or None)
+
+    def record_prediction(self, assessment: dict):
+        """Log this run's own prediction before it knows the answer.
+
+        Calibration is impossible without predictions made ahead of outcomes, and the project had 26
+        settled attempts and zero recorded predictions — all of that evidence unusable. The triage model
+        already estimates difficulty; capture it as a number and let it be scored later.
+        """
+        try:
+            raw = assessment.get("p_resolve")
+            p = float(raw) if isinstance(raw, (int, float, str)) and str(raw).strip() != "" else None
+        except (TypeError, ValueError):
+            p = None
+        if p is None or not 0.0 <= p <= 1.0:
+            # No usable number from triage: fall back to the reference class rather than invent one.
+            p = 0.0 if self.problem.get("open") else None
+        if p is None:
+            return
+        row = {"problem": str(self.problem["id"]), "at": datetime.now(timezone.utc).isoformat(),
+               "p_resolve": p, "p_partial": None, "by": f"triage/{self.run_dir.name}",
+               "basis": " ".join(str(assessment.get("reason") or assessment.get("depth") or "").split())[:300],
+               "model": "triage-v1", "score_at_prediction": None}
+        try:
+            with open(ROOT / "atlas-data" / "predictions.jsonl", "a") as fh:
+                fh.write(json.dumps(row) + "\n")
+            self.log.event("assess", "prediction_logged", p_resolve=p)
+        except OSError:
+            pass
 
     # -- structural reduction (runs before any search or proof) ------------------------------------
 
@@ -3262,7 +3653,8 @@ echo "exit=${{PIPESTATUS[0]}}"
         base = REDUCE_PROMPT.format(
             pid=self.problem["id"], statement_en=self.problem["statement"],
             notes=(self.problem.get("notes") or "(none)")[:2500], statement=self.state["statement"],
-            check_seconds=cap_s, modules=", ".join(sorted(ALLOWED_PY_MODULES)))
+            check_seconds=cap_s, modules=", ".join(sorted(ALLOWED_PY_MODULES)),
+            library=self.library_context())
         proposals, parsed = [], None
         for attempt in range(2):
             resp = self.ask("reduce", base if attempt == 0 else base + (
@@ -3303,6 +3695,7 @@ echo "exit=${{PIPESTATUS[0]}}"
             (rdir / f"check-{i}.out").write_text(out[-8000:])
             if rc == 0 and "REDUCTION-OK" in out:
                 entry["verdict"] = "checked"
+                self._certify_reduction_statement(entry, r.get("lean"), i)
                 verified.append(entry)
             else:
                 fail = next((l for l in out.splitlines() if "REDUCTION-FAIL" in l), "")
@@ -3314,7 +3707,7 @@ echo "exit=${{PIPESTATUS[0]}}"
         self.save()
         self.log.event("reduce", "done", proposed=len(proposals), checked=len(verified), rejected=len(rejected),
                        kinds=[e["kind"] for e in verified])
-        if verified:
+        if verified and not getattr(self.args, "benchmark", False):   # a benchmark alias is not knowledge
             out = KNOWLEDGE / "reductions" / str(self.problem["id"])
             out.mkdir(parents=True, exist_ok=True)
             (out / f"{self.run_dir.name}.md").write_text(
@@ -3322,7 +3715,67 @@ echo "exit=${{PIPESTATUS[0]}}"
                 "Each claim below was proposed by the reduction stage and then **empirically checked** on small\n"
                 "cases by a script run in the sandbox. A check is evidence, not a proof.\n\n"
                 + "\n".join(f"## {e['kind']}\n\n**{e['claim']}**\n\n{e['justification']}\n\n"
-                             f"*Consequence:* {e['consequence']}\n" for e in verified))
+                             f"*Consequence:* {e['consequence']}\n"
+                             + (f"\n*Lean:* {e.get('lean_status')}"
+                                + (f"\n\n```lean\n{e['lean']}\n```\n" if e.get('lean') else "\n")
+                                if e.get('lean_status') else "")
+                             for e in verified))
+
+    def _certify_reduction_statement(self, entry: dict, lean, i: int) -> None:
+        """A checked reduction is evidence; a PROVED one is a theorem. When the reduction stage also states the
+        claim in Lean, compile it (with `sorry`) and try the free specialist cascade on the hole. `certified` means
+        the statement now compiles sorry-free and may rewrite the working target; `stated` means it type-checks and
+        is carried as a hypothesis; `ill-typed` means the Lean text was dropped. No model call is spent here."""
+        if not lean or not isinstance(lean, str):
+            return
+        code = lean.strip()
+        if has_banned(code, allow_sorry=True) or not re.search(r"\btheorem\s+\w+", code):
+            entry["lean_status"] = "ill-typed"
+            return
+        try:
+            chk = self.check(code, f"reduction-{i}")
+        except Exception as e:                                  # noqa: BLE001 - never fail the stage on this
+            entry["lean_status"] = f"check_error: {type(e).__name__}"
+            return
+        if not chk["ok"]:
+            entry["lean_status"] = "ill-typed"
+            entry["lean_error"] = (chk["errors"][:1] or [""])[0][:200]
+            return
+        code = chk.get("body", code)
+        entry["lean"], entry["lean_status"], entry["lean_name"] = code, "stated", decl_name(code)
+        if not chk["sorries"]:
+            entry["lean_status"] = "certified"
+            return
+        try:
+            closed = self._close_holes_without_model(code, "")
+        except Exception:                                       # noqa: BLE001
+            return
+        if closed != code and hole_count(closed) == 0:
+            fin = self.check(closed, f"reduction-{i}-certified")
+            if fin["ok"] and not fin["sorries"]:
+                entry["lean"], entry["lean_status"] = fin.get("body", closed), "certified"
+                self.log.event("reduce", "certified", id=entry.get("id"), name=entry["lean_name"])
+
+    def _ensure_library(self, module: str) -> bool:
+        """Build a cluster library before importing it.
+
+        A library that will not build is DROPPED rather than imported: `import` of an unbuilt module is
+        a hard Lean error, so a stale library would fail every check in the cluster instead of only the
+        attempt that wanted it. `lake build` is a no-op when the olean is current.
+        """
+        try:
+            r = subprocess.run(["lake", "build", module], cwd=FORMAL, capture_output=True, text=True,
+                               timeout=1800, env=clean_env())
+            ok = r.returncode == 0
+            detail = "" if ok else (r.stdout + r.stderr)[-400:]
+        except (OSError, subprocess.TimeoutExpired) as e:      # noqa: BLE001
+            ok, detail = False, str(e)[:200]
+        self.log.event("library", "available" if ok else "unavailable", module=module, detail=detail)
+        return ok
+
+    def library_context(self) -> str:
+        """The cluster-library block for the reduce/prove prompts. Names only — the module is imported."""
+        return library_note(getattr(self, "libraries", []))
 
     def reduction_context(self) -> str:
         """Checked reductions, as a prompt block. Empty when there are none — never a placeholder.
@@ -3339,7 +3792,10 @@ echo "exit=${{PIPESTATUS[0]}}"
                "this harness ran; reliable, but evidence rather than proof):"]
         for e in v:
             out.append(f"- {e.get('id', '?')} [{e['kind']}] {e['claim']} — {e['justification']} "
-                       f"Consequence: {e['consequence']}")
+                       f"Consequence: {e['consequence']}"
+                       + (f" [PROVED in Lean as `{e.get('lean_name')}`]" if e.get("lean_status") == "certified"
+                          else " [stated in Lean, unproved: a hypothesis, not a fact]" if e.get("lean_status") == "stated"
+                          else ""))
         constrained = [e for e in v if e.get("constraint")]
         if constrained:
             out.append("\nASSERTABLE CONSTRAINTS — these are not background, they are constraints your "
@@ -3716,7 +4172,9 @@ for the SAT solver instead of enumerating it.
                 (cdir / "state.json").write_text(json.dumps(st, indent=2))
             cargs = argparse.Namespace(**vars(self.args))
             cargs.resume, cargs.open = str(cdir), False
-            cargs.run_budget = (budget / 2) if budget else None
+            # Split what is LEFT, not the original budget: the parent has already paid for literature,
+            # formalize and crosscheck, so halving `budget` guarantees a total of parent_spend + budget.
+            cargs.run_budget = (max(0.5, (budget - self.spent_usd()) / 2)) if budget else None
             h = Harness(cargs)
             h.thm_name = f"erdos_{pid}" if direction == "pos" else f"erdos_{pid}_neg"
             h.direction = direction
@@ -3923,11 +4381,18 @@ for the SAT solver instead of enumerating it.
         d = ROOT / "programs" / f"erdos_{self.problem['id']}"
         if getattr(self, "direction", None) in ("pos", "neg"):
             d = d / self.direction
+        if getattr(self, "program_subdir", None):
+            # a sub-residual (a hypothesis attacked with its own skeleton) keeps its own cycles, ledger,
+            # Lemmas.lean and Residual.lean, or it would race the parent on all four
+            d = d / "sub" / re.sub(r"[^A-Za-z0-9_]", "_", str(self.program_subdir))
         d.mkdir(parents=True, exist_ok=True)
         return d
 
     def _program_module_suffix(self) -> str:
-        return {"pos": "Pos", "neg": "Neg"}.get(getattr(self, "direction", None) or "", "")
+        base = {"pos": "Pos", "neg": "Neg"}.get(getattr(self, "direction", None) or "", "")
+        if getattr(self, "program_subdir", None):
+            base += "Sub" + hashlib.sha256(str(self.program_subdir).encode()).hexdigest()[:8]
+        return base
 
     def _install_lemmas_module(self, pdir: Path) -> str | None:
         """Compile programs/erdos_<n>/Lemmas.lean as module Formal.Programs.Erdos<n> so later attempts can import it."""
@@ -3949,9 +4414,461 @@ for the SAT solver instead of enumerating it.
         return mod_name if ok else None
 
     def run_program(self) -> int:
-        """Persistent research program: PLAN.md ↔ numerical experiments ↔ sub-statements attacked with the standard
-        pipeline ↔ certified lemmas accumulated in Lemmas.lean (a real Lean module) ↔ retrospect; REVIEW.md every k
-        cycles with a pause for human direction via the file backend. Exit 3 = partial progress."""
+        """Persistent research program on an open target. Two loops:
+
+        * `deductive` (default): the unit of progress is a certified CONDITIONAL THEOREM -- a residual skeleton in
+          which the frozen target is proved by glue from named hypotheses tagged conjecture / published /
+          certified. Each cycle: refute-first on the open hypotheses (an exact witness kills the skeleton and is
+          banked under knowledge/refuted/), then a skeleton is proposed and adopted only if it compiles, keeps the
+          frozen theorem verbatim, confines every `sorry` to a hypothesis, re-proposes nothing refuted, and has
+          fewer or more elementary open conjectures than the one in force; then the open conjectures are attacked
+          least-complex-first and a certified one is spliced back so the residual shrinks. RESIDUAL.md and a
+          campaign manifest render the state; the summary line carries `residual=`.
+        * `lemma`: the legacy experiments -> conjecture ledger -> sub-lemmas loop, kept for comparison.
+
+        Exit 0 only if the skeleton closes completely and passes final verification; 3 = a conditional theorem
+        or certified lemmas exist; 2 = nothing certified. See docs/deductive-research-mode.md."""
+        if not getattr(self.args, "run_budget", None):
+            self.log.event("program", "refused", detail="--allow-research requires --run-budget")
+            self.report(False)
+            return 2
+        loop = getattr(self.args, "research_loop", "deductive") or "deductive"
+        self.log.event("program", "loop", kind=loop)
+        return self._run_program_deductive() if loop == "deductive" else self._run_program_lemma()
+
+    def _deductive_experiments(self, cdir: Path, cycle: int, hyp_txt: str) -> tuple[str, dict]:
+        """Refute-first script: tries to break every open hypothesis and extracts necessary conditions on a
+        counterexample to the target. Runs in the sandbox; only REFUTED:/CLEAR:/INVARIANT: lines are read."""
+        pid = self.problem["id"]
+        prompt = EXPERIMENTS_PROMPT.format(
+            pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
+            literature=(self.state.get("literature") or "")[:4000], hypotheses=hyp_txt, refuted=refuted_context(pid))
+        resp = self.ask("experiments", prompt)
+        m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
+        code = m.group(1) if m else ""
+        bad = unsafe_python(code) if code else "no python block"
+        if bad and bad != "no python block":
+            resp = self.ask("experiments", prompt + f"\n\nYour previous script was REJECTED by the safety screen for "
+                            f"`{bad}`; allowed modules: {', '.join(sorted(ALLOWED_PY_MODULES))}; no file, network or OS access.")
+            m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
+            code = m.group(1) if m else ""
+            bad = unsafe_python(code) if code else "no python block"
+        empty = {"refuted": [], "clear": [], "invariants": []}
+        if bad:
+            self.log.event("program", "experiments_skipped", cycle=cycle, reason=bad)
+            return "", empty
+        (cdir / "experiments.py").write_text(code)
+        rc, out = self._run_py(cdir / "experiments.py", 180, cdir)
+        (cdir / "experiments.txt").write_text(out)
+        parsed = parse_refutation_output(out)
+        self.log.event("program", "experiments_ran", cycle=cycle, rc=rc, refuted=len(parsed["refuted"]),
+                       clear=len(parsed["clear"]), invariants=len(parsed["invariants"]))
+        return out, parsed
+
+    def _consider_skeleton(self, cand: str, meta: dict, current: dict | None, frozen: str, cycle: int,
+                           refutations: list[dict], cdir: Path, main: str | None = None) -> dict:
+        """Adopt a proposed residual skeleton only if it is a real conditional theorem that improves the residual:
+        frozen theorem verbatim, no banned construct, every `sorry` inside a hypothesis lemma, nothing refuted
+        re-proposed, compiles, and -- after the free specialist cascade has had a go at the holes -- fewer or
+        more elementary open conjectures than the skeleton in force. A skeleton with no holes left is a proof."""
+        pid = self.problem["id"]
+        main = main or getattr(self, "thm_name", None) or f"erdos_{pid}"
+        if not contains_frozen(cand, frozen):
+            return {"adopted": False, "reason": "altered the frozen theorem"}
+        bad = has_banned(cand, allow_sorry=True)
+        if bad:
+            return {"adopted": False, "reason": f"banned construct `{bad}`"}
+        parsed = parse_residual(cand, pid, meta, main=main)
+        if not parsed["main_present"]:
+            return {"adopted": False, "reason": "frozen theorem missing"}
+        if not parsed["glue_sorry_free"]:
+            return {"adopted": False, "reason": "a sorry outside the hypothesis lemmas: the glue is not glue"}
+        for h in parsed["hypotheses"]:
+            if statement_refuted(h["statement"], refutations):
+                return {"adopted": False, "reason": f"re-proposed a refuted statement as {h['name']}"}
+        names = [h["name"] for h in parsed["hypotheses"]]
+        if len(names) != len(set(names)):
+            return {"adopted": False, "reason": "duplicate hypothesis names"}
+        res = self.check(cand, f"skeleton-c{cycle}")
+        if not res["ok"]:
+            return {"adopted": False, "reason": "does not compile: " + (res["errors"][:1] or [""])[0][:200]}
+        cand = res.get("body", cand)
+        try:
+            closed = self._close_holes_without_model(cand, frozen)
+        except Exception:                                   # noqa: BLE001 - the cascade is a bonus, never a gate
+            closed = cand
+        if closed != cand:
+            r2 = self.check(closed, f"skeleton-c{cycle}-cascade")
+            if r2["ok"]:
+                cand = r2.get("body", closed)
+        parsed = parse_residual(cand, pid, meta, main=main)
+        (cdir / "skeleton.lean").write_text(cand)
+        if hole_count(cand) == 0:
+            fin = self.check(cand, f"skeleton-c{cycle}-closed")
+            if fin["ok"] and not fin["sorries"]:
+                return {"adopted": True, "proved": True, "skeleton": fin.get("body", cand), "parsed": parsed,
+                        "reason": "no hypothesis left: the skeleton is a proof"}
+        if not residual_improves(parsed, current):
+            return {"adopted": False, "reason": "no improvement over the skeleton in force", "parsed": parsed}
+        return {"adopted": True, "skeleton": cand, "parsed": parsed,
+                "reason": "improves the residual" if current else "first skeleton"}
+
+    def _attack_substatement(self, sub: str, name: str, sdir: Path, cycle: int, module: str | None, remaining: int,
+                             recursive: bool = False):
+        """Attack one closed hypothesis as a child run. Returns (exit_code, child), or (None, None) when the
+        parent's budget is gone; never hands a child more than the parent has left.
+
+        `recursive=False`: the standard fast pipeline (prove, agentic, decompose) on the statement.
+        `recursive=True`: the child runs the deductive loop itself, at depth+1, in its own program directory,
+        with the hypothesis as ITS frozen target -- so the argument grows as a tree of lemmas. A child that
+        closes its skeleton returns a proof; one that does not returns its own residual, which the parent
+        splices in as a REFINEMENT: the hypothesis becomes conditional on the child's simpler sub-hypotheses."""
+        sdir.mkdir(parents=True, exist_ok=True)
+        depth = int(getattr(self.args, "residual_depth_current", 1) or 1)
+        if not (sdir / "state.json").exists():
+            st = {"literature": self.state.get("literature", ""), "statement": sub, "problem_input": self.problem,
+                  "crosscheck": {"ranking": [0], "issues": {"0": "research-program hypothesis (not the frozen target)"}},
+                  "mode": "research" if recursive else "fast",
+                  "mode_reason": f"deductive sub-residual at depth {depth + 1}" if recursive else "deductive research-program hypothesis",
+                  "invocations": []}
+            (sdir / "state.json").write_text(json.dumps(st, indent=2))
+        cargs = argparse.Namespace(**vars(self.args))
+        cargs.resume, cargs.open, cargs.allow_research, cargs.skip_assess = str(sdir), False, recursive, True
+        if recursive:
+            cargs.reduce = "off"                       # the parent already reduced; a sub-residual plans directly
+            cargs.research_cycles = 1
+            cargs.hyps_per_cycle = min(2, int(getattr(self.args, "hyps_per_cycle", 4) or 2))
+            cargs.residual_depth_current = depth + 1
+        if self.args.run_budget:
+            left = self.args.run_budget - self.spent_usd()
+            if left <= 0:
+                self.log.event("program", "budget_exhausted", cycle=cycle, spent_usd=round(self.spent_usd(), 2),
+                               budget=self.args.run_budget)
+                return None, None
+            cargs.run_budget = min(left, max(0.5, left / max(1, remaining)))
+        else:
+            cargs.run_budget = None
+        child = Harness(cargs)
+        child.thm_name = name
+        child.direction = "program"
+        if recursive:
+            child.program_subdir = name
+        if module:
+            child.imports = list(dict.fromkeys(child.imports + [module]))
+        try:
+            rc = child.run()
+        except Harness.BudgetExhausted:
+            rc = 2
+        return rc, child
+
+    def _write_residual(self, pdir: Path, parsed: dict | None, skeleton: str, cycle: int, meta: dict,
+                        refutations: list[dict]) -> None:
+        """RESIDUAL.md, campaign.json and state['residual'] -- the three renderings of the conditional theorem."""
+        pid = self.problem["id"]
+        residual_path = pdir / "Residual.lean"
+        if skeleton.strip():
+            residual_path.write_text(skeleton)
+        try:
+            premises = [json.loads(l) for l in (pdir / "premises.jsonl").read_text().splitlines() if l.strip()]
+        except (OSError, ValueError):
+            premises = []
+        try:
+            moves = [json.loads(l) for l in (pdir / "moves.jsonl").read_text().splitlines() if l.strip()]
+        except (OSError, ValueError):
+            moves = []
+        (pdir / "RESIDUAL.md").write_text(render_residual_md(pid, parsed, residual_path, refutations, cycle, premises,
+                                                             failures=load_failures(pdir), moves=moves))
+        if parsed:
+            m = parsed["metric"]
+            self.state["residual"] = {
+                "cycle": cycle, "skeleton": str(residual_path), "open": m["open_conjectures"],
+                "published": m["published"], "certified": m["certified"], "complexity": m["complexity"],
+                "hypotheses": [{k: h.get(k) for k in ("name", "kind", "open", "complexity", "source")}
+                               for h in parsed["hypotheses"]],
+                "meta": meta, "updated": now()}
+            budget = {"model_calls": max(1, int(getattr(self.args, "research_cycles", 2)) * 20), "lean_checks": 400,
+                      "wall_seconds": max(60, int(getattr(self.args, "llm_timeout", 3600)) * 4)}
+            (pdir / "campaign.json").write_text(json.dumps(residual_campaign_manifest(pid, parsed, budget), indent=2))
+        else:
+            self.state["residual"] = None
+        self.save()
+
+    def _run_program_deductive(self) -> int:
+        pid = self.problem["id"]
+        pdir = self._program_dir()
+        plan_path, lemmas_path, ledger = pdir / "PLAN.md", pdir / "Lemmas.lean", pdir / "ledger.jsonl"
+        residual_path, premises_path = pdir / "Residual.lean", pdir / "premises.jsonl"
+        lemmas_path.touch()
+        cycles = int(getattr(self.args, "research_cycles", 2))
+        review_every = int(getattr(self.args, "review_every", 2))
+        per_cycle = max(0, int(getattr(self.args, "hyps_per_cycle", 4)))
+        refute_pol = getattr(self.args, "refute", "auto")
+        frozen = statement_prefix(self.state["statement"])
+        main = getattr(self, "thm_name", None) or f"erdos_{pid}"
+        hyp_prefix = f"{main}_hyp_"          # erdos_<n>_hyp_ at the top; <hypothesis>_hyp_ inside a sub-residual
+        depth = int(getattr(self.args, "residual_depth_current", 1) or 1)
+        max_depth = int(getattr(self.args, "residual_depth", 1) or 1)
+        certified_any = proved = False
+        skeleton = residual_path.read_text() if residual_path.exists() else ""
+        meta = ((self.state.get("residual") or {}) if isinstance(self.state.get("residual"), dict) else {}).get("meta") or {}
+        parsed = parse_residual(skeleton, pid, meta, main=main) if skeleton.strip() else None
+        if parsed and not (parsed["main_present"] and parsed["glue_sorry_free"]):
+            parsed, skeleton = None, ""          # a stale or hand-edited skeleton is not in force
+        exp_out = ""
+        for cycle in range(1, cycles + 1):
+            try:
+                cdir = pdir / "cycles" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-c{cycle}"
+                cdir.mkdir(parents=True, exist_ok=True)
+                refutations = load_refutations(pid)
+                # (a) refute first; a witness against an open hypothesis kills the skeleton in force
+                exp_out, rf = "", {"refuted": [], "clear": [], "invariants": []}
+                if refute_pol != "off":
+                    open_h = [h for h in (parsed or {}).get("hypotheses", []) if h["open"] and h["kind"] == "conjecture"]
+                    hyp_txt = ("\n".join(f"- {h['name']} : {h['statement']}" for h in open_h)
+                               or "(none yet -- this cycle, only extract necessary conditions on a counterexample to the target)")
+                    exp_out, rf = self._deductive_experiments(cdir, cycle, hyp_txt)
+                    killed = False
+                    for r in rf["refuted"]:
+                        h = next((x for x in open_h if x["name"] == str(r.get("hypothesis") or "")), None)
+                        if not h:
+                            continue
+                        path = record_refutation(pid, h["name"], h["statement"], r.get("witness"),
+                                                 str(cdir / "experiments.py"), cycle)
+                        self.log.event("program", "hypothesis_refuted", cycle=cycle, name=h["name"],
+                                       witness=json.dumps(r.get("witness"))[:200], path=str(path))
+                        with open(ledger, "a") as f:
+                            f.write(json.dumps({"cycle": cycle, "kind": "refutation", "sub": h["name"],
+                                                "witness": r.get("witness"), "at": now()}) + "\n")
+                        killed = True
+                    if killed:
+                        (cdir / "Residual.broken.lean").write_text(skeleton)
+                        skeleton, parsed = "", None
+                        self.state["residual"] = None
+                        self.save()
+                    refutations = load_refutations(pid)
+                # (b) plan: a residual skeleton, adopted only if it is real and better
+                lemmas = lemmas_path.read_text()
+                ledger_txt = ledger.read_text() if ledger.exists() else ""
+                resp = self.ask("plan", PLAN_PROMPT.format(
+                    pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
+                    literature=(self.state.get("literature") or "")[:4000],
+                    library=(self.library_context() + self.reduction_context()) or "(no cluster library for this problem)",
+                    lemmas=lemmas[-6000:] or "(empty)", residual=skeleton[-6000:] or "(none yet)",
+                    experiments=exp_out[-4000:] or "(none)", refuted=refuted_context(pid),
+                    failures=failures_context(pdir), hyp_prefix=hyp_prefix,
+                    ledger=ledger_txt[-3000:] or "(empty)", cycle=cycle))
+                new_meta = json_block(resp) or {}
+                # The plan's ratings, derivations and failure moves for hypotheses ALREADY in force are kept even
+                # when its skeleton is not adopted: a rating is information about the argument, not about the
+                # candidate skeleton (the first masked #275 run lost its ratings this way).
+                if parsed and isinstance(new_meta.get("hypotheses"), list):
+                    names = {h["name"] for h in parsed["hypotheses"]}
+                    merged = {h.get("name"): h for h in (meta.get("hypotheses") or []) if isinstance(h, dict)}
+                    for h in new_meta["hypotheses"]:
+                        if isinstance(h, dict) and h.get("name") in names:
+                            merged[h["name"]] = {**merged.get(h["name"], {}), **h}
+                    meta = {**meta, "hypotheses": list(merged.values())}
+                    parsed = parse_residual(skeleton, pid, meta, main=main)
+                for mv in (new_meta.get("failure_responses") or []):
+                    if isinstance(mv, dict) and mv.get("hypothesis"):
+                        with open(pdir / "moves.jsonl", "a") as f:
+                            f.write(json.dumps({"cycle": cycle, **{k: str(mv.get(k) or "")[:400] for k in ("hypothesis", "move", "detail")},
+                                                "at": now()}) + "\n")
+                        self.log.event("program", "failure_move", cycle=cycle, hypothesis=mv.get("hypothesis"),
+                                       move=mv.get("move"), detail=str(mv.get("detail") or "")[:160])
+                pm = re.search(r"```markdown\s*\n(.*?)```", resp, re.S)
+                with open(plan_path, "a") as f:
+                    f.write(f"\n\n## Cycle {cycle} ({now()})\n\n" + (pm.group(1).strip() if pm else "")
+                            + (f"\n\nRoute: {new_meta.get('route')}" if new_meta.get("route") else "") + "\n")
+                main_re = rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])"
+                cand = next((b for b in lean_blocks(resp) if re.search(main_re, b) and HYP_RE.search("\n" + b)), None)
+                if cand is None:      # a block with no hypothesis at all would be a full proof; consider it too
+                    cand = next((b for b in lean_blocks(resp) if re.search(main_re, b)), None)
+                if cand is None:
+                    self.log.event("program", "skeleton", cycle=cycle, adopted=False, reason="no skeleton block in the plan")
+                else:
+                    verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main)
+                    self.log.event("program", "skeleton", cycle=cycle, adopted=bool(verdict.get("adopted")),
+                                   reason=verdict.get("reason"), metric=(verdict.get("parsed") or {}).get("metric"))
+                    if verdict.get("adopted"):
+                        skeleton, parsed, meta = verdict["skeleton"], verdict["parsed"], new_meta
+                        residual_path.write_text(skeleton)
+                        with open(ledger, "a") as f:
+                            f.write(json.dumps({"cycle": cycle, "kind": "skeleton", "adopted": True,
+                                                "metric": parsed["metric"], "at": now()}) + "\n")
+                        self.log.event("program", "conditional_certified", cycle=cycle, **parsed["metric"])
+                        if verdict.get("proved"):
+                            self.state["proof"] = skeleton
+                            self.save()
+                            proved = True
+                if proved:
+                    self._write_residual(pdir, parsed, skeleton, cycle, meta, refutations)
+                    break
+                for h in (parsed or {}).get("hypotheses", []):
+                    if h["kind"] == "published" and h["open"]:
+                        with open(premises_path, "a") as f:
+                            f.write(json.dumps({"cycle": cycle, "name": h["name"], "statement": h["statement"],
+                                                "source": h.get("source"), "at": now()}) + "\n")
+                # (c) attack the open conjectures only -- least complex first -- and splice each certified one back
+                if parsed and per_cycle:
+                    module = self._install_lemmas_module(pdir)
+                    fails = failure_counts(pdir)
+                    todo = attack_order(parsed["hypotheses"], fails)[:per_cycle]
+                    # A child needs one prove round plus its Lean checks; a share below that buys a single
+                    # model call and nothing to compile (masked #275: three children at $1.32 each, all dead
+                    # after one $1.33 call). Concentrate what is left on fewer hypotheses instead.
+                    min_child = float(getattr(self.args, "min_child_budget", 2.5) or 0)
+                    if self.args.run_budget and min_child > 0:
+                        left = self.args.run_budget - self.spent_usd()
+                        affordable = int(left // min_child)
+                        if affordable < len(todo):
+                            skipped = [h["name"] for h in todo[affordable:]]
+                            todo = todo[:affordable]
+                            self.log.event("program", "hypotheses_deferred", cycle=cycle, skipped=skipped,
+                                           left_usd=round(left, 2), min_child_budget=min_child)
+                    for i, h in enumerate(todo):
+                        sub = hypothesis_substatement(skeleton, h["name"])
+                        if not sub:
+                            continue
+                        chk = self.check(sub, f"hyp-c{cycle}-{i}")
+                        if not (chk["ok"] and chk["sorries"]):
+                            self.log.event("program", "hypothesis_rejected", cycle=cycle, name=h["name"],
+                                           error=(chk["errors"][:1] or [""])[0][:200])
+                            continue
+                        sdir = cdir / f"hyp-{i}"
+                        # First attempt: a direct proof. A hypothesis that already failed, or one the plan rates
+                        # hard, gets the deductive treatment itself (its own skeleton, one level down) while depth
+                        # allows: the failure is analysed by decomposition, not retried verbatim.
+                        recursive = depth < max_depth and (fails.get(h["name"], 0) >= 1 or h.get("difficulty") == "hard")
+                        rc, child = self._attack_substatement(sub, h["name"], sdir, cycle, module, len(todo) - i,
+                                                              recursive=recursive)
+                        if rc is None:
+                            break
+                        with open(ledger, "a") as f:
+                            f.write(json.dumps({"cycle": cycle, "kind": "hypothesis", "sub": h["name"], "run": str(sdir),
+                                                "exit": rc, "verified": rc == 0, "recursive": recursive,
+                                                "statement": h["statement"][:200], "at": now()}) + "\n")
+                        sub_res = child.state.get("residual") if isinstance(child.state.get("residual"), dict) else None
+                        if not (rc == 0 and child.state.get("proof")) and sub_res and sub_res.get("skeleton"):
+                            # REFINEMENT: the child did not close its target but certified `target <= its own
+                            # sub-hypotheses`; splice that conditional theorem in, so the parent's residual becomes
+                            # the child's simpler open pieces. Depth without a full proof is still progress.
+                            try:
+                                sub_skel = Path(sub_res["skeleton"]).read_text()
+                            except OSError:
+                                sub_skel = ""
+                            sub_parsed = parse_residual(sub_skel, pid, sub_res.get("meta") or {}, main=h["name"]) if sub_skel.strip() else None
+                            refined = (splice_hypothesis(skeleton, h["name"], sub_skel)
+                                       if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"]
+                                       and any(x["open"] for x in sub_parsed["hypotheses"]) else None)
+                            res = self.check(refined, f"residual-refine-c{cycle}-{i}") if refined else {"ok": False, "errors": ["no refinable sub-residual"], "sorries": []}
+                            if res["ok"]:
+                                skeleton = res.get("body", refined)
+                                residual_path.write_text(skeleton)
+                                extra = [x for x in ((sub_res.get("meta") or {}).get("hypotheses") or []) if isinstance(x, dict)]
+                                meta = {**meta, "hypotheses": (meta.get("hypotheses") or []) + extra}
+                                parsed = parse_residual(skeleton, pid, meta, main=main)
+                                self.log.event("program", "hypothesis_refined", cycle=cycle, name=h["name"],
+                                               sub_hypotheses=[x["name"] for x in sub_parsed["hypotheses"] if x["open"]],
+                                               open_now=parsed["metric"]["open_conjectures"])
+                            else:
+                                self.log.event("program", "refine_failed", cycle=cycle, name=h["name"],
+                                               error=(res["errors"][:1] or [""])[0][:200])
+                                record_failure(pdir, failure_digest(child.state, h["name"], h["statement"], cycle, rc))
+                        elif not (rc == 0 and child.state.get("proof")):
+                            digest = failure_digest(child.state, h["name"], h["statement"], cycle, rc)
+                            record_failure(pdir, digest)
+                            self.log.event("program", "hypothesis_failed", cycle=cycle, name=h["name"], exit=rc,
+                                           attempts=digest["attempts"], goals=len(digest["unsolved_goals"]))
+                        if rc == 0 and child.state.get("proof"):
+                            body = strip_imports(child.state["proof"])
+                            with open(lemmas_path, "a") as f:
+                                f.write(f"\n-- certified in {sdir.name} ({now()})\nnamespace {h['name']}_ns\n{body}\nend {h['name']}_ns\n")
+                            certified_any = True
+                            self.log.event("program", "lemma_certified", cycle=cycle, name=h["name"])
+                            spliced = splice_hypothesis(skeleton, h["name"], body)
+                            res = self.check(spliced, f"residual-splice-c{cycle}-{i}") if spliced else {"ok": False, "errors": ["splice failed"], "sorries": []}
+                            if res["ok"]:
+                                skeleton = res.get("body", spliced)
+                                residual_path.write_text(skeleton)
+                                parsed = parse_residual(skeleton, pid, meta, main=main)
+                                self.log.event("program", "hypothesis_discharged", cycle=cycle, name=h["name"],
+                                               open_left=parsed["metric"]["open_conjectures"])
+                                if hole_count(skeleton) == 0 and not res["sorries"]:
+                                    self.state["proof"] = skeleton
+                                    self.save()
+                                    proved = True
+                            else:
+                                self.log.event("program", "splice_failed", cycle=cycle, name=h["name"],
+                                               error=(res["errors"][:1] or [""])[0][:200])
+                        self._check_run_budget("program")
+                        if proved:
+                            break
+                    if certified_any:
+                        self._install_lemmas_module(pdir)
+                # (d) render the state of the argument
+                self._write_residual(pdir, parsed, skeleton, cycle, meta, load_refutations(pid))
+                if proved:
+                    break
+                if cycle % review_every == 0 or cycle == cycles:
+                    review = (f"# REVIEW — Erdős #{pid}, after cycle {cycle} ({now()})\n\n**Requires human direction.** "
+                              f"Nothing here is a resolution.\n\n"
+                              + (pdir / "RESIDUAL.md").read_text()
+                              + f"\n\n## Plan notes\n{plan_path.read_text() if plan_path.exists() else ''}\n\n"
+                              f"## Ledger\n```\n{ledger.read_text() if ledger.exists() else ''}\n```\n\n"
+                              f"## Refutation output (last)\n```\n{exp_out[-3000:]}\n```\n"
+                              f"\nSpent so far: ${self.spent_usd():.2f} of ${self.args.run_budget}.\n")
+                    (pdir / "REVIEW.md").write_text(review)
+                    wait_s = int(getattr(self.args, "review_wait", 0))
+                    self.log.event("program", "review_written", cycle=cycle, path=str(pdir / "REVIEW.md"), wait_s=wait_s)
+                    if wait_s > 0 and cycle < cycles:
+                        fb = FileBackend(self.run_dir, wait_s)
+                        try:
+                            direction = fb.complete("review", review + "\n\nWrite your direction for the next cycles as plain text.")
+                            with open(plan_path, "a") as f:
+                                f.write(f"\n\n## HUMAN DIRECTION ({now()})\n{direction}\n")
+                        except TimeoutError:
+                            self.log.event("program", "paused_no_direction", cycle=cycle)
+                            break
+            except Harness.BudgetExhausted as e:
+                self.log.event("program", "stopped_on_budget", cycle=cycle, detail=str(e))
+                break
+        # Render the state of the argument however the loop ended. A budget stop inside a cycle used to skip
+        # this step, so a run that had adopted a skeleton finished with no RESIDUAL.md and no `residual=` on
+        # its summary line (masked #275 benchmark).
+        if parsed is not None:
+            try:
+                self._write_residual(pdir, parsed, skeleton, cycle, meta, load_refutations(pid))
+            except Exception as e:                       # noqa: BLE001 - reporting must not mask the outcome
+                self.log.event("program", "residual_report_failed", error=repr(e)[:200])
+        metric = (parsed or {}).get("metric") or {}
+        self.state["program"] = {"dir": str(pdir), "loop": "deductive", "certified_any": certified_any,
+                                 "residual": metric or None,
+                                 "ledger_entries": sum(1 for _ in open(ledger)) if ledger.exists() else 0}
+        if proved:
+            self.stage_verify()
+            outcome = "proved" if self.state.get("verify", {}).get("all_clear") is True else "proved_unverified"
+            if outcome == "proved_unverified":
+                self.state["stop_reason"] = "the residual skeleton closed but final verification did not clear"
+        else:
+            outcome = "partial" if (certified_any or parsed) else "not_proved"
+            self.state["stop_reason"] = (f"deductive research program finished {cycles} cycle(s); residual: "
+                                         + (f"{metric.get('open_conjectures')} open conjecture(s), "
+                                            f"{metric.get('published')} published premise(s)" if metric else "no skeleton in force")
+                                         + f" (see {pdir.relative_to(ROOT)}/RESIDUAL.md)")
+        self.state["outcome"] = outcome
+        self.save()
+        self.report(proved)
+        rc = 0 if outcome == "proved" else 3 if outcome == "partial" else 2
+        (self.run_dir / "DONE").write_text(json.dumps({"proved": proved, "outcome": outcome, "exit": rc,
+                                                        "verify": self.state.get("verify", {}).get("all_clear")}))
+        self.log.event("run", "end", proved=proved, outcome=outcome, spent_usd=round(self.spent_usd(), 2))
+        return rc
+
+    def _run_program_lemma(self) -> int:
+        """LEGACY loop (`--research-loop lemma`): PLAN.md ↔ numerical experiments ↔ sub-statements attacked with
+        the standard pipeline ↔ certified lemmas accumulated in Lemmas.lean ↔ retrospect; REVIEW.md every k cycles.
+        Kept for comparison with the deductive loop. Exit 3 = partial progress."""
         pid = self.problem["id"]
         if not getattr(self.args, "run_budget", None):
             self.log.event("program", "refused", detail="--allow-research requires --run-budget")
@@ -3971,14 +4888,14 @@ for the SAT solver instead of enumerating it.
                 lemmas = lemmas_path.read_text()
                 ledger_txt = ledger.read_text() if ledger.exists() else ""
                 # (a) numerical experiments
-                resp = self.ask("experiments", EXPERIMENTS_PROMPT.format(
+                resp = self.ask("experiments", EXPERIMENTS_PROMPT_LEMMA.format(
                     pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
                     literature=(self.state.get("literature") or "")[:4000], plan=plan[-6000:] or "(no plan yet)"))
                 exp_out = ""
                 m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
                 if m and unsafe_python(m.group(1)):
                     bad = unsafe_python(m.group(1))
-                    resp = self.ask("experiments", EXPERIMENTS_PROMPT.format(
+                    resp = self.ask("experiments", EXPERIMENTS_PROMPT_LEMMA.format(
                         pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
                         literature=(self.state.get("literature") or "")[:4000], plan=plan[-6000:] or "(no plan yet)")
                         + f"\n\nYour previous script was REJECTED by the safety screen for `{bad}`; allowed modules: "
@@ -3994,7 +4911,7 @@ for the SAT solver instead of enumerating it.
                     (cdir / "experiments.txt").write_text(exp_out)
                     self.log.event("program", "experiments_ran", cycle=cycle, rc=rc, lines=len(exp_out.splitlines()))
                 # (b) plan + sub-statements
-                resp = self.ask("plan", PLAN_PROMPT.format(
+                resp = self.ask("plan", PLAN_PROMPT_LEMMA.format(
                     pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
                     literature=(self.state.get("literature") or "")[:4000], plan=plan[-6000:] or "(none yet)",
                     experiments=exp_out[-4000:] or "(none)", lemmas=lemmas[-6000:] or "(empty)", ledger=ledger_txt[-3000:] or "(empty)",
@@ -4173,6 +5090,13 @@ Return the markdown only."""
             # reduction stage checked. Both change what a proof here actually means.
             "formalisation_readings": f["readings"] or None,
             "checked_structural_reductions": f["reductions"] or None,
+            # The deductive loop's conditional theorem. Say what the target was reduced TO, and that every open
+            # hypothesis is exactly as unproved as the problem.
+            "conditional_theorem_residual": ({"open_conjectures": f["residual"].get("open"),
+                                              "published_premises": f["residual"].get("published"),
+                                              "discharged": f["residual"].get("certified"),
+                                              "hypotheses": f["residual"].get("hypotheses")}
+                                             if f.get("residual") else None),
         }
         # The page shows everything KNOWN about the problem, not just what one run did. Findings recorded
         # in the Atlas by hand (a manual search, a read of the literature, a third-party claim) belong in
@@ -4683,6 +5607,412 @@ def decl_name(block: str) -> str:
     return m.group(1) if m else "(unnamed)"
 
 
+# --------------------------------------------------------------------------- deductive residuals
+# A RESIDUAL SKELETON is the artifact of the deductive research loop: optional `def`s, hypothesis lemmas
+# `theorem erdos_<pid>_hyp_<x> : <closed Prop> := by sorry`, and the frozen theorem proved from them with
+# NO sorry of its own. It is a certified conditional theorem `target ⇐ H₁ ∧ … ∧ Hₙ`; the open hypotheses
+# ARE the residual, and progress is that set getting smaller or more elementary. Everything here is text
+# analysis of Lean source; the compiler decides whether a skeleton is real.
+
+HYP_RE = re.compile(r"(?:^|\n)\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+)?(?:theorem|lemma)\s+"
+                    r"(erdos_(\d+)_hyp_[A-Za-z0-9_'!?]+)")
+# The plan rates each hypothesis; the attack order is (rating, syntactic complexity). Complexity alone put the
+# masked #275 run's "genuinely open residual" (all moduli odd) FIRST, because it had the shortest statement.
+DIFFICULTY_RANK = {"elementary": 0, "moderate": 1, "unrated": 2, "hard": 3}
+
+
+def attack_order(hyps: list[dict], failures: dict | None = None) -> list[dict]:
+    """Open conjecture hypotheses, easiest first: the plan's rating, then how often the hypothesis has already
+    failed (a second attempt without a changed plan is the same attempt), then complexity."""
+    failures = failures or {}
+    return sorted([h for h in hyps if h["open"] and h["kind"] == "conjecture"],
+                  key=lambda h: (DIFFICULTY_RANK.get(h.get("difficulty", "unrated"), 2),
+                                 failures.get(h["name"], 0), h["complexity"]))
+DEF_HEAD_RE = re.compile(r"^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                         r"(?:def|abbrev|structure|inductive|instance)\s")
+DECL_LINE_RE = re.compile(r"(?m)^(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                          r"(?:lemma|theorem|def|abbrev|instance|structure|inductive|namespace|end|section|open)\b")
+
+
+def split_decls(code: str) -> list[str]:
+    """Top-level declaration blocks. Trailing `--` comment lines of a block belong to the NEXT declaration —
+    that is where `-- PUBLISHED:` tags and derivation comments sit — so they are carried forward."""
+    raw = [b for b in re.split(r"\n(?=(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                               r"(?:lemma|theorem|def|abbrev|instance|structure|inductive|namespace|end|section|open)\s)",
+                           code) if b.strip()]
+    out, carry = [], ""
+    for b in raw:
+        lines = b.rstrip("\n").split("\n")
+        tail = []
+        while lines and (lines[-1].strip().startswith("--") or not lines[-1].strip()):
+            tail.insert(0, lines.pop())
+        body = "\n".join(lines)
+        block = ((carry + "\n") if carry else "") + body if body.strip() else carry
+        if block.strip():
+            out.append(block.strip("\n"))
+        carry = "\n".join(l for l in tail if l.strip())
+    if carry.strip():
+        out.append(carry)
+    return out
+
+
+def statement_prop(decl: str) -> str:
+    """The proposition of a `theorem name : P := …` block (binders, if any, stay in the text)."""
+    body = strip_comment_lines(decl)
+    m = re.search(r"(?:theorem|lemma)\s+\S+\s*(.*)", body, re.S)
+    if not m:
+        return ""
+    rest = m.group(1)
+    idx = rest.find(":= by")
+    if idx == -1:
+        idx = rest.rfind(":=")
+    header = (rest[:idx] if idx != -1 else rest).strip()
+    if header.startswith(":"):
+        header = header[1:]
+    return " ".join(header.split())
+
+
+def prop_complexity(prop: str) -> int:
+    """A crude, monotone size proxy for a proposition — quantifiers and connectives plus length. It ORDERS
+    residuals (lower = more elementary); it is never a probability and never reported as one."""
+    return len(re.findall(r"[∀∃]", prop)) * 3 + len(re.findall(r"[→↔∧∨¬]", prop)) + len(prop) // 60
+
+
+def parse_residual(skeleton: str, pid, meta: dict | None = None, main: str | None = None) -> dict:
+    """Split a residual skeleton into hypothesis lemmas and glue, and measure the residual.
+
+    `meta` is the plan's JSON ledger (kind / source / derivation per hypothesis name). A `published` tag
+    without a source is downgraded to `conjecture`: real mathematics enters with a citation or not at all.
+    The frozen theorem's own proof must be sorry-free — every hole must sit inside a hypothesis, or the glue
+    is not glue and the skeleton is rejected by the caller.
+    """
+    pid = str(pid)
+    main = main or f"erdos_{pid}"
+    meta_h = {h.get("name"): h for h in ((meta or {}).get("hypotheses") or []) if isinstance(h, dict)}
+    hyps, glue_holes, main_present = [], 0, False
+    seen: dict[str, int] = {}
+    for d in split_decls(skeleton):
+        holes = hole_count(d)
+        m = HYP_RE.search("\n" + d)
+        if m and m.group(2) == pid and m.group(1) != main:
+            name = m.group(1)
+            if name in seen:            # a discharged hypothesis keeps its proof in `<name>_ns` above it: the
+                hyps.pop(seen[name])    # top-level (last) declaration is the hypothesis, the copy is its proof
+                for k, v in list(seen.items()):
+                    if v > seen[name]:
+                        seen[k] = v - 1
+            seen[name] = len(hyps)
+            k = meta_h.get(name) or {}
+            tag = re.search(r"--\s*PUBLISHED:\s*(.+)", d)
+            src = k.get("source") or (tag.group(1).strip() if tag else None)
+            kind = k.get("kind") if k.get("kind") in ("conjecture", "published") else ("published" if tag else "conjecture")
+            if kind == "published" and not src:
+                kind = "conjecture"
+            prop = statement_prop(d)
+            diff = str(k.get("difficulty") or "").lower()
+            hyps.append({"name": name, "statement": prop, "kind": kind, "open": holes > 0, "holes": holes,
+                         "source": src if kind == "published" else None, "derivation": k.get("derivation"),
+                         "use": k.get("use"), "complexity": prop_complexity(prop),
+                         "difficulty": diff if diff in DIFFICULTY_RANK else "unrated"})
+        else:
+            glue_holes += holes
+            if re.search(rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])", strip_comment_lines(d)):
+                main_present = True
+    open_conj = [h for h in hyps if h["open"] and h["kind"] == "conjecture"]
+    metric = {"open_conjectures": len(open_conj),
+              "published": sum(1 for h in hyps if h["kind"] == "published" and h["open"]),
+              "certified": sum(1 for h in hyps if not h["open"]),
+              "complexity": sum(h["complexity"] for h in open_conj),
+              "max_complexity": max((h["complexity"] for h in open_conj), default=0)}
+    return {"hypotheses": hyps, "glue_sorry_free": glue_holes == 0, "main_present": main_present, "metric": metric}
+
+
+def residual_improves(new: dict, old: dict | None) -> bool:
+    """The HARDEST open conjecture must get easier first; then fewer open conjectures; then fewer published
+    premises; then lower total complexity.
+
+    Counting hypotheses first was tried and failed on the #645 benchmark (2026-09-16): the first skeleton
+    reduced the target to ONE compactness hypothesis -- "some N bounds every witness" -- which is exactly as
+    hard as the target and cannot be certified by kernel enumeration (witness-free colourings of [1,45]
+    exist), while the reference proof is four elementary lemmas. A count-first rule would have rejected the
+    four-lemma skeleton as "more hypotheses". Progress on a residual is its hard core getting smaller."""
+    if old is None:
+        return True
+    a, b = new["metric"], old["metric"]
+    for key in ("max_complexity", "open_conjectures", "published", "complexity"):
+        if a.get(key, 0) != b.get(key, 0):
+            return a.get(key, 0) < b.get(key, 0)
+    return False
+
+
+def hypothesis_span(skeleton: str, name: str) -> tuple[int, int] | None:
+    """(start, end) of the hypothesis declaration `name` in the skeleton source, up to the next declaration."""
+    ms = list(re.finditer(rf"(?m)^(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+)?(?:theorem|lemma)\s+{re.escape(name)}\b", skeleton))
+    if not ms:
+        return None
+    m = ms[-1]                          # the top-level hypothesis is the LAST declaration of that name
+    nxt = DECL_LINE_RE.search(skeleton, m.end())
+    end = nxt.start() if nxt else len(skeleton)
+    # trailing comment / blank lines belong to the NEXT declaration (`-- PUBLISHED:` tags, derivations)
+    head = skeleton[m.start():end].rstrip("\n").split("\n")
+    while len(head) > 1 and (head[-1].strip().startswith("--") or not head[-1].strip()):
+        head.pop()
+    return m.start(), m.start() + len("\n".join(head))
+
+
+def skeleton_defs(skeleton: str) -> list[str]:
+    return [d for d in split_decls(skeleton) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
+
+
+def hypothesis_substatement(skeleton: str, name: str) -> str | None:
+    """A self-contained sub-statement for ONE hypothesis: the skeleton's defs plus the hypothesis with `sorry`.
+    This is what a child run freezes and attacks; its proof splices back with `splice_hypothesis`."""
+    span = hypothesis_span(skeleton, name)
+    if not span:
+        return None
+    blk = skeleton[span[0]:span[1]].rstrip()
+    idx = blk.find(":= by")
+    if idx == -1:
+        idx = blk.rfind(":=")
+    if idx == -1:
+        return None
+    return "\n\n".join(skeleton_defs(skeleton) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
+
+
+def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:
+    """Discharge hypothesis `name` with a certified proof. The child's helpers and theorem go into a namespace
+    `<name>_ns` placed directly above the hypothesis (defs the skeleton already has are dropped, so the copies
+    refer to the skeleton's constants), and the hypothesis body becomes `exact <name>_ns.<name>`."""
+    span = hypothesis_span(skeleton, name)
+    if not span:
+        return None
+    have = {decl_name(d) for d in skeleton_defs(skeleton)}
+    parts = [d for d in split_decls(strip_imports(proof_block))
+             if not (DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n")) and decl_name(d) in have)]
+    if not any(decl_name(d) == name for d in parts):
+        return None
+    blk = skeleton[span[0]:span[1]]
+    idx = blk.find(":= by")
+    if idx == -1:
+        idx = blk.rfind(":=")
+    if idx == -1:
+        return None
+    new_blk = (f"namespace {name}_ns\n" + "\n\n".join(parts) + f"\nend {name}_ns\n\n"
+               + blk[:idx].rstrip() + f" := by\n  exact {name}_ns.{name}\n\n")
+    return skeleton[:span[0]] + new_blk + skeleton[span[1]:]
+
+
+def parse_refutation_output(out: str) -> dict:
+    """REFUTED: / CLEAR: / INVARIANT: lines from the refutation script's stdout."""
+    res = {"refuted": [], "clear": [], "invariants": [], "derivations": [], "observed": []}
+    pending = None
+    for line in out.splitlines():
+        line = line.strip()
+        for tag, key in (("REFUTED:", "refuted"), ("CLEAR:", "clear")):
+            if line.startswith(tag):
+                try:
+                    obj = json.loads(line[len(tag):].strip())
+                except json.JSONDecodeError:
+                    obj = None
+                if isinstance(obj, dict):
+                    res[key].append(obj)
+        if line.startswith("DERIVATION:"):
+            pending = line[len("DERIVATION:"):].strip()
+        elif line.startswith("INVARIANT:"):
+            inv = line[len("INVARIANT:"):].strip()
+            res["invariants"].append(inv)
+            # an invariant is only as good as the derivation printed just before it; keep them paired
+            res["derivations"].append({"invariant": inv, "derivation": pending})
+            pending = None
+        elif line.startswith("OBSERVED:"):
+            res["observed"].append(line[len("OBSERVED:"):].strip())
+    return res
+
+
+def failure_digest(child_state: dict, name: str, statement: str, cycle: int, exit_code) -> dict:
+    """What a failed hypothesis attempt actually said: unsolved goals, the last compiler errors of the best
+    attempts, the prover's own diagnosis (agentic summaries, critic notes) and the stop reason. This is the
+    material the next plan analyses; it is deliberately bounded so a failure never floods a prompt."""
+    attempts = [a for a in (child_state.get("attempts") or []) if isinstance(a, dict)]
+    def score(a):   # compiled-with-sorries first, then fewest errors
+        return (0 if a.get("compiled") else 1, len(a.get("errors") or []), -(a.get("n_sorries") or 0))
+    best = sorted([a for a in attempts if not a.get("rejected")], key=score)[:2]
+    goals = []
+    for a in attempts:
+        for e in a.get("errors") or []:
+            m = re.search(r"unsolved goals\n(.*)", str(e), re.S)
+            if m:
+                goals.append(" ".join(m.group(1).split())[:300])
+    critic = " ".join(str(v) for k, v in child_state.items() if str(k).startswith("critic") and v)
+    diagnoses = [str(a.get("summary") or "")[:300] for a in attempts if a.get("summary")]
+    dec = child_state.get("decomposition") or {}
+    return {"cycle": cycle, "name": name, "statement": statement[:400], "exit": exit_code,
+            "stop_reason": str(child_state.get("stop_reason") or "")[:200],
+            "attempts": len(attempts),
+            "best_attempts": [{"name": a.get("name"), "compiled": bool(a.get("compiled")), "sorries": a.get("n_sorries"),
+                               "errors": [str(e)[:220] for e in (a.get("errors") or [])[:3]]} for a in best],
+            "unsolved_goals": list(dict.fromkeys(goals))[:4],
+            "decomposition_errors": [str(e)[:220] for e in (dec.get("errors") or [])[:3]],
+            "diagnosis": (critic[:600] + (" | " if critic and diagnoses else "") + " | ".join(diagnoses)[:600]) or None,
+            "at": now()}
+
+
+def record_failure(pdir: Path, entry: dict) -> None:
+    with open(pdir / "failures.jsonl", "a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
+def load_failures(pdir: Path) -> list[dict]:
+    try:
+        return [json.loads(l) for l in (pdir / "failures.jsonl").read_text().splitlines() if l.strip()]
+    except (OSError, ValueError):
+        return []
+
+
+def failure_counts(pdir: Path) -> dict:
+    out: dict[str, int] = {}
+    for f in load_failures(pdir):
+        out[f.get("name", "")] = out.get(f.get("name", ""), 0) + 1
+    return out
+
+
+def failures_context(pdir: Path, limit: int = 6) -> str:
+    fs = load_failures(pdir)
+    if not fs:
+        return "(none yet)"
+    lines = []
+    for f in fs[-limit:]:
+        lines.append(f"- {f.get('name')} (cycle {f.get('cycle')}, exit {f.get('exit')}, {f.get('attempts')} attempt(s)): "
+                     f"{f.get('stop_reason') or 'no stop reason'}")
+        for g in f.get("unsolved_goals") or []:
+            lines.append(f"    unsolved goal: {g}")
+        for a in f.get("best_attempts") or []:
+            if a.get("errors"):
+                lines.append(f"    {a.get('name')}: compiled={a.get('compiled')} sorries={a.get('sorries')} | " + " || ".join(a["errors"]))
+        if f.get("diagnosis"):
+            lines.append(f"    prover's diagnosis: {f['diagnosis'][:500]}")
+    return "\n".join(lines)
+
+
+def refuted_dir(pid) -> Path:
+    return KNOWLEDGE / "refuted" / str(pid)
+
+
+def record_refutation(pid, name: str, statement: str, witness, source: str, cycle: int | None = None,
+                      certified: bool = False) -> Path:
+    """Bank a refuted statement so no later cycle re-proposes it in any disguise. A numerical witness is
+    labelled as such: it is an exact-arithmetic counterexample re-checked by the script, not a Lean proof of
+    the negation, and the record says so."""
+    d = refuted_dir(pid)
+    d.mkdir(parents=True, exist_ok=True)
+    entry = {"problem": str(pid), "name": name, "statement": statement, "witness": witness, "source": source,
+             "cycle": cycle, "at": now(), "certified": bool(certified),
+             "note": ("Lean-certified negation" if certified else
+                      "numerical witness re-checked by the refutation script; NOT a Lean-certified negation")}
+    path = d / f"{name}-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}.json"
+    path.write_text(json.dumps(entry, indent=2))
+    return path
+
+
+def load_refutations(pid) -> list[dict]:
+    d = refuted_dir(pid)
+    if not d.exists():
+        return []
+    out = []
+    for p in sorted(d.glob("*.json")):
+        try:
+            out.append(json.loads(p.read_text()))
+        except (OSError, ValueError):
+            continue
+    return out
+
+
+def refuted_context(pid, limit: int = 12) -> str:
+    rs = load_refutations(pid)
+    if not rs:
+        return "(none)"
+    return "\n".join(f"- {r.get('name')}: {str(r.get('statement') or '')[:300]} — witness "
+                     f"{json.dumps(r.get('witness'))[:200]} [{'certified' if r.get('certified') else 'numerical'}]"
+                     for r in rs[-limit:])
+
+
+def statement_refuted(prop: str, refutations: list[dict]) -> dict | None:
+    key = norm_ws(prop)
+    return next((r for r in refutations if norm_ws(str(r.get("statement") or "")) == key), None) if key else None
+
+
+def render_residual_md(pid, parsed: dict | None, skeleton_path: Path, refutations: list[dict], cycle: int,
+                       premises: list[dict] | None = None, failures: list[dict] | None = None,
+                       moves: list[dict] | None = None) -> str:
+    """RESIDUAL.md: the conditional theorem in force, its hypotheses by kind, and what has been refuted."""
+    lines = [f"# Residual — Erdős #{pid} (after cycle {cycle}, {now()})", "",
+             "**Nothing here resolves the problem.** A residual skeleton is a certified conditional theorem: the "
+             "frozen target follows by machine-checked glue from the hypotheses below. The OPEN hypotheses are the "
+             "residual; the problem is exactly as open as they are.", ""]
+    if not parsed:
+        lines += ["No skeleton is in force (none proposed yet, or the last one lost a hypothesis to a refutation).", ""]
+    else:
+        m = parsed["metric"]
+        lines += [f"Skeleton: `{skeleton_path}`", "",
+                  f"| open conjectures | published premises | discharged (certified) | complexity of open conjectures |",
+                  f"|---|---|---|---|",
+                  f"| {m['open_conjectures']} | {m['published']} | {m['certified']} | {m['complexity']} |", "",
+                  "| hypothesis | kind | status | complexity | derivation / source |", "|---|---|---|---|---|"]
+        for h in parsed["hypotheses"]:
+            status = "certified" if not h["open"] else ("premise (published, not formalised here)" if h["kind"] == "published" else "OPEN conjecture")
+            why = (h.get("source") or h.get("derivation") or "").replace("|", "/")[:160]
+            lines.append(f"| `{h['name']}` | {h['kind']} | {status} | {h['complexity']} | {why} |")
+        lines += ["", "Statements:", ""]
+        for h in parsed["hypotheses"]:
+            lines += [f"- `{h['name']}` : `{h['statement'][:400]}`"]
+        lines.append("")
+    if premises:
+        lines += ["## Published premises (hypotheses, never axioms)", ""]
+        for pr in premises[-12:]:
+            lines.append(f"- `{pr.get('name')}` — {pr.get('source')}")
+        lines.append("")
+    if failures:
+        lines += ["## Proof failures (what broke, fed back into the next plan)", ""]
+        for f in failures[-8:]:
+            lines.append(f"- cycle {f.get('cycle')}: `{f.get('name')}` exit {f.get('exit')}, {f.get('attempts')} attempt(s); "
+                         f"{(f.get('stop_reason') or '')[:120]}")
+            for g in (f.get("unsolved_goals") or [])[:2]:
+                lines.append(f"  - unsolved goal: `{g[:200]}`")
+        lines.append("")
+    if moves:
+        lines += ["## Moves the plan made in response", ""]
+        for mv in moves[-8:]:
+            lines.append(f"- cycle {mv.get('cycle')}: `{mv.get('hypothesis')}` → **{mv.get('move')}** — {(mv.get('detail') or '')[:220]}")
+        lines.append("")
+    lines += ["## Refuted statements (never re-propose)", ""]
+    lines += [f"- `{r.get('name')}` : `{str(r.get('statement') or '')[:200]}` — witness `{json.dumps(r.get('witness'))[:160]}` "
+              f"({'Lean-certified' if r.get('certified') else 'numerical, not Lean-certified'})" for r in refutations] or ["- (none)"]
+    lines.append("")
+    return "\n".join(lines)
+
+
+def residual_campaign_manifest(pid, parsed: dict, budget: dict) -> dict:
+    """The residual as a campaign DAG (campaign.py): open hypotheses are `conjecture` nodes the target is
+    `conditional_on`; discharged ones are `lemma` nodes it `depends_on`. A rendering of the argument's
+    structure, so `harness.py campaign residual` can report it; verification still goes through the harness."""
+    nodes, hyp_ids = [], []
+    for h in parsed["hypotheses"]:
+        nid = re.sub(r"[^A-Za-z0-9_]", "_", h["name"])
+        hyp_ids.append(nid)
+        if h["open"]:
+            nodes.append({"id": nid, "kind": "conjecture", "scope": "general", "claim": h["statement"][:400],
+                          "type": h["statement"], "premise": h["kind"] == "published", "source": h.get("source")})
+        else:
+            nodes.append({"id": nid, "kind": "lemma", "scope": "special_case", "claim": h["statement"][:400],
+                          "type": h["statement"]})
+    open_ids = [i for i, h in zip(hyp_ids, parsed["hypotheses"]) if h["open"]]
+    nodes.append({"id": "target", "kind": "target", "scope": "conditional" if open_ids else "general",
+                  "claim": f"Erdős #{pid}: the frozen theorem, proved by certified glue from the hypotheses",
+                  "depends_on": [i for i, h in zip(hyp_ids, parsed["hypotheses"]) if not h["open"]],
+                  "conditional_on": open_ids})
+    return {"schema_version": 1, "id": f"erdos_{pid}_residual", "targets": ["target"], "budget": budget, "nodes": nodes}
+
+
 RUN_SUMMARY_PREFIX = "RUN-SUMMARY"
 
 
@@ -4781,9 +6111,11 @@ def collect_run_facts(run_dir: Path, problem_id: str | None = None) -> dict:
         "llm_calls": len(resp),
         "lean_checks": sum(1 for e in events if e.get("event") == "check"),
         "fatals": sum(1 for e in events if e.get("stage") == "run" and e.get("event") == "fatal"),
-        "operator_context": any(e.get("event") == "operator_context" for e in events),
+        "operator_context": any(e.get("event") in ("operator_context", "operator_guidance") for e in events),
         "readings": [r for st in states.values() for r in (st.get("documented_readings") or [])],
         "reductions": [r for st in states.values() for r in ((st.get("reductions") or {}).get("verified") or [])],
+        # The deductive research loop's conditional theorem: which hypotheses the target rests on, by kind.
+        "residual": next((st["residual"] for st in states.values() if isinstance(st.get("residual"), dict)), None),
     }
 
 
@@ -4858,6 +6190,8 @@ def run_summary_line(run_dir: Path, exit_code: int | None = None) -> str:
         f"llm_calls={len(resp)}",
         f"lean_checks={leans}",
         f"lemmas={lemmas}",
+        *([f"residual=open:{r.get('open')},published:{r.get('published')},certified:{r.get('certified')}"]
+          if isinstance((r := st.get("residual")), dict) else []),
         f"fatals={fatals}",
         f"wall={wall or '?'}",
         f"mode={st.get('mode') or '?'}",
@@ -4944,6 +6278,26 @@ def main():
     runp.add_argument("--research-cycles", type=int, default=2, help="research program: cycles per invocation")
     runp.add_argument("--review-every", type=int, default=2, help="research program: write REVIEW.md every k cycles")
     runp.add_argument("--review-wait", type=int, default=0, help="research program: seconds to wait for human direction via the file backend (0 = stop)")
+    runp.add_argument("--masked", action="store_true",
+                      help="scrub the problem's identity (the word Erdős, the site's domain) from every outbound prompt; "
+                           "used with a synthetic problem id by benchmarks/deductive/prepare.py --masked")
+    runp.add_argument("--benchmark", action="store_true",
+                      help="blind re-derivation of an already-solved problem (benchmarks/deductive/): never writes "
+                           "knowledge/solved, harvests no lemmas, writes no brief; the run is an evaluation, not knowledge")
+    runp.add_argument("--research-loop", choices=["deductive", "lemma"], default="deductive",
+                      help="research program loop: 'deductive' (default) drives a certified conditional theorem whose open "
+                           "hypotheses are the residual; 'lemma' is the legacy experiments->conjectures->sub-lemmas loop")
+    runp.add_argument("--refute", choices=["auto", "off"], default="auto",
+                      help="deductive loop: run the refute-first script on open hypotheses each cycle (default) or skip it")
+    runp.add_argument("--hyps-per-cycle", type=int, default=4,
+                      help="deductive loop: open conjecture hypotheses attacked per cycle, easiest first (the plan's rating, then complexity)")
+    runp.add_argument("--residual-depth", type=int, default=2,
+                      help="deductive loop: how deep the residual tree may grow. 1 = hypotheses are attacked only as direct "
+                           "proofs; 2 (default) = a hypothesis that failed once, or is rated hard, is attacked with its own "
+                           "skeleton one level down and its residual spliced back as a refinement")
+    runp.add_argument("--min-child-budget", type=float, default=2.5,
+                      help="deductive loop: do not start a hypothesis child with less than this many USD; attack fewer "
+                           "hypotheses this cycle instead (0 disables)")
     runp.add_argument("--models", default=None, help="comma-separated model ids rotated across agentic attempts from round 2 (ensembles)")
     runp.add_argument("--literature-web", action="store_true", help="give the literature stage WebSearch/WebFetch (erdosproblems.com, forum, arXiv)")
     runp.add_argument("--web-budget", type=float, default=3.0, help="USD cap for the web-enabled literature call")
@@ -5042,7 +6396,7 @@ def main():
     finally:
         # Every run gets a plain-language brief, including one that failed: the account of a run that
         # found nothing is as useful to the next reader as one that found something.
-        if not getattr(args, "no_brief", False):
+        if not getattr(args, "no_brief", False) and not getattr(args, "benchmark", False):
             try:
                 h.stage_brief()
             except BaseException as e:                   # noqa: BLE001 — reporting must not fail a run

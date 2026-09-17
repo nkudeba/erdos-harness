@@ -1,6 +1,10 @@
 """Reproducible, evidence-aware triage of the complete catalogue. No LLM or solve calls.
 Run from repository root. Exact metadata and parsed source snapshots are retained.
 """
+import io,sys
+from pathlib import Path as _P
+sys.path.insert(0,str(_P(__file__).resolve().parent))
+from atomic import atomic_write
 import collections, csv, hashlib, json, re
 from pathlib import Path
 import sys
@@ -291,12 +295,15 @@ def main():
     for i,r in enumerate(rows):
         r['rank']=i+1;r['tier']='Demonstrated' if r['harness']=='Verified' else 'Promising' if r['score']>=70 else 'Plausible' if r['score']>=50 else 'Difficult' if r['score']>=30 else 'Research' if r['score']>=15 else 'Frontier'
     result={'meta':{'total':len(rows),'snapshot':'2026-09-09','preview':False,'method':'v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.','manually_reviewed':len(overrides),'sources':[{'url':'https://www.erdosproblems.com/range/1-1217','sha256':sha(DATA/'all-problems.html')},{'url':'https://raw.githubusercontent.com/teorth/erdosproblems/main/data/problems.yaml','sha256':sha(DATA/'problems.yaml')}],'harness_sha256':sha(ROOT/'harness.py'),'scorer_sha256':sha(Path(__file__)),'manual_reviews_sha256':sha(DATA/'reviewed.json')},'problems':rows}
-    (DATA/'rankings.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+    atomic_write(DATA/'rankings.json',json.dumps(result,ensure_ascii=False,indent=2))
     # Standalone private-site data contains no local paths, private transcripts or credentials.
-    (ROOT/'erdos-atlas/app/data.json').write_text(json.dumps(result,ensure_ascii=False,separators=(',',':')))
-    with (DATA/'rankings.csv').open('w',newline='') as f:
+    atomic_write(ROOT/'erdos-atlas/app/data.json',json.dumps(result,ensure_ascii=False,separators=(',',':')))
+    _csv=io.StringIO()
+    if True:
+        f=_csv
         w=csv.writer(f);w.writerow(['rank','problem','score','tier','catalogue_status','harness','categories','statement','rationale','requirements','source'])
         for r in rows:w.writerow([r['rank'],r['id'],r['score'],r['tier'],r['status'],r['harness'],'; '.join(r['tags']),r['statement'],' | '.join(r['rationale']),' | '.join(r['requirements']),r['url']])
+    atomic_write(DATA/'rankings.csv',_csv.getvalue())
     print(collections.Counter(r['status'] for r in rows));print(collections.Counter(r['tier'] for r in rows));print('Top new targets:')
     for r in [r for r in rows if r['harness']!='Verified'][:60]:print(r['rank'],r['id'],r['score'],r['status'],r['tags'],r['statement'][:160])
     print('OPEN:')

@@ -15,6 +15,9 @@ search on the next run without spending a model call. Run with --no-rerank to ba
 import argparse, datetime as dt, json, subprocess, sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from atomic import atomic_write, atomic_write_json, locked
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "atlas-data"
 REVIEWED = DATA / "reviewed.json"
@@ -48,10 +51,34 @@ def main() -> int:
                          "check we did not rerun. A floor is only as strong as what produced it.")
     ap.add_argument("--brief", help="path to a plain-language brief (markdown), or '-' for stdin; "
                                     "stored as atlas-data/briefs/<n>.md and shown on the problem page")
+    ap.add_argument("--residual", default=None,
+                    help="the deductive loop's conditional theorem for this problem, as a short text or a JSON "
+                         "object (e.g. the `residual` block of a run's state.json): which hypotheses the target "
+                         "now rests on, by kind. Recorded verbatim with a date so the partial axis can track "
+                         "shrinkage; never treated as a probability or a resolution")
     ap.add_argument("--no-rerank", action="store_true", help="do not regenerate the rankings now")
     args = ap.parse_args()
 
     pid = str(int(args.problem))
+    with locked(REVIEWED):
+        rc = _record(args, pid)
+    if rc:
+        return rc
+
+    if args.no_rerank:
+        print("skipped re-ranking (--no-rerank); run `python3 atlas-data/rank_problems.py` when done")
+        return 0
+    r = subprocess.run([sys.executable, str(DATA / "rank_problems.py")], cwd=str(ROOT),
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print(r.stdout[-2000:] + r.stderr[-2000:], file=sys.stderr)
+        return 1
+    print("rankings regenerated")
+    return 0
+
+
+def _record(args, pid: str) -> int:
+    """Read-modify-write the Atlas. Runs with an exclusive lock on reviewed.json held by the caller."""
     reviewed = load(REVIEWED, {})
     entry = reviewed.get(pid, {})
     if args.score is not None:
@@ -78,17 +105,30 @@ def main() -> int:
             print("--brief is empty", file=sys.stderr)
             return 2
         BRIEFS.mkdir(parents=True, exist_ok=True)
-        (BRIEFS / f"{pid}.md").write_text(text.rstrip() + "\n")
+        atomic_write(BRIEFS / f"{pid}.md", text.rstrip() + "\n")
         entry["brief_updated"] = dt.date.today().isoformat()
         print(f"atlas-data/briefs/{pid}.md: {len(text.split())} words")
+    if args.residual:
+        try:
+            parsed = json.loads(args.residual)
+        except ValueError:
+            parsed = args.residual.strip()
+        if not parsed:
+            print("--residual is empty", file=sys.stderr)
+            return 2
+        history = list(entry.get("residual_history", []))
+        if entry.get("residual") is not None:
+            history.append({"recorded": entry.get("residual_recorded"), "residual": entry["residual"]})
+        entry["residual"] = parsed
+        entry["residual_recorded"] = dt.date.today().isoformat()
+        entry["residual_history"] = history[-8:]
     if entry:
         entry["assessed"] = args.assessed or dt.date.today().isoformat()
     if not entry:
         print("nothing to record", file=sys.stderr)
         return 2
     reviewed[pid] = entry
-    REVIEWED.write_text(json.dumps(dict(sorted(reviewed.items(), key=lambda kv: int(kv[0]))),
-                                   ensure_ascii=False, indent=2) + "\n")
+    atomic_write_json(REVIEWED, dict(sorted(reviewed.items(), key=lambda kv: int(kv[0]))), indent=2)
     print(f"reviewed.json: #{pid} -> score={entry.get('score', '(unchanged)')}, "
           f"partial={entry.get('partial', '(unchanged)')}, "
           f"{len(entry.get('rationale', []))} rationale, {len(entry.get('requirements', []))} requirement(s)")
@@ -97,29 +137,21 @@ def main() -> int:
     if args.search_floor is not None:
         pf = ROOT / "problems" / f"erdos_{pid}.json"
         if pf.exists():
-            prob = load(pf, {})
-            prob["search_floor"] = args.search_floor
-            # The kind travels with the number, or the next search cannot tell a cheap screen from an
-            # executed sweep -- which is the entire point of typing floors.
-            if args.floor_kind:
-                prob["search_floor_kind"] = args.floor_kind
-            elif entry.get("search_floor_kind"):
-                prob["search_floor_kind"] = entry["search_floor_kind"]
-            pf.write_text(json.dumps(prob, ensure_ascii=False, indent=2) + "\n")
+            # its own lock: a different file, and a different read-modify-write
+            with locked(pf):
+                prob = load(pf, {})
+                prob["search_floor"] = args.search_floor
+                # The kind travels with the number, or the next search cannot tell a cheap screen from an
+                # executed sweep -- which is the entire point of typing floors.
+                if args.floor_kind:
+                    prob["search_floor_kind"] = args.floor_kind
+                elif entry.get("search_floor_kind"):
+                    prob["search_floor_kind"] = entry["search_floor_kind"]
+                atomic_write_json(pf, prob, indent=2)
             print(f"problems/erdos_{pid}.json: search_floor={args.search_floor:g}"
                   + (f" kind={prob['search_floor_kind']}" if prob.get("search_floor_kind") else ""))
         else:
             print(f"(no problems/erdos_{pid}.json yet; floor recorded in the Atlas only)")
-
-    if args.no_rerank:
-        print("skipped re-ranking (--no-rerank); run `python3 atlas-data/rank_problems.py` when done")
-        return 0
-    r = subprocess.run([sys.executable, str(DATA / "rank_problems.py")], cwd=str(ROOT),
-                       capture_output=True, text=True)
-    if r.returncode != 0:
-        print(r.stdout[-2000:] + r.stderr[-2000:], file=sys.stderr)
-        return 1
-    print("rankings regenerated")
     return 0
 
 

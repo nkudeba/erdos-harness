@@ -1,0 +1,81 @@
+{
+  "status": "REDUCTION-OK",
+  "purpose": "validate a necessary-condition derivation, not search for counterexamples",
+  "even_n_range": [
+    8,
+    800
+  ],
+  "counts": {
+    "factor_checks": 397,
+    "coprime_m_implications": 2219,
+    "coprime_b_implications": 219,
+    "localized_pairs": 22
+  },
+  "localized_examples": [
+    [
+      16,
+      5,
+      16,
+      1,
+      5,
+      5
+    ],
+    [
+      16,
+      6,
+      16,
+      1,
+      5,
+      6
+    ],
+    [
+      36,
+      15,
+      12,
+      3,
+      35,
+      5
+    ],
+    [
+      64,
+      7,
+      64,
+      1,
+      21,
+      7
+    ],
+    [
+      64,
+      15,
+      64,
+      1,
+      21,
+      15
+    ],
+    [
+      64,
+      21,
+      64,
+      1,
+      21,
+      21
+    ],
+    [
+      64,
+      22,
+      64,
+      1,
+      21,
+      22
+    ],
+    [
+      64,
+      28,
+      64,
+      1,
+      21,
+      28
+    ]
+  ],
+  "bound_at_r11": 9437185
+}

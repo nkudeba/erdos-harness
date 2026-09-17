@@ -1,0 +1,17 @@
+{
+  "id": "699",
+  "statement": "Is it true that for every $1\\leq i<j\\leq n/2$ there exists some prime $p\\geq i$ such that\\[p\\mid \\textrm{gcd}\\left(\\binom{n}{i}, \\binom{n}{j}\\right)?\\]",
+  "status": "FALSIFIABLE (open; class falsifiable)",
+  "notes": "OPEN problem (site class: falsifiable; status line: 'FALSIFIABLE — Open, but could be disproved with a finite counterexample.'). Nothing is resolved: the harness must formalize the question's conjectured direction and its negation (--open) and prove whichever it can. Site discussion (verbatim, no proof hints added): A problem of Erdős and Szekeres. A theorem of Sylvester and Schur says that for any $1\\leq i\\leq n/2$ there exists some prime $p>i$ which divides $\\binom{n}{i}$. GPT 5.6 (prompted by Price) has proved that this is true if $j\\leq \\frac{3}{2}i$ or $n=2j$. It is easy to prove (see the comments) that there are only finitely many possible $n$ which form a counterexample with any fixed $i<j$. Erdős and Szekeres further conjectured that $p\\geq i$ can be improved to $p>i$ except in a few special cases. In particular this fails when $i=2$ and $n$ being some particular powers of $2$. They also found some counterexamples when $i=3$, but only one counterexample when $i\\geq 4$:\\[\\textrm{gcd}\\left(\\binom{28}{5},\\binom{28}{14}\\right)=2^3\\cdot 3^3\\cdot 5.\\]This is mentioned in problem B31 of Guy's collection [Gu04] .\n\nQUANTIFIER READING (not a hint, a disambiguation): n is universally quantified as well as i and j. The target is: for every n and every pair i,j with 1 <= i < j <= n/2, there is a prime p >= i with p | gcd(C(n,i), C(n,j)). Read 'j <= n/2' as the integer condition 2*j <= n, and preserve 1 <= i < j (strict). A formalisation that weakens 2*j <= n, drops i < j, or fixes i or j is unfaithful.\n\nCRITICAL READING — p >= i, NEVER p > i (this is the single highest-risk confusion on this problem, and the site states both variants in adjacent sentences). The target uses the NON-STRICT p >= i. The strict variant p > i is a DIFFERENT and FALSE statement: Erdos and Szekeres conjectured it only 'except in a few special cases', and its known failures were recomputed here in exact integer arithmetic on 2026-09-11. In every one, the largest prime dividing the gcd is exactly i, so each SATISFIES the target and REFUTES the strict variant:\n  (n,i,j)=(10,3,5)            gcd = 2^2*3\n  (n,i,j)=(16,2,6)            gcd = 2^3\n  (n,i,j)=(28,3,14)           gcd = 2^2*3^2\n  (n,i,j)=(28,5,14)           gcd = 2^3*3^3*5\n  (n,i,j)=(244,3,122)         gcd = 2^2*3^4\n  (n,i,j)=(512,2,147)         gcd = 2^8\n  (n,i,j)=(2048,2,713)        gcd = 2^10\n  (n,i,j)=(2188,3,1094)       gcd = 2^2*3^6\n  (n,i,j)=(1594324,3,797162)  gcd = 2^2*3^12\nAny candidate counterexample MUST be tested against this list before it is reported: if a claimed refutation is one of these nine, the statement being refuted is the strict variant, not this target.\n\nThe NEGATIVE direction is a FINITE CERTIFICATE: one explicit triple (n,i,j) with 1 <= i < j, 2*j <= n, and no prime p >= i dividing gcd(C(n,i), C(n,j)). It is NOT a reachable one — see search_floor. The affirmative direction requires a general theorem; the ranges j <= 3i/2 and n = 2j are already settled on the site and reproving them does not resolve the problem.",
+  "url": "https://www.erdosproblems.com/699",
+  "open": true,
+  "class": "falsifiable",
+  "tags": [
+    "number theory",
+    "binomial coefficients"
+  ],
+  "comments": 9,
+  "flags": [],
+  "search_floor": 4.17e+19,
+  "search_floor_kind": "published"
+}

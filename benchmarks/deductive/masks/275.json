@@ -1,0 +1,8 @@
+{
+  "true_problem": "275",
+  "alias_id": "80317",
+  "statement_en": "Fix an integer m ≥ 0 and consider m residue classes u_j (mod q_j), j = 1, …, m, where every modulus q_j is a positive integer and the moduli are allowed to repeat. Suppose that some block of 2^m consecutive integers lies entirely inside the union of these m classes. Show that then every integer lies in one of the classes.",
+  "statement_lean": "theorem erdos_80317\n    (m : ℕ) (u : Fin m → ℤ) (q : Fin m → ℕ)\n    (hq : ∀ j, 0 < q j)\n    (hblock : ∃ t : ℤ, ∀ k : ℕ, k < 2 ^ m →\n      ∃ j : Fin m, (q j : ℤ) ∣ (t + (k : ℤ) - u j)) :\n    ∀ z : ℤ, ∃ j : Fin m, (q j : ℤ) ∣ (z - u j) := by\n  sorry",
+  "changes": "alpha-renaming only: r→m, a→u, n→q, s→t, i→j, x→z, hn→hq, hcover→hblock; theorem renamed to a synthetic id; English paraphrased without the words 'covering system', 'congruence' or any attribution; tags removed so no cluster library is attached",
+  "reference": "knowledge/solved/Erdos275.lean"
+}

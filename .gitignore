@@ -27,3 +27,10 @@ tmp/
 # The Atlas site is its own repository (github.com/nkudeba/erdos-atlas),
 # checked out here so the ranker can write app/data.json in place.
 erdos-atlas/
+
+# atomic-write lock and temp files (atlas-data/atomic.py)
+.*.lock
+.*.tmp
+
+# Test debris: the reduce/escalate tests write into the real knowledge dir under a synthetic problem id
+knowledge/reductions/99273/

@@ -1,0 +1,12 @@
+{
+  "resolved": false,
+  "claimEligible": false,
+  "new_mechanically_verified_theorems": 0,
+  "numerical_reduction_checks": "passed",
+  "lean_check": {
+    "exit": 142,
+    "status": "timeout",
+    "wall_limit_seconds": 180
+  },
+  "cost_usd": null
+}

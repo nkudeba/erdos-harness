@@ -1,0 +1,14 @@
+{
+  "id": "80317",
+  "statement": "Fix an integer m ≥ 0 and consider m residue classes u_j (mod q_j), j = 1, …, m, where every modulus q_j is a positive integer and the moduli are allowed to repeat. Suppose that some block of 2^m consecutive integers lies entirely inside the union of these m classes. Show that then every integer lies in one of the classes.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}

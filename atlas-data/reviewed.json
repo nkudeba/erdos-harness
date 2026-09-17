@@ -198,12 +198,18 @@
   },
   "242": {
     "rationale": [
-      "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier."
+      "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier.",
+      "Deductive-loop candidate, rank 2 (2026-09-16; fit 72): Erdos-Straus is the textbook case of shrinking a residual by certified reductions. Mordell's classical identities give 4/n = 1/x+1/y+1/z for every n outside six residue classes mod 840 (n congruent to 1, 11^2, 13^2, 17^2, 19^2, 23^2), and it suffices to treat primes; each identity is elementary algebra a child run can certify, so the first skeleton should read '#242 <= (every prime p in those classes has a representation)' with the identities as discharged hypotheses. The remaining classes are the genuinely open core (verified numerically far past 1e14 in the literature; not rerun here) and stay a conjecture hypothesis."
     ],
     "requirements": [
-      "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches."
+      "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches.",
+      "Judge a deductive run by whether the residual shrinks from 'all n>2' to the six Mordell classes with the identities certified and spliced; that is real, checkable partial value. Do not spend the budget on a counterexample search (falsifiable class, but the recorded literature checks make it futile) and do not expect the residual classes to close: that is the open problem."
     ],
-    "score": 3
+    "score": 3,
+    "sources": [
+      "atlas-data/deductive-candidates.md"
+    ],
+    "assessed": "2026-09-16"
   },
   "264": {
     "assessed": "2026-09-11",
@@ -220,7 +226,7 @@
     "partial": 70
   },
   "273": {
-    "assessed": "2026-09-11",
+    "assessed": "2026-09-16",
     "partial": 64,
     "rationale": [
       "Statement disambiguation: the site's bare wording omits 'distinct'. Erdos-Graham [ErGr80] and google-deepmind/formal-conjectures (StrictCoveringSystem, injective_moduli) both require DISTINCT moduli; without that the problem is trivially YES (0,1,2,3 mod 4, and 4=5-1). Any formalisation without injective moduli is unfaithful.",
@@ -238,7 +244,9 @@
       "The test bites hardest exactly where a candidate looks most attractive: k <= slack*L, so the tiny-slack candidates chosen for being nearly determined have almost no excess budget. m=16 does most of the work (17 prime, so 16 is admissible and forced) while the other admissible multiples of 16 are too sparse to cancel its weight. Standard Mirsky-Newman style argument applied at every d rather than only the largest modulus; no novelty of technique claimed.",
       "FOLLOW-UP (2026-09-11): the fibre/Fourier family is now provably EXHAUSTED, by decision rather than by search. Every d-constraint is implied by the constraint at mu = min{m in U : d|m}, so the family collapses to: for every mu in U, L/mu - sum_{m in U, mu|m, m!=mu} L/m <= k_U. That form is monotone in U, so a mu violating it under the maximal admissible set violates under every subset containing it and can be deleted outright; iterating to a fixed point is COMPLETE in polynomial time. No 2^47 enumeration is needed.",
       "Propagation eliminates exactly the same 20 candidates and deletes ZERO moduli at all nine survivors - the full admissible set already satisfies every constraint there, so no subset search can improve on it. The survivors fall short by 1944 to 19326; the closest, L=302400, misses by 1944 against a budget of 6700 (a 29 percent gap), versus 55440 which is over by only 16. Regression: 3130 genuine covering systems built across L=12..720, zero false kills.",
-      "The reason is intrinsic: k <= slack*L, so the inequality bites exactly when slack is tiny. The 20 eliminated are the tight candidates; the nine survivors all have slack 0.02-0.08 and thousands of units of excess to absorb any imbalance. Tightness is both what makes a candidate look attackable AND what this test needs, so the algebra consumed exactly the candidates a search would have preferred and left the ones that are loose for both."
+      "The reason is intrinsic: k <= slack*L, so the inequality bites exactly when slack is tiny. The 20 eliminated are the tight candidates; the nine survivors all have slack 0.02-0.08 and thousands of units of excess to absorb any imbalance. Tightness is both what makes a candidate look attackable AND what this test needs, so the algebra consumed exactly the candidates a search would have preferred and left the ones that are loose for both.",
+      "Viability assessment 2026-09-16 (operator session, no paid run; experiments/open-viability-2026-09-16/ASSESSMENT.md): of the 639 open problems, #273 is the only one whose FULL resolution can be a finite certificate at a plausibly reachable size - two disjoint distinct-modulus covering systems over H2, lcm likely 1e5-1e7, 50-100 congruences. Every other finite-certificate open problem is either a believed-true conjecture whose certificate would be a counterexample (#742, #23, #583, #628; #617 fixed cases do not resolve the universal statement) or has a witness floor far past reach (#7 lcm 1.15e7, #366 1e22, #647 9.2e18, #364 >1e28); #835's first open case is a ~2M-variable colouring of J(20,10) after k=4 and k=6, also with k+1 prime, failed.",
+      "Third-party claims on the live thread and claims page, NOT verified here: ideal_ombrer (12 Jul 2026, AI-assisted, repo paper_273) claims the 149 moduli with p <= 877 cannot cover Z on their own via the BBMST distortion sieve with an exact rational certificate, so any covering uses some modulus p-1 with p > 877, and that sum 1/(p-1) >= 1 + exp(-3.36e21) follows from Filaseta-Kalogirou (arXiv:2407.15280) because the 3-smooth (Pierpont) moduli sum to about 0.706 < 11/12. Zeraoulia (proof-claims page, 27 Jul 2026, GPT-5.6) claims L >= 393120 by a parity-capacity argument plus forced-residue CRT density; our own exhaustive floor is 110880 and our nine Fourier survivors below 400000 include 393120, so the two are not in conflict but neither confirms the other."
     ],
     "requirements": [
       "An affirmative resolution is a finite certificate but must exhibit two disjoint distinct-modulus covering systems over H; a bounded search is only worth running above lcm 55440, and the reciprocal budget is razor thin (best smooth L' <= 4e6 gives f = 2.30, i.e. 0.30 of total slack across both families).",
@@ -250,7 +258,8 @@
       "Use the condition as a screen before any solver call. For the 7 survivors at L=100800 (6 of which contain the modulus 100800, making the inequality vacuous) the remaining handle is the exact equality |sum_E zeta^r| = 1 at every primitive 100800-th root of unity, which is severe and untried.",
       "Do not spend solver time on L=55440 or L=100800; both are eliminated by algebra. Run the fibre/Fourier screen at every d BEFORE any SAT encoding - it is free and it killed 20 of 29 candidates that four solver runs could not.",
       "The nine surviving candidates need a genuinely different lever: the residue-free bound has no bite when slack is large. Either strengthen to an exact minimum over d-th roots of unity, combine several d simultaneously, or encode those nine for SAT.",
-      "Do not attempt subset branch-and-bound on the nine survivors: the propagation decision is complete and returns nothing. They need SAT or new mathematics, and they are WORSE SAT targets than the ones already tried - larger (L=110k-393k, |A|=52-72) and looser (more residue freedom) than L=100800, which did not decide in 37 minutes."
+      "Do not attempt subset branch-and-bound on the nine survivors: the propagation decision is complete and returns nothing. They need SAT or new mathematics, and they are WORSE SAT targets than the ones already tried - larger (L=110k-393k, |A|=52-72) and looser (more residue freedom) than L=100800, which did not decide in 37 minutes.",
+      "Expansion needed for the affirmative side, in order: (a) a constructive exact-cover/SAT search in the halved two-system form that fixes forced moduli, enumerates free subsets outside the solver, adds the fibre/Fourier inequalities and the Mirsky-Newman condition as constraints, breaks residue-translation symmetry, and extends candidate lcms past the 400000 compute cap (screen and propagation cost milliseconds per L); (b) a Lean certificate format for a found covering system that the kernel checks without enumerating L residues (CRT/tree certificate or Bool-reflected checker), since kernel decide timed out at 420 s on 3003 cases and native_decide is banned. Neither helps the negative side, which needs a distortion-type nonexistence theorem for the p-1 pool: research, not engineering. Treat the p > 877 and L >= 393120 claims as unverified until rerun."
     ],
     "score": 12,
     "search_floor": 110880.0,
@@ -265,7 +274,10 @@
       "knowledge/reductions/273/FOURIER-ELIMINATION.md",
       "knowledge/reductions/273/fourier_sweep.py",
       "knowledge/reductions/273/fourier_regression.py",
-      "knowledge/reductions/273/fourier_propagate.py"
+      "knowledge/reductions/273/fourier_propagate.py",
+      "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+      "https://www.erdosproblems.com/forum/thread/273",
+      "https://www.erdosproblems.com/forum/thread/273/proof-claims"
     ],
     "brief_updated": "2026-09-11"
   },
@@ -317,15 +329,21 @@
     "score": 62
   },
   "306": {
-    "assessed": "2026-09-11",
+    "assessed": "2026-09-16",
     "rationale": [
-      "The main theorem is already formalized sorry-free in Lean 4 / Mathlib and archived with the arXiv source (anc/lean/), leaving a stated axiom boundary of two explicit analytic inputs."
+      "The main theorem is already formalized sorry-free in Lean 4 / Mathlib and archived with the arXiv source (anc/lean/), leaving a stated axiom boundary of two explicit analytic inputs.",
+      "Live check 2026-09-16: still OPEN on the site (10 comments, 0 proof claims, 'Working on formalising: Yuren_Tang'). Two distinct Lean developments exist and the earlier Atlas note conflated them. (1) Yuren Tang, Zenodo 10.5281/zenodo.20767390 v0.0.3 (19 Jun 2026; github.com/Yuren-Tang/erdos-306): claims a COMPLETE sorry-free proof of the formal-conjectures statement erdos_306 (every q > 0 with squarefree denominator), with #print axioms = propext, Classical.choice, Quot.sound plus two named axioms transcribing Rosser-Schoenfeld 1962 - Corollary 3 (3x/(5 log x) < pi(2x) - pi(x) for x >= 20.5) and Theorem 5 (Mertens' prime-reciprocal sum within 1/(2 log^2 x) of log log x + B). Toolchain v4.28.0, CI rebuilds and audits the axiom set. Nat Sothanaphan ran a screening check and reports it 'could be correct'; no informal manuscript yet; NOT verified here and not accepted by Bloom. (2) Shisheng Li, arXiv:2606.15159 (18 Jun 2026): PARTIAL - all rationals for omega >= 3, and for omega = 2 only a/b above a threshold T(r) <= 1/5; uses native_decide plus Olson's theorem and a Rosser-type bound as inputs.",
+      "Mathlib v4.32.0-rc1 (local checkout) has theta(x) <= log 4 * x, Bertrand, and asymptotic Chebyshev/PNT-adjacent statements (eventually_primeCounting_le, primeCounting_sub_theta_div_log_isBigO) but no explicit Rosser-Schoenfeld bounds and no explicit Mertens error term, so Tang's two axioms are a genuine formalisation gap, not a lookup."
     ],
     "requirements": [
-      "Discharge one of the two boundary axioms against Mathlib rather than reproving the main theorem."
+      "Discharge one of the two boundary axioms against Mathlib rather than reproving the main theorem.",
+      "Not a harness solve target: the mathematics is Tang's. The harness-shaped contribution is independent verification (clean rebuild, #print axioms, statement-faithfulness audit against formal-conjectures) and, if the proof has slack, discharging the two analytic axioms against Mathlib with weaker explicit Chebyshev-type bounds. Record any such result as verification of a third-party proof, never as a resolution."
     ],
     "sources": [
-      "atlas-data/forum/306.json"
+      "atlas-data/forum/306.json",
+      "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+      "https://github.com/Yuren-Tang/erdos-306",
+      "https://www.erdosproblems.com/forum/thread/306"
     ]
   },
   "307": {
@@ -423,6 +441,18 @@
       "Establish a uniform Hall-type condition using new information about prime divisors of composite blocks."
     ],
     "score": 3
+  },
+  "376": {
+    "rationale": [
+      "Deductive-loop candidate, rank 4 (2026-09-16; fit 63): by Kummer, C(2n,n) is coprime to a prime p exactly when adding n+n in base p carries nowhere, i.e. every base-p digit of n is at most (p-1)/2. So the frozen target is EQUIVALENT to 'infinitely many n whose base-3 digits lie in {0,1}, base-5 digits in {0,1,2} and base-7 digits in {0,1,2,3}' - a statement with no binomial coefficient in it, provable as a certified reduction from Formal.Library.BinomialCoefficients (digit_carry) and Mathlib's Kummer theorem. Erdos-Graham-Ruzsa-Straus (1975) proved the two-prime case (coprime to 15); three primes is the open core."
+    ],
+    "requirements": [
+      "A deductive run should certify the Kummer equivalence and adopt the digit statement as the residual; the two-prime theorem may enter as a published premise. The digit statement itself is research-grade (simultaneous digit restrictions in three bases); do not expect it to close, and do not run a bounded search - infinitude cannot be exhibited."
+    ],
+    "sources": [
+      "atlas-data/deductive-candidates.md"
+    ],
+    "assessed": "2026-09-16"
   },
   "379": {
     "rationale": [
@@ -556,12 +586,19 @@
   },
   "475": {
     "rationale": [
-      "The source reports a large-prime resolution assembled from several deep ranges, leaving finite exceptions. Generic permutation enumeration does not supply an effective global cutoff."
+      "The source reports a large-prime resolution assembled from several deep ranges, leaving finite exceptions. Generic permutation enumeration does not supply an effective global cutoff.",
+      "Live site 2026-09-16: DECIDABLE ('resolved up to a finite check'). Per the thread (alpm, 24 Feb 2026; Alfaiz, 23 Feb and 03 Mar 2026), the resolution for all sufficiently large p spans four papers with different techniques: BeKr24 (small sets), PhSa25/26 (medium sets, and a complete resolution for large p), BBKMM25 (dense, t >= p^(1-c)), MuPo25 (ultra-dense, t >= (1-o(1))p); CoFi26 improves the small-set range to t <= exp((log p)^(1/3)). No explicit threshold p_0 is stated on the thread; an arXiv lookup from this session returned nothing, so effectiveness is unconfirmed."
     ],
     "requirements": [
-      "Extract effective thresholds and combine the four range theorems with certified finite checks."
+      "Extract effective thresholds and combine the four range theorems with certified finite checks.",
+      "Not a full-solution target for the harness: even an explicit p_0 leaves a check over all 2^(p-1) subsets of F_p^* for every p < p_0, and formalising four deep papers is out of scope. Partial value only, e.g. certifying sequenceability of every subset for a few small p."
     ],
-    "score": 18
+    "score": 18,
+    "sources": [
+      "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+      "https://www.erdosproblems.com/forum/thread/475"
+    ],
+    "assessed": "2026-09-16"
   },
   "481": {
     "rationale": [
@@ -618,6 +655,20 @@
       "Certify the positive-density construction as a separate dependency before using the final contradiction."
     ],
     "score": 43
+  },
+  "583": {
+    "rationale": [
+      "The 31 August forum report claims exhaustive verification of all connected graphs through 11 vertices, including 1,006,700,565 at n=11; not independently rerun. At n=12 the sweep leaves 35,633,639 undecided graphs and establishes no floor there. Small generic enumeration is therefore not a promising route to a full solution."
+    ],
+    "requirements": [
+      "Any computational attack must target unresolved structure beyond the reported n<=11 check, using a decision procedure for simple paths rather than trails; a bounded extension alone cannot prove the conjecture."
+    ],
+    "sources": [
+      "https://www.erdosproblems.com/forum/thread/583"
+    ],
+    "search_floor": 1006700565.0,
+    "search_floor_kind": "published",
+    "assessed": "2026-09-11"
   },
   "617": {
     "assessed": "2026-09-11",
@@ -687,7 +738,7 @@
     "score": 99
   },
   "677": {
-    "assessed": "2026-09-11",
+    "assessed": "2026-09-16",
     "partial": 60,
     "rationale": [
       "Quantifier reading: formal-conjectures states this as forall m n k, k>0 -> m >= n+k -> lcmInterval m k != lcmInterval n k. The two solutions Erdos knew (M(4,3)=M(13,2), M(3,4)=M(19,2)) use l != k and are NOT counterexamples to this statement.",
@@ -698,12 +749,14 @@
       "Because the ratio list is exhaustive, sweeping n rules out EVERY m (unbounded), not just m in a window: no counterexample for k=3 or k=4 with n < 1e8, k=5 or k=6 with n < 1e6, k=7 or k=8 with n < 2e5. For k=3 the whole question is the single equation (x-1)x(x+1)=2(y-1)y(y+1), whose only solution with x>y below 1e8 is (5,4) = the overlapping pair (n,m)=(2,3).",
       "Smoothness obstruction: if M(n,k)=M(m,k) with m>=n+k then every prime p>k dividing any of m+1..m+k satisfies p <= (m-n)+(k-1), because p divides some n+i and m+j>n+i. So all of m+1..m+k are max(k, m-n+k-1)-smooth.",
       "Open. The negative direction (find n,k,m with m>=n+k and lcm(n+1..n+k)=lcm(m+1..m+k)) is a finite certificate but no counterexample exists in any reachable range: verified none for k<=12 with n,m<=2e5, and k=3 reduces to the single cubic x^3-x=2(y^3-y), exhaustive to y<1e9 with only the degenerate y=4,x=5 (that is n=2,m=3, where m-n=1<k, which the hypothesis allows). The positive direction is Erdos's conjecture and needs new mathematics: k<=2 is elementary, k=3 is already a Thue-Siegel/elliptic-type Diophantine problem.",
-      "CORRECTION (2026-09-11): previously scored 7. Lowered because no route to a COMPLETE proof is reachable: the counterexample side is exhausted to 1e9 with only the allowed overlapping case, Thue-Siegel makes any survivor finite-but-unreachable, and the positive side is already deep at k=3. The banked k<=2 proof and 12 lemmas are real value but they are PARTIAL value, now recorded on the partial axis where they belong."
+      "CORRECTION (2026-09-11): previously scored 7. Lowered because no route to a COMPLETE proof is reachable: the counterexample side is exhausted to 1e9 with only the allowed overlapping case, Thue-Siegel makes any survivor finite-but-unreachable, and the positive side is already deep at k=3. The banked k<=2 proof and 12 lemmas are real value but they are PARTIAL value, now recorded on the partial axis where they belong.",
+      "Deductive-loop candidate, rank 3 (2026-09-16; fit 62): the k<=2 case is proved, d_k is periodic (certified), and for each fixed k the statement reduces to a Diophantine equation - k=3 is x^3-x = 2(y^3-y), swept to y<1e9 with only the allowed overlapping pair. The natural skeleton is '#677 <= (for every k>=3 the k-th equation has no admissible solution)', with the k<=2 lemmas discharged and, for k=3, an effective Thue bound (Baker-type) entering as a PUBLISHED premise. The residual is uniform-in-k finiteness, which is research-grade; the loop can make that explicit and certify the reductions."
     ],
     "requirements": [
       "A disproof needs one explicit triple (n,k,m); a proof needs a general theorem - Thue-Siegel only gives finiteness for each fixed k, so an affirmative resolution must be uniform in k.",
       "Certifiable now: the k<=2 cases, the periodicity of d_k, and the smoothness lemma. A resolution still needs either an effective Thue/elliptic argument uniform in k, or a counterexample outside the swept ranges.",
-      "Certified partial value is the realistic target: the k<=2 case is proved sorry-free (lcm{n+1}=n+1 injective; lcm{n+1,n+2}=(n+1)(n+2) strictly increasing). Anything at k>=3 needs the Thue-Siegel machinery, so do not spend a bounded search there."
+      "Certified partial value is the realistic target: the k<=2 case is proved sorry-free (lcm{n+1}=n+1 injective; lcm{n+1,n+2}=(n+1)(n+2) strictly increasing). Anything at k>=3 needs the Thue-Siegel machinery, so do not spend a bounded search there.",
+      "Success for a deductive run is a certified reduction of the frozen target to per-k Diophantine hypotheses with k<=2 discharged, not a proof. Tag any Thue/Baker input as published with its citation; never as an axiom."
     ],
     "score": 5,
     "search_floor": 1000000000.0,
@@ -712,7 +765,8 @@
       "scratchpad probes p677_big.py / p677_gaps.py",
       "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/677.lean",
       "experiments/open-atlas-top2/677-notes.md",
-      "knowledge/partial/677/"
+      "knowledge/partial/677/",
+      "atlas-data/deductive-candidates.md"
     ]
   },
   "678": {
@@ -724,14 +778,90 @@
     ],
     "score": 46
   },
-  "699": {
+  "686": {
+    "score": 8,
     "rationale": [
-      "Some parameter regions are settled, and a fixed pair i,j leaves only finitely many possible exceptions. This suggests a structured search, not an unrestricted proof."
+      "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4."
     ],
     "requirements": [
-      "Exploit the fixed-parameter bounds and certify any gcd/prime-factor witness; do not confuse the stronger p>i variant with p≥i."
+      "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary."
     ],
-    "score": 20
+    "sources": [
+      "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+      "https://www.erdosproblems.com/forum/thread/686"
+    ],
+    "assessed": "2026-09-16"
+  },
+  "699": {
+    "rationale": [
+      "Some parameter regions are settled, and a fixed pair i,j leaves only finitely many possible exceptions. This suggests a structured search, not an unrestricted proof.",
+      "Live forum checked 2026-09-11: still open. Cong reports the official p>=i statement tested through n=10^7, with targeted power families through about 1.3e8; not independently rerun. A generic bounded search would repeat known ground. The April full proof was explicitly rejected by Bloom on 11 May; its Lean code did not formalize this statement.",
+      "Accepted partial proof covers j<=3i/2 and n=2j. Van Doorn/Rocca claim a further reduction to i=3 or an ineffective finite exceptional set with 4<=i<=1475; this is an unverified partial claim, not a full solution or an executable finite cutoff. Preferred next proof-oriented candidate among the reviewed shortlist, with low confidence of full resolution.",
+      "Read the current Van Doorn/Rocca Overleaf source on 2026-09-11. It differs from the forum summary: binomial determinant lower bound G>exp(-2i)(n/i)^(i/4), asymptotic large-i theorem, an asserted i>=1000 explicit cutoff whose calculation is omitted, and ineffective fixed-i finiteness for i>=4. It explicitly leaves i=3 (G a power of two) unresolved. External proposed proof read but not independently validated; no full resolution.",
+      "Search floor filed in enumerable-object units, as the triage gate requires: Cong's open-sourced Rust search (github.com/conglu1997/erdos_699_rust) tested EVERY n <= 10^7, i.e. every candidate triple (n,i,j) with 1<=i<j<=n/2 below that n, which is sum_{n<=1e7} C(floor(n/2),2) = 4.17e19 triples -- 4.2e10 times the harness's bounded-search reach of 1e9. Targeted families beyond it (n=2^k, k<=27; n=3^m+1, m<=17) add ~5.3e15 more. Filing the problem's own parameter (n=1e7) instead would have read as a trivially cheap search and let a futile search stage run. Not rerun here; kind=published.",
+      "Four public forum reductions re-verified in exact integer arithmetic on 2026-09-11 BEFORE the first paid run (knowledge/reductions/699/pre-run-checks.md): the Erdos-Szekeres identity C(n,i)C(n-i,j-i)=C(n,j)C(j,i) (all i<j<=n/2, n<=160); its three-factor form used by the Van Doorn/Rocca determinant (n<=90, all h); the Kummer bound U_i(n)<=n^pi(i-1) (n<=900); and the prime-window step p|C(n,k) <=> n mod p < k for p>n/2 (n<=1200). All clean. Operator-executed checks, not stage_reduce output, and not REDUCTION-OK validated; evidence, not proof.",
+      "The binding constraint is arithmetic, not size: a prime in (n-i,n] divides both binomials, so any counterexample triple needs a prime-free window (n-i,n] (10.8M (n,i,p) combinations checked clean, n<=1200). All nine known failures of the STRICT p>i variant have a prime-free window, and for i=3 and i=5 the known n (10 and 28) is the SMALLEST n at which the window argument fails at all. This is the axis past the j<=3i/2 ceiling of size arguments, per Marco Del Pin's comment.",
+      "First harness attempt 2026-09-11 (runs/20260911-180317-544808-erdos699, mode=fast, --open, $18.61): NOT resolved. Both directions ended budget_exhausted with the main theorem still sorry. The frozen statement used the correct non-strict reading in both directions -- 'Nat.Prime p AND i <= p' -- so the p>i trap was avoided. The recorded floor did its job: triage logged 'search skipped: a witness is already excluded below ~4.17e19 ... so the search stage could only re-derive a known check', spending no model call on a futile search.",
+      "Certified partial value is thin: exactly two lemmas compiled sorry-free, both elementary stepping stones rather than progress on the obstruction -- quot_gcd_dvd_choose' (n/gcd(n,j) divides C(n,j)) and dvd_descFactorial' (p | n-t implies p | descFactorial n i for t<i). The lemma that matters, the Kummer single-digit step dvd_choose_of_mod_lt behind the prime-window reduction, was drafted but never certified: its containing attempt failed to compile. Mechanically verified lemmas only; claimEligible=false, no resolution claim.",
+      "Sharp obstruction derived and checked 2026-09-11 (knowledge/reductions/699 addendum): if a prime p>j divides any of n,n-1,...,n-i+1 then n mod p = t < i < j, so the single-digit Kummer lemma applies twice and p divides BOTH binomials with p>j>i. Hence a counterexample forces the descending product n(n-1)...(n-i+1) to be j-SMOOTH. Confirmed over 2,559,266 (n,i,j,p) witnesses for n<400. Strictly stronger than the known 'no prime in (n-i,n]' form, which is just the case where n-t is itself prime.",
+      "i=2 is settled outright and elementarily: pi(1)=0 gives V_2(n)=C(n,2), so a counterexample would force C(n,2) | C(j,2) hence n<=j, contradicting 2j<=n. The three known i=2 entries are failures of the strict p>i variant only. For i>=3 the size bound n<=j^(i/(i-pi(i-1))) closes nothing on its own -- the region is an infinite family -- so what must become effective is the smoothness condition, which is precisely the Bugeaud-Evertse-Gyory input the Van Doorn/Rocca manuscript uses ineffectively.",
+      "Second attempt 2026-09-11, research mode (runs/20260911-195529-727426-erdos699, --open, $30.54 of a $35 cap, 101m): NOT resolved, but 10 lemmas certified -- the most any run in this harness has produced on an open problem. Stopped by the Claude account usage limit, not by the budget (pos:infrastructure_error, neg:partial); the run is resumable. Certified: the Erdos-Szekeres identity C(n,j)C(j,i)=C(n,i)C(n-i,j-i), strict monotonicity C(j,i)<C(n,i), the weak Erdos-Szekeres result (some shared prime, no size constraint), the i=1 case, and the prime-window lemma (a prime in (n-i,n] has p>=i and divides both binomials).",
+      "IMPORTANT LIMITATION found by Codex on continuation and independently reconfirmed: the residue/Kummer route is SUFFICIENT but NOT NECESSARY, so it cannot prove #699 on its own. A proposed strengthening ('Conjecture D': some prime p>=i with n mod p < i mod p and n mod p < j mod p) is FALSE at (n,i,j)=(10,3,5): gcd(C(10,3),C(10,5))=12=2^2*3, the only shared prime >=3 is p=3, and 3 mod 3 = 0 so no strict residue inequality can hold -- yet the triple satisfies #699 via that same p=3, which divides through a carry at a HIGHER base-p digit. Do not spend a research cycle proving D. Any full proof must separately handle primes in [i,j], including p=i.",
+      "THE CERTIFIED REDUCTION EXISTS (verified independently 2026-09-12, not taken from a report). Compiling experiments/699-continuation/Continuation.lean and printing axioms: digit_carry, small_index_carry (=F4, the Lucas units-digit step), block_prime, counterexample_forces_smooth_block (=F5) and same_example_satisfies_target all depend only on [propext, Classical.choice, Quot.sound] -- sorry-free. So 'a counterexample to #699 forces every prime factor of every n-t (t<i) to be at most j' is now MECHANICALLY VERIFIED. That is a certified reduction of #699 to a smoothness statement about products of consecutive integers; it is one-way and yields no finite cutoff, and #699 remains open.",
+      "One claim in that same file did NOT verify and the report asserting it was wrong: residue_route_fails (the Lean refutation of Conjecture D) came back depending on sorryAx, with 9 'No goals to be solved' errors -- 'interval_cases p <;> norm_num at hp hi hj' closes each goal from hp and then keeps going with nothing left. The REPORT.md cited a verification.log that was never written. The underlying mathematics is correct (reconfirmed numerically: at (10,3,5) no prime p>=3 satisfies the residue condition, yet p=3 divides both binomials), but the proof was repaired, not accepted. Lesson: a continuation report's claim of a Lean proof is not evidence; print the axioms.",
+      "Banked as a reusable cluster library 2026-09-12: Formal.Library.BinomialCoefficients now holds all 11 certified declarations (the 5 from the research run plus the 6 Lucas/smoothness ones), builds clean, and every declaration prints [propext, Classical.choice, Quot.sound] with no sorryAx. Registered in CLUSTER_LIBRARIES under the 'binomial coefficients' tag, which 22 catalogue problems carry (#175, #376-379, #384, #386, #387, #396, #397, #683-685, #698-700, #730, #731, #849, #1093-1095) -- the same cluster size as covering systems. A later run on any of them gets the reduction chain by name instead of re-deriving it. Covered by tests/test_cluster_library.py.",
+      "Operator-assisted continuation: the Lucas carry lemma and counterexample-implies-j-smooth-block reduction are mechanically verified; this supersedes earlier notes saying they were only drafts. Conjecture D, the proposed universal units-digit criterion, fails at (10,3,5), which satisfies the actual target with p=3. The general digit test can use i<p<=j (16,3,7,p=5); only the narrower block argument requires p>j. No resolution and no new search floor.",
+      "Operator-assisted i=3 localization argument (written proof, not formalized end to end): odd n is excluded. For even n, n=2^r*a (a odd), c=2^r*gcd(a,3), e=gcd(n-1,3); coprime cancellation forces 4(n-1)<=e*c^2<=9*4^r. This is a finite bound only for fixed v2(n), not a full resolution. Exact-integer checks validate the intermediate implications for even n<=800; no new search floor or novelty claim.",
+      "2026-09-16 operator assessment (Claude, no paid run; experiments/699-units-digit/REPORT.md): a counterexample at i=3 implies the UNITS-DIGIT system (U3) A'|j, B'|j(j-1), C'|j(j-1)(j-2), where A',B',C' are the odd parts of n,n-1,n-2 with a single factor 3 removed when 3 exactly divides. (U3) uses no Lucas digit above the p^e block and has NO solution for any n with v_2(n)<=30, hence none below 2^31 (parametrised exact search, i3_param2.py; direct brute force to 3e5 agrees). So Conjecture U(3) -- (U3) is unsatisfiable -- would settle i=3; it is a statement about three consecutive integers with no binomial coefficients in it. Written argument plus exact-integer checks; NOT Lean-certified; no new search floor recorded because it is conditional and covers i=3 only.",
+      "Sharper localization (written, each step checked exactly on 22,986 (n,k) pairs to n=6000): any solution of (U3) has 4|n, j<n/2 (the j=n/2 pattern of the strict-variant near-misses is impossible), and with h=n/(2A') the bound A'^2 < 4.5h+2.25, i.e. A'^3 < 2.25n+2.25A': the power of 2 dividing n is at least about n^(2/3)/4. This supersedes the 2026-09-13 bound n<=(9/4)4^r+1 (exponent 1/2 -> 2/3) and is what 'bring n-2 into the constraints' yields. It is still not an absolute cutoff: n=2^r survives every size bound. Residual system: h^2-d^2=B'l, C'|d*l, eB'=2e'C'+1; for n=2^r this is (2^r-1)/e | k(k-1) and (2^(r-1)-1)/e' | (k(k-1)e/(2^r-1))(k-2) -- an exponential-Diophantine coincidence with no visible algebraic obstruction. That is the honest hard core of i=3.",
+      "The same phenomenon holds for larger i: the general units-digit system U(i) (for every t<i and p^e || n-t with p>=i, and e>=2 when p=i, j mod p^e <= t) has no solution for i=4..8 up to n=60,000 (ui_general.py). Empirically the higher Lucas digits are never needed to EXCLUDE a counterexample, even though they are needed to EXHIBIT a witness prime (refuted Conjecture D, (10,3,5)). #699 <= for all i U(i). Heuristic solution count of U(3) is sum polylog/(2^r a^2), dominated by small n (all checked); tail below 1e-4. Disproof is not a target.",
+      "2026-09-16 extension of the same assessment: the parametrised exact search of (U3) was completed for r = 2..38 with zero solutions (i3_param_31_38.log), so Conjecture U(3) holds for every n with 2 <= v_2(n) <= 38 and in particular for every n < 2^39 ≈ 5.5e11; the largest candidate actually tested was 1.1e18. The general system U(i) has no solution for i = 4..10 up to n = 10^6 (ui_general_1e6.log). Both are exact-integer computations resting on the WRITTEN reduction in experiments/699-units-digit/REPORT.md; not Lean-certified, not an Atlas search floor.",
+      "Deductive-loop candidate, rank 1 (2026-09-16; atlas-data/deductive_candidates.py fit 89): the binomial cluster library, the certified Lucas/smoothness chain and the hand-derived residual '#699 <= for all i, U(i)' make this the acceptance test for the deductive research mode (docs/deductive-research-mode.md section 6). The loop should re-derive in Lean, unaided, counterexample => j-smooth block => units-digit system U(i) => (i=3) n even, 4|n, j<n/2, A'^2 < 4.5h+2.25, ending with a certified skeleton whose single open hypothesis is U."
+    ],
+    "requirements": [
+      "Exploit the fixed-parameter bounds and certify any gcd/prime-factor witness; do not confuse the stronger p>i variant with p≥i.",
+      "Audit the Van Doorn/Rocca manuscript before using its reduction. Seek an arithmetic obstruction in the remaining region j>3i/2 and n>2j; merely extending a range or formalizing accepted cases does not meet a full-resolution objective. Do not start generic enumeration below the reported n=10^7 floor.",
+      "Audit the determinant lemma and explicit cutoff separately. Focus the first full-resolution attempt on simultaneous valuation constraints, especially i=3; do not treat ineffective finiteness as an enumerable residual.",
+      "A bounded counterexample search is pointless and must be skipped: the negative direction is a finite certificate but not a reachable one. Any claimed counterexample must first be checked against the nine known failures of the STRICT p>i variant (n=10,16,28,28,244,512,2048,2188,1594324), recomputed exactly on 2026-09-11; in all nine the largest shared prime is exactly i, so they satisfy this target and refute only the strict variant.",
+      "Freeze p >= i, never p > i. The nine known strict-variant failures (n=10,16,28,28,244,512,2048,2188,1594324) all have largest shared prime exactly i, so they satisfy this target; a run that 'refutes' 699 by producing one of them has formalized the wrong statement. The guard list is in problems/erdos_699.json.",
+      "Next attempt should target the Kummer single-digit lemma (p prime, i<p, n mod p < i => p | C(n,i)) as a standalone certified result first -- it is the checked prime-window reduction in knowledge/reductions/699/pre-run-checks.md and the drafted proof already exists in the run's partial.lean. Budget it above $12: this run's single agentic round of 3 parallel samples cost $8.79 uncapped, so a 3-sample round needs headroom before the cap or it overshoots and kills stage_brief.",
+      "The honest target is a CERTIFIED REDUCTION, not a resolution: certify the single-digit Kummer lemma, then the smoothness reduction, giving 'counterexample implies j-smooth descending product'. That reduces #699 to an effective smoothness statement about products of consecutive integers and is worth more than scattered lemmas. Resolution additionally requires making that smoothness statement effective, which is open research, not a harness gap.",
+      "Mode evidence, for target selection: research mode is the ONLY mode that has produced certified lemmas on an open problem in this harness (699: 10, 677: 9); six fast/search-first runs on open problems produced zero. Both research runs were killed before finishing -- 677 by the unenforceable budget cap, 699 by the account usage limit -- so research mode has still never completed a run. Resume with --resume rather than starting fresh: Lemmas.lean persists and later attempts import it by name.",
+      "A next attempt starts from a strictly better position than either run so far: the module is imported automatically, so the identity, monotonicity, the weak Erdos-Szekeres result, the i=1 case, the prime-window lemma, Lucas's units-digit step and the smoothness reduction are all available by name. The open work is NOT to re-derive those. It is (a) primes in [i,j] including p=i, which the residue route provably cannot reach, and (b) making the smoothness condition effective. Both are research-grade.",
+      "Reuse Formal.Library.BinomialCoefficients. Do not attempt Conjecture D or infer a contradiction from smoothness alone. Retain p=i and higher-digit carries in the remaining proof obligation.",
+      "The i=3 localization bound leaves arbitrarily large v2(n); do not report it as an absolute finite cutoff. Any inference that 4096 divides an i=3 counterexample is conditional on the recorded third-party n<=10^7 search. The i>=4 range remains outside this argument.",
+      "Current execution order: (1) audit and formally verify the unverified i=3 localization bound; (2) add n-2 to the n and n-1 constraints, retaining prime-power and higher-digit information; (3) prove a contradiction uniform in v2(n), or an absolute cutoff with a feasible exhaustive certificate. Record the exact failed step if the route stalls. Follow atlas-data/research-guidance/699.md, now automatically included in research and proof prompts on fresh and resumed runs.",
+      "Certify in Lean, on top of Formal.Library.BinomialCoefficients: the prime-power units-digit lemma (p prime, p^e | n-t, t<p, j mod p^e > t => p | C(n,j); induction over digit_carry), then 'counterexample at i=3 => (U3)', then the reduction steps odd-n impossible, n=2 mod 4 impossible, j<n/2, A'^2<4.5h+2.25. Elementary; a research-mode target. Do not re-derive the weaker 2026-09-13 bound or re-prove the carry lemmas.",
+      "Do not launch a proof run at 'prove #699 for i=3': the target is Conjecture U(3) and no route uniform in r is known here or on the forum. Highest-leverage move is a forum post with the U(3) reformulation, the n^(2/3) localization and the verified range, so the people already working on #699 (Del Pin, Van Doorn, Rocca) get a cleaner target. Follow atlas-data/research-guidance/699.md (rewritten 2026-09-16).",
+      "Run with --mode research --allow-research --research-loop deductive (default) and judge the run by RESIDUAL.md, not lemmas=: success means one open conjecture hypothesis (U, or an equivalent) and everything else discharged. Do not count a run that certifies stepping-stone lemmas and leaves the residual at the frozen target."
+    ],
+    "score": 20,
+    "sources": [
+      "https://www.erdosproblems.com/forum/thread/699",
+      "https://www.erdosproblems.com/forum/thread/699/proof-claims",
+      "experiments/699-first-attack/CONTEXT.md",
+      "https://github.com/conglu1997/erdos_699_rust",
+      "problems/erdos_699.json",
+      "knowledge/reductions/699/pre-run-checks.md",
+      "runs/20260911-180317-544808-erdos699/SUMMARY.line",
+      "runs/20260911-195529-727426-erdos699/SUMMARY.line",
+      "experiments/699-continuation/REPORT.md",
+      "experiments/699-continuation/Continuation.lean",
+      "formal/Formal/Library/BinomialCoefficients.lean",
+      "experiments/699-higher-carries/REPORT.md",
+      "atlas-data/research-guidance/699.md",
+      "experiments/699-units-digit/REPORT.md",
+      "experiments/699-units-digit/i3_param2.py",
+      "experiments/699-units-digit/verify_algebra.py",
+      "experiments/699-units-digit/ui_general.py",
+      "experiments/699-units-digit/i3_param_31_38.log",
+      "experiments/699-units-digit/ui_general_1e6.log",
+      "atlas-data/deductive-candidates.md"
+    ],
+    "assessed": "2026-09-16",
+    "search_floor": 4.17e+19,
+    "search_floor_kind": "published",
+    "brief_updated": "2026-09-13"
   },
   "723": {
     "assessed": "2026-09-11",
@@ -905,6 +1035,20 @@
     "sources": [
       "atlas-data/forum/1054.json"
     ]
+  },
+  "1056": {
+    "score": 10,
+    "rationale": [
+      "Assessed 2026-09-16 from the thread: YES for every 2 <= k <= 14 with explicit witnesses (OEIS A060427 and its b-file; KentaKitamura, 21 Jun 2026, lists the k=14 witness p=10428007 with fifteen factorials sharing residue 8978998, so fourteen adjacent intervals have product 1 mod p). Hernandez Santiago and octavioalberto (03 Jun 2026) give infinitely many primes with four equal factorial residues via Wilson reflection - q = 1 mod 6, p | q!-1, residues at 1, q, p-1-q, p-2 - with a Lean formalisation at github.com/octavioalberto/tetrads (third party, not verified here; the construction is Hardy-Subbarao's). Arbitrary k is the Noll-Simmons question; the site says it cannot be resolved by finite computation, and the reflection trick caps at four residues, so no route uniform in k is known."
+    ],
+    "requirements": [
+      "Full resolution needs k+1 equal factorial residues mod some prime for EVERY k, or a proof that some k has none - new mathematics either way; not a harness target. Certifiable partial value: the small-k witnesses (k <= 5 have primes small enough for a direct modular-product check) and the Wilson-reflection lemma k!(p-1-k)! = (-1)^(k+1) mod p."
+    ],
+    "sources": [
+      "experiments/open-viability-2026-09-16/ASSESSMENT.md",
+      "https://www.erdosproblems.com/forum/thread/1056"
+    ],
+    "assessed": "2026-09-16"
   },
   "1136": {
     "rationale": [

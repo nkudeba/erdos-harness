@@ -20,6 +20,11 @@ import harness as H
 IDENT = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
 MODULE = re.compile(r'^(Mathlib|Batteries|Init)(\.[A-Za-z0-9_]+)*$')
 PROOF_KINDS = {'lemma', 'target'}
+# A `conjecture` node is a formally stated proposition nobody has proved: the RESIDUAL of a deductive
+# research program (docs/deductive-research-mode.md). It carries a Lean `type` like a proof node but never a
+# certificate, it can never be a proof dependency, and a proof node that needs it says so with
+# `conditional_on`, which is documentation of the argument's shape, not a discharge.
+CONJECTURE_KIND = 'conjecture'
 SCOPES = {'infrastructure', 'special_case', 'conditional', 'general'}
 
 
@@ -44,8 +49,10 @@ def validate(plan):
         raise ValueError('node identifiers must be unique and safe')
     by_id = {n['id']: n for n in nodes}
     for n in nodes:
-        if n.get('kind') not in PROOF_KINDS | {'gap', 'experiment', 'literature'}:
+        if n.get('kind') not in PROOF_KINDS | {'gap', 'experiment', 'literature', CONJECTURE_KIND}:
             raise ValueError('unknown node kind')
+        if n.get('kind') == CONJECTURE_KIND and not n.get('type'):
+            raise ValueError('a conjecture node needs a formal type: it is a stated proposition, not a note')
         if n.get('scope') not in SCOPES:
             raise ValueError('explicit scope required')
         for dep in n.get('depends_on', []):
@@ -53,14 +60,22 @@ def validate(plan):
                 raise ValueError(f'unknown dependency {dep}')
             if by_id[dep]['kind'] in {'experiment', 'literature'}:
                 raise ValueError('empirical/literature evidence cannot be a proof dependency; use evidence_for')
+            if by_id[dep]['kind'] == CONJECTURE_KIND:
+                raise ValueError('a conjecture cannot be a proof dependency; state it as a hypothesis of the type '
+                                 'and list it under conditional_on')
+        for dst in n.get('conditional_on', []):
+            if dst not in by_id or by_id[dst]['kind'] != CONJECTURE_KIND:
+                raise ValueError('conditional_on must name conjecture nodes')
+            if n.get('kind') not in PROOF_KINDS:
+                raise ValueError('only proof nodes can be conditional on a conjecture')
         for dst in n.get('evidence_for', []):
             if dst not in by_id:
                 raise ValueError('unknown evidence target')
         for imp in n.get('imports', []):
             if not MODULE.fullmatch(imp):
                 raise ValueError(f'unsupported contract import: {imp}')
-        if n.get('type') and n['kind'] not in PROOF_KINDS:
-            raise ValueError('only formal proof nodes have Lean contracts')
+        if n.get('type') and n['kind'] not in PROOF_KINDS | {CONJECTURE_KIND}:
+            raise ValueError('only formal proof nodes and conjectures have Lean contracts')
     visiting, visited = set(), set()
     def visit(i):
         if i in visiting:
@@ -158,6 +173,7 @@ class Campaign:
             for i, node in self.nodes.items():
                 blocked = [d for d in node.get('depends_on', []) if not self.fresh(d, certs)]
                 status = ('verified' if self.fresh(i, certs) else
+                          'conjecture_open' if node['kind'] == CONJECTURE_KIND else
                           'needs_formalization' if not node.get('type') and node['kind'] in PROOF_KINDS | {'gap'} else
                           'evidence_only' if node['kind'] in {'experiment', 'literature'} else
                           'blocked' if blocked else 'ready')
@@ -185,6 +201,28 @@ class Campaign:
         rows = self.status()['nodes']
         ready = [r for r in rows if r['status'] == 'ready']
         return sorted(ready, key=lambda r: (-r['priority'], -descendants(r['id']), r['id']))
+
+    def residual(self):
+        """The argument's residual: every open conjecture, which proof nodes rest on it, and every proof node not
+        yet verified. This is the report a deductive research program is judged by -- the target is exactly as
+        open as the conjectures listed here."""
+        with self.locked_state() as state:
+            certs = state['certificates']
+            conjectures = []
+            for i, n in self.nodes.items():
+                if n['kind'] != CONJECTURE_KIND:
+                    continue
+                users = [j for j, m in self.nodes.items() if i in m.get('conditional_on', [])]
+                conjectures.append({'id': i, 'claim': n.get('claim', ''), 'type': n.get('type'),
+                                    'premise': bool(n.get('premise')), 'source': n.get('source'),
+                                    'conditions': users})
+            unverified = [i for i, n in self.nodes.items() if n['kind'] in PROOF_KINDS and not self.fresh(i, certs)]
+            conditional_targets = [t for t in self.plan['targets'] if self.nodes[t].get('conditional_on')]
+            return {'campaign': self.plan['id'], 'open_conjectures': conjectures,
+                    'published_premises': sum(1 for c in conjectures if c['premise']),
+                    'unverified_proof_nodes': unverified, 'conditional_targets': conditional_targets,
+                    'resolved': not conjectures and not unverified,
+                    'meaning_review': 'required independently of kernel verification'}
 
     def record_evidence(self, node_id, path, description):
         if node_id not in self.nodes:
@@ -333,7 +371,7 @@ class Campaign:
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('action', choices=['status', 'next', 'verify', 'run', 'evidence'])
+    ap.add_argument('action', choices=['status', 'next', 'verify', 'run', 'evidence', 'residual'])
     ap.add_argument('--manifest', required=True)
     ap.add_argument('--node')
     ap.add_argument('--candidate')
@@ -355,6 +393,7 @@ def main(argv=None):
         if args.node and args.node not in c.nodes:
             raise ValueError('unknown campaign node')
         if args.action == 'status': result = c.status()
+        elif args.action == 'residual': result = c.residual()
         elif args.action == 'next': result = c.next()
         elif args.action == 'evidence': result = c.record_evidence(args.node, args.candidate, args.description)
         elif args.action == 'verify': result = c.verify(args.node, args.candidate, args.lean_timeout)
@@ -366,7 +405,7 @@ def main(argv=None):
     except (ValueError, OSError) as e:
         result = {'verified': False, 'error': str(e)}
     print(json.dumps(result, indent=2))
-    return 0 if not isinstance(result, dict) or (not result.get('error') and (args.action in {'status', 'next', 'evidence'} or result.get('verified'))) else 2
+    return 0 if not isinstance(result, dict) or (not result.get('error') and (args.action in {'status', 'next', 'evidence', 'residual'} or result.get('verified'))) else 2
 
 
 if __name__ == '__main__':

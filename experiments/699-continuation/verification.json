@@ -1,0 +1,17 @@
+{
+  "claimEligible": false,
+  "resolved": false,
+  "verification": {
+    "Continuation.lean": {
+      "sha256": "be8342bb6c03f824b45fb73ef5623c723246c191f1a189795d9da81ebd271706",
+      "exit": 0,
+      "log": "verification.log"
+    },
+    "LibraryAxioms.lean": {
+      "sha256": "669617933f498373b7d26ac0faac00a59a7dd63edeb3160a1337cef704f32b11",
+      "exit": 0,
+      "log": "library-axioms.log"
+    }
+  },
+  "library_sha256": "6f7ae89386ea9848bb8fbe02dd27bdcea8d836eec94ec3927be5fa7c88a66afe"
+}

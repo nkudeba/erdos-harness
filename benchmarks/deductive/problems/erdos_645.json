@@ -1,0 +1,20 @@
+{
+  "id": "645",
+  "statement": "If $\\mathbb{N}$ is 2-coloured then must there exist a monochromatic three-term arithmetic progression $x,x+d,x+2d$ such that $d>x$?",
+  "url": "https://www.erdosproblems.com/645",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic"
+  ],
+  "benchmark": {
+    "kind": "blind deductive re-derivation",
+    "reference": "knowledge/solved/Erdos645.lean",
+    "withheld": [
+      "notes",
+      "status"
+    ]
+  }
+}

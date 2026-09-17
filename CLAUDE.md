@@ -291,8 +291,44 @@ And **the algebra eats exactly the candidates a search wants**: it bites when sl
 same property that makes a candidate look attackable, so success here can leave the target *less* tractable
 than before — say so plainly rather than reporting the eliminations alone.
 
+## Cluster libraries — import the machinery, never re-derive it
+
+The catalogue clusters hard (22 covering-system problems, 67 Ramsey, 22 Sidon), and until now every run
+started from near zero: only Lean tactics accumulated. `CLUSTER_LIBRARIES` in `harness.py` maps a problem
+TAG to a formalised Lean module; a problem carrying the tag gets the module added to its import header and
+named — **names only, never bodies** — in the reduce/prove/agentic prompts, so the model reuses certified
+results by name instead of re-deriving them.
+
+```
+covering systems -> Formal.Library.CoveringSystems
+```
+
+`Formal/Library/CoveringSystems.lean` holds the density bound, the pool/reciprocal screen, the finite form
+of the generating-function identity, the root-of-unity condition (`‖Σ_{r∈E} ζʳ‖ = L/m` at a
+divisibility-maximal `m`, hence `L/m ≤ k`), Mirsky–Newman / Davenport–Rado, and the #273 facts earlier runs
+certified — all sorry-free on `[propext, Classical.choice, Quot.sound]`.
+
+Rules for adding a cluster:
+
+- The module must **build sorry-free** before it goes in the table. `Harness._ensure_library` runs
+  `lake build <module>` at run start and **drops** a module that will not build, because `import` of an
+  unbuilt module is a hard Lean error that would fail every check in the cluster, not just the attempt
+  that wanted the library.
+- Never paste lemma text into a prompt. The header already imports the module; the prompt block lists
+  declaration names and tells the model to `#check` one for a signature.
+- Mirsky–Newman is a **published theorem** (1950). A library entry reconstructing published mathematics
+  says so in its own docstring; the module is mechanically verified, never new mathematics.
+- Mathlib v4.32.0-rc1 has **no** `CoveringSystem` / `StrictCoveringSystem` — those live in
+  `google-deepmind/formal-conjectures`, not Mathlib. `CongruenceFamily` is defined in the module, shaped so
+  a `StrictCoveringSystem` is the case `Covers ∧ DistinctModuli`.
+
+Covered by `tests/test_cluster_library.py`.
+
 ## Gotchas
 
+- The `claude` CLI default model on this account is Fable, and it hits a usage limit long before Opus
+  does — a run then dies at the literature stage with exit 1 after ~$0.002. Pass `--model claude-opus-5`
+  explicitly (it is also what the recorded baselines used, so it keeps comparisons controlled).
 - `erdosproblems.com` 403s WebFetch; plain `curl -A "Mozilla/5.0"` works. The site's `/forum/thread/<n>` and
   its proof-claims page carry decisive information the main page does not — read them before attacking.
 - The site's `falsifiable` / `verifiable` / `decidable` classes promise a finite witness, **not a reachable
@@ -300,5 +336,101 @@ than before — say so plainly rather than reporting the eliminations alone.
 - `native_decide` is banned in proofs. Kernel `decide` has timed out at 420 s on a 3,003-case check, so
   finite certificates must be small or Bool-reflected.
 - macOS has no `timeout` binary; use a perl alarm.
-- Pace model runs in ONE lane. Spend limits are a hard failure that stops a lane with exit 1, and runs are
-  resumable with `--resume`.
+- Pace model runs in ONE lane. This is a **spend-pacing** rule, not a correctness one: the account's usage
+  limit is the shared resource, and hitting it is a hard failure that stops a lane with exit 1 (runs are
+  resumable with `--resume`). Concurrent runs do not corrupt each other — audited 2026-09-11: each run's
+  Lean attempts are written inside its own `run_dir`, `lake env lean` only reads `.lake/build`, `lake build`
+  is reached only via a cluster library or `--allow-research` and its module names carry problem id +
+  direction, `runs/current` is swapped atomically, and `--open` already runs both directions at once by
+  design. So a second lane is a budget decision, not a data-safety one; check what is live with
+  `pgrep -f "harness.py run"` and budget the total, not the lane.
+
+## The Atlas is written under a lock — keep it that way
+
+`record_finding.py` used to mutate `atlas-data/reviewed.json` with a bare read-modify-write. Two agents
+recording findings for DIFFERENT problems at once each read the same dict and the second write silently
+erased the first — both printing success — and because `write_text` truncates first, an interrupted write
+left the Atlas's memory of every assessed problem unparseable, which `load()` then reads as `{}`.
+
+`atlas-data/atomic.py` fixes both: `locked(path)` holds an exclusive `flock` across the whole
+read-modify-write (locking only the write still loses updates — the stale *read* is the bug), and
+`atomic_write` renames a fully-written temp file over the target so a reader sees the old file or the new
+one, never a half-written one. The lock lives on a sibling `.<name>.lock` because `os.replace` would
+otherwise drop a lock held on the replaced inode. The rerank subprocess runs **outside** the lock.
+
+Any new writer of a shared Atlas file must go through these helpers. Covered by
+`tests/test_atlas_concurrency.py`.
+
+## The research program is deductive by default — the residual is the artifact
+
+`--mode research --allow-research` now runs the **deductive loop** (`--research-loop deductive`, the
+default; `lemma` keeps the old experiments → conjecture-ledger → sub-lemmas loop for comparison). Its unit
+of progress is a **certified conditional theorem**, kept as `programs/erdos_<n>/Residual.lean`: optional
+`def`s, hypothesis lemmas `theorem erdos_<n>_hyp_<x> : <closed Prop> := by sorry`, and the frozen theorem
+proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE the residual. A cycle is:
+
+1. **Refute first.** A model-written script (`EXPERIMENTS_PROMPT`) tries to break every open hypothesis on
+   small cases and near-miss families and prints `REFUTED:`/`CLEAR:`/`INVARIANT:` lines — never a
+   percentage. An exact witness against a hypothesis kills the skeleton in force and is banked under
+   `knowledge/refuted/<n>/` (labelled *numerical, not Lean-certified*); refuted statements are fed back so
+   no plan re-proposes them in any disguise, and `_consider_skeleton` rejects one that does.
+2. **Plan = skeleton.** `PLAN_PROMPT` demands the skeleton plus a JSON ledger tagging each hypothesis
+   `conjecture` (with a *derivation*, not a support rate) or `published` (with `-- PUBLISHED: <citation>`;
+   a published tag without a source is downgraded to a conjecture). Published theorems enter **as
+   hypotheses, never as `axiom`** — the audit stays `[propext, Classical.choice, Quot.sound]` and the trust
+   boundary sits in the theorem's signature. Provenance goes to `premises.jsonl`.
+3. **Adopt only if real and better.** Frozen theorem verbatim, no banned construct, every `sorry` inside a
+   hypothesis, nothing refuted, compiles; the free specialist cascade gets a go at the holes; then
+   `residual_improves`: the HARDEST open conjecture must get easier first (max complexity), then fewer open
+   conjectures, then fewer published premises, then lower total complexity. Count-first was tried and lost
+   on the #645 benchmark: the first skeleton reduced the target to ONE compactness hypothesis exactly as
+   hard as the target, and a count-first rule would have refused the four-lemma structural route the
+   reference proof uses. A skeleton with no hole left is a proof and goes through `stage_verify`.
+4. **Attack only the residual.** Open conjecture hypotheses are attacked easiest-first as closed
+   sub-statements: the plan rates each one `elementary` / `moderate` / `hard` in its JSON ledger and that
+   rating orders the attack before syntactic complexity (complexity alone sent the masked #275 run at its
+   own "genuinely open residual" first, because it had the shortest statement). `--hyps-per-cycle` caps the
+   count and `--min-child-budget` (default $2.50) refuses to start a child it cannot fund, deferring the
+   rest with a `hypotheses_deferred` event: three children at $1.32 each all died after one $1.33 prove
+   call with nothing compiled. Budget a deductive run at roughly $4 for reduce, refute and plan plus $2.50
+   per hypothesis you expect to attack. A certified one is spliced back
+   (`splice_hypothesis`: proof in `<name>_ns`, hypothesis becomes `exact <name>_ns.<name>`) and the residual
+   shrinks. `Lemmas.lean` still accumulates the certified proofs as an importable module.
+5. **Learn from failures, grow in depth.** A child that fails leaves a *failure digest* (unsolved goals,
+   best attempts' errors, the prover's own diagnosis) in `failures.jsonl`; the next plan sees it under
+   PROOF FAILURES and must answer with one of four moves — `lemma` (state the missing fact as a new
+   hypothesis), `split`, `define` (name the recurring structure and restate in terms of it: that is how a
+   concept like U(i) enters, from a failed proof), or `defer` (rate it hard) — recorded in `moves.jsonl`.
+   A hypothesis that failed once, or is rated hard, is attacked with its OWN skeleton one level down
+   (`--residual-depth`, default 2; sub-residuals live in `programs/erdos_<n>/sub/<name>/`); a child that
+   certifies `hypothesis <= sub-hypotheses` without closing them is spliced in as a REFINEMENT, so the
+   parent's frontier becomes the simpler pieces. Invariant extraction is derive-first: the script prints a
+   `DERIVATION:` before each `INVARIANT:`, and a pattern it cannot derive is `OBSERVED:`, never a hypothesis.
+6. **Render.** `RESIDUAL.md` (hypotheses by kind, refuted list, proof failures and the moves made),
+   `campaign.json` (the argument as a DAG:
+   `conjecture` nodes the target is `conditional_on`; `harness.py campaign residual --manifest …` reports
+   it), `state["residual"]`, and `residual=open:k,published:p,certified:c` on the `RUN-SUMMARY` line.
+   `record_finding.py --residual '<json>'` files it in the Atlas with a history so shrinkage is visible.
+
+`stage_reduce` now asks for a Lean statement beside each check; a checked reduction the cascade closes is
+`certified` and so labelled in prompts, one that only type-checks is `stated` and carried "as a hypothesis,
+not a fact". Nothing about the honesty gates changed: a closed skeleton is *mechanically verified*, never a
+resolution; `claimEligible=false` until human review. Design and acceptance test:
+`docs/deductive-research-mode.md`. Covered by `tests/test_deductive_mode.py`.
+
+**Benchmark it on solved problems before trusting it on open ones.** `benchmarks/deductive/prepare.py
+--problem 645 --launch` re-derives a saved solve BLIND (resolution notes withheld) under `--benchmark`, which never
+writes `knowledge/solved`, harvests no lemmas and writes no brief. The README there classifies the 19 saved
+proofs: eight are deductive arguments (645, 275, 499, 532, 350, 476, 649, 16) and are the test set; the
+certificate ones (674, 493, 399, 316, 105) are not deductive benchmarks. Judge by `RESIDUAL.md`, never `lemmas=`.
+
+**Two contamination paths, learned on the first run.** The lemma store `knowledge/lemmas.jsonl` is harvested
+from every verified proof and fed to provers as "helper fragments", so on #645 the child was handed the
+reference proof; `--benchmark` now excludes it. The model's own memory of public solutions cannot be excluded,
+only cued less and measured: `prepare.py --masked` (synthetic id, paraphrase, renamed theorem, no tags, `--masked`
+prompt scrub) plus `probe.py` before and `compare.py` after. A closed masked run is evidence about the loop only
+when the probe showed no recognition and the route differs from the reference.
+
+## Current research guidance reaches the model
+
+Store concise operator next steps in `atlas-data/research-guidance/<id>.md`, and link the file from an Atlas finding. The harness reloads this file for assessment, reduction, experiments, planning, ordinary and agentic proving, refinement, decomposition, criticism, search and construction. It applies to fresh runs, resumed checkpoints and research children without modifying the frozen problem input. Guidance is labelled unverified operator context, logged with its source and hash, and preserved in the actual prompt transcript (also TASK.md for agentic attempts). It is excluded from formalization and blind verification prompts. Record new results, open obligations and refuted routes with explicit status; do not promote a draft or numerical check into a proved premise.

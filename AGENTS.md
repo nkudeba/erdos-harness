@@ -12,7 +12,8 @@ appended to `runs/summary-log.tsv`), on the fatal path too:
 
 ```
 RUN-SUMMARY problem=677 exit=3 outcome=running directions=pos:infrastructure_error,neg:running \
-  verified=None spend=$8.07 llm_calls=19 lean_checks=42 lemmas=5 fatals=2 wall=60m mode=research dir=runs/...
+  verified=None spend=$8.07 llm_calls=19 lean_checks=42 lemmas=5 residual=open:2,published:1,certified:3 \
+  fatals=2 wall=60m mode=research dir=runs/...
 ```
 
 A background watcher must use it instead of parsing `log.jsonl`:
@@ -30,10 +31,16 @@ status, not the command's. Capture `EX=$?` on the very next line, or just read `
 Run **one** watcher per lane. Do not start a second waiter for a condition something is already
 waiting on, and do not echo tens of log lines per check.
 
+`residual=` appears on research runs: the deductive loop's conditional theorem — how many hypotheses the
+frozen target still rests on, by kind. `open` conjectures are exactly as unproved as the problem; a
+`published` premise is a cited theorem stated as a hypothesis (never an axiom). Read
+`programs/erdos_<n>/RESIDUAL.md` for the statements. `lemmas=` alone no longer measures progress.
+
 ## Pacing
 
 One model lane at a time (`CLAUDE.md` explains why: spend limits are a hard failure). Runs resume with
-`--resume`. macOS has no `timeout`; use a perl alarm.
+`--resume`. macOS has no `timeout`; use a perl alarm. Pass `--model claude-opus-5`: the CLI default (Fable)
+hits its usage limit long before Opus and kills a run at the literature stage with exit 1.
 
 ## Honesty
 
@@ -58,6 +65,17 @@ that as the problem's outcome would claim an open problem was solved.
   floors recorded for the rest were inert.
 - Before a solver call, ask what the structure forces. A residue-free algebraic necessary condition eliminated
   20 of 29 candidates on #273 in milliseconds, including the two that had absorbed four solver timeouts.
+
+## Cluster libraries
+
+- A problem TAG can carry a formalised Lean module into the run: `CLUSTER_LIBRARIES` in `harness.py` maps
+  `covering systems -> Formal.Library.CoveringSystems`. The module is added to the import header and NAMED
+  (names only, never bodies) in the reduce/prove prompts. Import the machinery; do not re-derive it.
+- A module only goes in the table once it builds sorry-free. `_ensure_library` runs `lake build` at run
+  start and DROPS a module that will not build — an `import` of an unbuilt module fails every check in the
+  cluster, not just the attempt that wanted it.
+- A library that reconstructs a published theorem (Mirsky-Newman, 1950) says so in its own docstring. It is
+  mechanically verified, never new mathematics.
 
 ## Reductions, escalation, readings
 
