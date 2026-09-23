@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "c870af8018de397a07c8f434232bb0f148acadbb0b0ce0451c1b27f36721f986",
     "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
-    "manual_reviews_sha256": "801006d16ba47d050e85886bf7cd342cd9262f6ee23f3b30756022fb0ce7b307"
+    "manual_reviews_sha256": "7fd8d11cb0c27942fbca27289047df04d2b2613860b012b3ead481cba31acc5c"
   },
   "problems": [
     {
@@ -643,15 +643,17 @@
       "harness": "Verified",
       "rationale": [
         "The literal question is refuted by p=2 and q=7: powers of two never equal −1 modulo seven. This is unusually close to our arithmetic/finite-residue strengths.",
+        "Reading defect in the saved solve (found 2026-09-23 by the clean Opus 5.5 recall probe): the frozen statement ¬(∀ p q prime, ∃ n, P(n)=p ∧ P(n+1)=q) does not require p ≠ q, so it follows trivially from p = q = 2 (2 cannot divide n and n+1). The saved proof uses the real pair (2, 7) (2^k + 1 is never divisible by 7), so the mathematics is right, but the certified statement is weaker than the problem. Re-freeze with p ≠ q before citing it.",
         "A saved full proof passed the local Lean regression and standard-axiom audit.",
         "This is demonstrated harness capability on its frozen formulation, not a calibrated probability of a fresh run."
       ],
       "requirements": [
         "Prove that greatest prime factor two forces a power of two, then certify the residue obstruction; do not silently switch to the harder odd-prime variant.",
+        "Re-freeze #649 with the hypothesis p ≠ q and re-verify the (2, 7) proof against it.",
         "Replay the verified proof and preserve statement faithfulness when testing future harness changes."
       ],
       "formal": "External Lean-verified resolution reported.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-23 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Saved, regression-checked full harness proof",
@@ -663,8 +665,11 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": null,
-        "sources": [],
+        "on": "2026-09-23",
+        "sources": [
+          "benchmarks/deductive/probes/649-masked-20260923-063342.md",
+          "knowledge/solved/Erdos649.lean"
+        ],
         "searchFloor": null
       },
       "rank": 17,
