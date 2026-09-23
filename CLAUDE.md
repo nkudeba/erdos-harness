@@ -337,6 +337,11 @@ Covered by `tests/test_cluster_library.py`.
   before Opus and kills a run at the first stage with exit 1 after ~$0.002. Runs before 2026-09-23 (all
   recorded baselines, and the first three sessions of masked #275) used `claude-opus-5`, so comparing against
   them is a model switch — record it. Each resume logs its model in `state["invocations"]`.
+- **Model calls see no ambient context.** Every `claude -p` call passes `--setting-sources ""`, which loads no
+  settings and stops CLAUDE.md discovery. Until 2026-09-23 every call saw THIS file and the operator's global
+  CLAUDE.md, i.e. a list of benchmark problems, the theorems behind them, and "masked #275" beside
+  `erdos_80317`: no masked benchmark or recall probe before that date was blind. Never drop the flag; never
+  write a benchmark's alias id next to its true number in a file a model call could load.
 - `erdosproblems.com` 403s WebFetch; plain `curl -A "Mozilla/5.0"` works. The site's `/forum/thread/<n>` and
   its proof-claims page carry decisive information the main page does not — read them before attacking.
 - The site's `falsifiable` / `verifiable` / `decidable` classes promise a finite witness, **not a reachable

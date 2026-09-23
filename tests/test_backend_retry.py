@@ -94,3 +94,18 @@ class ModelDefault(unittest.TestCase):
 
     def test_explicit_model_wins(self):
         self.assertEqual(self._model(H.ClaudeCliBackend("claude-sonnet-5", 10)), "claude-sonnet-5")
+
+
+class NoAmbientContext(unittest.TestCase):
+    """Every claude call loads no settings source, so no CLAUDE.md (repo or global) reaches the model."""
+    def test_every_call_kind_passes_empty_setting_sources(self):
+        calls = []
+        ok = _resp(0, {"is_error": False, "result": "ok", "total_cost_usd": 0.0, "num_turns": 1})
+        with patch.object(H.subprocess, "run", side_effect=lambda cmd, **k: calls.append(cmd) or ok):
+            b = H.ClaudeCliBackend(None, 10)
+            b.complete("prove", "x")
+            b.complete_web("literature", "x")
+            b.complete_agentic("prove", "x", Path("/tmp"), 3)
+        for cmd in calls:
+            i = cmd.index("--setting-sources")
+            self.assertEqual(cmd[i + 1], "")

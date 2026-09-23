@@ -181,7 +181,13 @@ class ClaudeCliBackend:
             effort = effort_override
         if budget_override:
             budget = budget_override
-        cmd = [self.bin, "-p", "--output-format", "json", "--max-budget-usd", str(budget)] + extra
+        # `--setting-sources ""`: load NO user/project/local settings, which also stops CLAUDE.md discovery. Without
+        # it every call saw this repo's CLAUDE.md and the operator's global one: a list of the benchmark problems,
+        # the theorems behind them (Crittenden–Vanden Eynden, Hindman) and "masked #275" beside `erdos_80317`, so
+        # no masked benchmark was blind (found 2026-09-23 by asking a bare call what its context named). Every
+        # permission the harness needs is passed as a flag, so nothing depends on a settings file.
+        cmd = [self.bin, "-p", "--output-format", "json", "--max-budget-usd", str(budget),
+               "--setting-sources", ""] + extra
         if effort:
             cmd += ["--effort", effort]
         if self.model:
