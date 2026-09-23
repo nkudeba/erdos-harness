@@ -4527,13 +4527,16 @@ for the SAT solver instead of enumerating it.
         return out, parsed
 
     def _consider_skeleton(self, cand: str, meta: dict, current: dict | None, frozen: str, cycle: int,
-                           refutations: list[dict], cdir: Path, main: str | None = None) -> dict:
+                           refutations: list[dict], cdir: Path, main: str | None = None,
+                           current_src: str = "") -> dict:
         """Adopt a proposed residual skeleton only if it is a real conditional theorem that improves the residual:
         frozen theorem verbatim, no banned construct, every `sorry` inside a hypothesis lemma, nothing refuted
         re-proposed, compiles, and -- after the free specialist cascade has had a go at the holes -- fewer or
         more elementary open conjectures than the skeleton in force. A skeleton with no holes left is a proof."""
         pid = self.problem["id"]
         main = main or getattr(self, "thm_name", None) or f"erdos_{pid}"
+        if current_src:
+            cand = restore_spliced(cand, current_src)
         if not contains_frozen(cand, frozen):
             return {"adopted": False, "reason": "altered the frozen theorem"}
         bad = has_banned(cand, allow_sorry=True)
@@ -4820,7 +4823,8 @@ for the SAT solver instead of enumerating it.
                         cands.append(joined)
                 verdict = None
                 for k, cand in enumerate(cands):
-                    verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main)
+                    verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main,
+                                                      current_src=skeleton)
                     if verdict.get("adopted"):
                         break
                     self.log.event("program", "skeleton_candidate_rejected", cycle=cycle, candidate=k + 1,
@@ -4866,6 +4870,14 @@ for the SAT solver instead of enumerating it.
                     module = self._install_lemmas_module(pdir)
                     fails = failure_counts(pdir)
                     todo = attack_order(parsed["hypotheses"], fails)[:per_cycle]
+                    if not todo:
+                        # Nothing conjectural left: try to PROVE the published premises. A premise that is in Mathlib
+                        # (Birkhoff for masked #499) or elementary is then certified and leaves the theorem's trust
+                        # boundary; one that is genuinely deep just fails and stays a premise.
+                        todo = sorted([h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published"],
+                                      key=lambda h: (fails.get(h["name"], 0), h["complexity"]))[:per_cycle]
+                        if todo:
+                            self.log.event("program", "premises_attacked", cycle=cycle, names=[h["name"] for h in todo])
                     # A child needs one prove round plus its Lean checks; a share below that buys a single
                     # model call and nothing to compile (masked #275: three children at $1.32 each, all dead
                     # after one $1.33 call). Concentrate what is left on fewer hypotheses instead.
@@ -5983,6 +5995,79 @@ def hypothesis_span(skeleton: str, name: str) -> tuple[int, int] | None:
 
 
 SPLICED_NS_RE = re.compile(r"(?ms)^namespace\s+(\S+_ns)\s*$.*?^end\s+\1\s*$")
+
+
+def restore_spliced(cand: str, current: str) -> str:
+    """Put back what a re-planned skeleton relies on from the skeleton in force but did not restate.
+
+    A re-plan sees the skeleton in force truncated to its last 6000 characters and often writes only a delta: the
+    changed hypotheses plus the target. Both masked #645 and masked #499 lost their cycle-2 skeleton this way
+    (`Unknown identifier erdos_…_ns.…`, `erdos_61249_W`). Restored, only when the candidate USES the name and
+    does not define it: (1) the skeleton's own defs, (2) certified hypotheses, i.e. their spliced `<name>_ns`
+    proof namespace plus the top-level `exact <name>_ns.<name>` declaration, (3) any directly referenced
+    `<name>_ns`. All of it is already kernel-checked; the candidate must still compile, so nothing unproved
+    can enter this way."""
+    if not current:
+        return cand
+    def uses(text, name):
+        return re.search(rf"(?<![A-Za-z0-9_'.]){re.escape(name)}(?![A-Za-z0-9_'!?])", text) is not None
+    def declares(text, name):
+        return re.search(rf"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                         rf"(?:def|abbrev|theorem|lemma|structure|inductive)\s+{re.escape(name)}(?![A-Za-z0-9_'!?])", text)
+    blocks = {m.group(1): m.group(0).strip() for m in SPLICED_NS_RE.finditer(current)}
+    top = SPLICED_NS_RE.sub("", current)
+    top_decls = {}
+    for d in split_decls(top):
+        m = re.search(r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                      r"(?:def|abbrev|theorem|lemma)\s+([^\s(:{\[]+)", strip_comment_lines(d))
+        if m:
+            top_decls[m.group(1)] = d.strip()
+
+    # (2) certified hypotheses and (3) directly referenced namespaces, kept in the ORDER of the skeleton in force
+    # (a later proof may use an earlier one) and inserted as one payload after the candidate's own defs
+    need = set()
+    for ns in blocks:
+        name = ns[:-3]
+        if name in top_decls and uses(cand, name) and not declares(cand, name):
+            need.add(ns)
+    for ns in {m.group(1) for m in re.finditer(r"\b([A-Za-z0-9_']+_ns)\.", cand)}:
+        if ns in blocks and not re.search(rf"(?m)^namespace\s+{re.escape(ns)}\s*$", cand):
+            need.add(ns)
+    if need:
+        order = [m.group(1) for m in SPLICED_NS_RE.finditer(current)]
+        parts = []
+        for ns in order:
+            if ns in need:
+                parts.append(blocks[ns])
+                if ns[:-3] in top_decls and not declares(cand, ns[:-3]):
+                    parts.append(top_decls[ns[:-3]])
+        at = 0
+        for m in DECL_LINE_RE.finditer(cand):
+            if re.match(r"(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*(?:def|abbrev|structure|inductive|open)\b",
+                        cand[m.start():]):
+                continue
+            at = m.start()
+            break
+        else:
+            at = len(cand)
+        # keep a `--` comment block that sits directly above the insertion point attached to its declaration
+        head = cand[:at]
+        while True:
+            k = head.rstrip("\n").rfind("\n")
+            line = head.rstrip("\n")[k + 1:]
+            if head.strip() and line.strip().startswith("--"):
+                head = head[:k + 1]            # k == -1: the comment is the first line, head becomes ""
+            else:
+                break
+        at = len(head)
+        cand = cand[:at] + "\n\n".join(parts) + "\n\n" + cand[at:]
+    # (1) defs last, at the top, so everything inserted above can see them
+    missing = [d for d in skeleton_defs(current)
+               if (m := re.search(r"(?:def|abbrev|structure|inductive)\s+([^\s(:{\[]+)", strip_comment_lines(d)))
+               and uses(cand, m.group(1)) and not declares(cand, m.group(1))]
+    if missing:
+        cand = "\n\n".join(d.strip() for d in missing) + "\n\n" + cand
+    return cand
 
 
 def skeleton_defs(skeleton: str) -> list[str]:

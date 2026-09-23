@@ -1064,3 +1064,92 @@ class SplicedNamespaceDefs(unittest.TestCase):
         sub = H.hypothesis_substatement(skel, "erdos_99_hyp_b")
         self.assertNotIn("MetaM", sub)
         self.assertIn("theorem erdos_99_hyp_b : search 1 = false := by\n  sorry", sub)
+
+
+PREMISE_ONLY = """def foo (n : ℕ) : Prop := n = n
+
+-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3
+theorem erdos_99_hyp_rs : ∀ n : ℕ, foo n := by
+  sorry
+
+theorem erdos_99 : ∀ n : ℕ, foo n := by
+  intro n
+  exact erdos_99_hyp_rs n"""
+
+
+class PremisesAreAttackedWhenNothingElseIsOpen(unittest.TestCase):
+    """masked #499 stopped at `open:0, published:1` with Birkhoff as the premise, although Mathlib proves it."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _run(self, child_rc, proof):
+        h = _stub(self.root / "run")
+        plan = ("```lean\n" + PREMISE_ONLY + "\n```\n```json\n"
+                + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_rs", "kind": "published", "source": "RS 1962"}]}) + "\n```\n")
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
+        h._install_lemmas_module = lambda pdir: None
+        attacked = []
+        def attack(sub, name, *a, **k):
+            attacked.append(name)
+            return child_rc, argparse.Namespace(state={"proof": proof} if proof else {})
+        h._attack_substatement = attack
+        def verify():
+            h.state["verify"] = {"all_clear": True}
+            return h.state["verify"]
+        h.stage_verify = verify
+        return h, h.run_program(), attacked
+
+    def test_a_provable_premise_is_certified_and_the_skeleton_closes(self):
+        h, rc, attacked = self._run(0, "theorem erdos_99_hyp_rs : ∀ n : ℕ, foo n := by\n  intro n\n  rfl")
+        self.assertEqual(attacked, ["erdos_99_hyp_rs"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(h.state["residual"]["published"], 0)
+        self.assertTrue(any(e[1] == "premises_attacked" for e in h.log.events))
+
+    def test_a_premise_that_resists_stays_a_premise(self):
+        h, rc, attacked = self._run(2, None)
+        self.assertEqual(attacked, ["erdos_99_hyp_rs"])
+        self.assertEqual(rc, 3)
+        self.assertEqual(h.state["residual"]["published"], 1)
+
+
+class RestoreSpliced(unittest.TestCase):
+    """A re-plan that writes only a delta gets the certified material it relies on back, in the original order."""
+    CURRENT = ("noncomputable def W (n : ℕ) : ℕ := n\n\n"
+               "namespace erdos_99_hyp_a_ns\ntheorem erdos_99_hyp_a : W 1 = 1 := rfl\nend erdos_99_hyp_a_ns\n\n"
+               "theorem erdos_99_hyp_a : W 1 = 1 := by\n  exact erdos_99_hyp_a_ns.erdos_99_hyp_a\n\n"
+               "namespace erdos_99_hyp_b_ns\ntheorem erdos_99_hyp_b : W 2 = 2 := rfl\nend erdos_99_hyp_b_ns\n\n"
+               "theorem erdos_99_hyp_b : W 2 = 2 := by\n  exact erdos_99_hyp_b_ns.erdos_99_hyp_b\n\n"
+               "theorem erdos_99_hyp_c : True := by\n  sorry\n\n"
+               "theorem erdos_99 : W 1 = 1 ∧ W 2 = 2 := ⟨erdos_99_hyp_a, erdos_99_hyp_b⟩")
+
+    def test_delta_candidate_gets_defs_and_certified_hypotheses(self):
+        delta = ("-- a new premise\ntheorem erdos_99_hyp_c : True := by\n  sorry\n\n"
+                 "theorem erdos_99 : W 1 = 1 ∧ W 2 = 2 := ⟨erdos_99_hyp_a, erdos_99_hyp_b⟩")
+        out = H.restore_spliced(delta, self.CURRENT)
+        self.assertTrue(out.startswith("noncomputable def W"))
+        a, b = out.index("namespace erdos_99_hyp_a_ns"), out.index("namespace erdos_99_hyp_b_ns")
+        self.assertLess(a, b)
+        self.assertLess(out.index("end erdos_99_hyp_a_ns"), b)                  # not nested
+        self.assertLess(b, out.index("-- a new premise"))                          # the comment stays with its decl
+        self.assertEqual(out.count("theorem erdos_99_hyp_a : W 1 = 1 := by"), 1)
+        r = H.parse_residual(out, 99)
+        self.assertTrue(r["glue_sorry_free"] and r["main_present"])
+        self.assertEqual(r["metric"]["certified"], 2)
+
+    def test_a_complete_candidate_is_untouched(self):
+        self.assertEqual(H.restore_spliced(self.CURRENT, self.CURRENT), self.CURRENT)
+
+    def test_a_candidate_that_drops_a_hypothesis_does_not_get_it_back(self):
+        cand = "theorem erdos_99 : W 1 = 1 := by\n  exact erdos_99_hyp_a"
+        out = H.restore_spliced(cand, self.CURRENT)
+        self.assertIn("namespace erdos_99_hyp_a_ns", out)
+        self.assertNotIn("erdos_99_hyp_b", out)
