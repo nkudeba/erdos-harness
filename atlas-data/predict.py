@@ -17,7 +17,7 @@ the log once outcomes land.
 
 Estimates are REFERENCE-CLASS CEILINGS, not calibrated probabilities, and say so in every row.
 """
-import argparse, datetime as dt, json, math, sys
+import argparse, datetime as dt, json, math, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -148,7 +148,9 @@ def main() -> int:
     r.add_argument("--p-partial", type=float)
     r.add_argument("--basis", required=True, help="why; recorded so a wrong prediction is diagnosable")
     r.add_argument("--by", default="harness")
-    sub.add_parser("score", help="Brier score and calibration over the log")
+    sc = sub.add_parser("score", help="Brier score and calibration over the log")
+    sc.add_argument("--log", default=str(LOG), help="predictions log (default: atlas-data/predictions.jsonl)")
+    sc.add_argument("--runs", default=str(ROOT / "runs"), help="run directories to settle predictions against")
     args = ap.parse_args()
 
     ranked = {str(p["id"]): p for p in load(DATA / "rankings.json", {}).get("problems", [])}
@@ -193,23 +195,98 @@ def main() -> int:
         print(f"recorded: #{row['problem']} p_resolve={args.p_resolve}")
         return 0
 
-    rows = [json.loads(l) for l in LOG.read_text().splitlines() if l.strip()] if LOG.exists() else []
+    return score(Path(args.log), Path(args.runs))
+
+
+def _when(ts: str):
+    try:
+        return dt.datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def attempts(runs_dir: Path) -> dict:
+    """Every finished-or-not attempt under runs/: {run name: {problem, start, settled, resolved}}.
+
+    `start` is the first timestamp in the run's own log (UTC; the directory name is local time). An attempt is
+    settled when its DONE file records a finished session: resolved iff it exited 0 (proved AND verified; for an
+    --open run, either direction). A fatal DONE is an infrastructure failure, not an outcome, so it stays
+    unsettled. Benchmark runs are not attempts on a catalogue problem and are skipped. A resumed run is scored on
+    its latest DONE, so a later session can turn a 0 into a 1: the score is recomputed, never stored."""
+    out = {}
+    if not runs_dir.exists():
+        return out
+    for d in runs_dir.iterdir():
+        m = re.search(r"-erdos(\d+)$", d.name)
+        if not m or "-bench-" in d.name or not (d / "log.jsonl").exists():
+            continue
+        start = None
+        try:
+            with open(d / "log.jsonl") as fh:
+                for line in fh:
+                    if line.strip():
+                        start = _when(json.loads(line).get("ts"))
+                        break
+        except (OSError, ValueError):
+            continue
+        settled = resolved = None
+        done = load(d / "DONE", None)
+        if isinstance(done, dict) and "fatal" not in done:
+            settled = True
+            if "exit" in done:
+                resolved = done["exit"] == 0
+            else:
+                resolved = done.get("outcome") == "proved" and done.get("verify") is True
+        out[d.name] = {"problem": m.group(1), "start": start, "settled": bool(settled), "resolved": resolved}
+    return out
+
+
+def settle(row: dict, runs: dict):
+    """The outcome of the attempt a prediction was made FOR, or None while it is unknown.
+
+    A harness row names its run (`by: triage/<run>`). Any other row is settled by the first attempt on that
+    problem that STARTED after the prediction was written. Scoring by the problem's current status instead (the
+    old rule) broke the write-ahead design twice over: a prediction written before a new attempt was settled at
+    once by an older one, and a failed attempt's prediction would flip to a success when a later run solved it."""
+    by = str(row.get("by") or "")
+    if by.startswith("triage/"):
+        a = runs.get(by.split("/", 1)[1])
+    else:
+        at = _when(row.get("at"))
+        later = [a for a in runs.values() if a["problem"] == str(row["problem"]) and a["start"] and at and a["start"] >= at]
+        a = min(later, key=lambda a: a["start"]) if later else None
+    if not a or not a["settled"]:
+        return None
+    return 1.0 if a["resolved"] else 0.0
+
+
+def score(log: Path, runs_dir: Path) -> int:
+    rows = [json.loads(l) for l in log.read_text().splitlines() if l.strip()] if log.exists() else []
     if not rows:
         print("no predictions logged yet; calibration is impossible until there are")
         return 0
-    scored = []
-    for row in rows:
-        p = ranked.get(row["problem"])
-        if not p or p["harness"] == "Untried":
-            continue
-        actual = 1.0 if p["harness"] == "Verified" else 0.0
-        scored.append((row["p_resolve"], actual, row["problem"]))
-    print(f"{len(rows)} predictions logged, {len(scored)} with a settled outcome")
+    runs = attempts(runs_dir)
+    scored = [(float(r["p_resolve"]), a, str(r["problem"])) for r in rows
+              for a in [settle(r, runs)] if a is not None]
+    print(f"{len(rows)} predictions logged, {len(scored)} with a settled outcome "
+          f"({len(rows) - len(scored)} still waiting on their attempt)")
     if not scored:
         print("none settled yet: no Brier score, no calibration. Keep logging.")
         return 0
+    base = sum(a for _, a, _ in scored) / len(scored)
+    if base in (0.0, 1.0):
+        # Four settled 0-probability predictions of four failures used to print "Brier score: 0.0000". With no
+        # variance in the outcomes a constant guess scores just as well, so the number measures nothing.
+        preds = sorted(p for p, _, _ in scored)
+        print(f"no Brier score: all {len(scored)} settled outcomes are {int(base)}, so a Brier score cannot separate "
+              f"forecasting skill from a constant guess (predictions ranged {preds[0]:g}–{preds[-1]:g}). Keep logging.")
+        return 0
     brier = sum((p - a) ** 2 for p, a, _ in scored) / len(scored)
-    print(f"Brier score: {brier:.4f}  (0 perfect, 0.25 = always saying 50%)")
+    ref = base * (1 - base)
+    print(f"Brier score: {brier:.4f} over n={len(scored)} (0 perfect); a constant forecast at the observed rate "
+          f"{base:.3f} scores {ref:.4f}, skill {1 - brier / ref:+.3f} (above 0 beats it)")
+    if len(scored) < 20:
+        print(f"  n={len(scored)} is too few to calibrate: read this as a record, not a calibration")
     for lo, hi in ((0, .01), (.01, .1), (.1, .5), (.5, 1.01)):
         band = [(p, a) for p, a, _ in scored if lo <= p < hi]
         if band:
