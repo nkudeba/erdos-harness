@@ -164,3 +164,42 @@ class TheCapBindsBeforeTheSpendNotAfter(unittest.TestCase):
    per = max(0.5, min(call_budget, remaining / max(1, samples)))
    # the floor of 0.5 can exceed a nearly-exhausted remainder; the pre-round check is what stops that
    self.assertLessEqual(per * samples, max(remaining, 0.5 * samples) + 1e-9)
+
+
+class OpenBudgetHandover(unittest.TestCase):
+ """A direction that stops early used to strand its unspent half of the --open budget."""
+
+ def _stub(self, spent, cap):
+  return argparse.Namespace(spent_usd=lambda: spent, args=argparse.Namespace(run_budget=cap))
+
+ def _parent(self, spent):
+  h = H.Harness.__new__(H.Harness)
+  events = []
+  h.log = argparse.Namespace(event=lambda *a, **k: events.append((a, k)))
+  h.spent_usd = lambda: spent
+  return h, events
+
+ def test_the_survivor_gets_what_the_run_has_left(self):
+  parent, events = self._parent(3.5)                 # 0.5 parent + 1.0 pos + 2.0 neg
+  kids = {"pos": self._stub(1.0, 4.75), "neg": self._stub(2.0, 4.75)}
+  parent._hand_over_budget("neg", kids, {"neg": 3}, 10.0)
+  self.assertAlmostEqual(kids["pos"].args.run_budget, 1.0 + 6.5)
+  self.assertEqual(events[0][0], ("open", "budget_handover"))
+
+ def test_an_overshooting_sibling_lowers_the_cap(self):
+  parent, _ = self._parent(9.8)
+  kids = {"pos": self._stub(1.0, 4.75), "neg": self._stub(8.3, 4.75)}
+  parent._hand_over_budget("neg", kids, {"neg": 3}, 10.0)
+  self.assertAlmostEqual(kids["pos"].args.run_budget, 1.2)
+
+ def test_nothing_changes_when_both_are_done_or_there_is_no_budget(self):
+  parent, events = self._parent(3.0)
+  kids = {"pos": self._stub(1.0, 4.0), "neg": self._stub(2.0, 4.0)}
+  parent._hand_over_budget("neg", kids, {"neg": 3, "pos": 3}, 10.0)
+  parent._hand_over_budget("neg", kids, {"neg": 3}, None)
+  self.assertEqual(kids["pos"].args.run_budget, 4.0)
+  self.assertEqual(events, [])
+
+ def test_run_open_calls_it_when_a_direction_ends(self):
+  import inspect
+  self.assertIn("self._hand_over_budget(direction, children, results, budget)", inspect.getsource(H.Harness.run_open))

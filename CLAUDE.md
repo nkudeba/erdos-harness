@@ -447,9 +447,9 @@ direction runs its own program (`erdos_N_neg_hyp_*` names parse; sub-runs keep t
 `open_direction_of`, so directories, modules and budgets stay separate). The failure mode is a false direction
 eating the budget: on #16 the negation's plan knew its target was false and still spent 70% of the run. The plan
 now reports `target_belief` and per-hypothesis `believed_false`; `target_belief: "false"` stops that direction
-(`target_believed_false` event, reason in `stop_reason`), and a believed-false hypothesis is never attacked. The
-budget split is fixed at launch (the directions run in parallel), so what a stopped direction saves is saved,
-not reassigned.
+(`target_believed_false` event, reason in `stop_reason`), and a believed-false hypothesis is never attacked. Each
+direction starts with half of what is left; when one ends, `_hand_over_budget` gives the other its own spend plus
+the whole run's remainder (a `budget_handover` event), so a direction that stops early no longer strands its half.
 
 `stage_reduce` now asks for a Lean statement beside each check; a checked reduction the cascade closes is
 `certified` and so labelled in prompts, one that only type-checks is `stated` and carried "as a hypothesis,

@@ -1632,7 +1632,7 @@ Produce, in this order:
     `believed_false: true` marks a hypothesis you have a concrete reason to think is FALSE (a refutation, a
     counterexample family, a known theorem in the other direction); it is never attacked. `target_belief: "false"`
     says the same of the frozen TARGET, and stops this program: when both directions of a problem are attacked,
-    a direction whose target is false must record why and stop spending, not keep splitting. Say "false"
+    a direction whose target is false must record why and stop, so the other direction can use the budget. Say "false"
     only with a concrete reason, stated in "route"; otherwise "unsure".
 
 (3) Optionally ONE ```markdown block with notes for the human reviewer.
@@ -4247,6 +4247,31 @@ for the SAT solver instead of enumerating it.
         chk = self.check(neg, "negation-compile")
         return neg if chk["ok"] else None
 
+    def _hand_over_budget(self, finished: str, children: dict, results: dict, budget) -> None:
+        """When one --open direction ends, the other may spend what the WHOLE run has left.
+
+        The split is fixed at launch (each direction gets half of what is left) and the directions run in parallel,
+        so a direction that stopped early used to strand its unspent half: on masked #16 and #242 the false direction
+        stopped itself for under a dollar and its share was simply lost. The survivor's cap becomes its own spend plus
+        the run's remainder. That can also LOWER the cap, if the finished direction overshot its half: --run-budget
+        is a real cap on the total. The child reads `args.run_budget` at every check, so this takes effect live."""
+        if not budget:
+            return
+        other = "neg" if finished == "pos" else "pos"
+        h = children.get(other)
+        if h is None or other in results:
+            return
+        try:
+            remaining = max(0.0, float(budget) - self.spent_usd())
+            new_cap = round(h.spent_usd() + remaining, 4)
+        except Exception as e:                                  # noqa: BLE001 - never kill the survivor over this
+            self.log.event("open", "budget_handover_failed", error=repr(e)[:200])
+            return
+        old = getattr(h.args, "run_budget", None)
+        h.args.run_budget = new_cap
+        self.log.event("open", "budget_handover", finished=finished, to=other, old_cap=old, new_cap=new_cap,
+                       run_remaining=round(remaining, 2))
+
     def run_open(self) -> int:
         """Formalize the conjecture AND its negation, freeze both, attack both in parallel, report which (if any)
         was proved. Everything lands in knowledge/open/<n>/<run>/ marked for human review."""
@@ -4296,6 +4321,8 @@ for the SAT solver instead of enumerating it.
                 results[direction] = children[direction].run()
             except BaseException as e:   # noqa: BLE001 — recorded, the other direction continues
                 results[direction] = f"error: {repr(e)[:200]}"
+            finally:
+                self._hand_over_budget(direction, children, results, budget)
 
         threads = [threading.Thread(target=go, args=(d,), daemon=True) for d in children]
         for t in threads:
