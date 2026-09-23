@@ -53,6 +53,8 @@ def main() -> int:
     ap.add_argument("--masked", action="store_true",
                     help="use benchmarks/deductive/masks/<n>.json: synthetic id, paraphrase, renamed theorem, prompts scrubbed")
     ap.add_argument("--no-check", action="store_true", help="skip the Lean compile check of the frozen statement")
+    ap.add_argument("--check-only", action="store_true",
+                    help="compile the frozen statement and stop: writes no problem file and creates no run dir")
     ap.add_argument("--run-budget", type=float, default=8.0)
     ap.add_argument("--research-cycles", type=int, default=2)
     ap.add_argument("--hyps-per-cycle", type=int, default=3)
@@ -77,9 +79,12 @@ def main() -> int:
         import harness as H
         res = H.LeanChecker(H.FORMAL, 420).check(H.compose(frozen, prob.get("imports") or H.DEFAULT_IMPORTS),
                                                    ROOT / "runs" / "adhoc" / f"bench-statement-{run_id}.lean")
+        # (runs/adhoc is scratch; --check-only stops right after this check)
         if not res["ok"]:
             print("frozen statement does not compile:", res["errors"][:2]); return 2
         print("frozen statement compiles (with sorry)")
+    if args.check_only:
+        return 0
     pdir = BENCH / "problems"
     pdir.mkdir(parents=True, exist_ok=True)
     pfile = pdir / f"erdos_{run_id}.json"

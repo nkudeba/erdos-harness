@@ -123,3 +123,45 @@ class JudgeVerdict(unittest.TestCase):
     def test_ambiguous_or_missing_is_no_verdict(self):
         self.assertIsNone(H.judge_verdict('"faithful": true ... "faithful": false')["faithful"])
         self.assertIsNone(H.judge_verdict("looks fine to me")["faithful"])
+
+
+class JudgeIssuesAreNotTruncated(unittest.TestCase):
+    def test_a_bracket_inside_an_issue_does_not_end_the_array(self):
+        t = ('```json\n{"faithful": true, "issues": ["the count of C in [0, x] is at most eps x", "k = 0 is harmless"]}\n'
+             ',"verdict": "ok."}\n```')
+        v = H.judge_verdict(t)
+        self.assertEqual(v["issues"][:2], ["the count of C in [0, x] is at most eps x", "k = 0 is harmless"])
+    def test_the_recorded_16_response(self):
+        import pathlib
+        f = pathlib.Path(H.ROOT) / "runs" / "20260923-084313-598873-bench-erdos45592" / "pos" / "transcripts" / "009-faithful.md"
+        if not f.exists():
+            self.skipTest("run transcript not present")
+        v = H.judge_verdict(f.read_text().split("## response", 1)[1])
+        self.assertIs(v["faithful"], True)
+        self.assertEqual(len(v["issues"]), 5)                       # four issues + the leniency note
+        self.assertIn("[0, x]", v["issues"][1])
+
+
+class Papercuts(unittest.TestCase):
+    def test_a_bare_problem_id_resolves_to_the_problem_file(self):
+        self.assertEqual(H.resolve_problem_path("242"), H.ROOT / "problems" / "erdos_242.json")
+        self.assertEqual(H.resolve_problem_path("problems/erdos_242.json"), Path("problems/erdos_242.json"))
+        self.assertEqual(H.resolve_problem_path("999999"), Path("999999"))          # no such problem: unchanged
+
+    def test_lean_check_resolves_a_relative_destination(self):
+        import tempfile, os
+        seen = {}
+        class P:
+            def __init__(self, cmd, **k):
+                seen["cmd"] = cmd
+                self.returncode, self.args, self.pid = 0, cmd, 0
+            def communicate(self, timeout=None):
+                return "", ""
+        with tempfile.TemporaryDirectory() as tmp, patch.object(H.subprocess, "Popen", P):
+            old = os.getcwd()
+            os.chdir(tmp)
+            try:
+                H.LeanChecker(Path(tmp), 5).check("example : True := trivial", Path("rel/x.lean"))
+            finally:
+                os.chdir(old)
+        self.assertTrue(Path(seen["cmd"][-1]).is_absolute())

@@ -374,6 +374,9 @@ class LeanChecker:
         self.timeout = timeout
 
     def check(self, source: str, dest: Path) -> dict:
+        # Lean runs with cwd = the Lean project, so a relative dest would not be found there ("no such file",
+        # which reads as a failed check). Production passes absolute paths; resolve anyway.
+        dest = Path(dest).resolve()
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(source)
         # Own process group, killed whole on timeout: `subprocess.run(timeout=)` kills `lake` but not the `lean` it
@@ -2036,11 +2039,42 @@ def judge_verdict(text: str) -> dict:
     vals = set(re.findall(r'"faithful"\s*:\s*(true|false)', text or ""))
     if len(vals) != 1:
         return {"faithful": None, "issues": ["judge returned no JSON"]}
-    issues = re.findall(r'"issues"\s*:\s*\[(.*?)\]', text, re.S)
     verdict = re.search(r'"verdict"\s*:\s*"((?:[^"\\]|\\.)*)"', text)
     return {"faithful": vals.pop() == "true",
-            "issues": ([issues[0].strip()[:1500]] if issues else []) + ["judge JSON was malformed; verdict read leniently"],
+            "issues": json_array_after(text, "issues") + ["judge JSON was malformed; verdict read leniently"],
             "verdict": verdict.group(1) if verdict else None}
+
+
+def json_array_after(text: str, key: str) -> list:
+    """The JSON array value of `"key": [...]` in otherwise malformed JSON, scanning brackets outside strings so a
+    `]` inside an issue ("the count in [0, x]") does not end it early. Unparseable → the raw text as one item."""
+    m = re.search(rf'"{re.escape(key)}"\s*:\s*\[', text or "")
+    if not m:
+        return []
+    depth, in_str, esc = 0, False, False
+    for i in range(m.end() - 1, len(text)):
+        c = text[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+        elif c == '"':
+            in_str = True
+        elif c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                raw = text[m.end() - 1:i + 1]
+                try:
+                    val = json.loads(raw)
+                    return [str(x) for x in val] if isinstance(val, list) else [raw[:1500]]
+                except ValueError:
+                    return [raw[1:-1].strip()[:1500]]
+    return [text[m.end():].strip()[:1500]]
 
 
 def strip_imports(src: str) -> str:
@@ -2347,7 +2381,7 @@ class MaskedBackend:
 
 class Harness:
     def __init__(self, args):
-        self.problem = json.loads(Path(args.problem).read_text())
+        self.problem = json.loads(resolve_problem_path(args.problem).read_text())
         pid = self.problem["id"]
         if args.resume:
             self.run_dir = Path(args.resume).resolve()
@@ -6042,6 +6076,17 @@ def circularity_probe_source(cand: str, target_frozen: str, prop: str) -> str | 
     return "\n\n".join(defs + [f"theorem circularity_probe (hH : {prop}) {th[1]} := by\n  {tac}"]).strip()
 
 
+def resolve_problem_path(arg: str) -> Path:
+    """`--problem` takes a path; a bare id such as `242` means problems/erdos_242.json (a Step 5 launch died on
+    FileNotFoundError: '242'). An existing path always wins."""
+    path = Path(str(arg))
+    if not path.exists() and str(arg).strip().isdigit():
+        cand = ROOT / "problems" / f"erdos_{int(str(arg).strip())}.json"
+        if cand.exists():
+            return cand
+    return path
+
+
 def owner_chain(h) -> list[str]:
     """The runs a sub-run spawned by `h` belongs to: `h`'s own run dir plus everything `h` belongs to. Written into
     every program child's state.json as `owner_runs`, so spend and facts are attributed by OWNERSHIP."""
@@ -6711,7 +6756,7 @@ def main():
 
     sub.add_parser("campaign", help="dependency-aware research campaigns; use campaign --help")
     runp = sub.add_parser("run")
-    runp.add_argument("--problem", required=True)
+    runp.add_argument("--problem", required=True, help="problem file, or a bare id for problems/erdos_<id>.json")
     runp.add_argument("--backend", choices=["claude-cli", "codex-cli", "file"], default="claude-cli")
     runp.add_argument("--model", default=None, help=f"model for the CLI backend (claude-cli default: {DEFAULT_CLAUDE_MODEL})")
     runp.add_argument("--samples", type=int, default=3, help="attempts requested per proving round")
