@@ -58,6 +58,7 @@ benchmark outcomes never enter the Atlas. Committed before the run starts, so th
 |---|---|---|---|---|
 | 645 (67734) | $20 | 0.25 | 0.60 | not recognised; the earlier blind close ($4.75) was carried by the lemma store, now excluded; the known proof is a finite forcing argument whose compactness step the #645 blind run found hard to certify by kernel enumeration |
 | 499 (61249) | $20 | 0.45 | 0.75 | route known to the model and Mathlib has Birkhoff (`exists_eq_sum_perm_of_mem_doublyStochastic`) and weighted AM–GM; the risk is `rpow` bookkeeping, which the reference needed two helper lemmas for |
+| 16 (45592), **Step 4: `--open`**, both directions | $24 split between directions | pos (the true statement): 0.10; neg (false): 0 | pos: 0.45; neg: the refute stage kills at least one negation hypothesis with an exact witness: 0.35 | recognised from content (names #16 and the resolving author) but no proof recalled; the reference is 289 lines with an explicit covering system and density bookkeeping, heavy for $12. The test is not whether pos closes but whether a false direction wastes its half: success = neg spends little and records why |
 
 Reading: the mask removes the name cue but not content recognition for a theorem this well known. The model does
 not claim to remember the reference's roots-of-unity proof, so a masked run that produces roots of unity is

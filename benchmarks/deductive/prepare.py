@@ -58,6 +58,10 @@ def main() -> int:
     ap.add_argument("--hyps-per-cycle", type=int, default=3)
     ap.add_argument("--model", default="claude-opus-5-5", help="CLAUDE.md: the CLI default hits its usage limit early")
     ap.add_argument("--backend", default="claude-cli", choices=["claude-cli", "codex-cli"])
+    ap.add_argument("--open", action="store_true",
+                    help="attack the frozen statement AND its negation (two directions, each its own deductive program; "
+                         "the budget is split between them)")
+    ap.add_argument("--min-child-budget", type=float, default=None)
     ap.add_argument("--launch", action="store_true", help="start the run now, detached, logging to <run_dir>/lane.log")
     args = ap.parse_args()
     pid = str(int(args.problem))
@@ -92,7 +96,8 @@ def main() -> int:
                                                         "reference": mask.get("reference"), "changes": mask.get("changes")}, indent=2))
     cmd = [sys.executable, str(ROOT / "harness.py"), "run", "--problem", str(pfile), "--resume", str(run_dir),
            "--mode", "research", "--allow-research", "--benchmark", "--skip-literature", "--no-brief",
-           *(["--masked"] if mask else []),
+           *(["--masked"] if mask else []), *(["--open"] if args.open else []),
+           *(["--min-child-budget", str(args.min_child_budget)] if args.min_child_budget else []),
            "--research-loop", "deductive", "--run-budget", str(args.run_budget),
            "--research-cycles", str(args.research_cycles), "--hyps-per-cycle", str(args.hyps_per_cycle),
            "--backend", args.backend] + (["--model", args.model] if args.model else [])

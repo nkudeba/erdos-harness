@@ -1,0 +1,15 @@
+{
+  "id": "67734",
+  "statement": "Colour every natural number with one of two colours. Show that there are natural numbers y and e with 0 < y < e such that y, y + e and y + 2e all have the same colour.",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "61249",
+  "statement": "Let N ≥ 1 and let b be an N×N array of real numbers, all non-negative, in which every row sums to 1 and every column sums to 1. Show that some bijection τ of {0, …, N−1} to itself makes the product of the N entries b(i, τ(i)) at least N^(−N).",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic",
+    "Mathlib.Analysis.Convex.Birkhoff",
+    "Mathlib.Analysis.Convex.DoublyStochasticMatrix"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}
