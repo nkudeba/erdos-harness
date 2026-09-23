@@ -49,7 +49,7 @@ Rerun after the context-leak fix; every earlier probe moved to `probes/leaked-co
 | 476 (94163) | yes (Erdős–Heilbronn, ~95%) | yes (Alon–Nathanson–Ruzsa) | reference route | excluded |
 | 532 (73508) | yes (Hindman, >95%) | yes (Galvin–Glazer); knows Mathlib has it | reference imports Mathlib's Hindman | excluded |
 | 275 (80317) | yes (Crittenden–Vanden Eynden) | proposes the analytic route "reconstructing" | reference route | excluded from further runs |
-| 649 (38027) | no | — | **the frozen statement is trivial**: take r = s, a prime cannot divide m and m + 1 | excluded; the saved #649 solve certifies a statement weaker than the problem |
+| 649 (38027) | no | — | **the frozen statement is trivial**: take r = s, a prime cannot divide m and m + 1 | excluded; the saved #649 solve certified a statement weaker than the problem (**re-frozen with p ≠ q on 2026-09-23 and re-verified**; the mask now carries r ≠ s) |
 
 ### Predictions, written before launch (2026-09-23)
 

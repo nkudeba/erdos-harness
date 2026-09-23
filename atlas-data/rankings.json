@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "5ddbe43f3a1e4bcefdc7a91b84411800c203fedc3c125aac585f03aa01418c5d",
+    "harness_sha256": "b86337cd63de61a309d7bac2faedf31976db90224615f2b73f8dc2e17c08c3b3",
     "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
-    "manual_reviews_sha256": "4e0a330585e158e05b553b0f1e7174cb540894def23ca7d0c4c4093698fc9ac2"
+    "manual_reviews_sha256": "392cbde6556669835440fc4d8591a7ec7732eeca430e194dc4a1798ca0ecf479"
   },
   "problems": [
     {
@@ -644,6 +644,7 @@
       "rationale": [
         "The literal question is refuted by p=2 and q=7: powers of two never equal −1 modulo seven. This is unusually close to our arithmetic/finite-residue strengths.",
         "Reading defect in the saved solve (found 2026-09-23 by the clean Opus 5.5 recall probe): the frozen statement ¬(∀ p q prime, ∃ n, P(n)=p ∧ P(n+1)=q) does not require p ≠ q, so it follows trivially from p = q = 2 (2 cannot divide n and n+1). The saved proof uses the real pair (2, 7) (2^k + 1 is never divisible by 7), so the mathematics is right, but the certified statement is weaker than the problem. Re-freeze with p ≠ q before citing it.",
+        "Re-frozen 2026-09-23 with p ≠ q (knowledge/solved/Erdos649.json → refrozen): the (2, 7) proof needed one extra argument, compiles sorry-free on the standard axioms, the trivial p = q route no longer typechecks, and a fresh faithfulness judgment (Opus 5.5, told about the re-freeze) calls it faithful: adding p ≠ q strengthens the negated claim and is the only non-degenerate reading. Operator correction, mechanically re-verified; still needs independent human review like every solve.",
         "A saved full proof passed the local Lean regression and standard-axiom audit.",
         "This is demonstrated harness capability on its frozen formulation, not a calibrated probability of a fresh run."
       ],
@@ -668,7 +669,8 @@
         "on": "2026-09-23",
         "sources": [
           "benchmarks/deductive/probes/649-masked-20260923-063342.md",
-          "knowledge/solved/Erdos649.lean"
+          "knowledge/solved/Erdos649.lean",
+          "knowledge/solved/Erdos649.json"
         ],
         "searchFloor": null
       },

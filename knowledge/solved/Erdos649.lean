@@ -43,12 +43,12 @@ def IsGreatestPrimeFactor649 (n p : ℕ) : Prop :=
   ∀ r : ℕ, Nat.Prime r → r ∣ n → r ≤ p
 
 theorem erdos_649 :
-    ¬ (∀ p q : ℕ, Nat.Prime p → Nat.Prime q →
+    ¬ (∀ p q : ℕ, Nat.Prime p → Nat.Prime q → p ≠ q →
       ∃ n : ℕ,
         IsGreatestPrimeFactor649 n p ∧
         IsGreatestPrimeFactor649 (n + 1) q) := by
   intro h
-  obtain ⟨n, hn, hn1⟩ := h 2 7 (by norm_num) (by norm_num)
+  obtain ⟨n, hn, hn1⟩ := h 2 7 (by norm_num) (by norm_num) (by norm_num)
   obtain ⟨k, hk⟩ := power_of_two649 n (by have := hn.1; omega) (by
     intro r hr hrd
     have := hn.2.2.2 r hr hrd

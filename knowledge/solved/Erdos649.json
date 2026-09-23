@@ -7,6 +7,37 @@
     "Mathlib.Data.Nat.Factorial.Basic",
     "Mathlib.Data.Nat.Prime.Basic"
   ],
-  "statement": "def IsGreatestPrimeFactor649 (n p : \u2115) : Prop :=\n  2 \u2264 n \u2227\n  Nat.Prime p \u2227\n  p \u2223 n \u2227\n  \u2200 r : \u2115, Nat.Prime r \u2192 r \u2223 n \u2192 r \u2264 p\n\ntheorem erdos_649 :\n    \u00ac (\u2200 p q : \u2115, Nat.Prime p \u2192 Nat.Prime q \u2192\n      \u2203 n : \u2115,\n        IsGreatestPrimeFactor649 n p \u2227\n        IsGreatestPrimeFactor649 (n + 1) q) := by\n  sorry",
-  "verified_at": "2026-09-10T15:27:38Z"
+  "statement": "def IsGreatestPrimeFactor649 (n p : ℕ) : Prop :=\n  2 ≤ n ∧\n  Nat.Prime p ∧\n  p ∣ n ∧\n  ∀ r : ℕ, Nat.Prime r → r ∣ n → r ≤ p\n\ntheorem erdos_649 :\n    ¬ (∀ p q : ℕ, Nat.Prime p → Nat.Prime q → p ≠ q →\n      ∃ n : ℕ,\n        IsGreatestPrimeFactor649 n p ∧\n        IsGreatestPrimeFactor649 (n + 1) q) := by\n  sorry",
+  "verified_at": "2026-09-23T23:31:36Z",
+  "refrozen": {
+    "at": "2026-09-23T23:31:36Z",
+    "by": "operator (Claude Code session, 2026-09-23), no model-written mathematics",
+    "why": "the previous frozen statement omitted p ≠ q and was trivially true (p = q = 2: 2 cannot divide both n and n + 1), so it certified nothing about the question; found by the clean Opus 5.5 recall probe (benchmarks/deductive/probes/649-masked-20260923-063342.md). The 2026-09-10 statement review (experiments/atlas-top3/STATEMENT-REVIEW-claude.md) and the original faithfulness judge both missed it.",
+    "previous_statement": "def IsGreatestPrimeFactor649 (n p : ℕ) : Prop :=\n  2 ≤ n ∧\n  Nat.Prime p ∧\n  p ∣ n ∧\n  ∀ r : ℕ, Nat.Prime r → r ∣ n → r ≤ p\n\ntheorem erdos_649 :\n    ¬ (∀ p q : ℕ, Nat.Prime p → Nat.Prime q →\n      ∃ n : ℕ,\n        IsGreatestPrimeFactor649 n p ∧\n        IsGreatestPrimeFactor649 (n + 1) q) := by\n  sorry",
+    "proof_change": "one extra argument (by norm_num : 2 ≠ 7); the (2, 7) route is unchanged",
+    "checks": {
+      "compiles": true,
+      "sorry_free": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "trivial_p_eq_q_route_now_fails": true
+    },
+    "faithful": {
+      "model": "claude-opus-5-5",
+      "verdict": {
+        "faithful": true,
+        "issues": [
+          "Adding p ≠ q narrows the universal quantifier, so it strengthens the negated claim rather than weakening it. B (there exist distinct p, q with no suitable n) implies the negation of A as written. It is also the only non-degenerate reading of A: for p = q the property fails trivially, since p cannot divide both n and n+1. So the hypothesis removes a triviality and does not tailor the statement to the route. The witness p=2, q=7 is distinct, matching the notes' resolution.",
+          "Restricting to n ≥ 2 weakens the 'no n exists' conclusion only nominally. P(1) is undefined, and with the divisibility encoding neither n = 0 nor n = 1 can satisfy both conditions (n = 0 fails the 'every prime dividing n is ≤ p' clause), so nothing is lost.",
+          "The divisibility encoding (p | n and every prime divisor of n is ≤ p) correctly captures P(n) = p for n ≥ 2."
+        ],
+        "verdict": "B is the negated form of A restricted to distinct primes. This is a stronger claim than the literal negation, it is the natural non-trivial reading, and it matches the documented resolution via p=2, q=7, so B is faithful."
+      },
+      "disclosure_given_to_judge": "OPERATOR RE-FREEZE (2026-09-23): statement B adds the hypothesis p ≠ q to the previously frozen statement. Without it the negated universal is trivially true (take p = q = 2: 2 cannot divide both n and n + 1), so the earlier certified statement did not engage with the question. The proof is unchanged: the pair p = 2, q = 7, since 2^k + 1 is never divisible by 7. Check adversarially whether adding p ≠ q is faithful to A's 'any two primes p, q' or narrows it.",
+      "backtranslation": "For an integer n ≥ 2, write P(n) for the largest prime factor of n. The theorem claims the following: it is **not** true that for every pair of distinct primes p and q there is a natural number n ≥ 2 with P(n) = p and P(n+1) = q.\n\nEquivalently, there exist two distinct primes p ≠ q for which no natural number n ≥ 2 has both of these properties:\n- p divides n and every prime dividing n is at most p;\n- q divides n+1 and every prime dividing n+1 is at most q."
+    }
+  }
 }
