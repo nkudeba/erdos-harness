@@ -331,9 +331,12 @@ Covered by `tests/test_cluster_library.py`.
 
 ## Gotchas
 
-- The `claude` CLI default model on this account is Fable, and it hits a usage limit long before Opus
-  does — a run then dies at the literature stage with exit 1 after ~$0.002. Pass `--model claude-opus-5`
-  explicitly (it is also what the recorded baselines used, so it keeps comparisons controlled).
+- **Model: `claude-opus-5-5`, never Opus 5.** `DEFAULT_CLAUDE_MODEL` in `harness.py` is what the claude-cli
+  backend uses when `--model` is omitted; `prepare.py`/`probe.py` default to the same. Never let a call fall
+  through to the `claude` CLI's own default: on this account that is Fable, which hits a usage limit long
+  before Opus and kills a run at the first stage with exit 1 after ~$0.002. Runs before 2026-09-23 (all
+  recorded baselines, and the first three sessions of masked #275) used `claude-opus-5`, so comparing against
+  them is a model switch — record it. Each resume logs its model in `state["invocations"]`.
 - `erdosproblems.com` 403s WebFetch; plain `curl -A "Mozilla/5.0"` works. The site's `/forum/thread/<n>` and
   its proof-claims page carry decisive information the main page does not — read them before attacking.
 - The site's `falsifiable` / `verifiable` / `decidable` classes promise a finite witness, **not a reachable

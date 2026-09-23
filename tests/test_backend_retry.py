@@ -77,3 +77,20 @@ class EffortTuning(unittest.TestCase):
         self.assertIn("medium", lit[lit.index("--effort") + 1]); self.assertEqual(lit[lit.index("--max-budget-usd") + 1], "2.5")
         self.assertIn("high", form[form.index("--effort") + 1]); self.assertEqual(form[form.index("--max-budget-usd") + 1], "4.0")
         self.assertNotIn("--effort", prove); self.assertEqual(prove[prove.index("--max-budget-usd") + 1], "8.0")
+
+
+class ModelDefault(unittest.TestCase):
+    """No --model must mean Opus 5.5, never the claude CLI's own default (Fable on this account) or Opus 5."""
+    def _model(self, b):
+        calls = []
+        ok = _resp(0, {"is_error": False, "result": "ok", "total_cost_usd": 0.0, "num_turns": 1})
+        with patch.object(H.subprocess, "run", side_effect=lambda cmd, **k: calls.append(cmd) or ok):
+            b.complete("prove", "x")
+        return calls[0][calls[0].index("--model") + 1]
+
+    def test_omitted_model_uses_opus_5_5(self):
+        self.assertEqual(H.DEFAULT_CLAUDE_MODEL, "claude-opus-5-5")
+        self.assertEqual(self._model(H.ClaudeCliBackend(None, 10)), "claude-opus-5-5")
+
+    def test_explicit_model_wins(self):
+        self.assertEqual(self._model(H.ClaudeCliBackend("claude-sonnet-5", 10)), "claude-sonnet-5")

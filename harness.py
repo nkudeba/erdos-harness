@@ -59,6 +59,11 @@ STD_AXIOMS = {"propext", "Classical.choice", "Quot.sound"}
 #                                                                  `field_simp`, `gcongr`, `decide +kernel` etc. were MISSING
 # Problems can override via an "imports" field; models can request more via `-- IMPORTS:`; and the
 # harness auto-resolves `unknown identifier` errors to the Mathlib module that defines the name.
+# The claude-cli model used when --model is not given. Never fall through to the CLI's own default: on this
+# account that is Fable, which hits its usage limit early and dies at the first stage. Opus 5 is retired now
+# that Opus 5.5 is out; runs before 2026-09-23 used claude-opus-5 and their invocation logs say so.
+DEFAULT_CLAUDE_MODEL = "claude-opus-5-5"
+
 DEFAULT_IMPORTS = [
     "Mathlib.Tactic",
     "Mathlib.Algebra.BigOperators.Fin",
@@ -136,7 +141,7 @@ class ClaudeCliBackend:
     def __init__(self, model: str | None, timeout: int, call_budget_usd: float = 8.0,
                  aux_effort: str | None = "medium", formal_effort: str | None = "high",
                  prove_effort: str | None = None, aux_budget_usd: float = 2.5, formal_budget_usd: float = 4.0):
-        self.model = model
+        self.model = model or DEFAULT_CLAUDE_MODEL
         self.timeout = timeout
         self.call_budget_usd = call_budget_usd
         self.aux_effort, self.formal_effort, self.prove_effort = aux_effort, formal_effort, prove_effort
@@ -2312,7 +2317,8 @@ class Harness:
         if getattr(args, "benchmark", False):
             self.state["benchmark"] = True
         self.state.setdefault("invocations", []).append({
-            "at": now(), "backend": args.backend, "model": args.model,
+            "at": now(), "backend": args.backend,
+            "model": args.model or (DEFAULT_CLAUDE_MODEL if args.backend == "claude-cli" else None),
             "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "rounds": args.rounds, "samples": args.samples,
             "decompose_rounds": args.decompose_rounds,
@@ -6321,7 +6327,7 @@ def main():
     runp = sub.add_parser("run")
     runp.add_argument("--problem", required=True)
     runp.add_argument("--backend", choices=["claude-cli", "codex-cli", "file"], default="claude-cli")
-    runp.add_argument("--model", default=None, help="model for claude-cli backend")
+    runp.add_argument("--model", default=None, help=f"model for the CLI backend (claude-cli default: {DEFAULT_CLAUDE_MODEL})")
     runp.add_argument("--samples", type=int, default=3, help="attempts requested per proving round")
     runp.add_argument("--rounds", type=int, default=6, help="max proving rounds before decomposition")
     runp.add_argument("--decompose-rounds", type=int, default=10, help="refinement budget after decomposition")

@@ -56,7 +56,7 @@ def main() -> int:
     ap.add_argument("--run-budget", type=float, default=8.0)
     ap.add_argument("--research-cycles", type=int, default=2)
     ap.add_argument("--hyps-per-cycle", type=int, default=3)
-    ap.add_argument("--model", default="claude-opus-5", help="CLAUDE.md: the CLI default hits its usage limit early")
+    ap.add_argument("--model", default="claude-opus-5-5", help="CLAUDE.md: the CLI default hits its usage limit early")
     ap.add_argument("--backend", default="claude-cli", choices=["claude-cli", "codex-cli"])
     ap.add_argument("--launch", action="store_true", help="start the run now, detached, logging to <run_dir>/lane.log")
     args = ap.parse_args()

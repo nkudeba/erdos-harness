@@ -39,8 +39,9 @@ frozen target still rests on, by kind. `open` conjectures are exactly as unprove
 ## Pacing
 
 One model lane at a time (`CLAUDE.md` explains why: spend limits are a hard failure). Runs resume with
-`--resume`. macOS has no `timeout`; use a perl alarm. Pass `--model claude-opus-5`: the CLI default (Fable)
-hits its usage limit long before Opus and kills a run at the literature stage with exit 1.
+`--resume`. macOS has no `timeout`; use a perl alarm. The harness defaults to `claude-opus-5-5`
+(`DEFAULT_CLAUDE_MODEL`); never use Opus 5, and never let a call reach the CLI default (Fable), which hits its
+usage limit long before Opus and kills a run at the literature stage with exit 1.
 
 ## Honesty
 

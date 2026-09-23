@@ -6,7 +6,7 @@
 # checked only after the fact, which then starved stage_brief.
 cd "$(dirname "$0")/../.."
 python3 harness.py run --problem problems/erdos_699.json --open \
-  --model claude-opus-5 \
+  --model claude-opus-5-5 \
   --informal-context experiments/699-full-attempt/CONTEXT.md \
   --allow-research --research-cycles 2 \
   --reduce always \

@@ -40,7 +40,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--problem", required=True)
     ap.add_argument("--only", choices=["identified", "masked"], default=None)
-    ap.add_argument("--model", default="claude-opus-5")
+    ap.add_argument("--model", default="claude-opus-5-5")
     args = ap.parse_args()
     pid = str(int(args.problem))
     solved = json.loads((ROOT / "knowledge" / "solved" / f"Erdos{pid}.json").read_text())
