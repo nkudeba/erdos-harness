@@ -26,7 +26,7 @@ kernel checks; "construction" means an explicit infinite family plus a proof tha
 | 645 | ∀ 2-colouring of ℕ, ∃ monochromatic x, x+d, x+2d with d > x | finite case analysis, 99 lines, omega | deductive (reduces to a finite statement) | 1 |
 | 275 | a system covering 2^r consecutive integers covers ℤ | induction on r, 116 lines | deductive | 2 |
 | 499 | doubly stochastic matrix has a permutation with product ≥ n^−n | inequality argument, 154 lines | deductive | 3 |
-| 532 | ∀ 2-colouring, ∃ infinite A with monochromatic finite subset sums | Mathlib Hindman + block grouping, 115 lines | deductive, one published premise | 4 |
+| 532 | ∀ 2-colouring, ∃ infinite A with monochromatic finite subset sums | Mathlib Hindman + block grouping, 115 lines | deductive, but the hard step is **certified in Mathlib** (`Mathlib.Combinatorics.Hindman`), not a premise: #532 *is* the 2-colour Hindman theorem, so a `-- PUBLISHED:` Hindman premise is circular and the guard rejects it. What remains to derive is the block grouping | 4 |
 | 350 | dissociated A ⇒ Σ 1/n < 2 | 22 lemmas, 407 lines | deductive | 5 |
 | 476 | Erdős–Heilbronn: \|A +̂ A\| ≥ min(2\|A\|−3, p) | structural, 315 lines | deductive | 6 |
 | 649 | ¬ ∀ primes p q, ∃ n with P(n)=p, P(n+1)=q | a pair (p,q) and a Diophantine argument that no n exists | deductive, negative direction | 7 |

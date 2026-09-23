@@ -56,7 +56,10 @@ Each hypothesis is one of three kinds, and the kind is recorded:
   Lucas, the BBMST distortion bound). *Hypotheses, never `axiom`*: the axiom audit stays
   `[propext, Classical.choice, Quot.sound]`, and the trust boundary is visible in the signature.
   This is what Tang's #306 development does with axioms and what `campaign.py`'s `conditional`
-  scope was designed for.
+  scope was designed for. A published premise must be a *different* result used as one ingredient:
+  `_circular_premise` rejects any premise the target (or the root target) follows from by routine steps,
+  checked first by free Lean tactics and then by one judge call (added 2026-09-23 after masked #275
+  closed a residual with the target itself, translated, cited as Crittenden–Vanden Eynden 1970).
 - **certified** — a lemma in the library; discharged, so it disappears from the signature.
 - **conjecture** — the residual. This is the object whose size and shape measure progress.
 

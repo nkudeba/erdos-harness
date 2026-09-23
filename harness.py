@@ -136,7 +136,7 @@ class ClaudeCliBackend:
     # at the default effort; medium effort is plenty for retrieval-style stages. Proof search keeps the default.
     AUX_PURPOSES = {"literature", "backtranslate", "faithful", "retrospect", "brief", "reduce", "readings"}
     FORMAL_PURPOSES = {"formalize", "crosscheck"}
-    TRIAGE_PURPOSES = {"assess", "critic", "search"}   # medium effort, $1 cap: classification / review / script writing
+    TRIAGE_PURPOSES = {"assess", "critic", "search", "circularity"}   # medium effort, $1 cap: classification / review / script writing
 
     def __init__(self, model: str | None, timeout: int, call_budget_usd: float = 8.0,
                  aux_effort: str | None = "medium", formal_effort: str | None = "high",
@@ -1577,7 +1577,11 @@ Produce, in this order:
       Each is one of: (a) a CONJECTURE you DERIVED — say in a `--` comment directly above it what it should follow
       from, or why a counterexample must satisfy it; never "holds in 99% of cases"; (b) a PUBLISHED theorem you rely
       on, stated faithfully, with `-- PUBLISHED: <authors, year, theorem number>` directly above it. That is how
-      real mathematics enters this program: as a hypothesis, never as an `axiom`.
+      real mathematics enters this program: as a hypothesis, never as an `axiom`. A published premise must be a
+      DIFFERENT result that the argument uses as one ingredient. Never the target itself, and never anything the
+      target follows from by routine steps alone (translation, renaming, specialisation, contrapositive, unfolding
+      a definition): that proves the target from itself, and the skeleton is rejected. If the result you need is
+      already in Mathlib, use the Mathlib theorem by name; it is certified and not a premise.
     - The FROZEN THEOREM, verbatim, proved from the hypotheses and the certified lemmas (by name) with NO `sorry` in
       its own proof: `:= by` followed by glue tactics. The only `sorry`s in the block are the hypothesis bodies.
     Prefer the WEAKEST hypotheses that still close the target. A good hypothesis is strictly more elementary than
@@ -4558,10 +4562,71 @@ for the SAT solver instead of enumerating it.
             if fin["ok"] and not fin["sorries"]:
                 return {"adopted": True, "proved": True, "skeleton": fin.get("body", cand), "parsed": parsed,
                         "reason": "no hypothesis left: the skeleton is a proof"}
+        circ = self._circular_premise(cand, parsed, frozen, cycle)
+        if circ:
+            return {"adopted": False, "reason": circ, "parsed": parsed}
         if not residual_improves(parsed, current):
             return {"adopted": False, "reason": "no improvement over the skeleton in force", "parsed": parsed}
         return {"adopted": True, "skeleton": cand, "parsed": parsed,
                 "reason": "improves the residual" if current else "first skeleton"}
+
+    def _circular_premise(self, cand: str, parsed: dict, frozen: str, cycle: int) -> str | None:
+        """A rejection reason if an open PUBLISHED premise is the target in disguise, else None.
+
+        The masked #275 run (2026-09-23) closed its residual with `hyp_cve`, tagged PUBLISHED as
+        Crittenden–Vanden Eynden 1970: the frozen theorem with the block starting at 0 instead of t. The skeleton
+        compiled on the standard axioms with every sorry inside a hypothesis and one fewer open conjecture, so
+        every gate passed and the target was "proved" from itself. The check runs against this skeleton's own
+        target AND the root target (that premise entered one level down, inside a sub-residual). Layer 1 is free:
+        the Lean tactics try `premise → target`. Layer 2 asks one judge call whether the target follows from the
+        premise by routine steps, which catches a translation the tactics cannot find. No verdict = rejected:
+        letting a circular premise through is the failure this exists to stop."""
+        targets = [frozen]
+        root = getattr(self, "root_frozen", None)
+        if root and root.strip() != frozen.strip():
+            targets.append(root)
+        cache = self.__dict__.setdefault("_circ_cache", {})
+        defs_txt = "\n\n".join(skeleton_defs(cand)) or "(none)"
+        for h in parsed["hypotheses"]:
+            if not (h["open"] and h["kind"] == "published"):
+                continue
+            for target in targets:
+                key = hashlib.sha256((h["statement"] + "\0" + target).encode()).hexdigest()
+                if key not in cache:
+                    cache[key] = self._judge_circularity(cand, h, target, defs_txt, cycle)
+                verdict = cache[key]
+                if verdict:
+                    which = "the target" if target is frozen else "the root target"
+                    self.log.event("program", "circular_premise", cycle=cycle, name=h["name"], against=which,
+                                   source=str(h.get("source") or "")[:160], why=verdict[:300])
+                    return (f"circular premise `{h['name']}`: {which} follows from it alone ({verdict[:240]}). "
+                            "A published premise must be a different result used as one ingredient; prove this step, "
+                            "or use a certified Mathlib theorem by name")
+        return None
+
+    def _judge_circularity(self, cand: str, h: dict, target: str, defs_txt: str, cycle: int) -> str | None:
+        """Why the premise is circular (a short reason) or None when it is a genuine ingredient."""
+        src = circularity_probe_source(cand, target, h["statement"])
+        if src:
+            res = self.check(src, f"circularity-c{cycle}-{h['name']}"[:120])
+            if res.get("ok") and not res.get("sorries"):
+                return "Lean closes premise → target with a routine tactic"
+        resp = self.ask("circularity", CIRCULARITY_PROMPT.format(
+            target=target.rstrip() + " by sorry", defs=defs_txt[-4000:], name=h["name"],
+            source=h.get("source") or "(none)", prop=h["statement"]))
+        v = json_block(resp)
+        if v is None:
+            m = re.search(r"\{.*\}", resp, re.S)
+            try:
+                v = json.loads(m.group(0)) if m else {}
+            except json.JSONDecodeError:
+                v = {}
+        v = v if isinstance(v, dict) else {}
+        if v.get("routine") is False:
+            return None
+        if v.get("routine") is True:
+            return "judge: " + str(v.get("why") or "routine")
+        return "circularity judge returned no verdict, so the premise is not accepted"
 
     def _attack_substatement(self, sub: str, name: str, sdir: Path, cycle: int, module: str | None, remaining: int,
                              recursive: bool = False):
@@ -4601,6 +4666,8 @@ for the SAT solver instead of enumerating it.
         child = Harness(cargs)
         child.thm_name = name
         child.direction = "program"
+        # a premise circular against the ROOT target is circular at any depth (masked #275, hyp_cve)
+        child.root_frozen = getattr(self, "root_frozen", None) or statement_prefix(self.state["statement"])
         if recursive:
             child.program_subdir = name
         if module:
@@ -5802,6 +5869,64 @@ def parse_residual(skeleton: str, pid, meta: dict | None = None, main: str | Non
               "complexity": sum(h["complexity"] for h in open_conj),
               "max_complexity": max((h["complexity"] for h in open_conj), default=0)}
     return {"hypotheses": hyps, "glue_sorry_free": glue_holes == 0, "main_present": main_present, "metric": metric}
+
+
+CIRCULARITY_PROMPT = """A proof skeleton proves a TARGET from named hypotheses. One hypothesis is tagged as a PUBLISHED theorem, which
+the harness accepts without proof. That is legitimate only when the premise is a genuinely different result that
+the target needs as one ingredient. It is illegitimate when the premise is the target itself, or when the target
+follows from the premise ALONE by routine steps: renaming, translating or reindexing, specialising or generalising
+parameters, adding or dropping trivial hypotheses, taking a contrapositive, unfolding definitions, restating in
+equivalent terms. A skeleton of that kind proves the target from itself, and its citation is a citation of the answer.
+
+TARGET (Lean):
+```lean
+{target}
+```
+
+DEFINITIONS in scope:
+```lean
+{defs}
+```
+
+PREMISE `{name}` (tagged PUBLISHED: {source}):
+```lean
+{prop}
+```
+
+Would a competent mathematician derive the TARGET from this PREMISE alone with nothing beyond routine
+bookkeeping? Answer with one ```json block and nothing else:
+{{"routine": true | false, "why": "one or two sentences: the routine transformation, or the non-routine idea the target still needs"}}"""
+
+# Tactics that close `premise → target` when the premise is a restatement. Tried in Lean, free, before the judge.
+CIRCULARITY_TACTICS = ("exact hH", "(intros; apply hH <;> assumption)", "simpa using hH", "aesop")
+
+
+def frozen_theorem(frozen: str) -> tuple[str, str] | None:
+    """(name, header) of the LAST theorem in a frozen prefix; the header is its binders and `: conclusion`,
+    without the trailing `:=`."""
+    ms = list(re.finditer(r"(?m)^\s*(?:theorem|lemma)\s+([^\s(:{\[]+)", strip_comment_lines(frozen)))
+    if not ms:
+        return None
+    body = strip_comment_lines(frozen)[ms[-1].end():].rstrip()
+    if body.endswith(":="):
+        body = body[:-2]
+    return ms[-1].group(1), body.strip()
+
+
+def circularity_probe_source(cand: str, target_frozen: str, prop: str) -> str | None:
+    """Lean source asking the free tactics to prove the target from the premise alone. The candidate's defs come
+    first (the premise may use them), then any target def the candidate does not already define."""
+    th = frozen_theorem(target_frozen)
+    if not th:
+        return None
+    defs = skeleton_defs(cand)
+    have = {m.group(1) for d in defs for m in [re.search(r"(?:def|abbrev|structure|inductive|instance)\s+(\S+)", d)] if m}
+    for d in skeleton_defs(target_frozen + " sorry"):
+        m = re.search(r"(?:def|abbrev|structure|inductive|instance)\s+(\S+)", d)
+        if m and m.group(1) not in have:
+            defs.append(d)
+    tac = "\n  ".join(["first"] + [f"| {t}" for t in CIRCULARITY_TACTICS])
+    return "\n\n".join(defs + [f"theorem circularity_probe (hH : {prop}) {th[1]} := by\n  {tac}"]).strip()
 
 
 def residual_improves(new: dict, old: dict | None) -> bool:

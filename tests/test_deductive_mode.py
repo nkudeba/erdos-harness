@@ -251,6 +251,14 @@ class Prompts(unittest.TestCase):
         self.assertIn("sub-statements", H.PLAN_PROMPT_LEMMA)
 
 
+JUDGE_OK = '```json\n{"routine": false, "why": "a different result"}\n```'
+
+
+def _judged(fn):
+    """A plan stub that also answers the circularity judge: the premise is a genuine ingredient."""
+    return lambda purpose, prompt, **kw: JUDGE_OK if purpose == "circularity" else fn(purpose, prompt, **kw)
+
+
 def _stub(tmp, **state):
     h = H.Harness.__new__(H.Harness)
     h.problem = {"id": "99", "statement": "Is foo n true for every n?", "tags": []}
@@ -267,9 +275,12 @@ def _stub(tmp, **state):
     h.spent_usd = lambda: 0.0
     h._check_run_budget = lambda purpose: None
     def check(body, name):
+        if name.startswith("circularity"):      # the free tactics do not close premise → target
+            return {"ok": False, "sorries": [], "errors": ["unsolved goals"], "infos": [], "body": body}
         return {"ok": True, "sorries": ["s"] if H.hole_count(body) else [], "errors": [], "infos": [], "body": body}
     h.check = check
     h._close_holes_without_model = lambda code, frozen: code
+    h.ask = lambda purpose, prompt, **kw: JUDGE_OK
     return h
 
 
@@ -373,7 +384,7 @@ class DeductiveLoopEndToEnd(unittest.TestCase):
                 + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture", "derivation": "reflexivity"}],
                               "conjectures": [], "definitions": [], "route": "glue"}) + "\n```\n")
         asked = []
-        h.ask = lambda purpose, prompt, **kw: asked.append(purpose) or plan
+        h.ask = _judged(lambda purpose, prompt, **kw: asked.append(purpose) or plan)
         h._install_lemmas_module = lambda pdir: None
         proof = "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  rfl"
         child = argparse.Namespace(state={"proof": proof})
@@ -402,7 +413,7 @@ class DeductiveLoopEndToEnd(unittest.TestCase):
         h = _stub(self.root / "run")
         plan = ("```lean\n" + SKELETON + "\n```\n```json\n"
                 + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_rs", "kind": "published", "source": "RS 1962"}]}) + "\n```\n")
-        h.ask = lambda purpose, prompt, **kw: plan
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
         h._install_lemmas_module = lambda pdir: None
         proof = "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  rfl"
         h._attack_substatement = lambda *a, **k: (0, argparse.Namespace(state={"proof": proof}))
@@ -436,7 +447,7 @@ class ChildFunding(unittest.TestCase):
                                 "theorem erdos_99_hyp_b : ∀ n : ℕ, foo n ∧ foo n := by\n  sorry")
         skel = skel.replace("-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3\n", "")
         plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": []}) + "\n```\n"
-        h.ask = lambda purpose, prompt, **kw: plan
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
         h._install_lemmas_module = lambda pdir: None
         started = []
         def attack(sub, name, sdir, cycle, module, remaining, **k):
@@ -467,7 +478,7 @@ class BudgetStopStillReports(unittest.TestCase):
         h = _stub(self.root / "run")
         h.args.min_child_budget = 0
         plan = "```lean\n" + SKELETON + "\n```\n```json\n" + json.dumps({"hypotheses": []}) + "\n```\n"
-        h.ask = lambda purpose, prompt, **kw: plan
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
         h._install_lemmas_module = lambda pdir: None
         def attack(*a, **k):
             raise H.Harness.BudgetExhausted("run budget $5.0 exhausted (spent $5.10)")
@@ -518,7 +529,7 @@ class Refinement(unittest.TestCase):
         skel = SKELETON.replace("-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3\n"
                                 "theorem erdos_99_hyp_rs : ∀ x : ℕ, 1 ≤ x → x ≤ x := by\n  sorry\n\n", "")
         plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "difficulty": "hard"}]}) + "\n```\n"
-        h.ask = lambda purpose, prompt, **kw: plan
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
         h._install_lemmas_module = lambda pdir: None
         sub_skel = ("def foo (n : ℕ) : Prop := n = n\n\n"
                     "theorem erdos_99_hyp_a_hyp_step : ∀ n : ℕ, foo n := by\n  sorry\n\n"
@@ -552,7 +563,7 @@ class Refinement(unittest.TestCase):
         prompts = []
         plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": [], "failure_responses": [
             {"hypothesis": "erdos_99_hyp_a", "move": "define", "detail": "name the recurring parity structure"}]}) + "\n```\n"
-        h.ask = lambda purpose, prompt, **kw: prompts.append(prompt) or plan
+        h.ask = _judged(lambda purpose, prompt, **kw: prompts.append(prompt) or plan)
         h._install_lemmas_module = lambda pdir: None
         h.args.research_cycles = 2
         child_state = {"attempts": [{"name": "proof-r1-a0", "compiled": False, "n_sorries": 0,
@@ -632,12 +643,12 @@ class SplitSkeletonBlocks(unittest.TestCase):
         seen = []
         def check(body, name):
             seen.append(body)
-            ok = "def foo" in body                      # a block without the def would not compile
+            ok = "def foo" in body and not name.startswith("circularity")   # a block without the def would not compile
             return {"ok": ok, "sorries": ["s"] if H.hole_count(body) else [], "infos": [],
                     "errors": [] if ok else ["unknown identifier `foo`"], "body": body}
         h.check = check
         plan = ("```lean\n" + defs + "\n```\n\n-- continuation\n\n```lean\n" + rest + "\n```\n```json\n{}\n```\n")
-        h.ask = lambda purpose, prompt, **kw: plan
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
         h._install_lemmas_module = lambda pdir: None
         h._attack_substatement = lambda *a, **k: (2, argparse.Namespace(state={}))
         rc = h.run_program()
@@ -671,7 +682,7 @@ class SkeletonRejectionFeedsForward(unittest.TestCase):
         h.args.research_cycles = 2
         bad = SKELETON.replace("  intro n\n  exact erdos_99_hyp_a n", "  sorry")      # a sorry in the glue
         prompts = []
-        h.ask = lambda purpose, prompt, **kw: prompts.append(prompt) or ("```lean\n" + bad + "\n```\n```json\n{}\n```\n")
+        h.ask = _judged(lambda purpose, prompt, **kw: prompts.append(prompt) or ("```lean\n" + bad + "\n```\n```json\n{}\n```\n"))
         h._install_lemmas_module = lambda pdir: None
         rc = h.run_program()
         self.assertEqual(rc, 2)                                            # nothing adopted, nothing certified
@@ -874,3 +885,120 @@ class RecordFindingResidual(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# The masked #275 failure (2026-09-23): a sub-residual closed with a PUBLISHED premise that was the frozen
+# theorem with the block starting at 0 instead of t.
+ROOT_275 = """theorem erdos_80317
+    (m : ℕ) (u : Fin m → ℤ) (q : Fin m → ℕ)
+    (hq : ∀ j, 0 < q j)
+    (hblock : ∃ t : ℤ, ∀ k : ℕ, k < 2 ^ m →
+      ∃ j : Fin m, (q j : ℤ) ∣ (t + (k : ℤ) - u j)) :
+    ∀ z : ℤ, ∃ j : Fin m, (q j : ℤ) ∣ (z - u j) := by
+  sorry"""
+
+CVE_SKELETON = """def C80317Cov (m : ℕ) (u : Fin m → ℤ) (q : Fin m → ℕ) (z : ℤ) : Prop :=
+  ∃ j : Fin m, (q j : ℤ) ∣ (z - u j)
+
+-- PUBLISHED: R. B. Crittenden and C. L. Vanden Eynden, Proc. Amer. Math. Soc. 24 (1970), 475-481
+theorem erdos_80317_hyp_cve : ∀ (m : ℕ) (u : Fin m → ℤ) (q : Fin m → ℕ), (∀ j, 0 < q j) →
+    (∀ k : ℕ, k < 2 ^ m → C80317Cov m u q (k : ℤ)) → ∀ z : ℤ, C80317Cov m u q z := by
+  sorry
+
+""" + ROOT_275.replace("  sorry", """  obtain ⟨t, ht⟩ := hblock
+  intro z
+  obtain ⟨j, hj⟩ := erdos_80317_hyp_cve m (fun j => u j - t) q hq (fun k hk => by
+    obtain ⟨j, hj⟩ := ht k hk
+    exact ⟨j, by show (q j : ℤ) ∣ (k : ℤ) - (u j - t); rw [show (k : ℤ) - (u j - t) = t + k - u j by ring]; exact hj⟩) (z - t)
+  exact ⟨j, by rw [show z - u j = (z - t) - (u j - t) by ring]; exact hj⟩""")
+
+
+class CircularPremise(unittest.TestCase):
+    """A published premise the target follows from by routine steps proves the target from itself."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.cdir = Path(self.tmp.name) / "c1"
+        self.cdir.mkdir()
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _h(self, verdict, lean_closes=False):
+        h = _stub(self.tmp.name)
+        h.problem = {"id": "80317", "statement": "s", "tags": []}
+        h.state = {"statement": ROOT_275}
+        asked = []
+        def check(body, name):
+            if name.startswith("circularity"):
+                return {"ok": lean_closes, "sorries": [], "errors": [] if lean_closes else ["unsolved goals"], "infos": [], "body": body}
+            return {"ok": True, "sorries": ["s"] if H.hole_count(body) else [], "errors": [], "infos": [], "body": body}
+        h.check = check
+        h.ask = lambda purpose, prompt, **kw: asked.append((purpose, prompt)) or verdict
+        return h, asked
+
+    def _consider(self, h):
+        return h._consider_skeleton(CVE_SKELETON, {}, None, H.statement_prefix(ROOT_275), 1, [], self.cdir,
+                                    main="erdos_80317")
+
+    def test_the_275_premise_is_rejected_when_the_judge_calls_it_routine(self):
+        h, asked = self._h('```json\n{"routine": true, "why": "translate every class by t"}\n```')
+        v = self._consider(h)
+        self.assertFalse(v["adopted"])
+        self.assertIn("circular premise `erdos_80317_hyp_cve`", v["reason"])
+        self.assertIn("translate every class by t", v["reason"])
+        self.assertEqual([p for p, _ in asked], ["circularity"])
+        self.assertIn("Crittenden", asked[0][1])                      # the judge sees the citation and the target
+        self.assertIn("theorem erdos_80317", asked[0][1])
+        self.assertTrue(any(e[1] == "circular_premise" for e in h.log.events))
+
+    def test_a_genuine_ingredient_is_adopted(self):
+        h, _ = self._h('```json\n{"routine": false, "why": "needs the parity descent"}\n```')
+        self.assertTrue(self._consider(h)["adopted"])
+
+    def test_a_restatement_lean_closes_needs_no_judge(self):
+        h, asked = self._h("unused", lean_closes=True)
+        v = self._consider(h)
+        self.assertFalse(v["adopted"])
+        self.assertIn("Lean closes premise → target", v["reason"])
+        self.assertEqual(asked, [])
+
+    def test_no_verdict_is_a_rejection(self):
+        h, _ = self._h("I think it is probably fine.")
+        v = self._consider(h)
+        self.assertFalse(v["adopted"])
+        self.assertIn("no verdict", v["reason"])
+
+    def test_bare_json_verdict_is_read(self):
+        h, _ = self._h('{"routine": false, "why": "different"}')
+        self.assertTrue(self._consider(h)["adopted"])
+
+    def test_checked_against_the_root_target_inside_a_sub_residual(self):
+        h, asked = self._h('```json\n{"routine": false, "why": "x"}\n```')
+        h.root_frozen = H.statement_prefix(FROZEN)                     # a different root: two judgements
+        self._consider(h)
+        self.assertEqual(len(asked), 2)
+        self.assertIn("theorem erdos_99", asked[1][1])
+
+    def test_conjectures_are_not_judged(self):
+        h, asked = self._h("unused")
+        skel = CVE_SKELETON.replace("-- PUBLISHED: R. B. Crittenden and C. L. Vanden Eynden, Proc. Amer. Math. Soc. 24 (1970), 475-481\n", "")
+        h._consider_skeleton(skel, {}, None, H.statement_prefix(ROOT_275), 1, [], self.cdir, main="erdos_80317")
+        self.assertEqual(asked, [])
+
+    def test_probe_source_puts_the_premise_before_the_target_binders(self):
+        prop = next(x for x in H.parse_residual(CVE_SKELETON, 80317, main="erdos_80317")["hypotheses"])["statement"]
+        src = H.circularity_probe_source(CVE_SKELETON, H.statement_prefix(ROOT_275), prop)
+        self.assertIn("def C80317Cov", src)
+        self.assertIn("theorem circularity_probe (hH : ∀ (m : ℕ)", src)
+        self.assertIn("(hq : ∀ j, 0 < q j)", src)
+        self.assertTrue(src.rstrip().endswith("| aesop"))
+        self.assertNotIn("sorry", src)
+        self.assertEqual(H.frozen_theorem(H.statement_prefix(ROOT_275))[0], "erdos_80317")
+
+    def test_plan_prompt_states_the_rule(self):
+        self.assertIn("never anything the\n      target follows from by routine steps", H.PLAN_PROMPT)
+        self.assertIn("use the Mathlib theorem by name", H.PLAN_PROMPT)
+
+    def test_children_inherit_the_root_target(self):
+        import inspect
+        self.assertIn("child.root_frozen", inspect.getsource(H.Harness._attack_substatement))

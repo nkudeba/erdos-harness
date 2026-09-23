@@ -71,3 +71,36 @@ class SkeletonMechanicsInLean(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(os.environ.get("DEDUCTIVE_LEAN_TESTS") == "1", "set DEDUCTIVE_LEAN_TESTS=1 for real Lean checks")
+class CircularityProbeInLean(unittest.TestCase):
+    """The free layer of the circular-premise guard: Lean closes a restatement of the target, and does NOT close
+    the masked #275 premise (a translation), which is why the judge exists."""
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import test_deductive_mode as T
+        self.T = T
+        self.tmp = tempfile.TemporaryDirectory()
+        h = H.Harness.__new__(H.Harness)
+        h.problem, h.state, h.log = {"id": "80317", "statement": "s", "tags": []}, {}, Log()
+        h.run_dir = Path(self.tmp.name)
+        h.args = argparse.Namespace(no_cascade=False, subgoal_prover=None)
+        h.imports, h.libraries = list(H.DEFAULT_IMPORTS), []
+        h.lean = H.LeanChecker(H.FORMAL, 420)
+        h._lock, h.checks = threading.Lock(), 0
+        self.h = h
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_fixture_restatement_and_translation(self):
+        T, fz = self.T, H.statement_prefix(self.T.ROOT_275)
+        res = self.h.check(T.CVE_SKELETON, "cve-skeleton")
+        self.assertTrue(res["ok"], res["errors"][:2])                    # target ⇐ premise really compiles
+        restated = ("∀ (m : ℕ) (u : Fin m → ℤ) (q : Fin m → ℕ), (∀ j, 0 < q j) → (∃ t : ℤ, ∀ k : ℕ, k < 2 ^ m → "
+                    "∃ j : Fin m, (q j : ℤ) ∣ (t + (k : ℤ) - u j)) → ∀ z : ℤ, ∃ j : Fin m, (q j : ℤ) ∣ (z - u j)")
+        res = self.h.check(H.circularity_probe_source(T.CVE_SKELETON, fz, restated), "circ-restated")
+        self.assertTrue(res["ok"] and not res["sorries"], res["errors"][:2])
+        cve = H.parse_residual(T.CVE_SKELETON, 80317, main="erdos_80317")["hypotheses"][0]["statement"]
+        res = self.h.check(H.circularity_probe_source(T.CVE_SKELETON, fz, cve), "circ-cve")
+        self.assertFalse(res["ok"])

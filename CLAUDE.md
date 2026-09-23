@@ -387,6 +387,15 @@ proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE
    a published tag without a source is downgraded to a conjecture). Published theorems enter **as
    hypotheses, never as `axiom`** — the audit stays `[propext, Classical.choice, Quot.sound]` and the trust
    boundary sits in the theorem's signature. Provenance goes to `premises.jsonl`.
+   **A published premise may not be the target in disguise** (`_circular_premise`). The masked #275 run closed
+   its residual with a premise tagged `PUBLISHED: Crittenden–Vanden Eynden 1970` that was the frozen theorem
+   translated by `t`: it compiled on the standard axioms with every `sorry` inside a hypothesis, so every gate
+   passed and the target was proved from itself. Every open published premise is now checked against the
+   skeleton's own target AND the root target (`root_frozen`, passed to children, because that premise entered
+   one level down): first Lean tries `premise → target` with free tactics (catches restatements), then one
+   `circularity` judge call asks whether the target follows by routine steps (catches translations,
+   specialisations, contrapositives). A missing verdict rejects. If a needed result is in Mathlib (Hindman for
+   #532), the model must use the Mathlib theorem by name; it is certified and not a premise.
 3. **Adopt only if real and better.** Frozen theorem verbatim, no banned construct, every `sorry` inside a
    hypothesis, nothing refuted, compiles; the free specialist cascade gets a go at the holes; then
    `residual_improves`: the HARDEST open conjecture must get easier first (max complexity), then fewer open
