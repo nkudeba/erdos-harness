@@ -59,6 +59,76 @@ if __name__ == "__main__":
  unittest.main()
 
 
+class SpendIsAttributedByOwnership(unittest.TestCase):
+ """Attribution by time alone charged an older run, when resumed, with every later run's sub-runs (the first
+ masked #275 run would have read $23.74 against a true $8.05). Sub-runs now record `owner_runs`."""
+
+ def setUp(self):
+  self.tmp = tempfile.TemporaryDirectory()
+  self.root = Path(self.tmp.name)
+  self._old_root = H.ROOT
+  H.ROOT = self.root
+  self.old = self._run("20260101-000000-000000-erdos99", "2026-01-01T00:00:00Z", 1.0)
+  self.new = self._run("20260201-000000-000000-erdos99", "2026-02-01T00:00:00Z", 2.0)
+ def tearDown(self):
+  H.ROOT = self._old_root
+  self.tmp.cleanup()
+
+ def _run(self, name, ts, cost):
+  d = self.root / "runs" / name
+  d.mkdir(parents=True)
+  (d / "log.jsonl").write_text(json.dumps({"ts": ts, "stage": "run", "event": "start"}) + "\n" +
+                               json.dumps({"ts": ts, "stage": "llm", "event": "response", "cost_usd": cost}) + "\n")
+  return d
+
+ def _harness(self, d):
+  h = H.Harness.__new__(H.Harness)
+  h.run_dir, h.problem, h.direction = d, {"id": "99"}, None
+  h.log = argparse.Namespace(path=d / "log.jsonl")
+  h.llm = argparse.Namespace(total_cost_usd=0.0)
+  return h
+
+ def _sub(self, rel, cost, ts, owners=None):
+  d = self.root / "programs" / "erdos_99" / rel
+  d.mkdir(parents=True)
+  (d / "log.jsonl").write_text(json.dumps({"ts": ts, "stage": "llm", "event": "response", "cost_usd": cost}) + "\n")
+  if owners is not None:
+   (d / "state.json").write_text(json.dumps({"owner_runs": [str(o.resolve()) for o in owners]}))
+
+ def test_a_resumed_older_run_is_not_charged_a_newer_runs_subruns(self):
+  self._sub("cycles/new-c1/hyp-0", 5.0, "2026-02-01T01:00:00Z", owners=[self.new])
+  self.assertAlmostEqual(self._harness(self.old).spent_usd(), 1.0)     # the old rule read 6.0
+  self.assertAlmostEqual(self._harness(self.new).spent_usd(), 7.0)
+
+ def test_ownership_beats_the_time_window(self):
+  # the old run's sub-run, resumed after the new run started, still belongs to the old run only
+  self._sub("cycles/old-c1/hyp-0", 3.0, "2026-03-01T00:00:00Z", owners=[self.old])
+  self.assertAlmostEqual(self._harness(self.old).spent_usd(), 4.0)
+  self.assertAlmostEqual(self._harness(self.new).spent_usd(), 2.0)
+
+ def test_a_grandchild_is_charged_to_the_root(self):
+  child = self.root / "programs" / "erdos_99" / "cycles" / "new-c1" / "hyp-0"
+  self._sub("cycles/new-c1/hyp-0", 1.0, "2026-02-01T01:00:00Z", owners=[self.new])
+  self._sub("sub/erdos_99_hyp_a/cycles/c1/hyp-0", 4.0, "2026-02-01T02:00:00Z", owners=[child, self.new])
+  self.assertAlmostEqual(self._harness(self.new).spent_usd(), 7.0)
+
+ def test_legacy_subruns_keep_the_time_window(self):
+  self._sub("cycles/legacy/hyp-0", 9.0, "2026-02-01T05:00:00Z")          # no owner_runs
+  self.assertAlmostEqual(self._harness(self.new).spent_usd(), 11.0)
+
+ def test_a_legacy_window_ends_where_the_next_run_starts(self):
+  """The live #275 case: unmarked sub-runs of the second run must not be charged to the first."""
+  self._sub("cycles/old-legacy/hyp-0", 4.0, "2026-01-01T01:00:00Z")      # during the old run
+  self._sub("cycles/new-legacy/hyp-0", 6.0, "2026-02-01T01:00:00Z")      # during the new run
+  self.assertAlmostEqual(self._harness(self.old).spent_usd(), 5.0)       # the old rule read 11.0
+  self.assertAlmostEqual(self._harness(self.new).spent_usd(), 8.0)
+
+ def test_owner_chain_extends_the_parents(self):
+  h = self._harness(self.new)
+  h.state = {"owner_runs": ["/runs/root"]}
+  self.assertEqual(H.owner_chain(h), [str(self.new.resolve()), "/runs/root"])
+
+
 class TheCapBindsBeforeTheSpendNotAfter(unittest.TestCase):
  """Accounting was fixed in a previous pass; the ENFORCEMENT POINT was not.
 

@@ -2421,13 +2421,13 @@ class Harness:
         Program logs are filtered to this run's own window so an earlier run's cycles are not charged
         to this one.
         """
-        def cost(path, since=None):
+        def cost(path, window=None):
             try:
                 with open(path) as stream:
                     return sum(float(r.get("cost_usd") or 0)
                                for r in (json.loads(l) for l in stream if l.strip())
                                if r.get("stage") == "llm" and r.get("event") in ("response", "response_failed")
-                               and (not since or (r.get("ts") or "") >= since))
+                               and in_window(r.get("ts"), window))
             except (OSError, ValueError):
                 return 0.0
         try:
@@ -2439,6 +2439,7 @@ class Harness:
         total = sum(float(r.get("cost_usd") or 0) for r in own
                     if r.get("stage") == "llm" and r.get("event") in ("response", "response_failed"))
         seen = {self.log.path.resolve()}
+        until = ...                          # computed lazily: only legacy sub-runs need it
         paths = list(self.run_dir.rglob("log.jsonl"))
         pdir = ROOT / "programs" / f"erdos_{self.problem['id']}"
         if open_direction_of(self):
@@ -2450,7 +2451,14 @@ class Harness:
             if rp in seen:
                 continue
             seen.add(rp)
-            total += cost(path, since=start if pdir in path.parents or path.is_relative_to(pdir) else None)
+            if path.is_relative_to(self.run_dir):
+                total += cost(path)
+                continue
+            if until is ...:
+                until = next_run_start(self.run_dir, self.problem["id"], start)
+            window = program_log_window(path, self.run_dir, start, until)
+            if window is not False:
+                total += cost(path, window)
         return total
 
     def _note_budget(self, purpose: str):
@@ -4270,7 +4278,8 @@ for the SAT solver instead of enumerating it.
             if not (cdir / "state.json").exists():
                 st = {k: self.state[k] for k in ("literature", "crosscheck", "formalize_notes", "verified_names",
                                                  "assessment", "mode", "mode_reason") if k in self.state}
-                st.update({"statement": stmt, "problem_input": self.problem, "direction": direction, "invocations": []})
+                st.update({"statement": stmt, "problem_input": self.problem, "direction": direction, "invocations": [],
+                           "owner_runs": owner_chain(self)})
                 (cdir / "state.json").write_text(json.dumps(st, indent=2))
             cargs = argparse.Namespace(**vars(self.args))
             cargs.resume, cargs.open = str(cdir), False
@@ -4708,6 +4717,7 @@ for the SAT solver instead of enumerating it.
         depth = int(getattr(self.args, "residual_depth_current", 1) or 1)
         if not (sdir / "state.json").exists():
             st = {"literature": self.state.get("literature", ""), "statement": sub, "problem_input": self.problem,
+                  "owner_runs": owner_chain(self),
                   "crosscheck": {"ranking": [0], "issues": {"0": "research-program hypothesis (not the frozen target)"}},
                   "mode": "research" if recursive else "fast",
                   "mode_reason": f"deductive sub-residual at depth {depth + 1}" if recursive else "deductive research-program hypothesis",
@@ -5169,6 +5179,7 @@ for the SAT solver instead of enumerating it.
                     sdir = cdir / f"sub-{i}"
                     sdir.mkdir(exist_ok=True)
                     st = {"literature": self.state.get("literature", ""), "statement": sub, "problem_input": self.problem,
+                          "owner_runs": owner_chain(self),
                           "crosscheck": {"ranking": [0], "issues": {"0": "program sub-statement (not the frozen target)"}},
                           "mode": "fast", "mode_reason": "research-program sub-goal", "invocations": []}
                     (sdir / "state.json").write_text(json.dumps(st, indent=2))
@@ -5382,26 +5393,6 @@ Return the markdown only."""
         self.save()
         self.log.event("brief", "written", problem=pid, words=len(body.split()), atlas=str(briefs / f"{pid}.md"))
         return True
-
-    def _all_events(self) -> list:
-        """Every event of this run and its children (direction children and research sub-runs)."""
-        out, seen = [], set()
-        paths = list(self.run_dir.rglob("log.jsonl"))
-        pdir = ROOT / "programs" / f"erdos_{self.problem['id']}"
-        if open_direction_of(self):
-            pdir = pdir / open_direction_of(self)
-        if pdir.exists():
-            paths += list(pdir.rglob("log.jsonl"))
-        for path in paths:
-            rp = path.resolve()
-            if rp in seen:
-                continue
-            seen.add(rp)
-            try:
-                out += [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
-            except (OSError, ValueError):
-                continue
-        return out
 
     def stage_partial(self) -> bool:
         """Salvage sorry-free helper lemmas (special cases, bounds) from the best failed material, compile them
@@ -6024,6 +6015,54 @@ def circularity_probe_source(cand: str, target_frozen: str, prop: str) -> str | 
     return "\n\n".join(defs + [f"theorem circularity_probe (hH : {prop}) {th[1]} := by\n  {tac}"]).strip()
 
 
+def owner_chain(h) -> list[str]:
+    """The runs a sub-run spawned by `h` belongs to: `h`'s own run dir plus everything `h` belongs to. Written into
+    every program child's state.json as `owner_runs`, so spend and facts are attributed by OWNERSHIP."""
+    return [str(Path(h.run_dir).resolve())] + list((getattr(h, "state", None) or {}).get("owner_runs") or [])
+
+
+def next_run_start(run_dir: Path, pid, start: str | None) -> str | None:
+    """When the next run of the same problem began after `start` (first log timestamp, UTC), or None. Bounds the
+    legacy attribution window: a sub-run with no owner marker that began after a LATER run started is that run's."""
+    if not start:
+        return None
+    later = []
+    for d in (ROOT / "runs").glob(f"*erdos{pid}"):
+        try:
+            with open(d / "log.jsonl") as fh:
+                ts = json.loads(fh.readline()).get("ts")
+        except (OSError, ValueError):
+            continue
+        if ts and ts > start and d.resolve() != Path(run_dir).resolve():
+            later.append(ts)
+    return min(later) if later else None
+
+
+def program_log_window(path: Path, run_dir: Path, start: str | None, until: str | None):
+    """Whether a program-tree log belongs to the run at `run_dir`: False (someone else's), None (yes, all of it),
+    or a legacy (since, until) window for a sub-run that predates the `owner_runs` marker.
+
+    Attribution used to be by time alone (records at or after this run's start, unbounded). That was right for the
+    NEWEST run of a problem and wrong for an older one resumed later: resumed, the first masked #275 run would have
+    charged itself $23.74 of the second run's sub-runs against a true $8.05 and stopped at once. Marked sub-runs are
+    attributed exactly; unmarked ones get the window [this run's start, the next run's start)."""
+    try:
+        owners = json.loads((Path(path).parent / "state.json").read_text()).get("owner_runs")
+    except (OSError, ValueError, AttributeError):
+        owners = None
+    if owners is None:
+        return (start, until)
+    return None if str(Path(run_dir).resolve()) in owners else False
+
+
+def in_window(ts: str | None, window) -> bool:
+    if window is None:
+        return True
+    since, until = window
+    ts = ts or ""
+    return (not since or ts >= since) and (not until or ts < until)
+
+
 def open_direction_of(h) -> str | None:
     """`pos`/`neg` for an --open direction AND for every research sub-run beneath it. A program child is
     `direction == "program"`, and used to lose its direction: its sub-residual landed in the shared
@@ -6458,7 +6497,10 @@ def collect_run_facts(run_dir: Path, problem_id: str | None = None) -> dict:
             if rp in seen:
                 continue
             seen.add(rp)
-            events += [e for e in read(path) if not start or (e.get("ts") or "") >= start]
+            window = program_log_window(path, run_dir, start, next_run_start(run_dir, pid, start))
+            if window is False:
+                continue
+            events += [e for e in read(path) if in_window(e.get("ts"), window)]
 
     states = {"": load(run_dir / "state.json")}
     for sub in ("pos", "neg"):
