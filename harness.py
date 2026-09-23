@@ -5000,8 +5000,10 @@ for the SAT solver instead of enumerating it.
         if proved:
             self.stage_verify()
             outcome = "proved" if self.state.get("verify", {}).get("all_clear") is True else "proved_unverified"
-            if outcome == "proved_unverified":
-                self.state["stop_reason"] = "the residual skeleton closed but final verification did not clear"
+            # always overwrite: a resumed run otherwise keeps the previous session's "1 open conjecture" text (masked #645)
+            self.state["stop_reason"] = ("the residual skeleton closed but final verification did not clear"
+                                         if outcome == "proved_unverified" else
+                                         "the residual skeleton closed: no hypothesis left, final verification cleared")
         else:
             outcome = "partial" if (certified_any or parsed) else "not_proved"
             self.state["stop_reason"] = (f"deductive research program finished {cycles} cycle(s); residual: "
