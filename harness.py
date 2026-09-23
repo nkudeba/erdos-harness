@@ -35,6 +35,7 @@ import hashlib
 import uuid
 import json
 import os
+import signal
 import re
 import shutil
 import subprocess
@@ -375,11 +376,23 @@ class LeanChecker:
     def check(self, source: str, dest: Path) -> dict:
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(source)
+        # Own process group, killed whole on timeout: `subprocess.run(timeout=)` kills `lake` but not the `lean` it
+        # spawned, and orphaned `lean` processes kept running for up to 7 hours after masked #645 finished,
+        # competing with every later check (found 2026-09-23).
+        proc = subprocess.Popen(["lake", "env", "lean", str(dest)], cwd=self.project, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True, env=clean_env(), start_new_session=True)
         try:
-            r = subprocess.run(["lake", "env", "lean", str(dest)],
-                               cwd=self.project, capture_output=True, text=True,
-                               timeout=self.timeout, env=clean_env())
+            out, err = proc.communicate(timeout=self.timeout)
+            r = subprocess.CompletedProcess(proc.args, proc.returncode, out, err)
         except subprocess.TimeoutExpired as e:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            try:
+                e.stdout, e.stderr = proc.communicate(timeout=10)
+            except Exception:                              # noqa: BLE001 - output is a courtesy
+                pass
             # Keep what Lean printed first: on a slow `decide` it often names the declaration it is stuck
             # on, which is the difference between "too slow" and "too slow HERE".
             def txt(stream):

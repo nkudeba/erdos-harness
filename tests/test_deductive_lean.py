@@ -104,3 +104,15 @@ class CircularityProbeInLean(unittest.TestCase):
         cve = H.parse_residual(T.CVE_SKELETON, 80317, main="erdos_80317")["hypotheses"][0]["statement"]
         res = self.h.check(H.circularity_probe_source(T.CVE_SKELETON, fz, cve), "circ-cve")
         self.assertFalse(res["ok"])
+
+
+@unittest.skipUnless(os.environ.get("DEDUCTIVE_LEAN_TESTS") == "1", "set DEDUCTIVE_LEAN_TESTS=1 for real Lean checks")
+class TimeoutLeavesNoOrphan(unittest.TestCase):
+    def test_timed_out_lean_is_killed(self):
+        import subprocess, time
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "orphan-probe-3141.lean"
+            r = H.LeanChecker(H.FORMAL, 3).check("import Mathlib.Tactic\nexample : 1 = 1 := rfl", dest)
+            self.assertTrue(r["timeout"])
+            time.sleep(2)
+            self.assertEqual(subprocess.run(["pgrep", "-f", "orphan-probe-3141"], capture_output=True, text=True).stdout, "")
