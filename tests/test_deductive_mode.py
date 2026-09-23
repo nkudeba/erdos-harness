@@ -1153,3 +1153,47 @@ class RestoreSpliced(unittest.TestCase):
         out = H.restore_spliced(cand, self.CURRENT)
         self.assertIn("namespace erdos_99_hyp_a_ns", out)
         self.assertNotIn("erdos_99_hyp_b", out)
+
+
+class FalseDirectionStops(unittest.TestCase):
+    """masked #16 --open: the negation's plan called its target false and the loop still spent $6.94 on it."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _run(self, ledger):
+        h = _stub(self.root / "run")
+        skel = SKELETON.replace("-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3\n"
+                                "theorem erdos_99_hyp_rs : ∀ x : ℕ, 1 ≤ x → x ≤ x := by\n  sorry\n\n", "")
+        plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps(ledger) + "\n```\n"
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
+        h._install_lemmas_module = lambda pdir: None
+        attacked = []
+        h._attack_substatement = lambda sub, name, *a, **k: attacked.append(name) or (2, argparse.Namespace(state={}))
+        return h, h.run_program(), attacked
+
+    def test_target_believed_false_stops_without_attacking(self):
+        h, rc, attacked = self._run({"target_belief": "false", "route": "refuted numerically: eps = 1/22369620",
+                                     "hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture"}]})
+        self.assertEqual(attacked, [])
+        self.assertTrue(any(e[1] == "target_believed_false" for e in h.log.events))
+        self.assertIn("believes the target FALSE", h.state["stop_reason"])
+        self.assertTrue((self.root / "programs" / "erdos_99" / "RESIDUAL.md").exists())
+
+    def test_a_hypothesis_believed_false_is_not_attacked(self):
+        h, rc, attacked = self._run({"target_belief": "unsure",
+                                     "hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture", "believed_false": True}]})
+        self.assertEqual(attacked, [])
+        self.assertTrue(any(e[1] == "hypotheses_believed_false" for e in h.log.events))
+
+    def test_unsure_attacks_as_before(self):
+        h, rc, attacked = self._run({"target_belief": "unsure",
+                                     "hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture"}]})
+        self.assertEqual(attacked, ["erdos_99_hyp_a"])

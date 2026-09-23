@@ -109,3 +109,17 @@ class NoAmbientContext(unittest.TestCase):
         for cmd in calls:
             i = cmd.index("--setting-sources")
             self.assertEqual(cmd[i + 1], "")
+
+
+class JudgeVerdict(unittest.TestCase):
+    def test_malformed_but_unambiguous(self):
+        t = '```json\n{"faithful": true, "issues": ["a", "b"]}\n,"verdict": "ok."}\n```'
+        v = H.judge_verdict(t)
+        self.assertIs(v["faithful"], True)
+        self.assertIn("read leniently", v["issues"][-1])
+        self.assertEqual(v["verdict"], "ok.")
+    def test_well_formed(self):
+        self.assertIs(H.judge_verdict('```json\n{"faithful": false, "issues": []}\n```')["faithful"], False)
+    def test_ambiguous_or_missing_is_no_verdict(self):
+        self.assertIsNone(H.judge_verdict('"faithful": true ... "faithful": false')["faithful"])
+        self.assertIsNone(H.judge_verdict("looks fine to me")["faithful"])

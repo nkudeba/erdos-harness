@@ -1614,7 +1614,9 @@ Produce, in this order:
                       "use": "what it contributes to the glue",
                       "source": "citation for published, else null",
                       "difficulty": "elementary" | "moderate" | "hard",
-                      "refutation_tried": "the smallest-case check you would run first"}}, ...],
+                      "refutation_tried": "the smallest-case check you would run first",
+                      "believed_false": true | false}}, ...],
+     "target_belief": "true" | "false" | "unsure",
      "conjectures": [{{"statement": "...", "status": "proved" | "refuted" | "conditional" | "open",
                        "witness": <json or null>, "note": "..."}}, ...],
      "definitions": ["<name>: <one-line meaning>", ...],
@@ -1625,6 +1627,11 @@ Produce, in this order:
     estimate of the Lean effort to discharge the hypothesis (elementary = a page of undergraduate mathematics;
     hard = the genuinely open core); the harness attacks elementary hypotheses first and leaves hard ones for
     later cycles, so a wrong rating wastes budget.
+    `believed_false: true` marks a hypothesis you have a concrete reason to think is FALSE (a refutation, a
+    counterexample family, a known theorem in the other direction); it is never attacked. `target_belief: "false"`
+    says the same of the frozen TARGET, and stops this program: when both directions of a problem are attacked,
+    a direction whose target is false must record why and stop spending, not keep splitting. Say "false"
+    only with a concrete reason, stated in "route"; otherwise "unsure".
 
 (3) Optionally ONE ```markdown block with notes for the human reviewer.
 
@@ -2013,6 +2020,25 @@ def json_block(text: str) -> dict | None:
     except json.JSONDecodeError:
         return None
     return parsed if isinstance(parsed, dict) else None
+
+
+def judge_verdict(text: str) -> dict:
+    """The faithfulness judge's verdict. A well-formed ```json block wins. Otherwise the verdict is read leniently,
+    but only when the response states ONE unambiguous `"faithful": true|false`: the masked #16 judge answered
+    `"faithful": true` with sound issues but a stray `}` before `"verdict"`, and a proof that compiled, was
+    sorry-free on the standard axioms and matched the frozen statement was left `proved_unverified`. Anything
+    ambiguous is still no verdict."""
+    v = json_block(text)
+    if isinstance(v, dict) and "faithful" in v:
+        return v
+    vals = set(re.findall(r'"faithful"\s*:\s*(true|false)', text or ""))
+    if len(vals) != 1:
+        return {"faithful": None, "issues": ["judge returned no JSON"]}
+    issues = re.findall(r'"issues"\s*:\s*\[(.*?)\]', text, re.S)
+    verdict = re.search(r'"verdict"\s*:\s*"((?:[^"\\]|\\.)*)"', text)
+    return {"faithful": vals.pop() == "true",
+            "issues": ([issues[0].strip()[:1500]] if issues else []) + ["judge JSON was malformed; verdict read leniently"],
+            "verdict": verdict.group(1) if verdict else None}
 
 
 def strip_imports(src: str) -> str:
@@ -3452,11 +3478,11 @@ echo "exit=${{PIPESTATUS[0]}}"
         elif clean and getattr(self, "direction", None) in ("pos", "neg"):
             back = self.ask("backtranslate", backtranslate_prompt(self.state["statement"])).strip()
             cmp_resp = self.ask("faithful", compare_prompt(self.problem, back, direction=self.direction, route=self._supplied_route()))
-            faithful = json_block(cmp_resp) or {"faithful": None, "issues": ["judge returned no JSON"]}
+            faithful = judge_verdict(cmp_resp)
         elif clean:
             back = self.ask("backtranslate", backtranslate_prompt(self.state["statement"])).strip()
             cmp_resp = self.ask("faithful", compare_prompt(self.problem, back, route=self._supplied_route()))
-            faithful = json_block(cmp_resp) or {"faithful": None, "issues": ["judge returned no JSON"]}
+            faithful = judge_verdict(cmp_resp)
         else:
             back = ""
             faithful = {"faithful": False, "issues": ["mechanical verification failed; semantic judge skipped"]}
@@ -4879,10 +4905,22 @@ for the SAT solver instead of enumerating it.
                             f.write(json.dumps({"cycle": cycle, "name": h["name"], "statement": h["statement"],
                                                 "source": h.get("source"), "at": now()}) + "\n")
                 # (c) attack the open conjectures only -- least complex first -- and splice each certified one back
+                if str(new_meta.get("target_belief") or "").lower() == "false":
+                    # masked #16, negation direction: the plan called its own target false and its hypotheses
+                    # "very likely false", and the loop still spent $6.94 attacking one of them.
+                    self.state["target_believed_false"] = {"cycle": cycle, "route": str(new_meta.get("route") or "")[:1000]}
+                    self.log.event("program", "target_believed_false", cycle=cycle,
+                                   route=str(new_meta.get("route") or "")[:300])
+                    self._write_residual(pdir, parsed, skeleton, cycle, meta, load_refutations(pid))
+                    break
                 if parsed and per_cycle:
                     module = self._install_lemmas_module(pdir)
                     fails = failure_counts(pdir)
-                    todo = attack_order(parsed["hypotheses"], fails)[:per_cycle]
+                    false_names = {h.get("name") for h in (meta.get("hypotheses") or [])
+                                   if isinstance(h, dict) and h.get("believed_false") is True}
+                    todo = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names][:per_cycle]
+                    if false_names & {h["name"] for h in parsed["hypotheses"] if h["open"]}:
+                        self.log.event("program", "hypotheses_believed_false", cycle=cycle, names=sorted(false_names))
                     if not todo:
                         # Nothing conjectural left: try to PROVE the published premises. A premise that is in Mathlib
                         # (Birkhoff for masked #499) or elementary is then certified and leaves the theorem's trust
@@ -5034,7 +5072,9 @@ for the SAT solver instead of enumerating it.
             self.state["stop_reason"] = (f"deductive research program finished {cycles} cycle(s); residual: "
                                          + (f"{metric.get('open_conjectures')} open conjecture(s), "
                                             f"{metric.get('published')} published premise(s)" if metric else "no skeleton in force")
-                                         + f" (see {pdir.relative_to(ROOT)}/RESIDUAL.md)")
+                                         + f" (see {pdir.relative_to(ROOT)}/RESIDUAL.md)"
+                                         + ("; stopped: the plan believes the target FALSE"
+                                            if self.state.get("target_believed_false") else ""))
         self.state["outcome"] = outcome
         self.save()
         self.report(proved)

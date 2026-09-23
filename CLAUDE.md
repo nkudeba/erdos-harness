@@ -442,6 +442,15 @@ proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE
    it), `state["residual"]`, and `residual=open:k,published:p,certified:c` on the `RUN-SUMMARY` line.
    `record_finding.py --residual '<json>'` files it in the Atlas with a history so shrinkage is visible.
 
+**Two directions (`--open`) compose with the deductive loop** — decided and tested 2026-09-23 on masked #16. Each
+direction runs its own program (`erdos_N_neg_hyp_*` names parse; sub-runs keep their direction via
+`open_direction_of`, so directories, modules and budgets stay separate). The failure mode is a false direction
+eating the budget: on #16 the negation's plan knew its target was false and still spent 70% of the run. The plan
+now reports `target_belief` and per-hypothesis `believed_false`; `target_belief: "false"` stops that direction
+(`target_believed_false` event, reason in `stop_reason`), and a believed-false hypothesis is never attacked. The
+budget split is fixed at launch (the directions run in parallel), so what a stopped direction saves is saved,
+not reassigned.
+
 `stage_reduce` now asks for a Lean statement beside each check; a checked reduction the cascade closes is
 `certified` and so labelled in prompts, one that only type-checks is `stated` and carried "as a hypothesis,
 not a fact". Nothing about the honesty gates changed: a closed skeleton is *mechanically verified*, never a
