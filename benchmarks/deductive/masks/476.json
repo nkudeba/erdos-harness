@@ -1,0 +1,8 @@
+{
+  "true_problem": "476",
+  "alias_id": "94163",
+  "statement_en": "Let ℓ be a prime and B a finite set of residues modulo ℓ. Count the residues that can be written as x + y with x and y two DIFFERENT elements of B. Show that this count is at least the smaller of 2|B| − 3 and ℓ.",
+  "statement_lean": "theorem erdos_94163 (ℓ : ℕ) (hℓ : Nat.Prime ℓ) (B : Finset (ZMod ℓ)) :\n    min (2 * (B.card : ℤ) - 3) (ℓ : ℤ) ≤\n      ((((B ×ˢ B).filter (fun w : ZMod ℓ × ZMod ℓ => w.1 ≠ w.2)).image\n          (fun w : ZMod ℓ × ZMod ℓ => w.1 + w.2)).card : ℤ) := by\n  sorry",
+  "changes": "alpha-renaming only: p→ℓ, hp→hℓ, A→B, q→w; theorem renamed to a synthetic id; English paraphrased without 'restricted sumset', any theorem or author name; tags removed",
+  "reference": "knowledge/solved/Erdos476.lean"
+}

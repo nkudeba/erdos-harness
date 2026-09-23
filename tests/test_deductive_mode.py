@@ -1002,3 +1002,10 @@ class CircularPremise(unittest.TestCase):
     def test_children_inherit_the_root_target(self):
         import inspect
         self.assertIn("child.root_frozen", inspect.getsource(H.Harness._attack_substatement))
+
+
+class OpenModeBenchmark(unittest.TestCase):
+    def test_a_benchmark_open_run_writes_no_knowledge(self):
+        import inspect
+        src = inspect.getsource(H.Harness.run_open)
+        self.assertIn('self.run_dir / "open-report") if getattr(self.args, "benchmark", False)', src)

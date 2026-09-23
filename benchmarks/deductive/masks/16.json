@@ -1,0 +1,8 @@
+{
+  "true_problem": "16",
+  "alias_id": "45592",
+  "statement_en": "Let V be the set of odd natural numbers that cannot be written as a power of 2 plus a prime. Show that V is not the union of an infinite arithmetic progression {b + m·e : m ∈ ℕ} (with e > 0) and a set C of density zero.",
+  "statement_lean": "-- IMPORTS: Mathlib.Data.Set.Card\n-- IMPORTS: Mathlib.Analysis.SpecificLimits.Basic\n-- IMPORTS: Mathlib.NumberTheory.LSeries.PrimesInAP\ntheorem erdos_45592\n    (V : Set ℕ)\n    (hV : V = {n : ℕ | Odd n ∧ ¬ ∃ (k p : ℕ), p.Prime ∧ n = 2 ^ k + p})\n    (b e : ℕ) (he : 0 < e)\n    (C : Set ℕ)\n    (hC : ∀ ε : ℝ, 0 < ε → ∃ N : ℕ, ∀ x : ℕ, N ≤ x →\n      ((C ∩ Set.Iic x).ncard : ℝ) ≤ ε * (x : ℝ)) :\n    V ≠ Set.range (fun m : ℕ => b + m * e) ∪ C := by\n  sorry",
+  "changes": "alpha-renaming only: U→V, hU→hV, a→b, d→e, hd→he, B→C, hB→hC; theorem renamed to a synthetic id; English paraphrased without any author name (no 'Romanoff', no 'covering'); tags removed",
+  "reference": "knowledge/solved/Erdos16.lean"
+}

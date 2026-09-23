@@ -1,0 +1,8 @@
+{
+  "true_problem": "645",
+  "alias_id": "67734",
+  "statement_en": "Colour every natural number with one of two colours. Show that there are natural numbers y and e with 0 < y < e such that y, y + e and y + 2e all have the same colour.",
+  "statement_lean": "theorem erdos_67734 (f : ℕ → Bool) :\n    ∃ y e : ℕ, 0 < y ∧ y < e ∧ f y = f (y + e) ∧ f (y + e) = f (y + 2 * e) := by\n  sorry",
+  "changes": "alpha-renaming only: c→f, x→y, d→e; theorem renamed to a synthetic id; English paraphrased without 'arithmetic progression' or attribution; tags removed",
+  "reference": "knowledge/solved/Erdos645.lean"
+}

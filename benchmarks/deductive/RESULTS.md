@@ -31,6 +31,33 @@ Nothing in `knowledge/solved/` was touched by any run (all carried `--benchmark`
 | 2026-09-23 | 275 | identified, **`claude-opus-5-5`** | yes: Crittenden–Vanden Eynden, ~90% | no: "proposing now, not recalled in detail" | reconstructed routes (see `probes/275-identified-20260923-052929.md`) | $0.16 |
 | 2026-09-23 | 275 | masked, **`claude-opus-5-5`** | **yes, ~90%** (names the theorem, cites Balister et al. c.2020 for a short proof) | **yes: says it REMEMBERS the exponential-sum / Vandermonde argument** "from the literature" | ∏(1 − ω_j^{x−u_j}) as an exponential sum with ≤ 2^m frequencies that cannot vanish on 2^m consecutive integers — the reference's analytic route | $0.17 |
 
+### Clean probes (2026-09-23, `claude-opus-5-5`, no ambient context)
+
+Rerun after the context-leak fix; every earlier probe moved to `probes/leaked-context/`. Masked statements from
+`masks/<n>.json` (synthetic id, alpha-renaming, paraphrase). Each masked probe cost $0.03–0.04.
+
+| # (alias) | recognised? | recalls a proof? | first strategy vs reference | set |
+|---|---|---|---|---|
+| 645 (67734) | **no** | no | finite case analysis / SAT for a bound N; reference is four elementary lemmas over explicit triples: same shape, which is the natural shape | **masked set: derivation benchmark** |
+| 499 (61249) | as a corollary of van der Waerden's permanent bound; no attribution for this exact statement | no; says it is reconstructing | Birkhoff–von Neumann + per-row entropy/Jensen; reference is Birkhoff + weighted AM–GM per row, i.e. **the same route** | **known-route control**: mechanics base rates only, never derivation evidence |
+| 16 (45592) | **yes**, names #16 and the resolving author from content alone | no | covering systems + CRT + density; reference is an argument, 289 lines | Step 4 negative-direction test (recognition noted) |
+| 350 (52871) | yes | yes (partial sums + majorisation) | reference route | excluded |
+| 476 (94163) | yes (Erdős–Heilbronn, ~95%) | yes (Alon–Nathanson–Ruzsa) | reference route | excluded |
+| 532 (73508) | yes (Hindman, >95%) | yes (Galvin–Glazer); knows Mathlib has it | reference imports Mathlib's Hindman | excluded |
+| 275 (80317) | yes (Crittenden–Vanden Eynden) | proposes the analytic route "reconstructing" | reference route | excluded from further runs |
+| 649 (38027) | no | — | **the frozen statement is trivial**: take r = s, a prime cannot divide m and m + 1 | excluded; the saved #649 solve certifies a statement weaker than the problem |
+
+### Predictions, written before launch (2026-09-23)
+
+Benchmark predictions live here, not in `atlas-data/predictions.jsonl`: the scorer settles by true problem id from
+`rankings.json`, so a #645 prediction would settle as "Verified" from the old solve whatever this run does, and
+benchmark outcomes never enter the Atlas. Committed before the run starts, so the git history orders them.
+
+| # (alias) | budget | P(closed: skeleton with no hypothesis, verified) | P(at least one hypothesis discharged) | basis |
+|---|---|---|---|---|
+| 645 (67734) | $20 | 0.25 | 0.60 | not recognised; the earlier blind close ($4.75) was carried by the lemma store, now excluded; the known proof is a finite forcing argument whose compactness step the #645 blind run found hard to certify by kernel enumeration |
+| 499 (61249) | $20 | 0.45 | 0.75 | route known to the model and Mathlib has Birkhoff (`exists_eq_sum_perm_of_mem_doublyStochastic`) and weighted AM–GM; the risk is `rpow` bookkeeping, which the reference needed two helper lemmas for |
+
 Reading: the mask removes the name cue but not content recognition for a theorem this well known. The model does
 not claim to remember the reference's roots-of-unity proof, so a masked run that produces roots of unity is
 evidence of recall of the public formal proof; an induction route, or a stall, is the loop's own work.

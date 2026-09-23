@@ -1,0 +1,8 @@
+{
+  "true_problem": "350",
+  "alias_id": "52871",
+  "statement_en": "Let B be a finite set of natural numbers such that no two different subsets of B have the same sum. Show that the sum of the reciprocals of the elements of B is less than 2.",
+  "statement_lean": "theorem erdos_52871 (B : Finset ℕ)\n    (hsub : ∀ X ⊆ B, ∀ Y ⊆ B, ∑ m ∈ X, m = ∑ m ∈ Y, m → X = Y) :\n    ∑ m ∈ B, (1 : ℝ) / (m : ℝ) < 2 := by\n  sorry",
+  "changes": "alpha-renaming only: A→B, S→X, T→Y, n→m, hdis→hsub; theorem renamed to a synthetic id; English paraphrased without the word 'dissociated' or any attribution; tags removed",
+  "reference": "knowledge/solved/Erdos350.lean"
+}

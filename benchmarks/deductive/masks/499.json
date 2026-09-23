@@ -1,0 +1,8 @@
+{
+  "true_problem": "499",
+  "alias_id": "61249",
+  "statement_en": "Let N ≥ 1 and let b be an N×N array of real numbers, all non-negative, in which every row sums to 1 and every column sums to 1. Show that some bijection τ of {0, …, N−1} to itself makes the product of the N entries b(i, τ(i)) at least N^(−N).",
+  "statement_lean": "theorem erdos_61249 (N : ℕ) (hN : 1 ≤ N) (b : Fin N → Fin N → ℝ)\n    (hnn : ∀ r s, 0 ≤ b r s)\n    (hr : ∀ r, ∑ s, b r s = 1)\n    (hs : ∀ s, ∑ r, b r s = 1) :\n    ∃ τ : Equiv.Perm (Fin N), (N : ℝ) ^ (-(N : ℤ)) ≤ ∏ r, b r (τ r) := by\n  sorry",
+  "changes": "alpha-renaming only: n→N, a→b, i→r, j→s, σ→τ, h0→hnn, hrow→hr, hcol→hs, hn→hN; theorem renamed to a synthetic id; English paraphrased without the words 'doubly stochastic', 'permanent' or any attribution; tags removed",
+  "reference": "knowledge/solved/Erdos499.lean"
+}

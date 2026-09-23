@@ -1,0 +1,8 @@
+{
+  "true_problem": "532",
+  "alias_id": "73508",
+  "statement_en": "Colour every natural number with one of two colours. Show that there is an infinite set B of positive integers and a single colour such that, for every non-empty finite subset T of B, the sum of the elements of T has that colour.",
+  "statement_lean": "theorem erdos_73508 (f : ℕ → Fin 2) :\n    ∃ B : Set ℕ, B.Infinite ∧ (∀ m ∈ B, 0 < m) ∧\n      ∃ k : Fin 2, ∀ T : Finset ℕ, T.Nonempty → (↑T : Set ℕ) ⊆ B →\n        f (∑ m ∈ T, m) = k := by\n  sorry",
+  "changes": "alpha-renaming only: c→f, A→B, n→m, i→k, S→T; theorem renamed to a synthetic id; English paraphrased without any theorem name, 'finite sums', 'IP set' or attribution; tags removed",
+  "reference": "knowledge/solved/Erdos532.lean"
+}

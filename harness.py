@@ -4251,7 +4251,8 @@ for the SAT solver instead of enumerating it.
             t.start()
         for t in threads:
             t.join()
-        out = KNOWLEDGE / "open" / pid / self.run_dir.name
+        # a benchmark (possibly a masked alias of a solved problem) is not knowledge: keep its report in the run dir
+        out = (self.run_dir / "open-report") if getattr(self.args, "benchmark", False) else KNOWLEDGE / "open" / pid / self.run_dir.name
         out.mkdir(parents=True, exist_ok=True)
         lines = [f"# Open problem #{pid} — two-direction attack (run {self.run_dir.name})", "",
                  "**REQUIRES HUMAN REVIEW BEFORE ANY EXTERNAL CLAIM.** Automated formalization of an open problem can be "
