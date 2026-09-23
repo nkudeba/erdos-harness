@@ -67,6 +67,15 @@ python3 atlas-data/predict.py score                     # Brier + calibration bi
 itself. Calibration stays impossible until outcomes accumulate, and `score` reports that honestly
 instead of printing a flattering Brier.
 
+**A prediction is settled by the attempt it was made for, never by the problem's current status.** A
+harness row names its run (`by: triage/<run>`); any other row is settled by the first run of that problem
+that started after it; the outcome is that run's `DONE` (exit 0 = proved and verified; a fatal `DONE` stays
+unsettled; benchmark runs never settle anything). Scoring by current status used to settle a write-ahead
+prediction at once from an older attempt, and would flip a failed attempt to a success when a later run
+solved the problem. When every settled outcome is the same, `score` prints no Brier at all (six p≈0
+predictions of six failures printed a "perfect" 0.0000); otherwise it prints the base-rate reference and a
+skill score beside it. Benchmark predictions go in `benchmarks/deductive/RESULTS.md`, written before launch.
+
 **The estimate is a decomposition, not an opinion:**
 `P(resolve) = reachability × class base rate`. Reachability is *arithmetic* — a recorded search floor
 past the bounded-search reach (`10^9`) pins it to 0 whatever else is true — which is why the whole
@@ -144,7 +153,11 @@ Keep watchers to ONE per lane and let the harness do the summarising; polling th
 ## --run-budget is a real cap; keep it that way
 
 `spent_usd()` counts this run's own log **plus** every descendant: `--open` pos/neg children (under
-`run_dir`) and research-program sub-runs (under `programs/erdos_<n>/`, filtered to this run's window).
+`run_dir`) and research-program sub-runs (under `programs/erdos_<n>/`, **attributed by ownership**: every
+program child records `owner_runs`, its spawner plus the spawner's owners, so a resumed older run is never
+charged a newer run's sub-runs; sub-runs that predate the marker fall back to the window
+[this run's start, the next run's start)). Attribution by time alone would have charged the first masked
+#275 run, resumed, $23.74 against a true $8.05.
 It used to read only its own log file, so in `research`/`--open` — the modes that spend most — the cap
 was unenforceable: a resumed #677 spent **$22.67 against `--run-budget 8`** before it was noticed and
 killed by hand. Sub-run budgets are now `min(remaining, remaining/n)` and the cycle stops when the
@@ -180,7 +193,7 @@ Briefs are written for a reader with no mathematics and for the next AI that ope
 ## Facts about a run come from the whole tree, never from one state.json
 
 `collect_run_facts(run_dir, pid)` is the single source: it walks child logs, `pos`/`neg` child state,
-research sub-runs under `programs/erdos_<n>/` (windowed to this run) and partial-result directories a crash
+research sub-runs under `programs/erdos_<n>/` (attributed by `owner_runs`, as `spent_usd` is) and partial-result directories a crash
 never recorded. Reading the parent's `state.json` alone produced three separate wrong reports — spend
 under-counted, an open problem shown as `exit=0` (proved), and a brief announcing "zero certified results"
 for a run holding seven. **When a stage fans out, its read-side aggregate must fan out too.**
