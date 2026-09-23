@@ -5980,8 +5980,16 @@ def hypothesis_span(skeleton: str, name: str) -> tuple[int, int] | None:
     return m.start(), m.start() + len("\n".join(head))
 
 
+SPLICED_NS_RE = re.compile(r"(?ms)^namespace\s+(\S+_ns)\s*$.*?^end\s+\1\s*$")
+
+
 def skeleton_defs(skeleton: str) -> list[str]:
-    return [d for d in split_decls(skeleton) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
+    """The skeleton's own top-level `def`s. A spliced proof's namespace (`namespace <name>_ns … end <name>_ns`) is
+    excluded: its helpers are proof internals, and one of them can need an `open` that lives only inside it. The
+    masked #645 run certified its compute lemma with a `MetaM` proof builder; that helper leaked into every later
+    sub-statement, which then failed on `Unknown identifier MetaM`, so the last open hypothesis was never attacked."""
+    top = SPLICED_NS_RE.sub("", skeleton)
+    return [d for d in split_decls(top) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
 
 
 def hypothesis_substatement(skeleton: str, name: str) -> str | None:

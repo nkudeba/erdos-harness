@@ -1046,3 +1046,21 @@ class NegationDirection(unittest.TestCase):
     def test_children_inherit_the_open_direction(self):
         import inspect
         self.assertIn("child.open_direction = open_direction_of(self)", inspect.getsource(H.Harness._attack_substatement))
+
+
+class SplicedNamespaceDefs(unittest.TestCase):
+    """masked #645: a spliced proof's private MetaM helper must not leak into later sub-statements."""
+    def test_defs_inside_a_spliced_namespace_are_not_skeleton_defs(self):
+        skel = ("def search : ℕ → Bool := fun _ => false\n\n"
+                "namespace erdos_99_hyp_a_ns\nprivate def helper : ℕ := 3\n\nopen Lean Meta in\n"
+                "private def build : ℕ → MetaM Expr := fun _ => pure (mkNatLit 0)\n\n"
+                "theorem erdos_99_hyp_a : search 0 = false := rfl\nend erdos_99_hyp_a_ns\n\n"
+                "theorem erdos_99_hyp_a : search 0 = false := by\n  exact erdos_99_hyp_a_ns.erdos_99_hyp_a\n\n"
+                "theorem erdos_99_hyp_b : search 1 = false := by\n  sorry\n\n"
+                "theorem erdos_99 : search 0 = false ∧ search 1 = false := ⟨erdos_99_hyp_a, erdos_99_hyp_b⟩")
+        defs = H.skeleton_defs(skel)
+        self.assertEqual(len(defs), 1)
+        self.assertIn("def search", defs[0])
+        sub = H.hypothesis_substatement(skel, "erdos_99_hyp_b")
+        self.assertNotIn("MetaM", sub)
+        self.assertIn("theorem erdos_99_hyp_b : search 1 = false := by\n  sorry", sub)
