@@ -2399,8 +2399,8 @@ class Harness:
         seen = {self.log.path.resolve()}
         paths = list(self.run_dir.rglob("log.jsonl"))
         pdir = ROOT / "programs" / f"erdos_{self.problem['id']}"
-        if getattr(self, "direction", None) in ("pos", "neg"):
-            pdir = pdir / self.direction
+        if open_direction_of(self):
+            pdir = pdir / open_direction_of(self)
         if pdir.exists():
             paths += list(pdir.rglob("log.jsonl"))
         for path in paths:
@@ -4440,8 +4440,8 @@ for the SAT solver instead of enumerating it.
         # directory or they race on cycles/, Lemmas.lean and ledger.jsonl (same-second cycle names
         # collide, and both append identically-named lemmas to one file).
         d = ROOT / "programs" / f"erdos_{self.problem['id']}"
-        if getattr(self, "direction", None) in ("pos", "neg"):
-            d = d / self.direction
+        if open_direction_of(self):
+            d = d / open_direction_of(self)
         if getattr(self, "program_subdir", None):
             # a sub-residual (a hypothesis attacked with its own skeleton) keeps its own cycles, ledger,
             # Lemmas.lean and Residual.lean, or it would race the parent on all four
@@ -4450,7 +4450,7 @@ for the SAT solver instead of enumerating it.
         return d
 
     def _program_module_suffix(self) -> str:
-        base = {"pos": "Pos", "neg": "Neg"}.get(getattr(self, "direction", None) or "", "")
+        base = {"pos": "Pos", "neg": "Neg"}.get(open_direction_of(self) or "", "")
         if getattr(self, "program_subdir", None):
             base += "Sub" + hashlib.sha256(str(self.program_subdir).encode()).hexdigest()[:8]
         return base
@@ -4673,6 +4673,7 @@ for the SAT solver instead of enumerating it.
         child = Harness(cargs)
         child.thm_name = name
         child.direction = "program"
+        child.open_direction = open_direction_of(self)
         # a premise circular against the ROOT target is circular at any depth (masked #275, hyp_cve)
         child.root_frozen = getattr(self, "root_frozen", None) or statement_prefix(self.state["statement"])
         if recursive:
@@ -5103,6 +5104,7 @@ for the SAT solver instead of enumerating it.
                     child = Harness(cargs)
                     child.thm_name = name
                     child.direction = "program"
+                    child.open_direction = open_direction_of(self)
                     if module:
                         child.imports = list(dict.fromkeys(child.imports + [module]))
                     try:
@@ -5302,8 +5304,8 @@ Return the markdown only."""
         out, seen = [], set()
         paths = list(self.run_dir.rglob("log.jsonl"))
         pdir = ROOT / "programs" / f"erdos_{self.problem['id']}"
-        if getattr(self, "direction", None) in ("pos", "neg"):
-            pdir = pdir / self.direction
+        if open_direction_of(self):
+            pdir = pdir / open_direction_of(self)
         if pdir.exists():
             paths += list(pdir.rglob("log.jsonl"))
         for path in paths:
@@ -5766,7 +5768,7 @@ def decl_name(block: str) -> str:
 # analysis of Lean source; the compiler decides whether a skeleton is real.
 
 HYP_RE = re.compile(r"(?:^|\n)\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+)?(?:theorem|lemma)\s+"
-                    r"(erdos_(\d+)_hyp_[A-Za-z0-9_'!?]+)")
+                    r"(erdos_(\d+)(?:_neg)?_hyp_[A-Za-z0-9_'!?]+)")   # `_neg`: the --open negation direction
 # The plan rates each hypothesis; the attack order is (rating, syntactic complexity). Complexity alone put the
 # masked #275 run's "genuinely open residual" (all moduli odd) FIRST, because it had the shortest statement.
 DIFFICULTY_RANK = {"elementary": 0, "moderate": 1, "unrated": 2, "hard": 3}
@@ -5934,6 +5936,15 @@ def circularity_probe_source(cand: str, target_frozen: str, prop: str) -> str | 
             defs.append(d)
     tac = "\n  ".join(["first"] + [f"| {t}" for t in CIRCULARITY_TACTICS])
     return "\n\n".join(defs + [f"theorem circularity_probe (hH : {prop}) {th[1]} := by\n  {tac}"]).strip()
+
+
+def open_direction_of(h) -> str | None:
+    """`pos`/`neg` for an --open direction AND for every research sub-run beneath it. A program child is
+    `direction == "program"`, and used to lose its direction: its sub-residual landed in the shared
+    programs/erdos_<n>/sub/, outside the direction's own tree, so the direction's spent_usd missed it and the
+    child's own window charged it the sibling direction's concurrent spend."""
+    d = getattr(h, "direction", None)
+    return d if d in ("pos", "neg") else getattr(h, "open_direction", None)
 
 
 def residual_improves(new: dict, old: dict | None) -> bool:

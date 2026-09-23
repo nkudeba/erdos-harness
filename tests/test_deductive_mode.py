@@ -1009,3 +1009,40 @@ class OpenModeBenchmark(unittest.TestCase):
         import inspect
         src = inspect.getsource(H.Harness.run_open)
         self.assertIn('self.run_dir / "open-report") if getattr(self.args, "benchmark", False)', src)
+
+
+class NegationDirection(unittest.TestCase):
+    """--open composes with the deductive loop: the negation child's hypotheses are `erdos_N_neg_hyp_*`, and every
+    research sub-run beneath a direction stays in that direction's tree and budget."""
+
+    def test_neg_hypotheses_are_hypotheses(self):
+        skel = ("theorem erdos_99_neg_hyp_w : ∃ n : ℕ, n = 3 := by\n  sorry\n\n"
+                "theorem erdos_99_neg : ¬ (∀ n : ℕ, n = 0) := by\n  intro h\n"
+                "  obtain ⟨n, hn⟩ := erdos_99_neg_hyp_w\n  have := h n\n  omega")
+        r = H.parse_residual(skel, 99, main="erdos_99_neg")
+        self.assertTrue(r["main_present"] and r["glue_sorry_free"])
+        self.assertEqual([h["name"] for h in r["hypotheses"]], ["erdos_99_neg_hyp_w"])
+        self.assertEqual(r["metric"]["open_conjectures"], 1)
+
+    def test_sub_runs_keep_the_open_direction(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        old = H.ROOT
+        H.ROOT = Path(tmp.name)
+        self.addCleanup(lambda: setattr(H, "ROOT", old))
+        h = _stub(tmp.name)
+        h.direction = "program"
+        h.open_direction = "neg"
+        h.program_subdir = "erdos_99_neg_hyp_w"
+        self.assertEqual(h._program_dir(), Path(tmp.name) / "programs" / "erdos_99" / "neg" / "sub" / "erdos_99_neg_hyp_w")
+        self.assertTrue(h._program_module_suffix().startswith("NegSub"))
+        top = _stub(tmp.name)
+        top.direction = "pos"
+        self.assertEqual(H.open_direction_of(top), "pos")
+        plain = _stub(tmp.name)
+        plain.direction = "program"
+        self.assertIsNone(H.open_direction_of(plain))
+
+    def test_children_inherit_the_open_direction(self):
+        import inspect
+        self.assertIn("child.open_direction = open_direction_of(self)", inspect.getsource(H.Harness._attack_substatement))
