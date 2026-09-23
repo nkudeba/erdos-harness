@@ -1220,3 +1220,11 @@ class RefuteScriptRepair(unittest.TestCase):
 
     def test_prompt_forbids_percent_formatting(self):
         self.assertIn("never `%`-formatting", H.EXPERIMENTS_PROMPT)
+
+
+class BenchmarkWritesNoKnowledge(unittest.TestCase):
+    def test_benchmark_refutations_live_with_the_program(self):
+        H.BENCHMARK_PIDS.add("45592")
+        self.addCleanup(H.BENCHMARK_PIDS.discard, "45592")
+        self.assertEqual(H.refuted_dir("45592"), H.ROOT / "programs" / "erdos_45592" / "refuted")
+        self.assertEqual(H.refuted_dir("242"), H.KNOWLEDGE / "refuted" / "242")

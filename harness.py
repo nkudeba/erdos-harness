@@ -2367,6 +2367,7 @@ class Harness:
         self.state["problem_input"] = self.problem
         if getattr(args, "benchmark", False):
             self.state["benchmark"] = True
+            BENCHMARK_PIDS.add(str(pid))
         self.state.setdefault("invocations", []).append({
             "at": now(), "backend": args.backend,
             "model": args.model or (DEFAULT_CLAUDE_MODEL if args.backend == "claude-cli" else None),
@@ -5445,7 +5446,9 @@ Return the markdown only."""
                 return False
             lemmas, body = good, "\n\n".join(defs + good)
         run_label = self.run_dir.name if not getattr(self, "direction", None) else f"{self.run_dir.parent.name}-{self.run_dir.name}"
-        out = KNOWLEDGE / "partial" / self.problem["id"] / run_label
+        # a benchmark alias is not knowledge (masked #16 wrote knowledge/partial/45592 before this)
+        out = (self.run_dir / "partial" if getattr(self.args, "benchmark", False)
+               else KNOWLEDGE / "partial" / self.problem["id"] / run_label)
         out.mkdir(parents=True, exist_ok=True)
         (out / "partial.lean").write_text(compose(body, self.imports))
         names = [decl_name(l) for l in lemmas]
@@ -6290,7 +6293,14 @@ def failures_context(pdir: Path, limit: int = 6) -> str:
     return "\n".join(lines)
 
 
+# Problem ids being run as benchmarks in this process (masked aliases of solved problems): their refutations
+# stay with the program, never in knowledge/ (masked #16 wrote knowledge/refuted/45592 before this).
+BENCHMARK_PIDS: set[str] = set()
+
+
 def refuted_dir(pid) -> Path:
+    if str(pid) in BENCHMARK_PIDS:
+        return ROOT / "programs" / f"erdos_{pid}" / "refuted"
     return KNOWLEDGE / "refuted" / str(pid)
 
 

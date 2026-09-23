@@ -1,0 +1,14 @@
+{
+  "id": "45592",
+  "statement": "Let V be the set of odd natural numbers that cannot be written as a power of 2 plus a prime. Show that V is not the union of an infinite arithmetic progression {b + m·e : m ∈ ℕ} (with e > 0) and a set C of density zero.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}
