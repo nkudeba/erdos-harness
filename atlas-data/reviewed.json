@@ -200,21 +200,44 @@
     "rationale": [
       "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier.",
       "Deductive-loop candidate, rank 2 (2026-09-16; fit 72): Erdos-Straus is the textbook case of shrinking a residual by certified reductions. Mordell's classical identities give 4/n = 1/x+1/y+1/z for every n outside six residue classes mod 840 (n congruent to 1, 11^2, 13^2, 17^2, 19^2, 23^2), and it suffices to treat primes; each identity is elementary algebra a child run can certify, so the first skeleton should read '#242 <= (every prime p in those classes has a representation)' with the identities as discharged hypotheses. The remaining classes are the genuinely open core (verified numerically far past 1e14 in the literature; not rerun here) and stay a conjecture hypothesis.",
-      "erdosproblems.com (page edited 2026-05-07) records the conjecture verified for all n <= 10^18 [MiDu25]; published, not rerun. The unit is candidate n, an enumerable-object count, so a bounded counterexample search is futile. Forum and proof-claims page checked 2026-09-23 (cache 2026-09-11): no proof claims."
+      "erdosproblems.com (page edited 2026-05-07) records the conjecture verified for all n <= 10^18 [MiDu25]; published, not rerun. The unit is candidate n, an enumerable-object count, so a bounded counterexample search is futile. Forum and proof-claims page checked 2026-09-23 (cache 2026-09-11): no proof claims.",
+      "Deductive --open run 2026-09-23 ($3.26): certified conditional theorem Erdős–Straus ⇐ (every prime p ≡ 1 mod 24 has a representation), six lemmas certified and spliced. Weaker than Mordell's six classes mod 840, which the Atlas names as the realistic target; the core's own derivation comment wrongly claims Mordell coverage, the Lean statement (p % 24 = 1) is what counts. Mechanically verified, not a resolution."
     ],
     "requirements": [
       "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches.",
-      "Judge a deductive run by whether the residual shrinks from 'all n>2' to the six Mordell classes with the identities certified and spliced; that is real, checkable partial value. Do not spend the budget on a counterexample search (falsifiable class, but the recorded literature checks make it futile) and do not expect the residual classes to close: that is the open problem."
+      "Judge a deductive run by whether the residual shrinks from 'all n>2' to the six Mordell classes with the identities certified and spliced; that is real, checkable partial value. Do not spend the budget on a counterexample search (falsifiable class, but the recorded literature checks make it futile) and do not expect the residual classes to close: that is the open problem.",
+      "Next: certify Mordell's identities for the classes mod 5 and mod 7 so the core shrinks from p ≡ 1 (24) to the six classes mod 840; the refute stage crashed in every cycle of this run (fixed afterwards), so rerun with it working."
     ],
     "score": 3,
     "sources": [
       "atlas-data/deductive-candidates.md",
       "https://www.erdosproblems.com/242",
-      "atlas-data/forum/242.json"
+      "atlas-data/forum/242.json",
+      "runs/20260923-113735-833279-erdos242"
     ],
     "assessed": "2026-09-23",
     "search_floor": 1e+18,
-    "search_floor_kind": "published"
+    "search_floor_kind": "published",
+    "residual": {
+      "run": "runs/20260923-113735-833279-erdos242",
+      "direction": "pos",
+      "skeleton": "programs/erdos_242/pos/Residual.lean",
+      "open": 1,
+      "published": 0,
+      "certified": 6,
+      "core": "∀ p prime, p % 24 = 1 → 4/p has a representation",
+      "certified_hypotheses": [
+        "mul (a representation of m gives one of k·m)",
+        "four (2,3,6)",
+        "three (1,4,12)",
+        "mod4_eq3 (p=4a-1, a≥2)",
+        "mod3_eq2 (p=3a-1)",
+        "mod8_eq5 (witness (2t,pt,2pt), t=(p+3)/8)"
+      ],
+      "neg_direction": "stopped at $0.76: plan believed the target false (target_believed_false); counterexample hypothesis restricted to Mordell classes, not attacked"
+    },
+    "residual_recorded": "2026-09-23",
+    "residual_history": []
   },
   "264": {
     "assessed": "2026-09-11",

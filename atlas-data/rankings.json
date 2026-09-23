@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "c870af8018de397a07c8f434232bb0f148acadbb0b0ce0451c1b27f36721f986",
+    "harness_sha256": "bb4ad2f6f77287f0b3d109fda957dbd0b1c3339f082a3b7b3167c06edbbbdf09",
     "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
-    "manual_reviews_sha256": "7fd8d11cb0c27942fbca27289047df04d2b2613860b012b3ead481cba31acc5c"
+    "manual_reviews_sha256": "1324dee3cf9be5ee8846951fada0963dc096efa6e9583814ac606ef8b0d344a9"
   },
   "problems": [
     {
@@ -45905,11 +45905,12 @@
         "unit fractions"
       ],
       "score": 3,
-      "harness": "Attempted",
+      "harness": "Partial result",
       "rationale": [
         "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier.",
         "Deductive-loop candidate, rank 2 (2026-09-16; fit 72): Erdos-Straus is the textbook case of shrinking a residual by certified reductions. Mordell's classical identities give 4/n = 1/x+1/y+1/z for every n outside six residue classes mod 840 (n congruent to 1, 11^2, 13^2, 17^2, 19^2, 23^2), and it suffices to treat primes; each identity is elementary algebra a child run can certify, so the first skeleton should read '#242 <= (every prime p in those classes has a representation)' with the identities as discharged hypotheses. The remaining classes are the genuinely open core (verified numerically far past 1e14 in the literature; not rerun here) and stay a conjecture hypothesis.",
         "erdosproblems.com (page edited 2026-05-07) records the conjecture verified for all n <= 10^18 [MiDu25]; published, not rerun. The unit is candidate n, an enumerable-object count, so a bounded counterexample search is futile. Forum and proof-claims page checked 2026-09-23 (cache 2026-09-11): no proof claims.",
+        "Deductive --open run 2026-09-23 ($3.26): certified conditional theorem Erdős–Straus ⇐ (every prime p ≡ 1 mod 24 has a representation), six lemmas certified and spliced. Weaker than Mordell's six classes mod 840, which the Atlas names as the realistic target; the core's own derivation comment wrongly claims Mordell coverage, the Lean statement (p % 24 = 1) is what counts. Mechanically verified, not a resolution.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -45922,6 +45923,7 @@
       "requirements": [
         "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches.",
         "Judge a deductive run by whether the residual shrinks from 'all n>2' to the six Mordell classes with the identities certified and spliced; that is real, checkable partial value. Do not spend the budget on a counterexample search (falsifiable class, but the recorded literature checks make it futile) and do not expect the residual classes to close: that is the open problem.",
+        "Next: certify Mordell's identities for the classes mod 5 and mod 7 so the core shrinks from p ≡ 1 (24) to the six classes mod 840; the refute stage crashed in every cycle of this run (fixed afterwards), so rerun with it working.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Do not budget a counterexample search. Target a proved special case or a certificate route instead.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
@@ -46021,10 +46023,12 @@
         "sources": [
           "atlas-data/deductive-candidates.md",
           "https://www.erdosproblems.com/242",
-          "atlas-data/forum/242.json"
+          "atlas-data/forum/242.json",
+          "runs/20260923-113735-833279-erdos242"
         ],
         "searchFloor": 1e+18
       },
+      "brief": "---\nproblem: 242\nupdated: 2026-09-23\nrun: 20260923-113735-833279-erdos242\noutcome: partial\nsolved: false\ncertified: 6\nsearch_floor: 1e+18\ncost_usd: 3.18\n---\n\n## What the problem asks\n\nTake any whole number n bigger than 2. The question is whether 4/n can always be written as a sum of three unit fractions, 1/x + 1/y + 1/z. A unit fraction is a fraction with 1 on top. The three bottom numbers x, y, z must be different positive whole numbers, with x < y < z. For example, 4/4 = 1/2 + 1/3 + 1/6. The problem asks whether this works for every n > 2. It is listed as open. It is also \"falsifiable\": a single n with no such sum would show the claim is false.\n\n## What we tried\n\nWe ran a deductive research program, meaning a step-by-step effort to shrink the problem into smaller pieces. It ran separately in two directions: trying to prove the claim, and trying to disprove it. Each direction ran two cycles and ended with one piece still open. The disproof direction recorded an internal planning guess that the claim is false. That guess is not evidence, and no counterexample was found. This run did no computer search of its own. The formal version (written in Lean, a proof-checking language) reads n as a whole number and reads the equation as exact equality of fractions. Both are the standard readings. The run cost $3.18.\n\n## What we found\n\nThe most useful result is a reduction. A reduction is a proof that the full claim follows from a smaller claim. We showed that only prime numbers need checking. A prime is a whole number whose only divisors are 1 and itself. This works because a sum for m gives a sum for any multiple of m. Explicit formulas then handle every prime except those that leave remainder 1 when divided by 24. So the open case is exactly primes of the form 24k + 1. Six supporting lemmas were certified, meaning checked by computer. They include the formula cases and the scaling step. The reductions themselves were checked by argument. Their Lean statements are written but not yet proved in Lean.\n\n## What would move it\n\nThe remaining step is to handle every prime that leaves remainder 1 on division by 24. Doing that is the open problem itself, and this run did not do it. Other notes, not from this run, point to known classical formulas. These would shrink the open case further, to six remainder classes on division by 840. The obvious next step is to certify those formulas. According to the problem page, the claim has been checked for all n up to 10^18. That check is published and was not rerun here. So a small computer search for a counterexample is very unlikely to find one. Real progress needs either a single formula that covers all remaining primes, or a counterexample beyond that bound.\n\n*Written automatically at the end of run `20260923-113735-833279-erdos242`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
       "rank": 780,
       "tier": "Frontier"
     },

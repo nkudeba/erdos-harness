@@ -1527,7 +1527,9 @@ runs in ≤ 60 s and does two things:
    instead; an observation is never a hypothesis until someone derives it. The check confirms a derivation; it
    does not replace one.
 
-Print at most 30 lines in total, each starting with REFUTED:, CLEAR:, DERIVATION:, INVARIANT:, OBSERVED: or EXP:."""
+Print at most 30 lines in total, each starting with REFUTED:, CLEAR:, DERIVATION:, INVARIANT:, OBSERVED: or EXP:.
+Build every message with f-strings, never `%`-formatting (a literal `n % 4` inside a %-formatted message crashes
+the script), and print each line as soon as it is known rather than collecting them for the end."""
 
 
 PLAN_PROMPT = """You are the planning stage of a DEDUCTIVE research program on an OPEN Erdős problem (#{pid}), cycle {cycle}.
@@ -4559,8 +4561,22 @@ for the SAT solver instead of enumerating it.
             return "", empty
         (cdir / "experiments.py").write_text(code)
         rc, out = self._run_py(cdir / "experiments.py", 180, cdir)
-        (cdir / "experiments.txt").write_text(out)
         parsed = parse_refutation_output(out)
+        if rc not in (0, None) and "Traceback" in out and not any(parsed.get(k) for k in ("refuted", "clear", "invariants")):
+            # One repair: all four #242 refute scripts died on `"... n % 4 ... %d" % N` (a literal `%` in a
+            # %-formatted message) after computing everything, and printed nothing. A crash that yields no
+            # result line is a bug in the script, not a finding; show it the traceback once.
+            self.log.event("program", "experiments_repair", cycle=cycle, error=out.strip().splitlines()[-1][:200])
+            resp = self.ask("experiments", prompt + "\n\nYour previous script CRASHED before printing any result line:\n```\n"
+                            + out[-1500:] + "\n```\nReturn the corrected script: f-strings only, and print each result "
+                            "line as soon as it is known.")
+            m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
+            code2 = m.group(1) if m else ""
+            if code2 and not unsafe_python(code2):
+                (cdir / "experiments.py").write_text(code2)
+                rc, out = self._run_py(cdir / "experiments.py", 180, cdir)
+                parsed = parse_refutation_output(out)
+        (cdir / "experiments.txt").write_text(out)
         self.log.event("program", "experiments_ran", cycle=cycle, rc=rc, refuted=len(parsed["refuted"]),
                        clear=len(parsed["clear"]), invariants=len(parsed["invariants"]))
         return out, parsed

@@ -1197,3 +1197,26 @@ class FalseDirectionStops(unittest.TestCase):
         h, rc, attacked = self._run({"target_belief": "unsure",
                                      "hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture"}]})
         self.assertEqual(attacked, ["erdos_99_hyp_a"])
+
+
+class RefuteScriptRepair(unittest.TestCase):
+    """#242: every refute script crashed on `"n % 4 ... %d" % N` after computing everything; one repair is allowed."""
+    def test_a_crash_with_no_result_line_gets_one_repair(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        h = _stub(tmp.name)
+        h.state["literature"] = ""
+        asked = []
+        scripts = iter(['```python\nprint("x")\n```', '```python\nprint("CLEAR: {}")\n```'])
+        h.ask = lambda purpose, prompt, **kw: asked.append(prompt) or next(scripts)
+        runs = iter([(1, "Traceback (most recent call last):\nValueError: unsupported format character"),
+                     (0, 'INVARIANT: every n is odd (n <= 100)')])
+        h._run_py = lambda script, timeout, cwd: next(runs)
+        out, parsed = h._deductive_experiments(Path(tmp.name), 1, "- h : P")
+        self.assertEqual(len(asked), 2)
+        self.assertIn("CRASHED", asked[1])
+        self.assertEqual(len(parsed["invariants"]), 1)
+        self.assertTrue(any(e[1] == "experiments_repair" for e in h.log.events))
+
+    def test_prompt_forbids_percent_formatting(self):
+        self.assertIn("never `%`-formatting", H.EXPERIMENTS_PROMPT)
