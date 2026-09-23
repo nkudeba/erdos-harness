@@ -13,5 +13,7 @@
   "comments": 18,
   "flags": [
     "trivial"
-  ]
+  ],
+  "search_floor": 1e+18,
+  "search_floor_kind": "published"
 }

@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "3517d6f1d3ef822a8797cc4874d0ee5989e8124fc98812b844033ac470234e81",
+    "harness_sha256": "c870af8018de397a07c8f434232bb0f148acadbb0b0ce0451c1b27f36721f986",
     "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
-    "manual_reviews_sha256": "a90f00c918e158d614fb5377ab210a7169580938e3e5fca3daf870052348ca5b"
+    "manual_reviews_sha256": "801006d16ba47d050e85886bf7cd342cd9262f6ee23f3b30756022fb0ce7b307"
   },
   "problems": [
     {
@@ -45904,6 +45904,7 @@
       "rationale": [
         "Erdős–Straus is verified to enormous bounds in the source and remains open. Our successful unit-fraction examples do not transfer to its universal quantifier.",
         "Deductive-loop candidate, rank 2 (2026-09-16; fit 72): Erdos-Straus is the textbook case of shrinking a residual by certified reductions. Mordell's classical identities give 4/n = 1/x+1/y+1/z for every n outside six residue classes mod 840 (n congruent to 1, 11^2, 13^2, 17^2, 19^2, 23^2), and it suffices to treat primes; each identity is elementary algebra a child run can certify, so the first skeleton should read '#242 <= (every prime p in those classes has a representation)' with the identities as discharged hypotheses. The remaining classes are the genuinely open core (verified numerically far past 1e14 in the literature; not rerun here) and stay a conjecture hypothesis.",
+        "erdosproblems.com (page edited 2026-05-07) records the conjecture verified for all n <= 10^18 [MiDu25]; published, not rerun. The unit is candidate n, an enumerable-object count, so a bounded counterexample search is futile. Forum and proof-claims page checked 2026-09-23 (cache 2026-09-11): no proof claims.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -45922,7 +45923,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-09-23 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -46011,11 +46012,13 @@
       "manual": true,
       "prize": "no",
       "assessed": {
-        "on": "2026-09-16",
+        "on": "2026-09-23",
         "sources": [
-          "atlas-data/deductive-candidates.md"
+          "atlas-data/deductive-candidates.md",
+          "https://www.erdosproblems.com/242",
+          "atlas-data/forum/242.json"
         ],
-        "searchFloor": null
+        "searchFloor": 1e+18
       },
       "rank": 780,
       "tier": "Frontier"
