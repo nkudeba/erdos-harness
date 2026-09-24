@@ -244,13 +244,17 @@ def attempts(runs_dir: Path) -> dict:
 def settle(row: dict, runs: dict):
     """The outcome of the attempt a prediction was made FOR, or None while it is unknown.
 
-    A harness row names its run (`by: triage/<run>`). Any other row is settled by the first attempt on that
-    problem that STARTED after the prediction was written. Scoring by the problem's current status instead (the
+    A row that names its run is settled by that run: the harness's own (`by: triage/<run>`) or an operator's
+    prediction for a resume (`by: operator/<run>`). Any other row is settled by the first attempt on that problem
+    that STARTED after the prediction was written. Scoring by the problem's current status instead (the
     old rule) broke the write-ahead design twice over: a prediction written before a new attempt was settled at
     once by an older one, and a failed attempt's prediction would flip to a success when a later run solved it."""
     by = str(row.get("by") or "")
-    if by.startswith("triage/"):
-        a = runs.get(by.split("/", 1)[1])
+    tail = by.split("/", 1)[1] if "/" in by else ""
+    if by.startswith("triage/") or tail in runs:
+        # a row that names its run: the harness's own (`triage/<run>`), or an operator's prediction for a RESUME of
+        # an existing run (`operator/<run>`), which the started-after rule could never match
+        a = runs.get(tail)
     else:
         at = _when(row.get("at"))
         later = [a for a in runs.values() if a["problem"] == str(row["problem"]) and a["start"] and at and a["start"] >= at]

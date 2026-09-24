@@ -138,6 +138,13 @@ class TheLogIsWriteAheadOfOutcomes(unittest.TestCase):
                      {"problem": "4", "at": "2025-12-31T00:00:00+00:00", "p_resolve": 0.3, "by": "triage/20260101-000000-000000-erdos4"})
         self.assertIn("observed rate 0.500", self.score())                  # 3 failed (0), 4 succeeded (1)
 
+    def test_a_prediction_for_a_resume_names_its_run(self):
+        self.run_("20260101-000000-000000-erdos11", "2026-01-01T00:00:00Z", {"exit": 0})     # resumed, then closed
+        self.run_("20260101-000000-000000-erdos12", "2026-01-01T00:00:00Z", {"exit": 2})
+        self.predict({"problem": "11", "at": "2026-02-01T00:00:00+00:00", "p_resolve": 0.5, "by": "operator/20260101-000000-000000-erdos11"},
+                     {"problem": "12", "at": "2026-02-01T00:00:00+00:00", "p_resolve": 0.5, "by": "operator/20260101-000000-000000-erdos12"})
+        self.assertIn("2 with a settled outcome", self.score())               # the started-after rule would find none
+
     def test_fatal_and_benchmark_runs_settle_nothing(self):
         self.run_("20260101-000000-000000-erdos8", "2026-01-01T00:00:00Z", {"proved": False, "fatal": "OAuth expired"})
         self.run_("20260101-000000-000000-bench-erdos8", "2026-01-01T00:00:00Z", {"exit": 0})
