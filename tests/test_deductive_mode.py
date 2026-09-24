@@ -1294,3 +1294,29 @@ class ResumeFundsDirectionsFromTheirOwnSpend(unittest.TestCase):
         child = argparse.Namespace(spent_usd=lambda: 9.64, args=argparse.Namespace(run_budget=6.875))
         parent._fund_direction(child, 25.0)
         self.assertAlmostEqual(child.args.run_budget, 9.64 + 6.875)     # the old rule left it at 6.875 < 9.64
+
+
+class DefsVisibleFromTheHypothesis(unittest.TestCase):
+    """#242: a refinement splices the child's skeleton (open sub-hypothesis + its own defs) into <name>_ns; the
+    sub-statement for that open hypothesis needs those defs, but never a sibling certified block's internals."""
+    SKEL = ("def es (n : ℕ) : Prop := n = n\n\n"
+            "namespace erdos_99_hyp_mul_ns\nopen Lean Meta in\nprivate def build : ℕ → MetaM Expr := fun _ => pure (mkNatLit 0)\n\n"
+            "theorem erdos_99_hyp_mul : es 1 := rfl\nend erdos_99_hyp_mul_ns\n\n"
+            "theorem erdos_99_hyp_mul : es 1 := by\n  exact erdos_99_hyp_mul_ns.erdos_99_hyp_mul\n\n"
+            "namespace erdos_99_hyp_core_ns\ndef hard (r : ℕ) : Prop := r = 1\n\n"
+            "namespace erdos_99_hyp_core_hyp_easy_ns\nprivate def helper : ℕ := 7\n\n"
+            "theorem erdos_99_hyp_core_hyp_easy : es 2 := rfl\nend erdos_99_hyp_core_hyp_easy_ns\n\n"
+            "theorem erdos_99_hyp_core_hyp_residual : ∀ r, hard r → es r := by\n  sorry\n\n"
+            "theorem erdos_99_hyp_core : es 3 := by\n  rfl\nend erdos_99_hyp_core_ns\n\n"
+            "theorem erdos_99 : es 3 := rfl")
+
+    def test_the_containing_block_is_visible_and_siblings_are_not(self):
+        sub = H.hypothesis_substatement(self.SKEL, "erdos_99_hyp_core_hyp_residual")
+        self.assertIn("def hard", sub)                 # same block as the open hypothesis
+        self.assertIn("def es", sub)                   # top level
+        self.assertNotIn("MetaM", sub)                 # a sibling certified block's internals
+        self.assertNotIn("helper", sub)                # a nested sibling block inside the containing one
+        self.assertIn("theorem erdos_99_hyp_core_hyp_residual : ∀ r, hard r → es r := by\n  sorry", sub)
+
+    def test_a_top_level_hypothesis_sees_only_top_level_defs(self):
+        self.assertEqual([d.split()[1] for d in H.skeleton_defs(self.SKEL)], ["es"])

@@ -6298,12 +6298,29 @@ def restore_spliced(cand: str, current: str) -> str:
     return cand
 
 
-def skeleton_defs(skeleton: str) -> list[str]:
-    """The skeleton's own top-level `def`s. A spliced proof's namespace (`namespace <name>_ns … end <name>_ns`) is
-    excluded: its helpers are proof internals, and one of them can need an `open` that lives only inside it. The
-    masked #645 run certified its compute lemma with a `MetaM` proof builder; that helper leaked into every later
-    sub-statement, which then failed on `Unknown identifier MetaM`, so the last open hypothesis was never attacked."""
-    top = SPLICED_NS_RE.sub("", skeleton)
+def visible_text(text: str, pos: int) -> str:
+    """`text` with every spliced `<name>_ns` block removed unless it CONTAINS position `pos`, in which case its body
+    is kept (recursively: a sibling block nested inside it is removed again). pos < 0 removes every block."""
+    out, last = [], 0
+    for m in SPLICED_NS_RE.finditer(text):
+        out.append(text[last:m.start()])
+        if m.start() <= pos < m.end():
+            inner_start = text.index("\n", m.start()) + 1
+            inner_end = text.rfind("\nend ", m.start(), m.end())
+            out.append(visible_text(text[inner_start:inner_end], pos - inner_start))
+        last = m.end()
+    out.append(text[last:])
+    return "".join(out)
+
+
+def skeleton_defs(skeleton: str, pos: int = -1) -> list[str]:
+    """The `def`s visible from position `pos` of the skeleton: the top-level ones, plus those of any spliced
+    `<name>_ns` block that contains `pos`. Blocks that do NOT contain it are excluded: they are a certified proof's
+    internals, and one can need an `open` that lives only inside it (masked #645's `MetaM` proof builder leaked into
+    a later sub-statement and broke it). Excluding EVERY block was wrong the other way: a refinement splices the
+    child's skeleton into `<name>_ns`, open sub-hypothesis and its own defs together, so #242's
+    `hyp_core_hyp_residual` lost `mordellHard` and was rejected for two cycles."""
+    top = visible_text(skeleton, pos)
     return [d for d in split_decls(top) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
 
 
@@ -6319,7 +6336,7 @@ def hypothesis_substatement(skeleton: str, name: str) -> str | None:
         idx = blk.rfind(":=")
     if idx == -1:
         return None
-    return "\n\n".join(skeleton_defs(skeleton) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
+    return "\n\n".join(skeleton_defs(skeleton, span[0]) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
 
 
 def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:
