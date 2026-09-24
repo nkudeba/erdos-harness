@@ -77,6 +77,12 @@ def main() -> int:
     else:
         prob, frozen = blind_problem(pid)
         run_id = pid
+    if args.launch:
+        # check the lane BEFORE writing anything: a refused launch used to leave an empty run dir behind
+        live = subprocess.run(["pgrep", "-f", "harness.py run"], capture_output=True, text=True).stdout.strip()
+        if live:
+            print(f"refusing to launch: a lane is already live (pids {live.split()}); CLAUDE.md says one lane at a time")
+            return 2
     if not args.no_check:
         sys.path.insert(0, str(ROOT))
         import harness as H
@@ -116,7 +122,7 @@ def main() -> int:
     if not args.launch:
         return 0
     live = subprocess.run(["pgrep", "-f", "harness.py run"], capture_output=True, text=True).stdout.strip()
-    if live:
+    if live:                                    # a lane started during the statement check
         print(f"refusing to launch: a lane is already live (pids {live.split()}); CLAUDE.md says one lane at a time")
         return 2
     log = open(run_dir / "lane.log", "w")

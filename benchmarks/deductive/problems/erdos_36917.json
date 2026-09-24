@@ -1,0 +1,14 @@
+{
+  "id": "36917",
+  "statement": "Show that there are only finitely many pairs (m, S), with S a non-empty finite set of natural numbers, such that 2^m equals the sum of a! over the elements a of S.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}
