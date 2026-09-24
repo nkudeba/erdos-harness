@@ -1,0 +1,18 @@
+{
+  "id": "39851",
+  "statement": "Show that there are infinitely many pairs (S, T) of disjoint non-empty finite sets of positive integers such that the product of the binomial coefficients C(2m, m) over m ∈ S equals the product of C(2k, k) over k ∈ T.",
+  "imports": [
+    "Mathlib.Tactic.NormNum.Basic",
+    "Mathlib.Tactic.Ring",
+    "Mathlib.Tactic.Linarith",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Choose.Central",
+    "Mathlib.Data.Set.Finite.Basic",
+    "Mathlib.Data.Finset.Lattice.Fold"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}

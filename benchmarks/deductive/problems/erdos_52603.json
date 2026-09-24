@@ -1,0 +1,14 @@
+{
+  "id": "52603",
+  "statement": "Show that there are infinitely many integers m ≥ 2 such that every prime factor q of m satisfies q² < m and every prime factor q of m + 1 satisfies q² < m + 1.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}

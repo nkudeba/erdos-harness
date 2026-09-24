@@ -1,0 +1,14 @@
+{
+  "id": "71129",
+  "statement": "Show that there is a set B of natural numbers with the following two properties. First, whenever w + x = y + z with w, x, y, z in B, the pair {w, x} is the pair {y, z}. Second, B meets every infinite arithmetic progression {c + s·e : s ∈ ℕ} with e > 0.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}
