@@ -464,6 +464,14 @@ decomposition goes to the next plan as a failure digest instead. `STALL_LIMIT` (
 discharge stop the program (`descent_stalled`, reason in `stop_reason`); the count lives in `state["stall_cycles"]`
 and survives resumes.
 
+**A refinement is spliced only if its open pieces are strictly easier** (`_refinement_not_easier`). Discharging a
+piece is not enough when the piece is the trivial direction: #242's last step certified "a type II certificate gives a
+representation" and left open "every hard prime has one", the same core in certificate form. A free Lean layer refuses
+an open piece that is equivalent to the old hypothesis in BOTH directions by routine tactics (one direction proves
+nothing: any hypothesis implies its own subcases, which is what a real reduction leaves open); then one `refinement`
+judge call decides "strictly easier" vs "restatement or harder". Checked on #242's two real refinements: the Mordell
+step judged easier, the type-II step judged not easier. No verdict means no splice (`refinement_not_easier`).
+
 **Two directions (`--open`) compose with the deductive loop** — decided and tested 2026-09-23 on masked #16. Each
 direction runs its own program (`erdos_N_neg_hyp_*` names parse; sub-runs keep their direction via
 `open_direction_of`, so directories, modules and budgets stay separate). The failure mode is a false direction

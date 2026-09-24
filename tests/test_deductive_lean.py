@@ -116,3 +116,34 @@ class TimeoutLeavesNoOrphan(unittest.TestCase):
             self.assertTrue(r["timeout"])
             time.sleep(2)
             self.assertEqual(subprocess.run(["pgrep", "-f", "orphan-probe-3141"], capture_output=True, text=True).stdout, "")
+
+
+@unittest.skipUnless(os.environ.get("DEDUCTIVE_LEAN_TESTS") == "1", "set DEDUCTIVE_LEAN_TESTS=1 for real Lean checks")
+class RefinementProbeInLean(unittest.TestCase):
+    """The refinement check's free layer in real Lean: H implies its own subcase (forward only), while a literal
+    restatement goes both ways. Only the second may be refused without the judge."""
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        h = H.Harness.__new__(H.Harness)
+        h.problem, h.state, h.log = {"id": "99", "statement": "s", "tags": []}, {}, Log()
+        h.run_dir = Path(self.tmp.name)
+        h.args = argparse.Namespace(no_cascade=False, subgoal_prover=None)
+        h.imports, h.libraries = list(H.DEFAULT_IMPORTS), []
+        h.lean = H.LeanChecker(H.FORMAL, 420)
+        h._lock, h.checks = threading.Lock(), 0
+        self.h = h
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _derives(self, premise, goal, tag):
+        tac = "\n  ".join(["first"] + [f"| {t}" for t in H.REFINEMENT_TACTICS])
+        src = f"def good (n : ℕ) : Prop := n = n\n\ntheorem refinement_probe (hH : {premise}) : {goal} := by\n  {tac}"
+        r = self.h.check(src, tag)
+        return r["ok"] and not r["sorries"]
+
+    def test_subcase_is_one_way_and_restatement_both_ways(self):
+        whole = "∀ n : ℕ, n % 24 = 1 → good n"
+        subcase = "∀ n : ℕ, n % 24 = 1 → n % 5 = 1 → good n"
+        self.assertTrue(self._derives(whole, subcase, "sub-fwd"))
+        self.assertFalse(self._derives(subcase, whole, "sub-bwd"))
+        self.assertTrue(self._derives(whole, whole, "same-fwd") and self._derives(whole, whole, "same-bwd"))

@@ -251,12 +251,12 @@ class Prompts(unittest.TestCase):
         self.assertIn("sub-statements", H.PLAN_PROMPT_LEMMA)
 
 
-JUDGE_OK = '```json\n{"routine": false, "why": "a different result"}\n```'
+JUDGE_OK = '```json\n{"routine": false, "easier": true, "why": "a different result / a strict subcase"}\n```'
 
 
 def _judged(fn):
-    """A plan stub that also answers the circularity judge: the premise is a genuine ingredient."""
-    return lambda purpose, prompt, **kw: JUDGE_OK if purpose == "circularity" else fn(purpose, prompt, **kw)
+    """A plan stub that also answers the judges: a premise is a genuine ingredient, a refinement is easier."""
+    return lambda purpose, prompt, **kw: JUDGE_OK if purpose in ("circularity", "refinement") else fn(purpose, prompt, **kw)
 
 
 def _stub(tmp, **state):
@@ -275,7 +275,7 @@ def _stub(tmp, **state):
     h.spent_usd = lambda: 0.0
     h._check_run_budget = lambda purpose: None
     def check(body, name):
-        if name.startswith("circularity"):      # the free tactics do not close premise → target
+        if name.startswith(("circularity", "refinement")):   # the free tactics close nothing by default
             return {"ok": False, "sorries": [], "errors": ["unsolved goals"], "infos": [], "body": body}
         return {"ok": True, "sorries": ["s"] if H.hole_count(body) else [], "errors": [], "infos": [], "body": body}
     h.check = check
@@ -1320,3 +1320,81 @@ class DefsVisibleFromTheHypothesis(unittest.TestCase):
 
     def test_a_top_level_hypothesis_sees_only_top_level_defs(self):
         self.assertEqual([d.split()[1] for d in H.skeleton_defs(self.SKEL)], ["es"])
+
+
+
+class RefinementMustBeEasier(unittest.TestCase):
+    """#242: a refinement certified 'a type II certificate gives a representation' and left open 'every hard prime
+    has one', the same core in certificate form, and Step 2 counted it as progress. A refinement is now spliced only
+    if its open pieces are strictly easier than the hypothesis they replace."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _run(self, verdict, probe_ok=lambda name: False):
+        h = _stub(self.root / "run")
+        h.args.min_child_budget = 0
+        skel = SKELETON.replace("-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3\n"
+                                "theorem erdos_99_hyp_rs : ∀ x : ℕ, 1 ≤ x → x ≤ x := by\n  sorry\n\n", "")
+        plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "difficulty": "hard"}]}) + "\n```\n"
+        asked = []
+        def ask(purpose, prompt, **kw):
+            asked.append((purpose, prompt))
+            if purpose == "refinement":
+                return verdict
+            return JUDGE_OK if purpose == "circularity" else plan
+        h.ask = ask
+        def check(body, name):
+            if name.startswith("refinement"):
+                ok = probe_ok(name)
+                return {"ok": ok, "sorries": [], "errors": [] if ok else ["unsolved goals"], "infos": [], "body": body}
+            if name.startswith("circularity"):
+                return {"ok": False, "sorries": [], "errors": ["unsolved goals"], "infos": [], "body": body}
+            return {"ok": True, "sorries": ["s"] if H.hole_count(body) else [], "errors": [], "infos": [], "body": body}
+        h.check = check
+        h._install_lemmas_module = lambda pdir: None
+        sub_path = self.root / "sub.lean"
+        sub_path.write_text("def foo (n : ℕ) : Prop := n = n\n\n"
+                            "theorem erdos_99_hyp_a_hyp_suffices : ∀ n : ℕ, foo n := by\n  intro n\n  rfl\n\n"
+                            "theorem erdos_99_hyp_a_hyp_cert : ∀ n : ℕ, foo n := by\n  sorry\n\n"
+                            "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  exact erdos_99_hyp_a_hyp_cert n")
+        h._attack_substatement = lambda *a, **k: (3, argparse.Namespace(state={"residual": {"skeleton": str(sub_path), "meta": {}}}))
+        rc = h.run_program()
+        return h, asked
+
+    def test_a_reformulation_is_not_spliced(self):
+        h, asked = self._run('```json\n{"easier": false, "why": "the same primes, in certificate form"}\n```')
+        self.assertTrue(any(e[1] == "refinement_not_easier" for e in h.log.events))
+        self.assertFalse(any(e[1] == "hypothesis_refined" for e in h.log.events))
+        self.assertEqual({x["name"] for x in h.state["residual"]["hypotheses"] if x["open"]}, {"erdos_99_hyp_a"})
+        self.assertIn("certificate form", (self.root / "programs" / "erdos_99" / "failures.jsonl").read_text())
+        self.assertEqual(h.state["stall_cycles"], 0)            # cycle 1 still adopted the first skeleton
+
+    def test_a_strictly_easier_refinement_is_spliced(self):
+        h, asked = self._run('```json\n{"easier": true, "why": "fewer residue classes"}\n```')
+        self.assertTrue(any(e[1] == "hypothesis_refined" for e in h.log.events))
+        prompt = [p for k, p in asked if k == "refinement"][0]
+        self.assertIn("erdos_99_hyp_a_hyp_suffices", prompt)      # certified pieces are shown
+        self.assertIn("erdos_99_hyp_a_hyp_cert", prompt)          # and the open frontier
+
+    def test_a_literal_restatement_is_caught_by_lean_without_a_judge(self):
+        h, asked = self._run("unused", probe_ok=lambda name: True)   # both directions close
+        self.assertTrue(any(e[1] == "refinement_not_easier" for e in h.log.events))
+        self.assertFalse(any(k == "refinement" for k, _ in asked))
+
+    def test_one_direction_is_a_subcase_not_a_restatement(self):
+        """H implies any subcase of itself: a forward-only probe must fall through to the judge."""
+        h, asked = self._run('```json\n{"easier": true, "why": "a subcase"}\n```', probe_ok=lambda name: name.endswith("-fwd"))
+        self.assertTrue(any(k == "refinement" for k, _ in asked))
+        self.assertTrue(any(e[1] == "hypothesis_refined" for e in h.log.events))
+
+    def test_no_verdict_is_no_splice(self):
+        h, asked = self._run("It looks like progress to me.")
+        self.assertTrue(any(e[1] == "refinement_not_easier" and "no verdict" in e[2]["why"] for e in h.log.events))

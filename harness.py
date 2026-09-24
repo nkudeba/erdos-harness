@@ -137,7 +137,7 @@ class ClaudeCliBackend:
     # at the default effort; medium effort is plenty for retrieval-style stages. Proof search keeps the default.
     AUX_PURPOSES = {"literature", "backtranslate", "faithful", "retrospect", "brief", "reduce", "readings"}
     FORMAL_PURPOSES = {"formalize", "crosscheck"}
-    TRIAGE_PURPOSES = {"assess", "critic", "search", "circularity"}   # medium effort, $1 cap: classification / review / script writing
+    TRIAGE_PURPOSES = {"assess", "critic", "search", "circularity", "refinement"}   # medium effort, $1 cap: classification / review / script writing
 
     def __init__(self, model: str | None, timeout: int, call_budget_usd: float = 8.0,
                  aux_effort: str | None = "medium", formal_effort: str | None = "high",
@@ -4751,6 +4751,48 @@ for the SAT solver instead of enumerating it.
                             "or use a certified Mathlib theorem by name")
         return None
 
+    def _refinement_not_easier(self, h: dict, sub_parsed: dict, sub_skel: str, cycle: int) -> str | None:
+        """A reason to REFUSE splicing a refinement (its open pieces are not strictly easier than `h`), or None.
+
+        Step 2 splices a refinement once the child discharged something, but the discharged piece can be the trivial
+        direction: #242's last step certified "a type II certificate gives a representation" and left open "every
+        hard prime has a type II certificate", i.e. the same core in certificate form, and it counted as progress.
+        Layer 1 is free: an open piece that Lean shows EQUIVALENT to `h` by routine tactics, in both directions, is `h`
+        restated. One direction is not enough: `h` trivially implies any SUBCASE of itself, which is exactly what a
+        genuine reduction leaves open (#242's Mordell step would have been refused). Layer 2 is one judge call, which
+        is what catches a reformulation that is not literal. No verdict = no splice: the decomposition still reaches
+        the next plan."""
+        defs = skeleton_defs(sub_skel)
+        opened = [x for x in sub_parsed["hypotheses"] if x["open"]]
+        certified = [x for x in sub_parsed["hypotheses"] if not x["open"]]
+        tac = "\n  ".join(["first"] + [f"| {t}" for t in REFINEMENT_TACTICS])
+
+        def derives(premise: str, goal: str, tag: str) -> bool:
+            src = "\n\n".join(defs + [f"theorem refinement_probe (hH : {premise}) : {goal} := by\n  {tac}"])
+            res = self.check(src, f"refinement-c{cycle}-{tag}"[:120])
+            return bool(res.get("ok") and not res.get("sorries"))
+        for x in opened:
+            if derives(h["statement"], x["statement"], x["name"] + "-fwd") and \
+                    derives(x["statement"], h["statement"], x["name"] + "-bwd"):
+                return f"Lean shows the open piece {x['name']} equivalent to {h['name']} by routine tactics: it is {h['name']} restated"
+        fmt = lambda xs: "\n".join(f"- {x['name']} : {x['statement']}" for x in xs) or "(none)"
+        resp = self.ask("refinement", REFINEMENT_PROMPT.format(
+            hypothesis=h["statement"], defs=("\n\n".join(defs) or "(none)")[-4000:],
+            certified=fmt(certified)[-3000:], open=fmt(opened)[-3000:]))
+        v = json_block(resp)
+        if v is None:
+            m = re.search(r"\{.*\}", resp or "", re.S)
+            try:
+                v = json.loads(m.group(0)) if m else {}
+            except json.JSONDecodeError:
+                v = {}
+        v = v if isinstance(v, dict) else {}
+        if v.get("easier") is True:
+            return None
+        if v.get("easier") is False:
+            return "judge: " + str(v.get("why") or "not strictly easier")
+        return "refinement judge returned no verdict, so the refinement is not spliced"
+
     def _judge_circularity(self, cand: str, h: dict, target: str, defs_txt: str, cycle: int) -> str | None:
         """Why the premise is circular (a short reason) or None when it is a genuine ingredient."""
         src = circularity_probe_source(cand, target, h["statement"])
@@ -5089,6 +5131,18 @@ for the SAT solver instead of enumerating it.
                                                       "diagnosis": f"split only: the child certified {h['name']} <= "
                                                                    f"{', '.join(opened)} but discharged none of them, so the "
                                                                    f"frontier was kept. Its decomposition:\n{sub_skel[-1500:]}"})
+                                continue
+                            not_easier = (self._refinement_not_easier(h, sub_parsed, sub_skel, cycle)
+                                          if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"] else None)
+                            if not_easier:
+                                opened = [x["name"] for x in sub_parsed["hypotheses"] if x["open"]]
+                                self.log.event("program", "refinement_not_easier", cycle=cycle, name=h["name"],
+                                               discharged=discharged_subs, sub_hypotheses=opened, why=not_easier[:300])
+                                record_failure(pdir, {**failure_digest(child.state, h["name"], h["statement"], cycle, rc),
+                                                      "diagnosis": f"refinement not spliced: {not_easier}. The child "
+                                                                   f"certified {', '.join(discharged_subs)} but its open pieces "
+                                                                   f"({', '.join(opened)}) are not strictly easier than "
+                                                                   f"{h['name']}. Its decomposition:\n{sub_skel[-1500:]}"})
                                 continue
                             refined = (splice_hypothesis(skeleton, h["name"], sub_skel)
                                        if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"]
@@ -6088,6 +6142,36 @@ PREMISE `{name}` (tagged PUBLISHED: {source}):
 Would a competent mathematician derive the TARGET from this PREMISE alone with nothing beyond routine
 bookkeeping? Answer with one ```json block and nothing else:
 {{"routine": true | false, "why": "one or two sentences: the routine transformation, or the non-routine idea the target still needs"}}"""
+
+REFINEMENT_PROMPT = """A research program replaced an open hypothesis H by a machine-checked conditional theorem:
+H follows from the CERTIFIED pieces (proved in Lean) together with the OPEN pieces (not proved). The open pieces
+become the new frontier. That counts as progress only if the OPEN pieces, taken together, are STRICTLY EASIER than H:
+a genuinely smaller claim (a subcase, fewer residue classes or cases, a weaker statement, a finite check). It is not
+progress if the open pieces restate H in other terms (an equivalent reformulation, a certificate or witness form of
+the same claim, a change of variables, the contrapositive) or are as hard as or harder than H. Judge the mathematics,
+not the length of the statements.
+
+H (the hypothesis being replaced):
+```lean
+{hypothesis}
+```
+
+DEFINITIONS in scope:
+```lean
+{defs}
+```
+
+CERTIFIED pieces:
+{certified}
+
+OPEN pieces (the new frontier):
+{open}
+
+Answer with one ```json block and nothing else:
+{{"easier": true | false, "why": "one or two sentences: what the open pieces no longer have to cover, or why they are H restated or harder"}}"""
+
+# The refinement check's free layer: literal restatements only (no aesop, which is slow and proves real subcases).
+REFINEMENT_TACTICS = ("exact hH", "simpa using hH", "(intros; apply hH <;> assumption)")
 
 # Tactics that close `premise → target` when the premise is a restatement. Tried in Lean, free, before the judge.
 CIRCULARITY_TACTICS = ("exact hH", "(intros; apply hH <;> assumption)", "simpa using hH", "aesop")
