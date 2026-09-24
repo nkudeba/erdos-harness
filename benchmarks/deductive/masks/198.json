@@ -1,0 +1,8 @@
+{
+  "true_problem": "198",
+  "alias_id": "71129",
+  "statement_en": "Show that there is a set B of natural numbers with the following two properties. First, whenever w + x = y + z with w, x, y, z in B, the pair {w, x} is the pair {y, z}. Second, B meets every infinite arithmetic progression {c + s·e : s ∈ ℕ} with e > 0.",
+  "statement_lean": "theorem erdos_71129 :\n    ∃ B : Set ℕ,\n      (∀ w ∈ B, ∀ x ∈ B, ∀ y ∈ B, ∀ z ∈ B,\n          w + x = y + z → (w = y ∧ x = z) ∨ (w = z ∧ x = y)) ∧\n      (∀ c e : ℕ, 0 < e → ∃ s : ℕ, c + s * e ∈ B) := by\n  sorry",
+  "changes": "alpha-renaming only: A→B, a b c d (elements)→w x y z, a d (progression)→c e, t→s; theorem renamed to a synthetic id; English paraphrased without 'Sidon', 'B2' or attribution; tags removed",
+  "reference": "knowledge/solved/Erdos198.lean"
+}

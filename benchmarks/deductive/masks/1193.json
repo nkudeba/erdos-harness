@@ -1,0 +1,8 @@
+{
+  "true_problem": "1193",
+  "alias_id": "64417",
+  "statement_en": "Show that there exist a set B of natural numbers and a function h : ℕ → ℕ, non-decreasing and always positive, such that the set of n for which the number of ordered pairs (x, y) ∈ B × B with x + y = n equals h(n) has positive lower density.",
+  "statement_lean": "theorem erdos_64417 :\n    ∃ (B : Set ℕ) (h : ℕ → ℕ), Monotone h ∧ (∀ n, 0 < h n) ∧\n      0 < Filter.liminf\n        (fun M : ℕ =>\n          ((Set.ncard {n : ℕ | n ∈ Set.Iio M ∧\n              Nat.card {w : B × B // (w.1 : ℕ) + (w.2 : ℕ) = n} = h n} : ℝ) / M))\n        Filter.atTop := by\n  sorry",
+  "changes": "alpha-renaming only: A→B, g→h, p→w, N→M; a CHECK directive dropped (no mathematical change); theorem renamed to a synthetic id; English paraphrased without 'representation function' or attribution; tags removed",
+  "reference": "knowledge/solved/Erdos1193.lean"
+}

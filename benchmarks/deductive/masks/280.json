@@ -1,0 +1,8 @@
+{
+  "true_problem": "280",
+  "alias_id": "83341",
+  "statement_en": "Show that there exist δ > 0, a strictly increasing sequence u(0) < u(1) < … of natural numbers with u(j) > (1 + δ)(j + 1) log(j + 1) for every j, and residues r(j), such that the number of x in {0, …, u(j) − 1} lying in none of the classes r(l) mod u(l) for l ≤ j is o(j) as j → ∞.",
+  "statement_lean": "theorem erdos_83341 :\n    ∃ (u r : ℕ → ℕ) (δ : ℝ), 0 < δ ∧ StrictMono u ∧\n      (∀ j : ℕ, (1 + δ) * ((j : ℝ) + 1) * Real.log ((j : ℝ) + 1) < (u j : ℝ)) ∧\n      Asymptotics.IsLittleO Filter.atTop\n        (fun j : ℕ =>\n          (((Finset.range (u j)).filter\n              (fun x => ∀ l ≤ j, x % u l ≠ r l % u l)).card : ℝ))\n        (fun j : ℕ => (j : ℝ) + 1) := by\n  sorry",
+  "changes": "alpha-renaming only: n→u, a→r, ε→δ, k→j, m→x, i→l; two explanatory comment lines dropped (no mathematical change); theorem renamed to a synthetic id; English paraphrased without 'covering' or attribution; tags removed",
+  "reference": "knowledge/solved/Erdos280.lean"
+}

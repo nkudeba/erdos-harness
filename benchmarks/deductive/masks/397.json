@@ -1,0 +1,8 @@
+{
+  "true_problem": "397",
+  "alias_id": "39851",
+  "statement_en": "Show that there are infinitely many pairs (S, T) of disjoint non-empty finite sets of positive integers such that the product of the binomial coefficients C(2m, m) over m ∈ S equals the product of C(2k, k) over k ∈ T.",
+  "statement_lean": "-- IMPORTS: Mathlib.Data.Nat.Choose.Central\ntheorem erdos_39851 :\n    Set.Infinite {w : Finset ℕ × Finset ℕ |\n      Disjoint w.1 w.2 ∧ w.1.Nonempty ∧ w.2.Nonempty ∧\n      (∀ m ∈ w.1, 0 < m) ∧ (∀ k ∈ w.2, 0 < k) ∧\n      ∏ m ∈ w.1, Nat.centralBinom m = ∏ k ∈ w.2, Nat.centralBinom k} := by\n  sorry",
+  "changes": "alpha-renaming only: p→w, n→k; theorem renamed to a synthetic id; English paraphrased without attribution; tags removed",
+  "reference": "knowledge/solved/Erdos397.lean"
+}

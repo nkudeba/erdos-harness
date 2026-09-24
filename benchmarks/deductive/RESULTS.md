@@ -51,6 +51,25 @@ Rerun after the context-leak fix; every earlier probe moved to `probes/leaked-co
 | 275 (80317) | yes (Crittenden–Vanden Eynden) | proposes the analytic route "reconstructing" | reference route | excluded from further runs |
 | 649 (38027) | no | — | **the frozen statement is trivial**: take r = s, a prime cannot divide m and m + 1 | excluded; the saved #649 solve certified a statement weaker than the problem (**re-frozen with p ≠ q on 2026-09-23 and re-verified**; the mask now carries r ≠ s) |
 
+### Clean probes, second batch (2026-09-23, `claude-opus-5-5`, no ambient context): the construction set
+
+| # (alias) | recognised? | recalls a proof? | first strategy vs reference | set |
+|---|---|---|---|---|
+| 370 (52603) | **no** | no | the family m = y⁴ − 1 (y odd), where m + 1 = y⁴; the reference uses n = (k+3)²(k²+6k+7) with n + 1 = ((k+2)(k+4))²: **a different family** | **derivation benchmark** |
+| 198 (71129) | **no** | no | greedy enumeration of all progressions with a lacunary (a_n > 2a_{n−1}) Sidon set; the reference uses the explicit f(n) = (n+1)! + n: **a different construction** | **derivation benchmark** |
+| 397 (39851) | the SOURCE only ("one of the Erdős–Graham questions on central binomial coefficients") | no | ratio method r(m) = C(2m+2, m+1)/C(2m, m) and a parametric family; the reference is one three-element identity with c = 8a² + 8a + 1, which is where the ratio method leads | **borderline benchmark**, labelled as such |
+| 363 (58367) | yes (Erdős–Graham; answered by Ulas c. 2005) | the method's flavour (polynomial identities) | Ulas-style parametric blocks | excluded |
+| 280 (83341) | no | — | finds u(j) = 2^(j+1): the frozen statement is trivially satisfiable, which the site itself records (Cambie's trivial negative answer, n_k = 2^k) | excluded: a trivial recorded resolution is no test |
+| 1193 (64417) | no | — | finds B = ℕ, h(n) = n + 1 (density 1); the site itself records the question as trivially answered by A = ℕ | excluded, same reason |
+
+### Predictions for the construction set, written before launch (2026-09-23)
+
+| # (alias) | budget | P(closed) | P(≥1 discharge) | basis |
+|---|---|---|---|---|
+| 370 (52603) | $20 | 0.55 | 0.85 | not recognised; the probe's own family works on paper (odd prime q ∣ y² + 1 gives q ≤ (y² + 1)/2); the Lean cost is the prime-factor bounds, moderate |
+| 198 (71129) | $20 | 0.40 | 0.75 | not recognised; the greedy/lacunary construction needs a recursive definition over an enumeration of progressions (`Nat.unpair`), harder to formalise than the reference's closed form |
+| 397 (39851) | $20 | 0.25 | 0.50 | an identity family has to be FOUND (the refute stage can search small cases); the ratio method points at it, but nothing forces the specific family |
+
 ### Predictions, written before launch (2026-09-23)
 
 Benchmark predictions live here, not in `atlas-data/predictions.jsonl`: the scorer settles by true problem id from

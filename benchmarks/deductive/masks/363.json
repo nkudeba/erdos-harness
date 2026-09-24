@@ -1,0 +1,8 @@
+{
+  "true_problem": "363",
+  "alias_id": "58367",
+  "statement_en": "Show that there are infinitely many finite collections of pairwise disjoint intervals of consecutive positive integers, each interval containing at least 4 numbers, such that the product of all the numbers in all the intervals is a perfect square.",
+  "statement_lean": "theorem erdos_58367 :\n    Set.Infinite {𝓙 : Finset (Finset ℕ) |\n      (∀ J ∈ 𝓙, 4 ≤ J.card ∧ 0 ∉ J ∧ ∃ a b : ℕ, J = Finset.Icc a b) ∧\n      (𝓙 : Set (Finset ℕ)).PairwiseDisjoint id ∧\n      IsSquare (∏ J ∈ 𝓙, ∏ m ∈ J, m)} := by\n  sorry",
+  "changes": "alpha-renaming only: 𝓘→𝓙, I→J; theorem renamed to a synthetic id; English paraphrased without attribution; tags removed",
+  "reference": "knowledge/solved/Erdos363.lean"
+}
