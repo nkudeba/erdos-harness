@@ -1,0 +1,17 @@
+{
+  "id": "74453",
+  "statement": "Show that there is a set A of natural numbers whose lower density is greater than 1/3 such that no sum a + b with a, b in A (a = b allowed) is a power of 2.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic",
+    "Mathlib.Data.Set.Card",
+    "Mathlib.Order.LiminfLimsup",
+    "Mathlib.Data.Real.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}

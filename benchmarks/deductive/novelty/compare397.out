@@ -1,0 +1,29 @@
+
+== 1. sanity: every transcribed published family really is a solution
+P1,P2,P3,P6,P7 verified on 200 parameters each; P4 valid instances 752, P5 valid instances 114
+P4 instances failing distinctness (e.g. Kesarwani's own a=1,b=0 note): 303  first: [(1, 0), (1, 1), (2, 0)]
+specific published solutions verified: Elkies-5 (MO 2013), Elkies-6 (MO 2013), Kesarwani heterogeneous, Kesarwani dense
+P6 = P4(3t,1), P7 = P4(5t+2,2), P1 = P4(a,0) with the shared 2a+1 cancelled: all confirmed
+
+== 2. the harness family is a solution, and its closed form
+H(t) verified for t = 0..399; H(t) = N(2t+6); N(n) verified for EVERY n = 4..1499 (odd n too)
+big-integer check of the full products for t = 0..3: equal (t=3 product has 1317 digits)
+N(4) = ([10, 6, 3, 104], [9, 5, 4, 105])  N(5) = ([15, 7, 4, 188], [14, 6, 5, 189])  (smallest members; the harness's own parametrisation starts at N(6))
+
+== 3. is any H(t) or N(n) an instance of a published family?  (exact, exhaustive per candidate)
+H(t), t=0..2999, instances coinciding with a published one: 0
+N(n), n=4..2999, instances coinciding with a published one: 0 []
+
+== 4. structural reason (not just a finite check): the invariants that define P4 and P5
+H(t) groups (lower ends): ([9, 35], [7, 674]) at t=1;  symbolic: {2t+7, A-1} | {2t+5, D-1}
+P4 needs a lower end y in one group and 2y+1 in the other (a and 2a+1);
+P5 needs a lower end y and 2y in the SAME group (a-1 and 2a-2).
+H(t) with P4 shape for some t < 3000: []
+H(t) with P5 shape for some t < 3000: []
+(as polynomials: 2(2t+5)+1=4t+11, 2(2t+7)+1=4t+15 are never 2t+7, A-1, 2t+5 or D-1 for t>=0,
+ and no doubling 2(2t+5), 2(2t+7) hits D-1 or A-1: no polynomial reparametrisation can land in P4 or P5)
+
+== 5. the slice (A-B)(C-B) = B(B-1): which published families does it contain?
+B = 2..399: 5715 valid slice solutions; 397 are Somani's (the factorisation x=B-1, y=B, 3-vs-3 after
+cancelling 2a+1 -- same as P4 with b=0); coincide with P4: 0, with P5: 0, other published: 397
+confirmed: slice(B=a+1, x=a, y=a+1) = Somani's P1(a) for a = 2..299
