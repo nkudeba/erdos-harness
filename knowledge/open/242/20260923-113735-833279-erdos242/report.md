@@ -13,7 +13,7 @@ theorem erdos_242 (n : ℕ) (hn : 2 < n) :
       (4 : ℚ) / (n : ℚ) = 1 / (x : ℚ) + 1 / (y : ℚ) + 1 / (z : ℚ) := by
   sorry
 ```
-- spent: $9.64
+- spent: $19.57
 
 Review milestones: {"schema_version": 1, "artifact_sha256": "68d2d52a5aa1740c2191c8efd728f50983998593618b5450be5f487abe75bdb9", "stage": "no_candidate", "candidate_solution": false, "mechanically_verified": false, "statement_independently_audited": false, "externally_reviewed": false, "resolution_claim_eligible": false, "scope": "full_problem_candidate", "catalogue_status_changed": false, "pending": ["clean_replay", "statement_audit", "adversarial_checks", "external_review"], "notice": "Operator-recorded review evidence; reviewer identity and independence require human verification. No automatic catalogue update."}
 ## Direction `neg` — outcome: **partial** (exit 3)
@@ -24,5 +24,5 @@ theorem erdos_242_neg :
         (4 : ℚ) / (n : ℚ) = 1 / (x : ℚ) + 1 / (y : ℚ) + 1 / (z : ℚ)) := by
   sorry
 ```
-- spent: $1.12
+- spent: $3.26
 

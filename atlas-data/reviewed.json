@@ -202,13 +202,15 @@
       "Deductive-loop candidate, rank 2 (2026-09-16; fit 72): Erdos-Straus is the textbook case of shrinking a residual by certified reductions. Mordell's classical identities give 4/n = 1/x+1/y+1/z for every n outside six residue classes mod 840 (n congruent to 1, 11^2, 13^2, 17^2, 19^2, 23^2), and it suffices to treat primes; each identity is elementary algebra a child run can certify, so the first skeleton should read '#242 <= (every prime p in those classes has a representation)' with the identities as discharged hypotheses. The remaining classes are the genuinely open core (verified numerically far past 1e14 in the literature; not rerun here) and stay a conjecture hypothesis.",
       "erdosproblems.com (page edited 2026-05-07) records the conjecture verified for all n <= 10^18 [MiDu25]; published, not rerun. The unit is candidate n, an enumerable-object count, so a bounded counterexample search is futile. Forum and proof-claims page checked 2026-09-23 (cache 2026-09-11): no proof claims.",
       "Deductive --open run 2026-09-23 ($3.26): certified conditional theorem Erdős–Straus ⇐ (every prime p ≡ 1 mod 24 has a representation), six lemmas certified and spliced. Weaker than Mordell's six classes mod 840, which the Atlas names as the realistic target; the core's own derivation comment wrongly claims Mordell coverage, the Lean statement (p % 24 = 1) is what counts. Mechanically verified, not a resolution.",
-      "Resume 2026-09-23 (run total $11.25): the certified conditional theorem is now Erdős–Straus ⇐ (primes p ≡ 1 mod 24 in Mordell's six classes mod 840 with p mod 11 ∉ {7,8,10}). Mordell's 18 non-hard residues mod 840 and three extra mod-11 families are certified and spliced (mordellHard checked: exactly {1,121,169,289,361,529}). Reconstruction of published reductions (Mordell 1969; mod-11 families of the same A/B/C type), mechanically verified, not new mathematics and not a resolution."
+      "Resume 2026-09-23 (run total $11.25): the certified conditional theorem is now Erdős–Straus ⇐ (primes p ≡ 1 mod 24 in Mordell's six classes mod 840 with p mod 11 ∉ {7,8,10}). Mordell's 18 non-hard residues mod 840 and three extra mod-11 families are certified and spliced (mordellHard checked: exactly {1,121,169,289,361,529}). Reconstruction of published reductions (Mordell 1969; mod-11 families of the same A/B/C type), mechanically verified, not new mathematics and not a resolution.",
+      "Final sessions 2026-09-24 (run total $23.59 of $25): the last step certified that a 'type II certificate' (x, k, divisors d1 < d2 of kx with d1 + d2 = k(4x − p), d2 < pk) gives a representation, and left open that every remaining hard prime has one. That open piece is the same problem in the standard certificate form, not a smaller one, so the substantive certified reduction is unchanged: Mordell's six classes mod 840 minus three mod-11 classes. A direct attack on the certificate core failed ($6.49). Reconstruction of published reductions; mechanically verified; not a resolution."
     ],
     "requirements": [
       "Discover a uniform parametrization covering all remaining primes/residue classes, or an exact counterexample beyond known searches.",
       "Judge a deductive run by whether the residual shrinks from 'all n>2' to the six Mordell classes with the identities certified and spliced; that is real, checkable partial value. Do not spend the budget on a counterexample search (falsifiable class, but the recorded literature checks make it futile) and do not expect the residual classes to close: that is the open problem.",
       "Next: certify Mordell's identities for the classes mod 5 and mod 7 so the core shrinks from p ≡ 1 (24) to the six classes mod 840; the refute stage crashed in every cycle of this run (fixed afterwards), so rerun with it working.",
-      "The residual is the open problem restricted to Mordell's classes minus three mod-11 classes. Further shrinkage means certifying more published families (Terzi's 198 classes mod 120120) or a new uniform identity; neither resolves the problem."
+      "The residual is the open problem restricted to Mordell's classes minus three mod-11 classes. Further shrinkage means certifying more published families (Terzi's 198 classes mod 120120) or a new uniform identity; neither resolves the problem.",
+      "Further progress needs a family of certificates covering more of the hard classes (Terzi's classes mod 120120 are the published next level) or a genuinely new idea. Rewording the core does not count; the harness should learn to tell the two apart (proposed: a judge on refinements)."
     ],
     "score": 3,
     "sources": [
@@ -226,19 +228,10 @@
       "skeleton": "programs/erdos_242/pos/Residual.lean",
       "open": 1,
       "published": 0,
-      "certified": 8,
-      "core": "∀ p prime, p % 24 = 1 → mordellHard (p % 840) → ¬(p % 11 ∈ {7,8,10}) → 4/p has a representation; mordellHard r ↔ r ∈ {1,121,169,289,361,529}",
-      "certified_hypotheses": [
-        "mul",
-        "four",
-        "three",
-        "mod4_eq3",
-        "mod3_eq2",
-        "mod8_eq5",
-        "core_hyp_covered840 (Mordell: the 18 non-hard residues mod 840 among p ≡ 1 mod 24)",
-        "core_hyp_mod11 (identities for p mod 11 in {7,8,10})"
-      ],
-      "neg_direction": "stopped twice via target_believed_false ($0.76, $1.12)"
+      "certified": 11,
+      "core": "∀ p prime, p % 24 = 1 → mordellHard (p % 840) → ¬(p % 11 ∈ {7,8,10}) → typeII p, where typeII p := ∃ x k d1 d2, 0 < x ∧ p < 4x ∧ k(4x − p) = d1 + d2 ∧ 0 < d1 < d2 < pk ∧ d1 ∣ kx ∧ d2 ∣ kx",
+      "last_step": "core ⇐ typeII_suffices (certified) + core_typeII (open): a REFORMULATION into certificate form, not a smaller core",
+      "neg_direction": "stops itself each session (target_believed_false); last session $3.26 cumulative"
     },
     "residual_recorded": "2026-09-23",
     "residual_history": [
@@ -261,6 +254,29 @@
             "mod8_eq5 (witness (2t,pt,2pt), t=(p+3)/8)"
           ],
           "neg_direction": "stopped at $0.76: plan believed the target false (target_believed_false); counterexample hypothesis restricted to Mordell classes, not attacked"
+        }
+      },
+      {
+        "recorded": "2026-09-23",
+        "residual": {
+          "run": "runs/20260923-113735-833279-erdos242",
+          "direction": "pos",
+          "skeleton": "programs/erdos_242/pos/Residual.lean",
+          "open": 1,
+          "published": 0,
+          "certified": 8,
+          "core": "∀ p prime, p % 24 = 1 → mordellHard (p % 840) → ¬(p % 11 ∈ {7,8,10}) → 4/p has a representation; mordellHard r ↔ r ∈ {1,121,169,289,361,529}",
+          "certified_hypotheses": [
+            "mul",
+            "four",
+            "three",
+            "mod4_eq3",
+            "mod3_eq2",
+            "mod8_eq5",
+            "core_hyp_covered840 (Mordell: the 18 non-hard residues mod 840 among p ≡ 1 mod 24)",
+            "core_hyp_mod11 (identities for p mod 11 in {7,8,10})"
+          ],
+          "neg_direction": "stopped twice via target_believed_false ($0.76, $1.12)"
         }
       }
     ]
