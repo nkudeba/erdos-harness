@@ -4281,6 +4281,16 @@ for the SAT solver instead of enumerating it.
         chk = self.check(neg, "negation-compile")
         return neg if chk["ok"] else None
 
+    def _fund_direction(self, h, budget) -> None:
+        """A direction's cap is ITS OWN prior spend plus half of what the run has left. The cap is compared with the
+        child's cumulative spend, so on a resume the old "half of what is left" alone could sit below what the
+        direction had already spent: #242's productive direction (prior spend $9.64, share $6.87) stopped on budget
+        before doing anything, and the handover then gave the whole remainder to the other side."""
+        if not budget:
+            return
+        share = max(0.5, (float(budget) - self.spent_usd()) / 2)
+        h.args.run_budget = round(h.spent_usd() + share, 4)
+
     def _hand_over_budget(self, finished: str, children: dict, results: dict, budget) -> None:
         """When one --open direction ends, the other may spend what the WHOLE run has left.
 
@@ -4348,6 +4358,7 @@ for the SAT solver instead of enumerating it.
             h = Harness(cargs)
             h.thm_name = f"erdos_{pid}" if direction == "pos" else f"erdos_{pid}_neg"
             h.direction = direction
+            self._fund_direction(h, budget)
             children[direction] = h
 
         def go(direction):
@@ -4871,6 +4882,7 @@ for the SAT solver instead of enumerating it.
             parsed, skeleton = None, ""          # a stale or hand-edited skeleton is not in force
         exp_out = ""
         for cycle in range(1, cycles + 1):
+            progress = False             # Step 2: did this cycle DISCHARGE anything (not merely split)?
             try:
                 cdir = pdir / "cycles" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-c{cycle}"
                 cdir.mkdir(parents=True, exist_ok=True)
@@ -4974,6 +4986,9 @@ for the SAT solver instead of enumerating it.
                                                                  "errors": [str(verdict.get("reason"))[:220]]}],
                                               "unsolved_goals": [], "decomposition_errors": [], "diagnosis": None, "at": now()})
                     if verdict.get("adopted"):
+                        prev_open = (parsed or {}).get("metric", {}).get("open_conjectures")
+                        if prev_open is None or verdict["parsed"]["metric"]["open_conjectures"] < prev_open or verdict.get("proved"):
+                            progress = True
                         skeleton, parsed, meta = verdict["skeleton"], verdict["parsed"], new_meta
                         residual_path.write_text(skeleton)
                         with open(ledger, "a") as f:
@@ -5061,6 +5076,20 @@ for the SAT solver instead of enumerating it.
                             except OSError:
                                 sub_skel = ""
                             sub_parsed = parse_residual(sub_skel, pid, sub_res.get("meta") or {}, main=h["name"]) if sub_skel.strip() else None
+                            discharged_subs = [x["name"] for x in (sub_parsed or {}).get("hypotheses", []) if not x["open"]]
+                            if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"] and not discharged_subs:
+                                # Step 2: a split that discharges nothing is not progress, and splicing it could make the
+                                # frontier HARDER (#242's negation turned "a counterexample exists" into the stronger
+                                # "a counterexample exists in the quadratic-residue classes"). Keep the frontier; hand the
+                                # decomposition to the next plan, which may adopt it in a skeleton that has to improve.
+                                opened = [x["name"] for x in sub_parsed["hypotheses"] if x["open"]]
+                                self.log.event("program", "split_only_refinement", cycle=cycle, name=h["name"],
+                                               sub_hypotheses=opened)
+                                record_failure(pdir, {**failure_digest(child.state, h["name"], h["statement"], cycle, rc),
+                                                      "diagnosis": f"split only: the child certified {h['name']} <= "
+                                                                   f"{', '.join(opened)} but discharged none of them, so the "
+                                                                   f"frontier was kept. Its decomposition:\n{sub_skel[-1500:]}"})
+                                continue
                             refined = (splice_hypothesis(skeleton, h["name"], sub_skel)
                                        if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"]
                                        and any(x["open"] for x in sub_parsed["hypotheses"]) else None)
@@ -5073,7 +5102,9 @@ for the SAT solver instead of enumerating it.
                                 parsed = parse_residual(skeleton, pid, meta, main=main)
                                 self.log.event("program", "hypothesis_refined", cycle=cycle, name=h["name"],
                                                sub_hypotheses=[x["name"] for x in sub_parsed["hypotheses"] if x["open"]],
+                                               discharged=discharged_subs,
                                                open_now=parsed["metric"]["open_conjectures"])
+                                progress = True
                             else:
                                 self.log.event("program", "refine_failed", cycle=cycle, name=h["name"],
                                                error=(res["errors"][:1] or [""])[0][:200])
@@ -5097,6 +5128,7 @@ for the SAT solver instead of enumerating it.
                                 parsed = parse_residual(skeleton, pid, meta, main=main)
                                 self.log.event("program", "hypothesis_discharged", cycle=cycle, name=h["name"],
                                                open_left=parsed["metric"]["open_conjectures"])
+                                progress = True
                                 if hole_count(skeleton) == 0 and not res["sorries"]:
                                     self.state["proof"] = skeleton
                                     self.save()
@@ -5133,6 +5165,17 @@ for the SAT solver instead of enumerating it.
                         except TimeoutError:
                             self.log.event("program", "paused_no_direction", cycle=cycle)
                             break
+                # Step 2: two consecutive cycles without a discharge mean the descent has stalled; record the
+                # obstruction and stop instead of refining forever. The count survives resumes.
+                self.state["stall_cycles"] = 0 if progress else int(self.state.get("stall_cycles") or 0) + 1
+                self.save()
+                if self.state["stall_cycles"] >= STALL_LIMIT:
+                    open_now = [x["name"] for x in (parsed or {}).get("hypotheses", []) if x["open"]]
+                    self.state["descent_stalled"] = {"cycle": cycle, "stall_cycles": self.state["stall_cycles"],
+                                                     "open": open_now, "at": now()}
+                    self.log.event("program", "descent_stalled", cycle=cycle, stall_cycles=self.state["stall_cycles"],
+                                   open=open_now)
+                    break
             except Harness.BudgetExhausted as e:
                 self.log.event("program", "stopped_on_budget", cycle=cycle, detail=str(e))
                 break
@@ -5162,7 +5205,9 @@ for the SAT solver instead of enumerating it.
                                             f"{metric.get('published')} published premise(s)" if metric else "no skeleton in force")
                                          + f" (see {pdir.relative_to(ROOT)}/RESIDUAL.md)"
                                          + ("; stopped: the plan believes the target FALSE"
-                                            if self.state.get("target_believed_false") else ""))
+                                            if self.state.get("target_believed_false") else "")
+                                         + (f"; stopped: the descent stalled ({STALL_LIMIT} cycles without a discharge)"
+                                            if self.state.get("descent_stalled") else ""))
         self.state["outcome"] = outcome
         self.save()
         self.report(proved)
@@ -6403,6 +6448,9 @@ def failures_context(pdir: Path, limit: int = 6) -> str:
             lines.append(f"    prover's diagnosis: {f['diagnosis'][:500]}")
     return "\n".join(lines)
 
+
+# Step 2 of the deductive programme: this many consecutive cycles without a discharge stop a research program.
+STALL_LIMIT = 2
 
 # Problem ids being run as benchmarks in this process (masked aliases of solved problems): their refutations
 # stay with the program, never in knowledge/ (masked #16 wrote knowledge/refuted/45592 before this).

@@ -531,7 +531,9 @@ class Refinement(unittest.TestCase):
         plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "difficulty": "hard"}]}) + "\n```\n"
         h.ask = _judged(lambda purpose, prompt, **kw: plan)
         h._install_lemmas_module = lambda pdir: None
+        # Step 2: a refinement is spliced only if the child DISCHARGED something (here: the base case)
         sub_skel = ("def foo (n : ℕ) : Prop := n = n\n\n"
+                    "theorem erdos_99_hyp_a_hyp_base : foo 0 := by\n  rfl\n\n"
                     "theorem erdos_99_hyp_a_hyp_step : ∀ n : ℕ, foo n := by\n  sorry\n\n"
                     "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  exact erdos_99_hyp_a_hyp_step n")
         sub_path = self.root / "sub_residual.lean"
@@ -552,7 +554,9 @@ class Refinement(unittest.TestCase):
         skeleton = (self.root / "programs" / "erdos_99" / "Residual.lean").read_text()
         self.assertIn("namespace erdos_99_hyp_a_ns", skeleton)
         self.assertEqual(skeleton.count("def foo"), 1)               # the child's copy of the parent's def is dropped
-        self.assertTrue(any(e[1] == "hypothesis_refined" for e in h.log.events))
+        refined = [e for e in h.log.events if e[1] == "hypothesis_refined"]
+        self.assertTrue(refined)
+        self.assertEqual(refined[0][2]["discharged"], ["erdos_99_hyp_a_hyp_base"])
         self.assertEqual(H.hole_count(skeleton), 1)
 
     def test_failed_child_is_banked_and_fed_forward(self):
@@ -1228,3 +1232,65 @@ class BenchmarkWritesNoKnowledge(unittest.TestCase):
         self.addCleanup(H.BENCHMARK_PIDS.discard, "45592")
         self.assertEqual(H.refuted_dir("45592"), H.ROOT / "programs" / "erdos_45592" / "refuted")
         self.assertEqual(H.refuted_dir("242"), H.KNOWLEDGE / "refuted" / "242")
+
+
+
+class DischargeNotSplit(unittest.TestCase):
+    """Step 2: progress is a discharge. A split that discharges nothing is not spliced (it could make the frontier
+    harder: #242's negation turned 'a counterexample exists' into a stronger existential), and two consecutive
+    cycles without a discharge stop the program with the obstruction recorded."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _run(self, cycles):
+        h = _stub(self.root / "run")
+        h.args.min_child_budget = 0
+        h.args.research_cycles = cycles
+        skel = SKELETON.replace("-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3\n"
+                                "theorem erdos_99_hyp_rs : ∀ x : ℕ, 1 ≤ x → x ≤ x := by\n  sorry\n\n", "")
+        plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "difficulty": "hard"}]}) + "\n```\n"
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
+        h._install_lemmas_module = lambda pdir: None
+        sub_path = self.root / "split.lean"
+        sub_path.write_text("def foo (n : ℕ) : Prop := n = n\n\n"
+                            "theorem erdos_99_hyp_a_hyp_stronger : ∀ n : ℕ, foo n ∧ foo (n + 1) := by\n  sorry\n\n"
+                            "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  exact (erdos_99_hyp_a_hyp_stronger n).1")
+        h._attack_substatement = lambda *a, **k: (3, argparse.Namespace(state={"residual": {"skeleton": str(sub_path), "meta": {}}}))
+        return h, h.run_program()
+
+    def test_a_pure_split_is_not_spliced_and_is_fed_forward(self):
+        h, rc = self._run(1)
+        self.assertTrue(any(e[1] == "split_only_refinement" for e in h.log.events))
+        self.assertFalse(any(e[1] == "hypothesis_refined" for e in h.log.events))
+        self.assertEqual({x["name"] for x in h.state["residual"]["hypotheses"] if x["open"]}, {"erdos_99_hyp_a"})
+        failures = (self.root / "programs" / "erdos_99" / "failures.jsonl").read_text()
+        self.assertIn("split only", failures)
+
+    def test_two_cycles_without_a_discharge_stop_the_program(self):
+        h, rc = self._run(4)
+        stalled = [e for e in h.log.events if e[1] == "descent_stalled"]
+        self.assertEqual(len(stalled), 1)
+        self.assertEqual(stalled[0][2]["cycle"], 3)          # cycle 1 adopted the first skeleton; 2 and 3 only split
+        self.assertFalse(any(e[2].get("cycle") == 4 for e in h.log.events if isinstance(e[2], dict)))
+        self.assertIn("descent stalled", h.state["stop_reason"])
+
+    def test_first_skeleton_counts_as_progress(self):
+        h, rc = self._run(1)
+        self.assertEqual(h.state["stall_cycles"], 0)
+
+
+class ResumeFundsDirectionsFromTheirOwnSpend(unittest.TestCase):
+    def test_a_resumed_direction_gets_its_prior_spend_plus_a_share(self):
+        parent = H.Harness.__new__(H.Harness)
+        parent.spent_usd = lambda: 11.25
+        child = argparse.Namespace(spent_usd=lambda: 9.64, args=argparse.Namespace(run_budget=6.875))
+        parent._fund_direction(child, 25.0)
+        self.assertAlmostEqual(child.args.run_budget, 9.64 + 6.875)     # the old rule left it at 6.875 < 9.64

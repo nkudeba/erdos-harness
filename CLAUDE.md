@@ -455,13 +455,23 @@ proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE
    it), `state["residual"]`, and `residual=open:k,published:p,certified:c` on the `RUN-SUMMARY` line.
    `record_finding.py --residual '<json>'` files it in the Atlas with a history so shrinkage is visible.
 
+**Progress is a discharge, not a split (Step 2, 2026-09-23).** A cycle counts as progress only if it discharged
+something: a spliced proof, a refinement in which the child certified at least one of its sub-hypotheses, or an
+adopted skeleton with fewer open conjectures (the first skeleton counts). A refinement that discharges nothing is
+NOT spliced (`split_only_refinement`), because splitting can make the frontier harder: #242's negation turned "a
+counterexample exists" into the stronger "a counterexample exists in the quadratic-residue classes". Its
+decomposition goes to the next plan as a failure digest instead. `STALL_LIMIT` (2) consecutive cycles without a
+discharge stop the program (`descent_stalled`, reason in `stop_reason`); the count lives in `state["stall_cycles"]`
+and survives resumes.
+
 **Two directions (`--open`) compose with the deductive loop** — decided and tested 2026-09-23 on masked #16. Each
 direction runs its own program (`erdos_N_neg_hyp_*` names parse; sub-runs keep their direction via
 `open_direction_of`, so directories, modules and budgets stay separate). The failure mode is a false direction
 eating the budget: on #16 the negation's plan knew its target was false and still spent 70% of the run. The plan
 now reports `target_belief` and per-hypothesis `believed_false`; `target_belief: "false"` stops that direction
 (`target_believed_false` event, reason in `stop_reason`), and a believed-false hypothesis is never attacked. Each
-direction starts with half of what is left; when one ends, `_hand_over_budget` gives the other its own spend plus
+direction starts with its own prior spend plus half of what is left (`_fund_direction`; without the prior spend a
+resumed direction could start below what it had already spent and stop at once, as #242's productive side did); when one ends, `_hand_over_budget` gives the other its own spend plus
 the whole run's remainder (a `budget_handover` event), so a direction that stops early no longer strands its half.
 
 `stage_reduce` now asks for a Lean statement beside each check; a checked reduction the cascade closes is
