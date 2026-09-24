@@ -1,0 +1,14 @@
+{
+  "true_problem": "473",
+  "alias_id": "90241",
+  "statement_en": "Show that the positive integers can be arranged in a sequence a₀, a₁, a₂, … in which every positive integer appears exactly once and every two consecutive terms have a prime sum.",
+  "statement_lean": "theorem erdos_90241 :\n    ∃ a : ℕ → ℕ, (∀ k, 0 < a k) ∧ Function.Injective a ∧ (∀ m, 0 < m → ∃ k, a k = m) ∧\n      ∀ k, (a k + a (k + 1)).Prime := by\n  sorry",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "changes": "synthetic id; English paraphrased without names or attribution; tags removed; frozen statement written by the operator (no saved solve exists), compile-checked and faithfulness-judged before the probe; recorded as operator assistance in the task specification, not in the solution",
+  "reference": "reference: Odlyzko (per erdosproblems.com, no published reference); no saved Lean proof"
+}

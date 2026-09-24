@@ -40,9 +40,12 @@ def masked_problem(pid: str) -> tuple[dict, str, dict]:
     alpha-renamed frozen theorem, no tags (so no cluster library and none of its Erdős-named declarations).
     The true id lives only in the mask file and in a sidecar the harness never reads."""
     mask = json.loads((BENCH / "masks" / f"{pid}.json").read_text())
-    solved = json.loads((ROOT / "knowledge" / "solved" / f"Erdos{pid}.json").read_text())
+    # A literature-solved problem has no saved solve: its frozen statement is the mask's own (operator-written,
+    # compile- and faithfulness-checked, recorded as such in the mask), and its imports come from the mask.
+    solved_path = ROOT / "knowledge" / "solved" / f"Erdos{pid}.json"
+    solved = json.loads(solved_path.read_text()) if solved_path.exists() else {}
     alias = str(int(mask["alias_id"]))
-    prob = {"id": alias, "statement": mask["statement_en"], "imports": solved.get("imports"),
+    prob = {"id": alias, "statement": mask["statement_en"], "imports": mask.get("imports") or solved.get("imports"),
             "benchmark": {"kind": "masked deductive re-derivation", "reference": "withheld (see benchmarks/deductive/masks/)"}}
     return prob, mask["statement_lean"], mask
 

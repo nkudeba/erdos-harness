@@ -1,0 +1,17 @@
+{
+  "true_problem": "1136",
+  "alias_id": "74453",
+  "statement_en": "Show that there is a set A of natural numbers whose lower density is greater than 1/3 such that no sum a + b with a, b in A (a = b allowed) is a power of 2.",
+  "statement_lean": "theorem erdos_74453 :\n    ∃ A : Set ℕ, (∀ a ∈ A, ∀ b ∈ A, ∀ k : ℕ, a + b ≠ 2 ^ k) ∧\n      (1 : ℝ) / 3 < Filter.liminf (fun N : ℕ => ((A ∩ Set.Iio N).ncard : ℝ) / N) Filter.atTop := by\n  sorry",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic",
+    "Mathlib.Data.Set.Card",
+    "Mathlib.Order.LiminfLimsup",
+    "Mathlib.Data.Real.Basic"
+  ],
+  "changes": "synthetic id; English paraphrased without names or attribution; tags removed; frozen statement written by the operator (no saved solve exists), compile-checked and faithfulness-judged before the probe; recorded as operator assistance in the task specification, not in the solution",
+  "reference": "reference: Müller 2011 (the set of n ≡ 3·2^i mod 2^(i+2), density 1/2)"
+}

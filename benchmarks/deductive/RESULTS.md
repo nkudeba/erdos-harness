@@ -73,6 +73,29 @@ Rerun after the context-leak fix; every earlier probe moved to `probes/leaked-co
 | 198 (71129) | $20 | 0.40 | 0.75 | not recognised; the greedy/lacunary construction needs a recursive definition over an enumeration of progressions (`Nat.unpair`), harder to formalise than the reference's closed form |
 | 397 (39851) | $20 | 0.25 | 0.50 | an identity family has to be FOUND (the refute stage can search small cases); the ratio method points at it, but nothing forces the specific family |
 
+### Harder solved problems: no saved Lean proof (probes 2026-09-24, `claude-opus-5-5`, clean context)
+
+A new pool: solved on the site, never attempted by the harness, no saved Lean proof, so no reference route to
+compare against beyond the literature. **The frozen statements are operator-written** (there is no saved solve to
+mask): each was compile-checked and judged faithful by the harness's own back-translation + judge
+(`masks/faithfulness-20260924.json`), and every mask records this as assistance in the task specification.
+
+| # (alias) | recognised? | recalls a proof? | first strategy | set |
+|---|---|---|---|---|
+| 473 (90241) | **no** ("olympiad-style", under 30% on any source) | no | a back-and-forth construction; its own route needs the sparseness of Goldbach exceptions (Montgomery–Vaughan), i.e. deep input. The site credits Odlyzko with no published reference | **run: hard derivation test** |
+| 1136 (74453) | the problem FAMILY only | no | multiples of 3 plus dyadic-block extras; the published answer is Müller's n ≡ 3·2^i mod 2^(i+2), density 1/2 | **run** |
+| 403 (36917) | the RESULT (Lin; largest solution 2^7 = 2!+3!+5!), ~60–70% | no ("the known proof relies on a computational sieve") | 2-adic splitting plus odd-prime congruences plus a finite computation | **run, borderline** (result known, proof not) |
+| 418 (58109) | yes (Browkin–Schinzel, 509203, the covering primes) | the outline | the published covering route | excluded |
+| 384 (29873) | yes (Erdős / Ecklund) | the style | Erdős–Ecklund inequality argument | excluded. Freezing it exposed a site wording error: "p < n/2" has 19 exceptions below 260 (e.g. C(4,2)); Ecklund's theorem is "p ≤ n/2" (recorded in the Atlas) |
+
+### Predictions for the harder batch, written before launch (2026-09-24)
+
+| # (alias) | budget | P(closed) | P(≥1 discharge) | basis |
+|---|---|---|---|---|
+| 473 (90241) | $20 | 0.10 | 0.60 | unrecognised; the construction glue is certifiable, but every route the model sees needs a prime-existence lemma it cannot prove elementarily; the likely outcome is a conditional theorem on a published or conjectural premise |
+| 1136 (74453) | $20 | 0.35 | 0.70 | a construction beating 1/3 must be found, then a liminf of ncard lower-bounded in Lean, which is formalisation-heavy |
+| 403 (36917) | $20 | 0.15 | 0.50 | finite in principle, but the published proof leans on a large computation (Lin bounds 2-adic valuations up to 2^254), beyond kernel `decide` |
+
 ### Predictions, written before launch (2026-09-23)
 
 Benchmark predictions live here, not in `atlas-data/predictions.jsonl`: the scorer settles by true problem id from

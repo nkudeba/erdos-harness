@@ -1,0 +1,14 @@
+{
+  "true_problem": "384",
+  "alias_id": "29873",
+  "statement_en": "Let n and k be natural numbers with 1 < k < n − 1, excluding the two cases n = 7, k = 3 and n = 7, k = 4. Show that the binomial coefficient C(n, k) has a prime factor p with p ≤ n/2.",
+  "statement_lean": "theorem erdos_29873 (n k : ℕ) (hk : 1 < k) (hkn : k + 1 < n) (hex : ¬ (n = 7 ∧ (k = 3 ∨ k = 4))) :\n    ∃ p : ℕ, p.Prime ∧ 2 * p ≤ n ∧ p ∣ Nat.choose n k := by\n  sorry",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "changes": "synthetic id; English paraphrased without names or attribution; tags removed; frozen statement written by the operator (no saved solve exists), compile-checked and faithfulness-judged before the probe; recorded as operator assistance in the task specification, not in the solution",
+  "reference": "reference: Ecklund 1969; reading: p ≤ n/2 (the site says p < n/2, which has 19 exceptions below 260, e.g. C(4,2) = 6; Ecklund's theorem is ≤, with only C(7,3) and its mirror C(7,4))"
+}

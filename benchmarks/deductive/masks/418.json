@@ -1,0 +1,15 @@
+{
+  "true_problem": "418",
+  "alias_id": "58109",
+  "statement_en": "Show that infinitely many positive integers m cannot be written as n − φ(n) for any natural number n, where φ is Euler's totient function.",
+  "statement_lean": "theorem erdos_58109 :\n    Set.Infinite {m : ℕ | 0 < m ∧ ∀ n : ℕ, n - Nat.totient n ≠ m} := by\n  sorry",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic",
+    "Mathlib.Data.Nat.Totient"
+  ],
+  "changes": "synthetic id; English paraphrased without names or attribution; tags removed; frozen statement written by the operator (no saved solve exists), compile-checked and faithfulness-judged before the probe; recorded as operator assistance in the task specification, not in the solution",
+  "reference": "reference: Browkin–Schinzel 1995 (every 2^k·509203, k ≥ 1)"
+}

@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 86,
+    "manually_reviewed": 87,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "52dafe1b4eb0ed490bb9e61bae966ffd9797be1b8241b050ea3d787885e8a28a",
+    "harness_sha256": "8b5a5b08da0eb6f474a52fc26b499cab89805b9f70a66697922f6f24e4090989",
     "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
-    "manual_reviews_sha256": "8bbd6fe13c3fd8bed5840caa0db1a773ed9e83053cebf92b8df2c27d6a7e409c"
+    "manual_reviews_sha256": "4deecec4a1c78470a1016d7b4bae80c8f5c7a05947339591a0848408da8fe7a2"
   },
   "problems": [
     {
@@ -1177,53 +1177,6 @@
       "tier": "Plausible"
     },
     {
-      "id": 384,
-      "statement": "If $1<k<n-1$ then $\\binom{n}{k}$ is divisible by a prime $p<n/2$ (except $\\binom{7}{3}=5\\cdot 7$).",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "number theory",
-        "binomial coefficients"
-      ],
-      "score": 66,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/384",
-      "manual": false,
-      "prize": "no",
-      "rank": 28,
-      "tier": "Plausible"
-    },
-    {
       "id": 403,
       "statement": "Does the equation\\[2^m=a_1!+\\cdots+a_k!\\]with $a_1<a_2<\\cdots <a_k$ have only finitely many solutions?",
       "status": "Solved",
@@ -1267,7 +1220,7 @@
       "url": "https://www.erdosproblems.com/403",
       "manual": false,
       "prize": "no",
-      "rank": 29,
+      "rank": 28,
       "tier": "Plausible"
     },
     {
@@ -1314,7 +1267,7 @@
       "url": "https://www.erdosproblems.com/419",
       "manual": false,
       "prize": "no",
-      "rank": 30,
+      "rank": 29,
       "tier": "Plausible"
     },
     {
@@ -1361,7 +1314,7 @@
       "url": "https://www.erdosproblems.com/427",
       "manual": false,
       "prize": "no",
-      "rank": 31,
+      "rank": 30,
       "tier": "Plausible"
     },
     {
@@ -1422,7 +1375,7 @@
       "url": "https://www.erdosproblems.com/728",
       "manual": false,
       "prize": "no",
-      "rank": 32,
+      "rank": 31,
       "tier": "Plausible"
     },
     {
@@ -1488,7 +1441,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 33,
+      "rank": 32,
       "tier": "Plausible"
     },
     {
@@ -1541,7 +1494,7 @@
       "url": "https://www.erdosproblems.com/707",
       "manual": false,
       "prize": "$1000",
-      "rank": 34,
+      "rank": 33,
       "tier": "Plausible"
     },
     {
@@ -1589,7 +1542,7 @@
       "url": "https://www.erdosproblems.com/825",
       "manual": false,
       "prize": "$25",
-      "rank": 35,
+      "rank": 34,
       "tier": "Plausible"
     },
     {
@@ -1652,7 +1605,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 36,
+      "rank": 35,
       "tier": "Plausible"
     },
     {
@@ -1695,7 +1648,7 @@
       "url": "https://www.erdosproblems.com/47",
       "manual": false,
       "prize": "$100",
-      "rank": 37,
+      "rank": 36,
       "tier": "Plausible"
     },
     {
@@ -1737,7 +1690,7 @@
       "url": "https://www.erdosproblems.com/123",
       "manual": false,
       "prize": "$250",
-      "rank": 38,
+      "rank": 37,
       "tier": "Plausible"
     },
     {
@@ -1780,7 +1733,7 @@
       "url": "https://www.erdosproblems.com/290",
       "manual": false,
       "prize": "no",
-      "rank": 39,
+      "rank": 38,
       "tier": "Plausible"
     },
     {
@@ -1823,7 +1776,7 @@
       "url": "https://www.erdosproblems.com/310",
       "manual": false,
       "prize": "no",
-      "rank": 40,
+      "rank": 39,
       "tier": "Plausible"
     },
     {
@@ -1866,7 +1819,7 @@
       "url": "https://www.erdosproblems.com/351",
       "manual": false,
       "prize": "no",
-      "rank": 41,
+      "rank": 40,
       "tier": "Plausible"
     },
     {
@@ -1909,7 +1862,7 @@
       "url": "https://www.erdosproblems.com/355",
       "manual": false,
       "prize": "no",
-      "rank": 42,
+      "rank": 41,
       "tier": "Plausible"
     },
     {
@@ -1952,7 +1905,7 @@
       "url": "https://www.erdosproblems.com/392",
       "manual": false,
       "prize": "no",
-      "rank": 43,
+      "rank": 42,
       "tier": "Plausible"
     },
     {
@@ -1994,7 +1947,7 @@
       "url": "https://www.erdosproblems.com/434",
       "manual": false,
       "prize": "no",
-      "rank": 44,
+      "rank": 43,
       "tier": "Plausible"
     },
     {
@@ -2036,7 +1989,7 @@
       "url": "https://www.erdosproblems.com/464",
       "manual": false,
       "prize": "no",
-      "rank": 45,
+      "rank": 44,
       "tier": "Plausible"
     },
     {
@@ -2088,7 +2041,7 @@
       "url": "https://www.erdosproblems.com/548",
       "manual": false,
       "prize": "no",
-      "rank": 46,
+      "rank": 45,
       "tier": "Plausible"
     },
     {
@@ -2131,7 +2084,7 @@
       "url": "https://www.erdosproblems.com/947",
       "manual": false,
       "prize": "no",
-      "rank": 47,
+      "rank": 46,
       "tier": "Plausible"
     },
     {
@@ -2180,6 +2133,68 @@
       "url": "https://www.erdosproblems.com/328",
       "manual": false,
       "prize": "no",
+      "rank": 47,
+      "tier": "Plausible"
+    },
+    {
+      "id": 384,
+      "statement": "If $1<k<n-1$ then $\\binom{n}{k}$ is divisible by a prime $p<n/2$ (except $\\binom{7}{3}=5\\cdot 7$).",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "number theory",
+        "binomial coefficients"
+      ],
+      "score": 63,
+      "harness": "Untried",
+      "rationale": [
+        "Reading correction found 2026-09-24 while freezing a benchmark statement: the site's wording 'divisible by a prime p < n/2 (except C(7,3))' is false as written. With strict '<' there are 19 exceptions below n = 260, e.g. C(4,2) = 6, C(6,2) = 15, C(14,2) = 91. Ecklund's 1969 theorem is the '≤ n/2' form, whose only exception is C(7,3) and its mirror C(7,4) (checked numerically to n = 259). Any formalisation must use p ≤ n/2 and exclude both (7,3) and (7,4).",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Formalise as: 1 < k, k + 1 < n, (n, k) ∉ {(7,3), (7,4)} ⇒ ∃ prime p, 2p ≤ n ∧ p ∣ C(n, k).",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-23 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/384",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-23",
+        "sources": [
+          "benchmarks/deductive/masks/384.json"
+        ],
+        "searchFloor": null
+      },
       "rank": 48,
       "tier": "Plausible"
     },
@@ -2576,58 +2591,6 @@
       "tier": "Plausible"
     },
     {
-      "id": 418,
-      "statement": "Are there infinitely many positive integers not of the form $n-\\phi(n)$?",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "number theory"
-      ],
-      "score": 61,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Construct and verify a uniform argument or an infinite family."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Unbounded quantifier",
-          "points": -5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/418",
-      "manual": false,
-      "prize": "no",
-      "rank": 57,
-      "tier": "Plausible"
-    },
-    {
       "id": 457,
       "statement": "Is there some $\\epsilon>0$ such that there are infinitely many $n$ where all primes $p\\leq (2+\\epsilon)\\log n$ divide\\[\\prod_{1\\leq i\\leq \\log n}(n+i)?\\]",
       "status": "Solved",
@@ -2676,7 +2639,7 @@
       "url": "https://www.erdosproblems.com/457",
       "manual": false,
       "prize": "no",
-      "rank": 58,
+      "rank": 57,
       "tier": "Plausible"
     },
     {
@@ -2728,7 +2691,7 @@
       "url": "https://www.erdosproblems.com/608",
       "manual": false,
       "prize": "no",
-      "rank": 59,
+      "rank": 58,
       "tier": "Plausible"
     },
     {
@@ -2781,7 +2744,7 @@
       "url": "https://www.erdosproblems.com/646",
       "manual": false,
       "prize": "no",
-      "rank": 60,
+      "rank": 59,
       "tier": "Plausible"
     },
     {
@@ -2834,7 +2797,7 @@
       "url": "https://www.erdosproblems.com/888",
       "manual": false,
       "prize": "no",
-      "rank": 61,
+      "rank": 60,
       "tier": "Plausible"
     },
     {
@@ -2887,7 +2850,7 @@
       "url": "https://www.erdosproblems.com/1141",
       "manual": false,
       "prize": "no",
-      "rank": 62,
+      "rank": 61,
       "tier": "Plausible"
     },
     {
@@ -2929,7 +2892,7 @@
       "url": "https://www.erdosproblems.com/83",
       "manual": false,
       "prize": "$500",
-      "rank": 63,
+      "rank": 62,
       "tier": "Plausible"
     },
     {
@@ -2977,7 +2940,7 @@
       "url": "https://www.erdosproblems.com/356",
       "manual": false,
       "prize": "no",
-      "rank": 64,
+      "rank": 63,
       "tier": "Plausible"
     },
     {
@@ -3025,7 +2988,7 @@
       "url": "https://www.erdosproblems.com/435",
       "manual": false,
       "prize": "no",
-      "rank": 65,
+      "rank": 64,
       "tier": "Plausible"
     },
     {
@@ -3073,7 +3036,7 @@
       "url": "https://www.erdosproblems.com/648",
       "manual": false,
       "prize": "no",
-      "rank": 66,
+      "rank": 65,
       "tier": "Plausible"
     },
     {
@@ -3121,7 +3084,7 @@
       "url": "https://www.erdosproblems.com/694",
       "manual": false,
       "prize": "no",
-      "rank": 67,
+      "rank": 66,
       "tier": "Plausible"
     },
     {
@@ -3170,7 +3133,7 @@
       "url": "https://www.erdosproblems.com/753",
       "manual": false,
       "prize": "no",
-      "rank": 68,
+      "rank": 67,
       "tier": "Plausible"
     },
     {
@@ -3219,7 +3182,7 @@
       "url": "https://www.erdosproblems.com/844",
       "manual": false,
       "prize": "no",
-      "rank": 69,
+      "rank": 68,
       "tier": "Plausible"
     },
     {
@@ -3267,7 +3230,7 @@
       "url": "https://www.erdosproblems.com/1037",
       "manual": false,
       "prize": "no",
-      "rank": 70,
+      "rank": 69,
       "tier": "Plausible"
     },
     {
@@ -3315,7 +3278,7 @@
       "url": "https://www.erdosproblems.com/1080",
       "manual": false,
       "prize": "no",
-      "rank": 71,
+      "rank": 70,
       "tier": "Plausible"
     },
     {
@@ -3363,7 +3326,7 @@
       "url": "https://www.erdosproblems.com/1102",
       "manual": false,
       "prize": "no",
-      "rank": 72,
+      "rank": 71,
       "tier": "Plausible"
     },
     {
@@ -3410,6 +3373,64 @@
       ],
       "partial": null,
       "url": "https://www.erdosproblems.com/1190",
+      "manual": false,
+      "prize": "no",
+      "rank": 72,
+      "tier": "Plausible"
+    },
+    {
+      "id": 418,
+      "statement": "Are there infinitely many positive integers not of the form $n-\\phi(n)$?",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "number theory"
+      ],
+      "score": 58,
+      "harness": "Untried",
+      "rationale": [
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Construct and verify a uniform argument or an infinite family.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Unbounded quantifier",
+          "points": -5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/418",
       "manual": false,
       "prize": "no",
       "rank": 73,

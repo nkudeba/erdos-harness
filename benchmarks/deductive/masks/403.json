@@ -1,0 +1,14 @@
+{
+  "true_problem": "403",
+  "alias_id": "36917",
+  "statement_en": "Show that there are only finitely many pairs (m, S), with S a non-empty finite set of natural numbers, such that 2^m equals the sum of a! over the elements a of S.",
+  "statement_lean": "theorem erdos_36917 :\n    Set.Finite {q : ℕ × Finset ℕ | q.2.Nonempty ∧ 2 ^ q.1 = ∑ a ∈ q.2, a.factorial} := by\n  sorry",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "changes": "synthetic id; English paraphrased without names or attribution; tags removed; frozen statement written by the operator (no saved solve exists), compile-checked and faithfulness-judged before the probe; recorded as operator assistance in the task specification, not in the solution",
+  "reference": "reference: Frankl; Lin 1976 (largest solution 2^7 = 2!+3!+5!); reading: S may contain 0 (0! = 1), a superset of the problem's solutions, so finiteness here implies the problem's"
+}

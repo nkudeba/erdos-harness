@@ -43,12 +43,24 @@ def main() -> int:
     ap.add_argument("--model", default="claude-opus-5-5")
     args = ap.parse_args()
     pid = str(int(args.problem))
-    solved = json.loads((ROOT / "knowledge" / "solved" / f"Erdos{pid}.json").read_text())
-    prob = json.loads((ROOT / "problems" / f"erdos_{pid}.json").read_text())
+    mask_path = ROOT / "benchmarks" / "deductive" / "masks" / f"{pid}.json"
+    # A literature-solved problem has no saved solve and may have no problems/ file: take the English statement
+    # from the Atlas rankings and the Lean statement from the mask, renamed back to the real theorem name.
+    solved_path = ROOT / "knowledge" / "solved" / f"Erdos{pid}.json"
+    prob_path = ROOT / "problems" / f"erdos_{pid}.json"
+    if prob_path.exists():
+        prob = json.loads(prob_path.read_text())
+    else:
+        prob = next(p for p in json.loads((ROOT / "atlas-data" / "rankings.json").read_text())["problems"]
+                    if str(p["id"]) == pid)
+    if solved_path.exists():
+        identified_lean = json.loads(solved_path.read_text())["statement"]
+    else:
+        m0 = json.loads(mask_path.read_text())
+        identified_lean = m0["statement_lean"].replace(f"erdos_{int(m0['alias_id'])}", f"erdos_{pid}")
     versions = {}
     if args.only in (None, "identified"):
-        versions["identified"] = (f"Erdős problem #{pid} (erdosproblems.com/{pid}): " + prob["statement"], solved["statement"])
-    mask_path = ROOT / "benchmarks" / "deductive" / "masks" / f"{pid}.json"
+        versions["identified"] = (f"Erdős problem #{pid} (erdosproblems.com/{pid}): " + prob["statement"], identified_lean)
     if args.only in (None, "masked"):
         if not mask_path.exists():
             print(f"no mask for #{pid}: {mask_path}", file=sys.stderr)

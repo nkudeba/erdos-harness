@@ -1,0 +1,52 @@
+{
+  "473": {
+    "faithful": true,
+    "verdict": null,
+    "issues": [
+      "Resolution notes are empty. A's affirmative answer is known: a greedy/back-and-forth construction gives such a permutation. So B's existential form is the correct resolved direction.",
+      "B indexes from 0 instead of 1. This is a harmless reindexing.",
+      "Positivity, injectivity and surjectivity onto the positive integers together correctly encode a permutation of the positive integers.",
+      "The prime condition applies to every consecutive pair, matching 'always'."
+    ],
+    "backtranslation": "There exists a sequence $a_0, a_1, a_2, \\dots$ of natural numbers with the following properties:\n\n- every term is a positive integer;\n- the terms are pairwise distinct;\n- every positive integer $m$ equals $a_k$ for some $k$.\n\nTogether these say the sequence is a permutation of the positive integers $\\{1, 2, 3, \\dots\\}$. The theorem further asserts that for every $k \\ge 0$, the sum $a_k + a_{k+1}$ of consecutive terms is a prime number."
+  },
+  "403": {
+    "faithful": true,
+    "verdict": "B is a slightly stronger but still correct form of the resolved 'yes, finitely many' answer to A, so a proof of B legitimately resolves A.",
+    "issues": [
+      "B widens A's domain rather than narrowing it: S may contain 0, and 0 and 1 count as distinct elements even though 0! = 1! = 1. So B's solution set contains A's solution set, whether A's a_i range over positive integers or over naturals.",
+      "Because the domain is wider, B is at least as strong as A. It is still true: for large m, 2^m cannot be a sum of distinct factorials (the known resolution, largest solution 2^7 = 2!+3!+5!), and adding a possible 0! only adds 1 to the sum, which does not break that argument.",
+      "Encoding the strictly increasing tuple a_1<...<a_k as a finite set S loses nothing. Requiring S to be nonempty excludes only k=0, whose empty sum 0 is never a power of 2.",
+      "Counting finitely many pairs (m, S) matches counting solutions (m, a_1, ..., a_k), and it implies finitely many m.",
+      "The route (B's solutions form a superset of A's, so finiteness of B gives finiteness of A) is valid. It does not rely on any restriction of A."
+    ],
+    "backtranslation": "The theorem claims that there are only finitely many pairs (m, S) where m is a natural number and S is a nonempty finite set of distinct natural numbers such that\n\n2^m = Σ_{a ∈ S} a!.\n\nNatural numbers here include 0. So S may contain both 0 and 1, which are distinct elements even though 0! = 1! = 1.\n\nEquivalently, only finitely many powers of 2 (with exponent m ≥ 0) can be written as a sum of factorials of distinct nonnegative integers. Each such power admits only finitely many such representations."
+  },
+  "1136": {
+    "faithful": true,
+    "verdict": "B faithfully states the existence claim asked in A, with the same condition (strict lower density above 1/3, all k≥0, a=b allowed), and the edge cases do not affect it.",
+    "issues": [
+      "Minor: B counts 0 as a natural number. A single element does not change lower density, and 0+0=0 is not a power of 2, so this is harmless.",
+      "B explicitly allows a=b, which forbids powers of 2 in A. This matches the natural reading of 'any a,b in A' in the original.",
+      "Counting a<N instead of a≤N does not change the liminf.",
+      "The resolution notes are empty, so the true answer is not stated. B is exactly the affirmative form of the yes/no question, so a proof of B would resolve A (answer: yes)."
+    ],
+    "backtranslation": "**Statement.** There exists a set $A$ of natural numbers (with $0$ counted as a natural number) satisfying two conditions:\n\n1. For all $a, b \\in A$, not necessarily distinct, and every integer $k \\ge 0$, we have $a + b \\neq 2^k$. Because $a = b$ is allowed, this in particular forces $A$ to contain no power of $2$.\n2. The lower asymptotic density of $A$ is strictly greater than $1/3$, that is,\n$$\\liminf_{N \\to \\infty} \\frac{\\#\\{a \\in A : a < N\\}}{N} > \\frac{1}{3}.$$"
+  },
+  "418": {
+    "faithful": true,
+    "verdict": "B asserts the affirmative answer to A (infinitely many positive integers are not of the form n − φ(n)), which is how the problem was resolved. Allowing n = 0 only adds the value 0, which the positivity requirement on m already excludes, so the domain choice changes nothing.",
+    "issues": [],
+    "backtranslation": "There are infinitely many positive integers $m$ that are not of the form $n - \\varphi(n)$ for any natural number $n$, where $\\varphi$ is Euler's totient function. Equivalently, the set of positive integers $m$ such that $n - \\varphi(n) \\neq m$ for every $n \\ge 0$ is infinite.\n\nHere $n$ ranges over all natural numbers including $0$, with $\\varphi(0) = 0$. Since $\\varphi(n) \\le n$ for every $n$, the difference $n - \\varphi(n)$ is always an ordinary nonnegative integer. The case $n = 0$ gives only the value $0$, which the positivity condition on $m$ already excludes."
+  },
+  "384": {
+    "faithful": true,
+    "verdict": "B is the intended theorem behind A (Ecklund's '≤ n/2' result with the lone exception C(7,3)=C(7,4)), so proving B resolves the problem, although it departs from A's literal '<', which is false as written.",
+    "issues": [
+      "B uses p ≤ n/2, while A as written says p < n/2. Read literally, the '<' version is false with many exceptions besides C(7,3). Examples: C(4,2)=6, where no prime is < 2, and C(6,2)=15, where no prime is < 3. So the only coherent reading of A that allows a single exception is the '≤' form, which is Ecklund's 1969 theorem, the result that resolved the problem. B is faithful only under this non-literal (intended) reading of A. That is exactly the reading the supplied route assumes, and it is a genuine weakening of A's literal wording.",
+      "B also lists (7,4) as an exception. This matches A, since C(7,4)=C(7,3) is the same number, so A's single stated exception implicitly covers both (n,k) pairs. It is not an extra carve-out.",
+      "Domain check: 2 ≤ k ≤ n-2 over the naturals matches 1<k<n-1. Truncated subtraction is harmless because k ≥ 2 forces n ≥ 4, and for n ≤ 3 there is no valid k in either statement."
+    ],
+    "backtranslation": "For all natural numbers $n$ and $k$ with $2 \\le k \\le n-2$, excluding the two cases $(n,k) = (7,3)$ and $(n,k) = (7,4)$, there is a prime $p$ with $p \\le n/2$ that divides the binomial coefficient $\\binom{n}{k}$. Equivalently, every such $\\binom{n}{k}$ has a prime factor $p$ satisfying $2p \\le n$."
+  }
+}

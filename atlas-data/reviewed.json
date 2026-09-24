@@ -533,6 +533,18 @@
     ],
     "score": 65
   },
+  "384": {
+    "rationale": [
+      "Reading correction found 2026-09-24 while freezing a benchmark statement: the site's wording 'divisible by a prime p < n/2 (except C(7,3))' is false as written. With strict '<' there are 19 exceptions below n = 260, e.g. C(4,2) = 6, C(6,2) = 15, C(14,2) = 91. Ecklund's 1969 theorem is the '≤ n/2' form, whose only exception is C(7,3) and its mirror C(7,4) (checked numerically to n = 259). Any formalisation must use p ≤ n/2 and exclude both (7,3) and (7,4)."
+    ],
+    "requirements": [
+      "Formalise as: 1 < k, k + 1 < n, (n, k) ∉ {(7,3), (7,4)} ⇒ ∃ prime p, 2p ≤ n ∧ p ∣ C(n, k)."
+    ],
+    "sources": [
+      "benchmarks/deductive/masks/384.json"
+    ],
+    "assessed": "2026-09-23"
+  },
   "385": {
     "rationale": [
       "The apparent finite sequence statistic hides a uniform prime-pattern problem and two eventual assertions."
