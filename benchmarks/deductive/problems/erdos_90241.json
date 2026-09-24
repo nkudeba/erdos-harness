@@ -1,0 +1,14 @@
+{
+  "id": "90241",
+  "statement": "Show that the positive integers can be arranged in a sequence a₀, a₁, a₂, … in which every positive integer appears exactly once and every two consecutive terms have a prime sum.",
+  "imports": [
+    "Mathlib.Tactic",
+    "Mathlib.Algebra.BigOperators.Fin",
+    "Mathlib.Data.Nat.Factorial.Basic",
+    "Mathlib.Data.Nat.Prime.Basic"
+  ],
+  "benchmark": {
+    "kind": "masked deductive re-derivation",
+    "reference": "withheld (see benchmarks/deductive/masks/)"
+  }
+}
