@@ -97,8 +97,10 @@ judges (circularity, refinement, faithfulness) never move.
 - **Honesty gates are off limits:** Lean verification, frozen-statement checks, the circularity and refinement
   judges' semantics, contradiction handling, `claimEligible`. A change there stops the loop and asks the operator.
 - **Never delete** runs, results, knowledge or other sessions' work. Never kill a process the loop did not start.
-- **One heavy lane at a time.** The usage limit is shared, and the runners wait out a limit and resume by
-  themselves. Check `pgrep -f "harness.py run"` before launching.
+- **At most one heavy lane launched by the loop at a time.** Lanes the operator started (the discover-v2 dev lane,
+  for one) keep running beside it, and the loop never stops them. The usage limit is shared, and the runners wait
+  out a limit and resume by themselves. Check `pgrep -f "harness.py run"` before launching, and do not launch a
+  second loop lane while one is in flight.
 - **Every prediction is written before its launch.** Every outcome is recorded, including failures.
 - **Pinned evaluations.** Compare a candidate only with a baseline run on the same pin and items.
 
