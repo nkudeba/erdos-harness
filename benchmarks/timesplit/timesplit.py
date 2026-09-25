@@ -1496,10 +1496,15 @@ def launch(item: dict, tag: str, proto: dict, args, ctx: dict) -> dict:
     infra = (f"killed after {args.item_hours} h" if killed else
              f"exit {rc}" + (f", fatal: {fatal[:160]}" if fatal else "")
              if rc == 1 or fatal else None)
+    # Under --open a direction can die (a usage limit mid-program) while the other finishes, and the parent then
+    # exits 3, not 1: #435 and baseline #537 were recorded as results although a direction had died on the limit.
+    lost = lost_directions(done)
+    if lost and not infra:
+        infra = f"direction(s) {', '.join(sorted(lost))} died: {' | '.join(lost.values())[:200]}"
     out = {"problem": item["problem"], "tag": tag, "alias": alias, "run_dir": str(run_dir.relative_to(ROOT)),
            "answer": item["answer"], "split": item["split"], "started": started, "returncode": rc,
-           "infrastructure": infra, "usage_limit": bool(LIMIT_RE.search(fatal)), "launches": ctx["launches"],
-           **rec, "protocol": proto}
+           "infrastructure": infra, "usage_limit": bool(LIMIT_RE.search(fatal) or LIMIT_RE.search(" ".join(lost.values()))),
+           "lost_directions": sorted(lost), "launches": ctx["launches"], **rec, "protocol": proto}
     if not infra:                    # measured now, before anything can resume the run dir and move its program on
         try:
             record_progress(out, tag)
@@ -1894,13 +1899,16 @@ def dense_compare(a: dict[str, dict], b: dict[str, dict]) -> dict:
     measurement of the current version are left out and listed. `pieces_only` is the naive count comparison, printed
     so that a verdict resting on chunking alone is visible."""
     common = sorted(set(a) & set(b), key=int)
-    rated = [p for p in common if a[p].get("progress") and b[p].get("progress")]
+    rated = [p for p in common if a[p].get("progress") and b[p].get("progress")
+             and not a[p].get("lost_directions") and not b[p].get("lost_directions")]
     calls = {p: dense_outcome(a[p], b[p]) for p in rated}
     wins = [p for p in rated if calls[p] == "W"]
     losses = [p for p in rated if calls[p] == "L"]
     naive = lambda r: (bool(r["solved"]), r["progress"]["pieces"])
     diff = [a[p]["progress"]["pieces"] - b[p]["progress"]["pieces"] for p in rated]
-    return {"pairs": len(rated), "unmeasured": [p for p in common if p not in rated], "wins": wins, "losses": losses,
+    return {"pairs": len(rated), "unmeasured": [p for p in common if p not in rated],
+            "lost_a_direction": [p for p in common if a[p].get("lost_directions") or b[p].get("lost_directions")],
+            "wins": wins, "losses": losses,
             "ties": len(rated) - len(wins) - len(losses), "p_one_sided": round(sign_test_greater(len(wins), len(losses)), 4),
             "pieces_only": {"wins": [p for p in rated if naive(a[p]) > naive(b[p])],
                             "losses": [p for p in rated if naive(a[p]) < naive(b[p])]},
@@ -2124,8 +2132,14 @@ def ideas_cmd(args) -> int:
     return 0
 
 
+def lost_directions(done: dict) -> dict[str, str]:
+    """Directions of an --open run that ended in an error (the parent records it as "error: ...")."""
+    return {d: v for d, v in (done.get("open") or {}).items() if isinstance(v, str) and v.startswith("error")}
+
+
 def load_results(tag: str) -> dict[str, dict]:
-    """problem -> record, each with its checked progress measurement (or None) under "progress"."""
+    """problem -> record, each with its checked progress measurement (or None) under "progress", and the directions
+    it lost to an error (read from the run's DONE for records written before that was recorded)."""
     path = RESULTS / f"{tag}.jsonl"
     recs = {}
     for line in path.read_text().splitlines() if path.exists() else []:
@@ -2135,6 +2149,11 @@ def load_results(tag: str) -> dict[str, dict]:
     prog = load_progress(tag)
     for p, r in recs.items():
         r["progress"] = prog.get((p, r["run_dir"]))
+        if "lost_directions" not in r:
+            try:
+                r["lost_directions"] = sorted(lost_directions(json.loads((ROOT / r["run_dir"] / "DONE").read_text())))
+            except (OSError, ValueError, KeyError):
+                r["lost_directions"] = []
     return recs
 
 
@@ -2238,6 +2257,36 @@ def topup(args) -> int:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         print(f"#{p}: solved={rec['solved']} contradiction={rec['contradiction']} spend {before} -> {rec['spend']} "
               f"({rec['run_dir']})", flush=True)
+    return 0
+
+
+def rerun(args) -> int:
+    """Relaunch recorded runs in place (`--resume`) and append their new records, which supersede the old ones. For a
+    run that lost a direction to an infrastructure failure the runner did not catch; the run dir, alias, budget and
+    protocol stay those of the original launch."""
+    recs = load_results(args.tag)
+    pool = {i["problem"]: i for i in load_pool()["items"]}
+    out = RESULTS / f"{args.tag}.jsonl"
+    for p in args.items:
+        r = recs.get(p)
+        if not r:
+            print(f"#{p}: no record under {args.tag}")
+            continue
+        run_dir = ROOT / r["run_dir"]
+        ctx = json.loads((run_dir / "launch.json").read_text())
+        disc = r.get("discovery")
+        ctx["discovery"] = {**disc, "guidance": (run_dir / "guidance.md").read_text()} if disc and (run_dir / "guidance.md").exists() else None
+        ctx["launches"] = max(ctx.get("launches", 0), int(r.get("launches") or 1))
+        rec = launch(pool[p], args.tag, r.get("protocol") or {}, args, ctx)     # launch() adds discovery spend itself
+        rec["rerun_of"] = r.get("started")
+        if rec.get("infrastructure"):
+            with (RESULTS / f"{args.tag}.infra.jsonl").open("a") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            print(f"#{p}: INFRASTRUCTURE again ({rec['infrastructure']}); not recorded as a result", flush=True)
+            continue
+        with out.open("a") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        print(f"#{p}: solved={rec['solved']} contradiction={rec['contradiction']} spend={rec['spend']} ({rec['run_dir']})", flush=True)
     return 0
 
 
@@ -2414,6 +2463,10 @@ def main() -> int:
     sub.add_parser("pin")
     rs = sub.add_parser("rescore")
     rs.add_argument("--tag", required=True)
+    rr = sub.add_parser("rerun")
+    rr.add_argument("--tag", required=True)
+    rr.add_argument("--items", nargs="+", required=True)
+    rr.add_argument("--item-hours", type=float, default=3.0)
     tu = sub.add_parser("topup")
     tu.add_argument("--tag", required=True, help="the arm whose nearly closed runs get more budget")
     tu.add_argument("--to", type=float, default=16.0, help="the item's new TOTAL budget, discovery included")
@@ -2424,7 +2477,7 @@ def main() -> int:
     args = ap.parse_args()
     return {"build": build, "probe": probe, "freeze": freeze, "judge": judge_cmd, "run": run, "score": score,
             "status": status, "pin": pin, "rescore": rescore, "topup": topup, "progress": progress_cmd,
-            "calibrate": calibrate, "ideas": ideas_cmd, "explore-screen": explore_screen}[args.cmd](args)
+            "calibrate": calibrate, "ideas": ideas_cmd, "explore-screen": explore_screen, "rerun": rerun}[args.cmd](args)
 
 
 if __name__ == "__main__":

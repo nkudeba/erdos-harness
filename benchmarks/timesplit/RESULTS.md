@@ -244,6 +244,10 @@ all three arms ran:
   - **Head to head with v1** on their 5 shared items, every item ties under the gate rule (equal pieces on each).
     v2 certified 18,481 characters against 9,695, left 9 hypotheses open against 14, and spent $36.60 against
     $34.06.
+  - **Correction (2026-09-25):** baseline #537's record lost BOTH directions to a usage limit and kept a $2.00
+    partial as its result. The runner did not detect a direction lost under `--open` and has been fixed
+    (`lost_directions`); such records are now left out of paired comparisons. Over the 8 valid pairs, v2 against the
+    baseline is **3 wins, 3 losses, 2 ties** (one-sided p = 0.66).
   - On #537 it committed to the WRONG direction: discovery called the statement true, and the answer is no. The
     true direction was never attempted, so the item scores 0 pieces, against the baseline's 1. This is v2's first
     wrong commit, and v1's write-ahead expected 1 or 2 such items. It is not caused by v2's looser rule. Both

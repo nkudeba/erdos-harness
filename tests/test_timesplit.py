@@ -560,6 +560,18 @@ class DenseProgress(unittest.TestCase):
         self.assertAlmostEqual(c["p_one_sided"], 0.5)
         self.assertEqual(c["closed_lemmas_delta"], -2)
 
+    def test_a_direction_lost_to_the_limit_is_infrastructure(self):
+        done = {"open": {"pos": "error: RuntimeError(\"You've hit your session limit · resets 4:10am\")", "neg": 3}, "exit": 3}
+        self.assertEqual(list(T.lost_directions(done)), ["pos"])
+        self.assertEqual(T.lost_directions({"open": {"pos": 3, "neg": 2}}), {})
+        g = {"pieces": 1, "certified_size": 100, "closed_lemmas": 1}
+        a = {"1": {"solved": False, "progress": g, "lost_directions": []},
+             "2": {"solved": False, "progress": g, "lost_directions": []}}
+        b = {"1": {"solved": False, "progress": g, "lost_directions": ["pos"]},
+             "2": {"solved": False, "progress": g, "lost_directions": []}}
+        c = T.dense_compare(a, b)
+        self.assertEqual((c["pairs"], c["lost_a_direction"]), (1, ["1"]))
+
     def test_chunking_or_verbosity_alone_is_a_tie(self):
         run = lambda k, size: {"solved": False, "progress": {"pieces": k, "certified_size": size, "closed_lemmas": k}}
         self.assertEqual(T.dense_outcome(run(3, 1000), run(1, 1100)), "T")     # the same proof split three ways
