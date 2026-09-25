@@ -2,9 +2,9 @@
  "goal": "a verified TRUE-direction solve of a time-split Erdős item (dev or test), replicated once on a fresh alias; or a verified proof on a real open problem, handed to the operator for review",
  "budget_usd": 200.0,
  "started": "2026-09-25T03:58:48Z",
- "iteration": 1,
+ "iteration": 2,
  "phase": "wait",
- "candidate": "v3 (V3_FLAGS in timesplit.py: exploration, empirical conjectures, routes, core-first, wide literature)",
+ "candidate": "baseline protocol on the fixed live harness (conversion test)",
  "baseline": {
   "tag": "baseline-v2-84f21c5",
   "pin": "pin_84f21c561c540e02_harness.py",
@@ -37,8 +37,9 @@
    "estimate": 25.0,
    "usd": 0.0,
    "note": "exploration on 14 train items",
-   "in_flight": true,
-   "registered": "2026-09-25T04:24:28Z"
+   "in_flight": false,
+   "registered": "2026-09-25T04:24:28Z",
+   "finished": "2026-09-25T06:07:32Z"
   },
   {
    "kind": "ideas",
@@ -49,6 +50,25 @@
    "in_flight": false,
    "registered": "2026-09-25T04:47:50Z",
    "finished": "2026-09-25T04:48:06Z"
+  },
+  {
+   "kind": "ideas",
+   "name": "explore-train-1",
+   "estimate": 1.5,
+   "usd": 0.0,
+   "note": "idea grades of the exploration screen",
+   "in_flight": false,
+   "registered": "2026-09-25T06:04:26Z",
+   "finished": "2026-09-25T06:07:32Z"
+  },
+  {
+   "kind": "run",
+   "name": "train-fixes-conv",
+   "estimate": 34.0,
+   "usd": 0.0,
+   "note": "iteration 2: fixed harness on 4 train hit items",
+   "in_flight": true,
+   "registered": "2026-09-25T06:09:10Z"
   }
  ],
  "notes": [
@@ -63,8 +83,12 @@
   {
    "at": "2026-09-25T04:48:34Z",
    "text": "smoke #152 recorded: 0 pieces; cause = sub-statements dropped opens in the live harness (skeleton_context upstreamed) + plans took $4.19 of $8.22; idea grade partial"
+  },
+  {
+   "at": "2026-09-25T06:09:10Z",
+   "text": "iteration 1 rejected (ideas W1 L3 T11); iteration 2 launched: train-fixes-conv on 283 435 997 1141"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T04:48:34Z"
+ "updated": "2026-09-25T06:09:10Z"
 }

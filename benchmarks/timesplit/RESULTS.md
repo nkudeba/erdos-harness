@@ -419,4 +419,50 @@ $80. Otherwise the exploration stage needs work first: that is iteration 2.
 - P(W − L ≥ 3) = 0.35.
 - An exploration session costs $1.00-1.60 and writes a notebook in at least 12 of 14 runs.
 
+**Outcome (2026-09-25): the gate fails. W − L = −2 (1 win, 3 losses, 11 ties over 15 items).**
+
+| arm | hit | partial | miss | spend |
+|---|---|---|---|---|
+| tool-less discovery (calibration round 0) | 7 | 8 | 0 | $0.64 (judge only) |
+| exploration (explore-train-1, plus #152 from the smoke run) | 5 | 10 | 0 | $9.96 + $0.91 judge |
+
+- **Paired:** exploration wins #990 (it built the published Vandermonde counterexample family). It loses #259, #678
+  and #1037, where tool-less attempts recalled the published route and the exploration sessions stopped after 1-3
+  scripts on a weaker recollection. The other 11 are ties.
+- **Directions:** exploration named the right one on 12 of 14. It was right on false statements where tool-less
+  discovery had been wrong: #884 (wrong in all three calibration rounds) and #990.
+- **Sessions were short:** a median of 3 scripts at $0.71, far under the $1.50 cap. On most items the model
+  concluded from recall rather than exploring.
+- **Against the predictions:** tool-less discovery 7/8/0 (predicted 4/5/6); exploration 5/10/0 (predicted 5/6/4);
+  P(W − L ≥ 3) was 0.35 and it did not happen; cost $0.33-1.27 a session (predicted $1.00-1.60); a notebook in all
+  14 runs (predicted at least 12).
+- **Decision:** exploration at $1.50 and medium effort does not beat tool-less discovery at finding the key idea on
+  train. `--explore` stays off by default. Its one clear value here was finding constructions and counterexamples,
+  and that is the lead to keep.
+
+## Improvement loop, iteration 2 (2026-09-25): does the fixed harness convert known ideas?
+
+**Why.** On half the train items tool-less discovery already reaches the published key idea, and the harness has
+never converted one. The diagnosis points at conversion: 61 deferrals for budget, and 33 runs stopped on budget. Of
+the fixes of 2026-09-24/25 (cascade, sub-statement opens, plan repair, hoisting, over-cap recovery, no connectors),
+none has been measured on a full run.
+
+**Protocol.**
+- Candidate `baseline` on the live harness: every fix, no discovery flags. `--open`, $8 an item, 6 research cycles.
+- Items: train #283, #435, #997 and #1141, the four whose key idea both arms found.
+- Tag `train-fixes-conv`. About $32. Train, so failures can be read.
+
+**How the result is used, written before launch.**
+- If at least one item is solved, or closed apart from published premises, run the fixed baseline on the 5-item dev
+  screen, pinned, against `baseline-v2-84f21c5`.
+- If none is, read these train transcripts for the conversion blocker; iteration 3 targets it.
+
+**Write-ahead predictions.**
+- P(at least one of the 4 solved) = 0.30.
+- P(at least one closed apart from published premises) = 0.50.
+- Mean pieces in the true direction at least 2: 0.5.
+- The hardest hypothesis gets at least one child attack on every item: 0.7.
+- No sub-statement is rejected for a lost `open`: 0.9.
+- About $8 an item.
+
 **Outcome.** To be filled in by the loop.
