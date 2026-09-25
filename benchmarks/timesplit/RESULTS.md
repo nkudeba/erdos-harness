@@ -673,6 +673,27 @@ declaration names (`hyp_long`, `hyp_sumbound`, `hyp_count`, `hyp_pigeon`), while
 - If it does not, the solve stands as verified but unreplicated, and the loop continues. The operator is told
   either way.
 
+**Outcome (2026-09-25 18:57Z): REPLICATED.** The TRUE direction verified again on the fresh alias 59388.
+- $3.92, including $0.32 for discovery. 37 minutes. 3 hypotheses certified, 0 open, 0 published premises.
+- Discovery again committed to TRUE at share 1.0.
+- The run: `runs/20260925-141600-634401-timesplit-erdos59388`.
+- **Independent re-check (no model calls; the proof was not read):**
+  - `final/Erdos59388.lean` compiles in `formal/`.
+  - It contains no `sorry` and no `native_decide`.
+  - `#print axioms erdos_59388` gives `[propext, Classical.choice, Quot.sound]`.
+  - The frozen statement equals `masks/1213.json`'s `statement_lean`, and its definition and theorem signature
+    appear verbatim.
+  - The same checks now also cover the original run's definitions: verbatim, with no `native_decide`.
+- **Predictions:** P(verifies) was 0.6; it verified. "Most likely under $4": $3.92.
+- **Stopping condition 1 is met:** a dev item's TRUE direction is verified and has been replicated once on a fresh
+  alias.
+- **Attribution, stated plainly.** The solve came from `discover-v2`, the candidate built with the operator on
+  2026-09-24 before the loop started, on pin `84f21c5`. None of the loop's three iterations produced it. Iteration
+  1 (exploration), iteration 2 (the fixed harness) and iteration 3 (`alloc`) were all rejected. What the loop
+  contributed here was the check that found the solve, and the replication.
+- **Not recorded in the Atlas, by design.** A dev item's route written where the harness reads would carry its
+  solution into every later evaluation. `claimEligible` stays false; the proofs await human review.
+
 ### Baseline on #1213, written before launch: `baseline-v2-84f21c5-1213`
 
 - **Why:** "Baseline v2 paused" requires it before any verdict: a v2 win counts only against the baseline's own run

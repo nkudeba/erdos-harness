@@ -3,7 +3,7 @@
  "budget_usd": 200.0,
  "started": "2026-09-25T03:58:48Z",
  "iteration": 3,
- "phase": "stop-signal",
+ "phase": "stopping",
  "candidate": "alloc (pin 00e9304): discovery round 1 with commit floor 0.6, --attack-order core-first, --refute changed, --premise-attack cheap",
  "baseline": {
   "tag": "train-fixes-conv",
@@ -97,8 +97,18 @@
    "estimate": 8.0,
    "usd": 0.0,
    "note": "replication of the #1213 solve (stopping condition 1)",
+   "in_flight": false,
+   "registered": "2026-09-25T18:16:00Z",
+   "finished": "2026-09-25T18:57:10Z"
+  },
+  {
+   "kind": "run",
+   "name": "baseline-v2-84f21c5-1213",
+   "estimate": 8.0,
+   "usd": 0.0,
+   "note": "baseline v2 on #1213, the v2 verdict's missing pair",
    "in_flight": true,
-   "registered": "2026-09-25T18:16:00Z"
+   "registered": "2026-09-25T18:57:10Z"
   }
  ],
  "notes": [
@@ -173,9 +183,27 @@
   {
    "at": "2026-09-25T18:18:18Z",
    "text": "iteration 3 rejected: alloc true pieces 2 vs 7, no new closure; commit rule 4/4 correct, refute-changed and premise-attack-cheap saved money, core-first lost the scaffolding; #1141 re-plans orphaned its only certified lemma"
+  },
+  {
+   "at": "2026-09-25T18:59:01Z",
+   "text": "stopping condition 1 met: dev #1213 solved by discover-v2 (09:00Z, $2.64) and replicated on alias 59388 (18:57Z, $3.92); both proofs re-checked mechanically; baseline on #1213 in flight, then stop"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T18:18:18Z",
- "rejected_streak": 3
+ "updated": "2026-09-25T18:59:01Z",
+ "rejected_streak": 3,
+ "acknowledged": [
+  {
+   "tag": "discover-v2-84f21c5",
+   "problem": "1213",
+   "at": "2026-09-25T18:59:01Z",
+   "note": "handled: mechanically re-checked; replicated as replicate-1213-84f21c5; RESULTS.md 'Stop signal: dev #1213'"
+  },
+  {
+   "tag": "replicate-1213-84f21c5",
+   "problem": "1213",
+   "at": "2026-09-25T18:59:01Z",
+   "note": "the replication itself; re-checked mechanically; stopping condition 1 met"
+  }
+ ]
 }
