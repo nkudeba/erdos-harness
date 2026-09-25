@@ -95,8 +95,12 @@
   {
    "at": "2026-09-25T08:15:06Z",
    "text": "runner fix: a direction lost to an error under --open is infrastructure (#435 and baseline #537 were affected); v2 vs baseline corrected to 3W 3L 2T over 8 valid pairs"
+  },
+  {
+   "at": "2026-09-25T09:02:46Z",
+   "text": "iteration 2 #997: closed modulo ONE published premise (BFT15), 3 pieces; decision rule met -> dev screen after #1141 and the #435 rerun"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T08:15:06Z"
+ "updated": "2026-09-25T09:02:46Z"
 }
