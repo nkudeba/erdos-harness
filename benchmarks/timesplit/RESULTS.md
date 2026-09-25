@@ -179,7 +179,16 @@ it is attributed.
 - Items with the true direction closed modulo published premises only: 1–3.
 - The second round proves its missing step, and the referee accepts it, on about 3 of 18 items.
 
-**Outcome.** To be filled in when the lane finishes.
+**Outcome (lane done 2026-09-25 ~09:00Z; recorded 2026-09-25 17:30Z by the loop, from aggregate numbers only).**
+- **1 of 18 dev items solved: #1213**, its TRUE direction verified, for $2.64. See "Stop signal: dev #1213" below.
+- $124.38 on the 18 results, plus $5.85 on infrastructure launches. 0 contradictions.
+- Discovery committed on 17 of 18 items, 15 of them to the true direction. 2 wrong commits spent their whole budget
+  on a false statement.
+- No true direction closed apart from published premises (predicted 1–3). The second round proved its missing step
+  on 1 item (predicted about 3).
+- **Against the predictions:** 1 solved (expected 1.5, range 0–4). Whether v2 solves more than the baseline is
+  still undecided: the baseline was paused before it reached #1213 (see "Baseline v2 paused"). The run that settles
+  it is pre-registered below.
 
 ## Dense progress metric, 2026-09-24 (operator's choice: gate iterations on certified progress)
 
@@ -584,3 +593,63 @@ Otherwise the allocation change is rejected, and the notes say why.
 - At least one new item closed apart from published premises: 0.35.
 
 **Outcome.** To be filled in by the loop.
+
+## Stop signal: dev #1213 solved by `discover-v2-84f21c5` (found by the loop 2026-09-25 17:15Z)
+
+**What happened.**
+- The operator's discover-v2 dev lane (pin `84f21c5`, $8, 6 cycles, candidate `discover-v2`) solved dev #1213.
+  - The run started at 08:36:57Z, took 22 minutes and cost $2.64, including $0.36 for discovery.
+  - Discovery committed to TRUE with weight share 1.0. One of its two attempts claimed a complete proof, at
+    confidence 0.93.
+  - The harness closed the residual: 4 hypotheses certified, 0 open, 0 published premises.
+- **Found 8 hours late.** The loop scored only its own tags and never read the operator's results file, so stopping
+  condition 1 was never checked mechanically. `loop.py status` now lists every solve or contradiction in any
+  results file until it is acknowledged (`loop.py ack`).
+
+**Independent re-check (no model calls; the proof and the transcripts were not read):**
+- `runs/20260925-043526-696629-timesplit-erdos82251/final/Erdos82251.lean` compiles in `formal/` under
+  `lake env lean`, with no errors and no warnings. It contains no `sorry`.
+- `#print axioms erdos_82251` gives `[propext, Classical.choice, Quot.sound]`.
+- The frozen theorem's signature appears verbatim in the file.
+- The run's frozen statement equals `masks/1213.json`'s `statement_lean`, up to the theorem's alias name. That is
+  formal-conjectures@077138338750's `ErdosProblems/1213.lean` main theorem with `answer(True)` stripped.
+- The harness's own final verification agrees: compiles, sorry-free, standard axioms, frozen match. The
+  faithfulness judge passed the statement.
+- Item facts: dev, probe `unaware`, first public 2026-04-21, answer True from formal-conjectures' `answer(...)`.
+
+**What it is and is not.**
+- It is a **mechanically verified** proof of the frozen statement, `claimEligible=false`.
+- It re-derives a result published on 2026-04-21, by a model that, asked directly, does not know the result.
+  That is evidence about the harness, not new mathematics.
+- The faithfulness judge added one caution: the route it was shown called the general-K case "likely open", so a
+  claimed proof should be checked closely. That concerns provability, not faithfulness, and Lean has settled
+  provability of the frozen statement. A human should still read the proof against the English statement.
+
+### Replication, written before launch: `replicate-1213-84f21c5`
+
+**Protocol.**
+- Same pin, knowledge and settings as the solving lane, on a fresh alias (a new tag):
+  `--candidate discover-v2 --discover-attempts 2 --discover-budget 0.8 --discover-effort medium --gap-budget 1.2
+  --gap-effort medium --budget 8 --research-cycles 6`.
+- One difference cannot be removed. The runner is today's `timesplit.py`. The lane ran the copy loaded when it
+  started (2026-09-24 12:12 EDT), and that copy was never committed. The v2 path's options are unchanged, and the
+  options added since (commit floor, `alloc`, `v3`) are off for v2.
+- It launches when the in-flight alloc item (#1141) finishes, keeping one loop lane at a time. About $8 is
+  reserved.
+
+**Write-ahead.**
+- P(the TRUE direction verifies again) = 0.6.
+- If it does, it most likely costs under $4.
+
+**Rule.**
+- If it verifies, stopping condition 1 is met. The loop records the evidence, notifies the operator, and stops.
+- If it does not, the solve stands as verified but unreplicated, and the loop continues. The operator is told
+  either way.
+
+### Baseline on #1213, written before launch: `baseline-v2-84f21c5-1213`
+
+- **Why:** "Baseline v2 paused" requires it before any verdict: a v2 win counts only against the baseline's own run
+  on the same item. The baseline never reached #1213.
+- **Protocol:** baseline v2 exactly, as its protocol record gives it: pin `84f21c5`, `--open`, no discovery, $8,
+  2 research cycles. It runs after the replication, in the same lane.
+- **Write-ahead:** P(the baseline solves #1213) = 0.4. A solve would mean discovery was not needed for this item.

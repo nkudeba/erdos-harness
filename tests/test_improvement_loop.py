@@ -30,6 +30,31 @@ class Budget(unittest.TestCase):
                 self.assertFalse(L.can_spend(state, 180))
 
 
+class StopSignals(unittest.TestCase):
+    def test_every_results_file_is_read_and_acks_are_honoured(self):
+        with tempfile.TemporaryDirectory() as d:
+            res = Path(d)
+            # the operator's lane, not in the loop's ledger: its dev solve must still surface
+            (res / "discover-v2-x.jsonl").write_text(
+                json.dumps({"problem": "1213", "split": "dev", "solved": True, "contradiction": False}) + "\n"
+                + json.dumps({"problem": "150", "split": "dev", "solved": False}) + "\n")
+            (res / "train-a.jsonl").write_text(json.dumps({"problem": "997", "split": "train", "solved": True}) + "\n")
+            (res / "screen-b.jsonl").write_text(
+                json.dumps({"problem": "7", "split": "train", "solved": True, "contradiction": True}) + "\n")
+            (res / "discover-v2-x.infra.jsonl").write_text(json.dumps({"problem": "9", "split": "dev", "solved": True}) + "\n")
+            (res / "discover-v2-x.progress.jsonl").write_text(json.dumps({"problem": "9", "solved": True}) + "\n")
+            with patch.object(L, "RESULTS", res):
+                sig = L.stop_signals({})
+                self.assertEqual(sorted((s["tag"], s["problem"], s["kind"]) for s in sig),
+                                 [("discover-v2-x", "1213", "solve"), ("screen-b", "7", "contradiction"),
+                                  ("train-a", "997", "solve")])
+                stopping = {s["problem"] for s in sig if L.stops_the_loop(s)}
+                self.assertEqual(stopping, {"1213", "7"})            # a train solve does not stop; a contradiction does
+                acked = L.stop_signals({"acknowledged": [{"tag": "discover-v2-x", "problem": "1213"}]})
+                self.assertTrue(next(s for s in acked if s["problem"] == "1213")["acknowledged"])
+                self.assertFalse(next(s for s in acked if s["problem"] == "7")["acknowledged"])
+
+
 class Diagnosis(unittest.TestCase):
     def test_rates_rejections_and_the_never_succeeds_flag(self):
         with tempfile.TemporaryDirectory() as d:

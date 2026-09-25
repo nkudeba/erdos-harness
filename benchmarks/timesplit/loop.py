@@ -2,7 +2,8 @@
 """The harness improvement loop's machinery (docs/improvement-loop.md): its state, its budget ledger, a diagnosis of
 where runs get blocked, and commits to its own branch. No model calls anywhere in this file.
 
-    python3 benchmarks/timesplit/loop.py status             # phase, iteration, budget, what is in flight
+    python3 benchmarks/timesplit/loop.py status             # stop signals, phase, iteration, budget, in flight
+    python3 benchmarks/timesplit/loop.py ack --tag <t> --problem <n> --note "..."   # a stop signal was handled
     python3 benchmarks/timesplit/loop.py diagnose [--since 2026-09-24T00:00]   # blockers, from every log on disk
     python3 benchmarks/timesplit/loop.py register --kind run --name <tag> --estimate 40
     python3 benchmarks/timesplit/loop.py can-spend --usd 40  # exit 1 if the cap would be crossed
@@ -85,6 +86,38 @@ def budget(state: dict) -> dict:
 
 def can_spend(state: dict, usd: float) -> bool:
     return budget(state)["left"] >= usd
+
+
+# ---------------------------------------------------------------- stop signals --------------------------------------
+# Stopping conditions 1 and 4 are read from EVERY results file, the operator's lanes included. The loop once scored only
+# its own tags, and a dev solve in the operator's discover-v2 lane (#1213, 2026-09-25) sat unnoticed for 8 hours.
+
+NOT_RESULTS = (".infra.jsonl", ".ideas.jsonl", ".progress.jsonl", ".aliases.jsonl")
+
+
+def stop_signals(state: dict | None = None) -> list[dict]:
+    """Every record with a verified TRUE direction (`solved`) or a verified wrong one (`contradiction`), on any split,
+    marked `acknowledged` once `loop.py ack` has recorded that it was handled."""
+    acked = {(a.get("tag"), str(a.get("problem"))) for a in (state or {}).get("acknowledged") or []}
+    out = []
+    for f in sorted(RESULTS.glob("*.jsonl")):
+        if f.name.endswith(NOT_RESULTS) or f.name.startswith("calibration-"):
+            continue
+        tag = f.name[: -len(".jsonl")]
+        for r in _jsonl(f):
+            if not (r.get("solved") or r.get("contradiction")):
+                continue
+            p = str(r.get("problem"))
+            out.append({"tag": tag, "problem": p, "split": r.get("split"),
+                        "kind": "contradiction" if r.get("contradiction") else "solve",   # the wrong direction wins
+                        "run_dir": r.get("run_dir"), "started": r.get("started"),
+                        "acknowledged": (tag, p) in acked})
+    return out
+
+
+def stops_the_loop(s: dict) -> bool:
+    """Condition 1 is a solve on dev or test; condition 4 is a contradiction anywhere."""
+    return s["kind"] == "contradiction" or s.get("split") in ("dev", "test")
 
 
 # ---------------------------------------------------------------- diagnosis -----------------------------------------
@@ -265,9 +298,17 @@ def main() -> int:
     s.add_argument("--stop")
     m = sub.add_parser("commit")
     m.add_argument("-m", "--message", required=True)
+    k = sub.add_parser("ack", help="record that a stop signal was handled")
+    k.add_argument("--tag", required=True)
+    k.add_argument("--problem", required=True)
+    k.add_argument("--note", required=True)
     args = ap.parse_args()
     state = load_state()
     if args.cmd == "status":
+        for s in stop_signals(state):
+            if stops_the_loop(s) and not s["acknowledged"]:
+                print(f"STOP SIGNAL: {s['kind']} of {s['split']} #{s['problem']} in {s['tag']} ({s['run_dir']}). Handle "
+                      f"it (docs/improvement-loop.md), then: loop.py ack --tag {s['tag']} --problem {s['problem']} --note ...")
         b = budget(state)
         print(json.dumps({k: state.get(k) for k in ("goal", "iteration", "phase", "candidate", "baseline", "stop", "updated")},
                          indent=1, ensure_ascii=False))
@@ -312,6 +353,14 @@ def main() -> int:
     if args.cmd == "commit":
         sha = commit_to_branch(args.message)
         print(f"{BRANCH} -> {sha}" if sha else "nothing to commit")
+        return 0
+    if args.cmd == "ack":
+        if not any(s["tag"] == args.tag and s["problem"] == str(args.problem) for s in stop_signals(state)):
+            print(f"no stop signal for #{args.problem} in {args.tag}")
+            return 1
+        state.setdefault("acknowledged", []).append({"tag": args.tag, "problem": str(args.problem), "at": now(),
+                                                     "note": args.note})
+        save_state(state)
         return 0
     return 2
 

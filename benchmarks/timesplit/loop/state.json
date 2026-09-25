@@ -2,19 +2,20 @@
  "goal": "a verified TRUE-direction solve of a time-split Erdős item (dev or test), replicated once on a fresh alias; or a verified proof on a real open problem, handed to the operator for review",
  "budget_usd": 200.0,
  "started": "2026-09-25T03:58:48Z",
- "iteration": 2,
- "phase": "wait",
- "candidate": "baseline protocol on the fixed live harness (conversion test)",
+ "iteration": 3,
+ "phase": "stop-signal",
+ "candidate": "alloc (pin 00e9304): discovery round 1 with commit floor 0.6, --attack-order core-first, --refute changed, --premise-attack cheap",
  "baseline": {
-  "tag": "baseline-v2-84f21c5",
-  "pin": "pin_84f21c561c540e02_harness.py",
-  "note": "old pin, without the 2026-09-24 fixes: a same-pin baseline is needed before a dev gain is attributed"
+  "tag": "train-fixes-conv",
+  "pin": "pin_ea6d9878462aac38_harness.py",
+  "dev_tag": "dev-fixes-ea6d987",
+  "note": "iteration 2's fixed harness; alloc's pin differs only by default-off options"
  },
  "next": [
-  "wait for the pre-loop smoke run train-v3-smoke (#152) to land; record it under 'Smoke run of candidate v3' in RESULTS.md, then run `timesplit.py ideas --tag train-v3-smoke`",
-  "grade tool-less discovery: register --kind ideas --name calib-ideas --estimate 1.5; timesplit.py ideas --tag calib-ideas --from-calibration train-v2r1",
-  "explore-screen: register --kind explore-screen --name explore-train-1 --estimate 25; timesplit.py explore-screen --tag explore-train-1 (all train items except 152); then ideas --tag explore-train-1 --baseline calib-ideas --baseline-calibration train-v2r1",
-  "decide by the gate in RESULTS.md 'Improvement loop, iteration 1'"
+  "STOP SIGNAL: dev #1213 solved by the operator's discover-v2 lane (RESULTS.md 'Stop signal: dev #1213')",
+  "chain-replicate.sh waits for the alloc lane, then runs replicate-1213-84f21c5 and baseline-v2-84f21c5-1213",
+  "when #1141 lands: record it and apply iteration 3's gate (for the record; no dev screen while the stop signal is open)",
+  "when the replication lands: verified -> write the evidence, ack, PushNotification, set --stop, ScheduleWakeup(stop); not verified -> record, ack, continue"
  ],
  "pre_loop": [
   "discover-v2-84f21c5: dev lane started by the operator before the loop, on pin 84f21c5; not counted",
@@ -155,8 +156,12 @@
   {
    "at": "2026-09-25T17:07:57Z",
    "text": "iteration 3 #997: closed apart from BFT15 as in iteration 2, for $2.32 vs $8.26; the paired pieces rule scores it a loss (instrument flaw, noted for the next iteration)"
+  },
+  {
+   "at": "2026-09-25T17:23:01Z",
+   "text": "STOP SIGNAL found late: dev #1213 solved by discover-v2-84f21c5 at ~09:00Z ($2.64); re-checked mechanically (compiles, no sorry, standard axioms, frozen = formal-conjectures statement); replication + baseline on #1213 pre-registered and chained after the alloc lane; loop.py status now scans every results file"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T17:07:57Z"
+ "updated": "2026-09-25T17:23:01Z"
 }

@@ -24,6 +24,11 @@ is `benchmarks/timesplit/loop.py` (state, budget, diagnosis, branch commits) and
 
 ## Stopping conditions (checked at every wake-up, in this order)
 
+`loop.py status` checks conditions 1 and 4 mechanically. It prints a `STOP SIGNAL` line for every dev or test solve
+and every contradiction in ANY results file, including lanes the operator started, until `loop.py ack` records that
+the signal was handled. Start every wake-up with it. The check exists because the loop once scored only its own
+tags: dev #1213, solved by the operator's discover-v2 lane at 09:00Z on 2026-09-25, went unnoticed until 17:15Z.
+
 1. **A solve.** A time-split item's TRUE direction is verified (`solved` in its record, with no contradiction), on
    dev or test.
    - Re-run it once on a fresh alias to replicate. Then stop, send a push notification, and write the evidence to
