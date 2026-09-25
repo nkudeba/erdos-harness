@@ -99,8 +99,12 @@
   {
    "at": "2026-09-25T09:02:46Z",
    "text": "iteration 2 #997: closed modulo ONE published premise (BFT15), 3 pieces; decision rule met -> dev screen after #1141 and the #435 rerun"
+  },
+  {
+   "at": "2026-09-25T09:03:27Z",
+   "text": "pinned the fixed harness as pin_ea6d987; dev screen dev-fixes-ea6d987 written (prediction + gate) and queued after iteration 2's lane"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T09:02:46Z"
+ "updated": "2026-09-25T09:03:27Z"
 }

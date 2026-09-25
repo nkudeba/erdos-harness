@@ -469,4 +469,30 @@ none has been measured on a full run.
 - No sub-statement is rejected for a lost `open`: 0.9.
 - About $8 an item.
 
-**Outcome.** To be filled in by the loop.
+**Interim (2026-09-25).**
+- #283: 1 piece. Allocation starved it: proving got 13% of the spend, and the core was deferred every cycle.
+- #435: its true direction died on the usage limit, so it is not a result and will be rerun in place.
+- **#997: closed apart from ONE published premise** (Banks–Freiberg–Turnage-Butterbaugh 2015), with 3 pieces and 0
+  open conjectures. **The decision rule is met.** #1141 and the #435 rerun complete the iteration.
+
+### Iteration 2, next step: dev screen of the fixed harness, `dev-fixes-ea6d987`
+
+**Candidate.**
+- `pin_ea6d9878462aac38_harness.py` (every fix up to 2026-09-25, including `skeleton_context`, the plan repair,
+  hoisting, the guarded cascade, over-cap recovery and no MCP connectors).
+- The baseline protocol (`--open`, no discovery flags), $8, **6 research cycles**. The comparison arm,
+  `baseline-v2-84f21c5`, ran 2, so this is a bundle of the fixes and the cycle count; attribute any gain to the
+  bundle only.
+- Items: the first 5 dev items (#150, #202, #204, #392, #401), paired with `baseline-v2-84f21c5`.
+
+**Gate, written before launch.**
+- If the screen does not lose on the dense rule (W ≥ L) and loses no solve, extend to the baseline's other valid
+  items (#419, #457, #570, #618, #729). #537 is excluded: its baseline record lost both directions.
+- On the 10 pairs, keep the fixed harness as the new baseline if it loses no solve and either solves more, or wins
+  the dense sign test at one-sided p ≤ 0.05.
+
+**Write-ahead predictions.**
+- P(at least one solve among the 5) = 0.12.
+- P(at least one true direction closed apart from published premises) = 0.35.
+- Dense calls on the 5: 3 wins, 1 loss, 1 tie expected; P(W ≥ L) = 0.7.
+- $40.
