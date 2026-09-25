@@ -151,8 +151,12 @@
   {
    "at": "2026-09-25T16:27:12Z",
    "text": "iteration 3 #435: committed correctly; core-first spent all on the two hard pieces, both failed -> 0 pieces (iteration 2: 1); overshoot $1.66"
+  },
+  {
+   "at": "2026-09-25T17:07:57Z",
+   "text": "iteration 3 #997: closed apart from BFT15 as in iteration 2, for $2.32 vs $8.26; the paired pieces rule scores it a loss (instrument flaw, noted for the next iteration)"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T16:27:12Z"
+ "updated": "2026-09-25T17:07:57Z"
 }
