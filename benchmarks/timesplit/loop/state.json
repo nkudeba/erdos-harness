@@ -143,8 +143,12 @@
   {
    "at": "2026-09-25T14:13:16Z",
    "text": "iteration 2 dev screen: fixed harness W0 L2 T3 vs old baseline (+$13.65); losses from plan variance and the false direction's spend; alloc train screen running"
+  },
+  {
+   "at": "2026-09-25T15:17:09Z",
+   "text": "iteration 3 #283: committed correctly, core attacked first (split-only, not spliced), proving 66% of spend (was 13%); 1 piece"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T14:13:16Z"
+ "updated": "2026-09-25T15:17:09Z"
 }
