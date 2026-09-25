@@ -577,6 +577,9 @@ every run on the live harness.
     truncated away.
   - Failure digests carry what each attempt tried.
 - **Masking keeps named results.** "Erdős–Ko–Rado" had become "the the catalogue's–Ko–Rado".
+- **Sub-statements keep the `open`s in force** (`skeleton_context`). This fix was measured in the time-split pins
+  on 2026-09-24 but not upstreamed. On the live harness a child lost `open scoped Pointwise`, and every hypothesis
+  attack of the v3 smoke run failed on `HAdd (Set ℕ) (Set ℕ)` before any proof was tried.
 
 **The options are off by default,** so baseline pins and the masked series keep their protocol. The time-split
 candidate `v3` (`V3_FLAGS`) turns them on together:

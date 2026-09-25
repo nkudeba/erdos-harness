@@ -39,6 +39,16 @@
    "note": "exploration on 14 train items",
    "in_flight": true,
    "registered": "2026-09-25T04:24:28Z"
+  },
+  {
+   "kind": "ideas",
+   "name": "train-v3-smoke",
+   "estimate": 0.2,
+   "usd": 0.0,
+   "note": "idea grade of the v3 smoke run",
+   "in_flight": false,
+   "registered": "2026-09-25T04:47:50Z",
+   "finished": "2026-09-25T04:48:06Z"
   }
  ],
  "notes": [
@@ -49,8 +59,12 @@
   {
    "at": "2026-09-25T04:27:44Z",
    "text": "calib-ideas: tool-less discovery idea grades on 15 train items = 7 hit / 8 partial / 0 miss ($0.64); explore-train-1 launched (14 items, pid 3069)"
+  },
+  {
+   "at": "2026-09-25T04:48:34Z",
+   "text": "smoke #152 recorded: 0 pieces; cause = sub-statements dropped opens in the live harness (skeleton_context upstreamed) + plans took $4.19 of $8.22; idea grade partial"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T04:27:44Z"
+ "updated": "2026-09-25T04:48:34Z"
 }

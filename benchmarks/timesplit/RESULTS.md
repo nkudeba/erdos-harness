@@ -378,7 +378,21 @@ unanimity alone, and to commit only on a refereed complete proof.
 - At least 2 pieces in the true direction: 0.5.
 - An exploration session costs under $1.50 once MCP connectors are off: 0.8.
 
-**Outcome.** To be filled in.
+**Outcome (2026-09-25): not solved, $8.22, 0 pieces. The run exposed a live-harness bug.**
+- **Exploration worked** ($1.25, 37 turns, 12 scripts). Its verdict: TRUE at 0.85, "the data suggests f(n) ≍ n²",
+  which is the published growth rate. Idea grade: **partial**, as for discover-v1. The notebook has the right double
+  count for k = 1 but not the published k = 1, 2, 3 argument.
+- **Every hypothesis attack was rejected before a proof was tried**, with `failed to synthesize instance
+  HAdd (Set ℕ) (Set ℕ)`. The live harness still built sub-statements from definitions alone and dropped `open scoped
+  Pointwise`. `fix-opens.patch` had fixed that in the baseline's pin on 2026-09-24, but was never upstreamed. It is
+  now (`skeleton_context` in `harness.py`, with a test). The extracted hypothesis compiles in Lean.
+- **Spend:** plans $4.19 (high effort, two routes), experiments $2.24, exploration $1.25, and $0.00 on proving. The
+  remaining hypotheses were deferred against the $2.50 minimum per child. At $8 an item, v3's plan settings leave
+  nothing for proofs.
+- **What worked:** the plan repair fixed a noncomputable definition in one round, the route judge chose on a stated
+  identity, and the negation direction called its false target false and stopped.
+- **Predictions:** notebook with conjectures yes (0.9); n² conjecture yes (0.5); idea grade partial (0.55); not
+  solved (0.95); at least 2 pieces no (0.5); session under $1.50 yes (0.8).
 
 ## Improvement loop, iteration 1 (seeded 2026-09-25): does exploration find the key idea?
 

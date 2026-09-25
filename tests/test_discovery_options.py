@@ -54,6 +54,23 @@ class HoistDefinitions(unittest.TestCase):
         self.assertEqual(H.hoist_defs(SKELETON), SKELETON)
 
 
+class SubStatementContext(unittest.TestCase):
+    """A hypothesis extracted for a child keeps the top-level `open`s in force (train #152's v3 smoke run lost every
+    attack to a dropped `open scoped Pointwise`)."""
+
+    SK = ("open Function Set\nopen scoped Pointwise\n\ndef iso (A : Set ℕ) : Set ℕ := A + A\n\n"
+          "open Classical in\nnoncomputable def pick (A : Set ℕ) : ℕ := 0\n\n"
+          "theorem erdos_9_hyp_a : ∀ A : Set ℕ, A + A = iso A := by\n  sorry\n\n"
+          "theorem erdos_9 : True := by\n  trivial")
+
+    def test_opens_travel_with_the_hypothesis(self):
+        sub = H.hypothesis_substatement(self.SK, "erdos_9_hyp_a")
+        self.assertIn("open scoped Pointwise", sub)
+        self.assertIn("open Function Set", sub)
+        self.assertIn("open Classical in\nnoncomputable def pick", sub.replace("\n\n", "\n"))
+        self.assertTrue(sub.rstrip().endswith("sorry"))
+
+
 class PlanContext(Isolated):
     def test_experiments_digest_keeps_findings_printed_early(self):
         out = "OBSERVED: family A grows like 0.3 p^2\n" + ("EXP: noise line\n" * 400) + "CLEAR: {\"hypothesis\": \"h\"}\n"

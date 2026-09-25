@@ -7148,6 +7148,31 @@ def skeleton_defs(skeleton: str, pos: int = -1) -> list[str]:
     return [d for d in split_decls(top) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
 
 
+def skeleton_context(skeleton: str, pos: int = -1) -> list[str]:
+    """The defs visible from `pos` (as `skeleton_defs`) together with the top-level `open` commands in force there,
+    in their original order. A hypothesis written under `open Filter` names `Tendsto` and `atTop`; extracted with
+    its defs alone it failed with `Unknown identifier` and was rejected unread (time-split baseline, #150, both
+    directions). An `open X in` applies to the next declaration only, so it is kept only when that one is.
+
+    Measured on the pinned baselines from 2026-09-24 (`benchmarks/timesplit/pins/fix-opens.patch`), but not upstreamed
+    until the v3 smoke run on the live harness lost EVERY hypothesis attack of train #152 to it: `open scoped
+    Pointwise` dropped, so `A + A` on sets failed with `failed to synthesize instance HAdd (Set ℕ) (Set ℕ)`."""
+    blocks = split_decls(visible_text(skeleton, pos))
+    is_def = [bool(DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))) for d in blocks]
+    out = []
+    for k, d in enumerate(blocks):
+        s = strip_comment_lines(d).strip()
+        if is_def[k]:
+            out.append(d)
+        elif re.match(r"open\s", s):
+            if re.search(r"\bin$", s):
+                if k + 1 < len(blocks) and is_def[k + 1]:
+                    out.append(d)
+            else:
+                out.append(d)
+    return out
+
+
 def hypothesis_substatement(skeleton: str, name: str) -> str | None:
     """A self-contained sub-statement for ONE hypothesis: the skeleton's defs plus the hypothesis with `sorry`.
     This is what a child run freezes and attacks; its proof splices back with `splice_hypothesis`."""
@@ -7160,7 +7185,7 @@ def hypothesis_substatement(skeleton: str, name: str) -> str | None:
         idx = blk.rfind(":=")
     if idx == -1:
         return None
-    return "\n\n".join(skeleton_defs(skeleton, span[0]) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
+    return "\n\n".join(skeleton_context(skeleton, span[0]) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
 
 
 def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:
