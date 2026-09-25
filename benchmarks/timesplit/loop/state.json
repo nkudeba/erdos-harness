@@ -121,8 +121,12 @@
   {
    "at": "2026-09-25T11:17:00Z",
    "text": "iteration 3 (alloc) pre-registered: train screen on the 4 iteration-2 items after the dev screen; harness options delegated to a Sonnet subagent"
+  },
+  {
+   "at": "2026-09-25T11:37:38Z",
+   "text": "reviewed the Sonnet subagent's --refute changed / --premise-attack diff: correct, scoped; 431 tests pass"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T11:17:00Z"
+ "updated": "2026-09-25T11:37:38Z"
 }

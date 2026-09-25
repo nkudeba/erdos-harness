@@ -5616,7 +5616,19 @@ for the SAT solver instead of enumerating it.
                     open_h = [h for h in (parsed or {}).get("hypotheses", []) if h["open"] and h["kind"] == "conjecture"]
                     hyp_txt = ("\n".join(f"- {h['name']} : {h['statement']}" for h in open_h)
                                or "(none yet -- this cycle, only extract necessary conditions on a counterexample to the target)")
-                    exp_out, rf = self._deductive_experiments(cdir, cycle, hyp_txt)
+                    hyp_sig = open_hypotheses_signature(open_h)
+                    if refute_pol == "changed" and cycle > 1 and hyp_sig == self.state.get("last_refute_sig"):
+                        # On train #283 the refutation script cost 39% of the run ($2.28 of $5.89), rerun every
+                        # cycle in both directions against a set of open hypotheses the plan had not touched.
+                        # Reuse the last output instead: the plan still sees those findings, unpaid-for again.
+                        self.log.event("program", "experiments_skipped", cycle=cycle,
+                                       reason="open hypotheses unchanged since the last run")
+                        exp_out = self.state.get("last_refute_out") or ""
+                    else:
+                        exp_out, rf = self._deductive_experiments(cdir, cycle, hyp_txt)
+                        self.state["last_refute_sig"] = hyp_sig
+                        self.state["last_refute_out"] = exp_out[:20000]
+                        self.save()
                     killed = False
                     for r in rf["refuted"]:
                         h = next((x for x in open_h if x["name"] == str(r.get("hypothesis") or "")), None)
@@ -5756,13 +5768,57 @@ for the SAT solver instead of enumerating it.
                     if false_names & {h["name"] for h in parsed["hypotheses"] if h["open"]}:
                         self.log.event("program", "hypotheses_believed_false", cycle=cycle, names=sorted(false_names))
                     if not todo:
-                        # Nothing conjectural left: try to PROVE the published premises. A premise that is in Mathlib
-                        # (Birkhoff for masked #499) or elementary is then certified and leaves the theorem's trust
-                        # boundary; one that is genuinely deep just fails and stays a premise.
-                        todo = sorted([h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published"],
-                                      key=lambda h: (fails.get(h["name"], 0), h["complexity"]))[:per_cycle]
-                        if todo:
-                            self.log.event("program", "premises_attacked", cycle=cycle, names=[h["name"] for h in todo])
+                        # Nothing conjectural left. --premise-attack decides whether the published premises are
+                        # worth spending on at all: on train #997 the run had closed every conjecture, then spent
+                        # its last budget on 27 attempts at a Maynard-Tao-level published theorem that cannot be
+                        # proved here.
+                        premise_pol = getattr(self.args, "premise_attack", "full")
+                        published_open = [h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published"]
+                        if premise_pol == "off":
+                            if published_open:
+                                self.log.event("program", "premises_not_attacked", cycle=cycle,
+                                               names=[h["name"] for h in published_open])
+                        elif premise_pol == "cheap":
+                            # Free tactics only, no child spawned: a premise this cascade cannot close stays a
+                            # premise instead of eating a full (paid) attack's budget.
+                            for i, h in enumerate(published_open):
+                                sub = hypothesis_substatement(skeleton, h["name"])
+                                if not sub:
+                                    continue
+                                result = self._close_holes_without_model(sub, statement_prefix(sub))
+                                chk = self.check(result, f"premise-cheap-c{cycle}-{i}") if hole_count(result) == 0 else None
+                                if not (chk and chk["ok"] and not chk["sorries"]):
+                                    self.log.event("program", "premise_kept", cycle=cycle, name=h["name"],
+                                                   reason="the free tactics do not close it")
+                                    continue
+                                # exactly as a certified child proof is spliced (below): check the spliced
+                                # skeleton compiles, then update skeleton/parsed/residual_path in lockstep.
+                                spliced = splice_hypothesis(skeleton, h["name"], result)
+                                res = (self.check(spliced, f"residual-splice-c{cycle}-{i}") if spliced
+                                       else {"ok": False, "errors": ["splice failed"], "sorries": []})
+                                if not res["ok"]:
+                                    self.log.event("program", "splice_failed", cycle=cycle, name=h["name"],
+                                                   error=(res["errors"][:1] or [""])[0][:200])
+                                    continue
+                                skeleton = res.get("body", spliced)
+                                residual_path.write_text(skeleton)
+                                parsed = parse_residual(skeleton, pid, meta, main=main)
+                                self.log.event("program", "hypothesis_discharged", cycle=cycle, name=h["name"],
+                                               open_left=parsed["metric"]["open_conjectures"])
+                                progress = True
+                                if hole_count(skeleton) == 0 and not res["sorries"]:
+                                    self.state["proof"] = skeleton
+                                    self.save()
+                                    proved = True
+                                    break
+                        else:
+                            # "full" (today's behaviour): attack each open published premise as a full child. One
+                            # that is in Mathlib (Birkhoff for masked #499) or elementary is then certified and
+                            # leaves the theorem's trust boundary; one that is genuinely deep just fails and stays
+                            # a premise.
+                            todo = sorted(published_open, key=lambda h: (fails.get(h["name"], 0), h["complexity"]))[:per_cycle]
+                            if todo:
+                                self.log.event("program", "premises_attacked", cycle=cycle, names=[h["name"] for h in todo])
                     # A child needs one prove round plus its Lean checks; a share below that buys a single
                     # model call and nothing to compile (masked #275: three children at $1.32 each, all dead
                     # after one $1.33 call). Concentrate what is left on fewer hypotheses instead.
@@ -7342,6 +7398,15 @@ def experiments_digest(out: str, limit: int = 4000) -> str:
             + (f"\n\nRAW OUTPUT (last {len(tail)} characters):\n{tail}" if tail else ""))
 
 
+def open_hypotheses_signature(hyps: list[dict]) -> str:
+    """sha256 over the sorted "name : statement" lines of a hypothesis list -- identifies the SET of open
+    conjecture hypotheses a refute-first run was tested against, so `--refute changed` can tell whether the
+    skeleton in force has moved on since the last run (train #283: rerun every cycle, in both directions,
+    cost 39% of the run on hypotheses that had not changed)."""
+    lines = sorted(f"{h['name']} : {h['statement']}" for h in hyps)
+    return hashlib.sha256("\n".join(lines).encode()).hexdigest()
+
+
 def plan_notes_context(pdir: Path, limit: int = 3000) -> str:
     """The plan's own notes and routes from earlier cycles (PLAN.md), with any HUMAN DIRECTION kept whole.
 
@@ -7820,8 +7885,14 @@ def main():
     runp.add_argument("--research-loop", choices=["deductive", "lemma"], default="deductive",
                       help="research program loop: 'deductive' (default) drives a certified conditional theorem whose open "
                            "hypotheses are the residual; 'lemma' is the legacy experiments->conjectures->sub-lemmas loop")
-    runp.add_argument("--refute", choices=["auto", "off"], default="auto",
-                      help="deductive loop: run the refute-first script on open hypotheses each cycle (default) or skip it")
+    runp.add_argument("--refute", choices=["auto", "off", "changed"], default="auto",
+                      help="deductive loop: run the refute-first script on open hypotheses each cycle (default); skip "
+                           "it (off); or run it on the first cycle of an invocation and afterwards only when the set "
+                           "of open conjecture hypotheses has changed since the last run of this program (changed)")
+    runp.add_argument("--premise-attack", choices=["full", "cheap", "off"], default="full",
+                      help="deductive loop, once no conjecture hypothesis is left to attack: spawn a full child per "
+                           "open published premise (default); try only the free tactic cascade with no child spawned "
+                           "(cheap); or leave published premises untouched (off)")
     runp.add_argument("--hyps-per-cycle", type=int, default=4,
                       help="deductive loop: open conjecture hypotheses attacked per cycle, easiest first (the plan's rating, then complexity)")
     runp.add_argument("--residual-depth", type=int, default=2,
