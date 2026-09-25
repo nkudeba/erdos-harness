@@ -12,10 +12,9 @@
   "note": "iteration 2's fixed harness; alloc's pin differs only by default-off options"
  },
  "next": [
-  "STOP SIGNAL: dev #1213 solved by the operator's discover-v2 lane (RESULTS.md 'Stop signal: dev #1213')",
-  "chain-replicate.sh waits for the alloc lane, then runs replicate-1213-84f21c5 and baseline-v2-84f21c5-1213",
-  "when #1141 lands: record it and apply iteration 3's gate (for the record; no dev screen while the stop signal is open)",
-  "when the replication lands: verified -> write the evidence, ack, PushNotification, set --stop, ScheduleWakeup(stop); not verified -> record, ack, continue"
+  "STOP SIGNAL: dev #1213 (RESULTS.md 'Stop signal: dev #1213'); replicate-1213-84f21c5 launched 18:16Z, then baseline-v2-84f21c5-1213",
+  "replication verified -> evidence, ack, PushNotification, set --stop, ScheduleWakeup(stop) once the baseline on #1213 is recorded",
+  "replication not verified -> record, ack, continue with iteration 4 diagnose (one more rejection = plateau stop)"
  ],
  "pre_loop": [
   "discover-v2-84f21c5: dev lane started by the operator before the loop, on pin 84f21c5; not counted",
@@ -88,8 +87,18 @@
    "estimate": 36.0,
    "usd": 0.0,
    "note": "iteration 3 train screen",
+   "in_flight": false,
+   "registered": "2026-09-25T14:11:37Z",
+   "finished": "2026-09-25T18:18:18Z"
+  },
+  {
+   "kind": "run",
+   "name": "replicate-1213-84f21c5",
+   "estimate": 8.0,
+   "usd": 0.0,
+   "note": "replication of the #1213 solve (stopping condition 1)",
    "in_flight": true,
-   "registered": "2026-09-25T14:11:37Z"
+   "registered": "2026-09-25T18:16:00Z"
   }
  ],
  "notes": [
@@ -160,8 +169,13 @@
   {
    "at": "2026-09-25T17:23:01Z",
    "text": "STOP SIGNAL found late: dev #1213 solved by discover-v2-84f21c5 at ~09:00Z ($2.64); re-checked mechanically (compiles, no sorry, standard axioms, frozen = formal-conjectures statement); replication + baseline on #1213 pre-registered and chained after the alloc lane; loop.py status now scans every results file"
+  },
+  {
+   "at": "2026-09-25T18:18:18Z",
+   "text": "iteration 3 rejected: alloc true pieces 2 vs 7, no new closure; commit rule 4/4 correct, refute-changed and premise-attack-cheap saved money, core-first lost the scaffolding; #1141 re-plans orphaned its only certified lemma"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T17:23:01Z"
+ "updated": "2026-09-25T18:18:18Z",
+ "rejected_streak": 3
 }

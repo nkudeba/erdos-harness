@@ -592,7 +592,33 @@ Otherwise the allocation change is rejected, and the notes say why.
 - At least one item solved: 0.2.
 - At least one new item closed apart from published premises: 0.35.
 
-**Outcome.** To be filled in by the loop.
+**Outcome (2026-09-25): rejected. True-direction pieces 2 against iteration 2's 7; no item newly solved or closed.
+$27.30.**
+
+| item | iteration 2 (pieces / open) | `alloc` (pieces / open) | $ (iteration 2 → `alloc`) |
+|---|---|---|---|
+| #283 | 1 / 2 | 1 / 2 | 5.89 → 8.06 |
+| #435 | 1 / 2 | 0 / 2 | 8.01 → 9.66 |
+| #997 | 3 / 0, apart from BFT15 | 1 / 0, apart from BFT15 | 8.26 → 2.32 |
+| #1141 | 2 / 1 | 0 / 2 | 8.03 → 7.26 |
+
+- **Gate:** the core was reached on 4 of 4, but the pieces fell short, and #997's closure was not new. So the gate
+  failed.
+- **Predictions:**
+  - Discovery committed on 4 of 4, all correctly (predicted 3, with #1141 weaker).
+  - Core reached on at least 3: yes (0.75).
+  - Pieces at least 7: no (0.55).
+  - A solve: no (0.2).
+  - A new closure: no (0.35).
+- **Reading:**
+  - The commit rule, `--refute changed` and `--premise-attack cheap` saved money at no measurable cost.
+  - Core-first lost the pieces. All four cores got half a budget, were split and not cracked, and the easy pieces
+    iteration 2 banked were then deferred for lack of budget.
+  - Two of the cores are deep published analytic results (BFT15; Burgess plus Siegel) that no budget here can
+    formalize.
+- **New harness finding:** on #1141, two re-plans reduced the open count by dropping the one certified lemma.
+  `residual_improves` does not weigh certified work.
+- Details: `loop/iterations/3.md`.
 
 ## Stop signal: dev #1213 solved by `discover-v2-84f21c5` (found by the loop 2026-09-25 17:15Z)
 
