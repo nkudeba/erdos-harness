@@ -606,7 +606,8 @@ Otherwise the allocation change is rejected, and the notes say why.
   condition 1 was never checked mechanically. `loop.py status` now lists every solve or contradiction in any
   results file until it is acknowledged (`loop.py ack`).
 
-**Independent re-check (no model calls; the proof and the transcripts were not read):**
+**Independent re-check (no model calls).** The transcripts were not read. Of the proof, the loop saw only its
+declaration names (`hyp_long`, `hyp_sumbound`, `hyp_count`, `hyp_pigeon`), while locating the main theorem.
 - `runs/20260925-043526-696629-timesplit-erdos82251/final/Erdos82251.lean` compiles in `formal/` under
   `lake env lean`, with no errors and no warnings. It contains no `sorry`.
 - `#print axioms erdos_82251` gives `[propext, Classical.choice, Quot.sound]`.
