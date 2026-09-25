@@ -147,8 +147,12 @@
   {
    "at": "2026-09-25T15:17:09Z",
    "text": "iteration 3 #283: committed correctly, core attacked first (split-only, not spliced), proving 66% of spend (was 13%); 1 piece"
+  },
+  {
+   "at": "2026-09-25T16:27:12Z",
+   "text": "iteration 3 #435: committed correctly; core-first spent all on the two hard pieces, both failed -> 0 pieces (iteration 2: 1); overshoot $1.66"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T15:17:09Z"
+ "updated": "2026-09-25T16:27:12Z"
 }
