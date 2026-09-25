@@ -67,8 +67,18 @@
    "estimate": 34.0,
    "usd": 0.0,
    "note": "iteration 2: fixed harness on 4 train hit items",
+   "in_flight": false,
+   "registered": "2026-09-25T06:09:10Z",
+   "finished": "2026-09-25T11:13:01Z"
+  },
+  {
+   "kind": "run",
+   "name": "dev-fixes-ea6d987",
+   "estimate": 42.0,
+   "usd": 0.0,
+   "note": "iteration 2 dev screen",
    "in_flight": true,
-   "registered": "2026-09-25T06:09:10Z"
+   "registered": "2026-09-25T11:13:01Z"
   }
  ],
  "notes": [
@@ -103,8 +113,12 @@
   {
    "at": "2026-09-25T09:03:27Z",
    "text": "pinned the fixed harness as pin_ea6d987; dev screen dev-fixes-ea6d987 written (prediction + gate) and queued after iteration 2's lane"
+  },
+  {
+   "at": "2026-09-25T11:15:28Z",
+   "text": "iteration 2 train part done: 0 solved, #997 closed modulo 1 published premise; cores deferred and never attacked on 3 of 4; dev screen in flight"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T09:03:27Z"
+ "updated": "2026-09-25T11:15:28Z"
 }

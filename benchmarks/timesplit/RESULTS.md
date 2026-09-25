@@ -475,6 +475,24 @@ none has been measured on a full run.
 - **#997: closed apart from ONE published premise** (Banks–Freiberg–Turnage-Butterbaugh 2015), with 3 pieces and 0
   open conjectures. **The decision rule is met.** #1141 and the #435 rerun complete the iteration.
 
+**Train outcome (all 4 items, $37.29 including the infrastructure launches).**
+
+| item | true direction | pieces | open | closed apart from published premises |
+|---|---|---|---|---|
+| #283 | pos | 1 | 2 | no |
+| #435 (rerun in place) | pos | 1 | 2 | no |
+| #997 | pos | 3 | 0 | **yes** (BFT15) |
+| #1141 | neg | 2 | 1 | no |
+
+- **Against the predictions:** no solves (P ≥ 1 was 0.30); one item closed apart from published premises (0.50);
+  mean pieces 1.75 (predicted at least 2, 0.5); sub-statements lost to a missing `open`: **0** (0.9); about $8 an
+  item.
+- **The core was NOT attacked on every item** (0.7). On 3 of 4, hypotheses including the cores were deferred for
+  budget and never attacked: #283's `hyp_core`, `hyp_constant` and `hyp_egypt`; #435's `hyp_lower` and `hyp_window`;
+  #1141's `mod6`. #997, the one closed, attacked everything.
+- **Blocker for iteration 3: allocation.** On #283, proving got 13% of the spend. The refutation script reran every
+  cycle in both directions (39%), and the false direction spent as much as the true one.
+
 ### Iteration 2, next step: dev screen of the fixed harness, `dev-fixes-ea6d987`
 
 **Candidate.**
