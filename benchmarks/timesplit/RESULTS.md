@@ -523,6 +523,30 @@ none has been measured on a full run.
 - `dev-fixes-ea6d987` becomes the baseline for iteration 3's dev screen: same 5 items, and pins that differ only by
   iteration 3's default-off options.
 
+**Outcome (2026-09-25): the fixed harness LOSES the screen. 0 wins, 2 losses (#202, #401), 3 ties. $34.21, against
+$20.56 for `baseline-v2-84f21c5`.**
+
+| item | fixed (pieces / size / open) | old baseline (pieces / size / open) |
+|---|---|---|
+| #150 | 0 / 0 / 2 | 0 / 0 / 2 |
+| #202 | 1 / 527 / 1 | 2 / 1305 / 0 |
+| #204 | 3 / 2885 / 1 | 3 / 3073 / 7 |
+| #392 | 3 / 3135 / 1 | 3 / 4384 / 1 |
+| #401 | 0 / 0 / 1 | 2 / 855 / 1 |
+
+- **Why, from aggregate counts only** (spend by stage and direction, event counts; no dev transcript was read):
+  - #202: the FALSE direction took 62% of the fixed run's spend ($3.25 of $5.27), and the true direction's proving
+    got $0.18. Six cycles let a direction that never judged its target false keep spending.
+  - #401: the true direction spent $2.77 on proving, one failed attack at a hard piece, where the old run's plan
+    had chosen two lemmas it could discharge for $0.27. That difference is between plans, not between harnesses.
+  - Certified work was not being orphaned by re-plans: every discharged hypothesis survives in the final residual,
+    in both arms.
+- **Reading:** single runs vary a lot from plan to plan; 0-2-3 over 5 is within noise (two-sided p = 0.5). The fixes
+  are correctness fixes and stay on. The more cycles bought, the more spending in the false direction. That is the
+  cost `alloc`'s commit-when-confident step targets.
+- **Predictions:** no solves (P ≥ 1 was 0.12); none closed apart from published premises (0.35); W ≥ L did not hold
+  (0.7). The prediction was wrong in direction.
+
 ## Improvement loop, iteration 3 (written 2026-09-25, launches after the dev screen): `alloc`, budget follows the core
 
 **Why.** Iteration 2 found the conversion blocker to be allocation. On 3 of 4 train items, hypotheses including the

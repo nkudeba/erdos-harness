@@ -77,8 +77,18 @@
    "estimate": 42.0,
    "usd": 0.0,
    "note": "iteration 2 dev screen",
+   "in_flight": false,
+   "registered": "2026-09-25T11:13:01Z",
+   "finished": "2026-09-25T14:10:33Z"
+  },
+  {
+   "kind": "run",
+   "name": "train-alloc-00e9304",
+   "estimate": 36.0,
+   "usd": 0.0,
+   "note": "iteration 3 train screen",
    "in_flight": true,
-   "registered": "2026-09-25T11:13:01Z"
+   "registered": "2026-09-25T14:11:37Z"
   }
  ],
  "notes": [
@@ -129,8 +139,12 @@
   {
    "at": "2026-09-25T11:38:27Z",
    "text": "pinned 00e9304 for alloc; budget amendment (no dev extension) written before the screen's outcome; chain3 queues the alloc train screen after the dev screen"
+  },
+  {
+   "at": "2026-09-25T14:13:16Z",
+   "text": "iteration 2 dev screen: fixed harness W0 L2 T3 vs old baseline (+$13.65); losses from plan variance and the false direction's spend; alloc train screen running"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T11:38:27Z"
+ "updated": "2026-09-25T14:13:16Z"
 }
