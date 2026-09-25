@@ -2024,9 +2024,19 @@ def explore_screen(args) -> int:
                args.explore_effort, "--literature-scope", args.literature_scope, "--run-budget", str(args.explore_budget + 1.0),
                "--backend", "claude-cli", "--model", args.model]
         env = dict(os.environ, **({"ERDOS_KNOWLEDGE": str((ROOT / args.knowledge).resolve())} if args.knowledge else {}))
-        with (run_dir / "lane.log").open("a") as log:
-            rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                                env=env, timeout=3 * 3600).returncode
+        for attempt in range(4):
+            with (run_dir / "lane.log").open("a") as log:
+                rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                    env=env, timeout=3 * 3600).returncode
+            text = (run_dir / "lane.log").read_text(errors="replace")[-6000:]
+            if rc != 1 or not LIMIT_RE.search(text):
+                break
+            wait = seconds_until_reset(text)                  # a usage limit: wait it out, then resume the same run dir
+            print(f"#{item['problem']}: usage limit; waiting {wait / 60:.0f} min, then resuming", flush=True)
+            time.sleep(wait)
+        else:
+            print(f"#{item['problem']}: still limited after 4 waits; not recorded (rerun the command)", flush=True)
+            continue
         import harness as H
         facts = H.collect_run_facts(run_dir, str(alias))
         try:
