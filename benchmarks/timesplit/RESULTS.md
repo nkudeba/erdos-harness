@@ -515,6 +515,14 @@ none has been measured on a full run.
 - Dense calls on the 5: 3 wins, 1 loss, 1 tie expected; P(W ≥ L) = 0.7.
 - $40.
 
+**Budget amendment, written 2026-09-25 while the screen was running and before any of its outcomes were read.**
+- The extension to 5 more dev items is dropped. $109 is free, and iteration 3 (`alloc`: about $34 train, plus about
+  $40 on dev) targets the blocker the evidence names, while the extension would only sharpen the estimate for fixes
+  that are already on by default as correctness fixes.
+- The screen's dense comparison is reported as it stands.
+- `dev-fixes-ea6d987` becomes the baseline for iteration 3's dev screen: same 5 items, and pins that differ only by
+  iteration 3's default-off options.
+
 ## Improvement loop, iteration 3 (written 2026-09-25, launches after the dev screen): `alloc`, budget follows the core
 
 **Why.** Iteration 2 found the conversion blocker to be allocation. On 3 of 4 train items, hypotheses including the

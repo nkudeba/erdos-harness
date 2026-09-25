@@ -125,8 +125,12 @@
   {
    "at": "2026-09-25T11:37:38Z",
    "text": "reviewed the Sonnet subagent's --refute changed / --premise-attack diff: correct, scoped; 431 tests pass"
+  },
+  {
+   "at": "2026-09-25T11:38:27Z",
+   "text": "pinned 00e9304 for alloc; budget amendment (no dev extension) written before the screen's outcome; chain3 queues the alloc train screen after the dev screen"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T11:37:38Z"
+ "updated": "2026-09-25T11:38:27Z"
 }
