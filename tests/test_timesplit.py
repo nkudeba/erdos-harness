@@ -605,6 +605,13 @@ class CommitCalibration(unittest.TestCase):
         self.assertIsNone(T.commit_at_floor(r, 0.6))                           # mean 0.55
         self.assertIsNone(T.commit_at_floor(self.rec(True, ["true", None], [0.9, None], None, None), 0.5))
 
+    def test_alloc_candidate_flags(self):
+        import argparse
+        a = argparse.Namespace(candidate="alloc", v3_flags=None)
+        self.assertEqual(T.candidate_flags(a), T.ALLOC_FLAGS)
+        self.assertIn("core-first", T.ALLOC_FLAGS)
+        self.assertEqual(T.candidate_flags(argparse.Namespace(candidate="baseline")), [])
+
     def test_decide_direction_honours_the_calibrated_floor(self):
         unsure = [{"answer": "true", "confidence": 0.5}, {"answer": "true", "confidence": 0.6}]    # the #537 shape
         self.assertEqual(T.decide_direction(unsure)["commit"], "pos")

@@ -514,3 +514,41 @@ none has been measured on a full run.
 - P(at least one true direction closed apart from published premises) = 0.35.
 - Dense calls on the 5: 3 wins, 1 loss, 1 tie expected; P(W ≥ L) = 0.7.
 - $40.
+
+## Improvement loop, iteration 3 (written 2026-09-25, launches after the dev screen): `alloc`, budget follows the core
+
+**Why.** Iteration 2 found the conversion blocker to be allocation. On 3 of 4 train items, hypotheses including the
+cores were deferred for budget and never attacked. On #283 proving got 13% of the spend, the refutation script 39%
+(rerun every cycle in both directions), and the false direction spent as much as the true one. On #997 the last budget
+went on a published premise at the level of Maynard–Tao.
+
+**Candidate `alloc`,** declared as one bundle aimed at one blocker:
+1. Discovery's first round, v2's settings (2 attempts at medium effort, $0.80 cap), with the train-calibrated commit
+   floor of 0.6. It commits to one direction only when confident; otherwise the run is `--open` as before.
+2. `--attack-order core-first`: the hardest open conjecture is attacked first, with half of what is left.
+3. `--refute changed`: the refutation script reruns only when the open hypotheses changed.
+4. `--premise-attack cheap`: a published premise gets only the free tactics, never a full child.
+
+It runs on a new pin taken after the harness change lands, with the fixed harness otherwise unchanged: $8, 6
+research cycles.
+
+**Screen:** the same 4 train items as iteration 2 (#283, #435, #997, #1141), paired with `train-fixes-conv`. About
+$34, including discovery.
+
+**Gate, written before launch.** Go to a dev screen, paired with `dev-fixes-ea6d987` on the same 5 items, if both
+hold:
+- the core is attacked (a child run on the hardest open conjecture) on at least 3 of the 4 items;
+- the total true-direction pieces are at least iteration 2's 7, or a new item is solved or closed apart from
+  published premises.
+
+Otherwise the allocation change is rejected, and the notes say why.
+
+**Write-ahead predictions.**
+- Discovery commits on 3 of 4 items: #1141 (false) with a weaker belief; #283, #435 and #997 at confidence ≥ 0.6.
+  All commits are correct: 0.8.
+- The core is attacked on at least 3 of 4: 0.75.
+- Pieces at least 7: 0.55.
+- At least one item solved: 0.2.
+- At least one new item closed apart from published premises: 0.35.
+
+**Outcome.** To be filled in by the loop.

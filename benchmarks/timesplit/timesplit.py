@@ -1084,11 +1084,15 @@ def discover(item: dict, statement: str, run_dir: Path, args) -> dict:
         return a
 
     v2 = getattr(args, "candidate", None) == "discover-v2"
+    # alloc: v2's first round and its single-confident rule, the calibrated floor, and no gap round (iteration 3)
+    alloc = getattr(args, "candidate", None) == "alloc"
     frames = DISCOVER_FRAMES[: args.discover_attempts]
     with ThreadPoolExecutor(max_workers=len(frames)) as ex:
         attempts = list(ex.map(lambda kf: one(*kf), enumerate(frames)))
     spent = sum(a.get("cost") or 0.0 for a in attempts)
-    d = decide_direction(attempts, single_confident=0.75 if v2 else None, floor=getattr(args, "commit_floor", None))
+    floor = getattr(args, "commit_floor", None)
+    d = decide_direction(attempts, single_confident=0.75 if (v2 or alloc) else None,
+                         floor=floor if floor is not None else (0.6 if alloc else None))
     best = d.get("best") or {}
     gap_attempt = None
     if v2 and best and not (best.get("complete") and (best.get("critic") or {}).get("valid")) and best.get("gap"):
@@ -1113,7 +1117,7 @@ def discover(item: dict, statement: str, run_dir: Path, args) -> dict:
                          f"refuted={gap_attempt.get('refuted')}; remaining gap: {gap_attempt.get('remaining_gap')}\n"
                          + gap_attempt.get("text", "")[-2500:])
         # v1's wording and length exactly, so v1's test items (a new process, this file) run what its dev items ran
-        guidance += (("\n\nThe first-round attempt in full (unverified):\n" + best.get("text", "")[-3500:]) if v2
+        guidance += (("\n\nThe first-round attempt in full (unverified):\n" + best.get("text", "")[-3500:]) if (v2 or alloc)
                      else "\n\nThe attempt in full (unverified):\n" + best.get("text", "")[-6000:])
     (run_dir / "discovery.json").write_text(json.dumps({"decision": {k: v for k, v in d.items() if k != "best"},
                                                         "best_frame": best.get("frame"), "attempts": attempts,
@@ -1267,12 +1271,20 @@ V3_FLAGS = ["--explore", "on", "--explore-budget", "1.5", "--explore-core", "on"
             "--literature-scope", "wide", "--child-cycles", "2"]
 
 
+# Candidate alloc (loop iteration 3): budget follows the true direction and its core. Evidence: train #283, where
+# proving got 13% of the spend, the refutation script 39%, and the core was deferred every cycle; and #997, whose last
+# budget went on a published premise at the level of Maynard–Tao.
+ALLOC_FLAGS = ["--attack-order", "core-first", "--refute", "changed", "--premise-attack", "cheap"]
+
+
 def candidate_flags(args) -> list[str]:
     """Extra harness flags a candidate adds to the fixed protocol (empty for baseline and the discover arms)."""
-    if getattr(args, "candidate", None) != "v3":
-        return []
     import shlex
-    return shlex.split(args.v3_flags) if getattr(args, "v3_flags", None) else list(V3_FLAGS)
+    if getattr(args, "candidate", None) == "v3":
+        return shlex.split(args.v3_flags) if getattr(args, "v3_flags", None) else list(V3_FLAGS)
+    if getattr(args, "candidate", None) == "alloc":
+        return list(ALLOC_FLAGS)
+    return []
 
 
 def protocol(args) -> dict:
@@ -1406,7 +1418,7 @@ def run_item(item: dict, tag: str, proto: dict, args, taken: set[int]) -> dict:
     pfile = run_dir / "problem.json"          # per evaluation, inside the (gitignored) run dir, never in the tree
     pfile.write_text(json.dumps(prob, indent=2, ensure_ascii=False))
     discovery, committed, budget, guidance_file = None, None, args.budget, None
-    if getattr(args, "candidate", None) in ("discover-v1", "discover-v2") and not args.dry_run:
+    if getattr(args, "candidate", None) in ("discover-v1", "discover-v2", "alloc") and not args.dry_run:
         discovery = discover(item, statement, run_dir, args)
         budget = round(max(args.budget - discovery["spend"], 1.0), 2)       # the same $8 in total as the baseline
         committed = discovery["commit"]
@@ -2397,7 +2409,7 @@ def main() -> int:
     r.add_argument("--compile-workers", type=int, default=2, help="ERDOS_COMPILE_WORKERS for the run (a shared machine)")
     r.add_argument("--item-hours", type=float, default=3.0, help="wall-clock cap per item; a kill is infrastructure")
     r.add_argument("--limit-waits", type=int, default=4, help="usage-limit waits per item before giving up on it")
-    r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "v3"], default="baseline",
+    r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "v3", "alloc"], default="baseline",
                    help="discover-v1: informal attempts + referee first, then commit to one direction (same total budget); "
                         "discover-v2: + a second round on the named missing step, and one confident answer may commit; "
                         "v3: no external discovery, the harness's own discovery options instead (V3_FLAGS)")

@@ -117,8 +117,12 @@
   {
    "at": "2026-09-25T11:15:28Z",
    "text": "iteration 2 train part done: 0 solved, #997 closed modulo 1 published premise; cores deferred and never attacked on 3 of 4; dev screen in flight"
+  },
+  {
+   "at": "2026-09-25T11:17:00Z",
+   "text": "iteration 3 (alloc) pre-registered: train screen on the 4 iteration-2 items after the dev screen; harness options delegated to a Sonnet subagent"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T11:15:28Z"
+ "updated": "2026-09-25T11:17:00Z"
 }
