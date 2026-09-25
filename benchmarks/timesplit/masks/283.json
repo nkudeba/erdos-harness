@@ -1,0 +1,37 @@
+{
+ "true_problem": "283",
+ "alias_id": "69730",
+ "statement_en": "Let $p:\\mathbb{Z}\\to \\mathbb{Z}$ be a polynomial whose leading coefficient is positive and such that there exists no $d\\geq 2$ with $d\\mid p(n)$ for all $n\\geq 1$. Is it true that, for all sufficiently large $m$, there exist integers $1\\leq n_1<\\cdots <n_k$ such that\\[1=\\frac{1}{n_1}+\\cdots+\\frac{1}{n_k}\\]and\\[m=p(n_1)+\\cdots+p(n_k)?\\]",
+ "statement_lean": "open Filter Polynomial Finset\n\ndef Condition (p : ℚ[X]) : Prop :=\n  (∀ n : ℤ, ∃ z : ℤ, p.eval (n : ℚ) = z) → p.leadingCoeff > 0 →\n  ¬ (∃ d : ℤ, d ≥ 2 ∧ ∀ n : ℤ, n ≥ 1 → ∃ z : ℤ, p.eval (n : ℚ) = d * z) →\n  ∀ᶠ (m : ℤ) in atTop, ∃ k ≥ 1, ∃ n : Fin (k + 1) → ℤ, 0 = n 0 ∧ StrictMono n ∧\n  1 = ∑ i ∈ Finset.Icc 1 (Fin.last k), (1 : ℚ) / (n i) ∧\n  (m : ℚ) = ∑ i ∈ Finset.Icc 1 (Fin.last k), p.eval (n i : ℚ)\n\ntheorem erdos_69730 :\n    ∀ p : ℚ[X], Condition p := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "unit fractions"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/283.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B takes p to be any integer-valued polynomial with rational coefficients. If A's 'polynomial p: Z→Z' means integer coefficients, B covers a strictly larger class of polynomials. That makes B a generalization, so proving B still settles A in the pos direction. If A already means integer-valued polynomials, the two classes are the same.",
+   "The other conditions match A: positive leading coefficient, and no d≥2 dividing p(n) for all n≥1.",
+   "B's 0<n_1<...<n_k is the same as A's 1≤n_1<...<n_k.",
+   "B's requirement k≥1 costs nothing, because a sum of reciprocals equal to 1 needs at least one term.",
+   "B's threshold M for integers m≥M is the same as A's 'for all sufficiently large m'.",
+   "Edge case: the constant polynomial p=1 is allowed by both statements and is handled the same way in each."
+  ],
+  "verdict": "B is equivalent to A, or at worst a generalization of it to integer-valued rational polynomials, so a proof of B legitimately settles A affirmatively.",
+  "backtranslation": "**Statement.** For every polynomial $p$ with rational coefficients, suppose three things hold:\n\n1. $p(n)$ is an integer for every integer $n$.\n2. The leading coefficient of $p$ is positive.\n3. There is no integer $d \\ge 2$ that divides $p(n)$ for every integer $n \\ge 1$.\n\nThen there is a threshold $M$ such that every integer $m \\ge M$ can be written as follows. There exist an integer $k \\ge 1$ and integers $0 < n_1 < n_2 < \\cdots < n_k$ with\n$$\\sum_{i=1}^{k} \\frac{1}{n_i} = 1 \\qquad\\text{and}\\qquad m = \\sum_{i=1}^{k} p(n_i).$$\n\nIn words, all sufficiently large integers are sums of $p(n_i)$ over the denominators of some Egyptian-fraction representation of $1$ with distinct denominators.",
+  "cost_usd": 0.0426,
+  "model": "claude-opus-5-5"
+ }
+}

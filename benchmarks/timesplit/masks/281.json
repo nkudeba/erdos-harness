@@ -1,0 +1,27 @@
+{
+ "true_problem": "281",
+ "alias_id": "97054",
+ "statement_en": "Let $n_1<n_2<\\cdots$ be an infinite sequence such that, for any choice of congruence classes $a_i\\pmod{n_i}$, the set of integers not satisfying any of the congruences $a_i\\pmod{n_i}$ has density $0$. Is it true that for every $\\epsilon>0$ there exists some $k$ such that, for every choice of congruence classes $a_i$, the density of integers not satisfying any of the congruences $a_i\\pmod{n_i}$ for $1\\leq i\\leq k$ is less than $\\epsilon$?",
+ "statement_lean": "namespace Set\nopen Filter\nopen scoped Topology\nnoncomputable def intPartialDensity (S : Set ℤ) (N : ℕ) : ℝ :=\n  open scoped Classical in\n  (((Finset.Icc (-(N : ℤ)) (N : ℤ)).filter (fun m => m ∈ S)).card : ℝ) /\n    (2 * (N : ℝ) + 1)\nend Set\n\nnamespace Set\nopen Filter\nopen scoped Topology\ndef HasIntDensity (S : Set ℤ) (α : ℝ) : Prop :=\n  Tendsto (fun N : ℕ => S.intPartialDensity N) atTop (𝓝 α)\nend Set\n\nopen Filter Topology\n\ndef ResidueChoice (n : ℕ → ℕ) := ∀ i : ℕ, ZMod (n i)\n\ndef avoidAll (n : ℕ → ℕ) (a : ResidueChoice n) : Set ℤ :=\n  {m | ∀ i : ℕ, (m : ZMod (n i)) ≠ a i}\n\ndef avoidPrefix (n : ℕ → ℕ) (a : ResidueChoice n) (k : ℕ) : Set ℤ :=\n  {m | ∀ i : ℕ, i < k → (m : ZMod (n i)) ≠ a i}\n\ntheorem erdos_97054 :\n    ∀ (n : ℕ → ℕ), StrictMono n → (∀ i, 0 < n i) →\n      (∀ a : ResidueChoice n, Set.HasIntDensity (avoidAll n a) 0) →\n        ∀ ε : ℝ, 0 < ε →\n          ∃ k : ℕ, ∀ a : ResidueChoice n,\n            ∃ d : ℝ, Set.HasIntDensity (avoidPrefix n a k) d ∧ d < ε := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "covering systems"
+ ],
+ "ok": false,
+ "errors": [
+  "line 191:26: Invalid field `intPartialDensity`: The environment does not contain `Function.intPartialDensity`, so it is not possible to project the field `intPartialDensity` from an expression\n  S\nof type `ℤ → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/281.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.intPartialDensity",
+  "Set.HasIntDensity"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

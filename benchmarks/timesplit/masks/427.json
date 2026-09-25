@@ -1,0 +1,23 @@
+{
+ "true_problem": "427",
+ "alias_id": "58791",
+ "statement_en": "Is it true that, for every $n$ and $d$, there exists $k$ such that\\[d \\mid p_{n+1}+\\cdots+p_{n+k},\\]where $p_r$ denotes the $r$th prime?",
+ "statement_lean": "def TSMain : Prop := ∀ (n d : ℕ),\n\n\n    d ≠ 0 → ∃ k, k ≠ 0 ∧\n    d ∣ ∑ i ∈ Finset.Ico n (n + k), i.nth Nat.Prime\n\ntheorem erdos_58791 :\n    TSMain := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Data.Nat.Nth"
+ ],
+ "tags": [
+  "number theory",
+  "primes"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/427.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

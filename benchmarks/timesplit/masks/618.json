@@ -1,0 +1,36 @@
+{
+ "true_problem": "618",
+ "alias_id": "25477",
+ "statement_en": "For a triangle-free graph $G$ let $h_2(G)$ be the smallest number of edges that need to be added to $G$ so that it has diameter $2$ and is still triangle-free. Is it true that if $G$ has maximum degree $o(n^{1/2})$ then $h(G)=o(n^2)$?",
+ "statement_lean": "open scoped Classical\nopen Filter Asymptotics\n\nnoncomputable def h2 {n : ℕ} (G : SimpleGraph (Fin n)) : ℕ :=\n  sInf {k : ℕ | ∃ H : SimpleGraph (Fin n),\n    G ≤ H ∧\n    H.CliqueFree 3 ∧\n    (∀ x y : Fin n, x ≠ y → H.Adj x y ∨ ∃ z, H.Adj x z ∧ H.Adj z y) ∧\n    (H.edgeFinset \\ G.edgeFinset).card = k}\n\ntheorem erdos_25477 :\n    ∀ (G : ∀ n : ℕ, SimpleGraph (Fin n)),\n      (∀ n, (G n).CliqueFree 3) →\n      (fun n => ((G n).maxDegree : ℝ)) =o[atTop] (fun n => (n : ℝ) ^ ((1 : ℝ) / 2)) →\n      (fun n => (h2 (G n) : ℝ)) =o[atTop] (fun n => (n : ℝ) ^ 2) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Finite"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/618.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": true,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "Minor: B indexes one graph per n for every n. This is equivalent to A, since a family defined only on some n can be padded with empty graphs. For an empty graph, adding a star gives h_2 = n-1 = o(n^2), and its maximum degree is 0.",
+   "Minor: B requires diameter at most 2 rather than exactly 2. For n>=3 this is the same, because diameter 1 means a complete graph, which has a triangle.",
+   "Minor: B takes the minimum as 0 if no valid H exists. This case never arises, since a maximal triangle-free supergraph always works."
+  ],
+  "verdict": "B is the standard asymptotic reading of A's positive direction, and its differences from A are harmless edge-case conventions, so a proof of B would settle A in the pos direction.",
+  "backtranslation": "For each $n$, let $G$ be a triangle-free graph on the vertex set $\\{0,\\dots,n-1\\}$. Define $h_2(G)$ as the minimum number of edges that must be added to $G$ to obtain a graph $H \\supseteq G$ on the same vertices such that:\n\n- $H$ is triangle-free, and\n- $H$ has diameter at most 2, meaning any two distinct vertices are adjacent or have a common neighbour.\n\n(If no such $H$ existed the minimum would be taken as $0$. Such an $H$ always exists, since any maximal triangle-free supergraph of $G$ works.)\n\nThe claim is as follows. Let $(G_n)_{n\\ge 0}$ be any sequence of graphs where each $G_n$ is a triangle-free graph on $n$ vertices. Suppose the maximum degree of $G_n$ is $o(\\sqrt{n})$ as $n\\to\\infty$. Then $h_2(G_n) = o(n^2)$ as $n \\to \\infty$.",
+  "cost_usd": 0.0405,
+  "model": "claude-opus-5-5"
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "true_problem": "1197",
+ "alias_id": "37086",
+ "statement_en": "Let $E\\subset (0,\\infty)$ be a set of positive measure. Is it true that, for almost all $x>0$, for all sufficiently large (depending on $x$) integers $n$ there exists an integer $r\\geq 1$ such that $nx\\in r\\cdot E$?",
+ "statement_lean": "open Filter MeasureTheory\nopen scoped Pointwise\n\ntheorem erdos_37086 :\n    ∀ E : Set ℝ, MeasurableSet E → E ⊆ Set.Ioi 0 → 0 < volume E →\n    ∀ᵐ x ∂(volume.restrict (Set.Ioi (0 : ℝ))), ∀ᶠ n : ℕ in atTop,\n      ∃ r : ℕ, 1 ≤ r ∧ (n : ℝ) * x ∈ (r : ℝ) • E := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.MeasureTheory.Function.ConditionalExpectation.CondexpL1"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": false,
+ "errors": [
+  "line 75:55: failed to synthesize instance of type class\n  MeasureSpace ℝ\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.",
+  "line 76:11: failed to synthesize instance of type class\n  MeasureSpace ℝ\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1197.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

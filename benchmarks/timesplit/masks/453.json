@@ -1,0 +1,22 @@
+{
+ "true_problem": "453",
+ "alias_id": "54144",
+ "statement_en": "Is it true that, for all sufficiently large $n$, there exists some $i<n$ such that\\[p_n^2 < p_{n+i}p_{n-i},\\]where $p_k$ is the $k$th prime?",
+ "statement_lean": "def EventuallyHasPrimeWitness : Prop :=\n  ∃ N : ℕ, ∀ n : ℕ, N ≤ n →\n    ∃ i : ℕ, i < n ∧\n      (Nat.nth Nat.Prime n) ^ (2 : ℕ) <\n        Nat.nth Nat.Prime (n + i) * Nat.nth Nat.Prime (n - i)\n\ntheorem erdos_54144 :\n    EventuallyHasPrimeWitness := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Data.Nat.Nth"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/453.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,23 @@
+{
+ "true_problem": "154",
+ "alias_id": "91594",
+ "statement_en": "Let $A\\subset \\{1,\\ldots,N\\}$ be a Sidon set with $\\lvert A\\rvert\\sim N^{1/2}$. Must $A+A$ be well-distributed over all small moduli? In particular, must about half the elements of $A+A$ be even and half odd?",
+ "statement_lean": "open Function Set\nopen scoped Pointwise\nvariable {α : Type*} [AddCommMonoid α]\ndef IsSidon (A : Set α) : Prop := ∀ᵉ (i₁ ∈ A) (j₁ ∈ A) (i₂ ∈ A) (j₂ ∈ A),\n  i₁ + i₂ = j₁ + j₂ → (i₁ = j₁ ∧ i₂ = j₂) ∨ (i₁ = j₂ ∧ i₂ = j₁)\n\nopen Filter Finset\nopen scoped Pointwise\n\ntheorem erdos_91594 :\n    ∀ (m : ℕ) (hm : 2 ≤ m) (N : ℕ → ℕ) (A : ℕ → Finset ℕ),\n      Tendsto (fun k => (N k : ℝ)) atTop atTop →\n      (∀ k, ∀ x ∈ A k, x ≤ N k) →\n      (∀ k, IsSidon (A k : Set ℕ)) →\n      Tendsto (fun k => ((A k).card : ℝ) / Real.sqrt (N k)) atTop (nhds 1) →\n      ∀ i < m, Tendsto\n        (fun k => (((A k + A k).filter (fun s => s % m = i)).card : ℝ) / ((A k + A k).card : ℝ))\n        atTop (nhds (1 / m)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "sidon sets"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/154.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "IsSidon"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

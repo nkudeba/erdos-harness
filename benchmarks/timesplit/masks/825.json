@@ -1,0 +1,36 @@
+{
+ "true_problem": "825",
+ "alias_id": "77651",
+ "statement_en": "Is there an absolute constant $C>0$ such that every integer $n$ with $\\sigma(n)>Cn$ is the distinct sum of proper divisors of $n$?",
+ "statement_lean": "open scoped ArithmeticFunction.sigma\n\ntheorem erdos_77651 :\n    ∃ (C : ℝ) (_ : C > 0),\n      ∀ (n) (_ : σ 1 n > C * n),\n        ∃ s ⊆ n.properDivisors, n = s.sum id := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "divisors",
+  "unit fractions"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/825.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "Restricting 'integer n' to natural numbers is harmless: σ is only meaningful for positive n, and n=0 is vacuous since σ(0)=0 in Mathlib.",
+   "'Distinct sum of proper divisors of n' is correctly read as 'n equals a sum of distinct proper divisors of n', i.e. n is semiperfect.",
+   "Small constants (C<1) fail at n=1, whose only proper-divisor subset is empty, but this only rules out some C; it does not distort the existential claim.",
+   "The quantifier order (∃C>0, ∀n) matches A."
+  ],
+  "verdict": "B is exactly A's YES assertion: there is a uniform constant C>0 such that every n with σ(n)>Cn is semiperfect, so a proof of B would settle the pos direction of A.",
+  "backtranslation": "There exists a positive real constant $C$ such that every natural number $n$ with $\\sigma(n) > C\\,n$ is semiperfect. Here $\\sigma(n)$ is the sum of all positive divisors of $n$. Semiperfect means there is a set $s$ of distinct proper divisors of $n$ (positive divisors other than $n$ itself) whose sum is exactly $n$. The same constant $C$ must work for every such $n$.",
+  "cost_usd": 0.0313,
+  "model": "claude-opus-5-5"
+ }
+}

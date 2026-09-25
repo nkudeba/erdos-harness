@@ -1,0 +1,24 @@
+{
+ "true_problem": "914",
+ "alias_id": "28772",
+ "statement_en": "Let $r\\geq 2$ and $m\\geq 1$. Every graph with $rm$ vertices and minimum degree at least $m(r-1)$ contains $m$ vertex disjoint copies of $K_r$.",
+ "statement_lean": "theorem erdos_28772 {r m : ℕ} (hr : 2 ≤ r) (hm : 1 ≤ m) {V : Type*} [Fintype V]\n    (G : SimpleGraph V) [DecidableRel G.Adj] (hV : Fintype.card V = r * m)\n    (hdeg : m * (r - 1) ≤ G.minDegree) :\n    ∃ K : Fin m → Finset V, (∀ i, G.IsNClique r (K i)) ∧\n      Pairwise fun i j => Disjoint (K i) (K j) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Finite"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/914.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

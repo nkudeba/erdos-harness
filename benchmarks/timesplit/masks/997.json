@@ -1,0 +1,37 @@
+{
+ "true_problem": "997",
+ "alias_id": "39016",
+ "statement_en": "Call $x_1,x_2,\\ldots \\in (0,1)$ well-distributed if, for every $\\epsilon>0$, if $k$ is sufficiently large then, for all $n>0$ and intervals $I\\subseteq [0,1]$,\\[\\lvert \\# \\{ n<m\\leq n+k : x_m\\in I\\} - \\lvert I\\rvert k\\rvert < \\epsilon k.\\]Is it true that, for every $\\alpha$, the sequence $\\{ \\alpha p_n\\}$ is not well-distributed, if $p_n$ is the sequence of primes?",
+ "statement_lean": "open Set\n\ndef IsWellDistributed (x : ℕ → ℝ) : Prop :=\n  ∀ ε > 0, ∀ᶠ k in Filter.atTop, ∀ n : ℕ,\n  ∀ a b, 0 ≤ a → a ≤ b → b ≤ 1 →\n    letI I := Ico a b\n    let count := (Finset.Ioc n (n + k)).filter (fun m ↦ x m ∈ I)\n    abs ((count.card : ℝ) - (b - a) * k) < ε * k\n\ntheorem erdos_39016 :\n    ∀ α : ℝ, ¬ IsWellDistributed (fun n ↦ Int.fract (α * (n.nth Nat.Prime))) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Data.Nat.Nth"
+ ],
+ "tags": [
+  "analysis",
+  "discrepancy",
+  "primes"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/997.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B tests only half-open intervals [a,b) with 0<=a<=b<=1, while A tests all intervals I in [0,1]. The two notions are equivalent up to a change of epsilon: point and closed-interval counts are controlled by approximating with half-open intervals, and the length-zero cases are covered. So 'not well-distributed' means the same thing in both.",
+   "B quantifies over n>=0, A over n>0. The extra n=0 window differs from the n=1 window by at most one term, which vanishes after dividing by k for large k. The definitions are therefore equivalent.",
+   "B indexes primes from p_0=2, A presumably from p_1=2. Well-distribution is uniform over all window starts, so it is invariant under a finite index shift; this is harmless.",
+   "A's definition assumes terms in (0,1), but {alpha p_n} can equal 0 (e.g. rational alpha, or alpha=0). B allows arbitrary reals, which is the natural reading of A's question; it is not a restriction."
+  ],
+  "verdict": "Up to harmless equivalences (half-open versus arbitrary intervals, n>=0 versus n>0, prime indexing), B states exactly A's claim that {alpha p_n} is never well-distributed, so proving B settles the pos direction.",
+  "backtranslation": "**Definition.** A real sequence $(x_m)_{m\\ge 0}$ is *well-distributed* if the following holds. For every $\\varepsilon>0$ there is a $K$ such that for all integers $k\\ge K$, all $n\\ge 0$, and all reals $0\\le a\\le b\\le 1$,\n$$\\Bigl|\\,\\#\\{m : n< m\\le n+k,\\ x_m\\in[a,b)\\} - (b-a)k\\,\\Bigr| < \\varepsilon k .$$\nCrucially, the bound must hold uniformly over every window $(n, n+k]$ of length $k$, not only windows starting at $0$.\n\n**Claim.** Let $p_n$ be the $n$-th prime, indexed from zero, so $p_0=2, p_1=3, p_2=5,\\dots$. Then for every real number $\\alpha$, the sequence of fractional parts $x_n=\\{\\alpha p_n\\}$ is not well-distributed.",
+  "cost_usd": 0.0485,
+  "model": "claude-opus-5-5"
+ }
+}

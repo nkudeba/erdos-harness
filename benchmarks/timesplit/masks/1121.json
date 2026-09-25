@@ -1,0 +1,24 @@
+{
+ "true_problem": "1121",
+ "alias_id": "54571",
+ "statement_en": "If $C_1,\\ldots,C_n$ are circles in $\\mathbb{R}^2$ with radii $r_1,\\ldots,r_n$ such that no line disjoint from all the circles divides them into two non-empty sets then the circles can be covered by a circle of radius $r=\\sum r_i$.",
+ "statement_lean": "open scoped EuclideanGeometry\n\ntheorem erdos_54571 {n : ℕ} (c : Fin n → ℝ²) (r : Fin n → ℝ) (hr : ∀ i, 0 < r i)\n    (hsep : ∀ (v : ℝ²) (t : ℝ), v ≠ 0 →\n      (∀ i, ∀ p ∈ Metric.closedBall (c i) (r i), inner ℝ v p ≠ t) →\n      (∀ i, inner ℝ v (c i) < t) ∨ (∀ i, t < inner ℝ v (c i))) :\n    ∃ z : ℝ², (⋃ i, Metric.closedBall (c i) (r i)) ⊆ Metric.closedBall z (∑ i, r i) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 181:42: unexpected token '²'; expected ')'"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1121.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

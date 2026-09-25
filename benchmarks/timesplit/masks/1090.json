@@ -1,0 +1,23 @@
+{
+ "true_problem": "1090",
+ "alias_id": "84315",
+ "statement_en": "Let $k\\geq 3$. Does there exist a finite set $A\\subset \\mathbb{R}^2$ such that, in any $2$-colouring of $A$, there exists a line which contains at least $k$ points from $A$, and all the points of $A$ on the line have the same colour?",
+ "statement_lean": "theorem erdos_84315 :\n    ∀ (k : ℕ), ∀ (hk : 3 ≤ k),\n    ∃ (A : Finset (Fin 2 → ℝ)), ∀ (C : A → Fin 2),\n      ∃ (S : Finset (Fin 2 → ℝ)), ∃ (hSA : S ⊆ A),\n        Collinear ℝ (S : Set (Fin 2 → ℝ)) ∧ S.card ≥ k ∧\n          (∀ y ∈ A, y ∈ affineSpan ℝ (S : Set (Fin 2 → ℝ)) → y ∈ S) ∧\n          ∃ c, ∀ x (hx : x ∈ S), C ⟨x, hSA hx⟩ = c := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional"
+ ],
+ "tags": [
+  "geometry",
+  "ramsey theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1090.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

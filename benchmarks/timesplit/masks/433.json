@@ -1,0 +1,21 @@
+{
+ "true_problem": "433",
+ "alias_id": "85768",
+ "statement_en": "If $A\\subset \\mathbb{N}$ is a finite set then let $G(A)$ denote the greatest integer which is not expressible as a finite sum of elements from $A$ (with repetitions allowed). Let\\[g(k,n)=\\max G(A)\\]where the maximum is taken over all $A\\subseteq \\{1,\\ldots,n\\}$ of size $\\lvert A\\rvert=k$ which has no common divisor. Is it true that\\[g(k,n)\\sim \\frac{n^2}{k-1}?\\]",
+ "statement_lean": "open Filter\nopen scoped Topology\n\nnoncomputable def frobeniusNumber (A : Finset ℕ) : ℕ :=\n  sSup {m | m ∉ AddSubmonoid.closure (A : Set ℕ)}\n\nnoncomputable def g (k n : ℕ) : ℕ :=\n  sSup {m | ∃ A : Finset ℕ, A ⊆ Finset.Icc 1 n ∧ A.card = k ∧ A.gcd id = 1 ∧\n    m = frobeniusNumber A}\n\ntheorem erdos_85768 :\n    ∀ k, 2 ≤ k →\n    Tendsto (fun n : ℕ => (g k n : ℝ) / ((n : ℝ) ^ 2 / ((k : ℝ) - 1))) atTop (𝓝 1) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/433.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

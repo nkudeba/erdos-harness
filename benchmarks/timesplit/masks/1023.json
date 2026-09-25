@@ -1,0 +1,25 @@
+{
+ "true_problem": "1023",
+ "alias_id": "68968",
+ "statement_en": "Let $F(n)$ be the maximal size of a family of subsets of $\\{1,\\ldots,n\\}$ such that no set in this family is the union of other members of the family. Is it true that there is a constant $c>0$ such that\\[F(n)\\sim c \\frac{2^n}{n^{1/2}}?\\]",
+ "statement_lean": "namespace Finset\ndef SubfamilyUnionFree {α : Type*} [DecidableEq α] (F : Finset (Finset α)) : Prop :=\n  ∀ A ∈ F, ∀ T ⊆ F.erase A, T.Nonempty → T.sup id ≠ A\nend Finset\n\nopen Filter\nopen scoped Asymptotics\n\nnoncomputable def F (n : ℕ) : ℕ :=\n  sSup {m | ∃ S ⊆ (Finset.Icc 1 n).powerset, S.SubfamilyUnionFree ∧ S.card = m}\n\ntheorem erdos_68968 :\n    ∃ c : ℝ, 0 < c ∧\n      ((fun n : ℕ => (F n : ℝ)) ~[atTop]\n        (fun n : ℕ => c * 2 ^ n / (n : ℝ) ^ (1 / 2 : ℝ))) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "combinatorics"
+ ],
+ "ok": false,
+ "errors": [
+  "line 829:47: Invalid field `SubfamilyUnionFree`: The environment does not contain `Finset.SubfamilyUnionFree`, so it is not possible to project the field `SubfamilyUnionFree` from an expression\n  S\nof type `Finset (Finset ℕ)`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1023.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Finset.SubfamilyUnionFree"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

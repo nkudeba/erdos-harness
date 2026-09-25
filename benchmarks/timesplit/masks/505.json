@@ -1,0 +1,25 @@
+{
+ "true_problem": "505",
+ "alias_id": "35973",
+ "statement_en": "Is every set of diameter $1$ in $\\mathbb{R}^n$ the union of at most $n+1$ sets of diameter $<1$?",
+ "statement_lean": "open Metric Set Borsuk\n\ntheorem erdos_35973 :\n    type_of% borsuk_conjecture.not_forall := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 313:16: unknown namespace `Borsuk`",
+  "line 316:13: Unknown identifier `borsuk_conjecture.not_forall`",
+  "line 315:0: type of theorem `TSB505.erdos_35973` is not a proposition\n  ?m.1"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/505.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

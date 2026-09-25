@@ -1,0 +1,28 @@
+{
+ "true_problem": "1136",
+ "alias_id": "82914",
+ "statement_en": "Does there exist $A\\subset \\mathbb{N}$ with lower density $>1/3$ such that $a+b\\neq 2^k$ for any $a,b\\in A$ and $k\\geq 0$?",
+ "statement_lean": "namespace Set\nopen Filter\nopen scoped Topology\n@[inline]\nnoncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]\n    (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=\n  ((S ∩ A) ∩ Iio b).ncard / (A ∩ Iio b).ncard\nend Set\n\nnamespace Set\nopen Filter\nopen scoped Topology\nnoncomputable def lowerDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]\n    (S : Set β) (A : Set β := Set.univ) : ℝ :=\n  atTop.liminf fun (b : β) ↦ S.partialDensity A b\nend Set\n\ndef AvoidsPowersOfTwo (A : Set ℕ) : Prop :=\n  ∀ a ∈ A, ∀ b ∈ A, ∀ k : ℕ, a + b ≠ 2 ^ k\n\ntheorem erdos_82914 :\n    ∃ A : Set ℕ, (1 / 3 : ℝ) < A.lowerDensity ∧ AvoidsPowersOfTwo A := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 909:13: Unknown identifier `Iio`",
+  "line 909:33: Unknown identifier `Iio`",
+  "line 917:31: Invalid field `partialDensity`: The environment does not contain `Function.partialDensity`, so it is not possible to project the field `partialDensity` from an expression\n  S\nof type `β → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1136.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.partialDensity",
+  "Set.lowerDensity"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

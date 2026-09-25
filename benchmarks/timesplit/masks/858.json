@@ -1,0 +1,35 @@
+{
+ "true_problem": "858",
+ "alias_id": "62204",
+ "statement_en": "Let $A\\subseteq \\{1,\\ldots,N\\}$ be such that there is no solution to $at=b$ with $a,b\\in A$ and the smallest prime factor of $t$ is $>a$. Estimate the maximum of\\[\\frac{1}{\\log N}\\sum_{n\\in A}\\frac{1}{n}.\\]",
+ "statement_lean": "open Filter Real\n\ndef IsAdmissible (A : Finset ℕ) : Prop :=\n  ∀ a ∈ A, ∀ b ∈ A, ∀ t : ℕ, a * t = b → t.minFac ≤ a\n\nnoncomputable def M (N : ℕ) : ℝ :=\n  sSup {m | ∃ A ⊆ Finset.Icc 1 N, IsAdmissible A ∧ ∑ n ∈ A, (1 : ℝ) / n = m}\n\ntheorem erdos_62204 :\n    ∃ c : ℝ, Tendsto (fun N : ℕ ↦ M N / log N) atTop (nhds c) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "primitive sets"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/858.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": false,
+  "issues": [
+   "Statement A asks to *estimate* the maximum of (1/log N)·Σ_{n∈A} 1/n, i.e. to find its asymptotic value or order. Statement B only asserts that M(N)/log N converges to some real constant c. It gives no information about c; it does not even exclude c = 0. A proof of B is therefore at most a partial structural result, not an estimate that answers A.",
+   "B makes a specific choice (existence of a limit) as a stand-in for a vague 'estimate' question. That is a substitution of the question, not a formalization of it.",
+   "Minor point: the convention lpf(1) = 1, used to handle t = 1 (a = b), is a reasonable reading of A's intended condition. The admissibility condition itself and M(N) as a finite maximum look correctly transcribed.",
+   "The quantifier structure is fine: c is chosen before the limit is taken. The issue is only that B is weaker than, or different from, what A requests."
+  ],
+  "verdict": "B only asserts that M(N)/log N has some limit, without identifying or bounding it, so proving B would not legitimately settle A's request to estimate the maximum.",
+  "backtranslation": "**Statement.** There exists a real constant $c$ such that\n$$\\lim_{N\\to\\infty} \\frac{M(N)}{\\log N} = c.$$\nIn other words, $M(N)/\\log N$ converges to a finite limit as $N \\to \\infty$.\n\n**Admissible sets.** Call a finite set $A$ of natural numbers *admissible* if the following holds: whenever $a, b \\in A$ and $b = at$ for a natural number $t$, the smallest prime factor of $t$ is at most $a$. Here the convention is that the \"smallest prime factor\" of $1$ is $1$. So the condition is automatic when $a = b$. Otherwise it says: whenever $a \\mid b$ with $a \\neq b$, the least prime factor of $b/a$ is $\\le a$.\n\n**The quantity $M(N)$.** For each natural number $N$, $M(N)$ is the largest possible value of $\\sum_{n\\in A} 1/n$, taken over all admissible subsets $A \\subseteq \\{1, \\dots, N\\}$. This is a maximum over finitely many sets.",
+  "cost_usd": 0.0512,
+  "model": "claude-opus-5-5"
+ }
+}

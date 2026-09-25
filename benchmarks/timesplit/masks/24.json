@@ -1,0 +1,26 @@
+{
+ "true_problem": "24",
+ "alias_id": "85915",
+ "statement_en": "Does every triangle-free graph on $5n$ vertices contain at most $n^5$ copies of $C_5$?",
+ "statement_lean": "open SimpleGraph\n\ntheorem erdos_85915 :\n    ∀ (n : ℕ) (G : SimpleGraph (Fin (5 * n))), G.CliqueFree 3 →\n      G.copyCount (cycleGraph 5) ≤ n ^ 5 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Copy"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 19:19: Unknown identifier `cycleGraph`\nNote: It is not possible to treat `cycleGraph` as an implicitly bound variable here because the `autoImplicit` option is set to `false`."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/24.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

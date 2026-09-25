@@ -1,0 +1,35 @@
+{
+ "true_problem": "401",
+ "alias_id": "45828",
+ "statement_en": "Is there some function $f(r)$ such that $f(r)\\to \\infty$ as $r\\to\\infty$, such that, for infinitely many $n$, there exist $a_1,a_2$ with\\[a_1+a_2> n+f(r)\\log n\\]such that $a_1!a_2! \\mid n!2^n3^n\\cdots p_r^n$?",
+ "statement_lean": "open Filter\n\ntheorem erdos_45828 :\n    ∃ f : ℕ → ℝ, Tendsto f atTop atTop ∧\n      ∀ (r : ℕ) (hr : 1 ≤ r),\n        {n : ℕ | ∃ a₁ a₂ : ℕ, 0 < a₁ ∧ 0 < a₂ ∧\n          (a₁ : ℝ) + a₂ > n + f r * Real.log n ∧\n          a₁.factorial * a₂.factorial ∣\n            n.factorial * (∏ i ∈ Finset.range r, Nat.nth Nat.Prime i) ^ n}.Infinite := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Data.Nat.Nth"
+ ],
+ "tags": [
+  "number theory",
+  "factorials"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/401.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B requires a_1, a_2 to be positive integers, while A leaves them unrestricted (a_i = 0 would give 0! = 1). This only strengthens B, so B still implies A in the pos direction.",
+   "B quantifies over r >= 1. A's r = 0 case is degenerate (empty product of primes), and since f is arbitrary at finitely many points, this is harmless.",
+   "The product 2^n 3^n ... p_r^n in A equals P_r^n in B exactly, and B uses the natural reading of A's quantifiers: one fixed f, then for every r, infinitely many n."
+  ],
+  "verdict": "B is the natural formalization of A's YES answer, with at most a harmless strengthening (positive a_i), so a proof of B settles A in the pos direction.",
+  "backtranslation": "There exists a function $f:\\mathbb{N}\\to\\mathbb{R}$ with $f(r)\\to\\infty$ as $r\\to\\infty$ such that the following holds for every integer $r\\ge 1$. Let $P_r = p_1p_2\\cdots p_r$ be the product of the first $r$ primes. Then there are infinitely many natural numbers $n$ for which there exist positive integers $a_1, a_2$ satisfying\n\n- $a_1 + a_2 > n + f(r)\\log n$, and\n- $a_1!\\,a_2! \\mid n!\\,P_r^{\\,n}$.",
+  "cost_usd": 0.0387,
+  "model": "claude-opus-5-5"
+ }
+}

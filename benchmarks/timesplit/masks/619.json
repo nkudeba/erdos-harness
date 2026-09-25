@@ -1,0 +1,38 @@
+{
+ "true_problem": "619",
+ "alias_id": "24878",
+ "statement_en": "For a triangle-free graph $G$ let $h_r(G)$ be the smallest number of edges that need to be added to $G$ so that it has diameter $r$ (while preserving the property of being triangle-free). Is it true that there exists a constant $c>0$ such that if $G$ is a connected graph on $n$ vertices then $h_4(G)<(1-c)n$?",
+ "statement_lean": "open SimpleGraph\n\nnoncomputable def minNewEdges {V : Type*} (r : ℕ) (G : SimpleGraph V) : ℕ :=\n  sInf {k | ∃ H : SimpleGraph V,\n    G ≤ H ∧ H.CliqueFree 3 ∧ H.ediam ≤ r ∧ (H \\ G).edgeSet.ncard = k}\n\ntheorem erdos_24878 :\n    ∃ c > (0 : ℝ), ∀ (V : Type) [Fintype V] (G : SimpleGraph V),\n      G.Connected → G.CliqueFree 3 →\n      (minNewEdges 4 G : ℝ) < (1 - c) * Fintype.card V := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected",
+  "Mathlib.Combinatorics.SimpleGraph.Diam"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/619.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B reads 'has diameter 4' as 'diameter at most 4'. This matches the standard Erdős–Gyárfás–Ruszinkó definition of h_r. The literal 'exactly 4' reading is ill-defined whenever G already has diameter below 4, since adding edges cannot increase distances.",
+   "The convention m(G)=0 when no supergraph exists is vacuous. Any triangle-free graph extends to a maximal triangle-free graph, which has diameter at most 2.",
+   "A says only 'connected graph'. B restricts to triangle-free G, which is how h_r is defined in A, so this matches.",
+   "Edge case n=0: the strict inequality 0 < 0 would fail. The formalization's connectedness hypothesis (Mathlib requires Nonempty) should exclude the empty graph. For n=1 the bound holds with any c<1."
+  ],
+  "verdict": "B faithfully states the positive direction of A under the standard 'diameter at most r' reading of h_r, with no hidden strengthening or weakening.",
+  "backtranslation": "**Statement.** There exists a real constant $c > 0$ such that the following holds for every finite, connected, triangle-free graph $G$ on $n$ vertices. Let $m(G)$ be the minimum number of edges that must be added to $G$, on the same vertex set, so that the resulting graph is still triangle-free and has diameter at most $4$. Then $m(G) < (1-c)\\,n$.\n\n**Convention.** If no triangle-free supergraph of diameter at most $4$ exists, $m(G)$ is taken to be $0$.",
+  "cost_usd": 0.0458,
+  "model": "claude-opus-5-5"
+ }
+}

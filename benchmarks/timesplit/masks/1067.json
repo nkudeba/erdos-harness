@@ -1,0 +1,37 @@
+{
+ "true_problem": "1067",
+ "alias_id": "58505",
+ "statement_en": "Does every graph with chromatic number $\\aleph_1$ contain an infinitely connected subgraph with chromatic number $\\aleph_1$?",
+ "statement_lean": "namespace SimpleGraph\nopen Finset List\nvariable {V : Type*} {G : SimpleGraph V}\ndef InternallyDisjoint {u v x y : V} (p : G.Walk u v) (q : G.Walk x y) : Prop :=\n  Disjoint p.support.tail.dropLast q.support.tail.dropLast\nend SimpleGraph\n\nnamespace SimpleGraph\nopen Finset List\nvariable {V : Type*} {G : SimpleGraph V}\ndef InfinitelyConnected (G : SimpleGraph V) : Prop := Nontrivial V ∧\n  Pairwise fun u v ↦ ∃ P : Set (G.Walk u v),\n    P.Infinite ∧ (∀ p ∈ P, p.IsPath) ∧ P.Pairwise InternallyDisjoint\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {V : Type*}\nstructure Cycle (G : SimpleGraph V) where\n  \n  base : V\n  \n  walk : G.Walk base base\n  \n  isCycle : walk.IsCycle\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {V : Type*}\ndef Cycle.edges {G : SimpleGraph V} (c : Cycle G) : List (Sym2 V) := c.walk.edges\nend SimpleGraph\n\nopen Cardinal Set\nstructure ThreeUniformHypergraph (V : Type) where\n  \n  edges : Set (Finset V)\n  \n  uniform : ∀ e ∈ edges, e.card = 3\n\nnamespace ThreeUniformHypergraph\nopen Cardinal Set\ndef IsProperColoring {V : Type} (H : ThreeUniformHypergraph V) {C : Type} (f : V → C) : Prop :=\n  ∀ e ∈ H.edges, ∃ u ∈ e, ∃ v ∈ e, f u ≠ f v\nend ThreeUniformHypergraph\n\nnamespace ThreeUniformHypergraph\nopen Cardinal Set\nnoncomputable def chromaticCardinal {V : Type} (H : ThreeUniformHypergraph V) : Cardinal.{0} :=\n  sInf {κ : Cardinal.{0} | ∃ (C : Type), #C = κ ∧ ∃ f : V → C, H.IsProperColoring f}\nend ThreeUniformHypergraph\n\nopen Cardinal SimpleGraph\n\ntheorem erdos_58505 :\n    ∀ (V : Type) (G : SimpleGraph V), G.chromaticCardinal = ℵ_ 1 →\n      ∃ (H : G.Subgraph), H.coe.chromaticCardinal = ℵ_ 1 ∧ InfinitelyConnected H.coe := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Subgraph",
+  "Mathlib.Combinatorics.SimpleGraph.Walk.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Paths"
+ ],
+ "tags": [
+  "graph theory",
+  "set theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 69:40: Invalid field `chromaticCardinal`: The environment does not contain `SimpleGraph.chromaticCardinal`, so it is not possible to project the field `chromaticCardinal` from an expression\n  G\nof type `SimpleGraph V`",
+  "line 70:32: Invalid field `chromaticCardinal`: The environment does not contain `SimpleGraph.chromaticCardinal`, so it is not possible to project the field `chromaticCardinal` from an expression\n  H.coe\nof type `SimpleGraph ↑H.verts`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1067.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.InternallyDisjoint",
+  "SimpleGraph.InfinitelyConnected",
+  "SimpleGraph.Cycle",
+  "SimpleGraph.Cycle.edges",
+  "ThreeUniformHypergraph",
+  "ThreeUniformHypergraph.IsProperColoring",
+  "ThreeUniformHypergraph.chromaticCardinal"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

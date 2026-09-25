@@ -1,0 +1,26 @@
+{
+ "true_problem": "224",
+ "alias_id": "81317",
+ "statement_en": "If $A\\subseteq \\mathbb{R}^d$ is any set of $2^d+1$ points then some three points in $A$ determine an obtuse angle.",
+ "statement_lean": "open scoped EuclideanGeometry\n\ndef ObtuseAt {d : ℕ} (x y z : ℝ^d) : Prop :=\n  inner ℝ (y - x) (z - x) < 0\n\ntheorem erdos_81317 {d : ℕ} (A : Finset (ℝ^d)) (hcard : A.card = 2 ^ d + 1) :\n    ∃ x y z : ℝ^d, x ∈ A ∧ y ∈ A ∧ z ∈ A ∧\n      x ≠ y ∧ x ≠ z ∧ y ≠ z ∧ ObtuseAt x y z := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 74:30: failed to synthesize instance of type class\n  HPow Type ℕ ?m.3\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.",
+  "line 74:30: failed to synthesize instance of type class\n  HPow Type ℕ ?m.7\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.",
+  "line 74:30: failed to synthesize instance of type class\n  HPow Type ℕ ?m.11\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/224.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

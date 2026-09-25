@@ -1,0 +1,24 @@
+{
+ "true_problem": "898",
+ "alias_id": "58806",
+ "statement_en": "If $A,B,C\\in \\mathbb{R}^2$ form a triangle and $P$ is a point in the interior then, if $N$ is where the perpendicular from $P$ to $AB$ meets the triangle, and similarly for $M$ and $L$,\\[\\overline{PA}+\\overline{PB}+\\overline{PC}\\geq 2(\\overline{PM}+\\overline{PN}+\\overline{PL}).\\]",
+ "statement_lean": "open Affine EuclideanGeometry\n\ntheorem erdos_58806 (A B C P L M N : ℝ²) (hABC : AffineIndependent ℝ ![A, B, C])\n    (hP : P ∈ interior (convexHull ℝ ({A, B, C} : Set ℝ²)))\n    (hN : N ∈ line[ℝ, A, B]) (hPN : line[ℝ, P, N].direction ⟂ line[ℝ, A, B].direction)\n    (hM : M ∈ line[ℝ, B, C]) (hPM : line[ℝ, P, M].direction ⟂ line[ℝ, B, C].direction)\n    (hL : L ∈ line[ℝ, C, A]) (hPL : line[ℝ, P, L].direction ⟂ line[ℝ, C, A].direction) :\n    dist P A + dist P B + dist P C ≥ 2 * (dist P M + dist P N + dist P L) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 166:38: unexpected token '²'; expected ')'"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/898.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

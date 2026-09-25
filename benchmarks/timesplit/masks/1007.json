@@ -1,0 +1,29 @@
+{
+ "true_problem": "1007",
+ "alias_id": "50714",
+ "statement_en": "The dimension of a graph $G$ is the minimal $n$ such that $G$ can be embedded in $\\mathbb{R}^n$ such that every edge of $G$ is a unit line segment. What is the smallest number of edges in a graph with dimension $4$?",
+ "statement_lean": "namespace SimpleGraph\nopen Finset List\nopen scoped EuclideanGeometry\nvariable {α : Type*} [Fintype α] [DecidableEq α]\ndef UnitDistanceEmbeddable {V : Type*} (G : SimpleGraph V) (n : ℕ) : Prop :=\n  ∃ f : V → ℝ^n, Function.Injective f ∧ ∀ u v : V, G.Adj u v → dist (f u) (f v) = 1\nend SimpleGraph\n\nnamespace SimpleGraph\nopen Finset List\nopen scoped EuclideanGeometry\nvariable {α : Type*} [Fintype α] [DecidableEq α]\ndef HasDimension {V : Type*} (G : SimpleGraph V) (n : ℕ) : Prop :=\n  IsLeast {m | UnitDistanceEmbeddable G m} n\nend SimpleGraph\n\nopen scoped EuclideanGeometry\nvariable {V : Type*}\n\ntheorem erdos_50714 :\n    IsLeast {m | ∃ (n : ℕ) (G : SimpleGraph (Fin n)), G.HasDimension 4 ∧ G.edgeSet.ncard = m}\n      9 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 19:12: failed to synthesize instance of type class\n  HPow Type ℕ ?m.4\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.",
+  "line 34:56: Invalid field `HasDimension`: The environment does not contain `SimpleGraph.HasDimension`, so it is not possible to project the field `HasDimension` from an expression\n  G\nof type `SimpleGraph (Fin n)`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1007.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.UnitDistanceEmbeddable",
+  "SimpleGraph.HasDimension"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

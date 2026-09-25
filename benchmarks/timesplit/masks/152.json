@@ -1,0 +1,36 @@
+{
+ "true_problem": "152",
+ "alias_id": "63980",
+ "statement_en": "For any $M\\geq 1$, if $A\\subset \\mathbb{N}$ is a sufficiently large finite Sidon set then there are at least $M$ many $a\\in A+A$ such that $a+1,a-1\\not\\in A+A$.",
+ "statement_lean": "open Function Set\nopen scoped Pointwise\nvariable {α : Type*} [AddCommMonoid α]\ndef IsSidon (A : Set α) : Prop := ∀ᵉ (i₁ ∈ A) (j₁ ∈ A) (i₂ ∈ A) (j₂ ∈ A),\n  i₁ + i₂ = j₁ + j₂ → (i₁ = j₁ ∧ i₂ = j₂) ∨ (i₁ = j₂ ∧ i₂ = j₁)\n\nopen scoped Pointwise Asymptotics\nopen Filter\n\nnoncomputable def f (n : ℕ) : ℕ :=\n  ⨅ A : {A : Set ℕ | A.ncard = n ∧ IsSidon A},\n  {s : ℕ | s - 1 ∉ A.1 + A.1 ∧ s ∈ A.1 + A.1 ∧ s + 1 ∉ A.1 + A.1}.ncard\n\ntheorem erdos_63980 :\n    Tendsto f atTop atTop := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "sidon sets"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/152.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "IsSidon"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "Truncated subtraction means s = 0 (possible only when 0 ∈ A) is never counted as isolated. Under the usual integer reading, 0 could be isolated in A, so B's count can be at most one lower than A's. That makes B marginally stronger, so a proof of B still settles A.",
+   "The convention for infinite sets (count taken as 0) matters only when n = 0, which does not affect the limit statement.",
+   "'Sufficiently large finite Sidon set' is correctly read as large cardinality. Taking a minimum over all Sidon sets of size n gives the correct uniform quantifier order: for every M there is an N that works for all Sidon sets of size ≥ N.",
+   "A+A includes the sums 2a, which is the standard convention in both statements."
+  ],
+  "verdict": "B faithfully captures A's assertion, and its only deviation (never counting the sum 0) makes it slightly stronger, so proving B settles A in the positive direction.",
+  "backtranslation": "A set $A \\subseteq \\mathbb{N}$ (with $0 \\in \\mathbb{N}$) is called Sidon if, whenever $a_1 + a_2 = b_1 + b_2$ with all four elements in $A$, the pair $\\{a_1, a_2\\}$ equals the pair $\\{b_1, b_2\\}$.\n\nFor each $n$, let $f(n)$ be the minimum, over all Sidon sets $A \\subseteq \\mathbb{N}$ with exactly $n$ elements, of the number of isolated points of the sumset $A+A$. An isolated point is an $s \\in A+A$ such that neither $s-1$ nor $s+1$ lies in $A+A$. Here $s-1$ is truncated at $0$, so $s = 0$ never counts. The count is taken as $0$ if the set is infinite. For $n = 0$ the minimum also ranges over infinite Sidon sets.\n\nThe claim is that $f(n) \\to \\infty$ as $n \\to \\infty$. Equivalently, for every $M$ there is an $N$ such that every Sidon set of size $n \\ge N$ has at least $M$ isolated sums, meaning sums $s \\in A+A$ with $s \\pm 1 \\notin A+A$.",
+  "cost_usd": 0.0475,
+  "model": "claude-opus-5-5"
+ }
+}

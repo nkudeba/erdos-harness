@@ -1,0 +1,23 @@
+{
+ "true_problem": "484",
+ "alias_id": "62104",
+ "statement_en": "Prove that there exists an absolute constant $c>0$ such that, whenever $\\{1,\\ldots,N\\}$ is $k$-coloured (and $N$ is large enough depending on $k$) then there are at least $cN$ many integers in $\\{1,\\ldots,N\\}$ which are representable as a monochromatic sum (that is, $a+b$ where $a,b\\in \\{1,\\ldots,N\\}$ are in the same colour class and $a\\neq b$).",
+ "statement_lean": "open scoped Classical\n\ntheorem erdos_62104 :\n    ∃ c : ℝ, 0 < c ∧ ∀ k : ℕ, 0 < k → ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → ∀ f : ℕ → Fin k,\n      c * N ≤ (((Finset.Icc 1 N).filter fun n =>\n        ∃ a ∈ Finset.Icc 1 N, ∃ b ∈ Finset.Icc 1 N,\n          a ≠ b ∧ f a = f b ∧ a + b = n).card : ℝ) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive combinatorics",
+  "ramsey theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/484.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": true,
+ "checked": "2026-09-24"
+}

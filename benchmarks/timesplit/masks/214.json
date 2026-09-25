@@ -1,0 +1,29 @@
+{
+ "true_problem": "214",
+ "alias_id": "20402",
+ "statement_en": "Let $S\\subset \\mathbb{R}^2$ be such that no two points in $S$ are distance $1$ apart. Must the complement of $S$ contain four points which form a unit square?",
+ "statement_lean": "open scoped Congruent EuclideanGeometry\n\ndef unitSquare : Fin 4 → ℝ² := ![!₂[0, 0], !₂[1, 0], !₂[1, 1], !₂[0, 1]]\n\ndef UnitDistanceAvoiding (S : Set ℝ²) : Prop := ∀ x ∈ S, ∀ y ∈ S, dist x y ≠ 1\n\ntheorem erdos_20402 :\n    ∀ S : Set ℝ², UnitDistanceAvoiding S →\n      ∃ p : Fin 4 → ℝ², (∀ i, p i ∈ Sᶜ) ∧ (p ≅ unitSquare) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Topology.MetricSpace.Congruence",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry",
+  "distances",
+  "ramsey theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 16:26: unexpected token '²'; expected ':=', 'where' or '|'",
+  "line 18:35: unexpected token '²'; expected ')'",
+  "line 21:15: unexpected token '²'; expected ','"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/214.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

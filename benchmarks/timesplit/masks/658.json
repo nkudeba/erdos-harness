@@ -1,0 +1,21 @@
+{
+ "true_problem": "658",
+ "alias_id": "41440",
+ "statement_en": "Let $\\delta>0$ and $N$ be sufficiently large depending on $\\delta$. Is it true that if $A\\subseteq \\{1,\\ldots,N\\}^2$ has $\\lvert A\\rvert \\geq \\delta N^2$ then $A$ must contain the vertices of a square?",
+ "statement_lean": "open Filter\n\ntheorem erdos_41440 :\n    ∀ δ : ℝ, 0 < δ → ∀ᶠ N : ℕ in atTop,\n    ∀ A : Finset (ℕ × ℕ), A ⊆ Finset.Icc 1 N ×ˢ Finset.Icc 1 N → δ * N ^ 2 ≤ A.card →\n      ∃ a b d : ℕ, 0 < d ∧ (a, b) ∈ A ∧ (a + d, b) ∈ A ∧ (a, b + d) ∈ A ∧ (a + d, b + d) ∈ A := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "additive combinatorics"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/658.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,24 @@
+{
+ "true_problem": "765",
+ "alias_id": "66778",
+ "statement_en": "Give an asymptotic formula for $\\mathrm{ex}(n;C_4)$.",
+ "statement_lean": "open Filter Asymptotics\n\ntheorem erdos_66778 :\n    (fun n : ℕ ↦ (SimpleGraph.extremalNumber n (SimpleGraph.cycleGraph 4) : ℝ)) ~[atTop]\n      fun n : ℕ ↦ (n : ℝ) ^ (3 / 2 : ℝ) / 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Extremal.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Circulant"
+ ],
+ "tags": [
+  "graph theory",
+  "turan number"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/765.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

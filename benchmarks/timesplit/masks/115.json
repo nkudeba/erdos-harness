@@ -1,0 +1,22 @@
+{
+ "true_problem": "115",
+ "alias_id": "64999",
+ "statement_en": "If $p(z)$ is a polynomial of degree $n$ such that $\\{z : \\lvert p(z)\\rvert\\leq 1\\}$ is connected then is it true that\\[\\max_{\\substack{z\\in\\mathbb{C}\\\\ \\lvert p(z)\\rvert\\leq 1}} \\lvert p'(z)\\rvert \\leq (\\tfrac{1}{2}+o(1))n^2?\\]",
+ "statement_lean": "open Filter\n\ntheorem erdos_64999 :\n    ∀ ε > (0 : ℝ), ∀ᶠ n : ℕ in atTop, ∀ p : Polynomial ℂ, p.Monic → p.natDegree = n →\n      IsConnected {z : ℂ | ‖p.eval z‖ ≤ 1} → ∀ z : ℂ, ‖p.eval z‖ ≤ 1 →\n        ‖p.derivative.eval z‖ ≤ (1 / 2 + ε) * (n : ℝ) ^ 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "polynomials",
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/115.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

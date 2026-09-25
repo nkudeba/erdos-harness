@@ -1,0 +1,22 @@
+{
+ "true_problem": "1196",
+ "alias_id": "45464",
+ "statement_en": "Is it true that, for any $x$, if $A\\subset [x,\\infty)$ is a primitive set of integers (so that no distinct elements of $A$ divide each other) then\\[\\sum_{a\\in A}\\frac{1}{a\\log a}< 1+o(1),\\]where the $o(1)$ term $\\to 0$ as $x\\to \\infty$?",
+ "statement_lean": "open scoped Asymptotics\n\ndef IsPrimitive {M : Type*} [CommMonoid M] (A : Set M) : Prop :=\n  ∀ᵉ (x ∈ A) (y ∈ A), x ∣ y → Associated x y\n\ntheorem erdos_45464 :\n    ∃ o : ℕ → ℝ, o =o[Filter.atTop] (1 : ℕ → ℝ) ∧ ∀ x > (0 : ℕ), ∀ A ⊆ Set.Ici x, IsPrimitive A →\n       ∑' (a : A), (1 / ((a.val : ℝ).log * a)) < 1 + o x := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "primitive sets"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1196.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

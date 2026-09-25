@@ -1,0 +1,22 @@
+{
+ "true_problem": "798",
+ "alias_id": "68737",
+ "statement_en": "Let $t(n)$ be the minimum number of points in $\\{1,\\ldots,n\\}^2$ such that the $\\binom{t}{2}$ lines determined by these points cover all points in $\\{1,\\ldots,n\\}^2$. Estimate $t(n)$. In particular, is it true that $t(n)=o(n)$?",
+ "statement_lean": "open Filter Asymptotics\n\ndef gridPoints (n : ℕ) : Set (ℝ × ℝ) :=\n  {p : ℝ × ℝ | ∃ i j : ℕ, 1 ≤ i ∧ i ≤ n ∧ 1 ≤ j ∧ j ≤ n ∧ p = ((i : ℝ), (j : ℝ))}\n\ndef IsLineCover (n : ℕ) (S : Set (ℝ × ℝ)) : Prop :=\n  S ⊆ gridPoints n ∧\n    ∀ x ∈ gridPoints n, ∃ p ∈ S, ∃ q ∈ S, p ≠ q ∧ Collinear ℝ ({p, q, x} : Set (ℝ × ℝ))\n\nnoncomputable def t (n : ℕ) : ℕ :=\n  sInf {k | ∃ S : Set (ℝ × ℝ), IsLineCover n S ∧ S.ncard = k}\n\ntheorem erdos_68737 :\n    (fun n : ℕ => (t n : ℝ)) =o[atTop] (fun n : ℕ => (n : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/798.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,37 @@
+{
+ "true_problem": "947",
+ "alias_id": "58572",
+ "statement_en": "There is no exact covering system - that is, a finite collection of congruence classes $a_i\\pmod{n_i}$ with distinct $n_i$ such that every integer satisfies exactly one of these congruence classes.",
+ "statement_lean": "namespace SimpleGraph\nvariable {V : Type*}\nstructure Cycle (G : SimpleGraph V) where\n  \n  base : V\n  \n  walk : G.Walk base base\n  \n  isCycle : walk.IsCycle\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {V : Type*}\ndef Cycle.length {G : SimpleGraph V} (c : Cycle G) : ℕ := c.walk.length\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {α : Type*} [Fintype α] [DecidableEq α]\ndef havelHakimiStep (s : List ℕ) : List ℕ :=\n  match s with\n  | [] => []\n  | d :: rest =>\n\n    let (to_decrement, remaining) := rest.splitAt d\n\n    let decremented := to_decrement.map (· - 1)\n\n    (decremented ++ remaining).mergeSort (· ≥ ·)\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {α : Type*} [Fintype α] [DecidableEq α]\ndef residueAux : List ℕ → ℕ\n  | [] => 0\n  | 0 :: s => 1 + s.length\n  | d :: rest => residueAux (havelHakimiStep (d :: rest))\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {α : Type*} [Fintype α] [DecidableEq α]\nnoncomputable def residue (G : SimpleGraph α) [DecidableRel G.Adj] : ℕ :=\n\n  residueAux ((Finset.univ.val.map fun v => G.degree v).sort (· ≥ ·))\nend SimpleGraph\n\nopen Pointwise\nstructure CoveringSystem (R : Type*) [CommSemiring R] where\n  ι : Type\n  [fintypeIndex : Fintype ι]\n  residue : ι → R\n  moduli : ι → Ideal R\n  unionCovers : ⋃ i, ({residue i} : Set R) + (moduli i : Set R) = @Set.univ R\n  ne_bot : ∀ i, moduli i ≠ ⊥\n  ne_top : ∀ i, moduli i ≠ ⊤\n\nopen Pointwise\nstructure StrictCoveringSystem (R : Type*) [CommSemiring R] extends CoveringSystem R where\n  injective_moduli : moduli.Injective\n\nopen Function\n\ntheorem erdos_58572 :\n    ¬ ∃ c : StrictCoveringSystem ℤ, Pairwise (Disjoint on c.coset) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Finite",
+  "Mathlib.Combinatorics.SimpleGraph.Walk.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Paths"
+ ],
+ "tags": [
+  "number theory",
+  "covering systems"
+ ],
+ "ok": false,
+ "errors": [
+  "line 48:4: fail to show termination for\n  TSB947.SimpleGraph.residueAux\nwith errors\nfailed to infer structural recursion:\nCannot use parameter #1:\n  failed to eliminate recursive application\n    residueAux (havelHakimiStep (d :: rest))\nfailed to prove termination, possible solutions:\n  - Use `have`-",
+  "line 78:60: Invalid field `coset`: The environment does not contain `TSB947.StrictCoveringSystem.coset`, so it is not possible to project the field `coset` from an expression\n  c\nof type `StrictCoveringSystem ℤ`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/947.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.Cycle",
+  "SimpleGraph.Cycle.length",
+  "SimpleGraph.havelHakimiStep",
+  "SimpleGraph.residueAux",
+  "SimpleGraph.residue",
+  "CoveringSystem",
+  "StrictCoveringSystem"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

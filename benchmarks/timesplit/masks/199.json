@@ -1,0 +1,30 @@
+{
+ "true_problem": "199",
+ "alias_id": "75688",
+ "statement_en": "If $A\\subset \\mathbb{R}$ does not contain a 3-term arithmetic progression then must $\\mathbb{R}\\backslash A$ contain an infinite arithmetic progression?",
+ "statement_lean": "variable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=\n  ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}\n\nvariable {α : Type*} [AddCommMonoid α]\ndef List.IsAPOfLengthWith (s : List α) (l : ℕ) (a d : α) : Prop :=\n  s = (List.range l).map (fun n ↦ a + n • d) ∨ s = (List.range l).reverse.map (fun n ↦ a + n • d)\n\nvariable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=\n  ∃ a d : α, s.IsAPOfLengthWith l a d\n\nvariable {α : Type*} [AddCommMonoid α]\ndef List.IsAPOfLength (s : List α) (l : ℕ) : Prop :=\n  ∃ a d : α, s.IsAPOfLengthWith l a d\n\ntheorem erdos_75688 :\n    ∀ A : Set ℝ, ThreeAPFree A →\n      ∃ S : Set ℝ, S.IsAPOfLength ⊤ ∧ S ⊆ Aᶜ := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "arithmetic progressions"
+ ],
+ "ok": false,
+ "errors": [
+  "line 127:15: Invalid field `IsAPOfLengthWith`: The environment does not contain `Function.IsAPOfLengthWith`, so it is not possible to project the field `IsAPOfLengthWith` from an expression\n  s\nof type `α → Prop`",
+  "line 131:15: Invalid field `IsAPOfLengthWith`: The environment does not contain `List.IsAPOfLengthWith`, so it is not possible to project the field `IsAPOfLengthWith` from an expression\n  s\nof type `List α`",
+  "line 134:17: Unknown identifier `ThreeAPFree`\nNote: It is not possible to treat `ThreeAPFree` as an implicitly bound variable here because the `autoImplicit` option is set to `false`."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/199.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.IsAPOfLengthWith",
+  "List.IsAPOfLengthWith",
+  "Set.IsAPOfLength",
+  "List.IsAPOfLength"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

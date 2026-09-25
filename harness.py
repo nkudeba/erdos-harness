@@ -96,6 +96,52 @@ def now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def parse_cli_stream(stdout: str) -> tuple[dict, list[str]]:
+    """(the result event, the text of every assistant message in order) from `claude -p` output, in either the
+    stream-json form (one event per line) or the older single-object json form. Raises ValueError when neither
+    parses, so the caller's fallback for unparseable output still applies."""
+    s = (stdout or "").strip()
+    if not s:
+        raise ValueError("empty output")
+    if s.startswith("{") and "\n" not in s:
+        d = json.loads(s)
+        if not isinstance(d, dict):
+            raise ValueError("not an object")
+        return d, []
+    result, texts = None, []
+    for line in s.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(e, dict):
+            continue
+        if e.get("type") == "result":
+            result = e
+        elif e.get("type") == "assistant":
+            parts = (e.get("message") or {}).get("content") or []
+            t = "".join(p.get("text") or "" for p in parts if isinstance(p, dict) and p.get("type") == "text")
+            if t:
+                texts.append(t)
+    if result is None:
+        raise ValueError("no result event")
+    return result, texts
+
+
+def scoped_read_rules(paths: list[str]) -> list[str]:
+    """Permission rules that let Read, Grep and Glob reach the working directory and exactly `paths` (absolute globs).
+    A bare `Read` in --allowedTools reads ANY file: measured 2026-09-24, a sandboxed session read the benchmark's
+    reference notes by absolute path with no denial. A rule's leading `//` marks an absolute path."""
+    rules = []
+    for tool in ("Read", "Grep", "Glob"):
+        rules.append(f"{tool}(./**)")
+        rules += [f"{tool}(/{p})" if p.startswith("/") else f"{tool}({p})" for p in paths]
+    return rules
+
+
 def clean_env() -> dict:
     home = os.environ.get("HOME", str(Path.home()))
     return {
@@ -187,8 +233,18 @@ class ClaudeCliBackend:
         # the theorems behind them (Crittenden–Vanden Eynden, Hindman) and "masked #275" beside `erdos_80317`, so
         # no masked benchmark was blind (found 2026-09-23 by asking a bare call what its context named). Every
         # permission the harness needs is passed as a flag, so nothing depends on a settings file.
-        cmd = [self.bin, "-p", "--output-format", "json", "--max-budget-usd", str(budget),
-               "--setting-sources", ""] + extra
+        # stream-json, not json: when a call ends over its `--max-budget-usd`, the json result carries NO text even
+        # though the turn finished and was billed. Measured 2026-09-24: a $0.03 cap, a completed 11,354-character
+        # answer billed $0.10, `result` absent. The stream's assistant event still holds that answer, so a text call
+        # can keep what it paid for (`recovered_over_budget`). Every v2 attempt, plan and one-shot proof that ran
+        # past its cap was discarded this way.
+        # `--strict-mcp-config` with an empty `--mcp-config`: NO MCP servers. `--setting-sources ""` does not stop the
+        # claude.ai account's connectors (Atlassian, Figma, GitLab, Gmail, Slack, ...), which arrive as tool definitions
+        # after the first tool call. Measured 2026-09-24: 221k-326k cache-write tokens, $1.78-$2.63 for a session
+        # that read one small file; with the flags, 1,049 tokens and $0.0125. The harness uses no MCP server.
+        cmd = [self.bin, "-p", "--output-format", "stream-json", "--verbose", "--max-budget-usd", str(budget),
+               "--setting-sources", "", "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}'] + extra
+        text_only = "--tools" in extra and extra[extra.index("--tools") + 1:extra.index("--tools") + 2] == [""]
         if effort:
             cmd += ["--effort", effort]
         if self.model:
@@ -207,17 +263,22 @@ class ClaudeCliBackend:
                     continue
                 break
             try:
-                d = json.loads(r.stdout)
+                d, streamed = parse_cli_stream(r.stdout)
                 text = d.get("result") or ""
+                recovered = bool(text_only and not text and d.get("subtype") == "error_max_budget_usd"
+                                 and d.get("stop_reason") == "end_turn" and streamed and streamed[-1].strip())
+                if recovered:
+                    text = streamed[-1]
                 mu = d.get("modelUsage") or {}
                 tokens = {"in": sum(int(v.get("inputTokens") or 0) for v in mu.values()),
                           "out": sum(int(v.get("outputTokens") or 0) for v in mu.values()),
                           "cache_read": sum(int(v.get("cacheReadInputTokens") or 0) for v in mu.values()),
                           "cache_write": sum(int(v.get("cacheCreationInputTokens") or 0) for v in mu.values())}
                 meta = {"cost_usd": float(d.get("total_cost_usd") or 0.0), "turns": d.get("num_turns"),
-                        "duration_ms": d.get("duration_ms"), "is_error": d.get("is_error"),
-                        "subtype": d.get("subtype"), "tokens": tokens, "models": sorted(mu.keys())}
-            except (json.JSONDecodeError, TypeError):
+                        "duration_ms": d.get("duration_ms"), "is_error": d.get("is_error") and not recovered,
+                        "subtype": d.get("subtype"), "tokens": tokens, "models": sorted(mu.keys()),
+                        **({"recovered_over_budget": True} if recovered else {})}
+            except (json.JSONDecodeError, TypeError, ValueError):
                 text, meta = r.stdout, {"cost_usd": 0.0, "turns": None, "parse_failed": True,
                                         "tokens": {"in": 0, "out": 0, "cache_read": 0, "cache_write": 0}}
             with self._lock:
@@ -226,7 +287,7 @@ class ClaudeCliBackend:
                     self.total_tokens[k] = self.total_tokens.get(k, 0) + v
                 self.calls += 1
                 self.last_meta = meta
-            if r.returncode == 0 and not meta.get("is_error"):
+            if (r.returncode == 0 and not meta.get("is_error")) or meta.get("recovered_over_budget"):
                 return text
             last_err = f"{meta.get('subtype')}: {text.strip()[:400]} {r.stderr.strip()[:400]}".strip()
             if attempt < self.RETRIES and (self.TRANSIENT_RE.search(last_err) or (r.returncode != 0 and not r.stdout.strip())):
@@ -270,13 +331,36 @@ class ClaudeCliBackend:
         finally:
             self.aux_budget_usd = old
 
-    def complete_agentic(self, purpose: str, prompt: str, sandbox: Path, max_turns: int) -> str:
-        """Tool-enabled call confined to `sandbox`: file edits auto-accepted only there, the sole
-        shell command allowed is `./check.sh` (which runs the Lean checker), reads may reach the
-        Mathlib sources for grepping."""
+    EXPLORE_SYSTEM_PROMPT = (
+        "You are a research mathematician exploring a problem computationally inside a sandbox directory. Create "
+        "Python scripts with the Write tool and run them ONLY as `./run.sh <script.py>`; no other shell command is "
+        "available. Update NOTEBOOK.md in the sandbox after EVERY script you run, not at the end: it is the only "
+        "thing kept if the session is cut off. Work in rounds: compute, look, conjecture, test, explain."
+    )
+
+    def complete_explore(self, purpose: str, prompt: str, sandbox: Path, max_turns: int,
+                         budget: float | None = None, effort: str | None = None) -> str:
+        """Tool-using exploration confined to `sandbox`: files may be written there, the only command is `./run.sh`
+        (the screened `python -I` runner), and nothing reaches Lean or the web."""
+        extra = ["--tools", "Bash", "Read", "Edit", "Write", "Grep", "Glob",
+                 "--allowedTools", "Bash(./run.sh:*)", "Edit(./**)", "Write(./**)", *scoped_read_rules([]),
+                 "--max-turns", str(max_turns), "--permission-mode", "acceptEdits",
+                 "--system-prompt", self.EXPLORE_SYSTEM_PROMPT]
+        return self._run(purpose, prompt, extra, sandbox, effort_override=effort, budget_override=budget)
+
+    def complete_agentic(self, purpose: str, prompt: str, sandbox: Path, max_turns: int,
+                         read_paths: list[str] | None = None) -> str:
+        """Tool-enabled call confined to `sandbox`: edits and writes only there, the sole shell command is
+        `./check.sh` (which runs the Lean checker), and reads reach the sandbox, the Mathlib and dependency sources,
+        the cluster libraries and `read_paths` (the program's own lemma modules), nothing else.
+
+        Until 2026-09-24 the tools were unscoped and `--add-dir` opened the whole Lean project. A session could read
+        any file by absolute path (the benchmark's pool with every answer; measured), write anywhere, and grep
+        `Formal/Programs`, which holds every run's certified lemmas: another arm's certified steps for the same
+        problem under a different alias."""
+        paths = [f"{FORMAL}/.lake/packages/**", f"{FORMAL}/Formal/Library/**", *(read_paths or [])]
         extra = ["--max-turns", str(max_turns), "--permission-mode", "acceptEdits",
-                 "--allowedTools", "Bash(./check.sh:*)", "Read", "Edit", "Write", "Grep", "Glob",
-                 "--add-dir", str(FORMAL)]
+                 "--allowedTools", "Bash(./check.sh:*)", "Edit(./**)", "Write(./**)", *scoped_read_rules(paths)]
         return self._run(purpose, prompt, extra, sandbox)
 
 
@@ -306,8 +390,8 @@ class CodexCliBackend:
                 raise RuntimeError(f"codex failed ({purpose}): {result.stderr[-1000:]}")
             return out.read_text()
 
-    def complete_agentic(self, purpose, prompt, sandbox, max_turns):
-        # Codex has no max-turns option; the subprocess timeout bounds this session.
+    def complete_agentic(self, purpose, prompt, sandbox, max_turns, read_paths=None):
+        # Codex has no max-turns option; the subprocess timeout bounds this session. Its sandbox is workspace-write.
         with tempfile.TemporaryDirectory(prefix="erdos-codex-agent-") as tmp:
             out = Path(tmp) / "response.txt"
             cmd = [self.bin, "exec", "--ignore-user-config", "--ephemeral",
@@ -1643,6 +1727,164 @@ Produce, in this order:
 """ + HOUSE_RULES
 
 
+# -- plan variants (docs/discovery-limits-2026-09-24.md). Each swap names text that must exist in the template, so a
+#    template edit that breaks one fails loudly in tests instead of silently dropping the option.
+PLAN_SWAPS = {
+    "empirical": [
+        ('from, or why a counterexample must satisfy it; never "holds in 99% of cases"; (b) a PUBLISHED theorem you rely',
+         'from, or why a counterexample must satisfy it; (a\') an EMPIRICAL conjecture: a pattern the computations above\n'
+         '      support SYSTEMATICALLY (a whole family, a growth rate, every small case) that nobody has derived yet. Quote the\n'
+         '      evidence in the `--` comment and set "basis": "empirical" in the ledger. It is attacked, and refuted first,\n'
+         '      like any hypothesis, and Lean decides; a support rate alone ("holds in 99% of cases") is still not evidence;\n'
+         '      (b) a PUBLISHED theorem you rely'),
+        ('"kind": "conjecture" | "published",', '"kind": "conjecture" | "published", "basis": "derived" | "empirical",'),
+    ],
+    "core-first": [
+        ("the harness attacks elementary hypotheses first and leaves hard ones for\n    later cycles, so a wrong rating wastes budget.",
+         "the harness attacks the HARDEST open conjecture first, with a large\n    share of the budget, and the elementary ones "
+         "after it, so a wrong rating wastes budget. Make the core one sharp\n    hypothesis rather than several vague ones."),
+    ],
+}
+EXPERIMENT_SWAPS = {
+    "empirical": [
+        ("instead; an observation is never a hypothesis until someone derives it. The check confirms a derivation; it\n"
+         "   does not replace one.",
+         "instead. A pattern that holds SYSTEMATICALLY (a whole family, a growth rate, every small case) and that you\n"
+         "   cannot derive may also be printed as\n"
+         "     CONJECTURE: <a closed statement, precise enough to become a Lean hypothesis> | EVIDENCE: <what was computed,\n"
+         "                 the family, the range>\n"
+         "   The plan may adopt it as an EMPIRICAL hypothesis, which is then attacked and refuted like any other. The check\n"
+         "   confirms a derivation; it does not replace one, and it never makes a conjecture a fact."),
+        ("each starting with REFUTED:, CLEAR:, DERIVATION:, INVARIANT:, OBSERVED: or EXP:.",
+         "each starting with REFUTED:, CLEAR:, DERIVATION:, INVARIANT:, OBSERVED:, CONJECTURE: or EXP:."),
+    ],
+}
+
+
+def apply_swaps(prompt: str, swaps: list[tuple[str, str]]) -> str:
+    for old, new in swaps:
+        if old not in prompt:
+            raise ValueError(f"prompt swap target missing: {old[:70]!r}")
+        prompt = prompt.replace(old, new, 1)
+    return prompt
+
+
+EXPLORE_PROMPT = """You are the EXPLORATION stage of a research program on an OPEN problem. Nobody expects a proof from you. Your
+job is to find out what is TRUE and WHY by computing, so that the planning stage can choose a route with evidence
+instead of a guess.
+
+PROBLEM:
+{statement_en}
+
+THE PRECISE STATEMENT (Lean 4) that will eventually have to be proved, or refuted by proving its negation:
+```lean
+{statement}
+```
+{focus}
+LITERATURE MEMO (from model memory; unverified):
+{literature}
+
+YOUR TOOLS. You are in a sandbox directory. Write Python scripts there with the Write tool and run each one with
+`./run.sh <script.py>`. Scripts may import only: {modules}. They get no files, OS access, network or subprocesses. A
+run is capped at {seconds} s, and its output is truncated to 20,000 characters, so print compact tables. Read, Edit,
+Grep and Glob work inside the sandbox.
+
+HOW TO WORK. Iterate, and let the data surprise you.
+1. Compute the smallest cases exactly, and tabulate the quantity the problem is about over as many cases as you can.
+2. Look at the data: growth rates, the extremal examples and their structure, near-misses, parity and residue
+   patterns, and the families that come closest to breaking the statement.
+3. Conjecture. Write the sharpest statements the data suggests, including ones STRONGER than the target; a sharper
+   statement often has the cleaner proof.
+4. Test every conjecture hard, on larger cases, random cases and structured families (name them). Kill the ones
+   that fail.
+5. Explain. For each surviving pattern, look for the MECHANISM that makes it hold: an argument sketch, an injection,
+   a potential function, a known theorem that would imply it.
+6. Repeat with what you learned. Several rounds of compute, look, conjecture, test are expected.
+
+Write NOTEBOOK.md early and update it after every round, because only the notebook survives if the session is cut
+off. Its sections, in this order:
+## Verdict
+TRUE, FALSE or UNSURE for the precise statement, a confidence between 0 and 1, and the single strongest piece of
+evidence for it.
+## Conjectures
+One entry each: a precise statement, close enough to Lean to become a hypothesis | evidence (what you checked, and
+the range) | status: survives, or refuted (with the counterexample) | the mechanism, if you have one.
+## Routes
+Two or three candidate proof routes. For each, give its KEY IDEA, the steps, and the hardest step stated precisely.
+Say which route the data favours and why.
+## Data
+What you computed, as compact tables, with the ranges and families.
+## Surprises
+Anything unexpected in the data, even if you cannot explain it.
+
+Label speculation as speculation. Never claim a proof you have not checked. A clear refutation of a natural
+conjecture is worth as much as a proof sketch. When you are done, reply with the Verdict section."""
+
+EXPLORE_FOCUS = """
+FOCUS: explore this ONE open hypothesis of the current argument. It is the step every attempt so far has failed
+at, and the rest of the argument is in place:
+```lean
+{hypothesis}
+```
+Is it true? Is it the right statement, or would a sharper or a weaker version still close the argument and be
+easier? What mechanism would prove it? Earlier failures on it:
+{failures}
+"""
+
+# --routes k: plan i > 0 is told to take a different route. The first keeps the ordinary instructions.
+ROUTE_FRAMES = (
+    "",
+    "ROUTE FOR THIS PLAN: take a genuinely DIFFERENT route from the skeleton in force and from the obvious one. "
+    "Reformulate the target in another framework (a generating function, a graph, a probabilistic or measure "
+    "statement, a dual or extremal formulation, a known equivalent form), or build the route on the strongest pattern "
+    "in the computations. Name the key idea in \"route\".",
+    "ROUTE FOR THIS PLAN: isolate the single deepest fact the argument needs as ONE hypothesis, stated as sharply as "
+    "you can, and make everything else elementary. Say in \"route\" why that fact is the real core and which technique "
+    "could prove it.",
+)
+
+PLAN_REPAIR_PROMPT = """Your residual skeleton was rejected before it could be judged: {reason}
+
+Return the SAME skeleton with that error fixed, as ONE ```lean block holding the whole skeleton: every `def`, every
+hypothesis, and the frozen theorem verbatim at the end, with definitions before their first use. Then give the same
+```json ledger as before. Change only what the error requires: a missing, misplaced or misspelt definition, a wrong
+name, a missing binder or `open`, a type mismatch. Keep the route.
+
+FROZEN FORMAL TARGET (verbatim, at the end of the skeleton):
+```lean
+{statement}
+```
+
+THE REJECTED SKELETON (as compiled, after the harness restored the certified parts it relies on):
+```lean
+{skeleton}
+```
+
+COMPILER OUTPUT (first errors):
+{errors}
+""" + HOUSE_RULES
+
+REPAIRABLE_SKELETON = ("does not compile", "frozen theorem missing", "altered the frozen theorem",
+                       "a sorry outside the hypothesis lemmas", "duplicate hypothesis names")
+
+ROUTE_JUDGE_PROMPT = """Several residual skeletons for the same frozen target all compile and are admissible. Each proves the
+target from its open hypotheses. Choose the one most likely to become a COMPLETE proof within a few more cycles of a
+Lean-based prover.
+
+Judge by the hardest open hypothesis of each. Is it plausibly TRUE? Is it strictly easier than the target? Is there a
+known technique that proves it, and would a prover find it? Fewer hypotheses is not better by itself: a short route
+through a false or target-hard hypothesis is worse than a longer one through elementary steps.
+
+FROZEN TARGET:
+```lean
+{statement}
+```
+
+{options}
+
+End with exactly one ```json block: {{"choice": <option number>, "why": "<two sentences>"}}"""
+
+
 NEGATION_PROMPT = """The Lean 4 theorem below is a frozen formalization of an OPEN conjecture (Erdős #{pid}). Write its exact logical
 NEGATION as a theorem named `erdos_{pid}_neg` with the SAME `def`s (copy them verbatim above it) and the goal
 `¬ (<the full proposition of erdos_{pid}, with all binders turned into ∀>)`. Do not simplify or push the negation
@@ -1851,27 +2093,112 @@ FORBIDDEN_PY_TOKENS = re.compile(r"__import__|\bopen\s*\(|\bexec\s*\(|\beval\s*\
                                  r"importlib|builtins|globals\s*\(|getattr\s*\(")
 
 
-def unsafe_python(code: str) -> str | None:
-    """Static screen for the model-written search script: stdlib math/itertools-style modules only, no I/O, no OS."""
+def unsafe_python(code: str, allowed: set[str] | None = None, extra: re.Pattern | None = None) -> str | None:
+    """Static screen for the model-written search script: stdlib math/itertools-style modules only, no I/O, no OS.
+    `allowed` widens the module list and `extra` adds forbidden tokens (the exploration sandbox uses both)."""
+    allowed = ALLOWED_PY_MODULES if allowed is None else allowed
     for line in code.splitlines():
         s = line.strip()
         m = re.match(r"^import\s+(.+)$", s)
         if m:
             for mod in m.group(1).split(","):
                 base = mod.strip().split(" as ")[0].split(".")[0].strip()
-                if base and base not in ALLOWED_PY_MODULES:
+                if base and base not in allowed:
                     return f"import {base}"
             continue
         m = re.match(r"^from\s+([A-Za-z_][\w.]*)\s+import\b", s)
         if m:
             base = m.group(1).split(".")[0]
-            if base not in ALLOWED_PY_MODULES:
+            if base not in allowed:
                 return f"from {base} import"
             continue
-        t = FORBIDDEN_PY_TOKENS.search(s)
+        t = FORBIDDEN_PY_TOKENS.search(s) or (extra.search(s) if extra else None)
         if t:
             return t.group(0)
     return None
+
+
+# -- the exploration sandbox (--explore). The session writes Python and runs it with `./run.sh <script.py>`: the same
+#    static screen as every model-written script, the same `python -I` isolation, plus numpy / sympy / networkx.
+EXPLORE_MODULES = ALLOWED_PY_MODULES | {"numpy", "sympy", "networkx"}
+# those three can write files or open viewers through their own functions; the screen names them
+EXPLORE_FORBIDDEN = re.compile(r"\.save\w*\s*\(|\.tofile\s*\(|memmap|savetxt|\bwrite_\w+\s*\(|\.write\s*\(|\bpreview\s*\(|"
+                               r"\bplot\w*\s*\(|\.show\s*\(|lambdify|\bdump\s*\(")
+EXPLORE_SECONDS = 120
+
+EXPLORE_RUNNER = r'''"""Run one exploration script in this sandbox: the harness's static screen, then an isolated python -I."""
+import re, subprocess, sys
+from pathlib import Path
+
+ALLOWED = set(%(allowed)r)
+FORBIDDEN = re.compile(%(forbidden)r)
+EXTRA = re.compile(%(extra)r)
+ARGV = %(argv)r
+PLACEHOLDER = %(placeholder)r
+SECONDS = %(seconds)d
+
+
+def unsafe(code):
+    for line in code.splitlines():
+        s = line.strip()
+        m = re.match(r"^import\s+(.+)$", s)
+        if m:
+            for mod in m.group(1).split(","):
+                base = mod.strip().split(" as ")[0].split(".")[0].strip()
+                if base and base not in ALLOWED:
+                    return "import " + base
+            continue
+        m = re.match(r"^from\s+([A-Za-z_][\w.]*)\s+import\b", s)
+        if m:
+            base = m.group(1).split(".")[0]
+            if base not in ALLOWED:
+                return "from " + base + " import"
+            continue
+        t = FORBIDDEN.search(s) or EXTRA.search(s)
+        if t:
+            return t.group(0)
+    return None
+
+
+here = Path(__file__).resolve().parent
+if len(sys.argv) != 2 or not sys.argv[1].endswith(".py"):
+    print("usage: ./run.sh <script.py>   (a script you wrote in this directory)")
+    sys.exit(2)
+script = (here / sys.argv[1]).resolve()
+if script.parent != here or not script.is_file():
+    print("the script must be a file in this directory")
+    sys.exit(2)
+bad = unsafe(script.read_text())
+if bad:
+    print("REFUSED: `%%s` is not allowed. Allowed imports: %%s. No files, OS access, network or subprocesses."
+          %% (bad, ", ".join(sorted(ALLOWED))))
+    sys.exit(2)
+cmd = [str(script) if a == PLACEHOLDER else a.replace(repr(PLACEHOLDER), repr(str(script))) for a in ARGV]
+try:
+    r = subprocess.run(cmd, cwd=str(here), capture_output=True, text=True, timeout=SECONDS,
+                       env={"PATH": "/usr/bin:/bin", "HOME": str(here)})
+    out, code = r.stdout + ("\n[stderr]\n" + r.stderr[-4000:] if r.stderr else ""), r.returncode
+except subprocess.TimeoutExpired as e:
+    raw = e.stdout or ""
+    out = (raw.decode(errors="replace") if isinstance(raw, bytes) else raw) + "\n[timeout after %%d s]" %% SECONDS
+    code = -9
+print(out[-20000:])
+print("[exit %%s]" %% code)
+# every run is also appended to runs.log, so the computations survive a session that never wrote its notebook
+with open(here / "runs.log", "a") as log:
+    log.write("\n===== %%s (exit %%s) =====\n%%s\n" %% (script.name, code, out[-6000:]))
+'''
+
+
+EXPLORE_PLACEHOLDER = "/__EXPLORE_SCRIPT__.py"
+
+
+def explore_runner_source() -> str:
+    """The sandbox runner, with the screen and the interpreter command line. The command line comes from
+    `sandbox_argv`, the one builder of isolated interpreter commands, with a placeholder the runner fills in."""
+    return EXPLORE_RUNNER % {"allowed": sorted(EXPLORE_MODULES), "forbidden": FORBIDDEN_PY_TOKENS.pattern,
+                             "extra": EXPLORE_FORBIDDEN.pattern, "argv": sandbox_argv(Path(EXPLORE_PLACEHOLDER)),
+                             "placeholder": EXPLORE_PLACEHOLDER, "seconds": EXPLORE_SECONDS}
 
 
 def decompose_prompt(problem: dict, statement: str, literature: str, history: str,
@@ -1992,7 +2319,33 @@ Respond with EXACTLY one ```json block: {{"faithful": true|false, "issues": ["..
 disproved conjecture — that counts as faithful if the notes say the problem was resolved that way).{disclosure}"""
 
 
-def literature_prompt(problem: dict) -> str:
+LITERATURE_WIDE_REPORT = """Report, in plain text:
+1. The problem's actual status and who resolved it (with citation if known). If you know of no resolution, say so
+   plainly; do not invent one.
+2. The proof/disproof route, if one is known, in enough mathematical detail to guide a formal proof (key lemmas,
+   constructions, witnesses — if the resolution is an explicit counterexample, GIVE the witness).
+3. PARTIAL RESULTS: special cases, bounds and conditional results that are known, and who proved them.
+4. ANALOGOUS SOLVED PROBLEMS: two to four problems of the same shape that ARE solved, and the idea that solved each.
+5. TRANSFERABLE TECHNIQUES: the methods most likely to work here and why: a named theorem and how it would be applied,
+   a construction family, a counting, probabilistic or analytic method, a reformulation into another framework.
+6. KNOWN OBSTRUCTIONS: why the obvious approaches fail, if known (a barrier result, a counterexample to a natural
+   strengthening, a parity problem).
+7. Up to 8 Mathlib declarations or concepts likely useful (best-guess names are fine).
+8. Pitfalls when formalizing (edge cases, off-by-ones, degenerate cases).
+Keep it under 1200 words, and mark anything you are unsure of."""
+
+
+def literature_prompt(problem: dict, scope: str = "status") -> str:
+    """The literature memo. `status` asks for the resolution and its route; `wide` (--literature-scope wide) also
+    asks for partial results, analogous solved problems, transferable techniques and known obstructions, the material
+    a route has to be invented from when no resolution is known."""
+    report = LITERATURE_WIDE_REPORT if scope == "wide" else """Report, in plain text:
+1. The problem's actual status and who resolved it (with citation if known).
+2. The proof/disproof route in enough mathematical detail to guide a formal proof (key lemmas,
+   constructions, witnesses — if the resolution is an explicit counterexample, GIVE the witness).
+3. Up to 8 Mathlib declarations or concepts likely useful (best-guess names are fine).
+4. Pitfalls when formalizing (edge cases, off-by-ones, degenerate cases).
+Keep it under 600 words."""
     return f"""You are the literature stage of a Lean 4 harness attempting an Erdős problem.
 If you have web access tools, use them; otherwise answer from knowledge, flagging uncertainty.
 
@@ -2001,13 +2354,7 @@ PROBLEM (erdosproblems.com #{problem['id']}, status: {problem.get('status', 'unk
 
 Notes: {problem.get('notes', '(none)')}
 
-Report, in plain text:
-1. The problem's actual status and who resolved it (with citation if known).
-2. The proof/disproof route in enough mathematical detail to guide a formal proof (key lemmas,
-   constructions, witnesses — if the resolution is an explicit counterexample, GIVE the witness).
-3. Up to 8 Mathlib declarations or concepts likely useful (best-guess names are fine).
-4. Pitfalls when formalizing (edge cases, off-by-ones, degenerate cases).
-Keep it under 600 words."""
+{report}"""
 
 
 # --------------------------------------------------------------------------- parsing helpers
@@ -2342,7 +2689,11 @@ MASK_SUBS = [
     (re.compile(r"erdosproblems\.com(?:/[A-Za-z0-9_/\-]*)?"), "the problem catalogue"),
     (re.compile(r"(?<![A-Za-z0-9_])Erd[őo]s(?:['’]s)?\s+[Pp]roblems(?![A-Za-z0-9_.])"), "problems"),
     (re.compile(r"(?<![A-Za-z0-9_])Erd[őo]s(?:['’]s)?\s+[Pp]roblem(?![A-Za-z0-9_.])"), "problem"),
-    (re.compile(r"(?<![A-Za-z0-9_])Erd[őo]s(?:['’]s)?(?![A-Za-z0-9_.])"), "the catalogue's"),
+    # A named result or object joined by a dash (Erdős–Ko–Rado, Erdős–Turán sets, Chvátal–Erdős) is mathematics,
+    # not the problem's identity. Masking it cost masked runs the technique names, as "the the catalogue's–Ko–Rado".
+    # A leading article is absorbed so that "the Erdős conjecture" does not become "the the catalogue's conjecture".
+    (re.compile(r"(?:(?<![A-Za-z0-9_])[Tt]he\s+)?(?<![A-Za-z0-9_])(?<![A-Za-zÀ-ž][-–—])Erd[őo]s(?:['’]s)?"
+                r"(?![A-Za-z0-9_.])(?!\s?[-–—]\s?[A-ZÀ-Ž])"), "the catalogue's"),
 ]
 
 
@@ -2370,7 +2721,7 @@ class MaskedBackend:
 
     def __getattr__(self, name):
         attr = getattr(self._inner, name)          # raises AttributeError like the real backend would
-        if name in ("complete_web", "complete_agentic") and callable(attr):
+        if name in ("complete_web", "complete_agentic", "complete_explore") and callable(attr):
             # only exists when the inner backend has it, so `hasattr(llm, "complete_web")` stays truthful
             return lambda purpose, prompt, *a, **k: attr(purpose, mask_prompt(prompt), *a, **k)
         return attr
@@ -2620,10 +2971,12 @@ class Harness:
         return res
 
     PROOF_PURPOSES = {"prove", "refine", "decompose", "prove-agentic"}
+    # calls that choose or judge a mathematical route: an over-budget retry keeps their effort (see ask)
+    IDEA_PURPOSES = {"plan", "plan-repair", "experiments", "route-judge"}
 
     RESEARCH_GUIDANCE_PURPOSES = {
         "assess", "reduce", "experiments", "plan", "prove", "refine",
-        "decompose", "prove-agentic", "critic", "search", "construct",
+        "decompose", "prove-agentic", "critic", "search", "construct", "explore",
     }
 
     def _with_research_guidance(self, purpose: str, prompt: str) -> str:
@@ -2692,11 +3045,21 @@ class Harness:
             # lower effort with a slightly larger cap; proof stages have their own escalation in stage_prove.
             if purpose in self.PROOF_PURPOSES or not re.search(r"budget", str(e), re.I) or not hasattr(self.llm, "_tuning"):
                 raise
-            effort, budget = self.llm._tuning(purpose)
-            lower = "low" if effort in ("medium", "low") else "medium"
-            self.log.event("llm", "budget_retry", purpose=purpose, effort=lower, budget=round(budget * 1.5, 2))
+            tuned_effort, tuned_budget = self.llm._tuning(purpose)
+            if purpose in self.IDEA_PURPOSES:
+                # The call that chooses the route is the one that most needs its thinking: retrying it at a LOWER
+                # effort bought a shallower plan exactly when the problem had asked for a deeper one. Same effort,
+                # twice the cap, never more than the run has left.
+                retry_effort = effort or tuned_effort
+                retry_budget = 2.0 * float(budget or tuned_budget)
+                if run_budget:
+                    retry_budget = min(retry_budget, max(0.5, float(run_budget) - self.spent_usd()))
+            else:
+                retry_effort = "low" if tuned_effort in ("medium", "low") else "medium"
+                retry_budget = tuned_budget * 1.5
+            self.log.event("llm", "budget_retry", purpose=purpose, effort=retry_effort, budget=round(retry_budget, 2))
             try:
-                text = self.llm.complete(purpose, prompt, effort_override=lower, budget_override=budget * 1.5)
+                text = self.llm.complete(purpose, prompt, effort_override=retry_effort, budget_override=retry_budget)
             except RuntimeError:
                 retry_meta = getattr(self.llm, "last_meta", {}) or {}
                 self.log.event("llm", "response_failed", purpose=purpose, cost_usd=retry_meta.get("cost_usd"),
@@ -2704,7 +3067,8 @@ class Harness:
                 raise
         meta = getattr(self.llm, "last_meta", {}) or {}
         self.log.event("llm", "response", purpose=purpose, chars=len(text), secs=round(time.time() - t0, 1),
-                       cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"))
+                       cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"),
+                       **({"recovered_over_budget": True} if meta.get("recovered_over_budget") else {}))
         # The cap is enforced BEFORE every model call (top of this method, and before each agentic round), never
         # after one: raising here threw away a response that was already paid for. On the masked #275 benchmark
         # two hypothesis children each received a $1.3-$2.7 proof text and died before compiling a line of it.
@@ -2724,7 +3088,8 @@ class Harness:
         if "literature" in self.state:
             return
         if getattr(self.args, "literature_web", False) and hasattr(self.llm, "complete_web"):
-            prompt = self._outbound(literature_prompt(self.problem) + WEB_LITERATURE_ADDENDUM.format(pid=self.problem["id"]))
+            prompt = self._outbound(literature_prompt(self.problem, getattr(self.args, "literature_scope", "status"))
+                                    + WEB_LITERATURE_ADDENDUM.format(pid=self.problem["id"]))
             self.log.event("llm", "request", purpose="literature-web", chars=len(prompt))
             t0 = time.time()
             try:
@@ -2766,7 +3131,8 @@ class Harness:
                 self.save()
                 self._check_run_budget("literature-web")
                 return
-        self.state["literature"] = self.ask("literature", literature_prompt(self.problem)).strip()
+        self.state["literature"] = self.ask("literature", literature_prompt(
+            self.problem, getattr(self.args, "literature_scope", "status"))).strip()
         self.save()
 
     def stage_informal_context(self):
@@ -2986,6 +3352,10 @@ echo "exit=${{PIPESTATUS[0]}}"
         os.chmod(sb / "check.sh", 0o755)
         return sb
 
+    def _own_module_paths(self) -> list[str]:
+        """This problem's certified lemma modules, the only files under Formal/Programs a prover may read."""
+        return [f"{FORMAL}/Formal/Programs/Erdos{self.problem['id']}*"]
+
     def _agentic_attempt(self, name: str, seed_body: str, prompt: str, seed_dir=None, model: str | None = None
                          ) -> tuple[str, str, str]:
         """Run one sandboxed agentic attempt; returns (response_text, final Attempt.lean body, sandbox dir)."""
@@ -2997,14 +3367,16 @@ echo "exit=${{PIPESTATUS[0]}}"
                 if model and hasattr(self.llm, "model"):
                     # ensemble: a per-attempt model override (backend objects are cheap; keep accounting on self.llm)
                     alt = ClaudeCliBackend(model, self.llm.timeout, self.llm.call_budget_usd)
-                    text = alt.complete_agentic("prove-agentic", prompt, sb, self.args.agentic_turns)
+                    text = alt.complete_agentic("prove-agentic", prompt, sb, self.args.agentic_turns,
+                                                read_paths=self._own_module_paths())
                     with self.llm._lock:
                         self.llm.total_cost_usd += alt.total_cost_usd
                         for k, v in alt.total_tokens.items():
                             self.llm.total_tokens[k] = self.llm.total_tokens.get(k, 0) + v
                         self.llm.last_meta = alt.last_meta
                 else:
-                    text = self.llm.complete_agentic("prove-agentic", prompt, sb, self.args.agentic_turns)
+                    text = self.llm.complete_agentic("prove-agentic", prompt, sb, self.args.agentic_turns,
+                                                     read_paths=self._own_module_paths())
             else:
                 text = self.llm.complete("prove-agentic", prompt)
         except (RuntimeError, subprocess.TimeoutExpired) as e:
@@ -3099,6 +3471,9 @@ echo "exit=${{PIPESTATUS[0]}}"
         verified = self._verified_block()
         playbook = self.playbook_block()
         literature = self.state.get("literature", "")
+        notebook = self._exploration_context(3000)
+        if notebook:
+            literature = (literature + "\n\n" + notebook).strip()
         force_agentic = self.state.get("force_agentic", False)
         for rnd in range(1, self.args.rounds + 1):
             repair = self._repair_context(attempts)
@@ -3352,7 +3727,12 @@ echo "exit=${{PIPESTATUS[0]}}"
 
     # -- specialist cascade: close `sorry` holes with Lean's own tactics (free) or an external prover ----------
 
-    CASCADE = "first | omega | (simp_all) | positivity | (norm_num) | (nlinarith) | (decide +kernel) | (aesop)"
+    # Every alternative must CLOSE the goal. Unguarded, a `simp_all`/`norm_num`/`aesop` that only simplifies ends
+    # `first` with the goal still open: the tactics after it never run, and Lean reports the leftover goal at the
+    # enclosing `by`, a line above the hole, so the hole reads as closed, the keep-check fails and the whole pass is
+    # reverted. Replayed on 41 saved passes (benchmarks/timesplit/analysis/cascade_replay.py): 71 holes read as
+    # closed, 0 actually closed; guarded, 3 close.
+    CASCADE = "first | omega | (simp_all; done) | positivity | (norm_num; done) | nlinarith | (decide +kernel) | (aesop; done)"
 
     @staticmethod
     def _hole_spans(code: str) -> list[tuple[int, int, bool]]:
@@ -3654,6 +4034,17 @@ echo "exit=${{PIPESTATUS[0]}}"
             try:
                 self.stage_literature()
                 self.stage_informal_context()
+                if getattr(self.args, "stop_after", None) == "explore":
+                    # the improvement loop's cheap screen: the idea stage alone, no Lean, both directions untouched
+                    self.args.explore = "on"
+                    self._maybe_explore()
+                    nb = ((self.state.get("exploration") or {}).get("notebooks") or [{}])[-1]
+                    self.state["outcome"] = "explored" if nb.get("text") else "explore_failed"
+                    self.save()
+                    self.log.event("run", "end", stopped_after="explore", verdict=(nb.get("verdict") or "")[:200],
+                                   spent_usd=round(self.spent_usd(), 2))
+                    (self.run_dir / "DONE").write_text(json.dumps({"outcome": self.state["outcome"], "exit": 3 if nb.get("text") else 2}))
+                    return 3 if nb.get("text") else 2
                 if getattr(self.args, "open", False):
                     return self.run_open()
                 self.stage_formalize()
@@ -4339,6 +4730,7 @@ for the SAT solver instead of enumerating it.
         self.state["statement_neg"] = neg
         self.save()
         self.log.event("open", "frozen_both", pos=pos[:200], neg=neg[:200])
+        self._maybe_explore()             # one exploration of the problem, shared by both directions
         children, results = {}, {}
         budget = getattr(self.args, "run_budget", None)
         for direction, stmt in (("pos", pos), ("neg", neg)):
@@ -4346,7 +4738,7 @@ for the SAT solver instead of enumerating it.
             cdir.mkdir(exist_ok=True)
             if not (cdir / "state.json").exists():
                 st = {k: self.state[k] for k in ("literature", "crosscheck", "formalize_notes", "verified_names",
-                                                 "assessment", "mode", "mode_reason") if k in self.state}
+                                                 "assessment", "mode", "mode_reason", "exploration") if k in self.state}
                 st.update({"statement": stmt, "problem_input": self.problem, "direction": direction, "invocations": [],
                            "owner_runs": owner_chain(self)})
                 (cdir / "state.json").write_text(json.dumps(st, indent=2))
@@ -4626,7 +5018,13 @@ for the SAT solver instead of enumerating it.
         pid = self.problem["id"]
         prompt = EXPERIMENTS_PROMPT.format(
             pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
-            literature=(self.state.get("literature") or "")[:4000], hypotheses=hyp_txt, refuted=refuted_context(pid))
+            literature=self._literature_text(), hypotheses=hyp_txt, refuted=refuted_context(pid))
+        if getattr(self.args, "empirical", "off") == "on":
+            prompt = apply_swaps(prompt, EXPERIMENT_SWAPS["empirical"])
+        notebook = self._exploration_context(3000)
+        if notebook:
+            prompt += ("\n\n" + notebook + "\nTest the notebook's conjectures too: a REFUTED line against one of them is "
+                       "as valuable as one against a hypothesis.")
         resp = self.ask("experiments", prompt)
         m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
         code = m.group(1) if m else ""
@@ -4663,9 +5061,276 @@ for the SAT solver instead of enumerating it.
                        clear=len(parsed["clear"]), invariants=len(parsed["invariants"]))
         return out, parsed
 
+    # -- planning (docs/discovery-limits-2026-09-24.md) ------------------------------------------------------------
+
+    def _literature_text(self) -> str:
+        """The literature memo as plans and experiments see it: 4,000 characters, or 8,000 for the wide memo."""
+        room = 8000 if getattr(self.args, "literature_scope", "status") == "wide" else 4000
+        return (self.state.get("literature") or "")[:room]
+
+    def _explore(self, scope: str = "problem", hypothesis: str = "", failures: str = "") -> dict | None:
+        """One exploration session (--explore). A tool-using agent computes in a Python sandbox and keeps
+        NOTEBOOK.md. The notebook joins state["exploration"]["notebooks"], which every later plan, experiments call,
+        proof attempt and research child sees. It informs and never certifies: nothing in it enters Lean.
+
+        Why this exists: every idea stage used to run with no tools. On train #152 the only computation (a one-shot
+        refutation script) found the published theorem's growth rate, and nothing downstream could use it."""
+        if not hasattr(self.llm, "complete_explore"):
+            self.log.event("explore", "unavailable", backend=type(self.llm).__name__)
+            return None
+        self._check_run_budget("explore")
+        sb = self.run_dir / "explore" / f"{scope}-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}"
+        sb.mkdir(parents=True, exist_ok=True)
+        (sb / "runner.py").write_text(explore_runner_source())
+        run_sh = sb / "run.sh"
+        run_sh.write_text(f'#!/bin/sh\nexec "{sys.executable}" "$(dirname "$0")/runner.py" "$@"\n')
+        run_sh.chmod(0o755)
+        (sb / "NOTEBOOK.md").write_text("## Verdict\n(not yet)\n")
+        focus = EXPLORE_FOCUS.format(hypothesis=hypothesis, failures=failures or "(none recorded)") if hypothesis else ""
+        prompt = EXPLORE_PROMPT.format(statement_en=self.problem["statement"], statement=self.state["statement"],
+                                       focus=focus, literature=self._literature_text() or "(none)",
+                                       modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+        prompt = self._outbound(self._with_research_guidance("explore", prompt))
+        (sb / "TASK.md").write_text(prompt)
+        budget = float(getattr(self.args, "explore_budget", 2.0) or 2.0)
+        run_budget = getattr(self.args, "run_budget", None)
+        if run_budget:
+            budget = round(max(0.5, min(budget, float(run_budget) - self.spent_usd())), 2)
+        turns = int(getattr(self.args, "explore_turns", 60) or 60)
+        self.log.event("llm", "request", purpose="explore", chars=len(prompt), budget=budget, scope=scope)
+        t0, text = time.time(), ""
+        try:
+            text = self.llm.complete_explore("explore", prompt, sb, turns, budget=budget,
+                                             effort=getattr(self.args, "explore_effort", "medium") or "medium")
+        except (RuntimeError, subprocess.TimeoutExpired) as e:
+            if ClaudeCliBackend.HARD_RE.search(str(e)):
+                raise                   # usage limit, auth: infrastructure, stop the run (it is resumable)
+            self.log.event("explore", "session_ended", scope=scope, error=repr(e)[:300])   # notebook harvested below
+        meta = getattr(self.llm, "last_meta", {}) or {}
+        self.log.event("llm", "response", purpose="explore", chars=len(text), secs=round(time.time() - t0, 1),
+                       cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"))
+        notebook = (sb / "NOTEBOOK.md").read_text() if (sb / "NOTEBOOK.md").exists() else ""
+        scripts = sorted(p.name for p in sb.glob("*.py") if p.name != "runner.py")
+        if notebook.strip() in ("", "## Verdict\n(not yet)"):
+            # The model did not keep its notebook (the first live session wrote six scripts and no notebook in its
+            # first nine minutes). Keep what it computed, labelled as raw output.
+            runs = (sb / "runs.log").read_text() if (sb / "runs.log").exists() else ""
+            notebook = ("## Verdict\n(no notebook written; raw material below)\n\n## Reply\n" + text[-3000:]
+                        + "\n\n## Data (raw script output, last runs)\n" + runs[-6000:])
+            self.log.event("explore", "notebook_missing", scope=scope, scripts=len(scripts))
+        verdict = re.search(r"##\s*Verdict\s*\n(.*?)(?:\n##\s|\Z)", notebook, re.S)
+        entry = {"scope": scope, "hypothesis": hypothesis[:600] or None,
+                 "target_sha": hashlib.sha256(self.state["statement"].encode()).hexdigest()[:16],
+                 "text": notebook[-12000:], "reply": text[-3000:], "dir": str(sb), "scripts": scripts,
+                 "verdict": verdict.group(1).strip()[:600] if verdict else None,
+                 "cost_usd": meta.get("cost_usd"), "at": now()}
+        self.state.setdefault("exploration", {}).setdefault("notebooks", []).append(entry)
+        self.save()
+        self.log.event("explore", "notebook", scope=scope, chars=len(notebook), scripts=len(scripts),
+                       verdict=(entry["verdict"] or "")[:200], cost_usd=meta.get("cost_usd"))
+        (self.run_dir / "transcripts").mkdir(exist_ok=True)
+        n = len(list((self.run_dir / "transcripts").glob("*.md"))) + 1
+        (self.run_dir / "transcripts" / f"{n:03d}-explore.md").write_text(
+            f"# explore ({scope})\n\n## prompt\n\n{prompt}\n\n## reply\n\n{text}\n\n## NOTEBOOK.md\n\n{notebook}\n")
+        return entry
+
+    def _maybe_explore(self) -> None:
+        """Run the exploration a program is owed: the problem once per run (both --open directions share it), and
+        with --explore-core a sub-residual's own target."""
+        if getattr(self.args, "explore", "off") != "on":
+            return
+        notebooks = (self.state.get("exploration") or {}).get("notebooks") or []
+        depth = int(getattr(self.args, "residual_depth_current", 1) or 1)
+        target = hashlib.sha256(self.state["statement"].encode()).hexdigest()[:16]
+        if depth <= 1:
+            if not any(n.get("scope") == "problem" for n in notebooks):
+                self._explore("problem")
+        elif not any(n.get("target_sha") == target for n in notebooks):
+            self._explore("hypothesis", hypothesis=self.state["statement"])
+
+    def _explore_core(self, pdir: Path, parsed: dict, skeleton: str) -> None:
+        """--explore-core: after a cycle that discharged nothing, explore the hardest open conjecture once."""
+        fails = failure_counts(pdir)
+        open_h = [h for h in parsed.get("hypotheses", []) if h["open"] and h["kind"] == "conjecture"]
+        if not open_h:
+            return
+        core = max(open_h, key=lambda h: (DIFFICULTY_RANK.get(h.get("difficulty", "unrated"), 2),
+                                          fails.get(h["name"], 0), h["complexity"]))
+        notebooks = (self.state.get("exploration") or {}).get("notebooks") or []
+        if any(n.get("hypothesis") and core["statement"][:300] in n["hypothesis"] for n in notebooks):
+            return
+        sub = hypothesis_substatement(skeleton, core["name"]) or core["statement"]
+        mine = [f for f in load_failures(pdir) if f.get("name") == core["name"]][-2:]
+        digest = "\n".join(f"- cycle {f.get('cycle')}: {f.get('stop_reason')}; diagnosis: {str(f.get('diagnosis') or '')[:400]}"
+                           for f in mine)
+        self.log.event("program", "explore_core", name=core["name"])
+        self._explore("core", hypothesis=sub, failures=digest)
+
+    def _exploration_context(self, limit: int = 6000) -> str:
+        """The exploration notebook(s) for plans and experiments; empty unless --explore ran."""
+        ex = self.state.get("exploration") if isinstance(getattr(self, "state", None), dict) else None
+        notes = [e for e in (ex or {}).get("notebooks", []) if isinstance(e, dict) and e.get("text")]
+        if not notes:
+            return ""
+        each = max(1500, limit // len(notes))
+        body = "\n\n".join(f"[{e.get('scope', 'problem')}, {e.get('at', '')}]\n{e['text'][-each:]}" for e in notes[-3:])
+        return ("EXPLORATION NOTEBOOK: computations, patterns and candidate routes from a tool-using exploration "
+                "session. It is unverified: data is evidence, not proof, and a conjecture here is a candidate hypothesis, "
+                "not a fact.\n" + body)
+
+    def _plan_prompt_variant(self, prompt: str) -> str:
+        if getattr(self.args, "empirical", "off") == "on":
+            prompt = apply_swaps(prompt, PLAN_SWAPS["empirical"])
+        if getattr(self.args, "attack_order", "easiest") == "core-first":
+            prompt = apply_swaps(prompt, PLAN_SWAPS["core-first"])
+        return prompt
+
+    def _plan_extras(self, pdir: Path, stalled: bool) -> str:
+        """Context a plan never used to get: its own earlier notes and any human direction, the routes that were
+        refused and why, alternative routes once the incumbent has stalled, and the exploration notebook."""
+        parts = []
+        notes = plan_notes_context(pdir)
+        if notes:
+            parts.append("EARLIER CYCLES OF THIS PROGRAM\n" + notes)
+        refused = refusals_context(pdir)
+        if refused:
+            parts.append("ROUTES NOT ADOPTED: skeletons proposed earlier that did not improve the one in force. Do not "
+                         "re-propose one unchanged; fix what made it lose, or say why it is still the right route.\n" + refused)
+        if stalled and int(getattr(self.args, "routes", 1) or 1) > 1:
+            alts = alternatives_context(pdir)
+            if alts:
+                parts.append("ALTERNATIVE ROUTES kept from earlier cycles (each was admissible when proposed). The skeleton "
+                             "in force has stalled, so a plan that returns one of these, improved or as it is, is adopted "
+                             "as a ROUTE SWITCH even if it does not beat the incumbent on the syntactic measure.\n" + alts)
+        notebook = self._exploration_context()
+        if notebook:
+            parts.append(notebook)
+        return ("\n\n" + "\n\n".join(parts)) if parts else ""
+
+    def _plan_calls(self, pdir: Path, prompt: str, cycle: int, stalled: bool = False) -> list[str]:
+        """This cycle's plan responses: one by default, or k with --routes k, each told to take a different route."""
+        base = self._plan_prompt_variant(prompt) + self._plan_extras(pdir, stalled)
+        effort, budget = getattr(self.args, "plan_effort", None), getattr(self.args, "plan_budget", None)
+        out = []
+        for i in range(max(1, int(getattr(self.args, "routes", 1) or 1))):
+            frame = (ROUTE_FRAMES[i % len(ROUTE_FRAMES)] + (f" (variant {i})" if i >= len(ROUTE_FRAMES) else "")) if i else ""
+            try:
+                out.append(self.ask("plan", base + ("\n\n" + frame if frame else ""), effort=effort, budget=budget))
+            except Harness.BudgetExhausted:
+                if not out:
+                    raise
+                break
+        return out
+
+    def _first_adoptable(self, resp: str, meta: dict, parsed: dict | None, frozen: str, cycle: int,
+                         refutations: list[dict], cdir: Path, main: str, skeleton: str,
+                         allow_switch: bool = False) -> tuple[dict | None, str | None]:
+        """(verdict, candidate) for the first adoptable skeleton in one plan response, else the last rejection."""
+        main_re = rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])"
+        blocks = lean_blocks(resp)
+        # A plan may split its skeleton across several fenced blocks ("continuation: this block concatenates
+        # directly after the previous one"), leaving the `def`s in one block and the theorem in the next. Taking
+        # only the block with the main theorem then loses the definitions and Lean rejects it for an unknown
+        # identifier, which reads as a mathematical failure and is not one (masked #275, cycle 1 after resume).
+        # Try the single block first, then the concatenation of all of them.
+        cands = [b for b in blocks if re.search(main_re, b) and HYP_RE.search("\n" + b)]
+        cands += [b for b in blocks if re.search(main_re, b) and b not in cands]
+        if len(blocks) > 1:
+            joined = "\n\n".join(blocks)
+            if re.search(main_re, joined) and joined not in cands:
+                cands.append(joined)
+        verdict, last = None, None
+        for k, cand in enumerate(cands):
+            verdict = self._consider_skeleton(cand, meta, parsed, frozen, cycle, refutations, cdir, main=main,
+                                              current_src=skeleton, allow_switch=allow_switch)
+            verdict["n_candidates"], last = len(cands), cand
+            if verdict.get("adopted"):
+                return verdict, cand
+            self.log.event("program", "skeleton_candidate_rejected", cycle=cycle, candidate=k + 1,
+                           of=len(cands), reason=str(verdict.get("reason"))[:200])
+        return verdict, last
+
+    def _repair_plan(self, verdict: dict, cand: str, meta: dict, parsed: dict | None, frozen: str, cycle: int,
+                     refutations: list[dict], cdir: Path, main: str, skeleton: str,
+                     allow_switch: bool = False) -> tuple[dict, str, dict]:
+        """Send a skeleton that failed to compile back with its compiler errors, up to --plan-repairs times.
+
+        A plan had one blind compile: 25 of 95 plan candidates in the logs to 2026-09-24 died this way and took
+        their cycle with them (train #152 and #997 both lost cycle 2 to an unknown identifier)."""
+        for r in range(max(0, int(getattr(self.args, "plan_repairs", 1) or 0))):
+            reason = str(verdict.get("reason") or "")
+            if not reason.startswith(REPAIRABLE_SKELETON):
+                break
+            errors = "\n".join(str(e)[:500] for e in (verdict.get("errors") or [reason])[:6])
+            self.log.event("program", "plan_repair", cycle=cycle, round=r + 1, reason=reason[:200])
+            resp = self.ask("plan-repair", PLAN_REPAIR_PROMPT.format(
+                reason=reason, statement=self.state["statement"], skeleton=(verdict.get("candidate") or cand or "")[-9000:],
+                errors=errors), effort=getattr(self.args, "plan_effort", None), budget=getattr(self.args, "plan_budget", None))
+            meta2 = json_block(resp) or meta
+            v2, c2 = self._first_adoptable(resp, meta2, parsed, frozen, cycle, refutations, cdir, main, skeleton,
+                                           allow_switch=allow_switch)
+            if v2 is None:
+                break
+            verdict, cand, meta = v2, c2, meta2
+            if verdict.get("adopted"):
+                verdict["repaired"] = r + 1
+                self.log.event("program", "plan_repaired", cycle=cycle, round=r + 1)
+                break
+        return verdict, cand, meta
+
+    def _route_judge(self, options: list[dict], cycle: int) -> int:
+        """Which admissible skeleton to adopt when --routes gave several. Falls back to the residual metric."""
+        def key(o):
+            m = o["verdict"]["parsed"]["metric"]
+            return (m["max_complexity"], m["open_conjectures"], m["published"], m["complexity"])
+        fallback = min(range(len(options)), key=lambda i: key(options[i]))
+        blocks = []
+        for i, o in enumerate(options, 1):
+            rating = {h.get("name"): h.get("difficulty") for h in (o["meta"].get("hypotheses") or []) if isinstance(h, dict)}
+            lines = [f"OPTION {i}. Route: {str(o['meta'].get('route') or '(none given)')[:600]}", "Open hypotheses:"]
+            lines += [f"- {h['name']} ({rating.get(h['name']) or h.get('difficulty')}, {h['kind']}): {h['statement'][:400]}"
+                      for h in o["verdict"]["parsed"]["hypotheses"] if h["open"]][:8]
+            blocks.append("\n".join(lines))
+        try:
+            v = json_block(self.ask("route-judge", ROUTE_JUDGE_PROMPT.format(statement=self.state["statement"],
+                                                                           options="\n\n".join(blocks)),
+                                    effort="medium", budget=1.0)) or {}
+            k = int(v.get("choice")) - 1
+            if 0 <= k < len(options):
+                self.log.event("program", "route_chosen", cycle=cycle, choice=k + 1, of=len(options),
+                               why=str(v.get("why") or "")[:300])
+                return k
+        except (ValueError, TypeError):
+            pass
+        self.log.event("program", "route_chosen", cycle=cycle, choice=fallback + 1, of=len(options),
+                       why="residual metric (no judge verdict)")
+        return fallback
+
+    def _record_plan_rejection(self, pdir: Path, cdir: Path, cycle: int, verdict: dict, cand: str | None,
+                               meta: dict, parsed: dict | None) -> None:
+        """A refusal for 'no improvement' goes to refusals.jsonl, which the next plan reads. Any other rejection is
+        the planner's own failure and goes to PROOF FAILURES, so the same skeleton is not re-proposed with the same
+        error. Masked #275's all-odd sub-residual died on an unknown identifier in its glue."""
+        reason = str(verdict.get("reason", ""))
+        if reason.startswith("no improvement"):
+            cp = verdict.get("parsed") or {}
+            record_refusal(pdir, {"cycle": cycle, "reason": reason, "candidate_metric": cp.get("metric"),
+                                  "current_metric": (parsed or {}).get("metric"),
+                                  "route": str(meta.get("route") or "")[:600],
+                                  "hypotheses": [f"{h['name']} : {h['statement'][:220]}"
+                                                 for h in cp.get("hypotheses", []) if h.get("open")][:6], "at": now()})
+            return
+        (cdir / "skeleton.rejected.lean").write_text(cand or "")
+        record_failure(pdir, {"cycle": cycle, "name": "(skeleton)", "kind": "skeleton", "statement": "",
+                              "exit": None, "stop_reason": f"skeleton rejected: {reason}",
+                              "attempts": 1, "rejected_attempts": 0,
+                              "best_attempts": [{"name": f"skeleton-c{cycle}", "compiled": False, "sorries": None,
+                                                 "errors": [reason[:220]]}],
+                              "unsolved_goals": [], "decomposition_errors": [], "diagnosis": None, "at": now()})
+
     def _consider_skeleton(self, cand: str, meta: dict, current: dict | None, frozen: str, cycle: int,
                            refutations: list[dict], cdir: Path, main: str | None = None,
-                           current_src: str = "") -> dict:
+                           current_src: str = "", allow_switch: bool = False) -> dict:
         """Adopt a proposed residual skeleton only if it is a real conditional theorem that improves the residual:
         frozen theorem verbatim, no banned construct, every `sorry` inside a hypothesis lemma, nothing refuted
         re-proposed, compiles, and -- after the free specialist cascade has had a go at the holes -- fewer or
@@ -4674,25 +5339,27 @@ for the SAT solver instead of enumerating it.
         main = main or getattr(self, "thm_name", None) or f"erdos_{pid}"
         if current_src:
             cand = restore_spliced(cand, current_src)
+        cand = hoist_defs(cand)
         if not contains_frozen(cand, frozen):
-            return {"adopted": False, "reason": "altered the frozen theorem"}
+            return {"adopted": False, "reason": "altered the frozen theorem", "candidate": cand}
         bad = has_banned(cand, allow_sorry=True)
         if bad:
             return {"adopted": False, "reason": f"banned construct `{bad}`"}
         parsed = parse_residual(cand, pid, meta, main=main)
         if not parsed["main_present"]:
-            return {"adopted": False, "reason": "frozen theorem missing"}
+            return {"adopted": False, "reason": "frozen theorem missing", "candidate": cand}
         if not parsed["glue_sorry_free"]:
-            return {"adopted": False, "reason": "a sorry outside the hypothesis lemmas: the glue is not glue"}
+            return {"adopted": False, "reason": "a sorry outside the hypothesis lemmas: the glue is not glue", "candidate": cand}
         for h in parsed["hypotheses"]:
             if statement_refuted(h["statement"], refutations):
                 return {"adopted": False, "reason": f"re-proposed a refuted statement as {h['name']}"}
         names = [h["name"] for h in parsed["hypotheses"]]
         if len(names) != len(set(names)):
-            return {"adopted": False, "reason": "duplicate hypothesis names"}
+            return {"adopted": False, "reason": "duplicate hypothesis names", "candidate": cand}
         res = self.check(cand, f"skeleton-c{cycle}")
         if not res["ok"]:
-            return {"adopted": False, "reason": "does not compile: " + (res["errors"][:1] or [""])[0][:200]}
+            return {"adopted": False, "reason": "does not compile: " + (res["errors"][:1] or [""])[0][:200],
+                    "errors": res["errors"][:6], "candidate": cand}
         cand = res.get("body", cand)
         try:
             closed = self._close_holes_without_model(cand, frozen)
@@ -4712,10 +5379,12 @@ for the SAT solver instead of enumerating it.
         circ = self._circular_premise(cand, parsed, frozen, cycle)
         if circ:
             return {"adopted": False, "reason": circ, "parsed": parsed}
-        if not residual_improves(parsed, current):
+        improves = residual_improves(parsed, current)
+        if not improves and not allow_switch:
             return {"adopted": False, "reason": "no improvement over the skeleton in force", "parsed": parsed}
-        return {"adopted": True, "skeleton": cand, "parsed": parsed,
-                "reason": "improves the residual" if current else "first skeleton"}
+        return {"adopted": True, "skeleton": cand, "parsed": parsed, "switch": bool(current and not improves),
+                "reason": ("improves the residual" if improves else "route switch: the skeleton in force had stalled")
+                          if current else "first skeleton"}
 
     def _circular_premise(self, cand: str, parsed: dict, frozen: str, cycle: int) -> str | None:
         """A rejection reason if an open PUBLISHED premise is the target in disguise, else None.
@@ -4818,7 +5487,7 @@ for the SAT solver instead of enumerating it.
         return "circularity judge returned no verdict, so the premise is not accepted"
 
     def _attack_substatement(self, sub: str, name: str, sdir: Path, cycle: int, module: str | None, remaining: int,
-                             recursive: bool = False):
+                             recursive: bool = False, share: float | None = None):
         """Attack one closed hypothesis as a child run. Returns (exit_code, child), or (None, None) when the
         parent's budget is gone; never hands a child more than the parent has left.
 
@@ -4836,12 +5505,17 @@ for the SAT solver instead of enumerating it.
                   "mode": "research" if recursive else "fast",
                   "mode_reason": f"deductive sub-residual at depth {depth + 1}" if recursive else "deductive research-program hypothesis",
                   "invocations": []}
+            if isinstance(self.state.get("exploration"), dict):
+                st["exploration"] = self.state["exploration"]      # the child plans with what the parent learned
             (sdir / "state.json").write_text(json.dumps(st, indent=2))
         cargs = argparse.Namespace(**vars(self.args))
         cargs.resume, cargs.open, cargs.allow_research, cargs.skip_assess = str(sdir), False, recursive, True
         if recursive:
             cargs.reduce = "off"                       # the parent already reduced; a sub-residual plans directly
-            cargs.research_cycles = 1
+            cargs.research_cycles = max(1, int(getattr(self.args, "child_cycles", 1) or 1))
+            # a sub-residual explores its own target only when asked to (--explore-core); the parent's notebook
+            # reaches it through its state either way
+            cargs.explore = "on" if getattr(self.args, "explore_core", "off") == "on" else "off"
             cargs.hyps_per_cycle = min(2, int(getattr(self.args, "hyps_per_cycle", 4) or 2))
             cargs.residual_depth_current = depth + 1
         if self.args.run_budget:
@@ -4850,7 +5524,7 @@ for the SAT solver instead of enumerating it.
                 self.log.event("program", "budget_exhausted", cycle=cycle, spent_usd=round(self.spent_usd(), 2),
                                budget=self.args.run_budget)
                 return None, None
-            cargs.run_budget = min(left, max(0.5, left / max(1, remaining)))
+            cargs.run_budget = min(left, max(0.5, left * share if share else left / max(1, remaining)))
         else:
             cargs.run_budget = None
         child = Harness(cargs)
@@ -4923,11 +5597,18 @@ for the SAT solver instead of enumerating it.
         if parsed and not (parsed["main_present"] and parsed["glue_sorry_free"]):
             parsed, skeleton = None, ""          # a stale or hand-edited skeleton is not in force
         exp_out = ""
+        try:
+            self._maybe_explore()
+        except Harness.BudgetExhausted as e:
+            self.log.event("program", "stopped_on_budget", cycle=0, detail=str(e))
         for cycle in range(1, cycles + 1):
             progress = False             # Step 2: did this cycle DISCHARGE anything (not merely split)?
             try:
                 cdir = pdir / "cycles" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-c{cycle}"
                 cdir.mkdir(parents=True, exist_ok=True)
+                if (getattr(self.args, "explore_core", "off") == "on" and parsed
+                        and int(self.state.get("stall_cycles") or 0) >= 1):
+                    self._explore_core(pdir, parsed, skeleton)
                 refutations = load_refutations(pid)
                 # (a) refute first; a witness against an open hypothesis kills the skeleton in force
                 exp_out, rf = "", {"refuted": [], "clear": [], "invariants": []}
@@ -4958,15 +5639,18 @@ for the SAT solver instead of enumerating it.
                 # (b) plan: a residual skeleton, adopted only if it is real and better
                 lemmas = lemmas_path.read_text()
                 ledger_txt = ledger.read_text() if ledger.exists() else ""
-                resp = self.ask("plan", PLAN_PROMPT.format(
+                plan_prompt = PLAN_PROMPT.format(
                     pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
-                    literature=(self.state.get("literature") or "")[:4000],
+                    literature=self._literature_text(),
                     library=(self.library_context() + self.reduction_context()) or "(no cluster library for this problem)",
                     lemmas=lemmas[-6000:] or "(empty)", residual=skeleton[-6000:] or "(none yet)",
-                    experiments=exp_out[-4000:] or "(none)", refuted=refuted_context(pid),
+                    experiments=experiments_digest(exp_out) or "(none)", refuted=refuted_context(pid),
                     failures=failures_context(pdir), hyp_prefix=hyp_prefix,
-                    ledger=ledger_txt[-3000:] or "(empty)", cycle=cycle))
-                new_meta = json_block(resp) or {}
+                    ledger=ledger_txt[-3000:] or "(empty)", cycle=cycle)
+                stalled = int(self.state.get("stall_cycles") or 0) >= 1
+                allow_switch = bool(parsed) and stalled and int(getattr(self.args, "routes", 1) or 1) > 1
+                responses = self._plan_calls(pdir, plan_prompt, cycle, stalled=stalled)
+                new_meta = json_block(responses[0]) or {}
                 # The plan's ratings, derivations and failure moves for hypotheses ALREADY in force are kept even
                 # when its skeleton is not adopted: a rating is information about the argument, not about the
                 # candidate skeleton (the first masked #275 run lost its ratings this way).
@@ -4978,59 +5662,57 @@ for the SAT solver instead of enumerating it.
                             merged[h["name"]] = {**merged.get(h["name"], {}), **h}
                     meta = {**meta, "hypotheses": list(merged.values())}
                     parsed = parse_residual(skeleton, pid, meta, main=main)
-                for mv in (new_meta.get("failure_responses") or []):
-                    if isinstance(mv, dict) and mv.get("hypothesis"):
-                        with open(pdir / "moves.jsonl", "a") as f:
-                            f.write(json.dumps({"cycle": cycle, **{k: str(mv.get(k) or "")[:400] for k in ("hypothesis", "move", "detail")},
-                                                "at": now()}) + "\n")
-                        self.log.event("program", "failure_move", cycle=cycle, hypothesis=mv.get("hypothesis"),
-                                       move=mv.get("move"), detail=str(mv.get("detail") or "")[:160])
-                pm = re.search(r"```markdown\s*\n(.*?)```", resp, re.S)
-                with open(plan_path, "a") as f:
-                    f.write(f"\n\n## Cycle {cycle} ({now()})\n\n" + (pm.group(1).strip() if pm else "")
-                            + (f"\n\nRoute: {new_meta.get('route')}" if new_meta.get("route") else "") + "\n")
-                main_re = rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])"
-                blocks = lean_blocks(resp)
-                # A plan may split its skeleton across several fenced blocks ("continuation: this block concatenates
-                # directly after the previous one"), leaving the `def`s in one block and the theorem in the next.
-                # Taking only the block with the main theorem then loses the definitions and Lean rejects it for an
-                # unknown identifier, which reads as a mathematical failure and is not one (masked #275, cycle 1
-                # after resume). Try the single block first, then the concatenation of all of them.
-                cands = [b for b in blocks if re.search(main_re, b) and HYP_RE.search("\n" + b)]
-                cands += [b for b in blocks if re.search(main_re, b) and b not in cands]
-                if len(blocks) > 1:
-                    joined = "\n\n".join(blocks)
-                    if re.search(main_re, joined) and joined not in cands:
-                        cands.append(joined)
-                verdict = None
-                for k, cand in enumerate(cands):
-                    verdict = self._consider_skeleton(cand, new_meta, parsed, frozen, cycle, refutations, cdir, main=main,
-                                                      current_src=skeleton)
-                    if verdict.get("adopted"):
-                        break
-                    self.log.event("program", "skeleton_candidate_rejected", cycle=cycle, candidate=k + 1,
-                                   of=len(cands), reason=str(verdict.get("reason"))[:200])
+                options, verdict, cand = [], None, None
+                for ri, resp in enumerate(responses):
+                    rmeta = json_block(resp) or {}
+                    for mv in (rmeta.get("failure_responses") or []):
+                        if isinstance(mv, dict) and mv.get("hypothesis"):
+                            with open(pdir / "moves.jsonl", "a") as f:
+                                f.write(json.dumps({"cycle": cycle, **{k: str(mv.get(k) or "")[:400] for k in ("hypothesis", "move", "detail")},
+                                                    "at": now()}) + "\n")
+                            self.log.event("program", "failure_move", cycle=cycle, hypothesis=mv.get("hypothesis"),
+                                           move=mv.get("move"), detail=str(mv.get("detail") or "")[:160])
+                    pm = re.search(r"```markdown\s*\n(.*?)```", resp, re.S)
+                    with open(plan_path, "a") as f:
+                        f.write(f"\n\n## Cycle {cycle}" + (f", route {ri + 1} of {len(responses)}" if len(responses) > 1 else "")
+                                + f" ({now()})\n\n" + (pm.group(1).strip() if pm else "")
+                                + (f"\n\nRoute: {rmeta.get('route')}" if rmeta.get("route") else "") + "\n")
+                    v, c = self._first_adoptable(resp, rmeta, parsed, frozen, cycle, refutations, cdir, main, skeleton,
+                                                 allow_switch=allow_switch)
+                    if v is not None and not v.get("adopted"):
+                        v, c, rmeta = self._repair_plan(v, c, rmeta, parsed, frozen, cycle, refutations, cdir, main,
+                                                        skeleton, allow_switch=allow_switch)
+                    if v is not None and v.get("adopted"):
+                        options.append({"verdict": v, "meta": rmeta, "cand": c})
+                        if v.get("proved"):
+                            break
+                    elif v is not None:
+                        self._record_plan_rejection(pdir, cdir, cycle, v, c, rmeta, parsed)
+                        verdict, cand = v, c
+                if options:
+                    proofs = [i for i, o in enumerate(options) if o["verdict"].get("proved")]
+                    pick = proofs[0] if proofs else (0 if len(options) == 1 else self._route_judge(options, cycle))
+                    for i, o in enumerate(options):
+                        if i != pick:
+                            record_alternative(pdir, cycle, o["verdict"]["skeleton"], o["verdict"]["parsed"]["metric"],
+                                               str(o["meta"].get("route") or ""))
+                    verdict, cand, new_meta = options[pick]["verdict"], options[pick]["cand"], options[pick]["meta"]
                 if verdict is None:
                     self.log.event("program", "skeleton", cycle=cycle, adopted=False, reason="no skeleton block in the plan")
                 else:
                     self.log.event("program", "skeleton", cycle=cycle, adopted=bool(verdict.get("adopted")),
-                                   reason=verdict.get("reason"), candidates=len(cands),
-                                   metric=(verdict.get("parsed") or {}).get("metric"))
-                    if not verdict.get("adopted") and not str(verdict.get("reason", "")).startswith("no improvement"):
-                        # The planner's own output failing is a failure too: a skeleton that does not compile (masked
-                        # #275's all-odd sub-residual died on an unknown identifier in its glue) must reach the next
-                        # plan as PROOF FAILURES, or the same skeleton is re-proposed with the same error.
-                        (cdir / "skeleton.rejected.lean").write_text(cand)
-                        record_failure(pdir, {"cycle": cycle, "name": "(skeleton)", "kind": "skeleton", "statement": "",
-                                              "exit": None, "stop_reason": f"skeleton rejected: {verdict.get('reason')}",
-                                              "attempts": 1, "rejected_attempts": 0,
-                                              "best_attempts": [{"name": f"skeleton-c{cycle}", "compiled": False, "sorries": None,
-                                                                 "errors": [str(verdict.get("reason"))[:220]]}],
-                                              "unsolved_goals": [], "decomposition_errors": [], "diagnosis": None, "at": now()})
+                                   reason=verdict.get("reason"), candidates=verdict.get("n_candidates"),
+                                   metric=(verdict.get("parsed") or {}).get("metric"),
+                                   **({"routes": len(responses)} if len(responses) > 1 else {}),
+                                   **({"repaired": verdict["repaired"]} if verdict.get("repaired") else {}))
                     if verdict.get("adopted"):
                         prev_open = (parsed or {}).get("metric", {}).get("open_conjectures")
                         if prev_open is None or verdict["parsed"]["metric"]["open_conjectures"] < prev_open or verdict.get("proved"):
                             progress = True
+                        elif getattr(self.args, "stall_credit", "discharge") == "easier" and not verdict.get("switch"):
+                            progress = True      # adopted because its hardest open piece got easier
+                        if verdict.get("switch"):
+                            self.log.event("program", "route_switch", cycle=cycle, stall_cycles=self.state.get("stall_cycles"))
                         skeleton, parsed, meta = verdict["skeleton"], verdict["parsed"], new_meta
                         residual_path.write_text(skeleton)
                         with open(ledger, "a") as f:
@@ -5063,7 +5745,14 @@ for the SAT solver instead of enumerating it.
                     fails = failure_counts(pdir)
                     false_names = {h.get("name") for h in (meta.get("hypotheses") or [])
                                    if isinstance(h, dict) and h.get("believed_false") is True}
-                    todo = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names][:per_cycle]
+                    todo = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names]
+                    core = None
+                    if getattr(self.args, "attack_order", "easiest") == "core-first" and len(todo) > 1:
+                        # The core used to get what was left after the scaffolding, and runs stalled exactly there
+                        # (5 of the baseline's 11 time-split runs ended with only `hyp_core` open). Attack it first.
+                        core = max(todo, key=lambda h: (DIFFICULTY_RANK.get(h.get("difficulty", "unrated"), 2), h["complexity"]))
+                        todo = [core] + [h for h in todo if h is not core]
+                    todo = todo[:per_cycle]
                     if false_names & {h["name"] for h in parsed["hypotheses"] if h["open"]}:
                         self.log.event("program", "hypotheses_believed_false", cycle=cycle, names=sorted(false_names))
                     if not todo:
@@ -5100,8 +5789,12 @@ for the SAT solver instead of enumerating it.
                         # hard, gets the deductive treatment itself (its own skeleton, one level down) while depth
                         # allows: the failure is analysed by decomposition, not retried verbatim.
                         recursive = depth < max_depth and (fails.get(h["name"], 0) >= 1 or h.get("difficulty") == "hard")
+                        share = (float(getattr(self.args, "core_share", 0.5) or 0.5)
+                                 if core is not None and h is core and len(todo) > 1 else None)
+                        if share:
+                            self.log.event("program", "core_first", cycle=cycle, name=h["name"], share=share)
                         rc, child = self._attack_substatement(sub, h["name"], sdir, cycle, module, len(todo) - i,
-                                                              recursive=recursive)
+                                                              recursive=recursive, **({"share": share} if share else {}))
                         if rc is None:
                             break
                         with open(ledger, "a") as f:
@@ -5296,14 +5989,14 @@ for the SAT solver instead of enumerating it.
                 # (a) numerical experiments
                 resp = self.ask("experiments", EXPERIMENTS_PROMPT_LEMMA.format(
                     pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
-                    literature=(self.state.get("literature") or "")[:4000], plan=plan[-6000:] or "(no plan yet)"))
+                    literature=self._literature_text(), plan=plan[-6000:] or "(no plan yet)"))
                 exp_out = ""
                 m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
                 if m and unsafe_python(m.group(1)):
                     bad = unsafe_python(m.group(1))
                     resp = self.ask("experiments", EXPERIMENTS_PROMPT_LEMMA.format(
                         pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
-                        literature=(self.state.get("literature") or "")[:4000], plan=plan[-6000:] or "(no plan yet)")
+                        literature=self._literature_text(), plan=plan[-6000:] or "(no plan yet)")
                         + f"\n\nYour previous script was REJECTED by the safety screen for `{bad}`; allowed modules: "
                           f"{', '.join(sorted(ALLOWED_PY_MODULES))}.")
                     m = re.search(r"```python\s*\n(.*?)```", resp, re.S)
@@ -5319,7 +6012,7 @@ for the SAT solver instead of enumerating it.
                 # (b) plan + sub-statements
                 resp = self.ask("plan", PLAN_PROMPT_LEMMA.format(
                     pid=pid, statement_en=self.problem["statement"], statement=self.state["statement"],
-                    literature=(self.state.get("literature") or "")[:4000], plan=plan[-6000:] or "(none yet)",
+                    literature=self._literature_text(), plan=plan[-6000:] or "(none yet)",
                     experiments=exp_out[-4000:] or "(none)", lemmas=lemmas[-6000:] or "(empty)", ledger=ledger_txt[-3000:] or "(empty)",
                     cycle=cycle))
                 pm = re.search(r"```markdown\s*\n(.*?)```", resp, re.S)
@@ -6103,6 +6796,7 @@ def parse_residual(skeleton: str, pid, meta: dict | None = None, main: str | Non
             hyps.append({"name": name, "statement": prop, "kind": kind, "open": holes > 0, "holes": holes,
                          "source": src if kind == "published" else None, "derivation": k.get("derivation"),
                          "use": k.get("use"), "complexity": prop_complexity(prop),
+                         "basis": k.get("basis") if k.get("basis") in ("derived", "empirical") else None,
                          "difficulty": diff if diff in DIFFICULTY_RANK else "unrated"})
         else:
             glue_holes += holes
@@ -6309,6 +7003,52 @@ def hypothesis_span(skeleton: str, name: str) -> tuple[int, int] | None:
 SPLICED_NS_RE = re.compile(r"(?ms)^namespace\s+(\S+_ns)\s*$.*?^end\s+\1\s*$")
 
 
+def hoist_defs(code: str) -> str:
+    """Move each top-level definition, with the `open` commands directly above it, before the first declaration that
+    uses it. Nothing is added or removed, so every frozen declaration stays verbatim.
+
+    Train #997's cycle-2 re-plan pasted the frozen block (`open Set`, `def IsWellDistributed`, the target) after
+    hypotheses that used the definition. It failed on `Unknown identifier IsWellDistributed`, and the cycle's plan
+    was lost. That was an ordering slip, not a mathematical failure. `restore_spliced` had also put the certified
+    proofs, which use that definition, above it. A `namespace … end` or `section … end` run is one unit, since its
+    inside is never reordered; only a top-level definition moves."""
+    units, cur, depth = [], [], 0
+    for b in split_decls(code):
+        head = strip_comment_lines(b).strip().split("\n", 1)[0].strip()
+        if re.match(r"(?:noncomputable\s+)?(?:namespace|section)\b", head):
+            depth += 1
+        cur.append(b)
+        if re.match(r"end\b", head) and depth:
+            depth -= 1
+        if depth == 0:
+            units.append("\n\n".join(cur))
+            cur = []
+    if cur:
+        units.append("\n\n".join(cur))
+    blocks = units
+
+    def uses(name: str, block: str) -> bool:
+        return re.search(rf"(?<![A-Za-z0-9_'.]){re.escape(name)}(?![A-Za-z0-9_'!?])", strip_comment_lines(block)) is not None
+
+    changed, i, moves = False, 0, 0
+    while i < len(blocks) and moves < 4 * len(blocks):
+        s = strip_comment_lines(blocks[i]).lstrip("\n")
+        name = decl_name(blocks[i]) if DEF_HEAD_RE.match(s) else None
+        first = next((j for j in range(i) if uses(name, blocks[j])), None) if name and name != "(unnamed)" else None
+        if first is None:
+            i += 1
+            continue
+        k = i
+        while k - 1 > first and re.match(r"open\s", strip_comment_lines(blocks[k - 1]).strip()):
+            k -= 1
+        moved = blocks[k:i + 1]
+        del blocks[k:i + 1]
+        blocks[first:first] = moved
+        changed, moves = True, moves + 1
+        i = first + len(moved)
+    return "\n\n".join(blocks) + "\n" if changed else code
+
+
 def restore_spliced(cand: str, current: str) -> str:
     """Put back what a re-planned skeleton relies on from the skeleton in force but did not restate.
 
@@ -6499,7 +7239,10 @@ def failure_digest(child_state: dict, name: str, statement: str, cycle: int, exi
     return {"cycle": cycle, "name": name, "statement": statement[:400], "exit": exit_code,
             "stop_reason": str(child_state.get("stop_reason") or "")[:200],
             "attempts": len(attempts), "rejected_attempts": len(rejected),
+            # the attempt's own plan line travels with its errors: without it the next plan saw what broke, never
+            # what had been tried
             "best_attempts": [{"name": a.get("name"), "compiled": bool(a.get("compiled")), "sorries": a.get("n_sorries"),
+                               "plan": str(a.get("plan") or "")[:240] or None,
                                "errors": [str(e)[:220] for e in (a.get("errors") or [])[:3]]} for a in best],
             "unsolved_goals": list(dict.fromkeys(goals))[:4],
             "decomposition_errors": [str(e)[:220] for e in (dec.get("errors") or [])[:3]],
@@ -6543,10 +7286,103 @@ def failures_context(pdir: Path, limit: int = 6) -> str:
         for g in f.get("unsolved_goals") or []:
             lines.append(f"    unsolved goal: {g}")
         for a in f.get("best_attempts") or []:
+            if a.get("plan") and a["plan"] not in ("?", "one-shot generation"):
+                lines.append(f"    {a.get('name')} tried: {a['plan']}")
             if a.get("errors"):
                 lines.append(f"    {a.get('name')}: compiled={a.get('compiled')} sorries={a.get('sorries')} | " + " || ".join(a["errors"]))
         if f.get("diagnosis"):
             lines.append(f"    prover's diagnosis: {f['diagnosis'][:500]}")
+    return "\n".join(lines)
+
+
+EXP_FINDING_TAGS = ("REFUTED:", "CLEAR:", "DERIVATION:", "INVARIANT:", "OBSERVED:", "CONJECTURE:", "EVIDENCE:", "EXP:")
+
+
+def experiments_digest(out: str, limit: int = 4000) -> str:
+    """The experiments output as a plan sees it: every finding line first, then as much of the raw tail as fits.
+
+    The plan used to get the last `limit` characters of raw stdout, so findings printed early were cut. On train
+    #152 the Bose–Chowla and exhaustive-search data never reached the plan, and only the Erdős–Turán line, which
+    happened to sit inside the tail, did."""
+    out = out or ""
+    if len(out) <= limit:
+        return out
+    found = [l.strip() for l in out.splitlines() if l.strip().startswith(EXP_FINDING_TAGS)]
+    head = "\n".join(found)
+    if len(head) > limit * 3 // 4:
+        head = head[: limit * 3 // 4].rsplit("\n", 1)[0] + "\n[... more finding lines truncated]"
+    room = limit - len(head) - 60
+    tail = out[-room:] if room > 300 else ""
+    return (f"FINDINGS (every tagged line, in order):\n{head}"
+            + (f"\n\nRAW OUTPUT (last {len(tail)} characters):\n{tail}" if tail else ""))
+
+
+def plan_notes_context(pdir: Path, limit: int = 3000) -> str:
+    """The plan's own notes and routes from earlier cycles (PLAN.md), with any HUMAN DIRECTION kept whole.
+
+    PLAN.md was written every cycle and never read back, so each plan started from the skeleton alone, and the
+    direction a reviewer gave through `--review-wait` reached only the old lemma loop."""
+    try:
+        text = (pdir / "PLAN.md").read_text()
+    except OSError:
+        return ""
+    human = re.findall(r"(?ms)^## HUMAN DIRECTION.*?(?=^## |\Z)", text)
+    human_txt = "\n".join(h.strip() for h in human)[-limit // 2:]
+    rest = re.sub(r"(?ms)^## HUMAN DIRECTION.*?(?=^## |\Z)", "", text).strip()
+    room = max(0, limit - len(human_txt))
+    body = rest[-room:] if room else ""
+    return ((f"HUMAN DIRECTION (takes priority over your own notes):\n{human_txt}\n\n" if human_txt else "")
+            + (f"YOUR NOTES AND ROUTES FROM EARLIER CYCLES (newest last):\n{body}" if body.strip() else "")).strip()
+
+
+def record_alternative(pdir: Path, cycle: int, skeleton: str, metric: dict, route: str) -> None:
+    """Keep an admissible skeleton the route judge did not pick, so a later plan can switch to it on a stall."""
+    d = pdir / "alternatives"
+    d.mkdir(exist_ok=True)
+    path = d / f"c{cycle}-{hashlib.sha256(skeleton.encode()).hexdigest()[:8]}.lean"
+    path.write_text(skeleton)
+    with open(pdir / "alternatives.jsonl", "a") as f:
+        f.write(json.dumps({"cycle": cycle, "path": str(path), "metric": metric, "route": route[:600], "at": now()}) + "\n")
+
+
+def alternatives_context(pdir: Path, limit: int = 2, chars: int = 4000) -> str:
+    try:
+        rows = [json.loads(l) for l in (pdir / "alternatives.jsonl").read_text().splitlines() if l.strip()]
+    except (OSError, ValueError):
+        return ""
+    out = []
+    for r in rows[-limit:]:
+        try:
+            src = Path(r["path"]).read_text()
+        except (OSError, KeyError):
+            continue
+        m = r.get("metric") or {}
+        out.append(f"- from cycle {r.get('cycle')}: {m.get('open_conjectures')} open, hardest complexity "
+                   f"{m.get('max_complexity')}. Route: {r.get('route') or '(none given)'}\n```lean\n{src[-chars:]}\n```")
+    return "\n".join(out)
+
+
+def record_refusal(pdir: Path, entry: dict) -> None:
+    with open(pdir / "refusals.jsonl", "a") as f:
+        f.write(json.dumps(entry) + "\n")
+
+
+def refusals_context(pdir: Path, limit: int = 5) -> str:
+    """Skeletons the loop did not adopt because they did not improve the one in force. These were not recorded
+    anywhere, so a planner whose route was refused was never told and could propose it again, or drop it
+    unexamined. 39 of 95 plan candidates in the logs to 2026-09-24 were refused this way."""
+    try:
+        rows = [json.loads(l) for l in (pdir / "refusals.jsonl").read_text().splitlines() if l.strip()]
+    except (OSError, ValueError):
+        return ""
+    lines = []
+    for r in rows[-limit:]:
+        cm, pm = r.get("candidate_metric") or {}, r.get("current_metric") or {}
+        lines.append(f"- cycle {r.get('cycle')}: {r.get('reason')}. Yours: {cm.get('open_conjectures')} open, hardest "
+                     f"complexity {cm.get('max_complexity')}; in force: {pm.get('open_conjectures')} open, hardest "
+                     f"{pm.get('max_complexity')}. Route: {str(r.get('route') or '(none given)')[:300]}")
+        for h in (r.get("hypotheses") or [])[:4]:
+            lines.append(f"    {h}")
     return "\n".join(lines)
 
 
@@ -6627,7 +7463,8 @@ def render_residual_md(pid, parsed: dict | None, skeleton_path: Path, refutation
         for h in parsed["hypotheses"]:
             status = "certified" if not h["open"] else ("premise (published, not formalised here)" if h["kind"] == "published" else "OPEN conjecture")
             why = (h.get("source") or h.get("derivation") or "").replace("|", "/")[:160]
-            lines.append(f"| `{h['name']}` | {h['kind']} | {status} | {h['complexity']} | {why} |")
+            kind = h["kind"] + (" (empirical)" if h.get("basis") == "empirical" else "")
+            lines.append(f"| `{h['name']}` | {kind} | {status} | {h['complexity']} | {why} |")
         lines += ["", "Statements:", ""]
         for h in parsed["hypotheses"]:
             lines += [f"- `{h['name']}` : `{h['statement'][:400]}`"]
@@ -6933,7 +7770,9 @@ def main():
     runp.add_argument("--skip-assess", action="store_true", help="skip the triage stage (route = fast)")
     runp.add_argument("--mode", choices=["fast", "search-first", "construct", "research"], default=None,
                       help="override the triage routing decision")
-    runp.add_argument("--stop-after", choices=["assess", "search", "construct"], default=None, help="stop after this stage (for routing/search regressions)")
+    runp.add_argument("--stop-after", choices=["assess", "search", "construct", "explore"], default=None,
+                      help="stop after this stage (for routing/search regressions); `explore` runs the literature memo and "
+                           "one exploration session only, the cheap screen for changes to the idea stages")
     runp.add_argument("--search", choices=["auto", "always", "off"], default="auto",
                       help="bounded Python witness/counterexample search: auto = when triage routes search-first")
     runp.add_argument("--search-seconds", type=int, default=90, help="wall-clock cap for the search script")
@@ -6967,6 +7806,40 @@ def main():
     runp.add_argument("--min-child-budget", type=float, default=2.5,
                       help="deductive loop: do not start a hypothesis child with less than this many USD; attack fewer "
                            "hypotheses this cycle instead (0 disables)")
+    # -- discovery (docs/discovery-limits-2026-09-24.md): every capability below is OFF by default, so baseline pins
+    #    and the masked benchmark series keep their protocol; the time-split candidate `v3` turns them on together.
+    runp.add_argument("--explore", choices=["off", "on"], default="off",
+                      help="deductive loop: before the first plan, run a tool-using exploration session (Python sandbox, "
+                           "compute -> look -> conjecture -> test -> sketch) that writes a research notebook every plan sees")
+    runp.add_argument("--explore-budget", type=float, default=2.0, help="USD cap for one exploration session")
+    runp.add_argument("--explore-turns", type=int, default=60, help="turn cap for one exploration session")
+    runp.add_argument("--explore-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"],
+                      help="effort per exploration turn; the value of the stage is in its rounds, not one long turn")
+    runp.add_argument("--explore-core", choices=["off", "on"], default="off",
+                      help="when a cycle discharged nothing, explore the hardest open hypothesis before the next plan")
+    runp.add_argument("--empirical", choices=["off", "on"], default="off",
+                      help="let a pattern the computations support become a hypothesis (basis: empirical), labelled as such; "
+                           "Lean still decides. Default: derive-first, an underived pattern is OBSERVED only")
+    runp.add_argument("--routes", type=int, default=1,
+                      help="deductive loop: plans drawn per cycle, each told to take a different route; the best adoptable "
+                           "skeleton is chosen by a route judge and the others kept as alternatives to switch to on a stall")
+    runp.add_argument("--plan-effort", default=None, choices=["low", "medium", "high", "xhigh", "max"],
+                      help="effort for plan calls (default: the CLI default, which cost a mean $0.32 per plan to 2026-09-24)")
+    runp.add_argument("--plan-budget", type=float, default=None, help="USD cap per plan call (default: --call-budget)")
+    runp.add_argument("--attack-order", choices=["easiest", "core-first"], default="easiest",
+                      help="deductive loop: easiest hypotheses first (default), or the hardest open conjecture first with "
+                           "--core-share of what is left, then the rest")
+    runp.add_argument("--core-share", type=float, default=0.5, help="core-first: share of the remaining budget for the core")
+    runp.add_argument("--stall-credit", choices=["discharge", "easier"], default="discharge",
+                      help="what resets the stall count: a discharge only (default), or also an adopted skeleton whose hardest "
+                           "open piece got easier")
+    runp.add_argument("--literature-scope", choices=["status", "wide"], default="status",
+                      help="literature memo: status and route (default), or also partial results, analogous solved problems, "
+                           "transferable techniques and known obstructions")
+    runp.add_argument("--child-cycles", type=int, default=1, help="research cycles of a recursive (sub-residual) child")
+    runp.add_argument("--plan-repairs", type=int, default=1,
+                      help="deductive loop: repair rounds for a plan whose skeleton does not compile (the compiler errors are "
+                           "sent back once); 0 restores the old behaviour, where the cycle's plan was simply lost")
     runp.add_argument("--models", default=None, help="comma-separated model ids rotated across agentic attempts from round 2 (ensembles)")
     runp.add_argument("--literature-web", action="store_true", help="give the literature stage WebSearch/WebFetch (erdosproblems.com, forum, arXiv)")
     runp.add_argument("--web-budget", type=float, default=3.0, help="USD cap for the web-enabled literature call")

@@ -1,0 +1,23 @@
+{
+ "true_problem": "1048",
+ "alias_id": "96993",
+ "statement_en": "If $f\\in \\mathbb{C}[x]$ is a monic polynomial with all roots satisfying $\\lvert z\\rvert \\leq r$ for some $r<2$, then must\\[\\{ z: \\lvert f(z)\\rvert <1\\}\\]have a connected component with diameter $>2-r$?",
+ "statement_lean": "open Polynomial Erdos1043\n\ndef openLevelSet (f : Polynomial ℂ) : Set ℂ :=\n  {z : ℂ | ‖f.eval z‖ < 1}\n\ntheorem erdos_96993 :\n    ∀ (r : ℝ) (f : ℂ[X]), 0 < r → r < 2 → f.Monic → f.degree ≥ 1 → (∀ z ∈ f.roots, ‖z‖ ≤ r) →\n      ∃ z ∈ openLevelSet f, ENNReal.ofReal (2 - r) <\n        Metric.ediam (connectedComponentIn (openLevelSet f) z) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": false,
+ "errors": [
+  "line 248:16: unknown namespace `Erdos1043`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1048.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

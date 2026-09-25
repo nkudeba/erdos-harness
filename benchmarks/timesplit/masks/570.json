@@ -1,0 +1,43 @@
+{
+ "true_problem": "570",
+ "alias_id": "58348",
+ "statement_en": "Let $k\\geq 3$. Is it true that, if $m$ is sufficiently large, for any graph $H$ on $m$ edges without isolated vertices,\\[R(C_k,H) \\leq 2m+\\left\\lfloor\\frac{k-1}{2}\\right\\rfloor?\\]",
+ "statement_lean": "namespace SimpleGraph\nnoncomputable def graphRamsey {α β : Type*} [Fintype α] [Fintype β]\n    (G : SimpleGraph α) (H : SimpleGraph β) : ℕ :=\n  sInf { n : ℕ | ∀ (C : SimpleGraph (Fin n)), G.IsContained C ∨ H.IsContained Cᶜ }\nend SimpleGraph\n\nopen Filter\n\ntheorem erdos_58348 :\n    ∀ (k : ℕ) (hk : 3 ≤ k),\n      ∀ᶠ (m : ℕ) in atTop,\n        ∀ (W : Type) [Fintype W] (H : SimpleGraph W) [DecidableRel H.Adj],\n          (∀ v, 0 < H.degree v) →\n          H.edgeSet.ncard = m →\n          SimpleGraph.graphRamsey (SimpleGraph.cycleGraph k) H ≤ 2 * m + (k - 1) / 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Finite",
+  "Mathlib.Combinatorics.SimpleGraph.Circulant",
+  "Mathlib.Combinatorics.SimpleGraph.Copy"
+ ],
+ "tags": [
+  "graph theory",
+  "ramsey theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/570.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.graphRamsey"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "The convention that R = 0 when no valid n exists is harmless: Ramsey numbers are always finite, so R(C_k, H) is a genuine least element.",
+   "The defining property is monotone in n, so 'least n ≤ bound' is equivalent to the Ramsey property holding at n = bound.",
+   "The quantifier order (for each k, there exists M, for all m ≥ M, for all H) matches A's 'for m sufficiently large'.",
+   "The domains match: H is a finite simple graph with exactly m edges and no isolated vertices, and k ≥ 3.",
+   "The bound 2m + ⌊(k-1)/2⌋ is non-strict, as in A.",
+   "The subgraph notion (not necessarily induced copy of C_k in C, copy of H in the complement) is standard."
+  ],
+  "verdict": "Statement B faithfully restates A's conjecture answered YES, with matching quantifiers, domains, bound and standard Ramsey semantics, so a proof of B settles the pos direction.",
+  "backtranslation": "For every integer $k \\ge 3$ there is a threshold $M$ such that for every $m \\ge M$ the following holds. Let $H$ be any finite simple graph with no isolated vertices (every vertex has positive degree) and exactly $m$ edges. Then the Ramsey number $R(C_k, H)$ is at most $2m + \\lfloor (k-1)/2 \\rfloor$, where $C_k$ is the cycle on $k$ vertices.\n\nHere $R(C_k, H)$ is the least $n$ such that for every simple graph $C$ on $n$ vertices, either $C$ contains a copy of $C_k$ as a (not necessarily induced) subgraph, or the complement of $C$ contains a copy of $H$ as a subgraph. By convention this number is $0$ if no such $n$ exists, but such an $n$ always exists here.",
+  "cost_usd": 0.0403,
+  "model": "claude-opus-5-5"
+ }
+}

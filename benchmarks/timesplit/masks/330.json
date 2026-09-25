@@ -1,0 +1,29 @@
+{
+ "true_problem": "330",
+ "alias_id": "52584",
+ "statement_en": "Does there exist a minimal basis with positive density, say $A\\subset\\mathbb{N}$, such that for any $n\\in A$ the (upper) density of integers which cannot be represented without using $n$ is positive?",
+ "statement_lean": "namespace Set\nopen Filter\nopen scoped Topology\n@[inline]\nnoncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]\n    (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=\n  ((S ∩ A) ∩ Iio b).ncard / (A ∩ Iio b).ncard\nend Set\n\nnamespace Set\nopen Filter\nopen scoped Topology\nnoncomputable def upperDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]\n    (S : Set β) (A : Set β := Set.univ) : ℝ :=\n  atTop.limsup fun (b : β) ↦ S.partialDensity A b\nend Set\n\nopen Set\nopen scoped BigOperators Pointwise\n\ndef Rep (A : Set ℕ) (m h : ℕ) : Prop := m ∈ h • A\n\ndef UnrepWithout (A : Set ℕ) (n h : ℕ) : Set ℕ :=\n  {m | ¬ Rep (A \\ {n}) m h}\n\ndef MinAsymptoticAddBasisOfOrder (A : Set ℕ) (h : ℕ) : Prop :=\n  IsAsymptoticAddBasisOfOrder A h ∧ ∀ n ∈ A, ¬ IsAsymptoticAddBasisOfOrder (A \\ {n}) h\n\ntheorem erdos_52584 :\n    ∃ (A : Set ℕ), ∃ h, MinAsymptoticAddBasisOfOrder A h ∧\n    0 < A.upperDensity ∧ ∀ n ∈ A, 0 < (UnrepWithout A n h).upperDensity := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive basis"
+ ],
+ "ok": false,
+ "errors": [
+  "line 279:13: Unknown identifier `Iio`",
+  "line 279:33: Unknown identifier `Iio`",
+  "line 287:31: Invalid field `partialDensity`: The environment does not contain `Function.partialDensity`, so it is not possible to project the field `partialDensity` from an expression\n  S\nof type `β → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/330.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.partialDensity",
+  "Set.upperDensity"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

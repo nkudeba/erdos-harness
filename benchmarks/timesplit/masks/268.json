@@ -1,0 +1,21 @@
+{
+ "true_problem": "268",
+ "alias_id": "49038",
+ "statement_en": "Let $X\\subseteq \\mathbb{R}^3$ be the set of all points of the shape\\[\\left( \\sum_{n\\in A} \\frac{1}{n},\\sum_{n\\in A}\\frac{1}{n+1},\\sum_{n\\in A} \\frac{1}{n+2}\\right) \\]as $A\\subseteq\\mathbb{N}$ ranges over all infinite sets with $\\sum_{n\\in A}\\frac{1}{n}<\\infty$. Does $X$ contain an open set?",
+ "statement_lean": "theorem erdos_49038 (d : ℕ) :\n    (interior {x : Fin d → ℝ | ∃ A : Set ℕ, A.Infinite ∧\n    Summable (fun n : A => (1 : ℝ) / n ) ∧\n    x = fun i : Fin d => ∑' n : A, (1 : ℝ) / (n + i)}).Nonempty := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/268.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

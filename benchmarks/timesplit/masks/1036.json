@@ -1,0 +1,24 @@
+{
+ "true_problem": "1036",
+ "alias_id": "55229",
+ "statement_en": "Let $G$ be a graph on $n$ vertices which does not contain a trivial (empty or complete) graph on more than $c\\log n$ vertices. Must $G$ contain at least $2^{\\Omega_c(n)}$ many induced subgraphs which are not pairwise isomorphic?",
+ "statement_lean": "open Filter\n\ndef HasManyNonIsomorphicInducedSubgraphs {V : Type*} (G : SimpleGraph V) (k : ℝ) : Prop :=\n  ∃ 𝒮 : Set (Set V), (𝒮.Pairwise fun s t => IsEmpty (G.induce s ≃g G.induce t)) ∧\n    k ≤ (𝒮.ncard : ℝ)\n\ntheorem erdos_55229 :\n    ∀ c : ℝ, 0 < c → ∃ δ : ℝ, 0 < δ ∧ ∀ᶠ n : ℕ in atTop, ∀ G : SimpleGraph (Fin n),\n      (G.cliqueNum : ℝ) ≤ c * Real.log (n : ℝ) → (G.indepNum : ℝ) ≤ c * Real.log (n : ℝ) →\n        HasManyNonIsomorphicInducedSubgraphs G ((2 : ℝ) ^ (δ * (n : ℝ))) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Maps"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1036.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -501,6 +501,101 @@ only cued less and measured: `prepare.py --masked` (synthetic id, paraphrase, re
 prompt scrub) plus `probe.py` before and `compare.py` after. A closed masked run is evidence about the loop only
 when the probe showed no recognition and the route differs from the reference.
 
+## Measure self-improvement on the time-split benchmark, nowhere else
+
+`benchmarks/timesplit/` holds problems resolved in 2026 that the model does not know are resolved. The frozen
+Lean statement is formal-conjectures' main theorem with `answer(...)` stripped; every docstring and comment is
+removed, and every identifier carrying the problem number is renamed. Each item runs `--open` under a fixed
+protocol with a fresh synthetic id per evaluation, because `programs/erdos_<id>/` and the Atlas are keyed by id.
+`solved` means the TRUE direction verified. A verified proof of the wrong direction is a `contradiction` to
+re-audit, never a solve.
+
+As built on 2026-09-24 it has 35 items: test 2, dev 18, train 15. The stated June 2026 cutoff protected little:
+35 of the 53 problems the probe excluded were resolved in 2026 itself, so the probe, not the date, decides
+contamination.
+
+Gate a harness change on `dev`, paired against the baseline (`score --baseline`). Report `test` and never
+select on it. Harvest lessons and lemmas from `train` runs only: anything learned from a dev or test run carries
+that item's solution into every later evaluation. The model's prior guess of the answer is right 26 times in 31,
+so calling the direction is a weak signal. See `benchmarks/timesplit/README.md`.
+
+**Gate iterations on `pieces`, keep solves as the verdict.** Three arms and 20 dev runs at $8 solved nothing, so
+a solve-only gate cannot tell a better harness from a worse one. `pieces` counts the true direction's certified
+steps that are:
+- **closed**: nothing beneath them open. A refinement parent over open sub-hypotheses has no hole of its own and
+  the harness's `certified` counts it.
+- **used**: the glue reaches them. Baseline #419 had 3 of 4 certified lemmas orphaned by a re-plan.
+- **non-trivial**: the free cascade does not prove them alone.
+- **maximal**: counted once however the prover structured the proof.
+
+Each item is measured at record time (`progress --tag` for older runs, Lean only). A paired item is a win only
+with more `pieces` AND a larger `certified_size`. Finer chunking alone raises the first, and verbosity alone
+raises the second; on #392 the naive count said 3-1 where both runs had the same single hypothesis open. A
+candidate is kept when it loses no solve and wins the sign test at one-sided p ≤ 0.05. It gates iterations and
+never describes a problem.
+
+**The free cascade must have every alternative close its goal (fixed 2026-09-24).** `first | … | (simp_all) | …`
+accepted a `simp_all` or `norm_num` that only simplifies, so the tactics after it never ran. Lean then reported the
+leftover goal at the enclosing `by`, a line above the hole. `_close_holes_without_model` attributes errors by line,
+so it read the hole as closed, its keep-check failed, and it reverted the whole pass, genuine closures included.
+
+A replay of 41 saved passes outside time-split dev and test (`benchmarks/timesplit/analysis/cascade_replay.py`)
+found 71 holes read as closed and 0 actually closed; the guarded string closes 3. `CASCADE` is now guarded
+(`(simp_all; done)`, `(norm_num; done)`, `(aesop; done)`), and `tests/test_cascade_guard.py` pins both the
+shape and, under `DEDUCTIVE_LEAN_TESTS=1`, the Lean behaviour. Time-split pins before 3aaab15 keep the old string,
+so an arm pinned from the live harness differs from `baseline-v2-84f21c5` in the cascade as well as in anything
+else committed since `ce09b11`. Build a candidate on that pin plus patches, or re-run the baseline.
+
+## Discovery fixes and options (2026-09-24)
+
+`docs/discovery-limits-2026-09-24.md` is the audit behind these. The **fixes are on by default** and change
+every run on the live harness.
+- **No MCP server on any call.** `--setting-sources ""` does not stop the claude.ai account's connectors, which
+  arrive as tool definitions after a session's first tool call: 221k-326k cache-write tokens, $1.78-$2.63 for a
+  session that read one file. `_run` now passes `--strict-mcp-config` with an empty `--mcp-config`, and that
+  session costs $0.0125.
+- **Tool sessions are scoped.** A bare `Read` in `--allowedTools` reads any file on the machine (measured: the
+  benchmark's reference notes, by absolute path). The prover may now read only:
+  - its sandbox;
+  - `formal/.lake/packages`;
+  - `Formal/Library`;
+  - its own `Formal/Programs/Erdos<id>*` modules. Other runs' certified lemmas live under `Programs` too.
+
+  It writes only in its sandbox. Exploration reads and writes only its sandbox. `scoped_read_rules` builds the
+  rules.
+- **Text past the cap is kept.** When a call ends past `--max-budget-usd`, the json result drops its text even
+  though the turn finished and was billed. `_run` reads stream-json and keeps a text call's answer
+  (`recovered_over_budget`).
+- **An over-budget idea call** (plan, experiments, route judge) is retried at the same effort, never a lower one.
+- **Plans.**
+  - A skeleton that does not compile gets one repair round with its compiler errors (`--plan-repairs`). 25 of 95
+    plan candidates had died that way.
+  - `hoist_defs` moves a definition above its first use; this alone would have saved train #997's cycle 2.
+  - A plan now sees its own earlier notes and any HUMAN DIRECTION (`plan_notes_context`).
+  - It sees the routes that were refused and why (`refusals.jsonl`). 39 refusals were silent.
+  - Every finding line of the experiments comes first (`experiments_digest`); #152's growth data had been
+    truncated away.
+  - Failure digests carry what each attempt tried.
+- **Masking keeps named results.** "Erdős–Ko–Rado" had become "the the catalogue's–Ko–Rado".
+
+**The options are off by default,** so baseline pins and the masked series keep their protocol. The time-split
+candidate `v3` (`V3_FLAGS`) turns them on together:
+- `--explore`: an agentic session that computes in a Python sandbox (`./run.sh`, the usual static screen plus
+  numpy, sympy and networkx) and writes NOTEBOOK.md. Every later plan, experiments call, proof attempt and child
+  sees the notebook. It runs once per run (both `--open` directions share it).
+- `--explore-core`: after a cycle that discharged nothing, explore the hardest open hypothesis.
+- `--empirical`: a systematically supported pattern may become a hypothesis with `basis: empirical`, labelled as
+  such; Lean still decides.
+- `--routes k`: k plans per cycle on different routes. A route judge picks one, and the rest are kept; after a
+  stall a new route may replace the incumbent even if it is not "better" by the syntactic measure.
+- `--attack-order core-first` with `--core-share`: the hardest hypothesis is attacked first, with a real budget.
+- `--plan-effort`, `--plan-budget`, `--stall-credit easier`, `--literature-scope wide` (partial results,
+  analogues, techniques, obstructions), `--child-cycles`.
+
+`timesplit.py ideas` grades, blind, whether a run's notes contain the key idea of the published resolution,
+against `benchmarks/timesplit/ideas/<n>.md`. Those notes exist for train items only, and the harness never sees
+them.
+
 ## Current research guidance reaches the model
 
 Store concise operator next steps in `atlas-data/research-guidance/<id>.md`, and link the file from an Atlas finding. The harness reloads this file for assessment, reduction, experiments, planning, ordinary and agentic proving, refinement, decomposition, criticism, search and construction. It applies to fresh runs, resumed checkpoints and research children without modifying the frozen problem input. Guidance is labelled unverified operator context, logged with its source and hash, and preserved in the actual prompt transcript (also TASK.md for agentic attempts). It is excluded from formalization and blind verification prompts. Record new results, open obligations and refuted routes with explicit status; do not promote a draft or numerical check into a proved premise.

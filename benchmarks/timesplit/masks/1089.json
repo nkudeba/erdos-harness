@@ -1,0 +1,27 @@
+{
+ "true_problem": "1089",
+ "alias_id": "21665",
+ "statement_en": "Let $g_d(n)$ be minimal such that every collection of $g_d(n)$ points in $\\mathbb{R}^d$ determines at least $n$ many distinct distances. Estimate $g_d(n)$. In particular, does\\[\\lim_{d\\to \\infty}\\frac{g_d(n)}{d^{n-1}}\\]exist?",
+ "statement_lean": "open scoped Finset\nvariable {X : Type*} [MetricSpace X]\nnoncomputable def distanceSet (points : Finset X) : Finset ℝ :=\n  points.offDiag.image fun (pair : X × X) => dist pair.1 pair.2\n\nopen scoped Finset\nvariable {X : Type*} [MetricSpace X]\nnoncomputable def distinctDistances (points : Finset X) : ℕ :=\n  #(distanceSet points)\n\nopen scoped Finset\nvariable {X : Type*} [MetricSpace X]\nvariable (X) in\nnoncomputable def minimalDistinctDistances (n : ℕ) : ℕ :=\n  sInf {m : ℕ | ∃ points : Finset X, #points = n ∧ distinctDistances points = m}\n\nopen Filter\nopen scoped Topology\n\nnoncomputable def g (d n : ℕ) : ℕ :=\n  sInf {m : ℕ | n ≤ minimalDistinctDistances (EuclideanSpace ℝ (Fin d)) m}\n\ntheorem erdos_21665 :\n    ∀ n : ℕ, 2 ≤ n → ∃ L : ℝ,\n      Tendsto (fun d : ℕ => (g d n : ℝ) / (d : ℝ) ^ (n - 1)) atTop (𝓝 L) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Analysis.InnerProductSpace.PiL2"
+ ],
+ "tags": [
+  "geometry",
+  "distances"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1089.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "distanceSet",
+  "distinctDistances",
+  "minimalDistinctDistances"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

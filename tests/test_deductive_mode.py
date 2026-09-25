@@ -686,7 +686,7 @@ class SkeletonRejectionFeedsForward(unittest.TestCase):
         h.args.research_cycles = 2
         bad = SKELETON.replace("  intro n\n  exact erdos_99_hyp_a n", "  sorry")      # a sorry in the glue
         prompts = []
-        h.ask = _judged(lambda purpose, prompt, **kw: prompts.append(prompt) or ("```lean\n" + bad + "\n```\n```json\n{}\n```\n"))
+        h.ask = _judged(lambda purpose, prompt, **kw: prompts.append((purpose, prompt)) or ("```lean\n" + bad + "\n```\n```json\n{}\n```\n"))
         h._install_lemmas_module = lambda pdir: None
         rc = h.run_program()
         self.assertEqual(rc, 2)                                            # nothing adopted, nothing certified
@@ -694,7 +694,12 @@ class SkeletonRejectionFeedsForward(unittest.TestCase):
         fs = [json.loads(l) for l in (pdir / "failures.jsonl").read_text().splitlines()]
         self.assertEqual(fs[0]["kind"], "skeleton")
         self.assertIn("glue", fs[0]["stop_reason"])
-        self.assertIn("YOUR OWN SKELETON was rejected", prompts[1])         # cycle 2 saw cycle 1's rejection
+        plans = [p for purpose, p in prompts if purpose == "plan"]
+        self.assertIn("YOUR OWN SKELETON was rejected", plans[1])           # cycle 2 saw cycle 1's rejection
+        # each rejected plan got one repair round first, which saw the reason and the as-compiled skeleton
+        repairs = [p for purpose, p in prompts if purpose == "plan-repair"]
+        self.assertEqual(len(repairs), 2)
+        self.assertIn("the glue is not glue", repairs[0])
         self.assertEqual(H.failure_counts(pdir), {})                       # skeleton entries are not hypotheses
 
 
@@ -822,6 +827,18 @@ class BenchmarkIsolation(unittest.TestCase):
         self.assertIn("Erdos.Covering.density", out)            # library declaration names are untouched
         self.assertIn("Erdos273.pool_bound", out)
         self.assertIn("OPEN problem (#80317)", out)
+
+    def test_mask_keeps_named_results_and_never_doubles_the_article(self):
+        out = H.mask_prompt("Use the Erdős–Ko–Rado theorem, the Erdős-Szekeres bound, an Erdős–Rényi graph, "
+                            "Erdős–Turán sets and the Chvátal–Erdős condition. The Erdős conjecture on this, "
+                            "as Erdős showed—and Erdős's own note—is open (Erdős problem #7).")
+        for name in ("Erdős–Ko–Rado", "Erdős-Szekeres", "Erdős–Rényi", "Erdős–Turán", "Chvátal–Erdős"):
+            self.assertIn(name, out)
+        self.assertNotIn("the the", out.lower())
+        self.assertIn("the catalogue's conjecture", out)
+        self.assertIn("as the catalogue's showed", out)            # a dash before lower case is punctuation
+        self.assertIn("problem #7", out)
+        self.assertNotIn("Erdős problem", out)
 
     def test_masked_backend_scrubs_every_call_and_forwards_attributes(self):
         seen = {}

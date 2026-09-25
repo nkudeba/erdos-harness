@@ -1,0 +1,23 @@
+{
+ "true_problem": "904",
+ "alias_id": "94766",
+ "statement_en": "Let $r\\geq 2$ and let $t_r(n)$ be the Turán number (the maximal number of edges in a graph on $n$ vertices with no $K_{r+1}$). If $G$ is a graph with $n$ vertices and $m\\geq t_r(n)$ edges there exists a clique on $r$ vertices, say $x_1,\\ldots,x_r$, such that\\[d(x_1)+\\cdots+d(x_r)\\geq \\frac{2rm}{n}.\\]",
+ "statement_lean": "open Finset\n\nabbrev n (V : Type*) [Fintype V] : ℕ := Fintype.card V\n\nabbrev turanNumber (n r : ℕ) : ℕ := #(SimpleGraph.turanGraph n r).edgeFinset\n\ntheorem erdos_94766 :\n    ∀ (V : Type*) [Fintype V] (G : SimpleGraph V) [DecidableRel G.Adj]\n      (r : ℕ) (hr : r ∈ Set.Icc 1 (n V)) (hm : turanNumber (n V) r ≤ #G.edgeFinset),\n      ∃ s, G.IsNClique r s ∧ 2 * r * #G.edgeFinset ≤ n V * ∑ v ∈ s, G.degree v := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Extremal.Turan"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/904.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

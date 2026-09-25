@@ -34,3 +34,6 @@ erdos-atlas/
 
 # Test debris: the reduce/escalate tests write into the real knowledge dir under a synthetic problem id
 knowledge/reductions/99273/
+
+# Pinned harness copies for multi-day benchmark evaluations (benchmarks/timesplit/timesplit.py pin)
+pin_*_harness.py

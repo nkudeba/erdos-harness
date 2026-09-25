@@ -165,3 +165,43 @@ class Papercuts(unittest.TestCase):
             finally:
                 os.chdir(old)
         self.assertTrue(Path(seen["cmd"][-1]).is_absolute())
+
+
+def _stream(result_event, texts):
+    lines = [json.dumps({"type": "system", "subtype": "init"})]
+    lines += [json.dumps({"type": "assistant", "message": {"content": [{"type": "text", "text": t}]}}) for t in texts]
+    lines.append(json.dumps({"type": "result", **result_event}))
+    return "\n".join(lines) + "\n"
+
+
+class OverBudgetRecovery(unittest.TestCase):
+    """A call that finished its turn past `--max-budget-usd` is billed in full, and the json result drops its text
+    (measured 2026-09-24). A text-only call keeps the answer from the stream; a tool-using session still fails."""
+
+    OVER = {"subtype": "error_max_budget_usd", "is_error": True, "stop_reason": "end_turn", "total_cost_usd": 0.1,
+            "num_turns": 1, "errors": ["Reached maximum budget ($0.03)"]}
+
+    def test_text_call_keeps_the_paid_answer(self):
+        with patch.object(H.subprocess, "run", return_value=_resp(1, stdout=_stream(self.OVER, ["", "THE ANSWER"]))):
+            b = H.ClaudeCliBackend(None, 10)
+            self.assertEqual(b.complete("plan", "x"), "THE ANSWER")
+        self.assertTrue(b.last_meta["recovered_over_budget"])
+        self.assertAlmostEqual(b.total_cost_usd, 0.1)                 # the spend is still counted
+
+    def test_an_unfinished_turn_is_not_recovered(self):
+        cut = {**self.OVER, "stop_reason": "max_tokens"}
+        with patch.object(H.subprocess, "run", return_value=_resp(1, stdout=_stream(cut, ["half an answer"]))), \
+             patch.object(H.time, "sleep", lambda s: None):
+            with self.assertRaisesRegex(RuntimeError, "error_max_budget_usd"):
+                H.ClaudeCliBackend(None, 10).complete("plan", "x")
+
+    def test_tool_sessions_still_fail_over_budget(self):
+        with patch.object(H.subprocess, "run", return_value=_resp(1, stdout=_stream(self.OVER, ["step 3 of 9"]))), \
+             patch.object(H.time, "sleep", lambda s: None):
+            with self.assertRaisesRegex(RuntimeError, "error_max_budget_usd"):
+                H.ClaudeCliBackend(None, 10).complete_agentic("prove-agentic", "x", Path("/tmp"), 5)
+
+    def test_a_normal_stream_returns_the_result(self):
+        ok = {"subtype": "success", "is_error": False, "result": "PONG", "total_cost_usd": 0.01, "num_turns": 1}
+        with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["PONG"]))):
+            self.assertEqual(H.ClaudeCliBackend(None, 10).complete("t", "x"), "PONG")

@@ -1,0 +1,47 @@
+{
+ "decision": {
+  "commit": "pos",
+  "answer": "true",
+  "share": 1.0,
+  "score": {
+   "true": 0.8,
+   "false": 0.0
+  }
+ },
+ "best_frame": 0,
+ "attempts": [
+  {
+   "frame": 0,
+   "answer": "true",
+   "confidence": 0.8,
+   "complete": false,
+   "key_steps": [
+    "With a=floor(sqrt n), m=n-a^2 in [0,2a]: if m is odd, (a,(m+1)/2,(m-1)/2) works.",
+    "If 4 | m, (a, m/4+1, m/4-1) works, or (a,0,0) when m=0.",
+    "If m ≡ 2 mod 4, n-x^2 is never divisible by 4, so n-x^2=de must use d,e odd, and the trivial factorization always gives y>a.",
+    "Criterion: if q is odd, q^2<=2a, j is odd with 1<=j<=q-2 and q | n-(a-j)^2, then x=a-j, y=(q+e)/2, z=|q-e|/2 with e=(n-x^2)/q is a valid representation."
+   ],
+   "gap": "In the case m ≡ 2 mod 4, prove the existence of an odd q<=sqrt(2a) and an odd j<=q-2 with (a-j)^2 ≡ n mod q (or an equivalent factorization statement) for all large n.",
+   "text": "**Answer: TRUE (I believe), but I have not completed the proof.** Below I prove the statement for every $n$ outside one residue case. For the remaining case I reduce it to one explicit arithmetic claim that I could not prove unconditionally.\n\n**Lean conventions.** The subtraction is truncated ℕ subtraction. For $n>0$ an equation $n=x^2+y^2-z^2$ is therefore a genuine integer identity with $x^2+y^2>z^2$. The target is to write $n=x^2+y^2-z^2$ with $x,y,z\\le a:=\\lfloor\\sqrt n\\rfloor$. Put $m:=n-a^2$, so $0\\le m\\le 2a$.\n\n**Case A: $m$ odd.** Take\n$$x=a,\\qquad y=\\tfrac{m+1}{2},\\qquad z=\\tfrac{m-1}{2}.$$\n- Then $y^2-z^2=m$, so $x^2+y^2-z^2=a^2+m=n$.\n- Since $m\\le 2a$ is odd, $m\\le 2a-1$, so $y\\le a$.\n- Also $z<y$, so all three squares are at most $n$.\n\n**Case B: $m\\equiv 0 \\pmod 4$.**\n- If $m=0$, take $(x,y,z)=(a,0,0)$.\n- Otherwise take $x=a$, $y=m/4+1$, $z=m/4-1$. Then $y^2-z^2=m$.\n- $y\\le a/2+1\\le a$ holds for $a\\ge 2$.\n\n**Case C: $m\\equiv 2 \\pmod 4$ (the hard case).**\n\n*Parity obstruction.* Here $n\\equiv a^2+2 \\pmod 4$, so $n\\equiv 2$ or $3 \\pmod 4$. Hence $n-x^2\\not\\equiv 0 \\pmod 4$ for every $x$. So $n-x^2=(y-z)(y+z)$ forces both factors odd, and $n-x^2$ must be odd.\n\nWrite $x=a-j$. Then\n$$M_j:=n-x^2=m+2aj-j^2,$$\nand $M_j$ is odd exactly when $j$ is odd.\n\n*Why the trivial factorization fails.* Using $M_j=1\\cdot M_j$ gives $y=(M_j+1)/2$. For every $j\\ge 1$ this exceeds $a$, since $M_j\\ge 2a+1$. So a nontrivial factorization is required.\n\n*Sufficient criterion (proved).* Suppose $q$ is odd, $q^2\\le 2a$, $j$ is odd with $1\\le j\\le q-2$, and $q\\mid M_j$. Set\n$$d=q,\\qquad e=M_j/q,\\qquad x=a-j,\\qquad y=\\tfrac{d+e}{2},\\qquad z=\\tfrac{|d-e|}{2}.$$\n- $d$ and $e$ are odd, so $y,z$ are integers and $y^2-z^2=de=M_j$. Hence $n=x^2+y^2-z^2$.\n- The condition $y\\le a$ is equivalent to $M_j\\le q(2a-q)$.\n- We have $M_j\\le 2a(j+1)-j^2\\le 2a(q-1)-j^2$.\n- Therefore $M_j\\le q(2a-q)$ holds whenever $q^2\\le 2a+j^2$, which follows from $q^2\\le 2a$.\n- Finally $z\\le y\\le a$ and $0\\le x\\le a$.\n\n*The congruence.* $q\\mid M_j$ is equivalent to $(a-j)^2\\equiv n \\pmod q$. So $n$ must be a quadratic residue mod $q$, and one of its square roots must be congruent to $a-j$ for an odd $j\\le q-2$.\n\n**Gap.** It remains to show that for all large $n$ in Case C there exist an odd $q\\le\\sqrt{2a}$ and an odd $j\\in[1,q-2]$ with $(a-j)^2\\equiv n \\pmod q$.\n\n- If this is replaced by a more flexible version (other factor ranges, $d$ as the larger factor), the conclusion follows.\n- Heuristically it clearly holds: there are about $\\sqrt n$ representations on average.\n- Proving it unconditionally seems to need a bound on the least modulus at which $n$ is a quadratic residue, plus equidistribution of the roots. I could not do this elementarily.\n\n```json\n{\"answer\": \"true\", \"confidence\": 0.8, \"complete\": false,\n \"key_steps\": [\"With a=floor(sqrt n), m=n-a^2 in [0,2a]: if m is odd, (a,(m+1)/2,(m-1)/2) works.\",\n  \"If 4 | m, (a, m/4+1, m/4-1) works, or (a,0,0) when m=0.\",\n  \"If m ≡ 2 mod 4, n-x^2 is never divisible by 4, so n-x^2=de must use d,e odd, and the trivial factorization always gives y>a.\",\n  \"Criterion: if q is odd, q^2<=2a, j is odd with 1<=j<=q-2 and q | n-(a-j)^2, then x=a-j, y=(q+e)/2, z=|q-e|/2 with e=(n-x^2)/q is a valid representation.\"],\n \"gap\": \"In the case m ≡ 2 mod 4, prove the existence of an odd q<=sqrt(2a) and an odd j<=q-2 with (a-j)^2 ≡ n mod q (or an equivalent factorization statement) for all large n.\"}\n```",
+   "cost": 0.2577
+  },
+  {
+   "frame": 1,
+   "answer": "true",
+   "confidence": 0.8,
+   "complete": false,
+   "key_steps": [
+    "For n>0 the truncated-subtraction equation is equivalent to x^2+y^2=n+z^2.",
+    "Lemma 1: a representation exists iff for some x<=sqrt n, n-x^2=q q' with q≡q' mod 2 and q in [sqrt n - x, sqrt n + x], taking y=(q+q')/2, z=|q'-q|/2.",
+    "With n=s^2+r: r=0 uses (s,0,0); r odd uses (s,(r+1)/2,(r-1)/2); r≡0 mod 4 uses (s,r/4+1,r/4-1).",
+    "When r≡2 mod 4, x must have parity opposite to s, and it suffices that N_j=n-(s-j)^2 (j odd) has a divisor in [j+1,2s-j]; e.g. N_1=r+2s-1 composite suffices.",
+    "Small cases such as n=6 fail, consistent with 'large n'."
+   ],
+   "gap": "Prove that for every large n=s^2+r with r≡2 (mod 4) there is an odd j with n-(s-j)^2 having a divisor in [j+1, 2s-j] (a divisor-in-range / quadratic-residue existence statement not established here).",
+   "text": "**Answer: very likely TRUE. I do not have a complete proof.** Below I reduce the problem to one number-theoretic condition and show which cases are fully settled. The remaining step is a divisor-existence statement that I could not prove with elementary methods.\n\n**Why TRUE is the likely answer.** No counterexample is apparent. The statement also fails for some small n, which is why it says \"large\". For example, n = 6: the only available squares are 0, 1, 4, and none of the values x²+y²−z² equals 6. On the other hand, n = 18 = 3²+3²−0² works. Heuristically, the needed divisors should be plentiful for large n; this is not a proof.\n\n**Convention.** Write n = s² + r with s = ⌊√n⌋ and 0 ≤ r ≤ 2s.\n\nIn the Lean statement ℕ-subtraction truncates. But since n > 0, the equation n = x²+y²−z² is equivalent to x²+y² = n + z². So the conditions are exactly the integer ones.\n\n**Lemma 1 (reformulation).** For 0 ≤ x ≤ √n, put N = n − x². Then n = x² + y² − z² with y, z ≤ √n holds if and only if N = q·q′ where:\n- q ≡ q′ (mod 2),\n- q + q′ ≤ 2√n.\n\nIn that case y = (q+q′)/2 and z = |q′−q|/2. Since R² − N = x² for R = √n, the condition q + N/q ≤ 2R is equivalent to q ∈ [R−x, R+x].\n\n**Lemma 2 (the easy cases).**\n- **r = 0:** take (x, y, z) = (s, 0, 0).\n- **r odd:** take x = s, y = (r+1)/2, z = (r−1)/2.\n  - The equation holds because y² − z² = r.\n  - The bound y ≤ s holds because r is odd and at most 2s, so r ≤ 2s−1.\n- **r ≡ 0 (mod 4), r ≥ 4:** take x = s, y = r/4 + 1, z = r/4 − 1.\n  - The equation holds because y² − z² = r.\n  - The bound holds because y ≤ s/2 + 1 ≤ s once s ≥ 2.\n\n**Lemma 3 (the hard case r ≡ 2 mod 4).**\n- If x ≡ s (mod 2), then N ≡ 2 (mod 4). Such an N is never a difference of two squares, so this parity is ruled out.\n- So we need x = s − j with j odd. Then N_j = n − (s−j)² = r + 2js − j² is odd.\n- By Lemma 1, a sufficient condition is that N_j has a divisor q with j+1 ≤ q ≤ 2s−j. This works because R − x < j+1 and R + x ≥ 2s − j.\n- For example, with j = 1 it is enough that N₁ = r + 2s − 1 is composite. Then N₁ = q·q′ with 3 ≤ q ≤ q′ ≤ (4s−1)/3 ≤ 2s−1.\n\n**Attempted algebraic choices, all of which fail.** I tried to pick q or x algebraically so that the divisibility is automatic.\n- Taking q = r/2 with x = s − r/2 misses the required interval by exactly the boundary term.\n- Families of the form q = s + x − c | N_c just reproduce the same condition.\n- The quadratic −j² + 2sj + r is irreducible unless n is a square, so it gives no polynomial factorisation.\n\n**Missing step.** For all large n with r ≡ 2 (mod 4), show that some odd j ≤ s has N_j = n − (s−j)² with a divisor in [j+1, 2s−j]. Equivalently, show that some x ≤ √n has n − x² with a divisor in [√n − x, √n + x] of the right parity. This seems to need input on divisors or quadratic residues in short ranges, which I did not supply.\n\n```json\n{\"answer\": \"true\", \"confidence\": 0.8, \"complete\": false,\n \"key_steps\": [\"For n>0 the truncated-subtraction equation is equivalent to x^2+y^2=n+z^2.\",\n  \"Lemma 1: a representation exists iff for some x<=sqrt n, n-x^2=q q' with q≡q' mod 2 and q in [sqrt n - x, sqrt n + x], taking y=(q+q')/2, z=|q'-q|/2.\",\n  \"With n=s^2+r: r=0 uses (s,0,0); r odd uses (s,(r+1)/2,(r-1)/2); r≡0 mod 4 uses (s,r/4+1,r/4-1).\",\n  \"When r≡2 mod 4, x must have parity opposite to s, and it suffices that N_j=n-(s-j)^2 (j odd) has a divisor in [j+1,2s-j]; e.g. N_1=r+2s-1 composite suffices.\",\n  \"Small cases such as n=6 fail, consistent with 'large n'.\"],\n \"gap\": \"Prove that for every large n=s^2+r with r≡2 (mod 4) there is an odd j with n-(s-j)^2 having a divisor in [j+1, 2s-j] (a divisor-in-range / quadratic-residue existence statement not established here).\"}\n```",
+   "cost": 0.6851
+  }
+ ],
+ "gap_attempt": null,
+ "spend": 0.9428
+}

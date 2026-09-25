@@ -1,0 +1,24 @@
+{
+ "true_problem": "512",
+ "alias_id": "27467",
+ "statement_en": "Is it true that, if $A\\subset \\mathbb{Z}$ is a finite set of size $N$, then\\[\\int_0^1 \\left\\lvert \\sum_{n\\in A}e(n\\theta)\\right\\rvert \\mathrm{d}\\theta \\gg \\log N,\\]where $e(x)=e^{2\\pi ix }$?",
+ "statement_lean": "open scoped ExponentialSum\n\ntheorem erdos_27467 :\n    ∃ c > (0 : ℝ), ∀ (N : ℕ) (A : Finset ℤ), A.card = N →\n      c * Real.log N ≤ ∫ θ in (0 : ℝ)..1, ‖∑ n ∈ A, e (n * θ)‖ := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": false,
+ "errors": [
+  "line 324:12: unknown namespace `ExponentialSum`",
+  "line 328:23: expected token"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/512.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

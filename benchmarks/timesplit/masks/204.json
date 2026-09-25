@@ -1,0 +1,34 @@
+{
+ "true_problem": "204",
+ "alias_id": "96805",
+ "statement_en": "Are there $n$ such that there is a covering system with moduli the divisors of $n$ which is 'as disjoint as possible'? That is, for all $d\\mid n$ with $d>1$ there is an associated $a_d$ such that every integer is congruent to some $a_d\\pmod{d}$, and if there is some integer $x$ with\\[x\\equiv a_d\\pmod{d}\\textrm{ and }x\\equiv a_{d'}\\pmod{d'}\\]then $(d,d')=1$.",
+ "statement_lean": "theorem erdos_96805 :\n    ∃ (n : ℕ) (a : ℕ → ℤ),\n    let D := {d : ℕ | d ∣ n ∧ d > 1}\n    (∀ x : ℤ, ∃ d ∈ D, x ≡ a d [ZMOD d]) ∧\n    (∀ d ∈ D, ∀ d' ∈ D, d ≠ d' → (∃ x : ℤ, x ≡ a d [ZMOD d] ∧ x ≡ a d' [ZMOD d']) →\n      Nat.gcd d d' = 1) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "covering systems",
+  "divisors"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/204.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "n=0 edge case: B lets D be all integers >1 when n=0, which A does not intend. This is harmless. The moduli 2,4,6,8,... pairwise share the factor 2, so their classes would have to be pairwise disjoint. Their densities 1/(2k) sum to infinity, which is impossible. So n=0 can never witness B.",
+   "n=1 gives D empty, so the covering condition fails; B cannot be proven trivially there either.",
+   "B adds 'distinct d, d''. This is the intended reading of A: taking d=d' would force d=1, so A implicitly means distinct moduli."
+  ],
+  "verdict": null,
+  "backtranslation": "There exist a natural number $n$ and an assignment of integers $a_d$ with the following two properties. Let $D$ be the set of divisors $d$ of $n$ with $d > 1$; if $n = 0$, $D$ is the set of all integers greater than $1$.\n\n1. **Covering:** every integer $x$ satisfies $x \\equiv a_d \\pmod d$ for at least one $d \\in D$.\n2. **Coprimality of overlaps:** for any two distinct $d, d' \\in D$, if some integer $x$ satisfies both $x \\equiv a_d \\pmod d$ and $x \\equiv a_{d'} \\pmod{d'}$, then $\\gcd(d, d') = 1$. Equivalently, residue classes whose distinct moduli share a common factor are disjoint.",
+  "cost_usd": 0.0571,
+  "model": "claude-opus-5-5"
+ }
+}

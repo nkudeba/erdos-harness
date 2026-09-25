@@ -1,0 +1,48 @@
+{
+ "decision": {
+  "commit": "pos",
+  "answer": "true",
+  "share": 1.0,
+  "score": {
+   "true": 0.575,
+   "false": 0.0
+  }
+ },
+ "best_frame": 0,
+ "attempts": [
+  {
+   "frame": 0,
+   "answer": "true",
+   "confidence": 0.6,
+   "complete": false,
+   "key_steps": [
+    "For n <= N0 take c < 1/N0 so that d=1 works.",
+    "For eps*n <= k <= n/2 and n large, a prime in ((1-eps)n, n] exists by the prime number theorem, and it divides C(n,k).",
+    "By Kummer, d_i = (n-i)/gcd(n-i, lcm(1..k)) divides C(n,k) for each 0 <= i < k.",
+    "Hence it suffices that some n-i in the block has gcd(n-i, lcm(1..k)) <= C, which gives a divisor >= n/(2C).",
+    "The construction n ≡ k mod prod p^{e_p} fails as a counterexample because n-k+1 >= n/2 divides C(n,k)."
+   ],
+   "gap": "Prove that among any k consecutive integers some x has gcd(x, lcm(1..k)) <= C for an absolute constant C (a Jacobsthal-type covering bound), or otherwise combine several d_i with small prime factors to reach (cn, n].",
+   "text": "**Verdict: I believe the statement is TRUE, but I have not proved it.** Confidence is about 0.6. Below are the parts I did prove, a reduction of the problem to one lemma about consecutive integers, and the exact point where the argument stops. I found no counterexample: the most natural candidate construction fails, and a heuristic count suggests counterexamples do not exist. I believe this is an open Erdős problem, though I have not checked that.\n\nThroughout, write $L_k=\\operatorname{lcm}(1,\\dots,k)$. By the symmetry $\\binom nk=\\binom n{n-k}$, assume $k\\le n/2$.\n\n**Step 1 (bounded $n$ is free).** If $n\\le N_0$ and $c<1/N_0$, then $cn<1$. So $d=1$ lies in $(cn,n]$ and divides $\\binom nk$. Only $n\\to\\infty$ matters.\n\n**Step 2 (large $k$).** Suppose $\\varepsilon n\\le k\\le n/2$ and $p$ is a prime in $(n-k,n]$. Then $p>n-k\\ge k$. Such a $p$ divides the numerator $n(n-1)\\cdots(n-k+1)$ exactly once and does not divide $k!$, so $p\\mid\\binom nk$. For $n\\ge N(\\varepsilon)$, the prime number theorem gives a prime in $((1-\\varepsilon)n,n]\\subseteq(n-k,n]$. So $\\binom nk$ has a divisor greater than $(1-\\varepsilon)n$.\n\n**Step 3 (key lemma, proved).** For each $0\\le i<k$, let\n$$d_i=\\frac{n-i}{\\gcd(n-i,\\,L_k)}.$$\nThen $d_i\\mid\\binom nk$.\n\n*Proof.* By Kummer, \n$$v_p\\binom nk=\\sum_{j\\ge1}\\Big(\\lfloor n/p^j\\rfloor-\\lfloor k/p^j\\rfloor-\\lfloor (n-k)/p^j\\rfloor\\Big),$$\nand every summand is $\\ge0$. Fix $j$ with $p^j>k$ and $p^j\\mid n-i$.\n- Because $n-i\\in(n-k,n]$, the interval $(n-k,n]$ contains a multiple of $p^j$, so $\\lfloor n/p^j\\rfloor-\\lfloor (n-k)/p^j\\rfloor\\ge 1$.\n- Because $p^j>k$, we have $\\lfloor k/p^j\\rfloor=0$.\n- So this summand is $\\ge1$.\n\nThe number of such $j$ is $\\max\\big(0,\\,v_p(n-i)-v_p(L_k)\\big)$, which equals $v_p(d_i)$. Hence $v_p(d_i)\\le v_p\\binom nk$ for every prime $p$. $\\square$\n\n**Step 4 (reduction).** Suppose some $0\\le i<k$ has $\\gcd(n-i,L_k)\\le C$. Then\n$$d_i\\ \\ge\\ \\frac{n-k}{C}\\ \\ge\\ \\frac{n}{2C},$$\nand also $d_i\\le n$. So $c=1/(2C)$ works for that pair $(n,k)$.\n\nFor small $k$ this is automatic, because $\\gcd(\\cdot,L_k)\\le L_k$. The whole problem therefore reduces to the following lemma.\n\n**Missing lemma.** There is an absolute constant $C$ such that every block of $k$ consecutive integers contains some $x$ with $\\gcd(x,L_k)\\le C$.\n\nSome weaker variant that also combines several $d_i$ with small prime factors of $\\binom nk$ would also suffice.\n\n**Why I believe the lemma (heuristic only).**\n- To make every $x$ in the block have $\\gcd(x,L_k)\\ge C$, one must cover the block with residue classes $0 \\bmod q$, where the $q$ are divisors of $L_k$ with $q\\ge C$.\n- Using primes $p\\ge C$: an Erdős–Rankin-style greedy sieve leaves about $k\\log C/\\log Y$ survivors after using primes up to $Y$. Only about $k/\\log k$ primes remain to cover them, which is too few.\n- Using small primes $p<C$ only through powers $p^e\\ge C$ contributes density about $1/C$ each.\n- So covering should fail for large $C$.\n\nThis is not a proof. It is a Jacobsthal-type problem with sieving primes up to the length of the interval. Known bounds (Iwaniec, $j\\ll$ roughly $k^2$ here) are far too weak.\n\n**Failed counterexample attempt.** Choose $n\\equiv k \\pmod{\\prod_{p\\le k}p^{e_p}}$ with $p^{e_p}>k$. Then $\\binom nk$ is coprime to all primes $\\le k$, and\n$$\\binom nk=\\prod_{j=1}^{k}\\frac{n-k+j}{j},$$\nwhere the factors are pairwise coprime integers. But the $j=1$ factor, $n-k+1\\ge n/2$, is already a divisor in $(n/2,n]$. So this family is not a counterexample.\n\n**Gap.** The missing lemma in Step 4 is not proved. That lemma, or a strengthening that combines several $d_i$, is exactly the missing step.\n\n```json\n{\"answer\":\"true\",\"confidence\":0.6,\"complete\":false,\n\"key_steps\":[\"For n <= N0 take c < 1/N0 so that d=1 works.\",\n\"For eps*n <= k <= n/2 and n large, a prime in ((1-eps)n, n] exists by the prime number theorem, and it divides C(n,k).\",\n\"By Kummer, d_i = (n-i)/gcd(n-i, lcm(1..k)) divides C(n,k) for each 0 <= i < k.\",\n\"Hence it suffices that some n-i in the block has gcd(n-i, lcm(1..k)) <= C, which gives a divisor >= n/(2C).\",\n\"The construction n ≡ k mod prod p^{e_p} fails as a counterexample because n-k+1 >= n/2 divides C(n,k).\"],\n\"gap\":\"Prove that among any k consecutive integers some x has gcd(x, lcm(1..k)) <= C for an absolute constant C (a Jacobsthal-type covering bound), or otherwise combine several d_i with small prime factors to reach (cn, n].\"}\n```",
+   "cost": 0.2957
+  },
+  {
+   "frame": 1,
+   "answer": "true",
+   "confidence": 0.55,
+   "complete": false,
+   "key_steps": [
+    "By symmetry C(n,k)=C(n,n-k) assume k<=n/2.",
+    "n/gcd(n,k) divides C(n,k) via k*C(n,k)=n*C(n-1,k-1), giving c=1/K for k<=K.",
+    "Any prime in (n-k,n] exceeds k and divides C(n,k), lying in (n/2,n].",
+    "Baker-Harman-Pintz gives such a prime when k>=n^0.525 and n is large.",
+    "k-rough parts r_i of n-i divide C(n,k) and are pairwise coprime; if some r_i>cn we are done."
+   ],
+   "gap": "Regime K<k<n^0.525 with no prime in (n-k,n]: need a smooth divisor t of C(n,k) in (c*s_i, s_i] for some i, where s_i is the k-smooth part of n-i, so that t*r_i lies in (cn,n].",
+   "text": "**Verdict:** I believe the statement is TRUE, but I have not proved it. The argument below settles three regimes rigorously and names the one remaining regime I could not close. The \"true\" verdict is my belief, not something I derived; I am not certain of the problem's status in the literature.\n\nThroughout, B = C(n,k) and 1 ≤ k < n. Since C(n,k) = C(n,n−k), we may assume k ≤ n/2.\n\n**Lemma 1 (divisor n/gcd(n,k)).** We have k·C(n,k) = n·C(n−1,k−1).\n- Put g = gcd(n,k). Then (n/g) divides (k/g)·B.\n- Since gcd(n/g, k/g) = 1, it follows that (n/g) divides B.\n- Also n/g ≥ n/k.\n\n**Regime A (k ≤ K for a fixed K).** By Lemma 1, d = n/gcd(n,k) divides B.\n- It satisfies n/K ≤ n/k ≤ d ≤ n.\n- So any c < 1/K works in this regime.\n\n**Lemma 2 (a prime in (n−k, n]).** Suppose some prime p satisfies n−k < p ≤ n.\n- Since k ≤ n/2, we get p > n−k ≥ n/2 ≥ k.\n- So p divides the numerator n(n−1)⋯(n−k+1) but not k!, because every prime factor of k! is at most k.\n- Hence p divides B and p ∈ (n/2, n]. So c = 1/2 works whenever such a prime exists.\n\n**Regime B (k ≥ n^{0.525}, n large).** By Baker–Harman–Pintz, for all sufficiently large n there is a prime in (n − n^{0.525}, n].\n- If k ≥ n^{0.525}, Lemma 2 applies, so c = 1/2 works.\n- The finitely many small n are handled by taking c small enough, since d = n/gcd(n,k) ≥ 1 for each of them.\n\n**Lemma 3 (large 2-part).** Suppose 2^{v₂(B)} ≥ n/2.\n- Then 2^{⌊log₂ n⌋} divides B.\n- That power of 2 lies in (n/2, n], so c = 1/2 works.\n- More generally, if the smooth part of B has divisors spaced by ratios at most 1/c throughout [1, n], a divisor in (cn, n] exists.\n\n**Remaining regime (not closed).** This is K < k < n^{0.525} with no prime in (n−k, n], and B not highly divisible by small primes. Here is the structure available:\n- For each i < k, write n−i = s_i·r_i, where s_i is the k-smooth part and r_i the k-rough part.\n- Each r_i divides B, since any prime p > k divides at most one term n−i and does not divide k!.\n- The r_i are pairwise coprime.\n- More generally, the identity k·C(k−1,i)·B = C(n,i)·(n−i)·C(n−i−1, k−i−1) shows that (n−i)/gcd(n−i, k·C(k−1,i)) divides B.\n- If some r_i > cn, we are done.\n- Otherwise every s_i ≥ 1/c. One then needs a smooth divisor t of B with t ∈ (c·s_i, s_i] for some i, so that t·r_i ∈ (cn, n].\n\n**Missing step.** I cannot show the k-smooth part of B is rich enough to supply such a t. Concretely, I need: for some i < k, the smooth part of B has a divisor in (c·s_i, s_i]. A possible route is to compare v_p(B), computed as the number of carries by Kummer's theorem, with v_p(n−i) − ⌊log_p k⌋.\n\n```json\n{\"answer\": \"true\", \"confidence\": 0.55, \"complete\": false,\n \"key_steps\": [\"By symmetry C(n,k)=C(n,n-k) assume k<=n/2.\",\n  \"n/gcd(n,k) divides C(n,k) via k*C(n,k)=n*C(n-1,k-1), giving c=1/K for k<=K.\",\n  \"Any prime in (n-k,n] exceeds k and divides C(n,k), lying in (n/2,n].\",\n  \"Baker-Harman-Pintz gives such a prime when k>=n^0.525 and n is large.\",\n  \"k-rough parts r_i of n-i divide C(n,k) and are pairwise coprime; if some r_i>cn we are done.\"],\n \"gap\": \"Regime K<k<n^0.525 with no prime in (n-k,n]: need a smooth divisor t of C(n,k) in (c*s_i, s_i] for some i, where s_i is the k-smooth part of n-i, so that t*r_i lies in (cn,n].\"}\n```",
+   "cost": 0.1397
+  }
+ ],
+ "gap_attempt": null,
+ "spend": 0.4354
+}

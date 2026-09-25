@@ -1,0 +1,31 @@
+{
+ "true_problem": "1213",
+ "alias_id": "82969",
+ "statement_en": "Let $a,K\\geq 1$. Does there exist $f(a,K)$ such that if\\[a=a_1<\\cdots <a_s\\]is a sequence of integers with $a_s> f(a,K)$ and with bounded gaps $a_{i+1}-a_i\\leq K$ then there are two distinct intervals $I$ and $J$ such that\\[\\sum_{i\\in I}a_i=\\sum_{j\\in J}a_j?\\]",
+ "statement_lean": "def HasEqualIntervalSums (A : ℕ → ℕ) (s : ℕ) : Prop :=\n  ∃ u v x y : ℕ, u < v ∧ v ≤ s ∧ x < y ∧ y ≤ s ∧ (u, v) ≠ (x, y) ∧\n    ∑ i ∈ Finset.Ico u v, A i = ∑ i ∈ Finset.Ico x y, A i\n\ntheorem erdos_82969 :\n    ∀ a K : ℕ, 1 ≤ a → 1 ≤ K → ∃ f : ℕ,\n    ∀ (s : ℕ) (A : ℕ → ℕ), 0 < s → A 0 = a → StrictMonoOn A (Set.Iio s) →\n      (∀ i, i + 1 < s → A (i + 1) - A i ≤ K) → f < A (s - 1) → HasEqualIntervalSums A s := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "additive combinatorics"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1213.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "No material discrepancies. Blocks are nonempty because u<v and x<y, which rules out the trivial empty-interval case. 'Distinct pairs' is the same as 'distinct intervals'. Overlap is allowed in both, since A does not require disjointness. Natural numbers vs integers makes no difference: a≥1 and the sequence increases, so every term is positive. The quantifier order matches: for each a and K there is one f, and it works for all s and all sequences. Taking f as a natural number is harmless. The edge case s=1 is handled consistently."
+  ],
+  "verdict": "B faithfully captures the positive answer to A, so a proof of B settles A in the pos direction.",
+  "backtranslation": "For all natural numbers $a \\ge 1$ and $K \\ge 1$, there exists a natural number $f$ with the following property. Let $s \\ge 1$ and let $A_0 < A_1 < \\dots < A_{s-1}$ be a strictly increasing finite sequence of natural numbers with $A_0 = a$ and $A_{i+1} - A_i \\le K$ for all $0 \\le i < s-1$. If $A_{s-1} > f$, then there are two distinct pairs of indices $(u,v) \\neq (x,y)$ with $0 \\le u < v \\le s$ and $0 \\le x < y \\le s$ such that\n$$\\sum_{i=u}^{v-1} A_i = \\sum_{i=x}^{y-1} A_i.$$\nIn words, some two different nonempty blocks of consecutive terms have the same sum; the two blocks may overlap.",
+  "cost_usd": 0.0395,
+  "model": "claude-opus-5-5"
+ }
+}

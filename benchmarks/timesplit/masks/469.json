@@ -1,0 +1,26 @@
+{
+ "true_problem": "469",
+ "alias_id": "45201",
+ "statement_en": "Let $A$ be the set of all $n$ such that $n=d_1+\\cdots+d_k$ with $d_i$ distinct proper divisors of $n$, but this is not true for any $m\\mid n$ with $m<n$. Does\\[\\sum_{n\\in A}\\frac{1}{n}\\]converge?",
+ "statement_lean": "open Erdos469\n\ndef Nat.IsSumDivisors (n : ℕ) : Prop :=\n  ∃ S ⊆ n.properDivisors, ∑ d ∈ S, d = n\n\ntheorem erdos_45201 :\n    letI A := {n : ℕ | 0 < n ∧ n.IsSumDivisors ∧ ∀ m < n, m ∣ n → ¬ m.IsSumDivisors}\n    Summable fun n : A ↦ 1 / (n : ℝ) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "divisors"
+ ],
+ "ok": false,
+ "errors": [
+  "line 227:5: unknown namespace `Erdos469`",
+  "line 233:33: Invalid field `IsSumDivisors`: The environment does not contain `Nat.IsSumDivisors`, so it is not possible to project the field `IsSumDivisors` from an expression\n  n\nof type `ℕ`",
+  "line 233:70: Invalid field `IsSumDivisors`: The environment does not contain `Nat.IsSumDivisors`, so it is not possible to project the field `IsSumDivisors` from an expression\n  m\nof type `ℕ`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/469.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

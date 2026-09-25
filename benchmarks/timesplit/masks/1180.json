@@ -1,0 +1,34 @@
+{
+ "true_problem": "1180",
+ "alias_id": "92419",
+ "statement_en": "Let $\\epsilon>0$. Does there exist a constant $C_\\epsilon$ such that, for all primes $p$, every residue modulo $p$ is the sum of at most $C_\\epsilon$ many elements of\\[\\{ n^{-1} : 1\\leq n\\leq p^\\epsilon\\}\\]where $n^{-1}$ denotes the inverse of $n$ modulo $p$?",
+ "statement_lean": "open Filter\n\ndef Represents (ε : ℝ) (p : ℕ) (a : ZMod p) (s : Multiset ℕ) : Prop :=\n  (∀ n ∈ s, 1 ≤ n ∧ (n : ℝ) ≤ (p : ℝ) ^ ε ∧ n.Coprime p) ∧\n    (s.map fun n : ℕ ↦ (n : ZMod p)⁻¹).sum = a\n\nnoncomputable def C (ε : ℝ) : ℕ :=\n  sInf {C | ∀ p : ℕ, p.Prime → ∀ a : ZMod p, ∃ s : Multiset ℕ, s.card ≤ C ∧ Represents ε p a s}\n\ntheorem erdos_92419 :\n    ∀ ε : ℝ, 0 < ε → ∃ C : ℕ, ∀ p : ℕ, p.Prime → ∀ a : ZMod p,\n    ∃ s : Multiset ℕ, s.card ≤ C ∧ Represents ε p a s := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1180.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B adds the condition gcd(n,p)=1. This is harmless: for ε<1 it holds automatically, and for ε≥1 n^{-1} is undefined when p|n, so such n cannot be in A's set anyway.",
+   "B allows repeated terms (multiset). This is the standard reading of 'sum of at most C elements' in this Erdős-type additive problem, so it is not a weakening.",
+   "B allows the empty sum for 0. This only affects the constant: once every other residue has a bounded representation, 0 = 1 + (-1) needs at most C+1 terms.",
+   "Small primes cause no trouble. n=1 is always allowed, so there are finitely many exceptional cases and C can absorb them."
+  ],
+  "verdict": "B faithfully states the affirmative answer to A, with the same quantifier order (for each ε, one C uniform over all primes p and all residues a), and differs only in harmless formal details.",
+  "backtranslation": "For every real ε > 0, there is a natural number C with the following property. For every prime p and every residue class a modulo p, a can be written modulo p as a sum of at most C terms of the form n⁻¹ (the multiplicative inverse of n modulo p). Each n in the sum must be a positive integer with n ≤ p^ε and gcd(n, p) = 1.\n\nRepetitions of the same n are allowed, since the terms form a multiset. The empty sum, which equals 0, is also allowed.\n\nThe auxiliary quantity \"C(ε)\", defined as the least such constant, does not appear in the claim. The theorem asserts only that some finite such C exists for each ε > 0.",
+  "cost_usd": 0.0462,
+  "model": "claude-opus-5-5"
+ }
+}

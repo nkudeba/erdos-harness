@@ -1,0 +1,34 @@
+{
+ "true_problem": "966",
+ "alias_id": "51621",
+ "statement_en": "Let $k,r\\geq 2$. Does there exist a set $A\\subseteq \\mathbb{N}$ that contains no non-trivial arithmetic progression of length $k+1$, yet in any $r$-colouring of $A$ there must exist a monochromatic non-trivial arithmetic progression of length $k$?",
+ "statement_lean": "variable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=\n  ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}\n\nvariable {α : Type*} [AddCommMonoid α]\ndef List.IsAPOfLengthWith (s : List α) (l : ℕ) (a d : α) : Prop :=\n  s = (List.range l).map (fun n ↦ a + n • d) ∨ s = (List.range l).reverse.map (fun n ↦ a + n • d)\n\nvariable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=\n  ∃ a d : α, s.IsAPOfLengthWith l a d\n\nvariable {α : Type*} [AddCommMonoid α]\ndef List.IsAPOfLength (s : List α) (l : ℕ) : Prop :=\n  ∃ a d : α, s.IsAPOfLengthWith l a d\n\nvariable {α : Type*} [AddCommMonoid α]\ndef ContainsMonoAPofLength {κ : Type} [Finite κ] {M : Set α}\n    (coloring : M → κ) (k : ℕ) : Prop :=\n  ∃ c : κ, ∃ ap : Set M, ((·.1) '' ap).IsAPOfLength k ∧\n    ∀ m ∈ ap, coloring m = c\n\nvariable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLengthFree (s : Set α) (l : ℕ∞) : Prop :=\n  ∀ t ⊆ s, t.IsAPOfLength l → l ≤ 1\n\ntheorem erdos_51621 :\n    ∀ k r : ℕ, 2 ≤ k → 2 ≤ r → ∃ A : Set ℕ, A.IsAPOfLengthFree (k + 1) ∧\n      ∀ coloring : A → Fin r, ContainsMonoAPofLength coloring k := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive combinatorics",
+  "ramsey theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 745:15: Invalid field `IsAPOfLengthWith`: The environment does not contain `Function.IsAPOfLengthWith`, so it is not possible to project the field `IsAPOfLengthWith` from an expression\n  s\nof type `α → Prop`",
+  "line 749:15: Invalid field `IsAPOfLengthWith`: The environment does not contain `List.IsAPOfLengthWith`, so it is not possible to project the field `IsAPOfLengthWith` from an expression\n  s\nof type `List α`",
+  "line 754:39: Invalid field `IsAPOfLength`: The environment does not contain `Function.IsAPOfLength`, so it is not possible to project the field `IsAPOfLength` from an expression\n  (fun x => ?m.7) '' ap\nof type `?m.5 → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/966.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.IsAPOfLengthWith",
+  "List.IsAPOfLengthWith",
+  "Set.IsAPOfLength",
+  "List.IsAPOfLength",
+  "ContainsMonoAPofLength",
+  "Set.IsAPOfLengthFree"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

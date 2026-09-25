@@ -1,0 +1,25 @@
+{
+ "true_problem": "923",
+ "alias_id": "90571",
+ "statement_en": "Is it true that, for every $k$, there is some $f(k)$ such that if $G$ has chromatic number $\\geq f(k)$ then $G$ contains a triangle-free subgraph with chromatic number $\\geq k$?",
+ "statement_lean": "open SimpleGraph\n\ntheorem erdos_90571 :\n    ∀ (V : Type*) (n : ℕ),\n    ∃ k : ℕ, ∀ G : SimpleGraph V, k ≤ G.chromaticNumber →\n    ∃ H ≤ G, n ≤ H.chromaticNumber ∧ H.CliqueFree 3 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Coloring.Vertex"
+ ],
+ "tags": [
+  "graph theory",
+  "chromatic number"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/923.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

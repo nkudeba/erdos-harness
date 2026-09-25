@@ -1,0 +1,35 @@
+{
+ "true_problem": "71",
+ "alias_id": "35202",
+ "statement_en": "Is it true that for every infinite arithmetic progression $P$ which contains even numbers there is some constant $c=c(P)$ such that every graph with average degree at least $c$ contains a cycle whose length is in $P$?",
+ "statement_lean": "variable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLengthWith (s : Set α) (l : ℕ∞) (a d : α) : Prop :=\n  ENat.card s = l ∧ s = {a + n • d | (n : ℕ) (_ : n < l)}\n\nvariable {α : Type*} [AddCommMonoid α]\ndef List.IsAPOfLengthWith (s : List α) (l : ℕ) (a d : α) : Prop :=\n  s = (List.range l).map (fun n ↦ a + n • d) ∨ s = (List.range l).reverse.map (fun n ↦ a + n • d)\n\nvariable {α : Type*} [AddCommMonoid α]\ndef Set.IsAPOfLength (s : Set α) (l : ℕ∞) : Prop :=\n  ∃ a d : α, s.IsAPOfLengthWith l a d\n\nvariable {α : Type*} [AddCommMonoid α]\ndef List.IsAPOfLength (s : List α) (l : ℕ) : Prop :=\n  ∃ a d : α, s.IsAPOfLengthWith l a d\n\nnamespace SimpleGraph\nvariable {α : Type*} [Fintype α] [DecidableEq α]\nnoncomputable def averageDegree (G : SimpleGraph α) [DecidableRel G.Adj] : ℚ  :=\n  (∑ v, (G.degree v : ℚ)) / (Fintype.card α : ℚ)\nend SimpleGraph\n\ntheorem erdos_35202 :\n    ∀ P : Set ℕ, P.IsAPOfLength ⊤ → (∃ n ∈ P, Even n) →\n      ∃ c : ℚ, ∀ (V : Type) [Fintype V] [DecidableEq V] (G : SimpleGraph V)\n        [DecidableRel G.Adj], c ≤ G.averageDegree →\n          ∃ (v : V) (w : G.Walk v v), w.IsCycle ∧ w.length ∈ P := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Walk.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Paths"
+ ],
+ "tags": [
+  "graph theory",
+  "cycles"
+ ],
+ "ok": false,
+ "errors": [
+  "line 25:15: Invalid field `IsAPOfLengthWith`: The environment does not contain `Function.IsAPOfLengthWith`, so it is not possible to project the field `IsAPOfLengthWith` from an expression\n  s\nof type `α → Prop`",
+  "line 29:15: Invalid field `IsAPOfLengthWith`: The environment does not contain `List.IsAPOfLengthWith`, so it is not possible to project the field `IsAPOfLengthWith` from an expression\n  s\nof type `List α`",
+  "line 38:19: Invalid field `IsAPOfLength`: The environment does not contain `Function.IsAPOfLength`, so it is not possible to project the field `IsAPOfLength` from an expression\n  P\nof type `ℕ → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/71.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.IsAPOfLengthWith",
+  "List.IsAPOfLengthWith",
+  "Set.IsAPOfLength",
+  "List.IsAPOfLength",
+  "SimpleGraph.averageDegree"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

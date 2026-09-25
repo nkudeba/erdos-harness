@@ -1,0 +1,36 @@
+{
+ "true_problem": "1179",
+ "alias_id": "92221",
+ "statement_en": "Let $0<\\epsilon<1$ and let $g_\\epsilon(N)$ be the minimal $k$ such that if $G$ is an abelian group of size $N$ and $A\\subseteq G$ is a uniformly random subset of size $k$, and\\[F_A(g) = \\#\\left\\{ S\\subseteq A : g = \\sum_{x\\in S}x\\right\\},\\]then, with probability $\\to 1$ as $N\\to \\infty$,\\[\\left\\lvert F_A(g)-\\frac{2^k}{N}\\right\\rvert \\leq \\epsilon \\frac{2^k}{N}\\]for all $g\\in G$. Estimate $g_\\epsilon(N)$ - in particular, is it true that for all $\\epsilon>0$\\[g_\\epsilon(N)=(1+o_\\epsilon(1))\\log_2N?\\]",
+ "statement_lean": "open scoped Classical\nopen Filter Finset\nvariable {G : Type*} [AddCommGroup G] [Fintype G]\n\nnoncomputable def repCount (A : Finset G) (g : G) : ℕ :=\n  (A.powerset.filter fun S ↦ ∑ x ∈ S, x = g).card\n\ndef IsBalanced (ε : ℝ) (A : Finset G) : Prop :=\n  ∀ g : G, |(repCount A g : ℝ) - 2 ^ A.card / Fintype.card G| ≤\n    ε * (2 ^ A.card / Fintype.card G)\n\nnoncomputable def successProbability (G : Type*) [AddCommGroup G] [Fintype G] (ε : ℝ) (k : ℕ) :\n    ℝ :=\n  (((univ : Finset G).powersetCard k).filter (IsBalanced ε)).card /\n    ((univ : Finset G).powersetCard k).card\n\ntheorem erdos_92221 :\n    ∀ ε : ℝ, 0 < ε → ε < 1 → ∃ k : ℕ → ℕ,\n    Tendsto (fun N : ℕ ↦ (k N : ℝ) / Real.logb 2 N) atTop (nhds 1) ∧\n      ∀ (G : ℕ → Type) [∀ i, AddCommGroup (G i)] [∀ i, Fintype (G i)],\n        Tendsto (fun i ↦ Fintype.card (G i)) atTop atTop →\n          Tendsto (fun i ↦ successProbability (G i) ε (k (Fintype.card (G i)))) atTop\n            (nhds 1) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Analysis.SpecialFunctions.Log.Base"
+ ],
+ "tags": [
+  "additive combinatorics",
+  "probability"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1179.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": true,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B asserts only the upper bound: some k(N) ~ log2 N makes almost every k-subset ε-balanced, uniformly over all abelian groups of order N. The matching lower bound is trivial and so is not needed. If 2^k < N, some g has F_A(g)=0, and then |0 - 2^k/N| = 2^k/N > ε·2^k/N. So g_ε(N) ≥ log2 N always.",
+   "A's 'minimal k' is ambiguous because success need not be monotone in k. Reading it as 'a threshold function that works' agrees with B's existence of a good k(N). B's formulation 'for every sequence of groups with |G_i| → ∞' is equivalent to uniformity over all groups of order N.",
+   "B restricts to 0<ε<1, matching A's hypothesis; A's later 'for all ε>0' is within that stated domain. Small N are irrelevant to the asymptotic claim, and B's convention for k > N is harmless.",
+   "Possible concern: if a known Erdős–Rényi-type bound log2 N + O(log log N) holds, the question as literally stated may be easy. Even so, B faithfully captures A as written."
+  ],
+  "verdict": "B faithfully formalizes the positive answer g_ε(N) = (1+o(1)) log2 N: its uniform upper bound combined with the trivial lower bound settles A as stated.",
+  "backtranslation": "For a finite abelian group $G$ of order $N$, a subset $A \\subseteq G$, and $g \\in G$, let $r_A(g)$ be the number of subsets $S \\subseteq A$ (including the empty set) whose elements sum to $g$. Call $A$ *$\\varepsilon$-balanced* if\n$$\\left|\\, r_A(g) - \\frac{2^{|A|}}{N} \\,\\right| \\le \\varepsilon \\cdot \\frac{2^{|A|}}{N} \\quad \\text{for every } g \\in G.$$\nLet $P_G(\\varepsilon, k)$ be the proportion of $k$-element subsets of $G$ that are $\\varepsilon$-balanced. By convention, this proportion is $0$ when $k > N$, since there are then no $k$-element subsets.\n\nThe claim is as follows. For every real $\\varepsilon$ with $0 < \\varepsilon < 1$, there is a function $k : \\mathbb{N} \\to \\mathbb{N}$ such that $k(N)/\\log_2 N \\to 1$ as $N \\to \\infty$. Moreover, for every sequence $(G_i)_{i \\in \\mathbb{N}}$ of finite abelian groups with $|G_i| \\to \\infty$, we have $P_{G_i}(\\varepsilon, k(|G_i|)) \\to 1$ as $i \\to \\infty$.",
+  "cost_usd": 0.0658,
+  "model": "claude-opus-5-5"
+ }
+}

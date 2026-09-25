@@ -1,0 +1,27 @@
+{
+ "true_problem": "45",
+ "alias_id": "99376",
+ "statement_en": "Let $k\\geq 2$. Is there an integer $n_k$ such that, if $D=\\{ 1<d<n_k : d\\mid n_k\\}$, then for any $k$-colouring of $D$ there is a monochromatic subset $D'\\subseteq D$ such that $\\sum_{d\\in D'}\\frac{1}{d}=1$?",
+ "statement_lean": "namespace Finset\nnoncomputable def reciprocalSum (A : Finset ℕ) : ℝ :=\n  ∑ a ∈ A, (1 : ℝ) / a\nend Finset\n\ntheorem erdos_99376 :\n    ∀ k : ℕ, 2 ≤ k → ∃ n : ℕ, ∀ colouring : ℕ → Fin k,\n      ∃ colour : Fin k, ∃ D' ⊆ {d ∈ n.divisors | 1 < d ∧ d < n},\n        (∀ d ∈ D', colouring d = colour) ∧ D'.reciprocalSum = 1 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "unit fractions",
+  "ramsey theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 20:46: Invalid field `reciprocalSum`: The environment does not contain `Finset.reciprocalSum`, so it is not possible to project the field `reciprocalSum` from an expression\n  D'\nof type `Finset ℕ`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/45.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Finset.reciprocalSum"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

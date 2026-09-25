@@ -1,0 +1,23 @@
+{
+ "true_problem": "231",
+ "alias_id": "55123",
+ "statement_en": "Let $S$ be a string of length $2^k-1$ formed from an alphabet of $k$ characters. Must $S$ contain an abelian square: two consecutive blocks $x$ and $y$ such that $y$ is a permutation of $x$?",
+ "statement_lean": "def ContainsAbelianSquare {α : Type*} (S : List α) : Prop :=\n  ∃ x y : List α, x ≠ [] ∧ x.Perm y ∧ x ++ y <:+: S\n\ninstance {α : Type*} [DecidableEq α] (S : List α) : Decidable (ContainsAbelianSquare S) :=\n  decidable_of_iff _ (containsAbelianSquare_iff S).symm\n\ntheorem erdos_55123 :\n    ∀ k : ℕ, 2 ≤ k → ∀ S : List (Fin k), S.length = 2 ^ k - 1 → ContainsAbelianSquare S := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "combinatorics"
+ ],
+ "ok": false,
+ "errors": [
+  "line 399:22: Unknown identifier `containsAbelianSquare_iff`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/231.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

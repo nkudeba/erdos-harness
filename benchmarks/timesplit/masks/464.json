@@ -1,0 +1,23 @@
+{
+ "true_problem": "464",
+ "alias_id": "75740",
+ "statement_en": "Let $A=\\{n_1<n_2<\\cdots\\}\\subset \\mathbb{N}$ be a lacunary sequence (so there exists some $\\epsilon>0$ with $n_{k+1}\\geq (1+\\epsilon)n_k$ for all $k$). Must there exist an irrational $\\theta$ such that\\[\\{ \\|\\theta n_k\\| : k\\geq 1\\}\\]is not dense in $[0,1]$ (where $\\| x\\|$ is the distance to the nearest integer)?",
+ "statement_lean": "open Filter\ndef IsLacunary (n : ℕ → ℕ) : Prop := ∃ c > (1 : ℝ), ∀ᶠ k in atTop, c * n k < n (k + 1)\n\ntheorem erdos_75740 :\n    ∀ n : ℕ → ℕ, StrictMono n → (∀ k, 0 < n k) → IsLacunary n →\n      ∃ θ : ℝ, Irrational θ ∧\n        ¬ Dense (Set.range fun k => (↑(θ * n k) : AddCircle (1 : ℝ))) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/464.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "IsLacunary"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

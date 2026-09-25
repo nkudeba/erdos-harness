@@ -1,0 +1,23 @@
+{
+ "true_problem": "694",
+ "alias_id": "33857",
+ "statement_en": "Let $f_{\\max}(n)$ be the largest $m$ such that $\\phi(m)=n$, and $f_{\\min}(n)$ be the smallest such $m$, where $\\phi$ is Euler's totient function. Investigate\\[\\max_{n\\leq x}\\frac{f_{\\max}(n)}{f_{\\min}(n)}\\](where the maximum is restricted to those $n$ of the form $n=\\phi(m)$ for some $m$.)",
+ "statement_lean": "open Filter Topology Real\n\ntheorem erdos_33857 :\n    ∀ᵉ (fmax : ℕ → ℕ) (fmin : ℕ → ℕ),\n      (∀ n, (∃ m, Nat.totient m = n) → IsGreatest (Nat.totient ⁻¹' {n}) (fmax n)) →\n      (∀ n, (∃ m, Nat.totient m = n) → IsLeast (Nat.totient ⁻¹' {n}) (fmin n)) →\n      ∃ o : ℕ → ℝ, Tendsto o atTop (𝓝 0) ∧\n        ∀ᶠ x : ℕ in atTop,\n          sSup { (fmax n : ℝ) / fmin n | (n : ℕ) (_ : n ≤ x) (_ : ∃ m, Nat.totient m = n) } =\n            (exp eulerMascheroniConstant + o x) * log (log (x : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 58:17: Unknown identifier `eulerMascheroniConstant`\nNote: It is not possible to treat `eulerMascheroniConstant` as an implicitly bound variable here because the `autoImplicit` option is set to `false`."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/694.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

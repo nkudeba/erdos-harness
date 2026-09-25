@@ -1,0 +1,35 @@
+{
+ "true_problem": "678",
+ "alias_id": "65589",
+ "statement_en": "Let $M(n,k)=[n+1,\\ldots,n+k]$ be the least common multiple of $\\{n+1,\\ldots,n+k\\}$. Are there infinitely many $m,n$ and $k\\geq 3$ with $m\\geq n+k$ such that\\[M(n,k)>M(m,k+1)?\\]",
+ "statement_lean": "namespace Finset\ndef lcmInterval {α : Type*} [CommSemiring α] [NormalizedGCDMonoid α]\n    [Preorder α] [LocallyFiniteOrder α] (n k : α) : α := (Finset.Ioc n (n + k)).lcm id\nend Finset\n\nopen Asymptotics Filter Finset\n\ntheorem erdos_65589 :\n    ∀ᶠ k in atTop, {(m, n) | n + k ≤ m ∧ lcmInterval m (k + 1) < lcmInterval n k}.Nonempty := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/678.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Finset.lcmInterval"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B is strictly stronger than A. A asks only for infinitely many triples (m, n, k) with k ≥ 3. B asks, for every sufficiently large k, for at least one pair (m, n). B implies A: distinct large k give infinitely many distinct triples, and eventually k ≥ 3. The converse fails, since A's triples could all use finitely many k or only sparse k. So the harness may fail to prove B even if A is true, but a proof of B still settles A positively.",
+   "Domain: B allows n = 0 (block 1..k) and natural-number m. A does not exclude n = 0, and every other condition matches: m ≥ n + k is non-strict, M(n,k) > M(m,k+1) is strict, and the blocks are n+1..n+k and m+1..m+k+1. So no spurious witnesses arise.",
+   "If the intended Erdős question fixes k and asks for infinitely many (m, n) for that k, B does not directly give that reading. As written, however, A quantifies k together with m and n."
+  ],
+  "verdict": "B is a strengthening of A: for every large k, some witness pair exists. Any proof of B yields infinitely many valid triples with k ≥ 3, so it legitimately settles A in the positive direction.",
+  "backtranslation": "**Statement.** For every sufficiently large natural number $k$, there exist natural numbers $m$ and $n$ with $m \\ge n + k$ such that\n$$\\operatorname{lcm}(m+1, m+2, \\dots, m+k+1) \\;<\\; \\operatorname{lcm}(n+1, n+2, \\dots, n+k).$$\n\nIn words: for all large $k$, some block of $k+1$ consecutive integers lies entirely beyond an earlier block of $k$ consecutive integers, yet has a strictly smaller least common multiple.\n\n**Reading assumptions.**\n- I read the variables as natural numbers; the statement itself does not fix the type.\n- The helper function takes the lcm over the half-open interval $(n, n+k]$, which is the integers $n+1, \\dots, n+k$.",
+  "cost_usd": 0.044,
+  "model": "claude-opus-5-5"
+ }
+}

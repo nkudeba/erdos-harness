@@ -1,0 +1,21 @@
+{
+ "true_problem": "1051",
+ "alias_id": "76470",
+ "statement_en": "Is it true that if $1\\leq a_1<a_2<\\cdots$ is a sequence of integers with\\[\\liminf a_n^{1/2^n}>1\\]then\\[\\sum_{n=1}^\\infty \\frac{1}{a_na_{n+1}}\\]is irrational?",
+ "statement_lean": "def GrowthCondition (a : ℕ → ℤ) : Prop :=\n  Filter.liminf (fun n => (((a n : ℝ) ^ (1 / 2 ^ n : ℝ) : ℝ) : EReal)) Filter.atTop > 1\n\nnoncomputable def ErdosSeries (a : ℕ → ℤ) : ℝ :=\n  ∑' n : ℕ, 1 / ((a n : ℝ) * (a (n + 1) : ℝ))\n\ntheorem erdos_76470 :\n    ∀ (a : ℕ → ℤ), StrictMono a → GrowthCondition a →\n      Irrational (ErdosSeries a) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "irrationality"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1051.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,22 @@
+{
+ "true_problem": "1028",
+ "alias_id": "42041",
+ "statement_en": "Let\\[H(n)=\\min_f \\max_{X\\subseteq \\{1,\\ldots,n\\}} \\left\\lvert \\sum_{x\\neq y\\in X} f(x,y)\\right\\rvert,\\]where $f$ ranges over all functions $f:X^2\\to \\{-1,1\\}$. Estimate $H(n)$.",
+ "statement_lean": "open Filter Asymptotics\n\ndef imbalance (f : ℕ → ℕ → ℤ) (X : Finset ℕ) : ℤ :=\n  |∑ x ∈ X, ∑ y ∈ X.filter (fun y => x < y), f x y|\n\nnoncomputable def H (n : ℕ) : ℕ :=\n  sInf {m | ∃ f : ℕ → ℕ → ℤ, (∀ x y, f x y = 1 ∨ f x y = -1) ∧\n    ∀ X ⊆ Finset.Icc 1 n, imbalance f X ≤ (m : ℤ)}\n\ntheorem erdos_42041 :\n    (fun n => (H n : ℝ)) =Θ[atTop]\n      fun n : ℕ => (n : ℝ) ^ (3 / 2 : ℝ) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "graph theory",
+  "discrepancy"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1028.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,26 @@
+{
+ "true_problem": "756",
+ "alias_id": "81813",
+ "statement_en": "Let $A\\subset \\mathbb{R}^2$ be a set of $n$ points. Can there be $\\gg n$ many distinct distances each of which occurs for more than $n$ many pairs from $A$?",
+ "statement_lean": "open Filter\nopen scoped EuclideanGeometry Asymptotics\n\nnoncomputable def richDistances (A : Finset ℝ²) (k : ℕ) : Finset ℝ :=\n  (distanceSet A).filter fun d => k ≤ distanceMultiplicity A d\n\nnoncomputable def maxRichDistances (n : ℕ) : ℕ :=\n  sSup {(richDistances A (n + 1)).card | (A : Finset ℝ²) (_ : A.card = n)}\n\ntheorem erdos_81813 :\n    (fun n : ℕ => (n : ℝ)) =O[atTop] (fun n : ℕ => (maxRichDistances n : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry",
+  "distances"
+ ],
+ "ok": false,
+ "errors": [
+  "line 130:45: unexpected token '²'; expected ')'",
+  "line 134:54: unexpected token '²'; expected ')'"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/756.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

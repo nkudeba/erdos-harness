@@ -1,0 +1,25 @@
+{
+ "true_problem": "353",
+ "alias_id": "64596",
+ "statement_en": "Let $A\\subseteq \\mathbb{R}^2$ be a measurable set with infinite measure. Must $A$ contain the vertices of an isosceles trapezoid of area $1$? What about an isosceles triangle, or a right-angled triangle, or a cyclic quadrilateral, or a convex polygon with congruent sides?",
+ "statement_lean": "open Affine EuclideanGeometry MeasureTheory\nopen scoped Real\n\ntheorem erdos_64596 :\n    ∀ A : Set ℝ², MeasurableSet A → volume A = ⊤ →\n      ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A, ∃ d ∈ A,\n        IsIsoscelesTrapezoid a b c d ∧\n        volume (convexHull ℝ {a, b, c, d}) = 1 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine",
+  "Mathlib.MeasureTheory.Function.ConditionalExpectation.CondexpL1"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 18:15: unexpected token '²'; expected ','"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/353.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

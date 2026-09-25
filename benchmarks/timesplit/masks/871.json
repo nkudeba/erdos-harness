@@ -1,0 +1,35 @@
+{
+ "true_problem": "871",
+ "alias_id": "76362",
+ "statement_en": "Let $A$ be an additive basis of order $2$, and suppose $1_A\\ast 1_A(n)\\to \\infty$ as $n\\to \\infty$. Can $A$ be partitioned into two disjoint additive bases of order $2$?",
+ "statement_lean": "theorem erdos_76362 :\n    ∀ (A : Set ℕ),\n        (∀ᶠ n in Filter.atTop, ∃ a ∈ A, ∃ b ∈ A, a + b = n) ∧\n        (∀ t, ∀ᶠ n in Filter.atTop, ∃ pairs : Finset (ℕ × ℕ),\n          pairs.card ≥ t ∧\n            ∀ p ∈ pairs, p.1 ∈ A ∧ p.2 ∈ A ∧ p.1 + p.2 = n ∧ p.1 ≤ p.2) →\n        ∃ (B C : Set ℕ),\n          (∀ x, x ∈ A ↔ x ∈ B ∨ x ∈ C) ∧\n          Disjoint B C ∧\n          (∀ᶠ n in Filter.atTop, ∃ a ∈ B, ∃ b ∈ B, a + b = n) ∧\n          (∀ᶠ n in Filter.atTop, ∃ a ∈ C, ∃ b ∈ C, a + b = n) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive basis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/871.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B reads 'additive basis of order 2' as an asymptotic basis: every sufficiently large n is in A+A. This is the only sensible reading. Under the exact reading (every n, including 0), n=0 would force 0 into both disjoint parts, which is impossible, so the question would be trivially NO.",
+   "B counts representations as unordered pairs a<=b tending to infinity, while A's 1_A*1_A(n) counts ordered pairs. The ordered count equals 2 x (unordered count) minus at most 1, so the two divergence conditions are equivalent.",
+   "Condition 1 in B is redundant, since condition 2 implies it. This is harmless.",
+   "Allowing 0 in A, B and C, and allowing a=b in representations, matches the standard convention."
+  ],
+  "verdict": "Under the standard asymptotic-basis reading, B is exactly the YES answer to A, so proving B would settle A in the positive direction.",
+  "backtranslation": "**Statement.** Let $A$ be any set of natural numbers (including $0$). Suppose two conditions hold:\n\n1. Every sufficiently large $n$ can be written as $a+b$ with $a, b \\in A$.\n2. For every $t$, every sufficiently large $n$ has at least $t$ distinct representations $n = a+b$ with $a, b \\in A$ and $a \\le b$. In other words, the number of such representations tends to infinity.\n\nThen $A$ can be partitioned into two disjoint sets $B$ and $C$ with $A = B \\cup C$, such that:\n\n- every sufficiently large $n$ is a sum of two elements of $B$ (not necessarily distinct), and\n- every sufficiently large $n$ is a sum of two elements of $C$ (not necessarily distinct).",
+  "cost_usd": 0.0408,
+  "model": "claude-opus-5-5"
+ }
+}

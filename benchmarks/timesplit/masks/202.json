@@ -1,0 +1,37 @@
+{
+ "true_problem": "202",
+ "alias_id": "70716",
+ "statement_en": "Let $n_1<\\cdots < n_r\\leq N$ with associated $a_i\\pmod{n_i}$ such that the congruence classes are disjoint (that is, every integer is $\\equiv a_i\\pmod{n_i}$ for at most one $1\\leq i\\leq r$). How large can $r$ be in terms of $N$?",
+ "statement_lean": "open Real\nnoncomputable def scaleL (n : ℕ) : ℝ := exp (sqrt (log n * log (log n)))\n\nopen Filter Real\n\nnoncomputable def f (N : ℕ) : ℕ :=\n  sSup {r : ℕ | ∃ n : Fin r → ℕ, ∃ a : Fin r → ℤ,\n    StrictMono n ∧ (∀ i, 0 < n i ∧ n i ≤ N) ∧\n    ∀ m : ℤ, ∀ i j : Fin r, m ≡ a i [ZMOD (n i : ℤ)] → m ≡ a j [ZMOD (n j : ℤ)] → i = j}\n\ntheorem erdos_70716 :\n    ∃ o : ℕ → ℝ, o =o[atTop] (1 : ℕ → ℝ) ∧\n    ∀ᶠ N : ℕ in atTop, (f N : ℝ) = (N : ℝ) * scaleL N ^ (-1 + o N) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "covering systems"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/202.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "scaleL"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "Statement A is an open-ended 'how large can r be' question with no explicit conjecture. The formalization commits to the specific asymptotic f(N) = N/L(N)^{1+o(1)} with L(N) = exp(sqrt(log N · log log N)). I believe this matches the conjecture of de la Bretèche–Ford–Vandehey, recalled from memory rather than checked.",
+   "As I recall the literature, the lower bound f(N) ≥ N/L^{1+o(1)} is already known and the upper bound currently has exponent about sqrt(3)/2. So B's real content is the open upper bound f(N) ≤ N/L^{1-o(1)}; proving it would determine f(N) up to a factor L^{o(1)}, which answers A at the natural resolution.",
+   "Writing the exponent as -1+o(N) is equivalent to N/L^{1+o(1)}, since the o(1) term may take either sign.",
+   "Allowing n_1 = 1 is harmless: the class mod 1 is all of ℤ, which forces r = 1, and this does not affect the asymptotics.",
+   "Defining f(N) as the maximum r and requiring pairwise disjointness matches A's hypotheses, with no change to quantifiers or domains."
+  ],
+  "verdict": "B asserts the natural conjectured answer to A, f(N) = N/L(N)^{1+o(1)}, with correctly matched hypotheses, so a proof of B would legitimately settle A in the positive direction.",
+  "backtranslation": "For each positive integer $N$, let $f(N)$ be the largest $r$ for which there exist integers $1 \\le n_1 < n_2 < \\dots < n_r \\le N$ and integers $a_1, \\dots, a_r$ such that the residue classes $a_i \\bmod n_i$ are pairwise disjoint. That is, no integer $m$ satisfies both $m \\equiv a_i \\pmod{n_i}$ and $m \\equiv a_j \\pmod{n_j}$ for $i \\ne j$. Let $L(N) = \\exp\\!\\big(\\sqrt{\\log N \\cdot \\log\\log N}\\big)$.\n\nThe theorem states that there is a real function $o(N)$ tending to $0$ as $N \\to \\infty$ such that, for all sufficiently large $N$, $f(N) = N \\cdot L(N)^{-1 + o(N)}$. In other words, $f(N) = N / L(N)^{1+o(1)}$.",
+  "cost_usd": 0.0596,
+  "model": "claude-opus-5-5"
+ }
+}

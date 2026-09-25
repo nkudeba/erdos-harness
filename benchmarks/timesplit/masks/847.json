@@ -1,0 +1,24 @@
+{
+ "true_problem": "847",
+ "alias_id": "54005",
+ "statement_en": "Let $A\\subset \\mathbb{N}$ be an infinite set for which there exists some $\\epsilon>0$ such that in any subset of $A$ of size $n$ there is a subset of size at least $\\epsilon n$ which contains no three-term arithmetic progression. Is it true that $A$ is the union of a finite number of sets which contain no three-term arithmetic progression?",
+ "statement_lean": "def HasFew3APs (A : Set ℕ) := ∃ (ε : ℝ), ε > 0 ∧ ∀ (B : Set ℕ), B ⊆ A → Finite B →\n  ∃ (C : Set ℕ), C ⊆ B ∧ C.ncard ≥ ε * B.ncard ∧ ThreeAPFree C\n\ntheorem erdos_54005 :\n    ∀ (A : Set ℕ), Infinite A → HasFew3APs A →\n    ∃ n, ∃ (S : Fin n → Set ℕ), (∀ i, ThreeAPFree (S i)) ∧ A = ⋃ i : Fin n, S i := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "additive combinatorics"
+ ],
+ "ok": false,
+ "errors": [
+  "line 334:49: Unknown identifier `ThreeAPFree`",
+  "line 338:38: Unknown identifier `ThreeAPFree`\nNote: It is not possible to treat `ThreeAPFree` as an implicitly bound variable here because the `autoImplicit` option is set to `false`."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/847.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

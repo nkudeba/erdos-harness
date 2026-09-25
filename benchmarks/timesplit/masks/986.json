@@ -1,0 +1,30 @@
+{
+ "true_problem": "986",
+ "alias_id": "47245",
+ "statement_en": "For any fixed $s\\geq 3$,\\[R(s,k) \\gg \\frac{k^{s-1}}{(\\log k)^c}\\]for some constant $c=c(s)>0$.",
+ "statement_lean": "namespace SimpleGraph\nnoncomputable def graphRamsey {α β : Type*} [Fintype α] [Fintype β]\n    (G : SimpleGraph α) (H : SimpleGraph β) : ℕ :=\n  sInf { n : ℕ | ∀ (C : SimpleGraph (Fin n)), G.IsContained C ∨ H.IsContained Cᶜ }\nend SimpleGraph\n\nnamespace SimpleGraph\nnoncomputable def classicalRamsey (k l : ℕ) : ℕ :=\n  graphRamsey (completeGraph (Fin k)) (completeGraph (Fin l))\nend SimpleGraph\n\nopen Filter\n\ntheorem erdos_47245 :\n    ∀ (s : ℕ) (hs : 3 ≤ s),\n      ∃ (c C : ℝ), 0 < c ∧ 0 < C ∧\n        ∀ᶠ (k : ℕ) in atTop,\n          (SimpleGraph.classicalRamsey s k : ℝ) ≥\n            C * (k : ℝ) ^ (s - 1) / (Real.log k) ^ c := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Copy"
+ ],
+ "tags": [
+  "graph theory",
+  "ramsey theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 22:15: Unknown identifier `completeGraph`",
+  "line 22:39: Unknown identifier `completeGraph`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/986.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.graphRamsey",
+  "SimpleGraph.classicalRamsey"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

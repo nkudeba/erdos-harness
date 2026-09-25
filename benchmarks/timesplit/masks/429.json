@@ -1,0 +1,21 @@
+{
+ "true_problem": "429",
+ "alias_id": "42604",
+ "statement_en": "Is it true that, if $A\\subseteq \\mathbb{N}$ is sparse enough and does not cover all residue classes modulo $p$ for any prime $p$, then there exists some $n$ such that $n+a$ is prime for all $a\\in A$?",
+ "statement_lean": "open Filter\n\ntheorem erdos_42604 :\n    ∃ f : ℕ → ℕ, Tendsto f atTop atTop ∧\n      ∀ A : Set ℕ, A.Infinite → (∀ N, (A ∩ Set.Icc 1 N).ncard ≤ f N) →\n        (∀ p : ℕ, p.Prime → ∃ b : ZMod p, ∀ a ∈ A, (a : ZMod p) ≠ b) →\n        ∃ n : ℤ, ∀ a ∈ A, (n + a).toNat.Prime := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/429.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

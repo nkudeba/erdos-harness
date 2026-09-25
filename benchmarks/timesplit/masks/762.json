@@ -1,0 +1,32 @@
+{
+ "true_problem": "762",
+ "alias_id": "42440",
+ "statement_en": "The cochromatic number of $G$, denoted by $\\zeta(G)$, is the minimum number of colours needed to colour the vertices of $G$ such that each colour class induces either a complete graph or empty graph. Is it true that if $G$ has no $K_5$ and $\\zeta(G)\\geq 4$ then $\\chi(G) \\leq \\zeta(G)+2$?",
+ "statement_lean": "namespace SimpleGraph\nopen SimpleGraph\nvariable {V α ι : Type*} {G : SimpleGraph V} {n : ℕ}\nvariable (G) in\nvariable (G) in\nvariable (G)\ndef Cocolorable (G : SimpleGraph V) (n : ℕ) : Prop := ∃ coloring : V → Fin n,\n  ∀ i, G.induce {v | coloring v = i} = ⊥ ∨ G.induce {v | coloring v = i} = ⊤\nend SimpleGraph\n\nnamespace SimpleGraph\nopen SimpleGraph\nvariable {V α ι : Type*} {G : SimpleGraph V} {n : ℕ}\nvariable (G) in\nvariable (G) in\nvariable (G)\nnoncomputable def cochromaticNumber (G : SimpleGraph V) : ℕ∞ := ⨅ n ∈ Set.ofPred G.Cocolorable, (n : ℕ∞)\nend SimpleGraph\n\ntheorem erdos_42440 :\n    ∀ (V : Type*) [Fintype V] (G : SimpleGraph V),\n      G.CliqueFree 5 → 4 ≤ G.cochromaticNumber →\n        G.chromaticNumber ≤ G.cochromaticNumber + 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Coloring.Vertex"
+ ],
+ "tags": [
+  "graph theory",
+  "chromatic number"
+ ],
+ "ok": false,
+ "errors": [
+  "line 19:10: redundant binder annotation update",
+  "line 20:10: redundant binder annotation update",
+  "line 29:10: redundant binder annotation update"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/762.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.Cocolorable",
+  "SimpleGraph.cochromaticNumber"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

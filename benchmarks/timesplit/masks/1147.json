@@ -1,0 +1,27 @@
+{
+ "true_problem": "1147",
+ "alias_id": "48907",
+ "statement_en": "Let $\\alpha>0$ be an irrational number. Is the set\\[A=\\left\\{ n\\geq 1: \\| \\alpha n^2\\| < \\frac{1}{\\log n}\\right\\},\\]where $\\|\\cdot\\|$ denotes the distance to the nearest integer, an additive basis of order $2$?",
+ "statement_lean": "noncomputable def distToNearestInt (x : ℝ) : ℝ := |x - round x|\n\nopen Filter MeasureTheory\n\ndef recurrenceSet (α : ℝ) (ε : ℕ → ℝ) : Set ℕ :=\n  {n | 1 ≤ n ∧ distToNearestInt (α * n ^ 2) < ε n}\n\ntheorem erdos_48907 :\n    ∀ α : ℝ, 0 < α → Irrational α →\n    (recurrenceSet α fun n ↦ 1 / Real.log n).IsAsymptoticAddBasisOfOrder 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.MeasureTheory.Function.ConditionalExpectation.CondexpL1"
+ ],
+ "tags": [
+  "irrational",
+  "additive basis"
+ ],
+ "ok": false,
+ "errors": [
+  "line 22:45: Invalid field `IsAsymptoticAddBasisOfOrder`: The environment does not contain `Function.IsAsymptoticAddBasisOfOrder`, so it is not possible to project the field `IsAsymptoticAddBasisOfOrder` from an expression\n  recurrenceSet α fun n => 1 / Real.log ↑n\nof type `ℕ → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1147.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "distToNearestInt"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

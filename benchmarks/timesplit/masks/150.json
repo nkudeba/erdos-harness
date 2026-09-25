@@ -1,0 +1,37 @@
+{
+ "true_problem": "150",
+ "alias_id": "52644",
+ "statement_en": "A minimal cut of a graph is a minimal set of vertices whose removal disconnects the graph. Let $c(n)$ be the maximum number of minimal cuts a graph on $n$ vertices can have. Does $c(n)^{1/n}\\to \\alpha$ for some $\\alpha <2$?",
+ "statement_lean": "open Filter\nopen scoped Topology\n\ndef IsMinimalCut {V : Type*} (G : SimpleGraph V) (T : Set V) : Prop :=\n  ¬ (G.induce Tᶜ).Preconnected ∧ ∀ S ⊂ T, (G.induce Sᶜ).Preconnected\n\nnoncomputable def maxMinimalCuts (n : ℕ) : ℕ :=\n  sSup {k | ∃ G : SimpleGraph (Fin n), {T : Set (Fin n) | IsMinimalCut G T}.ncard = k}\n\ntheorem erdos_52644 :\n    ∃ α : ℝ, α < 2 ∧\n      Tendsto (fun n : ℕ ↦ (maxMinimalCuts n : ℝ) ^ (1 / n : ℝ)) atTop (𝓝 α) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Maps",
+  "Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/150.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "No substantive issues. B defines a minimal cut as an inclusion-minimal vertex set whose removal disconnects the graph (every proper subset leaves a connected graph), which matches A's 'minimal set of vertices whose removal disconnects the graph'.",
+   "The convention that an empty vertex set counts as connected is harmless. Removing all vertices never counts as a cut, and for already-disconnected graphs only the empty set is a minimal cut. Neither affects the maximum asymptotically.",
+   "f(n) is a maximum over the finitely many graphs on n labeled vertices, so it is well-defined, and it equals A's c(n).",
+   "The conclusion, that the limit of f(n)^{1/n} exists and equals some real alpha < 2, is exactly A's question answered YES, with the same quantifier structure and a strict bound."
+  ],
+  "verdict": "Statement B faithfully restates A's positive direction: the limit of c(n)^{1/n} exists and is strictly less than 2, with matching definitions of minimal cut and c(n).",
+  "backtranslation": "For a finite simple graph $G$ on vertex set $V$, call a vertex set $T \\subseteq V$ a **minimal cut** if two conditions hold:\n\n- The subgraph induced on $V \\setminus T$ is disconnected, meaning some two of its vertices are not joined by a path in it. An empty vertex set counts as connected.\n- For every proper subset $S \\subsetneq T$, the subgraph induced on $V \\setminus S$ is connected in that same sense.\n\nLet $f(n)$ be the maximum, over all simple graphs $G$ on $n$ labeled vertices, of the number of minimal cuts of $G$.\n\nThe claim is that there is a real number $\\alpha < 2$ such that $f(n)^{1/n} \\to \\alpha$ as $n \\to \\infty$. In particular, the limit of $f(n)^{1/n}$ exists and is strictly less than $2$.",
+  "cost_usd": 0.0438,
+  "model": "claude-opus-5-5"
+ }
+}

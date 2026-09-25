@@ -1,0 +1,47 @@
+{
+ "decision": {
+  "commit": "pos",
+  "answer": "true",
+  "share": 1.0,
+  "score": {
+   "true": 0.6,
+   "false": 0.0
+  }
+ },
+ "best_frame": 0,
+ "attempts": [
+  {
+   "frame": 0,
+   "answer": "true",
+   "confidence": 0.6,
+   "complete": false,
+   "key_steps": [
+    "A Sidon set contains at most one pair of consecutive integers, since a+(a'+1)=(a+1)+a' otherwise.",
+    "End analysis: 2a_n is isolated unless a_n-1 is in A, and similarly at the bottom, so I >= 2 for large n.",
+    "Each adjacent pair s, s+1 in A+A yields up to 4 distinct x in D with 1-x in D, injectively by the Sidon property.",
+    "Hence D=A-A is a union of at most 2I+2n+5 runs of consecutive integers."
+   ],
+   "gap": "Prove that the difference set of a Sidon set of size n cannot consist of O(n) runs (equivalently |D ∩ (D+1)| <= |D| - ω(n)); combined with the counting lemma this would give I -> infinity.",
+   "text": "**Verdict.** I believe the statement is **true**, but I have **not** found a complete proof. What follows is a partial reduction plus the exact missing step. I did not reliably recall the literature status. I have a vague and unverified memory that this weak form appears in Erdős–Sárközy–Sós, \"On sum sets of Sidon sets I\" (1994), and that the open question there asks for ≫|A|² such elements. That memory is not evidence.\n\n**Notation.** Let A be Sidon with |A| = n, elements a₁ < … < aₙ. Write S = A+A, so |S| = n(n+1)/2. Write D = A−A, so |D| = n²−n+1, and every nonzero difference is represented exactly once. Call s ∈ S *isolated* if s±1 ∉ S, and let I be the number of isolated elements.\n\n**Lean conventions.** The Lean statement has no loophole.\n- For n ≥ 1 the sets with ncard = n are finite, so the set of isolated sums is finite.\n- s = 0 is never counted: 0−1 = 0 in ℕ, so \"0−1 ∉ A+A\" contradicts \"0 ∈ A+A\".\n- Infinite sets have ncard 0, so they only affect f(0), which is irrelevant to the limit.\n\n**Small cases and ends.** At most one pair of consecutive integers lies in A, since a+(a'+1) = (a+1)+a' otherwise.\n- 2aₙ is non-isolated only if aₙ−1 ∈ A.\n- If aₙ − aₙ₋₁ ≥ 2, then aₙ+aₙ₋₁ is non-isolated only if aₙ₋₁−1 ∈ A.\n- The same holds at the bottom end, and at an end with no consecutive pair, 2a₁ and a₁+a₂ are both isolated.\n\nSo I ≥ 2 for all large n, but this end argument alone yields only a bounded number of isolated elements.\n\n**Lemma (counting).** The set D is a union of at most 2I + 2n + 5 intervals of consecutive integers.\n\n*Proof.*\n1. Let P = #{s : s, s+1 ∈ S}. Each non-isolated element is adjacent to some other element of S, so |S| − I ≤ 2P.\n2. Take an adjacent pair: s = a+b and s+1 = c+d, with unique representations. Each of x ∈ {c−a, d−b, c−b, d−a} lies in D and satisfies 1−x ∈ D.\n3. These four values are distinct when a ≠ b and c ≠ d. For example, c−a = d−b together with (c−a)+(d−b) = 1 is impossible by parity. At most 2n adjacent pairs have a = b or c = d.\n4. By the Sidon property, a value x ∉ {0,1} determines (c,a). It also determines y = 1−x, and hence (d,b). So distinct adjacent pairs give distinct x.\n5. Therefore #{x ∈ D : 1−x ∈ D} ≥ 4P − 4n − 4 ≥ n(n+1) − 2I − 4n − 4.\n6. Since D = −D, the condition 1−x ∉ D is equivalent to x−1 ∉ D. Hence the number of left endpoints of runs of D is at most |D| − (n² + n − 2I − 4n − 4) = 2I + 2n + 5. ∎\n\n**Consequence.** If I were bounded along some sequence of n, then D = A−A would consist of only O(n) runs. Since |D| ≈ n², D would contain intervals of length about n/2.\n\n**Missing step.** Show that the difference set of a Sidon set of size n cannot be a union of O(n) intervals. Equivalently, show that |D ∩ (D+1)| ≤ |D| − ω(n) for Sidon sets.\n\nI checked that the Fourier identity ∫|Â|⁴(1−cos 2πθ) = n² + R, where R is the number of runs of D, is consistent with this and gives no contradiction. A single long run in D is achievable, so a genuinely global argument is needed. A complementary tool would be the rigid \"boundary\" analysis at the extreme differences near ±(aₙ−a₁).\n\n```json\n{\"answer\": \"true\", \"confidence\": 0.6, \"complete\": false,\n \"key_steps\": [\"A Sidon set contains at most one pair of consecutive integers, since a+(a'+1)=(a+1)+a' otherwise.\",\n  \"End analysis: 2a_n is isolated unless a_n-1 is in A, and similarly at the bottom, so I >= 2 for large n.\",\n  \"Each adjacent pair s, s+1 in A+A yields up to 4 distinct x in D with 1-x in D, injectively by the Sidon property.\",\n  \"Hence D=A-A is a union of at most 2I+2n+5 runs of consecutive integers.\"],\n \"gap\": \"Prove that the difference set of a Sidon set of size n cannot consist of O(n) runs (equivalently |D ∩ (D+1)| <= |D| - ω(n)); combined with the counting lemma this would give I -> infinity.\"}\n```",
+   "cost": 0.346
+  },
+  {
+   "frame": 1,
+   "answer": "true",
+   "confidence": 0.6,
+   "complete": false,
+   "key_steps": [
+    "A Sidon set has at most one pair of consecutive elements, so 2·minA or 2·maxA is an isolated sum (f(n)≥1 for n≥3).",
+    "Runs of non-isolated sums give N−I ≤ 2P, where P counts adjacent pairs in A+A.",
+    "Counting solutions to c+d=a+b+1 with representation multiplicities gives 4P−4n ≤ Q.",
+    "The Sidon property gives Q ≤ 2n + n(n−1) − 2R, where R is the number of maximal runs of the positive difference set.",
+    "Combining the bounds: #isolated sums ≥ R − 2n."
+   ],
+   "gap": "Show that the number R of maximal runs of (A−A)∩ℕ_{>0} satisfies R − 2n → ∞ for Sidon A with |A|=n, or find another argument forcing unboundedly many isolated sums.",
+   "text": "**Answer: TRUE, with moderate confidence (≈0.6). I do not have a complete proof.** Below are the conventions check, a rigorous reduction of the problem to a statement about differences, and the exact step that is still missing.\n\n## Conventions check\n\n- For n ≥ 1, `ncard A = n` forces A to be finite, because `ncard` of an infinite set is 0.\n- Sidon sets of every size exist, so the infimum ranges over a nonempty family.\n- The subtraction `s - 1` in ℕ causes no trouble. At s = 0 it would require 0 ∉ A+A while also 0 ∈ A+A, which is impossible, so s = 0 is never counted.\n- So f(n) is exactly the minimum, over Sidon sets A with |A| = n, of the number of isolated sums (s ∈ A+A with s ± 1 ∉ A+A). The theorem says this minimum tends to ∞.\n\n## Rigorous partial results\n\n**Lemma 1 (at least one isolated sum).**\n- A Sidon set contains at most one pair of consecutive elements. Indeed, x+1, y+1 ∈ A with x ≠ y gives (x+1)+y = x+(y+1), which violates the Sidon condition.\n- Hence, for |A| ≥ 3, either min A + 1 ∉ A or max A − 1 ∉ A.\n- If min A + 1 ∉ A, then 2·min A is isolated. If max A − 1 ∉ A, then 2·max A is isolated.\n- So f(n) ≥ 1 for n ≥ 3.\n\n**Lemma 2 (counting reduction).** Set up the following notation.\n- S = A+A, N = |S| = n(n+1)/2, and I = the number of isolated points of S.\n- P = the number of s with s, s+1 ∈ S.\n- Q = #{(a,b,c,d) ∈ A⁴ : c+d = a+b+1}.\n\nStep 1: bound I by P.\n- The non-isolated points of S form maximal runs of length at least 2.\n- A run of length L contributes L−1 ≥ L/2 adjacencies.\n- Therefore N − I ≤ 2P.\n\nStep 2: bound P by Q.\n- Each sum s has r(s) ∈ {1, 2} ordered representations, and r(s) = 1 exactly when s = 2a.\n- There are only n diagonal sums 2a, and two consecutive integers cannot both be diagonal.\n- Therefore Q ≥ 4P − 4n.\n\nStep 3: evaluate Q.\n- Write Q = Σ_t r_D(t)·r_D(1−t), where D = A−A.\n- The Sidon property gives r_D(t) ∈ {0, 1} for t ≠ 0, and r_D(0) = n.\n- Since D is symmetric, Q ≤ 2n + #{t ∈ D∖{0} : t−1 ∈ D∖{0}} = 2n + n(n−1) − K.\n- Here K is the number of maximal runs of D∖{0}.\n- Negation maps runs of D₊ = D ∩ ℕ_{>0} to runs of D₋, and 0 separates the two sides, so K = 2R, where R is the number of runs of D₊.\n\nCombining the three steps:\n\n I ≥ N − 2P ≥ n(n+1)/2 − (n² + 5n − 2R)/2 = R − 2n.\n\n## Missing step\n\nThe proof would be complete given the following claim.\n\n**Claim (unproved).** For Sidon sets with |A| = n, the number R of maximal runs of the positive difference set A−A satisfies R − 2n → ∞.\n\nEvidence for the claim:\n- By Erdős–Turán, diam A ≥ n² − O(n^{3/2}), while |D₊| = n(n−1)/2. So D₊ has density about 1/2 in [1, diam A], which suggests many runs.\n- However, density alone does not bound the number of runs. For instance, D₊ could in principle be a union of few long intervals.\n\nWhat is needed is a structural result: a Sidon set cannot have its difference set concentrated in O(n) intervals. This might come from Singer/modular lifting arguments or from bounds on restricted difference bases. I was not able to establish it.\n\nAn alternative route would be to find a different extremal argument showing that many diagonal sums 2a are isolated.\n\n```json\n{\"answer\": \"true\", \"confidence\": 0.6, \"complete\": false,\n \"key_steps\": [\"A Sidon set has at most one pair of consecutive elements, so 2·minA or 2·maxA is an isolated sum (f(n)≥1 for n≥3).\",\n  \"Runs of non-isolated sums give N−I ≤ 2P, where P counts adjacent pairs in A+A.\",\n  \"Counting solutions to c+d=a+b+1 with representation multiplicities gives 4P−4n ≤ Q.\",\n  \"The Sidon property gives Q ≤ 2n + n(n−1) − 2R, where R is the number of maximal runs of the positive difference set.\",\n  \"Combining the bounds: #isolated sums ≥ R − 2n.\"],\n \"gap\": \"Show that the number R of maximal runs of (A−A)∩ℕ_{>0} satisfies R − 2n → ∞ for Sidon A with |A|=n, or find another argument forcing unboundedly many isolated sums.\"}\n```",
+   "cost": 0.2466
+  }
+ ],
+ "gap_attempt": null,
+ "spend": 0.5926
+}

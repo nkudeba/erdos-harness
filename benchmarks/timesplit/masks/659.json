@@ -1,0 +1,27 @@
+{
+ "true_problem": "659",
+ "alias_id": "95418",
+ "statement_en": "Is there a set of $n$ points in $\\mathbb{R}^2$ such that every subset of $4$ points determines at least $3$ distances, yet the total number of distinct distances is\\[\\ll \\frac{n}{\\sqrt{\\log n}}?\\]",
+ "statement_lean": "notation g \" ≪ \" f => Asymptotics.IsBigO Filter.atTop (g : ℕ → ℝ) (f : ℕ → ℝ)\n\nopen EuclideanGeometry Finset Real\n\ntheorem erdos_95418 :\n    ∃ A : ℕ → Finset ℝ²,\n   (∀ n, #(A n) = n ∧ ∀ S ⊆ A n, #S = 4 → 3 ≤ distinctDistances S) ∧\n    (fun n ↦ distinctDistances (A n)) ≪ fun n ↦ n / sqrt (log n) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry",
+  "distances"
+ ],
+ "ok": false,
+ "errors": [
+  "line 18:22: unexpected token '²'; expected ','"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/659.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "notation ≪"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

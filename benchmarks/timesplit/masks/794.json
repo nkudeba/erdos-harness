@@ -1,0 +1,30 @@
+{
+ "true_problem": "794",
+ "alias_id": "55204",
+ "statement_en": "Is it true that every $3$-uniform hypergraph on $3n$ vertices with at least $n^3+1$ edges must contain either a subgraph on $4$ vertices with $3$ edges or a subgraph on $5$ vertices with $7$ edges?",
+ "statement_lean": "open Cardinal Set\ndef Finset.IsThreeUniform {V : Type*} (H : Finset (Finset V)) : Prop := ∀ e ∈ H, e.card = 3\n\nopen Cardinal Set\ndef Finset.ContainsSubgraph {V : Type*} [DecidableEq V] (H : Finset (Finset V)) (m k : ℕ) : Prop :=\n  ∃ S : Finset V, S.card = m ∧ k ≤ (Finset.filter (fun e : Finset V => e ⊆ S) H).card\n\nopen Filter\n\ntheorem erdos_55204 :\n    ∀ n : ℕ, ∀ H : Finset (Finset (Fin (3 * n))), H.IsThreeUniform →\n      n ^ 3 + 1 ≤ H.card → H.ContainsSubgraph 4 3 ∨ H.ContainsSubgraph 5 7 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "graph theory",
+  "hypergraphs",
+  "turan number"
+ ],
+ "ok": false,
+ "errors": [
+  "line 579:52: Invalid field `IsThreeUniform`: The environment does not contain `Finset.IsThreeUniform`, so it is not possible to project the field `IsThreeUniform` from an expression\n  H\nof type `Finset (Finset (Fin (3 * n)))`",
+  "line 580:29: Invalid field `ContainsSubgraph`: The environment does not contain `Finset.ContainsSubgraph`, so it is not possible to project the field `ContainsSubgraph` from an expression\n  H\nof type `Finset (Finset (Fin (3 * n)))`",
+  "line 580:54: Invalid field `ContainsSubgraph`: The environment does not contain `Finset.ContainsSubgraph`, so it is not possible to project the field `ContainsSubgraph` from an expression\n  H\nof type `Finset (Finset (Fin (3 * n)))`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/794.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Finset.IsThreeUniform",
+  "Finset.ContainsSubgraph"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

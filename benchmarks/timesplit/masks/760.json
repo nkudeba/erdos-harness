@@ -1,0 +1,32 @@
+{
+ "true_problem": "760",
+ "alias_id": "98978",
+ "statement_en": "The cochromatic number of $G$, denoted by $\\zeta(G)$, is the minimum number of colours needed to colour the vertices of $G$ such that each colour class induces either a complete graph or independent set. If $G$ is a graph with chromatic number $\\chi(G)=m$ then must $G$ contain a subgraph $H$ with\\[\\zeta(H) \\gg \\frac{m}{\\log m}?\\]",
+ "statement_lean": "namespace SimpleGraph\nopen SimpleGraph\nvariable {V α ι : Type*} {G : SimpleGraph V} {n : ℕ}\nvariable (G) in\nvariable (G) in\nvariable (G)\ndef Cocolorable (G : SimpleGraph V) (n : ℕ) : Prop := ∃ coloring : V → Fin n,\n  ∀ i, G.induce {v | coloring v = i} = ⊥ ∨ G.induce {v | coloring v = i} = ⊤\nend SimpleGraph\n\nnamespace SimpleGraph\nopen SimpleGraph\nvariable {V α ι : Type*} {G : SimpleGraph V} {n : ℕ}\nvariable (G) in\nvariable (G) in\nvariable (G)\nnoncomputable def cochromaticNumber (G : SimpleGraph V) : ℕ∞ := ⨅ n ∈ Set.ofPred G.Cocolorable, (n : ℕ∞)\nend SimpleGraph\n\ntheorem erdos_98978 :\n    ∃ c > (0 : ℝ), ∀ (V : Type*) [Finite V] (G : SimpleGraph V) (m : ℕ),\n      G.chromaticNumber = (m : ℕ∞) →\n        ∃ H : G.Subgraph, ∃ k : ℕ, ((k : ℕ∞) ≤ H.coe.cochromaticNumber) ∧\n          (c * (m : ℝ) / Real.log (m : ℝ) ≤ (k : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Coloring.Vertex",
+  "Mathlib.Combinatorics.SimpleGraph.Subgraph"
+ ],
+ "tags": [
+  "graph theory",
+  "chromatic number"
+ ],
+ "ok": false,
+ "errors": [
+  "line 19:10: redundant binder annotation update",
+  "line 20:10: redundant binder annotation update",
+  "line 29:10: redundant binder annotation update"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/760.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.Cocolorable",
+  "SimpleGraph.cochromaticNumber"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

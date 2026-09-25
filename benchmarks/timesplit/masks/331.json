@@ -1,0 +1,22 @@
+{
+ "true_problem": "331",
+ "alias_id": "76885",
+ "statement_en": "Let $A,B\\subseteq \\mathbb{N}$ such that for all large $N$\\[\\lvert A\\cap \\{1,\\ldots,N\\}\\rvert \\gg N^{1/2}\\]and\\[\\lvert B\\cap \\{1,\\ldots,N\\}\\rvert \\gg N^{1/2}.\\]Is it true that there are infinitely many solutions to $a_1-a_2=b_1-b_2\\neq 0$ with $a_1,a_2\\in A$ and $b_1,b_2\\in B$?",
+ "statement_lean": "open scoped Classical\nopen Nat Filter\nopen scoped Asymptotics\n\ntheorem erdos_76885 :\n    ∀ A B : Set ℕ,\n      (fun (n : ℕ) ↦ (n : ℝ) ^ (1 / 2 : ℝ)) =O[atTop] (fun (n : ℕ) ↦ (count (· ∈ A) n : ℝ)) →\n      (fun (n : ℕ) ↦ (n : ℝ) ^ (1 / 2 : ℝ)) =O[atTop] (fun (n : ℕ) ↦ (count (· ∈ B) n : ℝ)) →\n      { s : ℕ × ℕ × ℕ × ℕ | let ⟨a₁, a₂, b₁, b₂⟩ := s\n        a₁ ∈ A ∧ a₂ ∈ A ∧ b₁ ∈ B ∧ b₂ ∈ B ∧\n        a₁ ≠ a₂ ∧ a₁ + b₂ = a₂ + b₁ }.Infinite := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive combinatorics"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/331.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": true,
+ "checked": "2026-09-24"
+}

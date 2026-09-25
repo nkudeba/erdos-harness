@@ -1,0 +1,32 @@
+{
+ "true_problem": "865",
+ "alias_id": "28459",
+ "statement_en": "There exists a constant $C>0$ such that, for all large $N$, if $A\\subseteq \\{1,\\ldots,N\\}$ has size at least $\\frac{5}{8}N+C$ then there are distinct $a,b,c\\in A$ such that $a+b,a+c,b+c\\in A$.",
+ "statement_lean": "open Finset Filter\nopen scoped Asymptotics\n\ntheorem erdos_28459 :\n    ∃ C > 0, ∀ᶠ (N : ℕ) in atTop,\n      ∀ A ⊆ Icc 1 N, A.card ≥ (5 / 8 : ℝ) * N + C →\n      ∃ a ∈ A, ∃ b ∈ A, ∃ c ∈ A, a ≠ b ∧ a ≠ c ∧ b ≠ c ∧\n      a + b ∈ A ∧ a + c ∈ A ∧ b + c ∈ A := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive combinatorics"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/865.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "None substantive: B matches A in quantifier order (∃C>0, ∀ sufficiently large N, ∀A ⊆ [1,N]), uses the same non-strict bound |A| ≥ 5N/8 + C, and has the same conclusion (pairwise distinct a,b,c with a+b, a+c, b+c ∈ A). Taking C real rather than integer is harmless. The sums need not be distinct from a,b,c in either statement, and pairwise distinctness of a,b,c already forces a+b, a+c, b+c to be distinct from each other."
+  ],
+  "verdict": "Statement B is a faithful restatement of A's positive direction, so a proof of B would settle A in the `pos` direction.",
+  "backtranslation": "There exists a real constant $C > 0$ such that, for all sufficiently large natural numbers $N$, the following holds. Let $A$ be any subset of $\\{1, 2, \\dots, N\\}$ with $|A| \\ge \\tfrac{5}{8}N + C$. Then $A$ contains three pairwise distinct elements $a, b, c$ such that the three pairwise sums $a+b$, $a+c$ and $b+c$ also all belong to $A$.",
+  "cost_usd": 0.0245,
+  "model": "claude-opus-5-5"
+ }
+}

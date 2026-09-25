@@ -1,0 +1,29 @@
+{
+ "true_problem": "905",
+ "alias_id": "58188",
+ "statement_en": "Every graph with $n$ vertices and $>n^2/4$ edges contains an edge which is in at least $n/6$ triangles.",
+ "statement_lean": "namespace SimpleGraph\nopen Finset List\nvariable {V : Type*} {G : SimpleGraph V}\nnoncomputable def trianglesContaining {α : Type*} [Fintype α] (G : SimpleGraph α)\n    (uv : Sym2 α) : Finset (Finset α) :=\n  (G.cliqueFinset 3).filter (fun t ↦ uv.toFinset ⊆ t)\nend SimpleGraph\n\nopen scoped Classical\nopen Finset\n\ntheorem erdos_58188 (n : ℕ) (G : SimpleGraph (Fin n)) [DecidableRel G.Adj]\n    (hG : (n : ℝ) ^ 2 / 4 < (#G.edgeFinset : ℝ)) :\n    ∃ e ∈ G.edgeFinset, (n : ℝ) / 6 ≤ (#(G.trianglesContaining e) : ℝ) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Finite",
+  "Mathlib.Combinatorics.SimpleGraph.Clique"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 20:3: failed to synthesize instance of type class\n  DecidableEq α\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.",
+  "line 28:43: Invalid field `trianglesContaining`: The environment does not contain `SimpleGraph.trianglesContaining`, so it is not possible to project the field `trianglesContaining` from an expression\n  G\nof type `SimpleGraph (Fin n)`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/905.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.trianglesContaining"
+ ],
+ "classical": true,
+ "checked": "2026-09-24"
+}

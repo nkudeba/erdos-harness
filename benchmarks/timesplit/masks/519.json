@@ -1,0 +1,21 @@
+{
+ "true_problem": "519",
+ "alias_id": "31695",
+ "statement_en": "Let $z_1,\\ldots,z_n\\in \\mathbb{C}$ with $z_1=1$. Must there exist an absolute constant $c>0$ such that\\[\\max_{1\\leq k\\leq n}\\left\\lvert \\sum_{i}z_i^k\\right\\rvert>c?\\]",
+ "statement_lean": "open scoped BigOperators\n\nnoncomputable def powerSum {n : ℕ} (z : Fin n → ℂ) (k : ℕ) : ℂ :=\n  ∑ i : Fin n, z i ^ k\n\ntheorem erdos_31695 :\n    ∃ c : ℝ, 0 < c ∧\n      ∀ (n : ℕ) (hn : 0 < n) (z : Fin n → ℂ),\n        z ⟨0, hn⟩ = 1 →\n          ∃ k : Fin n, c < ‖powerSum z (k.val + 1)‖ := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/519.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

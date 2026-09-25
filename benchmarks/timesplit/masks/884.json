@@ -1,0 +1,39 @@
+{
+ "true_problem": "884",
+ "alias_id": "87199",
+ "statement_en": "Is it true that, for any $n$, if $d_1<\\cdots <d_t$ are the divisors of $n$, then\\[\\sum_{1\\leq i<j\\leq t}\\frac{1}{d_j-d_i} \\ll 1+\\sum_{1\\leq i<t}\\frac{1}{d_{i+1}-d_i},\\]where the implied constant is absolute?",
+ "statement_lean": "notation g \" ≪ \" f => Asymptotics.IsBigO Filter.atTop (g : ℕ → ℝ) (f : ℕ → ℝ)\n\nnoncomputable abbrev sumDivisorInvPairwiseDifference (n : ℕ) : ℝ :=\n    ∑ j : Fin n.divisors.card, ∑ i : Fin  j,\n    (1 : ℚ) / (Nat.nth (· ∣ n) j - Nat.nth (· ∣ n) i )\n\nnoncomputable abbrev sumDivisorInvConsecutiveDifference (n : ℕ) : ℝ :=\n    ∑ i : Fin (n.divisors.card - 1),\n    (1 : ℚ) / (Nat.nth (· ∣ n) (i + 1) - Nat.nth (· ∣ n) i)\n\ndef TSProp : Prop :=\n    sumDivisorInvPairwiseDifference ≪ 1 + sumDivisorInvConsecutiveDifference\n\ntheorem erdos_87199 :\n    TSProp := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Data.Nat.Nth"
+ ],
+ "tags": [
+  "number theory",
+  "divisors"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/884.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "notation ≪"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "The formalized 'consecutive-difference' sum B(n) has an off-by-one wrap-around bug. Its last term is 1/(1 − e_{k−2}), which is negative (or 0 when n is prime), instead of 1/(n − e_{k−2}). So B(n) is not the intended sum S(n) = Σ 1/(d_{i+1} − d_i).",
+   "Despite the bug, the pos direction still follows. Write B(n) = S(n) − 1/(n − e_{k−2}) + 1/(1 − e_{k−2}). If e_{k−2} ≥ 2, both corrections lie in [−1, 0], so S − 2 ≤ B ≤ S. Hence 1 + B ≥ S − 1 ≥ −1, and |1 + B| ≤ max(1 + S, 1) = 1 + S. The degenerate cases (n = 1, n prime) give B = 0, so |1 + B| = 1 ≤ 1 + S.",
+   "Therefore |A(n)| ≤ C|1 + B(n)| implies A(n) ≤ C(1 + S(n)). The exceptional n < N are finitely many, and each has 1 + S(n) ≥ 1, so enlarging C gives an absolute constant for all n.",
+   "B is formally at least as strong as A, not literally equivalent. If A were true, B could in principle still fail, e.g. if 1 + B(n) came close to 0; this seems unlikely, but it is not excluded.",
+   "Using the asymptotic form 'O as n → ∞' with a threshold N instead of 'for all n' is harmless, since it can be upgraded as above. The n = 0 convention is irrelevant."
+  ],
+  "verdict": "Although the formalized consecutive sum has a wrap-around bug, |1 + B(n)| ≤ 1 + S(n) always holds, so a proof of B implies the conjectured bound for all n with an absolute constant and settles A in the pos direction.",
+  "backtranslation": "**Statement.** For each natural number n, list its positive divisors in increasing order as e₀ = 1 < e₁ < ⋯ < e_{k−1} = n, where k = τ(n) is the number of divisors. For n = 0 there are no divisors and both sums below are empty. Define\n\n- A(n) = Σ_{0 ≤ i < j ≤ k−1} 1/(e_j − e_i), the sum of reciprocals of all pairwise differences of divisors;\n- B(n) = Σ_{i=0}^{k−2} 1/(e_{(i+1) mod (k−1)} − e_i), with the division taken in the rationals and 1/0 = 0.\n\nThe claim is that A(n) = O(1 + B(n)) as n → ∞. That is, there exist a constant C and a threshold N such that |A(n)| ≤ C·|1 + B(n)| for all n ≥ N.\n\n**How B(n) differs from the consecutive-difference sum.** The index i+1 wraps around modulo k−1, so B(n) is not exactly the sum of reciprocals of consecutive differences:\n\n- For i ≤ k−3, the terms are the usual 1/(e_{i+1} − e_i).\n- The final term i = k−2 is 1/(1 − e_{k−2}) instead of 1/(n − e_{k−2}). This term is negative, and it equals 0 when k = 2, i.e., when n is prime.",
+  "cost_usd": 0.0888,
+  "model": "claude-opus-5-5"
+ }
+}

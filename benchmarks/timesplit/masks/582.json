@@ -1,0 +1,24 @@
+{
+ "true_problem": "582",
+ "alias_id": "22008",
+ "statement_en": "Does there exist a graph $G$ which contains no $K_4$, and yet any $2$-colouring of the edges produces a monochromatic $K_3$?",
+ "statement_lean": "def EdgeRamseyTriangle {V : Type*} (G : SimpleGraph V) : Prop :=\n  ∀ c : G.edgeSet → Fin 2,\n    ∃ (u v w : V) (huv : G.Adj u v) (hvw : G.Adj v w) (huw : G.Adj u w),\n      c ⟨s(u, v), huv⟩ = c ⟨s(v, w), hvw⟩ ∧ c ⟨s(v, w), hvw⟩ = c ⟨s(u, w), huw⟩\n\ntheorem erdos_22008 :\n    ∃ (V : Type*) (_ : Fintype V) (G : SimpleGraph V),\n      G.CliqueFree 4 ∧ EdgeRamseyTriangle G := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique"
+ ],
+ "tags": [
+  "graph theory",
+  "ramsey theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/582.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

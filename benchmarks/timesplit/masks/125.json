@@ -1,0 +1,25 @@
+{
+ "true_problem": "125",
+ "alias_id": "36002",
+ "statement_en": "Let $A = \\{ \\sum\\epsilon_k3^k : \\epsilon_k\\in \\{0,1\\}\\}$ be the set of integers which have only the digits $0,1$ when written base $3$, and $B=\\{ \\sum\\epsilon_k4^k : \\epsilon_k\\in \\{0,1\\}\\}$ be the set of integers which have only the digits $0,1$ when written base $4$. Does $A+B$ have positive lower density?",
+ "statement_lean": "open Nat Pointwise\n\ntheorem erdos_36002 :\n    (A + B).HasPosDensity := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "base representations"
+ ],
+ "ok": false,
+ "errors": [
+  "line 125:5: Unknown identifier `A`\nNote: It is not possible to treat `A` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.",
+  "line 125:9: Unknown identifier `B`\nNote: It is not possible to treat `B` as an implicitly bound variable here because the `autoImplicit` option is set to `false`."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/125.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,23 @@
+{
+ "true_problem": "785",
+ "alias_id": "94477",
+ "statement_en": "Let $A,B\\subseteq \\mathbb{N}$ be infinite sets such that $A+B$ contains all large integers. Let $A(x)=\\lvert A\\cap [1,x]\\rvert$ and similarly for $B(x)$. Is it true that if $A(x)B(x)\\sim x$ then\\[A(x)B(x)-x\\to \\infty\\]as $x\\to \\infty$?",
+ "statement_lean": "open Filter\nopen scoped Pointwise\ndef IsAdditiveComplement (A B : Set ℕ) : Prop :=\n  ∀ᶠ n : ℕ in atTop, n ∈ A + B\n\nopen Filter Pointwise\nopen scoped Topology\n\nnoncomputable def counting (A : Set ℕ) (x : ℕ) : ℕ :=\n  (A ∩ Set.Icc 1 x).ncard\n\ndef IsExactAdditiveComplement (A B : Set ℕ) : Prop :=\n  IsAdditiveComplement A B ∧\n    Tendsto (fun x : ℕ => (counting A x * counting B x : ℝ) / (x : ℝ)) atTop (𝓝 1)\n\ntheorem erdos_94477 :\n    ∀ A B : Set ℕ, A.Infinite → B.Infinite → 0 ∉ A → 0 ∉ B → IsExactAdditiveComplement A B →\n      Tendsto (fun x : ℕ => (counting A x * counting B x : ℝ) - (x : ℝ)) atTop atTop := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "additive combinatorics"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/785.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "IsAdditiveComplement"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

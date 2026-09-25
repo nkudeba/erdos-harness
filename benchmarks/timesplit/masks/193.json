@@ -1,0 +1,35 @@
+{
+ "true_problem": "193",
+ "alias_id": "56127",
+ "statement_en": "Let $S\\subseteq \\mathbb{Z}^3$ be a finite set and let $A=\\{a_1,a_2,\\ldots,\\}\\subset \\mathbb{Z}^3$ be an infinite $S$-walk, so that $a_{i+1}-a_i\\in S$ for all $i$. Must $A$ contain three collinear points?",
+ "statement_lean": "open Set\n\ndef IsSWalk {V : Type*} [AddCommGroup V] (S : Set V) (a : ℕ → V) : Prop :=\n  ∀ n, a (n + 1) - a n ∈ S\n\ndef HasCollinearTriple (R) {V : Type*} [DivisionRing R] [AddCommGroup V] [Module R V] (A : Set V) : Prop :=\n  ∃ x ∈ A, ∃ y ∈ A, ∃ z ∈ A, x ≠ y ∧ y ≠ z ∧ x ≠ z ∧ Collinear R ({x, y, z} : Set V)\n\ntheorem erdos_56127 :\n    ∀ S : Set (Fin 3 → ℤ), S.Finite →\n      ∀ a : ℕ → Fin 3 → ℤ, IsSWalk S a → (range a).Infinite →\n      HasCollinearTriple ℚ (range (fun n ↦ (↑) ∘ a n : ℕ → Fin 3 → ℚ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/193.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B does not require the walk to be injective; it only assumes the set of visited points is infinite. A says A = {a_1, a_2, ...} is an infinite subset, so the hypotheses match. If anything, B covers at least as many walks, so proving B also settles the injective reading.",
+   "Collinearity over ℚ versus ℝ makes no difference for points of ℤ³ (a determinant/rank condition over ℚ). 'Three pairwise distinct points' is the intended meaning of 'three collinear points'.",
+   "Indexing from 0 versus 1 and taking S as an arbitrary finite subset of ℤ³ are harmless.",
+   "Degenerate cases (for example S = {0}, or a bounded walk) are excluded by the infinite-set hypothesis in both A and B."
+  ],
+  "verdict": "B is exactly A's assertion answered YES (at least as general a hypothesis), so a proof of B would settle A in the pos direction.",
+  "backtranslation": "Let S be any finite set of vectors in ℤ³, and let a₀, a₁, a₂, … be an infinite sequence of points in ℤ³ such that every step aₙ₊₁ − aₙ belongs to S for all n ≥ 0. Suppose the set of points visited by the sequence, {aₙ : n ≥ 0}, is infinite. The claim is that this set of visited points, viewed as a subset of ℚ³, contains three pairwise distinct points that are collinear, meaning they lie on a common affine line over ℚ.",
+  "cost_usd": 0.0366,
+  "model": "claude-opus-5-5"
+ }
+}

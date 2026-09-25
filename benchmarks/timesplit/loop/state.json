@@ -1,0 +1,32 @@
+{
+ "goal": "a verified TRUE-direction solve of a time-split Erdős item (dev or test), replicated once on a fresh alias; or a verified proof on a real open problem, handed to the operator for review",
+ "budget_usd": 200.0,
+ "started": "2026-09-25T03:58:48Z",
+ "iteration": 1,
+ "phase": "screen",
+ "candidate": "v3 (V3_FLAGS in timesplit.py: exploration, empirical conjectures, routes, core-first, wide literature)",
+ "baseline": {
+  "tag": "baseline-v2-84f21c5",
+  "pin": "pin_84f21c561c540e02_harness.py",
+  "note": "old pin, without the 2026-09-24 fixes: a same-pin baseline is needed before a dev gain is attributed"
+ },
+ "next": [
+  "wait for the pre-loop smoke run train-v3-smoke (#152) to land; record it under 'Smoke run of candidate v3' in RESULTS.md, then run `timesplit.py ideas --tag train-v3-smoke`",
+  "grade tool-less discovery: register --kind ideas --name calib-ideas --estimate 1.5; timesplit.py ideas --tag calib-ideas --from-calibration train-v2r1",
+  "explore-screen: register --kind explore-screen --name explore-train-1 --estimate 25; timesplit.py explore-screen --tag explore-train-1 (all train items except 152); then ideas --tag explore-train-1 --baseline calib-ideas --baseline-calibration train-v2r1",
+  "decide by the gate in RESULTS.md 'Improvement loop, iteration 1'"
+ ],
+ "pre_loop": [
+  "discover-v2-84f21c5: dev lane started by the operator before the loop, on pin 84f21c5; not counted",
+  "train-v3-smoke: the build's end-to-end check on train #152, launched before the loop; not counted"
+ ],
+ "ledger": [],
+ "notes": [
+  {
+   "at": "2026-09-25T03:58:48Z",
+   "text": "loop seeded; authority: $200, commits to branch harness-loop, dev evaluations without asking"
+  }
+ ],
+ "stop": null,
+ "updated": "2026-09-25T03:58:48Z"
+}

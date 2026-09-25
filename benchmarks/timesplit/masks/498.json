@@ -1,0 +1,22 @@
+{
+ "true_problem": "498",
+ "alias_id": "58557",
+ "statement_en": "Let $z_1,\\ldots,z_n\\in\\mathbb{C}$ with $1\\leq \\lvert z_i\\rvert$ for $1\\leq i\\leq n$. Let $D$ be an arbitrary disc of radius $1$. Is it true that the number of sums of the shape\\[\\sum_{i=1}^n\\epsilon_iz_i \\textrm{ for }\\epsilon_i\\in \\{-1,1\\}\\]which lie in $D$ is at most $\\binom{n}{\\lfloor n/2\\rfloor}$?",
+ "statement_lean": "theorem erdos_58557 :\n    ∀ (n : ℕ) (z : Fin n → ℂ), (∀ i, 1 ≤ ‖z i‖) → ∀ c : ℂ,\n      {ε : Fin n → ℤ | (∀ i, ε i = -1 ∨ ε i = 1) ∧\n        (∑ i, (ε i : ℂ) * z i) ∈ Metric.ball c 1}.ncard ≤ n.choose (n / 2) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "combinatorics",
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/498.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

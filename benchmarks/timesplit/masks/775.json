@@ -1,0 +1,44 @@
+{
+ "true_problem": "775",
+ "alias_id": "38876",
+ "statement_en": "Is there a $3$-uniform hypergraph on $n$ vertices which contains at least $n-O(1)$ different sizes of cliques (maximal complete subgraphs)",
+ "statement_lean": "namespace SimpleGraph\nvariable {V : Type*}\nstructure Cycle (G : SimpleGraph V) where\n  \n  base : V\n  \n  walk : G.Walk base base\n  \n  isCycle : walk.IsCycle\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {V : Type*}\ndef Cycle.edges {G : SimpleGraph V} (c : Cycle G) : List (Sym2 V) := c.walk.edges\nend SimpleGraph\n\nopen Cardinal Set\nstructure ThreeUniformHypergraph (V : Type) where\n  \n  edges : Set (Finset V)\n  \n  uniform : ∀ e ∈ edges, e.card = 3\n\nnamespace ThreeUniformHypergraph\nopen Cardinal Set\ndef IsCompleteSubgraph {V : Type} (H : ThreeUniformHypergraph V) (S : Finset V) : Prop :=\n  ∀ e : Finset V, e ⊆ S → e.card = 3 → e ∈ H.edges\nend ThreeUniformHypergraph\n\nnamespace ThreeUniformHypergraph\nopen Cardinal Set\ndef cliqueSizes {V : Type} (H : ThreeUniformHypergraph V) : Set ℕ :=\n  { k | ∃ S : Finset V, Maximal (IsCompleteSubgraph H) S ∧ S.card = k }\nend ThreeUniformHypergraph\n\nnamespace SimpleGraph\nopen Finset List\nvariable {V : Type*} {G : SimpleGraph V}\ndef cliqueSizes {V : Type} (G : SimpleGraph V) : Set ℕ :=\n  { k | ∃ S : Finset V, Maximal (fun T : Finset V => G.IsClique (T : Set V)) S ∧ S.card = k }\nend SimpleGraph\n\nopen Filter\n\ntheorem erdos_38876 :\n    ∃ C : ℕ, ∃ᶠ n : ℕ in atTop, ∃ H : ThreeUniformHypergraph (Fin n),\n      n - C ≤ (ThreeUniformHypergraph.cliqueSizes H).ncard := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Walk.Basic"
+ ],
+ "tags": [
+  "graph theory",
+  "hypergraphs"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/775.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.Cycle",
+  "SimpleGraph.Cycle.edges",
+  "ThreeUniformHypergraph",
+  "ThreeUniformHypergraph.IsCompleteSubgraph",
+  "ThreeUniformHypergraph.cliqueSizes",
+  "SimpleGraph.cliqueSizes"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": false,
+  "issues": [
+   "Quantifier weakening: B only requires suitable hypergraphs for infinitely many n. A's 'n − O(1)' asks for a family defined for every (sufficiently large) n with a uniform constant C.",
+   "No evident padding argument closes the gap. Adding k edge-free vertices to a good hypergraph on n vertices keeps its maximal-clique sizes, but the deficit grows by k. If the good n's are sparse, the gaps between them are unbounded, so no single C works for all large n. So B does not obviously imply A.",
+   "Minor: counting vacuous cliques of size ≤2 among the maximal-clique sizes shifts the count by at most O(1), so it is harmless for an n − O(1) statement."
+  ],
+  "verdict": "B is a strictly weaker 'infinitely many n' version of A's 'for all n, n − O(1)' assertion, so proving B would not legitimately settle A in the positive direction.",
+  "backtranslation": "There exists a natural number $C$ such that for infinitely many positive integers $n$ there is a 3-uniform hypergraph $H$ on the vertex set $\\{0,1,\\dots,n-1\\}$ with the following property. The number of distinct sizes of maximal cliques of $H$ is at least $n - C$, where the subtraction is truncated at $0$.\n\nHere a clique is a set $S$ of vertices such that every 3-element subset of $S$ is an edge of $H$. Sets with fewer than 3 vertices therefore count as cliques vacuously. A clique is maximal if it is not properly contained in any other clique.",
+  "cost_usd": 0.0545,
+  "model": "claude-opus-5-5"
+ }
+}

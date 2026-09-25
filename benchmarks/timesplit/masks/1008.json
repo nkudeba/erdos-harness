@@ -1,0 +1,25 @@
+{
+ "true_problem": "1008",
+ "alias_id": "53563",
+ "statement_en": "Does every graph with $m$ edges contain a subgraph with $\\gg m^{2/3}$ edges which contains no $C_4$?",
+ "statement_lean": "open SimpleGraph\n\ntheorem erdos_53563 :\n    ∃ c > (0 : ℝ), ∀ (V : Type) [Fintype V] (G : SimpleGraph V),\n      ∃ H ≤ G, (cycleGraph 4).Free H ∧\n        c * (G.edgeSet.ncard : ℝ) ^ (2 / 3 : ℝ) ≤ (H.edgeSet.ncard : ℝ) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic"
+ ],
+ "tags": [
+  "graph theory",
+  "cycles"
+ ],
+ "ok": false,
+ "errors": [
+  "line 311:16: Unknown identifier `cycleGraph`\nNote: It is not possible to treat `cycleGraph` as an implicitly bound variable here because the `autoImplicit` option is set to `false`."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1008.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

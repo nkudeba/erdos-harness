@@ -1,0 +1,23 @@
+{
+ "true_problem": "497",
+ "alias_id": "30574",
+ "statement_en": "How many antichains in $[n]$ are there? That is, how many families of subsets of $[n]$ are there such that, if $\\mathcal{F}$ is such a family and $A,B\\in \\mathcal{F}$, then $A\\not\\subseteq B$?",
+ "statement_lean": "open Filter\n\ntheorem erdos_30574 :\n    ∃ (o : ℕ → ℝ) (_ : o =o[atTop] (1 : ℕ → ℝ)),\n      ∀ n : ℕ, (DedekindNumber.M' n : ℝ) = 2 ^ ((1 + o n) * (n.choose (n / 2) : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "combinatorics"
+ ],
+ "ok": false,
+ "errors": [
+  "line 282:16: Unknown identifier `DedekindNumber.M'`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/497.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

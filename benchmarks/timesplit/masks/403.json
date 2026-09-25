@@ -1,0 +1,22 @@
+{
+ "true_problem": "403",
+ "alias_id": "95200",
+ "statement_en": "Does the equation\\[2^m=a_1!+\\cdots+a_k!\\]with $a_1<a_2<\\cdots <a_k$ have only finitely many solutions?",
+ "statement_lean": "theorem erdos_95200 :\n    {p : ℕ × Finset ℕ | (∀ a ∈ p.2, 0 < a) ∧\n      2 ^ p.1 = ∑ a ∈ p.2, a.factorial}.Finite := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "factorials"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/403.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

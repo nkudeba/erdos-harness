@@ -1,0 +1,26 @@
+{
+ "true_problem": "705",
+ "alias_id": "96885",
+ "statement_en": "Let $G$ be a finite unit distance graph in $\\mathbb{R}^2$ (i.e. the vertices are a finite collection of points in $\\mathbb{R}^2$ and there is an edge between two points if and only if the distance between them is $1$). Is there some $k$ such that if $G$ has girth $\\geq k$ (i.e. $G$ contains no cycles of length $<k$) then $\\chi(G)\\leq 3$?",
+ "statement_lean": "open scoped EuclideanGeometry\nopen SimpleGraph\n\ntheorem erdos_96885 :\n    ∃ k, ∀ V : Set ℝ², V.Finite →\n    (UnitDistancePlaneGraph V).girth ≥ k → (UnitDistancePlaneGraph V).chromaticNumber ≤ 3 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "graph theory",
+  "chromatic number"
+ ],
+ "ok": false,
+ "errors": [
+  "line 18:20: unexpected token '²'; expected ','"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/705.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

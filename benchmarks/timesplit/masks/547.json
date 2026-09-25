@@ -1,0 +1,39 @@
+{
+ "true_problem": "547",
+ "alias_id": "85684",
+ "statement_en": "If $T$ is a tree on $n$ vertices then\\[R(T) \\leq 2n-2.\\]",
+ "statement_lean": "namespace SimpleGraph\nnoncomputable def graphRamsey {α β : Type*} [Fintype α] [Fintype β]\n    (G : SimpleGraph α) (H : SimpleGraph β) : ℕ :=\n  sInf { n : ℕ | ∀ (C : SimpleGraph (Fin n)), G.IsContained C ∨ H.IsContained Cᶜ }\nend SimpleGraph\n\nnamespace SimpleGraph\nnoncomputable def diagonalGraphRamsey {α : Type*} [Fintype α] (G : SimpleGraph α) : ℕ :=\n  graphRamsey G G\nend SimpleGraph\n\nopen Filter\n\ntheorem erdos_85684 :\n    ∀ (n : ℕ) (hn : 2 ≤ n) (T : SimpleGraph (Fin n)),\n      T.IsTree → SimpleGraph.diagonalGraphRamsey T ≤ 2 * n - 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Acyclic"
+ ],
+ "tags": [
+  "graph theory",
+  "ramsey theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/547.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.graphRamsey",
+  "SimpleGraph.diagonalGraphRamsey"
+ ],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B restricts to n ≥ 2 while A states no lower bound. For n = 1 the single-vertex tree has R(T) = 1 > 0 = 2n − 2, so the literal statement fails trivially there. The conjecture is intended for n ≥ 2, so this restriction is a benign correction, not a weakening.",
+   "The fallback convention R = 0 when no N exists never matters, because Ramsey numbers of finite graphs always exist. The property is monotone in N, so 'least N ≤ 2n−2' is equivalent to the property holding on K_{2n−2}, as B's restatement says.",
+   "Labeled vs unlabeled trees and non-induced copies both match the standard meaning of R(T) in A."
+  ],
+  "verdict": "B is the standard statement of this conjecture for trees on n ≥ 2 vertices, the only range where it is meaningful, so a proof of B would settle A in the positive direction.",
+  "backtranslation": "For every integer n ≥ 2 and every tree T on n labeled vertices, the diagonal Ramsey number R(T, T) is at most 2n − 2. Here R(T, T) is the least natural number N with the following property: for every simple graph C on N vertices, either C contains a copy of T as a (not necessarily induced) subgraph, or the complement of C does. If no such N existed, the convention would set R(T, T) to 0.\n\nEquivalently, in every red/blue coloring of the edges of the complete graph on 2n − 2 vertices, some color class contains a copy of T.",
+  "cost_usd": 0.038,
+  "model": "claude-opus-5-5"
+ }
+}

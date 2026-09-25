@@ -1,0 +1,21 @@
+{
+ "true_problem": "1047",
+ "alias_id": "28342",
+ "statement_en": "Let $f\\in \\mathbb{C}[x]$ be a monic polynomial with $m$ distinct roots, and let $c>0$ be a constant small enough such that $\\{ z: \\lvert f(z)\\rvert\\leq c\\}$ has $m$ distinct connected components. Must all these components be convex?",
+ "statement_lean": "open Polynomial\n\ndef sublevelSet (f : ℂ[X]) (c : ℝ) : Set ℂ := {z : ℂ | ‖f.eval z‖ ≤ c}\n\ndef componentsIn (s : Set ℂ) : Set (Set ℂ) :=\n  {t : Set ℂ | ∃ z ∈ s, t = connectedComponentIn s z}\n\ntheorem erdos_28342 :\n    ∀ (f : ℂ[X]) (m : ℕ) (c : ℝ), f.Monic → (f.rootSet ℂ).ncard = m → 0 < c →\n      (componentsIn (sublevelSet f c)).ncard = m →\n        ∀ t ∈ componentsIn (sublevelSet f c), Convex ℝ t := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1047.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

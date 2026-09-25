@@ -1,0 +1,21 @@
+{
+ "true_problem": "34",
+ "alias_id": "94295",
+ "statement_en": "For any permutation $\\pi\\in S_n$ of $\\{1,\\ldots,n\\}$ let $S(\\pi)$ count the number of distinct consecutive sums, that is, sums of the shape $\\sum_{u\\leq i\\leq v}\\pi(i)$. Is it true that\\[S(\\pi) = o(n^2)\\]for all $\\pi\\in S_n$?",
+ "statement_lean": "open scoped BigOperators\n\ndef consecutiveSums (n : ℕ) (p : Equiv.Perm (Fin n)) : Finset ℕ :=\n  (Finset.univ.filter (fun x : Fin n × Fin n => x.1 ≤ x.2)).image\n    (fun x => ∑ k ∈ Finset.Icc x.1 x.2, ((p k : ℕ) + 1))\n\ntheorem erdos_94295 :\n    ∀ c : ℝ, 0 < c → ∃ N : ℕ, ∀ n ≥ N, ∀ p : Equiv.Perm (Fin n),\n      ((consecutiveSums n p).card : ℝ) < c * (n : ℝ) ^ 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/34.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,24 @@
+{
+ "true_problem": "355",
+ "alias_id": "74349",
+ "statement_en": "Is there a lacunary sequence $A\\subseteq \\mathbb{N}$ (so that $A=\\{a_1<a_2<\\cdots\\}$ and there exists some $\\lambda>1$ such that $a_{n+1}/a_n\\geq \\lambda$ for all $n\\geq 1$) such that\\[\\left\\{ \\sum_{a\\in A'}\\frac{1}{a} : A'\\subseteq A\\textrm{ finite}\\right\\}\\]contains all rationals in some open interval?",
+ "statement_lean": "open Filter\ndef IsLacunary (n : ℕ → ℕ) : Prop := ∃ c > (1 : ℝ), ∀ᶠ k in atTop, c * n k < n (k + 1)\n\ntheorem erdos_74349 :\n    ∃ A : ℕ → ℕ, IsLacunary A ∧ ∃ u v : ℝ, u < v ∧ ∀ q : ℚ, ↑q ∈ Set.Ioo u v →\n      q ∈ {∑ a ∈ A', (1 / a : ℚ) | (A' : Finset ℕ) (_ : ↑A' ⊆ Set.range A)} := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "unit fractions"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/355.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "IsLacunary"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

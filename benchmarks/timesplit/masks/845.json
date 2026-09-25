@@ -1,0 +1,28 @@
+{
+ "true_problem": "845",
+ "alias_id": "43789",
+ "statement_en": "Let $C>0$. Is it true that the set of integers of the form\\[n=b_1+\\cdots+b_t\\textrm{ with }b_1<\\cdots<b_t\\]where $b_i=2^{k_i}3^{l_i}$ for $1\\leq i\\leq t$ and $b_t\\leq Cb_1$ has density $0$?",
+ "statement_lean": "namespace Set\nopen Filter\nopen scoped Topology\n@[inline]\nnoncomputable abbrev partialDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]\n    (S : Set β) (A : Set β := Set.univ) (b : β) : ℝ :=\n  ((S ∩ A) ∩ Iio b).ncard / (A ∩ Iio b).ncard\nend Set\n\nnamespace Set\nopen Filter\nopen scoped Topology\ndef HasDensity {β : Type*} [Preorder β] [LocallyFiniteOrderBot β]\n    (S : Set β) (α : ℝ) (A : Set β := Set.univ) : Prop :=\n  Tendsto (fun (b : β) => S.partialDensity A b) atTop (𝓝 α)\nend Set\n\ntheorem erdos_43789 :\n    ∀ᵉ (C : ℝ) (hC : 0 < C),\n        let f : ℕ × ℕ → ℕ := fun (k, l) ↦ 2 ^ k * 3 ^ l\n        { ∑ x ∈ B, f x | (B : Finset (ℕ × ℕ)) (h : B.Nonempty)\n          (hB : B.sup f ≤ C * B.inf' h f) }.HasDensity 0 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 594:13: Unknown identifier `Iio`",
+  "line 594:33: Unknown identifier `Iio`",
+  "line 602:28: Invalid field `partialDensity`: The environment does not contain `Function.partialDensity`, so it is not possible to project the field `partialDensity` from an expression\n  S\nof type `β → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/845.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.partialDensity",
+  "Set.HasDensity"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

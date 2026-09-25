@@ -1,0 +1,21 @@
+{
+ "true_problem": "867",
+ "alias_id": "88103",
+ "statement_en": "Is it true that if $A=\\{a_1<\\cdots <a_t\\}\\subseteq \\{1,\\ldots,N\\}$ has no solutions to\\[a_i+a_{i+1}+\\cdots+a_j\\in A\\]then\\[\\lvert A\\rvert \\leq \\frac{N}{2}+O(1)?\\]",
+ "statement_lean": "open Filter\n\ndef ConsecutiveSumFree (A : Finset ℕ) : Prop :=\n  ∀ m n : ℕ, 2 ≤ (Finset.Icc m n ∩ A).card → (∑ a ∈ Finset.Icc m n ∩ A, a) ∉ A\n\ntheorem erdos_88103 :\n    ∃ C : ℝ, ∀ N : ℕ, ∀ A ⊆ Finset.Icc 1 N, ConsecutiveSumFree A →\n      (A.card : ℝ) ≤ (N : ℝ) / 2 + C := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "additive combinatorics"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/867.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

@@ -1,0 +1,39 @@
+--- pin_8b5a5b08da0eb6f4_harness.py	2026-09-24 02:36:51
++++ pin_84f21c561c540e02_harness.py	2026-09-24 03:08:46
+@@ -6408,6 +6408,27 @@
+     return [d for d in split_decls(top) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
+ 
+ 
++def skeleton_context(skeleton: str, pos: int = -1) -> list[str]:
++    """The defs visible from `pos` (as `skeleton_defs`) together with the top-level `open` commands in force there,
++    in their original order. A hypothesis written under `open Filter` names `Tendsto` and `atTop`; extracted with
++    its defs alone it failed with `Unknown identifier` and was rejected unread (time-split baseline, #150, both
++    directions). An `open X in` applies to the next declaration only, so it is kept only when that one is."""
++    blocks = split_decls(visible_text(skeleton, pos))
++    is_def = [bool(DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))) for d in blocks]
++    out = []
++    for k, d in enumerate(blocks):
++        s = strip_comment_lines(d).strip()
++        if is_def[k]:
++            out.append(d)
++        elif re.match(r"open\s", s):
++            if re.search(r"\bin$", s):
++                if k + 1 < len(blocks) and is_def[k + 1]:
++                    out.append(d)
++            else:
++                out.append(d)
++    return out
++
++
+ def hypothesis_substatement(skeleton: str, name: str) -> str | None:
+     """A self-contained sub-statement for ONE hypothesis: the skeleton's defs plus the hypothesis with `sorry`.
+     This is what a child run freezes and attacks; its proof splices back with `splice_hypothesis`."""
+@@ -6420,7 +6441,7 @@
+         idx = blk.rfind(":=")
+     if idx == -1:
+         return None
+-    return "\n\n".join(skeleton_defs(skeleton, span[0]) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
++    return "\n\n".join(skeleton_context(skeleton, span[0]) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
+ 
+ 
+ def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:

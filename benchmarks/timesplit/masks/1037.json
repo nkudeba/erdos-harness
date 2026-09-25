@@ -1,0 +1,36 @@
+{
+ "true_problem": "1037",
+ "alias_id": "87642",
+ "statement_en": "Let $G$ be a graph on $n$ vertices in which every degree occurs at most twice, and the number of distinct degree is $>(\\frac{1}{2}+\\epsilon)n$. Must $G$ contain a trivial (empty or complete) subgraph of size 'much larger' than $\\log n$?",
+ "statement_lean": "open Filter\n\ndef IsTrivialSet {V : Type*} (G : SimpleGraph V) (s : Set V) : Prop :=\n  G.IsIndepSet s ∨ G.IsClique s\n\ntheorem erdos_87642 :\n    ∀ ε : ℝ, 0 < ε → ∀ C : ℝ, ∀ᶠ n : ℕ in atTop, ∀ G : SimpleGraph (Fin n),\n      (∀ d : ℕ, {v : Fin n | (G.neighborSet v).ncard = d}.ncard ≤ 2) →\n      ((1 / 2 + ε) * (n : ℝ) <\n        ((Set.range fun v : Fin n => (G.neighborSet v).ncard).ncard : ℝ)) →\n      ∃ s : Set (Fin n), IsTrivialSet G s ∧ (C * Real.log (n : ℝ) < (s.ncard : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1037.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "'Much larger than log n' is read as superlogarithmic: for every constant C, a homogeneous set of size > C·ln n exists for all large n. This is the standard reading and the weakest natural one, so proving it settles the YES direction. A stronger reading such as n^c would not be implied, but nothing in A demands it.",
+   "Quantifier order is appropriate: for every ε and every C there is an N such that the claim holds for all n ≥ N and all qualifying G. The threshold N may depend on ε and C, which matches an asymptotic question.",
+   "'Trivial subgraph' becomes an independent set or a clique, which is correct. The vertex set {0,…,n−1} and the strict inequality on the number of distinct degrees are harmless. Choices such as ln versus log base and > versus ≥ are absorbed by C.",
+   "Edge cases are harmless. If ε ≥ 1/2, the hypothesis is vacuous because the number of distinct degrees is at most n. Small n are excluded by 'sufficiently large'."
+  ],
+  "verdict": "B faithfully encodes the affirmative answer to A under the standard reading of 'much larger than log n' as ω(log n), with correct quantifier structure and hypotheses.",
+  "backtranslation": "For every real ε > 0 and every real constant C, the following holds for all sufficiently large natural numbers n. Let G be any simple graph on the vertex set {0, 1, …, n−1} satisfying two conditions:\n\n- each degree value d is attained by at most two vertices;\n- the number of distinct vertex degrees is strictly greater than (1/2 + ε)·n.\n\nThen G contains a set of vertices that is either independent or a clique, and whose size is strictly greater than C·ln n (natural logarithm).",
+  "cost_usd": 0.0387,
+  "model": "claude-opus-5-5"
+ }
+}

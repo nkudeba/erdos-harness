@@ -1,0 +1,34 @@
+{
+ "true_problem": "459",
+ "alias_id": "75529",
+ "statement_en": "Let $f(u)$ be the largest $v$ such that no $m\\in (u,v)$ is composed entirely of primes dividing $uv$. Estimate $f(u)$.",
+ "statement_lean": "noncomputable def f (u : ℕ) : ℕ := sInf {v | u < v ∧ v.primeFactors ⊆ u.primeFactors}\n\ntheorem erdos_75529 {u : ℕ} (hu : 2 ≤ u) :\n    u + 2 ≤ f u ∧ f u ≤ u ^ 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "primes"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/459.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": false,
+  "issues": [
+   "Wrong function: A takes v to be the LARGEST value such that no m in (u,v) is composed entirely of primes dividing uv, so the prime set depends on v itself. B instead defines f(u) as the LEAST v > u whose prime factors all divide u. That removes the dependence on v and changes the object entirely.",
+   "A asks for an estimate, meaning asymptotic growth or quantitative bounds on f(u). B only proves the trivial bounds u+2 <= f(u) <= u^2 for its own function. These bounds are immediate: u+1 is coprime to u, and u^2 qualifies. They give no nontrivial estimate.",
+   "Even if the definitions matched, bounds this crude would not count as resolving an open estimation problem. B is a drastic weakening."
+  ],
+  "verdict": "B formalizes a different and much simpler function with trivial bounds, so proving it would not settle A's estimation question.",
+  "backtranslation": "For a natural number $u$, let $f(u)$ be the least natural number $v$ with $v > u$ such that every prime factor of $v$ also divides $u$. If no such $v$ existed, $f(u)$ would be $0$ by convention, but for $u \\ge 2$ the number $u^2$ always qualifies.\n\nThe theorem states that for every natural number $u \\ge 2$,\n$$u + 2 \\le f(u) \\le u^2.$$\nEquivalently, neither $u+1$ nor any smaller integer above $u$ qualifies, and some integer in the range $(u, u^2]$ has all its prime factors dividing $u$.",
+  "cost_usd": 0.0335,
+  "model": "claude-opus-5-5"
+ }
+}

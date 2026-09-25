@@ -1,0 +1,26 @@
+{
+ "true_problem": "846",
+ "alias_id": "42986",
+ "statement_en": "Let $A\\subset \\mathbb{R}^2$ be an infinite set for which there exists some $\\epsilon>0$ such that in any subset of $A$ of size $n$ there are always at least $\\epsilon n$ with no three on a line. Is it true that $A$ is the union of a finite number of sets where no three are on a line?",
+ "statement_lean": "open EuclideanGeometry\n\ndef NonTrilinearFor (A : Set ℝ²) (ε : ℝ) : Prop :=\n  ∀ B : Finset ℝ², ↑B ⊆ A → ∃ C ⊆ B,\n    ε * B.card ≤ C.card ∧ NonTrilinear (C : Set ℝ²)\n\ndef WeaklyNonTrilinear (A : Set ℝ²) : Prop :=\n  ∃ B : Finset (Set ℝ²), A = sSup B ∧ ∀ b ∈ B, NonTrilinear b\n\ntheorem erdos_42986 :\n    ∀ᵉ (A : Set ℝ²) (ε > 0), A.Infinite → NonTrilinearFor A ε →\n    WeaklyNonTrilinear A := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 147:30: unexpected token '²'; expected ')'",
+  "line 151:33: unexpected token '²'; expected ')'",
+  "line 155:17: unexpected token '²'; expected ')'"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/846.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

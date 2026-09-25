@@ -1,0 +1,21 @@
+{
+ "true_problem": "974",
+ "alias_id": "94399",
+ "statement_en": "Let $z_1,\\ldots,z_n\\in \\mathbb{C}$ be a sequence such that $z_1=1$. Suppose that the sequence of\\[s_k=\\sum_{1\\leq i\\leq n}z_i^k\\]contains infinitely many $(n-1)$-tuples of consecutive values of $s_k$ which are all $0$. Then (essentially)\\[z_j=e(j/n),\\]where $e(x)=e^{2\\pi ix}$.",
+ "statement_lean": "def IsTuranConfiguration {n : ℕ} (z : Fin n → ℂ) : Prop :=\n  (Odd n → Set.range z = {ζ : ℂ | ζ ^ n = 1}) ∧\n    (Even n → ∃ c : ℂ, ‖c‖ = 1 ∧ c ≠ 1 ∧\n      Set.range z = {ζ : ℂ | ζ ^ (n / 2) = 1} ∪ {ζ : ℂ | ζ ^ (n / 2) = c})\n\ntheorem erdos_94399 {n : ℕ} [NeZero n] (z : Fin n → ℂ) (hz : z 0 = 1)\n    (hs : Set.Infinite {k : ℕ | ∀ j < n - 1, ∑ i, z i ^ (k + j) = 0}) :\n    IsTuranConfiguration z := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/974.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

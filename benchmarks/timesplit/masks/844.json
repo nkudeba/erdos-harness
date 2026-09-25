@@ -1,0 +1,22 @@
+{
+ "true_problem": "844",
+ "alias_id": "41931",
+ "statement_en": "Let $A\\subseteq \\{1,\\ldots,N\\}$ be such that, for all $a,b\\in A$, the product $ab$ is not squarefree. Is the maximum size of such an $A$ achieved by taking $A$ to be the set of even numbers and odd non-squarefree numbers?",
+ "statement_lean": "def evenOrOddNonSquarefree (N : ℕ) : Finset ℕ :=\n  (Finset.Icc 1 N).filter (fun n => 2 ∣ n ∨ ¬ Squarefree n)\n\ntheorem erdos_41931 :\n    ∀ N : ℕ,\n    IsGreatest {k : ℕ | ∃ A ⊆ Finset.Icc 1 N,\n      (∀ a ∈ A, ∀ b ∈ A, ¬ Squarefree (a * b)) ∧ A.card = k}\n      (evenOrOddNonSquarefree N).card := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "intersecting family"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/844.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

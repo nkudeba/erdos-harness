@@ -1,0 +1,26 @@
+{
+ "true_problem": "209",
+ "alias_id": "68267",
+ "statement_en": "Let $A$ be a finite collection of $d\\geq 4$ non-parallel lines in $\\mathbb{R}^2$ such that there are no points where at least four lines from $A$ meet. Must there exist a 'Gallai triangle' (or 'ordinary triangle'): three lines  from $A$ which intersect in three points, and each of these intersection points only intersects two lines from $A$?",
+ "statement_lean": "open EuclideanGeometry Affine\n\ndef IsLine (L : AffineSubspace ℝ ℝ²) : Prop :=\n  Module.finrank ℝ L.direction = 1\n\nnoncomputable def pointMultiplicity (A : Finset (AffineSubspace ℝ ℝ²)) (p : ℝ²) : ℕ :=\n  {L ∈ (A : Set (AffineSubspace ℝ ℝ²)) | p ∈ L}.ncard\n\ndef HasGallaiTriangle (A : Finset (AffineSubspace ℝ ℝ²)) : Prop :=\n  ∃ L₁ ∈ A, ∃ L₂ ∈ A, ∃ L₃ ∈ A, L₁ ≠ L₂ ∧ L₂ ≠ L₃ ∧ L₁ ≠ L₃ ∧\n    ∃ p₁ p₂ p₃ : ℝ², p₁ ≠ p₂ ∧ p₂ ≠ p₃ ∧ p₁ ≠ p₃ ∧\n      p₁ ∈ L₁ ∧ p₁ ∈ L₂ ∧ p₂ ∈ L₂ ∧ p₂ ∈ L₃ ∧ p₃ ∈ L₃ ∧ p₃ ∈ L₁ ∧\n      pointMultiplicity A p₁ = 2 ∧ pointMultiplicity A p₂ = 2 ∧ pointMultiplicity A p₃ = 2\n\ntheorem erdos_68267 :\n    ∀ d : ℕ, 4 ≤ d → ∀ A : Finset (AffineSubspace ℝ ℝ²), A.card = d →\n      (∀ L ∈ A, IsLine L) →\n      ((A : Set (AffineSubspace ℝ ℝ²)).Pairwise fun L₁ L₂ => ¬ L₁ ∥ L₂) →\n      (∀ p : ℝ², pointMultiplicity A p ≤ 3) →\n      HasGallaiTriangle A := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry"
+ ],
+ "ok": false,
+ "errors": [
+  "line 47:34: unexpected token '²'; expected ')'",
+  "line 50:67: unexpected token '²'; expected ')', ',' or ':'",
+  "line 53:53: unexpected token '²'; expected ')', ',' or ':'"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/209.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

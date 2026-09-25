@@ -1,0 +1,25 @@
+{
+ "true_problem": "502",
+ "alias_id": "34884",
+ "statement_en": "What is the size of the largest $A\\subseteq \\mathbb{R}^n$ such that there are only two distinct distances between elements of $A$? That is,\\[\\# \\{ \\lvert x-y\\rvert : x\\neq y\\in A\\} = 2.\\]",
+ "statement_lean": "open scoped EuclideanGeometry\n\ntheorem erdos_34884 (n : ℕ) (A : Set (ℝ^n)) (hA : A.Finite)\n    (hA2 : {d : ℝ | ∃ x ∈ A, ∃ y ∈ A, x ≠ y ∧ dist x y = d}.ncard = 2) :\n    A.ncard ≤ (n + 2).choose 2 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Geometry.Euclidean.Angle.Oriented.Affine"
+ ],
+ "tags": [
+  "geometry",
+  "distances"
+ ],
+ "ok": false,
+ "errors": [
+  "line 104:38: failed to synthesize instance of type class\n  HPow Type ℕ ?m.3\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/502.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

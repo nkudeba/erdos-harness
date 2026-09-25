@@ -1,0 +1,25 @@
+{
+ "true_problem": "206",
+ "alias_id": "81629",
+ "statement_en": "Let $x>0$ be a real number. For any $n\\geq 1$ let\\[R_n(x) = \\sum_{i=1}^n\\frac{1}{m_i}<x\\]be the maximal sum of $n$ distinct unit fractions which is $<x$. Is it true that, for almost all $x$, for sufficiently large $n$, we have\\[R_{n+1}(x)=R_n(x)+\\frac{1}{m},\\]where $m$ is minimal such that $m$ does not appear in $R_n(x)$ and the right-hand side is $<x$? (That is, are the best underapproximations eventually always constructed in a 'greedy' fashion?)",
+ "statement_lean": "open MeasureTheory\n\nnoncomputable def egyptianSum (S : Finset ℕ) : ℝ :=\n  ∑ m ∈ S, (1 : ℝ) / m\n\ndef IsUnderapprox (S : Finset ℕ) (x : ℝ) : Prop :=\n  (∀ m ∈ S, 0 < m) ∧ egyptianSum S < x\n\ndef IsBestNTerm (S : Finset ℕ) (n : ℕ) (x : ℝ) : Prop :=\n  S.card = n ∧ IsUnderapprox S x ∧\n    ∀ T : Finset ℕ, T.card = n → IsUnderapprox T x → egyptianSum T ≤ egyptianSum S\n\ndef EventuallyGreedy (x : ℝ) : Prop :=\n  x > 0 ∧ ∃ (m : ℕ → ℕ), StrictMono m ∧ (∀ k, 0 < m k) ∧\n    ∃ n₀ : ℕ, ∀ n ≥ n₀,\n      IsBestNTerm (Finset.image m (Finset.range n)) n x\n\ntheorem erdos_81629 :\n    ∀ᵐ x ∂(volume.restrict (Set.Ioi (0 : ℝ))), EventuallyGreedy x := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.MeasureTheory.Function.ConditionalExpectation.CondexpL1"
+ ],
+ "tags": [
+  "number theory",
+  "unit fractions"
+ ],
+ "ok": false,
+ "errors": [
+  "line 31:11: failed to synthesize instance of type class\n  MeasureSpace ℝ\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/206.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

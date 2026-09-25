@@ -1,0 +1,34 @@
+{
+ "true_problem": "990",
+ "alias_id": "28289",
+ "statement_en": "Let $f=a_0+\\cdots+a_dx^d\\in \\mathbb{C}[x]$ be a polynomial. Is it true that, if $f$ has roots $z_1,\\ldots,z_d$ with corresponding arguments $\\theta_1,\\ldots,\\theta_d\\in [0,2\\pi]$, then for all intervals $I\\subseteq [0,2\\pi]$\\[\\left\\lvert (\\# \\theta_i \\in I) - \\frac{\\lvert I\\rvert}{2\\pi}d\\right\\rvert \\ll \\left(n\\log M\\right)^{1/2},\\]where $n$ is the number of non-zero coefficients of $f$ and\\[M=\\frac{\\lvert a_0\\rvert+\\cdots +\\lvert a_d\\rvert}{(\\lvert a_0\\rvert\\lvert a_d\\rvert)^{1/2}}.\\]",
+ "statement_lean": "open scoped Classical\nopen Polynomial\nopen scoped Real\n\nnoncomputable def rootArgCount (f : ℂ[X]) (I : Set ℝ) : ℕ :=\n  f.roots.countP fun z =>\n    (if Complex.arg z < 0 then Complex.arg z + 2 * π else Complex.arg z) ∈ I\n\nnoncomputable def M (f : ℂ[X]) : ℝ :=\n  (∑ i ∈ Finset.range (f.natDegree + 1), ‖f.coeff i‖) /\n    Real.sqrt (‖f.coeff 0‖ * ‖f.leadingCoeff‖)\n\ntheorem erdos_28289 :\n    ∃ C : ℝ, ∀ f : ℂ[X], f.coeff 0 ≠ 0 → ∀ α β : ℝ, 0 ≤ α → α ≤ β → β ≤ 2 * π →\n      |(rootArgCount f (Set.Icc α β) : ℝ) - (β - α) / (2 * π) * (f.natDegree : ℝ)| ≤\n        C * Real.sqrt ((f.support.card : ℝ) * Real.log (M f)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/990.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": true,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B requires a₀ ≠ 0. This is harmless: if a₀ = 0 then M is undefined (division by zero) and the root 0 has no argument, so A implicitly assumes it.",
+   "B uses only closed intervals [α, β], while A says 'all intervals'. Open, half-open and degenerate intervals follow by a limiting argument: the root count is locally constant under shrinking or enlarging the endpoints, and the length changes by an arbitrarily small amount.",
+   "B fixes the argument convention to [0, 2π) (positive reals get argument 0). A's 'θ ∈ [0, 2π]' is ambiguous here. The only intervals affected are those ending at 2π, and these correspond to half-open intervals that A covers anyway, so nothing is lost.",
+   "Variable names are swapped (B's n is A's d, B's k is A's n), but the roles match. '≪' is correctly read as an absolute constant C. log M ≥ log 2 > 0, so the right-hand side is well-defined. Roots are counted with multiplicity, matching A's list z_1, …, z_d."
+  ],
+  "verdict": "B is a faithful formalization of A's affirmative assertion: it has the same quantifiers, an absolute constant, roots counted with multiplicity, and the same M and n; its restrictions to a₀ ≠ 0, closed intervals and a fixed argument convention lose no generality.",
+  "backtranslation": "There is an absolute constant C such that the following holds for every nonzero-constant-term polynomial f(z) = a₀ + a₁z + … + aₙzⁿ with complex coefficients, where a₀ ≠ 0, n is the degree and aₙ ≠ 0 is the leading coefficient. Define\n\nM(f) = (|a₀| + |a₁| + … + |aₙ|) / √(|a₀|·|aₙ|).\n\nTake any real numbers α, β with 0 ≤ α ≤ β ≤ 2π. Let N(α, β) be the number of roots of f, counted with multiplicity, whose argument lies in the closed interval [α, β]. Here each argument is taken in [0, 2π): the principal argument has 2π added if it is negative. The claim is\n\n|N(α, β) − ((β − α)/(2π))·n| ≤ C·√(k · log M(f)),\n\nwhere k is the number of nonzero coefficients of f.",
+  "cost_usd": 0.0588,
+  "model": "claude-opus-5-5"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "true_problem": "1125",
+ "alias_id": "74107",
+ "statement_en": "Let $f:\\mathbb{R}\\to \\mathbb{R}$ be such that\\[2f(x) \\leq f(x+h)+f(x+2h)\\]for every $x\\in \\mathbb{R}$ and $h>0$. Must $f$ be monotonic?",
+ "statement_lean": "theorem erdos_74107 :\n    ∀ (f : ℝ → ℝ)\n    (hf : ∀ x : ℝ, ∀ h : ℝ, h > 0 → 2 * f x ≤ f (x + h) + f (x + 2 * h)),\n    Monotone f := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "analysis"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1125.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "B asserts 'non-decreasing', which looks stronger than A's 'monotonic' (either direction). The gap closes under the hypothesis. If f is non-increasing and satisfies 2f(x) ≤ f(x+h)+f(x+2h), then both f(x+h) ≤ f(x) and f(x+2h) ≤ f(x), so the sum is at most 2f(x). This forces f(x+h) = f(x) for all h > 0, so f is constant, hence also non-decreasing. So for functions satisfying the hypothesis, 'monotonic' and 'non-decreasing' are equivalent.",
+   "Quantifiers match: all f, all real x, all h > 0, with no regularity assumptions, as in A.",
+   "B implies A-YES directly; the equivalence above shows the extra strength in B is only apparent."
+  ],
+  "verdict": "A proof of B settles A affirmatively, and under the given inequality B is equivalent to A's YES answer, so the formalization is faithful for the pos direction.",
+  "backtranslation": "For every function f from the real numbers to the real numbers, suppose that for all real x and all real h > 0 we have 2f(x) ≤ f(x + h) + f(x + 2h). The claim is that every such f is non-decreasing on all of ℝ, meaning f(x) ≤ f(y) whenever x ≤ y. No continuity, measurability, or other regularity is assumed about f.",
+  "cost_usd": 0.0312,
+  "model": "claude-opus-5-5"
+ }
+}

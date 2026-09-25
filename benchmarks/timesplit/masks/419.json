@@ -1,0 +1,34 @@
+{
+ "true_problem": "419",
+ "alias_id": "60518",
+ "statement_en": "If $\\tau(n)$ counts the number of divisors of $n$, then what is the set of limit points of\\[\\frac{\\tau((n+1)!)}{\\tau(n!)}?\\]",
+ "statement_lean": "open Filter\nopen scoped ArithmeticFunction.sigma\n\nnoncomputable def factorialDivisorRatio (n : ℕ) : ℝ :=\n  (σ 0 (n + 1).factorial : ℝ) / (σ 0 n.factorial : ℝ)\n\ndef limitPointSet : Set ℝ :=\n  {1} ∪ {x | ∃ k : ℕ, 1 ≤ k ∧ x = 1 + 1 / (k : ℝ)}\n\ntheorem erdos_60518 :\n    {x : ℝ | MapClusterPt x atTop factorialDivisorRatio} = limitPointSet := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "factorials"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/419.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": true,
+  "issues": [
+   "A is an open-ended 'what is the set' question, so B commits to one specific answer: {1} ∪ {1+1/k : k ≥ 1}. That matches the expected conjectured answer. Each 1+1/k arises from n+1 = kp with p a large prime, and 1 arises from n+1 = 2^j. Proving B would therefore settle A.",
+   "B defines limit points as sequence cluster points (every neighbourhood contains a_n for infinitely many n). This is the standard reading for a sequence. It correctly includes 2, which is attained at every prime n+1.",
+   "Starting at n = 0 is harmless, since a_0 = 1 and a single term cannot affect cluster points."
+  ],
+  "verdict": "B asserts the natural conjectured answer to A's open question with the standard notion of limit point, so a proof of B would legitimately resolve A in the positive direction.",
+  "backtranslation": "For each natural number $n \\ge 0$, let $d(m)$ denote the number of positive divisors of $m$, and define the real sequence $a_n = d((n+1)!)/d(n!)$. The theorem asserts that the set of cluster points of $(a_n)_{n\\ge 0}$ is exactly $\\{1\\} \\cup \\{1 + 1/k : k \\text{ a positive integer}\\}$. Here $x$ is a cluster point if every neighborhood of $x$ contains $a_n$ for infinitely many $n$. The claimed set is $\\{1, 2, 3/2, 4/3, 5/4, \\dots\\}$.",
+  "cost_usd": 0.0484,
+  "model": "claude-opus-5-5"
+ }
+}

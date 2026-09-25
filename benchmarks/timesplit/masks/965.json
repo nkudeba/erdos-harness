@@ -1,0 +1,21 @@
+{
+ "true_problem": "965",
+ "alias_id": "61793",
+ "statement_en": "Is it true that, for any $2$-colouring of $\\mathbb{R}$, there is a set $A\\subseteq \\mathbb{R}$ of cardinality $\\aleph_1$ such that all sums $a+b$ with $a\\neq b$ and $a,b\\in A$ are the same colour?",
+ "statement_lean": "theorem erdos_61793 :\n    ∀ f : ℝ → Fin 2, ∃ A : Set ℝ, ¬ A.Countable ∧\n      ∀ᵉ (a ∈ A) (b ∈ A) (c ∈ A) (d ∈ A), a ≠ b → c ≠ d → f (a + b) = f (c + d) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "ramsey theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/965.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

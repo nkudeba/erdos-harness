@@ -1,0 +1,14 @@
+--- pin_84f21c561c540e02_harness.py	2026-09-24 03:08:46
++++ pin_3aaab15508852d05_harness.py	2026-09-24 19:49:54
+@@ -3352,7 +3352,10 @@
+ 
+     # -- specialist cascade: close `sorry` holes with Lean's own tactics (free) or an external prover ----------
+ 
+-    CASCADE = "first | omega | (simp_all) | positivity | (norm_num) | (nlinarith) | (decide +kernel) | (aesop)"
++    # Every alternative must CLOSE the goal. Unguarded, a `simp_all`/`norm_num`/`aesop` that only simplifies ends
++    # `first` with the goal still open: the tactics after it never run, and the leftover goal is reported at the
++    # enclosing `by` rather than at the hole, so the hole reads as closed and the keep-check reverts the whole pass.
++    CASCADE = "first | omega | (simp_all; done) | positivity | (norm_num; done) | nlinarith | (decide +kernel) | (aesop; done)"
+ 
+     @staticmethod
+     def _hole_spans(code: str) -> list[tuple[int, int, bool]]:

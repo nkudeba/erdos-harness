@@ -1,0 +1,25 @@
+{
+ "true_problem": "648",
+ "alias_id": "98308",
+ "statement_en": "Let $g(n)$ denote the largest $t$ such that there exist integers $2\\leq a_1<a_2<\\cdots <a_t <n$ such that\\[P(a_1)>P(a_2)>\\cdots >P(a_t)\\]where $P(m)$ is the greatest prime factor of $m$. Estimate $g(n)$.",
+ "statement_lean": "namespace Nat\ndef maxPrimeFac (n : ℕ) : ℕ := if n = 1 then 1 else n.primeFactorsList.getLastI\nend Nat\n\nopen Filter Asymptotics\n\nnoncomputable def g (n : ℕ) : ℕ :=\n  sSup {t | ∃ a : Fin t → ℕ, StrictMono a ∧ (∀ i, a i ∈ Set.Ico 2 n) ∧\n    StrictAnti fun i => (a i).maxPrimeFac}\n\ntheorem erdos_98308 :\n    (fun n => (g n : ℝ)) =Θ[atTop] fun n => Real.sqrt ((n : ℝ) / Real.log (n : ℝ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 463:30: Invalid field `maxPrimeFac`: The environment does not contain `Nat.maxPrimeFac`, so it is not possible to project the field `maxPrimeFac` from an expression\n  a i\nof type `ℕ`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/648.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Nat.maxPrimeFac"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

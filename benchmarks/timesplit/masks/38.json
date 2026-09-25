@@ -1,0 +1,24 @@
+{
+ "true_problem": "38",
+ "alias_id": "31415",
+ "statement_en": "Does there exist $B\\subset\\mathbb{N}$ which is not an additive basis, but is such that for every set $A\\subseteq\\mathbb{N}$ of Schnirelmann density $\\alpha$ and every $N$ there exists $b\\in B$ such that\\[\\lvert (A\\cup (A+b))\\cap \\{1,\\ldots,N\\}\\rvert\\geq (\\alpha+f(\\alpha))N\\]where $f(\\alpha)>0$ for $0<\\alpha <1 $? The Schnirelmann density is defined by\\[d_s(A) = \\inf_{N\\geq 1}\\frac{\\lvert A\\cap\\{1,\\ldots,N\\}\\rvert}{N}.\\]",
+ "statement_lean": "open scoped Classical\nopen Set Pointwise\n\ntheorem erdos_31415 :\n    ∃ B : Set ℕ, ¬ B.IsWeakAddBasis ∧ ∃ f : ℝ → ℝ, (∀ α, 0 < α → α < 1 → f α > 0) ∧\n      ∀ (A : Set ℕ) (N : ℕ),\n        let α := schnirelmannDensity A\n        ∃ b ∈ B, (Ioc 0 N ∩ (A ∪ (A + {b}))).ncard ≥ (α + f α) * N := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.Schnirelmann"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 17:21: Invalid field `IsWeakAddBasis`: The environment does not contain `Function.IsWeakAddBasis`, so it is not possible to project the field `IsWeakAddBasis` from an expression\n  B\nof type `ℕ → Prop`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/38.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": true,
+ "checked": "2026-09-24"
+}

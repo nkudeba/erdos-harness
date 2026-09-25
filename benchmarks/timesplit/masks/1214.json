@@ -1,0 +1,21 @@
+{
+ "true_problem": "1214",
+ "alias_id": "82412",
+ "statement_en": "Let $x,y\\geq 1$ be integers such that, for all $n\\geq 1$, the set of primes dividing $x^{n}-1$ is equal to set of primes dividing $y^n-1$. Must $x=y$?",
+ "statement_lean": "theorem erdos_82412 :\n    ∀ x y : ℕ, x ≥ 1 → y ≥ 1 →\n      (∀ n : ℕ, n ≥ 1 → { p : ℕ | p.Prime ∧ p ∣ x ^ n - 1 } = { p : ℕ | p.Prime ∧ p ∣ y ^ n - 1 }) →\n      x = y := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1214.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

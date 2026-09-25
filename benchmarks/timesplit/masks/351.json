@@ -1,0 +1,34 @@
+{
+ "true_problem": "351",
+ "alias_id": "46430",
+ "statement_en": "Let $p(x)\\in \\mathbb{Q}[x]$ with positive leading coefficient. Is it true that\\[A=\\{ p(n)+1/n : n\\in \\mathbb{N}\\}\\]is strongly complete, in the sense that, for any finite set $B$,\\[\\left\\{\\sum_{n\\in X}n : X\\subseteq A\\backslash B\\textrm{ finite }\\right\\}\\]contains all sufficiently large integers?",
+ "statement_lean": "open Polynomial\n\ndef imageSet {α : Type*} [Semifield α] (P : α[X]) : Set α :=\n  Set.range (fun (n : ℕ) ↦ P.eval ↑n + 1 / n)\n\ndef IsStronglyComplete {α : Type*} [Semiring α] (A : Set α) : Prop :=\n  ∀ B : Finset α,\n    ∀ᶠ (m : ℕ) in Filter.atTop,\n      ↑m ∈ { ∑ n ∈ X, n | (X : Finset α) (_ : ↑X ⊆ A \\ B) }\n\ndef HasCompleteImage (P : ℚ[X]) : Prop := IsStronglyComplete (imageSet P)\n\ntheorem erdos_46430 :\n    ∀ P : ℚ[X], 0 < P.natDegree → 0 < P.leadingCoeff → HasCompleteImage P := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "complete sequences"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/351.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24",
+ "faithfulness": {
+  "faithful": false,
+  "issues": [
+   "Domain restriction: A only requires p ∈ Q[x] to have a positive leading coefficient, which literally includes nonzero constant polynomials p = c > 0 (degree 0). B adds the hypothesis deg P ≥ 1, so a proof of B leaves the constant case A = {c + 1/n} unaddressed. That case is not obviously trivial: it amounts to representing every large integer as k·c plus a sum of k distinct unit fractions, avoiding finitely many excluded ones.",
+   "Minor, harmless: B includes n = 0 with the convention 1/0 = 0, adding the extra value P(0). Because B quantifies over all finite excluded sets, one can take B ∪ {P(0)}. This gives A_orig \\ B ⊇ A_B \\ (B ∪ {P(0)}), so B for all finite sets still implies A's conclusion.",
+   "Otherwise the rest matches: distinct elements of the value set, every finite removal set, and all sufficiently large naturals."
+  ],
+  "verdict": "B proves the conjecture only for polynomials of degree ≥ 1, while A as literally stated also covers positive constant polynomials, so B is a strict weakening and would not fully settle A's `pos` direction.",
+  "backtranslation": "**Statement.** Let $P$ be any polynomial with rational coefficients, of degree at least $1$ and with positive leading coefficient. Let $A$ be the set of rational numbers\n$$A = \\{\\, P(n) + 1/n : n = 0, 1, 2, \\dots \\,\\},$$\nwith the convention $1/0 = 0$, so $n = 0$ contributes the value $P(0)$. The claim is that for every finite set $B$ of rational numbers, there is a threshold $M$ such that every natural number $m \\ge M$ is the sum of the elements of some finite subset of $A \\setminus B$.\n\nHere \"finite subset\" means a sum of distinct elements of the value set, so each value is used at most once. Equivalently, $A$ is \"strongly complete\": after removing any finitely many elements, every sufficiently large integer is still a finite sum of distinct remaining elements.",
+  "cost_usd": 0.0579,
+  "model": "claude-opus-5-5"
+ }
+}

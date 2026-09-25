@@ -1,0 +1,21 @@
+{
+ "true_problem": "1096",
+ "alias_id": "21558",
+ "statement_en": "Let $1<q<1+\\epsilon$ and consider the set of numbers of the shape $\\sum_{i\\in S}q^i$ (for all finite $S$), ordered by size as $0=x_1<x_2<\\cdots$. Is it true that, provided $\\epsilon>0$ is sufficiently small, $x_{k+1}-x_k \\to 0$?",
+ "statement_lean": "open Filter\nopen scoped Topology\n\ntheorem erdos_21558 :\n    ∃ ε > 0, ∀ q, 1 < q → q < 1 + ε →\n    ∀ x : ℕ → ℝ, StrictMono x → Set.range x = { ∑ i ∈ S, q ^ i | S : Finset ℕ } →\n    Tendsto (fun k => x (k + 1) - x k) atTop (𝓝 0) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1096.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

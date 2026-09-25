@@ -1,0 +1,22 @@
+{
+ "true_problem": "315",
+ "alias_id": "74817",
+ "statement_en": "Let $u_1=1$ and $u_{n+1}=u_n(u_n+1)$, so that $\\sum_{k\\geq 1}\\frac{1}{u_k+1}$ and $u_k=\\lfloor c_0^{2^k}+1\\rfloor$ for $k\\geq 1$, where\\[c_0=\\lim u_n^{1/2^n}=1.264085\\cdots.\\]Let $a_1<a_2<\\cdots $ be any other sequence with $\\sum \\frac{1}{a_k}=1$. Is it true that\\[\\liminf a_n^{1/2^n}<c_0=1.264085\\cdots?\\]",
+ "statement_lean": "open Filter\n\ndef u : ℕ → ℕ\n  | 0 => 1\n  | n + 1 => u n * (u n + 1)\n\nnoncomputable def c₀ : ℝ := limUnder atTop fun i => (u i : ℝ) ^ ((1 / 2 : ℝ) ^ (i + 1))\n\ntheorem erdos_74817 :\n    ∀ a : ℕ → ℕ, (∀ i, 0 < a i) → StrictMono a → (∃ i, a i ≠ u i + 1) →\n      ∑' i, (1 : ℝ) / a i = 1 →\n      atTop.liminf (fun i => (a i : ℝ) ^ ((1 / 2 : ℝ) ^ (i + 1))) < c₀ := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "unit fractions"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/315.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

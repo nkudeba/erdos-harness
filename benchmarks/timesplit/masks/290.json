@@ -1,0 +1,24 @@
+{
+ "true_problem": "290",
+ "alias_id": "59514",
+ "statement_en": "Let $a\\geq 1$. Must there exist some $b>a$ such that\\[\\sum_{a\\leq n\\leq b}\\frac{1}{n}=\\frac{r_1}{s_1}\\textrm{ and }\\sum_{a\\leq n\\leq b+1}\\frac{1}{n}=\\frac{r_2}{s_2},\\]with $(r_i,s_i)=1$ and $s_2<s_1$? If so, how does this $b(a)$ grow with $a$?",
+ "statement_lean": "def harmonicBlock (n m : ℕ) : ℚ := ∑ k ∈ Finset.Icc n m, (k : ℚ)⁻¹\n\nnoncomputable def harmonicDen (a b : ℕ) : ℕ := (harmonicBlock a b).den\n\ntheorem erdos_59514 :\n    (∀ a : ℕ, 1 ≤ a → ∃ b : ℕ, a < b ∧ harmonicDen a (b + 1) < harmonicDen a b) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "unit fractions"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/290.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "harmonicBlock"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

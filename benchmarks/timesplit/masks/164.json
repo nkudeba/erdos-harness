@@ -1,0 +1,26 @@
+{
+ "true_problem": "164",
+ "alias_id": "64120",
+ "statement_en": "A set $A\\subset \\mathbb{N}$ is primitive if no member of $A$ divides another. Is the sum\\[\\sum_{n\\in A}\\frac{1}{n\\log n}\\]maximised over all primitive sets when $A$ is the set of primes?",
+ "statement_lean": "namespace Set\ndef IsPrimitive (S : Set ℕ) (n : ℕ) : Prop :=\n  n ∈ S ∧ Disjoint (n.properDivisors : Set ℕ) S\nend Set\n\ntheorem erdos_64120 :\n    ∀ A : Set ℕ, (∀ a ∈ A, 2 ≤ a) → Erdos1196.IsPrimitive A →\n      (∑' a : A, 1 / ((a : ℕ) * Real.log (a : ℕ))) ≤\n        ∑' p : {p : ℕ | p.Prime}, 1 / ((p : ℕ) * Real.log (p : ℕ)) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "primitive sets"
+ ],
+ "ok": false,
+ "errors": [
+  "line 81:36: Unknown identifier `Erdos1196.IsPrimitive`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/164.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.IsPrimitive"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

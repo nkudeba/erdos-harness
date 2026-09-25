@@ -1,0 +1,30 @@
+{
+ "true_problem": "328",
+ "alias_id": "23464",
+ "statement_en": "Suppose $A\\subseteq\\mathbb{N}$ and $C>0$ is such that $1_A\\ast 1_A(n)\\leq C$ for all $n\\in\\mathbb{N}$. Can $A$ be partitioned into $t$ many subsets $A_1,\\ldots,A_t$ (where $t=t(C)$ depends only on $C$) such that $1_{A_i}\\ast 1_{A_i}(n)<C$ for all $1\\leq i\\leq t$ and $n\\in \\mathbb{N}$?",
+ "statement_lean": "namespace Set\nvariable {α R : Type*} [One R] [Zero R] (A : Set α)\nnoncomputable def indicatorOne : α → R := indicator A (fun _ ↦ 1)\nend Set\n\nnamespace Set\nvariable {α R : Type*} [One R] [Zero R] (A : Set α)\nscoped notation \"𝟙_\" A:max => indicatorOne A\nend Set\n\nnamespace AdditiveCombinatorics\nopen Finset Set\nvariable {R : Type*} [Semiring R]\ndef sumConv (f g : ℕ → R) (n : ℕ) : R := ∑ p ∈ antidiagonal n, f p.1 * g p.2\nend AdditiveCombinatorics\n\nnamespace AdditiveCombinatorics\nopen Finset Set\nvariable {R : Type*} [Semiring R]\ninfixl:70 \" ∗ \" => sumConv\nend AdditiveCombinatorics\n\nnamespace AdditiveCombinatorics\nopen Finset Set\nvariable {R : Type*} [Semiring R]\nnoncomputable def sumRep (A : Set ℕ) : ℕ → ℕ := (𝟙_A ∗ 𝟙_A)\nend AdditiveCombinatorics\n\nopen AdditiveCombinatorics\n\ntheorem erdos_23464 :\n    ∀ C : ℕ, 0 < C →\n      ∃ t : ℕ, ∀ A : Set ℕ, (∀ n, sumRep A n ≤ C) →\n        ∃ P : Fin t → Set ℕ, (⋃ i, P i) = A ∧\n          Set.univ.PairwiseDisjoint P ∧\n          ∀ i, ∀ n, sumRep (P i) n < C := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic"
+ ],
+ "tags": [
+  "number theory",
+  "additive combinatorics"
+ ],
+ "ok": false,
+ "errors": [
+  "line 232:42: Unknown identifier `indicator`"
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/328.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "Set.indicatorOne",
+  "notation 𝟙_",
+  "AdditiveCombinatorics.sumConv",
+  "notation ∗",
+  "AdditiveCombinatorics.sumRep"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}

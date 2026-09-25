@@ -1,0 +1,24 @@
+{
+ "true_problem": "1021",
+ "alias_id": "32231",
+ "statement_en": "Is it true that, for every $k\\geq 3$, there is a constant $c_k>0$ such that\\[\\mathrm{ex}(n,G_k) \\ll n^{3/2-c_k},\\]where $G_k$ is the bipartite graph between $\\{y_1,\\ldots,y_k\\}$ and $\\{z_1,\\ldots,z_{\\binom{k}{2}}\\}$, with each $z_j$ joined to a unique pair of $y_i$?",
+ "statement_lean": "open Filter Asymptotics\n\ndef cliqueSubdivision (k : ℕ) : SimpleGraph (Fin k ⊕ Set.powersetCard (Fin k) 2) where\n  Adj x y :=\n    match x, y with\n    | Sum.inl i, Sum.inr p => i ∈ (p : Finset (Fin k))\n    | Sum.inr p, Sum.inl i => i ∈ (p : Finset (Fin k))\n    | _, _ => False\n  symm := by\n    constructor\n    intro x y h\n    cases x <;> cases y <;> simp_all\n  loopless := by\n    constructor\n    intro x\n    cases x <;> simp\n\ntheorem erdos_32231 :\n    ∀ k : ℕ, 3 ≤ k → ∃ c : ℝ, 0 < c ∧\n      (fun n : ℕ ↦ (SimpleGraph.extremalNumber n (cliqueSubdivision k) : ℝ)) =O[atTop]\n        fun n : ℕ ↦ (n : ℝ) ^ (3 / 2 - c) := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Extremal.Basic",
+  "Mathlib.Data.Set.PowersetCard"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": true,
+ "errors": [],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1021.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

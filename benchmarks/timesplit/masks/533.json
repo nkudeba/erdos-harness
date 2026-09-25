@@ -1,0 +1,26 @@
+{
+ "true_problem": "533",
+ "alias_id": "66555",
+ "statement_en": "Let $\\delta>0$. If $n$ is sufficiently large and $G$ is a graph on $n$ vertices with no $K_5$ and at least $\\delta n^2$ edges then $G$ contains a set of $\\gg_\\delta n$ vertices containing no triangle.",
+ "statement_lean": "open Filter SimpleGraph\n\ntheorem erdos_66555 :\n    ∀ δ : ℝ, 0 < δ → ∃ c : ℝ, 0 < c ∧ ∀ᶠ n : ℕ in atTop,\n      ∀ G : SimpleGraph (Fin n), G.CliqueFree 5 →\n        δ * (n : ℝ) ^ 2 ≤ G.edgeFinset.card →\n          ∃ S : Finset (Fin n), c * n ≤ (S.card : ℝ) ∧\n            G.CliqueFreeOn (S : Set (Fin n)) 3 := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Finite"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 37:26: failed to synthesize instance of type class\n  Fintype ↑G.edgeSet\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command."
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/533.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [],
+ "classical": false,
+ "checked": "2026-09-24"
+}

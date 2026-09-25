@@ -1,0 +1,35 @@
+{
+ "true_problem": "927",
+ "alias_id": "35764",
+ "statement_en": "Let $g(n)$ be the maximum number of different sizes of cliques that can occur in a graph on $n$ vertices. Estimate $g(n)$ - in particular, is it true that\\[g(n)=n-\\log_2n-\\log_*(n)+O(1),\\]where $\\log_*(n)$ is the number of iterated logarithms such that $\\log\\cdots \\log n <1$.",
+ "statement_lean": "namespace SimpleGraph\nvariable {V : Type*}\nstructure Cycle (G : SimpleGraph V) where\n  \n  base : V\n  \n  walk : G.Walk base base\n  \n  isCycle : walk.IsCycle\nend SimpleGraph\n\nnamespace SimpleGraph\nvariable {V : Type*}\ndef Cycle.edges {G : SimpleGraph V} (c : Cycle G) : List (Sym2 V) := c.walk.edges\nend SimpleGraph\n\nopen Cardinal Set\nstructure ThreeUniformHypergraph (V : Type) where\n  \n  edges : Set (Finset V)\n  \n  uniform : ∀ e ∈ edges, e.card = 3\n\nnamespace ThreeUniformHypergraph\nopen Cardinal Set\ndef IsCompleteSubgraph {V : Type} (H : ThreeUniformHypergraph V) (S : Finset V) : Prop :=\n  ∀ e : Finset V, e ⊆ S → e.card = 3 → e ∈ H.edges\nend ThreeUniformHypergraph\n\nnamespace ThreeUniformHypergraph\nopen Cardinal Set\ndef cliqueSizes {V : Type} (H : ThreeUniformHypergraph V) : Set ℕ :=\n  { k | ∃ S : Finset V, Maximal (IsCompleteSubgraph H) S ∧ S.card = k }\nend ThreeUniformHypergraph\n\nnamespace SimpleGraph\nopen Finset List\nvariable {V : Type*} {G : SimpleGraph V}\ndef cliqueSizes {V : Type} (G : SimpleGraph V) : Set ℕ :=\n  { k | ∃ S : Finset V, Maximal (fun T : Finset V => G.IsClique (T : Set V)) S ∧ S.card = k }\nend SimpleGraph\n\nnoncomputable def Real.iteratedLog (x : ℝ) : ℕ :=\n  sInf { (n : ℕ) | Real.log^[n] x ≤ 1 }\n\ndef Nat.iteratedLog (b : ℕ) : ℕ → ℕ\n  | 0 => 0\n  | 1 => 0\n  | (n + 2) => Nat.iteratedLog b (Nat.log b (n + 2)) + 1\n\nopen Filter\n\nnoncomputable def g (n : ℕ) : ℕ := by\n  classical\n  exact Finset.sup (Finset.univ (α := SimpleGraph (Fin n)))\n    fun G => (SimpleGraph.cliqueSizes G).ncard\n\ntheorem erdos_35764 :\n    ∃ C : ℕ, ∀ᶠ n : ℕ in atTop,\n      g n + Nat.log 2 n + Nat.iteratedLog 2 n ≤ n + C ∧\n        n ≤ g n + Nat.log 2 n + Nat.iteratedLog 2 n + C := by\n  sorry",
+ "imports": [
+  "Mathlib.Tactic",
+  "Mathlib.Algebra.BigOperators.Fin",
+  "Mathlib.Data.Nat.Factorial.Basic",
+  "Mathlib.Data.Nat.Prime.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Basic",
+  "Mathlib.Combinatorics.SimpleGraph.Clique",
+  "Mathlib.Combinatorics.SimpleGraph.Walk.Basic"
+ ],
+ "tags": [
+  "graph theory"
+ ],
+ "ok": false,
+ "errors": [
+  "line 114:4: fail to show termination for\n  TSB927.Nat.iteratedLog\nwith errors\nfailed to infer structural recursion:\nNot considering parameter b of TSB927.Nat.iteratedLog:\n  it is unchanged in the recursive calls\nCannot use parameter #2:\n  failed to eliminate recursive application\n    iteratedLog b ("
+ ],
+ "source": "google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/927.lean (main theorem; answer stripped; comments removed; identity renamed)",
+ "inlined_from_formal_conjectures": [
+  "SimpleGraph.Cycle",
+  "SimpleGraph.Cycle.edges",
+  "ThreeUniformHypergraph",
+  "ThreeUniformHypergraph.IsCompleteSubgraph",
+  "ThreeUniformHypergraph.cliqueSizes",
+  "SimpleGraph.cliqueSizes",
+  "Real.iteratedLog",
+  "Nat.iteratedLog"
+ ],
+ "classical": false,
+ "checked": "2026-09-24"
+}
