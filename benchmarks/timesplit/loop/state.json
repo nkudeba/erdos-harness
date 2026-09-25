@@ -87,8 +87,12 @@
   {
    "at": "2026-09-25T06:09:10Z",
    "text": "iteration 1 rejected (ideas W1 L3 T11); iteration 2 launched: train-fixes-conv on 283 435 997 1141"
+  },
+  {
+   "at": "2026-09-25T06:42:27Z",
+   "text": "iteration 2 #283: unsolved $5.89, 1 piece; proving got 13% of spend, experiments 39%, plans 35%; false direction spent as much as true; core deferred every cycle"
   }
  ],
  "stop": null,
- "updated": "2026-09-25T06:09:10Z"
+ "updated": "2026-09-25T06:42:27Z"
 }
