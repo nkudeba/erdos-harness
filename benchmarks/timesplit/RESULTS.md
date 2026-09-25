@@ -701,3 +701,43 @@ declaration names (`hyp_long`, `hyp_sumbound`, `hyp_count`, `hyp_pigeon`), while
 - **Protocol:** baseline v2 exactly, as its protocol record gives it: pin `84f21c5`, `--open`, no discovery, $8,
   2 research cycles. It runs after the replication, in the same lane.
 - **Write-ahead:** P(the baseline solves #1213) = 0.4. A solve would mean discovery was not needed for this item.
+
+**Outcome (2026-09-25 19:45Z): the baseline does NOT solve #1213.**
+- $7.48 under `--open`. The true direction certified 1 hypothesis and left 1 open.
+- The false direction's plan judged its target false and stopped (`target_believed_false`).
+- Run: `runs/20260925-145711-117917-timesplit-erdos94894`.
+- **Reading:** on this item, the discovery stage is what made the difference. With discovery, 2 of 2 runs solved
+  it, at $2.64 and $3.92. Without it, the one baseline run left the true direction one hypothesis short at $7.48.
+  One pair is not a rate.
+- **The v2 verdict so far:** v2 solved 1 item and the baseline 0, with #1213 now paired. That is one discordant pair
+  for v2, short of the pre-registered "evident gain" (≥ 3 discordant for, none against). The baseline still has not
+  run 6 of v2's items (#825, #865, #871, #888, #1125, #1180), so a solve only the baseline would find is not ruled
+  out there.
+
+## The improvement loop stops (2026-09-25 19:50Z): stopping condition 1
+
+- **Goal met:** a dev item's TRUE direction is verified in Lean (#1213) and replicated once on a fresh alias. Both
+  proofs pass the loop's own mechanical re-check. Human review is pending, and `claimEligible` stays false.
+- **The loop's spend:** $121.71 of the $200 cap, and $78.29 is left unspent. This session's own model use is not
+  counted, as the protocol says.
+- **Its iterations:**
+  - Iteration 1 (exploration): rejected.
+  - Iteration 2 (the fixed harness): lost its dev screen, W0 L2 T3.
+  - Iteration 3 (`alloc`): rejected, 2 pieces against 7.
+  - None of them produced the solve. It came from `discover-v2` (2026-09-24, before the loop), and the loop
+    found it, checked it and replicated it.
+- **What the loop learned that outlives it:**
+  - Discovery that yields a complete, refereed informal proof is what converts. The solved item is the one where
+    discovery wrote the whole argument, and the baseline without it fell one hypothesis short.
+  - At $8, budget allocation cannot buy a deep core. Two of iteration 3's four cores are published analytic results
+    no budget here could formalize.
+  - Two instrument lessons:
+    - The pieces rule scores a cheaper route to the same end state as a loss (#997).
+    - A stop check must read every results file, the operator's lanes included.
+  - One harness finding: `residual_improves` lets a re-plan drop a certified lemma to lower the open count (#1141).
+- **For the operator:**
+  - Review the two proofs:
+    - `runs/20260925-043526-696629-timesplit-erdos82251/final/Erdos82251.lean`
+    - `runs/20260925-141600-634401-timesplit-erdos59388/final/Erdos59388.lean`
+  - Decide whether to merge branch `harness-loop`.
+  - Decide whether to finish the baseline on v2's 6 unpaired dev items.

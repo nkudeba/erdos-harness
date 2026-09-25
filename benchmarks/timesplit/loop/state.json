@@ -3,7 +3,7 @@
  "budget_usd": 200.0,
  "started": "2026-09-25T03:58:48Z",
  "iteration": 3,
- "phase": "stopping",
+ "phase": "stopped",
  "candidate": "alloc (pin 00e9304): discovery round 1 with commit floor 0.6, --attack-order core-first, --refute changed, --premise-attack cheap",
  "baseline": {
   "tag": "train-fixes-conv",
@@ -12,9 +12,7 @@
   "note": "iteration 2's fixed harness; alloc's pin differs only by default-off options"
  },
  "next": [
-  "STOP SIGNAL: dev #1213 (RESULTS.md 'Stop signal: dev #1213'); replicate-1213-84f21c5 launched 18:16Z, then baseline-v2-84f21c5-1213",
-  "replication verified -> evidence, ack, PushNotification, set --stop, ScheduleWakeup(stop) once the baseline on #1213 is recorded",
-  "replication not verified -> record, ack, continue with iteration 4 diagnose (one more rejection = plateau stop)"
+  "stopped: the operator reviews the #1213 proofs, decides on merging harness-loop, and on the baseline for v2's 6 unpaired dev items"
  ],
  "pre_loop": [
   "discover-v2-84f21c5: dev lane started by the operator before the loop, on pin 84f21c5; not counted",
@@ -107,8 +105,9 @@
    "estimate": 8.0,
    "usd": 0.0,
    "note": "baseline v2 on #1213, the v2 verdict's missing pair",
-   "in_flight": true,
-   "registered": "2026-09-25T18:57:10Z"
+   "in_flight": false,
+   "registered": "2026-09-25T18:57:10Z",
+   "finished": "2026-09-25T19:45:20Z"
   }
  ],
  "notes": [
@@ -187,10 +186,14 @@
   {
    "at": "2026-09-25T18:59:01Z",
    "text": "stopping condition 1 met: dev #1213 solved by discover-v2 (09:00Z, $2.64) and replicated on alias 59388 (18:57Z, $3.92); both proofs re-checked mechanically; baseline on #1213 in flight, then stop"
+  },
+  {
+   "at": "2026-09-25T19:46:19Z",
+   "text": "loop stopped: goal met; spent $121.71 of $200; baseline v2 on #1213 not solved ($7.48), so discovery made the difference on this item"
   }
  ],
- "stop": null,
- "updated": "2026-09-25T18:59:01Z",
+ "stop": "stopping condition 1 met 2026-09-25: dev #1213 TRUE direction verified (discover-v2-84f21c5) and replicated (replicate-1213-84f21c5); baseline v2 did not solve it; human review pending",
+ "updated": "2026-09-25T19:46:19Z",
  "rejected_streak": 3,
  "acknowledged": [
   {
