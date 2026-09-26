@@ -363,7 +363,7 @@ class CLIDefaults(unittest.TestCase):
         args = H.build_parser().parse_args(["run", "--problem", "1"])
         self.assertEqual(args.refute, "changed")             # Change C: was "auto"
         self.assertEqual(args.premise_attack, "cheap")       # Change C: was "full"
-        self.assertEqual(args.sweep, "on")
+        self.assertEqual(args.sweep, "off")                 # the train replay proved 0 of 9 deferred steps
         self.assertEqual(args.sweep_budget, 0.6)
         self.assertEqual(args.sweep_max, 8)
         self.assertEqual(args.attack_rounds, 2)

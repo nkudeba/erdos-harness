@@ -5978,7 +5978,7 @@ for the SAT solver instead of enumerating it.
                     # the sweep's own (possibly updated) `parsed`, so the depth phase only ever sees hypotheses
                     # the sweep did not already discharge; when the sweep closes the skeleton, `todo` comes back
                     # empty and every step after this one is a no-op down to the shared "(d) render" below.
-                    if getattr(self.args, "sweep", "on") != "off":
+                    if getattr(self.args, "sweep", "off") == "on":
                         sr = self._sweep_cycle(pdir, cdir, cycle, skeleton, parsed, meta, pid, main, module,
                                                false_names, fails, lemmas_path, residual_path, ledger)
                         skeleton, parsed = sr["skeleton"], sr["parsed"]
@@ -8199,12 +8199,13 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--min-child-budget", type=float, default=2.5,
                       help="deductive loop: do not start a hypothesis child with less than this many USD; attack fewer "
                            "hypotheses this cycle instead (0 disables)")
-    runp.add_argument("--sweep", choices=["on", "off"], default="on",
+    runp.add_argument("--sweep", choices=["on", "off"], default="off",
                       help="deductive loop (Change A, \"breadth before depth\", 2026-09-26): before core-first/"
                            "per-cycle/min-child-budget narrow the field, try every open conjecture hypothesis once, "
-                           "cheaply (one one-shot round, no agentic, no decompose). 51 of 79 steps left open at the "
-                           "end of unsolved runs were never even attempted, and a hypothesis that DOES get a direct "
-                           "proof costs a median $0.22. off restores the pre-2026-09-26 behaviour")
+                           "cheaply (one one-shot round, no agentic, no decompose). OFF by default: the replay on the "
+                           "10 train steps that runs left open and never attacked proved 0 of 9 ($2.67). The steps a "
+                           "run defers are mostly the hard ones, because the attack order is easiest-first, so the "
+                           "historical $0.22 median cost of a SUCCESSFUL attack does not carry over to them")
     runp.add_argument("--sweep-budget", type=float, default=0.6,
                       help="USD cap per sweep attempt (never below $0.30, and never more than the run has left)")
     runp.add_argument("--sweep-max", type=int, default=8, help="at most this many sweep attempts per cycle")

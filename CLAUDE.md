@@ -530,15 +530,21 @@ $3.51 ($317.6 total) chasing extra rounds and decompose escalations that almost 
 spent most of its money on long tails that rarely pay, while cheap one-shot attempts — which usually work —
 were never even offered to most hypotheses.
 
-**Change A**, `--sweep {on,off}` (default `on`, `--sweep-budget` USD per attempt default 0.6, `--sweep-max`
-attempts per cycle default 8): before core-first/per-cycle/min-child-budget narrow the field, `_sweep_cycle`
-gives EVERY open conjecture hypothesis one cheap, one-shot try (`_attack_substatement(..., cheap=True)`: one
-round, no agentic, no decompose) up front. A hit is banked exactly like a certified depth child (the shared
-`_bank_certified` helper), logged with `via="sweep"`, and removes the hypothesis from what the depth phase
-sees next. A miss is recorded with `kind="sweep"` in `failures.jsonl` and **excluded from `failure_counts`**
-— a cheap miss is weak evidence and must not flip the next attack to recursive or reorder the attack order.
-Each hypothesis TEXT (not name) is swept at most once ever, via a hash in `self.state["swept"]` that survives
-resumes. `--sweep off` reproduces the pre-2026-09-26 behaviour exactly.
+**Change A**, `--sweep {on,off}`, **default `off`**; `--sweep-budget` USD per attempt, default 0.6; `--sweep-max`
+attempts per cycle, default 8:
+- Before core-first, the per-cycle cap and min-child-budget narrow the field, `_sweep_cycle` gives every open
+  conjecture hypothesis one cheap one-shot try: `_attack_substatement(..., cheap=True)`, one round, no agentic, no
+  decompose.
+- A hit is banked exactly like a certified depth child (the shared `_bank_certified`, logged `via="sweep"`).
+- A miss is recorded with `kind="sweep"` and excluded from `failure_counts`.
+- Each hypothesis TEXT is swept at most once (`self.state["swept"]`).
+- **Why it is off.** The pre-registered train replay gave the sweep's exact attempt to the 10 steps that runs left
+  open and never attacked, and it proved **0 of 9** ($2.67; one replay crashed, one was unfair for want of the lemma
+  module). The prediction was 3.
+  - The runs' never-attacked steps are mostly the HARD ones: the attack order is easiest-first, so the $0.22 median
+    of a *successful* attack was selection, not a property of the deferred steps.
+  - Most misses compiled with `sorry` holes left: genuine difficulty, not formatting.
+  - Turn it on only with a screen that shows otherwise.
 
 **Change B**, `--attack-rounds` (default 2) / `--attack-decompose-rounds` (default 0): caps a normal (depth)
 child's `rounds`/`decompose_rounds` in `_attack_substatement`, freeing the tail budget for the sweep and for

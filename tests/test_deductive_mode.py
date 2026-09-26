@@ -268,12 +268,9 @@ def _stub(tmp, **state):
     h.args = argparse.Namespace(no_cascade=True, run_budget=5.0, research_cycles=1, review_every=1,
                                 hyps_per_cycle=4, refute="off", llm_timeout=60, review_wait=0, min_child_budget=2.5,
                                 residual_depth=2, residual_depth_current=1,
-                                # Change A's breadth-first sweep defaults to "on" on the real CLI, but almost
-                                # none of the tests built on this stub are ABOUT the sweep: they mock
-                                # `_attack_substatement` once and count/inspect its calls, and a sweep pass would
-                                # call the very same mock again before the behaviour under test ever runs. Off
-                                # here, like `refute` above, so those tests keep seeing exactly what they did
-                                # before Change A; tests/test_sweep_and_caps.py turns it back on deliberately.
+                                # the breadth-first sweep is off by default (its train replay proved 0 of 9);
+                                # pinned off here too, since these tests mock `_attack_substatement` once and a
+                                # sweep would call the same mock first. tests/test_sweep_and_caps.py turns it on.
                                 sweep="off")
     h.imports, h.libraries = list(H.DEFAULT_IMPORTS), []
     h.direction = None

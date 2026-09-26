@@ -805,3 +805,29 @@ The plan rated them hard 5, moderate 3, unrated 2.
 - 3 of the 10 proved (range 1–5); P(at least 2) = 0.7.
 - At most 1 of the 5 "hard" steps. The historical one-shot rates are hard ~5%, moderate ~80%, unrated ~55%.
 - Under $6 in total.
+
+**Outcome (2026-09-26): 0 of 9 proved. The prediction was wrong, and the sweep goes back to off by default.**
+
+| step (train) | the plan's rating | result | $ |
+|---|---|---|---|
+| #283 `hyp_egypt` | unrated | not proved: the omitted-def repair fired, but the proof failed (unsolved goals) | 0.51 |
+| #283 `hyp_complete_tail` | moderate | not proved: attempts compiled with `sorry` left | 0.22 |
+| #283 `hyp_core` | hard | not a fair replay: it needs the run's lemma module (`IntValued`), which the replay did not import | 0.31 |
+| #435 `hyp_lower` | hard | not proved: `sorry` left | 0.19 |
+| #435 `hyp_window` | hard | not proved: `sorry` left | 0.27 |
+| #1141 `neg_hyp_tail` | hard | not proved: `sorry` left | 0.18 |
+| #1141 `hyp_coprime_in_class` | unrated | not proved: `sorry` left | 0.26 |
+| #152 `hyp_duality` | moderate | not proved: an `omega` failure and `sorry` left | 0.53 |
+| #152 `hyp_gap_linear` | hard | not proved: `le_or_lt` unknown (Mathlib renamed it) and `sorry` left | 0.22 |
+| #997 `hyp_bridge` | moderate | replay crashed: the older run has no `launch.json` | 0 |
+
+- **Reading:** the steps a run defers are the hard ones. The attack order is easiest-first, so the historical
+  $0.22 median of a *successful* attack was a selection effect, not a property of the deferred steps. "65% never
+  attacked" is true, but a cheap attempt does not convert them.
+- **What stays:**
+  - The round cap (Change B). It needs no replay: 1 success in rounds 3+ out of 278, and 1 decompose success in 192.
+  - The two validated defaults.
+  - The omitted-declaration repair, a bug fix that fired here.
+  - The audit.
+- **What goes back behind its flag:** the sweep (`--sweep on`).
+- **The real blocker on these items is the hard step itself.** That is the next thing to work on, not allocation.
