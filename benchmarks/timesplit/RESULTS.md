@@ -752,6 +752,35 @@ declaration names (`hyp_long`, `hyp_sumbound`, `hyp_count`, `hyp_pigeon`), while
   - P(the baseline solves at least one of the 6) = 0.12. discover-v2 solved none of them and got 0–2 pieces each.
   - About $35 in total.
 
+**Outcome (2026-09-26): none solved, $38.74.**
+
+| item | spend | notes |
+|---|---|---|
+| #825 | $5.79 | |
+| #865 | $8.18 | |
+| #871 | $9.91 | $1.91 over its $8 cap: parallel agentic sessions check the cap only between turns, a known limit |
+| #888 | $4.21 | the false direction stopped as believed false |
+| #1125 | $8.80 | the false direction stopped as believed false |
+| #1180 | $1.85 | the false direction stopped as believed false |
+
+No record is infrastructure, and no record lost a direction.
+
+**The discover-v2 verdict, with every dev item now paired** (17 in `baseline-v2-84f21c5`, and #1213 in
+`baseline-v2-84f21c5-1213`):
+- **Solves:** discover-v2 1 (#1213), baseline 0. One discordant pair for v2 and none against, short of the
+  pre-registered "evident gain" (≥ 3 for, none against). McNemar p = 1.0 on 17 pairs, so nothing is significant.
+- **Dense (15 measured pairs):** v2 wins 6, loses 4, ties 5; one-sided sign test p = 0.38.
+- **Spend:** v2 spent $27.08 more on the 17 pairs.
+- **Against its predictions:**
+  - 1 solved (expected 1.5, range 0–4);
+  - "v2 solves strictly more than the baseline" held (0.50);
+  - no evident gain (0.20).
+- **Reading:**
+  - The one solve anywhere on dev in 37 runs belongs to v2. On #1213 the discovery stage is what made the difference,
+    and the baseline fell one step short.
+  - Across the split, v2 is not shown to be better. One pair is an anecdote, and the dense metric is within noise.
+  - Its two wrong commits (#537, #871) are what `discover-v3`'s calibrated floor removes.
+
 ## #1213 verified by the automated audit (2026-09-26): no human review needed
 
 The operator ruled that a problem already resolved in the literature needs no human review, provided the

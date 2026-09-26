@@ -17,3 +17,5 @@
 {"alias": 80212, "problem": "865", "run_dir": "runs/20260926-102443-943788-timesplit-erdos80212"}
 {"alias": 34364, "problem": "871", "run_dir": "runs/20260926-104920-352714-timesplit-erdos34364"}
 {"alias": 87680, "problem": "888", "run_dir": "runs/20260926-111602-796928-timesplit-erdos87680"}
+{"alias": 58615, "problem": "1125", "run_dir": "runs/20260926-114611-851093-timesplit-erdos58615"}
+{"alias": 85699, "problem": "1180", "run_dir": "runs/20260926-123119-650370-timesplit-erdos85699"}
