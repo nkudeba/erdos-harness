@@ -2,4 +2,6 @@ cache/
 results/*.log
 results/*.pid
 pins/knowledge-*/
+# the knowledge snapshot of pin 84f21c5, which ran both verified #1213 solves (evidence/1213)
+!pins/knowledge-8b5a5b08da0eb6f4/
 loop/*.tmp

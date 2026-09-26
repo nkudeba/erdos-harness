@@ -797,7 +797,7 @@ verification is complete without one. `audit.py` is that verification. Both #121
 | faithfulness judges (at build, at verification) | pass | pass |
 | blindness: probe `unaware`, masked, `--benchmark`, no prompt names the problem (12 and 18 prompts scanned) | pass | pass |
 
-**Verdict: #1213's formal-conjectures statement is proved in Lean, twice, by blind runs.** It is a reconstruction
+**Verdict: #1213's formal-conjectures statement is proved in Lean, twice, by blind runs.** The proofs, audits and discovery records are kept in `evidence/1213/`, because `runs/` is not tracked. The solving pin and its knowledge snapshot are tracked too, so the runs can be reproduced exactly. It is a reconstruction
 of a result published 2026-04-21, not new mathematics. One response in the original run used the word "Erdős"
 unprompted. That is a recall signal to note, not a leak, since no prompt contained it.
 

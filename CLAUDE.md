@@ -590,6 +590,8 @@ select on it. Harvest lessons and lemmas from `train` runs only: anything learne
 that item's solution into every later evaluation. The model's prior guess of the answer is right 26 times in 31,
 so calling the direction is a weak signal. See `benchmarks/timesplit/README.md`.
 
+**A solve's proof is kept in `benchmarks/timesplit/evidence/<n>/`** (proof, `AUDIT.md`, discovery record). Benchmark runs never write `knowledge/solved/` and `runs/` is untracked, so without this copy a solve's evidence lives on one machine. Track its pin and knowledge snapshot through a `.gitignore` exception if their contents are in no commit: `git cat-file -e $(git hash-object pin_<sha>_harness.py)` tells you. Like `ideas/`, the evidence directory is evaluation-only: nothing the harness runs may read it.
+
 **Gate iterations on `pieces`, keep solves as the verdict.** Three arms and 20 dev runs at $8 solved nothing, so
 a solve-only gate cannot tell a better harness from a worse one. `pieces` counts the true direction's certified
 steps that are:

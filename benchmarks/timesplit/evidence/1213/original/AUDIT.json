@@ -1,0 +1,81 @@
+{
+ "run": "runs/20260925-043526-696629-timesplit-erdos82251",
+ "at": "2026-09-26T14:39:17Z",
+ "direction": null,
+ "proof": {
+  "file": "runs/20260925-043526-696629-timesplit-erdos82251/final/Erdos82251.lean",
+  "sha256": "3f7c56c0eab3d617ef1357d6a1f91d166e56b08b0c27e4c90b1521c68440f847"
+ },
+ "benchmark": {
+  "tag": "discover-v2-84f21c5",
+  "problem": "1213",
+  "split": "dev",
+  "alias": 82251,
+  "responses_naming_the_problem": {
+   "problem number with context": 0,
+   "Erdős by name": 1
+  },
+  "other_verified_runs": [
+   {
+    "tag": "replicate-1213-84f21c5",
+    "alias": 59388,
+    "run_dir": "runs/20260925-141600-634401-timesplit-erdos59388"
+   }
+  ]
+ },
+ "checks": {
+  "source_scan": {
+   "ok": true,
+   "detail": "no sorry, kernel bypass or elaboration-time code"
+  },
+  "imports": {
+   "ok": true,
+   "detail": "4 import(s), all Mathlib, Formal.Library or the statement's own"
+  },
+  "compiles": {
+   "ok": true,
+   "detail": "no errors"
+  },
+  "no_sorry_warning": {
+   "ok": true,
+   "detail": "0 sorry warning(s)"
+  },
+  "axioms": {
+   "ok": true,
+   "detail": "[Classical.choice, Quot.sound, propext]"
+  },
+  "statement_identity": {
+   "ok": true,
+   "detail": "the proved `erdos_82251` and 1 frozen definition(s) are structurally identical to a clean elaboration of the frozen statement (2 constant(s) compared)"
+  },
+  "kernel_replay": {
+   "ok": true,
+   "detail": "all declarations replayed"
+  },
+  "provenance": {
+   "ok": true,
+   "detail": "the pos direction of the benchmark's statement (google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1213.lean (main theorem; answer stripped; comments removed; identity renamed))"
+  },
+  "direction_matches_answer": {
+   "ok": true,
+   "detail": "proved pos, recorded answer True (formal-conjectures answer(...))"
+  },
+  "faithfulness_judges": {
+   "ok": true,
+   "detail": "at build: True; at verification: True"
+  },
+  "probe": {
+   "ok": true,
+   "detail": "probe verdict: unaware"
+  },
+  "masked_benchmark_run": {
+   "ok": true,
+   "detail": "masked=True, --benchmark=True, knowledge=benchmarks/timesplit/pins/knowledge-8b5a5b08da0eb6f4"
+  },
+  "no_identity_in_prompts": {
+   "ok": true,
+   "detail": "12 prompt(s) scanned; matches: {'problem number with context': 0, 'Erdős by name': 0}"
+  }
+ },
+ "verdict": "PASS"
+}

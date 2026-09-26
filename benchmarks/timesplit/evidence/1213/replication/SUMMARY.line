@@ -1,0 +1,1 @@
+RUN-SUMMARY problem=59388 exit=0 outcome=proved verified=True spend=$3.60 llm_calls=15 lean_checks=35 lemmas=3 residual=open:0,published:0,certified:3 fatals=0 wall=37m mode=research dir=runs/20260925-141600-634401-timesplit-erdos59388 stop="the residual skeleton closed: no hypothesis left, final verification cleared"
