@@ -741,3 +741,67 @@ declaration names (`hyp_long`, `hyp_sumbound`, `hyp_count`, `hyp_pigeon`), while
     - `runs/20260925-141600-634401-timesplit-erdos59388/final/Erdos59388.lean`
   - Decide whether to merge branch `harness-loop`.
   - Decide whether to finish the baseline on v2's 6 unpaired dev items.
+
+## Baseline v2 on discover-v2's 6 unpaired dev items (operator's request, 2026-09-26), written before launch
+
+- **Items:** #825, #865, #871, #888, #1125 and #1180, the dev items baseline v2 never reached. The run appends to
+  `baseline-v2-84f21c5` (the resume command in "Baseline v2 paused"), so `score --tag discover-v2-84f21c5 --baseline
+  baseline-v2-84f21c5` pairs 17 of 18 items. #1213's pair is in `baseline-v2-84f21c5-1213`.
+- **Protocol:** unchanged: pin `84f21c5`, `--open`, no discovery, $8, 2 research cycles.
+- **Write-ahead:**
+  - P(the baseline solves at least one of the 6) = 0.12. discover-v2 solved none of them and got 0–2 pieces each.
+  - About $35 in total.
+
+## #1213 verified by the automated audit (2026-09-26): no human review needed
+
+The operator ruled that a problem already resolved in the literature needs no human review, provided the
+verification is complete without one. `audit.py` is that verification. Both #1213 proofs pass all 13 checks (see
+`AUDIT.md` in each run):
+
+| check | original (alias 82251) | replication (alias 59388) |
+|---|---|---|
+| kernel replay (`leanchecker`), compiles, no `sorry` | pass | pass |
+| axioms exactly `[propext, Classical.choice, Quot.sound]` | pass | pass |
+| no kernel bypass, elaboration-time code or untrusted import | pass | pass |
+| **elaborated statement identity** (the proved type and the frozen definition, hashed against a clean elaboration) | pass | pass |
+| provenance: the benchmark's statement, formal-conjectures@077138338750, answer `True` | pass | pass |
+| faithfulness judges (at build, at verification) | pass | pass |
+| blindness: probe `unaware`, masked, `--benchmark`, no prompt names the problem (12 and 18 prompts scanned) | pass | pass |
+
+**Verdict: #1213's formal-conjectures statement is proved in Lean, twice, by blind runs.** It is a reconstruction
+of a result published 2026-04-21, not new mathematics. One response in the original run used the word "Erdős"
+unprompted. That is a recall signal to note, not a leak, since no prompt contained it.
+
+**The audit found a hole in the harness's own verification.** `stage_verify` checks that the frozen statement's
+TEXT appears in the proof. `tests/test_audit.py` shows a file that proves `(3 : ℕ) < 2` by declaring
+`instance : LT ℕ := ⟨fun _ _ => True⟩` above the verbatim frozen theorem:
+- it compiles, with no `sorry` and no axioms at all, and it passes `leanchecker`;
+- it would have been recorded as `verified`;
+- only the elaborated-identity check rejects it.
+
+Every earlier saved proof is being re-audited for this, and the result is recorded below when it lands.
+
+## Breadth before depth: a replay on train, written before launch (2026-09-26)
+
+**What was fixed, and why** (every research-program log on disk):
+- 51 of the 79 steps left open by unsolved runs were never attacked: 37 deferred for budget, 14 never reached.
+- A hypothesis attack that succeeds costs a median $0.22. 224 of 281 successes came in the one-shot round 1.
+- Rounds 3+ produced 1 success, and decompose 1 in 192 escalations. Failed attacks cost $317.6.
+- The harness now defaults to:
+  - a cheap one-shot sweep of every open conjecture before any depth attack;
+  - depth attacks capped at 2 rounds (one-shot + one agentic);
+  - `--refute changed` and `--premise-attack cheap`.
+- Design: CLAUDE.md, "Breadth before depth".
+
+**Replay:** the 10 distinct train steps that the final residuals left open and no attack ever touched get exactly the
+sweep's cheap attempt:
+- one round, no agentic, no decompose, $0.60 cap;
+- on copies of each run's direction state, so the original runs' accounting is untouched;
+- more conservative than a live sweep: no program lemma module, no discovery guidance.
+
+The plan rated them hard 5, moderate 3, unrated 2.
+
+**Write-ahead:**
+- 3 of the 10 proved (range 1–5); P(at least 2) = 0.7.
+- At most 1 of the 5 "hard" steps. The historical one-shot rates are hard ~5%, moderate ~80%, unrated ~55%.
+- Under $6 in total.

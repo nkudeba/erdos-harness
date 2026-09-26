@@ -1,0 +1,102 @@
+[
+ {
+  "tag": "train-fixes-conv",
+  "problem": "283",
+  "alias": 50182,
+  "run_dir": "runs/20260925-020910-641911-timesplit-erdos50182",
+  "skeleton": "programs/erdos_50182/pos/Residual.lean",
+  "name": "erdos_50182_hyp_core",
+  "direction": "pos",
+  "rating": "hard"
+ },
+ {
+  "tag": "train-fixes-conv",
+  "problem": "283",
+  "alias": 50182,
+  "run_dir": "runs/20260925-020910-641911-timesplit-erdos50182",
+  "skeleton": "programs/erdos_50182/pos/Residual.lean",
+  "name": "erdos_50182_hyp_egypt",
+  "direction": "pos",
+  "rating": "unrated"
+ },
+ {
+  "tag": "train-fixes-conv",
+  "problem": "435",
+  "alias": 44628,
+  "run_dir": "runs/20260925-024010-543206-timesplit-erdos44628",
+  "skeleton": "programs/erdos_44628/pos/Residual.lean",
+  "name": "erdos_44628_hyp_lower",
+  "direction": "pos",
+  "rating": "hard"
+ },
+ {
+  "tag": "train-fixes-conv",
+  "problem": "435",
+  "alias": 44628,
+  "run_dir": "runs/20260925-024010-543206-timesplit-erdos44628",
+  "skeleton": "programs/erdos_44628/pos/Residual.lean",
+  "name": "erdos_44628_hyp_window",
+  "direction": "pos",
+  "rating": "hard"
+ },
+ {
+  "tag": "train-fixes-conv",
+  "problem": "1141",
+  "alias": 53249,
+  "run_dir": "runs/20260925-050105-047067-timesplit-erdos53249",
+  "skeleton": "programs/erdos_53249/neg/Residual.lean",
+  "name": "erdos_53249_neg_hyp_tail",
+  "direction": "neg",
+  "rating": "hard"
+ },
+ {
+  "tag": "train-alloc-00e9304",
+  "problem": "283",
+  "alias": 31732,
+  "run_dir": "runs/20260925-101137-585164-timesplit-erdos31732",
+  "skeleton": "programs/erdos_31732/Residual.lean",
+  "name": "erdos_31732_hyp_complete_tail",
+  "direction": "pos",
+  "rating": "moderate"
+ },
+ {
+  "tag": "train-alloc-00e9304",
+  "problem": "1141",
+  "alias": 93184,
+  "run_dir": "runs/20260925-130407-808327-timesplit-erdos93184",
+  "skeleton": "programs/erdos_93184/Residual.lean",
+  "name": "erdos_93184_hyp_coprime_in_class",
+  "direction": "neg",
+  "rating": "unrated"
+ },
+ {
+  "tag": "train-diag-discover-v1",
+  "problem": "997",
+  "alias": 51190,
+  "run_dir": "runs/20260924-063844-893333-timesplit-erdos51190",
+  "skeleton": "programs/erdos_51190/Residual.lean",
+  "name": "erdos_51190_hyp_bridge",
+  "direction": "pos",
+  "rating": "moderate"
+ },
+ {
+  "tag": "train-v3-smoke",
+  "problem": "152",
+  "alias": 54847,
+  "run_dir": "runs/20260924-233455-674195-timesplit-erdos54847",
+  "skeleton": "programs/erdos_54847/pos/Residual.lean",
+  "name": "erdos_54847_hyp_duality",
+  "direction": "pos",
+  "rating": "moderate"
+ },
+ {
+  "tag": "train-v3-smoke",
+  "problem": "152",
+  "alias": 54847,
+  "run_dir": "runs/20260924-233455-674195-timesplit-erdos54847",
+  "skeleton": "programs/erdos_54847/pos/Residual.lean",
+  "name": "erdos_54847_hyp_gap_linear",
+  "direction": "pos",
+  "rating": "hard"
+ }
+]

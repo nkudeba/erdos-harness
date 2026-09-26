@@ -1083,16 +1083,17 @@ def discover(item: dict, statement: str, run_dir: Path, args) -> dict:
         a["cost"] = round(inner.total_cost_usd, 4)        # every call this attempt made, failed ones included
         return a
 
-    v2 = getattr(args, "candidate", None) == "discover-v2"
+    v2 = getattr(args, "candidate", None) in ("discover-v2", "discover-v3")
     # alloc: v2's first round and its single-confident rule, the calibrated floor, and no gap round (iteration 3)
     alloc = getattr(args, "candidate", None) == "alloc"
+    v3floor = getattr(args, "candidate", None) == "discover-v3"
     frames = DISCOVER_FRAMES[: args.discover_attempts]
     with ThreadPoolExecutor(max_workers=len(frames)) as ex:
         attempts = list(ex.map(lambda kf: one(*kf), enumerate(frames)))
     spent = sum(a.get("cost") or 0.0 for a in attempts)
     floor = getattr(args, "commit_floor", None)
     d = decide_direction(attempts, single_confident=0.75 if (v2 or alloc) else None,
-                         floor=floor if floor is not None else (0.6 if alloc else None))
+                         floor=floor if floor is not None else (0.6 if (alloc or v3floor) else None))
     best = d.get("best") or {}
     gap_attempt = None
     if v2 and best and not (best.get("complete") and (best.get("critic") or {}).get("valid")) and best.get("gap"):
@@ -1297,7 +1298,10 @@ def protocol(args) -> dict:
             "research_cycles": args.research_cycles, "hyps_per_cycle": args.hyps_per_cycle,
             "literature": args.literature, "lean_timeout": args.lean_timeout, "compile_workers": args.compile_workers,
             "open": True, "masked": True, "candidate": getattr(args, "candidate", None) or "baseline",
-            **({"harness_flags": candidate_flags(args)} if candidate_flags(args) else {})}
+            **({"harness_flags": candidate_flags(args)} if candidate_flags(args) else {}),
+            **({"discovery": {k: getattr(args, k, None) for k in DISCOVERY_KEYS}}
+               if str(getattr(args, "candidate", None) or "").startswith("discover") or getattr(args, "candidate", None) == "alloc"
+               else {})}
 
 
 def harness_file(args) -> Path:
@@ -1334,7 +1338,24 @@ def default_tag(proto: dict) -> str:
     return f"{datetime.now().strftime('%Y%m%d')}-{proto['git']['commit'][:7]}{'-dirty' if proto['git']['dirty'] else ''}-{h}"
 
 
+# discover-v3 = discover-v2's settings, fixed in code, plus the calibrated commit floor. v2's first-round settings
+# lived only in its launch command (the argparse defaults are v1's), so replicating #1213 meant recovering them from a
+# session transcript. The floor: 0 wrong commits of 33 at >= 0.6 on train, and dev's two wrong v2 commits (#537 at
+# 0.55, #871 at 0.33) sat below it, each spending a whole run on a false statement.
+DISCOVER_V3 = {"discover_attempts": 2, "discover_effort": "medium", "discover_budget": 0.8, "critic_budget": 0.3,
+               "gap_budget": 1.2, "gap_effort": "medium", "commit_floor": 0.6}
+DISCOVERY_KEYS = tuple(DISCOVER_V3)
+
+
+def apply_candidate_settings(args) -> None:
+    if getattr(args, "candidate", None) == "discover-v3":
+        for k, v in DISCOVER_V3.items():
+            if k != "commit_floor" or getattr(args, k, None) is None:
+                setattr(args, k, v)
+
+
 def run(args) -> int:
+    apply_candidate_settings(args)
     pool = load_pool()
     items = [i for i in pool["items"] if i["split"] == args.split and (i.get("mask") or {}).get("ok")]
     if args.items:
@@ -1418,7 +1439,7 @@ def run_item(item: dict, tag: str, proto: dict, args, taken: set[int]) -> dict:
     pfile = run_dir / "problem.json"          # per evaluation, inside the (gitignored) run dir, never in the tree
     pfile.write_text(json.dumps(prob, indent=2, ensure_ascii=False))
     discovery, committed, budget, guidance_file = None, None, args.budget, None
-    if getattr(args, "candidate", None) in ("discover-v1", "discover-v2", "alloc") and not args.dry_run:
+    if getattr(args, "candidate", None) in ("discover-v1", "discover-v2", "discover-v3", "alloc") and not args.dry_run:
         discovery = discover(item, statement, run_dir, args)
         budget = round(max(args.budget - discovery["spend"], 1.0), 2)       # the same $8 in total as the baseline
         committed = discovery["commit"]
@@ -1566,6 +1587,23 @@ def discovery_limited(ctx: dict) -> bool:
 
 # ---------------------------------------------------------------- scoring ---------------------------------------------
 
+def audit_run(run_dir: Path) -> dict:
+    """`audit.py` on a run whose direction verified. `solved` needs its Lean checks to pass: the harness's own
+    verification matches the frozen statement's TEXT, and a redefined `<` proves `(3 : ℕ) < 2` under a verbatim
+    frozen theorem (tests/test_audit.py). The direction check is left out of `lean_ok` on purpose: a verified
+    proof of the wrong direction must still reach `contradiction`, where it is re-audited, never counted."""
+    sys.path.insert(0, str(ROOT))
+    try:
+        import audit as AU
+        rep = AU.audit(run_dir)
+    except Exception as e:                                  # noqa: BLE001 - an unauditable proof is not a solve
+        return {"verdict": "ERROR", "lean_ok": False, "failed": [f"{type(e).__name__}: {str(e)[:200]}"]}
+    reps = rep.get("all") or [rep]
+    failed = sorted({k for r in reps for k, c in (r.get("checks") or {}).items() if c.get("ok") is not True})
+    return {"verdict": rep.get("verdict"), "failed": failed,
+            "lean_ok": not [k for k in failed if k != "direction_matches_answer"]}
+
+
 def score_run(run_dir: Path, alias: str, answer: bool, committed: str | None = None) -> dict:
     """Outcome of one run against the known answer: an --open run (pos/ and neg/ children), or a run committed to
     one direction (its own state at the root; the other direction reads as not attempted).
@@ -1598,7 +1636,10 @@ def score_run(run_dir: Path, alias: str, answer: bool, committed: str | None = N
                    "judge_faithful": (v.get("faithful") or {}).get("faithful") if isinstance(v.get("faithful"), dict) else None,
                    "stop_reason": str(s.get("stop_reason") or "")[:240]}
     true_d, false_d = ("pos", "neg") if answer else ("neg", "pos")
-    return {"solved": dirs[true_d]["verified"], "contradiction": dirs[false_d]["verified"],
+    audited = audit_run(run_dir) if (dirs[true_d]["verified"] or dirs[false_d]["verified"]) else None
+    lean_ok = bool(audited and audited["lean_ok"])
+    return {"solved": dirs[true_d]["verified"] and lean_ok, "contradiction": dirs[false_d]["verified"] and lean_ok,
+            "audit": audited,
             "true_certified": dirs[true_d]["certified"], "true_modulo_published": dirs[true_d]["modulo_published"],
             "true_open": dirs[true_d]["open"], "false_stopped": dirs[false_d]["believed_false"],
             "true_abandoned": dirs[true_d]["believed_false"], "directions": dirs,
@@ -2409,9 +2450,11 @@ def main() -> int:
     r.add_argument("--compile-workers", type=int, default=2, help="ERDOS_COMPILE_WORKERS for the run (a shared machine)")
     r.add_argument("--item-hours", type=float, default=3.0, help="wall-clock cap per item; a kill is infrastructure")
     r.add_argument("--limit-waits", type=int, default=4, help="usage-limit waits per item before giving up on it")
-    r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "v3", "alloc"], default="baseline",
+    r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "discover-v3", "v3", "alloc"],
+                   default="baseline",
                    help="discover-v1: informal attempts + referee first, then commit to one direction (same total budget); "
                         "discover-v2: + a second round on the named missing step, and one confident answer may commit; "
+                        "discover-v3: discover-v2 with its settings fixed in code and the calibrated 0.6 commit floor; "
                         "v3: no external discovery, the harness's own discovery options instead (V3_FLAGS)")
     r.add_argument("--v3-flags", help="override V3_FLAGS for candidate v3 (one string, shell-split)")
     r.add_argument("--commit-floor", type=float, default=None,

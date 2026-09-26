@@ -109,8 +109,27 @@ reads whatever is cached and derives its own penalties from it.
 
 ## Honesty rules that outrank convenience
 
-- A compiling Lean proof is **mechanically verified**, never a resolved problem. Keep `claimEligible=false`
-  until independent human review; never describe a reconstruction of a published result as new mathematics.
+- A compiling Lean proof is **mechanically verified**, never a resolved problem by itself. Whether it can be
+  trusted without anyone reading it is decided by `python3 audit.py --run <run_dir>` (no model calls, about 90 s),
+  which writes `AUDIT.md` and `AUDIT.json` into the run. It checks:
+  - a kernel replay with `leanchecker`;
+  - exactly the standard axioms;
+  - no `sorry`, kernel bypass or elaboration-time code;
+  - trusted imports;
+  - that the proved constant's **elaborated type** is structurally identical to a clean elaboration of the frozen
+    statement.
+
+  The last check is new, and it is not optional. The harness's own final check compares TEXT, and a redefined `<`
+  lets a file prove `(3 : ℕ) < 2` with the frozen text verbatim, no `sorry` and no axioms. `tests/test_audit.py`
+  shows that attack passing every text check and failing the audit.
+  - **Problems already resolved in the literature** (every time-split item): an audit PASS is the verification,
+    and no human review is needed to call the proof verified. It is still a reconstruction of a published result,
+    never new mathematics.
+  - **Problems open on erdosproblems.com:** the audit is necessary but not sufficient. A claim of resolution also
+    needs independent human review, because our own formalization of an open statement has no external check.
+    `claimEligible` stays false until then.
+  - Faithfulness of the frozen statement rests on its provenance, which the audit records: formal-conjectures for
+    time-split items, plus the faithfulness judges.
 - Record assistance. Operator-supplied notes, a supplied proof route, a recovered sandbox, a model switch —
   all of it goes in the run report. A result nobody can reproduce unaided is not an autonomous solve.
 - Report unavailable costs as unavailable, not as zero.
@@ -500,6 +519,52 @@ reference proof; `--benchmark` now excludes it. The model's own memory of public
 only cued less and measured: `prepare.py --masked` (synthetic id, paraphrase, renamed theorem, no tags, `--masked`
 prompt scrub) plus `probe.py` before and `compare.py` after. A closed masked run is evidence about the loop only
 when the probe showed no recognition and the route differs from the reference.
+
+### Breadth before depth (2026-09-26)
+
+Measured over every research-program log on disk: 79 steps were still open at the end of unsolved runs, and
+51 of them (65%) were **never attacked** — most deferred for want of `--min-child-budget`. Of 152 hypothesis
+children that DID prove their target, the median cost was $0.22 (66% <= $0.50, 74% <= $1.00), and of 278
+`prove` SUCCESS events only 1 happened in round 3 or later (224 in round 1). The 86 that failed cost a median
+$3.51 ($317.6 total) chasing extra rounds and decompose escalations that almost never paid off. So the loop
+spent most of its money on long tails that rarely pay, while cheap one-shot attempts — which usually work —
+were never even offered to most hypotheses.
+
+**Change A**, `--sweep {on,off}` (default `on`, `--sweep-budget` USD per attempt default 0.6, `--sweep-max`
+attempts per cycle default 8): before core-first/per-cycle/min-child-budget narrow the field, `_sweep_cycle`
+gives EVERY open conjecture hypothesis one cheap, one-shot try (`_attack_substatement(..., cheap=True)`: one
+round, no agentic, no decompose) up front. A hit is banked exactly like a certified depth child (the shared
+`_bank_certified` helper), logged with `via="sweep"`, and removes the hypothesis from what the depth phase
+sees next. A miss is recorded with `kind="sweep"` in `failures.jsonl` and **excluded from `failure_counts`**
+— a cheap miss is weak evidence and must not flip the next attack to recursive or reorder the attack order.
+Each hypothesis TEXT (not name) is swept at most once ever, via a hash in `self.state["swept"]` that survives
+resumes. `--sweep off` reproduces the pre-2026-09-26 behaviour exactly.
+
+**Change B**, `--attack-rounds` (default 2) / `--attack-decompose-rounds` (default 0): caps a normal (depth)
+child's `rounds`/`decompose_rounds` in `_attack_substatement`, freeing the tail budget for the sweep and for
+the next plan's response to the failure digest. `--attack-rounds 6 --attack-decompose-rounds 10` restores the
+old caps. Recursive (sub-residual) children are uncapped here — they run their own deductive loop, and their
+OWN hypothesis children get the same caps in turn.
+
+**Change C**: `--refute` now defaults to `changed` (was `auto`) and `--premise-attack` now defaults to `cheap`
+(was `full`) — both validated in the improvement loop's iteration 3 (`benchmarks/timesplit/RESULTS.md`): they
+saved money at no measured cost. `--refute auto --premise-attack full` restores the old defaults.
+
+**Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
+was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def
+Condition`, all three one-shot attempts dropped it, and the frozen guard rejected each without compiling it
+(48 of 1,073 attempts overall died on a missing frozen `def`). Now:
+- a frozen `def` or `open` the attempt merely LEFT OUT is re-inserted verbatim after its header;
+- a declaration the attempt redefines is never replaced;
+- an altered target theorem is never repaired;
+- the guard itself is unchanged.
+
+**Final verification runs `audit.py`** (`--audit on`, the default). `stage_verify` adds the audit's Lean checks to
+every final proof. Research-program sub-lemmas are exempt, because they reach a final proof only spliced into it.
+`frozen_match` is a text check, and the honesty rules above show a proof of `3 < 2` passing it. The verdict
+carries `audit`, and a failed check leaves `all_clear` false.
+
+Covered by `tests/test_sweep_and_caps.py` and `tests/test_audit.py`.
 
 ## Measure self-improvement on the time-split benchmark, nowhere else
 

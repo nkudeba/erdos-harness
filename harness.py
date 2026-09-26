@@ -2640,6 +2640,56 @@ def normalize_helper_layout(attempt: str, frozen: str) -> str:
     return candidate if contains_frozen(candidate, frozen) else attempt
 
 
+_DECL_NAME_RE = re.compile(r"^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                           r"(?:def|abbrev|structure|inductive|class|instance)\s+([^\s:({\[]+)")
+
+
+def restore_omitted_frozen(attempt: str, frozen: str) -> str:
+    """Put back, verbatim, frozen declarations an attempt simply LEFT OUT: typically a `def` of the skeleton's
+    context that the hypothesis never uses. Measured on the breadth-first sweep's replay (2026-09-26): train
+    #283's `hyp_egypt` carries the skeleton's unused `def Condition`, all three one-shot attempts dropped it, and
+    each was rejected by the frozen guard without compiling -- a one-round sweep attempt lost to a formatting
+    slip. Across all children, 48 of 1,073 attempts died on a missing frozen `def`.
+
+    The guard is not relaxed: the repaired text must still pass `contains_frozen`, the proof must still compile
+    against the restored declarations, and the final verification and audit re-check everything. A declaration
+    the attempt REDEFINES (the same name appears) is never replaced, and an altered target theorem is never
+    repaired; both stay rejected. Only `def`-like declarations and `open` lines are restored, right after the
+    attempt's header, in frozen order."""
+    if contains_frozen(attempt, frozen):
+        return attempt
+    body = norm_ws(strip_comment_lines(attempt))
+    src = strip_comment_lines(attempt)
+    missing = []
+    for d in split_decls(frozen):
+        dn = norm_ws(strip_comment_lines(d))
+        if not dn or dn in body:
+            continue
+        head = strip_comment_lines(d).lstrip()
+        if re.match(r"(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+)*(?:theorem|lemma)\b", head):
+            return attempt                                   # the target itself was altered: never repaired
+        m = _DECL_NAME_RE.match(head)
+        if m:
+            if re.search(rf"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                         rf"(?:def|abbrev|structure|inductive|class|instance|theorem|lemma)\s+{re.escape(m.group(1))}(?![\w'.])", src):
+                return attempt                               # redefined, not omitted
+        elif not re.match(r"open\b", head):
+            return attempt
+        missing.append(d.strip("\n"))
+    if not missing:
+        return attempt
+    lines = attempt.split("\n")
+    cut = 0
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if not s or s.startswith("--") or re.match(r"(?:import|open|set_option)\b", s):
+            cut = i + 1
+            continue
+        break
+    candidate = "\n".join(lines[:cut] + [""] + missing + [""] + lines[cut:])
+    return candidate if contains_frozen(candidate, frozen) else attempt
+
+
 def repair_closed_goal_branches(body: str, errors: list[str]) -> str:
     """Narrow syntax repair: run branch tactics on remaining goals, allowing zero goals."""
     harmless = ("No goals to be solved", "`simp` made no progress")
@@ -3572,7 +3622,10 @@ echo "exit=${{PIPESTATUS[0]}}"
                 repaired = normalize_helper_layout(block, frozen)
                 if repaired != block:
                     self.log.event("prove", "helper_layout_normalized", name=name)
-                normalized.append((name, plan, repaired))
+                restored = restore_omitted_frozen(repaired, frozen)
+                if restored != repaired:
+                    self.log.event("prove", "frozen_decls_restored", name=name)
+                normalized.append((name, plan, restored))
             cands = normalized
             # cheap pre-screen, then compile survivors in parallel
             to_compile = [(n, p, b) for (n, p, b) in cands if self._screen(attempts, n, p, rnd, b, frozen)]
@@ -3864,6 +3917,16 @@ echo "exit=${{PIPESTATUS[0]}}"
             return cand
         return code
 
+    def _audit_final(self, proof: str) -> dict:
+        """audit.py's Lean checks on the file this verification would write to final/ (no model calls, ~90 s)."""
+        try:
+            import audit as AU
+            return AU.lean_checks(compose(proof, self.imports), self.state["statement"], list(self.imports),
+                                  f"{self.run_dir.name[-36:]}-verify")
+        except Exception as e:                            # noqa: BLE001 - an unauditable proof does not clear
+            self.log.event("verify", "audit_error", error=repr(e)[:300])
+            return {"audit_error": {"ok": False, "detail": repr(e)[:300]}}
+
     def stage_verify(self) -> dict:
         # Deliberately NOT short-circuited on resume: a saved `verify.all_clear` is never trusted; the mechanical
         # guard (compile, sorry, banned, frozen, axioms) always re-runs (tests/test_outcomes.py pins this).
@@ -3885,11 +3948,21 @@ echo "exit=${{PIPESTATUS[0]}}"
         banned = has_banned(proof)
         frozen_match = contains_frozen(proof, statement_prefix(self.state["statement"]))
         clean = res["ok"] and not res["sorries"] and axioms <= STD_AXIOMS and bool(axline) and not banned and frozen_match
+        # `frozen_match` compares TEXT. `instance : LT ℕ := ⟨fun _ _ => True⟩` above a verbatim frozen theorem
+        # proves `(3 : ℕ) < 2` with no sorry and no axioms, and passes every check above (tests/test_audit.py).
+        # audit.py compares the ELABORATED type with a clean elaboration of the frozen statement and replays the
+        # kernel over the whole file. Run it on every final proof (not on research-program sub-lemmas: they reach
+        # a final proof only spliced into it, and are audited there).
+        audit = None
+        if clean and getattr(self, "direction", None) != "program" and getattr(getattr(self, "args", None), "audit", "off") == "on":
+            audit = self._audit_final(proof)
+            clean = clean and audit_passes(audit)
 
         self.state['direction'] = getattr(self, 'direction', self.state.get('direction'))
         self.state["verify"] = {
             "compiles": res["ok"], "sorry_free": not res["sorries"], "banned": banned,
             "frozen_match": frozen_match, "axioms": sorted(axioms), "axioms_clean": axioms <= STD_AXIOMS,
+            **({"audit": audit_summary(audit)} if audit is not None else {}),
             "faithful": {"faithful": None, "issues": ["semantic audit pending"]}, "all_clear": False,
             "artifact_sha256": fingerprint(self.problem, self.state, getattr(self, "imports", []), environment_snapshot(FORMAL)),
         }
@@ -3916,6 +3989,7 @@ echo "exit=${{PIPESTATUS[0]}}"
             "compiles": res["ok"], "sorry_free": not res["sorries"],
             "banned": banned, "frozen_match": frozen_match,
             "axioms": sorted(axioms), "axioms_clean": axioms <= STD_AXIOMS,
+            **({"audit": audit_summary(audit)} if audit is not None else {}),
             "backtranslation": back, "faithful": faithful, "all_clear": clean and faithful.get("faithful") is True,
         }
         self.state['direction'] = getattr(self, 'direction', self.state.get('direction'))
@@ -5487,7 +5561,7 @@ for the SAT solver instead of enumerating it.
         return "circularity judge returned no verdict, so the premise is not accepted"
 
     def _attack_substatement(self, sub: str, name: str, sdir: Path, cycle: int, module: str | None, remaining: int,
-                             recursive: bool = False, share: float | None = None):
+                             recursive: bool = False, share: float | None = None, cheap: bool = False):
         """Attack one closed hypothesis as a child run. Returns (exit_code, child), or (None, None) when the
         parent's budget is gone; never hands a child more than the parent has left.
 
@@ -5495,7 +5569,9 @@ for the SAT solver instead of enumerating it.
         `recursive=True`: the child runs the deductive loop itself, at depth+1, in its own program directory,
         with the hypothesis as ITS frozen target -- so the argument grows as a tree of lemmas. A child that
         closes its skeleton returns a proof; one that does not returns its own residual, which the parent
-        splices in as a REFINEMENT: the hypothesis becomes conditional on the child's simpler sub-hypotheses."""
+        splices in as a REFINEMENT: the hypothesis becomes conditional on the child's simpler sub-hypotheses.
+        `cheap=True` (Change A, the breadth-first sweep, 2026-09-26): one one-shot round, no agentic escalation,
+        no decomposition beyond the free cascade, and a budget capped at --sweep-budget. Never recursive."""
         sdir.mkdir(parents=True, exist_ok=True)
         depth = int(getattr(self.args, "residual_depth_current", 1) or 1)
         if not (sdir / "state.json").exists():
@@ -5518,13 +5594,26 @@ for the SAT solver instead of enumerating it.
             cargs.explore = "on" if getattr(self.args, "explore_core", "off") == "on" else "off"
             cargs.hyps_per_cycle = min(2, int(getattr(self.args, "hyps_per_cycle", 4) or 2))
             cargs.residual_depth_current = depth + 1
+        if not recursive and not cheap:
+            # Change B (2026-09-26): of 152 hypothesis children that proved their target, the median cost was
+            # $0.22 (74% <= $1.00) and 224 of 278 SUCCESS events happened in round 1, the one-shot round; only
+            # 1 needed round 3 or later. The 86 that FAILED cost a median $3.51 ($317.6 total) chasing extra
+            # rounds and decompose escalations that almost never paid off. Capping the tail here frees that
+            # budget for the sweep (below) and for the next plan's response to the failure digest.
+            # --attack-rounds 6 --attack-decompose-rounds 10 restores the pre-2026-09-26 behaviour.
+            cargs.rounds = min(cargs.rounds, int(getattr(self.args, "attack_rounds", 2) or 2))
+            cargs.decompose_rounds = min(cargs.decompose_rounds, int(getattr(self.args, "attack_decompose_rounds", 0) or 0))
+        if cheap:
+            cargs.rounds, cargs.agentic, cargs.decompose_rounds = 1, "off", 0
         if self.args.run_budget:
             left = self.args.run_budget - self.spent_usd()
-            if left <= 0:
+            floor = 0.3 if cheap else 0.0     # below this, not even one sweep attempt is worth starting
+            if left <= floor:
                 self.log.event("program", "budget_exhausted", cycle=cycle, spent_usd=round(self.spent_usd(), 2),
                                budget=self.args.run_budget)
                 return None, None
-            cargs.run_budget = min(left, max(0.5, left * share if share else left / max(1, remaining)))
+            cargs.run_budget = (min(left, float(getattr(self.args, "sweep_budget", 0.6) or 0.6)) if cheap else
+                                min(left, max(0.5, left * share if share else left / max(1, remaining))))
         else:
             cargs.run_budget = None
         child = Harness(cargs)
@@ -5574,6 +5663,133 @@ for the SAT solver instead of enumerating it.
         else:
             self.state["residual"] = None
         self.save()
+
+    def _bank_certified(self, lemmas_path: Path, residual_path: Path, skeleton: str, parsed: dict, meta: dict,
+                        pid, main: str | None, name: str, body: str, origin: str, cycle: int, check_tag: str,
+                        via: str | None = None) -> dict:
+        """Splice a certified proof of hypothesis `name` into the residual skeleton in force: append it to
+        Lemmas.lean inside its own namespace, splice it into the skeleton, check the result compiles, and
+        update skeleton/parsed in lockstep. Shared by the depth loop (one full child per hypothesis) and the
+        breadth-first sweep (Change A, 2026-09-26), so a hypothesis proved either way is banked identically --
+        `via` records which one found it (None for the depth loop, "sweep" for the sweep), for the log only."""
+        with open(lemmas_path, "a") as f:
+            f.write(f"\n-- certified in {origin} ({now()})\nnamespace {name}_ns\n{body}\nend {name}_ns\n")
+        self.log.event("program", "lemma_certified", cycle=cycle, name=name, **({"via": via} if via else {}))
+        spliced = splice_hypothesis(skeleton, name, body)
+        res = self.check(spliced, check_tag) if spliced else {"ok": False, "errors": ["splice failed"], "sorries": []}
+        if not res["ok"]:
+            self.log.event("program", "splice_failed", cycle=cycle, name=name,
+                           error=(res["errors"][:1] or [""])[0][:200], **({"via": via} if via else {}))
+            return {"ok": False, "skeleton": skeleton, "parsed": parsed, "proved": False}
+        skeleton = res.get("body", spliced)
+        residual_path.write_text(skeleton)
+        parsed = parse_residual(skeleton, pid, meta, main=main)
+        self.log.event("program", "hypothesis_discharged", cycle=cycle, name=name,
+                       open_left=parsed["metric"]["open_conjectures"], **({"via": via} if via else {}))
+        proved = hole_count(skeleton) == 0 and not res["sorries"]
+        if proved:
+            self.state["proof"] = skeleton
+            self.save()
+        return {"ok": True, "skeleton": skeleton, "parsed": parsed, "proved": proved}
+
+    def _sweep_cycle(self, pdir: Path, cdir: Path, cycle: int, skeleton: str, parsed: dict, meta: dict, pid,
+                     main: str | None, module: str | None, false_names: set, fails: dict, lemmas_path: Path,
+                     residual_path: Path, ledger: Path) -> dict:
+        """Change A, "breadth before depth" (2026-09-26): before core-first/per-cycle/min-child-budget narrow
+        the field to a handful of hypotheses attacked at length, give EVERY open conjecture hypothesis one
+        cheap, one-shot try. Measured over every research-program log on disk: 51 of 79 steps left open at the
+        end of unsolved runs were never even attempted (most deferred for want of --min-child-budget), while a
+        hypothesis that DOES get a direct proof costs a median $0.22 -- proving one is usually cheap, when it
+        is tried at all. A sweep hit updates `skeleton`/`parsed` in place, exactly like a certified depth child,
+        so the caller's own `todo` (recomputed from the returned `parsed`) never re-attacks it.
+
+        Each candidate is tried at most once ever: `self.state["swept"]`, keyed by a hash of the hypothesis's
+        own (whitespace-normalized) text, survives cycles and resumes via `self.save()`."""
+        swept = self.state.setdefault("swept", {})
+        sweep_max = int(getattr(self.args, "sweep_max", 8) or 8)
+        candidates = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names]
+        attempted = proved_n = 0
+        spent_total = 0.0
+        progress = proved = False
+        for i, h in enumerate(candidates):
+            if attempted >= sweep_max:
+                break
+            if self.args.run_budget and self.args.run_budget - self.spent_usd() < 0.3:
+                break
+            sub = hypothesis_substatement(skeleton, h["name"])
+            if not sub:
+                continue
+            key = sweep_key(sub)
+            if key in swept:
+                continue
+            attempted += 1
+            chk = self.check(sub, f"sweep-c{cycle}-{i}")
+            if not (chk["ok"] and chk["sorries"]):
+                self.log.event("program", "hypothesis_rejected", cycle=cycle, name=h["name"], kind="sweep",
+                               error=(chk["errors"][:1] or [""])[0][:200])
+                swept[key] = {"name": h["name"], "cycle": cycle, "proved": False, "spent": 0.0}
+                self.save()
+                continue
+            before = self.spent_usd()
+            sdir = cdir / f"sweep-{i}"
+            rc, child = self._attack_substatement(sub, h["name"], sdir, cycle, module, 1, recursive=False, cheap=True)
+            if rc is None:                        # the parent's own budget ran out mid-sweep
+                break
+            spent = round(self.spent_usd() - before, 4)
+            spent_total += spent
+            with open(ledger, "a") as f:
+                f.write(json.dumps({"cycle": cycle, "kind": "sweep", "sub": h["name"], "run": str(sdir),
+                                    "exit": rc, "verified": rc == 0, "recursive": False,
+                                    "statement": h["statement"][:200], "at": now()}) + "\n")
+            self.log.event("program", "sweep_attempt", cycle=cycle, name=h["name"], exit=rc, spent_usd=spent)
+            this_proved = False
+            if rc == 0 and child.state.get("proof"):
+                body = strip_imports(child.state["proof"])
+                r = self._bank_certified(lemmas_path, residual_path, skeleton, parsed, meta, pid, main,
+                                         h["name"], body, sdir.name, cycle, f"residual-sweep-splice-c{cycle}-{i}",
+                                         via="sweep")
+                skeleton, parsed = r["skeleton"], r["parsed"]
+                if r["ok"]:
+                    progress = True
+                    proved_n += 1
+                    this_proved = r["proved"]
+                    proved = proved or this_proved
+            else:
+                digest = failure_digest(child.state, h["name"], h["statement"], cycle, rc)
+                digest["missing_subgoals"] = self._missing_subgoals(child, digest, f"extract-sweep-c{cycle}-{i}")
+                record_failure(pdir, {**digest, "kind": "sweep",
+                                      "diagnosis": "cheap one-shot sweep did not prove it (" +
+                                                   (digest.get("stop_reason") or "no stop reason") + ")"})
+                self.log.event("program", "sweep_failed", cycle=cycle, name=h["name"], exit=rc)
+            swept[key] = {"name": h["name"], "cycle": cycle, "proved": this_proved, "spent": spent}
+            self.save()
+            if proved:
+                break
+        self.log.event("program", "sweep", cycle=cycle, attempted=attempted, proved=proved_n,
+                       spent_usd=round(spent_total, 4))
+        return {"skeleton": skeleton, "parsed": parsed, "progress": progress, "proved": proved,
+                "certified_any": proved_n > 0}
+
+    def _missing_subgoals(self, child, digest: dict, tag: str) -> list[str]:
+        """Change D (--extract-subgoals, default off): the best attempt of a failed attack, re-checked with
+        every `sorry` replaced by the `xsorry` macro, names and types each missing sub-goal. Best-effort and
+        additive only -- any problem locating or re-checking the attempt leaves the digest exactly as it was;
+        this must never be why a run fails."""
+        if not getattr(self.args, "extract_subgoals", False):
+            return []
+        try:
+            best = (digest.get("best_attempts") or [None])[0] or {}
+            name, run_dir = best.get("name"), getattr(child, "run_dir", None)
+            if not name or not run_dir:
+                return []
+            source = (Path(run_dir) / "attempts" / f"{name}.lean").read_text()
+            if not (1 <= hole_count(source) <= 3):
+                return []
+            res = self.lean.check(with_extract_goal_macros(source), self.run_dir / "attempts" / f"{tag}.lean")
+            return parse_extracted_subgoals(res.get("raw", ""))
+        except Exception as e:                # noqa: BLE001 - an enrichment step must never break the run
+            self.log.event("program", "extract_subgoals_failed", tag=tag, error=repr(e)[:200])
+            return []
 
     def _run_program_deductive(self) -> int:
         pid = self.problem["id"]
@@ -5757,6 +5973,19 @@ for the SAT solver instead of enumerating it.
                     fails = failure_counts(pdir)
                     false_names = {h.get("name") for h in (meta.get("hypotheses") or [])
                                    if isinstance(h, dict) and h.get("believed_false") is True}
+                    # Change A, "breadth before depth" (2026-09-26): sweep every open conjecture cheaply BEFORE
+                    # core-first/per-cycle/min-child-budget narrow the field. `todo` below is recomputed from
+                    # the sweep's own (possibly updated) `parsed`, so the depth phase only ever sees hypotheses
+                    # the sweep did not already discharge; when the sweep closes the skeleton, `todo` comes back
+                    # empty and every step after this one is a no-op down to the shared "(d) render" below.
+                    if getattr(self.args, "sweep", "on") != "off":
+                        sr = self._sweep_cycle(pdir, cdir, cycle, skeleton, parsed, meta, pid, main, module,
+                                               false_names, fails, lemmas_path, residual_path, ledger)
+                        skeleton, parsed = sr["skeleton"], sr["parsed"]
+                        progress = progress or sr["progress"]
+                        certified_any = certified_any or sr["certified_any"]
+                        proved = proved or sr["proved"]
+                        fails = failure_counts(pdir)     # sweep failures are excluded; re-read for clarity
                     todo = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names]
                     core = None
                     if getattr(self.args, "attack_order", "easiest") == "core-first" and len(todo) > 1:
@@ -5914,31 +6143,21 @@ for the SAT solver instead of enumerating it.
                                 record_failure(pdir, failure_digest(child.state, h["name"], h["statement"], cycle, rc))
                         elif not (rc == 0 and child.state.get("proof")):
                             digest = failure_digest(child.state, h["name"], h["statement"], cycle, rc)
+                            digest["missing_subgoals"] = self._missing_subgoals(child, digest, f"extract-c{cycle}-{i}")
                             record_failure(pdir, digest)
                             self.log.event("program", "hypothesis_failed", cycle=cycle, name=h["name"], exit=rc,
                                            attempts=digest["attempts"], goals=len(digest["unsolved_goals"]))
                         if rc == 0 and child.state.get("proof"):
                             body = strip_imports(child.state["proof"])
-                            with open(lemmas_path, "a") as f:
-                                f.write(f"\n-- certified in {sdir.name} ({now()})\nnamespace {h['name']}_ns\n{body}\nend {h['name']}_ns\n")
                             certified_any = True
-                            self.log.event("program", "lemma_certified", cycle=cycle, name=h["name"])
-                            spliced = splice_hypothesis(skeleton, h["name"], body)
-                            res = self.check(spliced, f"residual-splice-c{cycle}-{i}") if spliced else {"ok": False, "errors": ["splice failed"], "sorries": []}
-                            if res["ok"]:
-                                skeleton = res.get("body", spliced)
-                                residual_path.write_text(skeleton)
-                                parsed = parse_residual(skeleton, pid, meta, main=main)
-                                self.log.event("program", "hypothesis_discharged", cycle=cycle, name=h["name"],
-                                               open_left=parsed["metric"]["open_conjectures"])
+                            r = self._bank_certified(lemmas_path, residual_path, skeleton, parsed, meta, pid, main,
+                                                     h["name"], body, sdir.name, cycle,
+                                                     f"residual-splice-c{cycle}-{i}")
+                            skeleton, parsed = r["skeleton"], r["parsed"]
+                            if r["ok"]:
                                 progress = True
-                                if hole_count(skeleton) == 0 and not res["sorries"]:
-                                    self.state["proof"] = skeleton
-                                    self.save()
+                                if r["proved"]:
                                     proved = True
-                            else:
-                                self.log.event("program", "splice_failed", cycle=cycle, name=h["name"],
-                                               error=(res["errors"][:1] or [""])[0][:200])
                         self._check_run_budget("program")
                         if proved:
                             break
@@ -7267,6 +7486,26 @@ def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:
     return skeleton[:span[0]] + new_blk + skeleton[span[1]:]
 
 
+def audit_passes(checks: dict) -> bool:
+    """Every audit check passed. The kernel replay alone may be unavailable (`ok: None`, no `leanchecker` in the
+    toolchain) without blocking; a check that ran and failed always blocks."""
+    return bool(checks) and all(c.get("ok") is True or (k == "kernel_replay" and c.get("ok") is None)
+                                for k, c in checks.items())
+
+
+def audit_summary(checks: dict | None) -> dict | None:
+    return None if checks is None else {k: {"ok": c.get("ok"), "detail": str(c.get("detail", ""))[:200]}
+                                        for k, c in checks.items()}
+
+
+def sweep_key(sub: str) -> str:
+    """sha256 of a whitespace-normalized hypothesis sub-statement -- identifies a hypothesis TEXT (not just its
+    name) for the breadth-first sweep's `self.state["swept"]` (Change A, 2026-09-26), so a statement that has
+    already been given one cheap try is not tried again in a later cycle, or after a resume, even though the
+    plan may rename or reshuffle hypotheses around it."""
+    return hashlib.sha256(" ".join(sub.split()).encode()).hexdigest()
+
+
 def parse_refutation_output(out: str) -> dict:
     """REFUTED: / CLEAR: / INVARIANT: lines from the refutation script's stdout."""
     res = {"refuted": [], "clear": [], "invariants": [], "derivations": [], "observed": []}
@@ -7344,12 +7583,65 @@ def load_failures(pdir: Path) -> list[dict]:
 
 
 def failure_counts(pdir: Path) -> dict:
+    """How many times each hypothesis has failed, for `attack_order`'s tie-break and the recursion decision.
+
+    Excludes `kind == "skeleton"` (the plan's own skeleton was rejected, not a hypothesis) and, since
+    2026-09-26, `kind == "sweep"`: a cheap one-shot sweep attempt failing is weak evidence of hardness --
+    it must not flip a hypothesis's next depth attack to recursive, or sink it in the attack order, the way
+    a real (depth) failure does."""
     out: dict[str, int] = {}
     for f in load_failures(pdir):
-        if f.get("kind") == "skeleton":
+        if f.get("kind") in ("skeleton", "sweep"):
             continue
         out[f.get("name", "")] = out.get(f.get("name", ""), 0) + 1
     return out
+
+
+# ---- Change D (lower priority, 2026-09-26): name the exact missing sub-goal ------------------------------
+#
+# When a failed attempt compiled with 1-3 `sorry` holes, one extra free Lean check -- every `sorry` replaced
+# by the `xsorry` macro below -- has `extract_goal` (Mathlib.Tactic.ExtractGoal, reached through the
+# `Mathlib.Tactic` import every run already has) print each hole's own goal as a named, typed, sorry'd
+# theorem. That is a fact a plan can act on ("state it as a hypothesis"), not a re-derivation of the
+# compiler's own errors. Gated behind --extract-subgoals (default off): it costs one extra Lean check per
+# failed attempt, and is not required for anything else in the loop.
+XSORRY_MACROS = ('macro "xsorry" : tactic => `(tactic| (extract_goal; sorry))\n'
+                 'macro "xsorry" : term => `(term| (by extract_goal; sorry))\n')
+
+
+def with_extract_goal_macros(source: str) -> str:
+    """`source` (a fully composed Lean file, i.e. `compose()`'s output, or anything starting with `import`
+    lines) with every `sorry` replaced by `xsorry` and the two macros above declared right after the header --
+    `macro` must follow every `import`, so the header is never touched, only found.
+
+    Verified against real Lean (formal/, 2026-09-26): `extract_goal` prints its
+    `theorem <enclosing decl>.extracted_<hygienic id> ... := sorry` as a bare, untagged stdout line with no
+    `file:line:col:` of its own, so `LeanChecker._parse` -- which recognizes a NEW message only by that prefix
+    -- glues it onto whatever message happens to be open at that point (often an unrelated warning several
+    declarations away), never cleanly into its own `info` entry. `parse_extracted_subgoals` therefore reads
+    the checker's raw output directly, not `res["infos"]`."""
+    marker = "set_option autoImplicit false\n"
+    idx = source.find(marker)
+    if idx != -1:
+        cut = idx + len(marker)
+    else:                                    # no recognized header: insert after any leading import/blank lines
+        cut, lines = 0, source.splitlines(keepends=True)
+        for line in lines:
+            if re.match(r"^\s*import\s+\S+\s*$", line) or not line.strip():
+                cut += len(line)
+            else:
+                break
+    head, body = source[:cut], source[cut:]
+    return head + "\n" + XSORRY_MACROS + "\n" + re.sub(r"\bsorry\b", "xsorry", body)
+
+
+EXTRACTED_GOAL_RE = re.compile(r"theorem\s+\S+\.extracted_[0-9_]+\b.*?:=\s*sorry", re.S)
+
+
+def parse_extracted_subgoals(raw: str, limit: int = 4) -> list[str]:
+    """The `theorem <decl>.extracted_... := sorry` statements `extract_goal` printed for each `xsorry` site,
+    whitespace-normalized and bounded to `limit` entries so a digest can never be flooded by one attempt."""
+    return [" ".join(m.group(0).split()) for m in EXTRACTED_GOAL_RE.finditer(raw or "")][:limit]
 
 
 def failures_context(pdir: Path, limit: int = 6) -> str:
@@ -7366,6 +7658,8 @@ def failures_context(pdir: Path, limit: int = 6) -> str:
                      f"{f.get('stop_reason') or 'no stop reason'}")
         for g in f.get("unsolved_goals") or []:
             lines.append(f"    unsolved goal: {g}")
+        for g in f.get("missing_subgoals") or []:
+            lines.append(f"    missing sub-goal (extract_goal): {g}")
         for a in f.get("best_attempts") or []:
             if a.get("plan") and a["plan"] not in ("?", "one-shot generation"):
                 lines.append(f"    {a.get('name')} tried: {a['plan']}")
@@ -7823,10 +8117,10 @@ def emit_run_summary(run_dir: Path, exit_code: int | None = None, persist: bool 
     return line
 
 
-def main():
-    if len(sys.argv) > 1 and sys.argv[1] == "campaign":
-        from campaign import main as campaign_main
-        return campaign_main(sys.argv[2:])
+def build_parser() -> argparse.ArgumentParser:
+    """The full CLI, split out of `main()` so tests can inspect flags and defaults (e.g. the new Change A/B/C
+    ones) without running anything -- `main()`'s `campaign` fast-path short-circuits before this is ever built,
+    so it stays there rather than here."""
     ap = argparse.ArgumentParser(description="LLM + Lean 4 harness for Erdős problems")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -7885,14 +8179,17 @@ def main():
     runp.add_argument("--research-loop", choices=["deductive", "lemma"], default="deductive",
                       help="research program loop: 'deductive' (default) drives a certified conditional theorem whose open "
                            "hypotheses are the residual; 'lemma' is the legacy experiments->conjectures->sub-lemmas loop")
-    runp.add_argument("--refute", choices=["auto", "off", "changed"], default="auto",
-                      help="deductive loop: run the refute-first script on open hypotheses each cycle (default); skip "
+    runp.add_argument("--refute", choices=["auto", "off", "changed"], default="changed",
+                      help="deductive loop: run the refute-first script on open hypotheses every cycle (auto); skip "
                            "it (off); or run it on the first cycle of an invocation and afterwards only when the set "
-                           "of open conjecture hypotheses has changed since the last run of this program (changed)")
-    runp.add_argument("--premise-attack", choices=["full", "cheap", "off"], default="full",
+                           "of open conjecture hypotheses has changed since the last run of this program (changed -- "
+                           "the default since 2026-09-26, validated in the improvement loop's iteration 3: it saved "
+                           "money at no measured cost)")
+    runp.add_argument("--premise-attack", choices=["full", "cheap", "off"], default="cheap",
                       help="deductive loop, once no conjecture hypothesis is left to attack: spawn a full child per "
-                           "open published premise (default); try only the free tactic cascade with no child spawned "
-                           "(cheap); or leave published premises untouched (off)")
+                           "open published premise (full); try only the free tactic cascade with no child spawned "
+                           "(cheap -- the default since 2026-09-26, validated in the improvement loop's iteration 3: "
+                           "it saved money at no measured cost); or leave published premises untouched (off)")
     runp.add_argument("--hyps-per-cycle", type=int, default=4,
                       help="deductive loop: open conjecture hypotheses attacked per cycle, easiest first (the plan's rating, then complexity)")
     runp.add_argument("--residual-depth", type=int, default=2,
@@ -7902,6 +8199,25 @@ def main():
     runp.add_argument("--min-child-budget", type=float, default=2.5,
                       help="deductive loop: do not start a hypothesis child with less than this many USD; attack fewer "
                            "hypotheses this cycle instead (0 disables)")
+    runp.add_argument("--sweep", choices=["on", "off"], default="on",
+                      help="deductive loop (Change A, \"breadth before depth\", 2026-09-26): before core-first/"
+                           "per-cycle/min-child-budget narrow the field, try every open conjecture hypothesis once, "
+                           "cheaply (one one-shot round, no agentic, no decompose). 51 of 79 steps left open at the "
+                           "end of unsolved runs were never even attempted, and a hypothesis that DOES get a direct "
+                           "proof costs a median $0.22. off restores the pre-2026-09-26 behaviour")
+    runp.add_argument("--sweep-budget", type=float, default=0.6,
+                      help="USD cap per sweep attempt (never below $0.30, and never more than the run has left)")
+    runp.add_argument("--sweep-max", type=int, default=8, help="at most this many sweep attempts per cycle")
+    runp.add_argument("--attack-rounds", type=int, default=2,
+                      help="deductive loop (Change B, 2026-09-26): max proving rounds for a non-recursive, "
+                           "non-sweep hypothesis child (default 2 = one one-shot round plus one agentic round, with "
+                           "--agentic-after 1). The 86 failed hypothesis children on disk cost a median $3.51 "
+                           "chasing extra rounds that almost never paid off (1 SUCCESS in round 3 or later, of "
+                           "278 total). --attack-rounds 6 restores the pre-2026-09-26 behaviour")
+    runp.add_argument("--attack-decompose-rounds", type=int, default=0,
+                      help="deductive loop (Change B, 2026-09-26): decomposition-refinement budget for the same "
+                           "child (default 0 = the free specialist cascade only, no model-written decomposition). "
+                           "--attack-decompose-rounds 10 restores the pre-2026-09-26 behaviour")
     # -- discovery (docs/discovery-limits-2026-09-24.md): every capability below is OFF by default, so baseline pins
     #    and the masked benchmark series keep their protocol; the time-split candidate `v3` turns them on together.
     runp.add_argument("--explore", choices=["off", "on"], default="off",
@@ -7941,6 +8257,16 @@ def main():
     runp.add_argument("--web-budget", type=float, default=3.0, help="USD cap for the web-enabled literature call")
     runp.add_argument("--subgoal-prover", default=None, help="module:function implementing prove(goal, timeout) -> proof|None for isolated sorry goals")
     runp.add_argument("--no-cascade", action="store_true", help="disable the free specialist tactic cascade on sorry holes (ablation)")
+    runp.add_argument("--audit", choices=["on", "off"], default="on",
+                      help="final verification also runs audit.py's Lean checks (elaborated statement identity, "
+                           "kernel replay, source scan, imports), because the frozen match compares text only; "
+                           "off is for ablations")
+    runp.add_argument("--extract-subgoals", action="store_true",
+                      help="deductive loop (Change D, 2026-09-26): when a failed attack's best attempt compiled "
+                           "with 1-3 sorry holes, one extra free Lean check (every `sorry` -> the `xsorry` "
+                           "macro, so extract_goal names and types each one) adds `missing_subgoals` to its "
+                           "failure digest, surfaced under PROOF FAILURES for the next plan. Off by default: "
+                           "one extra Lean check per failed attempt")
     runp.add_argument("--search-escalate", choices=["auto", "off"], default="auto",
                       help="when a bounded search stalls (timeout, or it only cleared its range with a cheap "
                            "screen), re-ask for a SAT encoding that DECIDES the first undecided case")
@@ -8007,7 +8333,14 @@ def main():
     im.add_argument("--backend", choices=["claude-cli", "codex-cli"], default="claude-cli",
                     help="claude-cli is the default; codex-cli needs the `codex` CLI on PATH")
     im.add_argument("--model", default=None)
+    return ap
 
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "campaign":
+        from campaign import main as campaign_main
+        return campaign_main(sys.argv[2:])
+    ap = build_parser()
     args = ap.parse_args()
     if args.cmd == "check":
         checker = LeanChecker(FORMAL, args.lean_timeout)

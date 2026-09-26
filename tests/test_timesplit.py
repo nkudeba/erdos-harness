@@ -340,7 +340,15 @@ class BatchCheck(unittest.TestCase):
 
 
 class Scoring(unittest.TestCase):
+    # These tests exercise the scoring logic on fake run directories that hold no real proof, so the audit is
+    # stubbed to pass; `test_a_failed_audit_blocks_the_solve_and_the_contradiction` covers the other side.
+    PASSED = {"verdict": "PASS", "failed": [], "lean_ok": True}
+
     def setUp(self):
+        from unittest.mock import patch
+        self._audit = patch.object(T, "audit_run", return_value=self.PASSED)
+        self.audit_stub = self._audit.start()
+        self.addCleanup(self._audit.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.run = Path(self.tmp.name) / "20260924-000000-000000-timesplit-erdos45678"
         for d in ("pos", "neg"):
@@ -384,6 +392,25 @@ class Scoring(unittest.TestCase):
         r = T.score_run(self.run, "45678", True)
         self.assertTrue(r["solved"])
         self.assertIs(r["directions"]["pos"]["judge_faithful"], False)
+
+    def test_a_failed_audit_blocks_the_solve_and_the_contradiction(self):
+        # a proof the harness verified by TEXT but whose elaborated statement is not the frozen one
+        self.audit_stub.return_value = {"verdict": "FAIL", "failed": ["statement_identity"], "lean_ok": False}
+        self._state("pos", outcome="proved", verify=self.GOOD)
+        self._state("neg", outcome="partial")
+        r = T.score_run(self.run, "45678", True)
+        self.assertFalse(r["solved"])
+        self.assertEqual(r["audit"]["failed"], ["statement_identity"])
+        self.assertFalse(T.score_run(self.run, "45678", False)["contradiction"])
+        # the wrong direction proved and every Lean check passing still reaches `contradiction`
+        self.audit_stub.return_value = {"verdict": "FAIL", "failed": ["direction_matches_answer"], "lean_ok": True}
+        self.assertTrue(T.score_run(self.run, "45678", False)["contradiction"])
+
+    def test_the_audit_runs_only_when_a_direction_verified(self):
+        self._state("pos", outcome="partial")
+        self._state("neg", outcome="partial")
+        self.assertIsNone(T.score_run(self.run, "45678", True)["audit"])
+        self.audit_stub.assert_not_called()
 
     def test_a_run_committed_to_one_direction(self):
         (self.run / "state.json").write_text(json.dumps({"outcome": "proved_unverified", "verify": self.GOOD}))
@@ -631,3 +658,25 @@ class CommitCalibration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DiscoverV3(unittest.TestCase):
+    def test_v3_fixes_v2s_settings_and_the_calibrated_floor(self):
+        import argparse
+        a = argparse.Namespace(candidate="discover-v3", discover_attempts=2, discover_effort="high", discover_budget=1.2,
+                               critic_budget=0.3, gap_budget=1.2, gap_effort="medium", commit_floor=None)
+        T.apply_candidate_settings(a)
+        self.assertEqual((a.discover_effort, a.discover_budget, a.commit_floor), ("medium", 0.8, 0.6))
+        b = argparse.Namespace(**{**vars(a), "commit_floor": 0.7})
+        T.apply_candidate_settings(b)
+        self.assertEqual(b.commit_floor, 0.7)                 # an explicit floor is kept
+        c = argparse.Namespace(candidate="discover-v2", discover_effort="high", commit_floor=None)
+        T.apply_candidate_settings(c)
+        self.assertEqual((c.discover_effort, c.commit_floor), ("high", None))   # v2 keeps its own protocol
+
+    def test_the_floor_refuses_dev_s_two_wrong_commits(self):
+        # #537 (0.5, 0.6) and #871 (0.35, 0.3): both said "true", both were false; v2 committed, the floor does not
+        for confs in ((0.5, 0.6), (0.35, 0.3)):
+            attempts = [{"answer": "true", "confidence": c, "complete": False} for c in confs]
+            self.assertIsNotNone(T.decide_direction(attempts, single_confident=0.75)["commit"])
+            self.assertIsNone(T.decide_direction(attempts, single_confident=0.75, floor=0.6)["commit"])
