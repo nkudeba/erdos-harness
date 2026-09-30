@@ -8204,11 +8204,13 @@ def build_parser() -> argparse.ArgumentParser:
                            "of open conjecture hypotheses has changed since the last run of this program (changed -- "
                            "the default since 2026-09-26, validated in the improvement loop's iteration 3: it saved "
                            "money at no measured cost)")
-    runp.add_argument("--premise-attack", choices=["full", "cheap", "off"], default="cheap",
+    runp.add_argument("--premise-attack", choices=["full", "cheap", "off"], default="full",
                       help="deductive loop, once no conjecture hypothesis is left to attack: spawn a full child per "
-                           "open published premise (full); try only the free tactic cascade with no child spawned "
-                           "(cheap -- the default since 2026-09-26, validated in the improvement loop's iteration 3: "
-                           "it saved money at no measured cost); or leave published premises untouched (off)")
+                           "open published premise (full, the default); try only the free tactic cascade with no "
+                           "child (cheap); or leave published premises untouched (off). full again since "
+                           "2026-09-30: premises are attacked only when nothing else is open, so a full attack "
+                           "spends money with no better use, and on train #678 it proved the last open premise "
+                           "(Ramanujan's two primes in (x/2, x]) for $3.22 where cheap had left the run unsolved")
     runp.add_argument("--hyps-per-cycle", type=int, default=4,
                       help="deductive loop: open conjecture hypotheses attacked per cycle, easiest first (the plan's rating, then complexity)")
     runp.add_argument("--residual-depth", type=int, default=2,

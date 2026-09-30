@@ -1023,3 +1023,39 @@ The plan rated them hard 5, moderate 3, unrated 2.
   - Solved: #1037 0.1. It needs graphs with small clique and independence numbers, a probabilistic existence
     argument that Mathlib lacks.
   - Discovery spend $1–3 an item, about $30 in all.
+
+**Outcome (2026-09-30): not solved. Closed apart from ONE published premise, $11.70.**
+- **Discovery:** two complete refereed proofs (0.93, 0.9), committed to TRUE.
+- **The harness:** 4 certified steps and 0 open conjectures. One published premise stayed open: `hyp_ramanujan`,
+  "for x ≥ 11 there are primes p < q in (x/2, x]" (Ramanujan 1919). Mathlib has only Bertrand's single prime. The
+  previous run's route needed Bertrand alone (used four times), so this plan's route asked for more than it needed.
+- **The fallback fired once:** a cheap attempt on the deferred `hyp_final` in cycle 1 failed ($0.82). The next
+  cycle's depth attack proved that step.
+- **Why it stopped:**
+  1. `--premise-attack cheap`, the default since 2026-09-26, gave the premise only the free tactics
+     (`premise_kept`, cycles 3 and 4) and never a real attack. The earlier `full` policy attacks a premise only
+     once no conjecture is left, so on this run it could only have helped.
+  2. In cycle 4 the plan proposed replacing the premise with a strictly WEAKER conjecture: a prime in (n+1, 2n] for
+     n ≥ 12, Bertrand with one endpoint removed. `residual_improves` rejected it as "no improvement", because it
+     ranks fewer open conjectures ahead of fewer published premises. For a complete proof, a premise not in Mathlib
+     blocks as much as a conjecture.
+  3. Then two stalled cycles ended the run, with about $4 unspent.
+- **Against the predictions:** solved no (0.45). The fallback fired, but it proved nothing (predicted: fires and
+  proves something, 0.7).
+- **Follow-ups:**
+  - `--premise-attack cheap` as a default is reconsidered below, with a replay of a full attack on the premise.
+  - Letting a plan trade a published premise for a weaker, plausibly provable conjecture once no conjecture is open
+    is a change to the adoption rule. It is recorded as a candidate and not made here.
+
+**The premise, attacked in full (2026-09-30): proved for $3.22.**
+- A replayed full attack on `hyp_ramanujan` proved it in its first agentic round. The one-shots failed on Mathlib
+  names.
+- Spliced into the run's residual, the proof is complete and passes all 7 of the audit's Lean checks
+  (`evidence/678-assembled-b/`, not an autonomous solve).
+- **So both #678 runs ended one mechanical policy short of a solve:**
+  - the first on deferral, now fixed by the cheap fallback;
+  - the second on `--premise-attack cheap`.
+- **`--premise-attack` is back to `full` by default.** Premises are attacked only once no conjecture is left, when a
+  full attack has no better use for the money.
+- **Next:** a third fresh #678 run with both fixes, after the v4 lane. Pre-registered in the section below when it
+  launches.

@@ -1,0 +1,12 @@
+[
+ {
+  "tag": "train-678-fallback-543fd9d",
+  "problem": "678",
+  "alias": 55963,
+  "run_dir": "runs/20260930-162114-886885-timesplit-erdos55963",
+  "skeleton": "programs/erdos_55963/Residual.lean",
+  "name": "erdos_55963_hyp_ramanujan",
+  "direction": "pos",
+  "rating": "published"
+ }
+]

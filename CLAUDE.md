@@ -566,9 +566,15 @@ the next plan's response to the failure digest. `--attack-rounds 6 --attack-deco
 old caps. Recursive (sub-residual) children are uncapped here — they run their own deductive loop, and their
 OWN hypothesis children get the same caps in turn.
 
-**Change C**: `--refute` now defaults to `changed` (was `auto`) and `--premise-attack` now defaults to `cheap`
-(was `full`) — both validated in the improvement loop's iteration 3 (`benchmarks/timesplit/RESULTS.md`): they
-saved money at no measured cost. `--refute auto --premise-attack full` restores the old defaults.
+**Change C**: `--refute` now defaults to `changed` (was `auto`), validated in the improvement loop's iteration 3:
+it saved money at no measured cost. **`--premise-attack` is back to `full`** (2026-09-30).
+- It went to `cheap` on 2026-09-26, on #997's evidence: its last open premise was BFT15, far beyond reach.
+- But premises are attacked only once no conjecture is left. At that point a full attack spends money with no
+  better use, and it is the only remaining path to a solve.
+- On train #678 the fresh run closed every conjecture and kept Ramanujan's two-primes premise under `cheap`. A
+  replayed full attack proved it for $3.22, and the assembled proof passes the audit
+  (`benchmarks/timesplit/evidence/678-assembled-b/`).
+- `--refute auto --premise-attack cheap` gives the other combinations.
 
 **Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
 was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def

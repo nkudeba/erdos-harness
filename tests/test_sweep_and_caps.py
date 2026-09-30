@@ -362,7 +362,7 @@ class CLIDefaults(unittest.TestCase):
     def test_new_defaults(self):
         args = H.build_parser().parse_args(["run", "--problem", "1"])
         self.assertEqual(args.refute, "changed")             # Change C: was "auto"
-        self.assertEqual(args.premise_attack, "cheap")       # Change C: was "full"
+        self.assertEqual(args.premise_attack, "full")        # back to full (2026-09-30): #678's last premise
         self.assertEqual(args.sweep, "off")                 # the train replay proved 0 of 9 deferred steps
         self.assertEqual(args.sweep_budget, 0.6)
         self.assertEqual(args.sweep_max, 8)

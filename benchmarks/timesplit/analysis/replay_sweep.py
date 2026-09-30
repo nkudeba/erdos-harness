@@ -21,6 +21,8 @@ def main() -> int:
     ap.add_argument("--list", required=True)
     ap.add_argument("--index", type=int, required=True)
     ap.add_argument("--out", default=str(ROOT / "runs" / "replay-sweep-20260926"))
+    ap.add_argument("--full", action="store_true", help="a depth attack (the round caps apply) instead of the cheap one")
+    ap.add_argument("--budget", type=float, default=None, help="cap the parent copy's run budget (full attacks)")
     a = ap.parse_args()
     o = json.loads(Path(a.list).read_text())[a.index]
     run_dir = ROOT / o["run_dir"]
@@ -38,13 +40,15 @@ def main() -> int:
     j = argv.index("--problem")
     argv[j + 1] = str(parent / "problem.json")
     args = H.build_parser().parse_args(argv)
+    if a.budget:
+        args.run_budget = a.budget
     h = H.Harness(args)
     h.direction = o["direction"] if o["direction"] in ("pos", "neg") else None
     skeleton = (ROOT / o["skeleton"]).read_text()
     sub = H.hypothesis_substatement(skeleton, o["name"])
     rec = {**o, "replay_dir": str(base.relative_to(ROOT)), "substatement_found": bool(sub)}
     if sub:
-        rc, child = h._attack_substatement(sub, o["name"], base / "sweep", 99, None, 1, recursive=False, cheap=True)
+        rc, child = h._attack_substatement(sub, o["name"], base / "sweep", 99, None, 1, recursive=False, cheap=not a.full)
         # the child sits outside the parent copy's tree, so it is read directly, not through the parent's spend
         rec.update({"exit": rc, "proved": bool(rc == 0 and child is not None and child.state.get("proof")),
                     "spent_usd": round(child.spent_usd(), 4) if child is not None else 0.0,
