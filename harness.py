@@ -5694,7 +5694,8 @@ for the SAT solver instead of enumerating it.
 
     def _sweep_cycle(self, pdir: Path, cdir: Path, cycle: int, skeleton: str, parsed: dict, meta: dict, pid,
                      main: str | None, module: str | None, false_names: set, fails: dict, lemmas_path: Path,
-                     residual_path: Path, ledger: Path) -> dict:
+                     residual_path: Path, ledger: Path, exclude: set | None = None, skip_hard: bool = False,
+                     via: str = "sweep") -> dict:
         """Change A, "breadth before depth" (2026-09-26): before core-first/per-cycle/min-child-budget narrow
         the field to a handful of hypotheses attacked at length, give EVERY open conjecture hypothesis one
         cheap, one-shot try. Measured over every research-program log on disk: 51 of 79 steps left open at the
@@ -5707,7 +5708,9 @@ for the SAT solver instead of enumerating it.
         own (whitespace-normalized) text, survives cycles and resumes via `self.save()`."""
         swept = self.state.setdefault("swept", {})
         sweep_max = int(getattr(self.args, "sweep_max", 8) or 8)
-        candidates = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names]
+        candidates = [h for h in attack_order(parsed["hypotheses"], fails)
+                      if h["name"] not in false_names and h["name"] not in (exclude or set())
+                      and not (skip_hard and h.get("difficulty") == "hard")]
         attempted = proved_n = 0
         spent_total = 0.0
         progress = proved = False
@@ -5731,7 +5734,7 @@ for the SAT solver instead of enumerating it.
                 self.save()
                 continue
             before = self.spent_usd()
-            sdir = cdir / f"sweep-{i}"
+            sdir = cdir / f"{via}-{i}"
             rc, child = self._attack_substatement(sub, h["name"], sdir, cycle, module, 1, recursive=False, cheap=True)
             if rc is None:                        # the parent's own budget ran out mid-sweep
                 break
@@ -5746,8 +5749,8 @@ for the SAT solver instead of enumerating it.
             if rc == 0 and child.state.get("proof"):
                 body = strip_imports(child.state["proof"])
                 r = self._bank_certified(lemmas_path, residual_path, skeleton, parsed, meta, pid, main,
-                                         h["name"], body, sdir.name, cycle, f"residual-sweep-splice-c{cycle}-{i}",
-                                         via="sweep")
+                                         h["name"], body, sdir.name, cycle, f"residual-{via}-splice-c{cycle}-{i}",
+                                         via=via)
                 skeleton, parsed = r["skeleton"], r["parsed"]
                 if r["ok"]:
                     progress = True
@@ -5766,7 +5769,7 @@ for the SAT solver instead of enumerating it.
             if proved:
                 break
         self.log.event("program", "sweep", cycle=cycle, attempted=attempted, proved=proved_n,
-                       spent_usd=round(spent_total, 4))
+                       spent_usd=round(spent_total, 4), via=via)
         return {"skeleton": skeleton, "parsed": parsed, "progress": progress, "proved": proved,
                 "certified_any": proved_n > 0}
 
@@ -6161,6 +6164,22 @@ for the SAT solver instead of enumerating it.
                         self._check_run_budget("program")
                         if proved:
                             break
+                    # Cheap fallback (2026-09-30): a step the depth phase could not fund gets ONE cheap one-shot
+                    # attempt with what is left, instead of none. Train #678 certified 12 of 15 steps and ended
+                    # with its last three -- elementary counting lemmas, siblings of ones it had just proved --
+                    # deferred twice for want of --min-child-budget ($4.85, then $2.44 left); the cheap attempt
+                    # proved all three for $0.73, so the deferral threw away a solve. Steps rated hard are
+                    # skipped: cheap attempts on deferred HARD steps proved 0 of 5 (the sweep replay), and the
+                    # plan's rating separates the two (hard 1 of 20 proved, elementary 29 of 29). Shares the
+                    # sweep's once-per-statement memory, so no statement is cheaply tried twice.
+                    if not proved and getattr(self.args, "cheap_fallback", "off") == "on":
+                        sr = self._sweep_cycle(pdir, cdir, cycle, skeleton, parsed, meta, pid, main, module,
+                                               false_names, fails, lemmas_path, residual_path, ledger,
+                                               exclude={h["name"] for h in todo}, skip_hard=True, via="fallback")
+                        skeleton, parsed = sr["skeleton"], sr["parsed"]
+                        progress = progress or sr["progress"]
+                        certified_any = certified_any or sr["certified_any"]
+                        proved = proved or sr["proved"]
                     if certified_any:
                         self._install_lemmas_module(pdir)
                 # (d) render the state of the argument
@@ -8206,6 +8225,12 @@ def build_parser() -> argparse.ArgumentParser:
                            "10 train steps that runs left open and never attacked proved 0 of 9 ($2.67). The steps a "
                            "run defers are mostly the hard ones, because the attack order is easiest-first, so the "
                            "historical $0.22 median cost of a SUCCESSFUL attack does not carry over to them")
+    runp.add_argument("--cheap-fallback", choices=["on", "off"], default="on",
+                      help="deductive loop (2026-09-30): after each cycle's depth attacks, give every open step the "
+                           "depth phase did not fund (deferred for --min-child-budget or beyond --hyps-per-cycle), "
+                           "unless rated hard, one cheap one-shot attempt (--sweep-budget each) with what is left. "
+                           "Train #678 left 3 elementary steps deferred with $2.44 unspent; the cheap attempt proved "
+                           "all three for $0.73. off restores deferral")
     runp.add_argument("--sweep-budget", type=float, default=0.6,
                       help="USD cap per sweep attempt (never below $0.30, and never more than the run has left)")
     runp.add_argument("--sweep-max", type=int, default=8, help="at most this many sweep attempts per cycle")

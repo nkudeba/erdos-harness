@@ -38,6 +38,16 @@ class SourceScan(unittest.TestCase):
         self.assertIn("environment manipulation", A.forbidden_constructs('elab "t" : tactic => do\n  modifyEnv id'))
         self.assertIn("elaborator attributes", A.forbidden_constructs("@[command_elab Foo] def f := 0"))
 
+    def test_frozen_names_are_fully_qualified(self):
+        # train #678's statement defines `lcmInterval` inside `namespace Finset`; the constant is Finset.lcmInterval,
+        # and looking up the bare name found nothing in either elaboration, which read as a failed identity check
+        frozen = ("namespace Finset\ndef lcmInterval (n k : ℕ) : ℕ := n + k\nend Finset\n\nopen Finset\n\n"
+                  "theorem erdos_28730 : lcmInterval 1 2 = 3 := by\n  sorry\n")
+        self.assertEqual(A.frozen_names(frozen), ("erdos_28730", ["Finset.lcmInterval"]))
+        self.assertEqual(A.frozen_names("namespace A\nsection\ndef f : ℕ := 0\nend\ndef g : ℕ := 1\nend A\n"
+                                        "def _root_.h : ℕ := 2\ntheorem t : True := by\n  sorry"),
+                         ("t", ["A.f", "A.g", "h"]))
+
     def test_frozen_names(self):
         frozen = ("def HasEqualIntervalSums (A : ℕ → ℕ) (s : ℕ) : Prop :=\n  True\n\n"
                   "theorem erdos_82251 :\n    ∀ a : ℕ, HasEqualIntervalSums (fun _ => a) 1 := by\n  sorry\n")

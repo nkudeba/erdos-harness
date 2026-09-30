@@ -860,3 +860,129 @@ The plan rated them hard 5, moderate 3, unrated 2.
   - The audit.
 - **What goes back behind its flag:** the sweep (`--sweep on`).
 - **The real blocker on these items is the hard step itself.** That is the next thing to work on, not allocation.
+
+## Complete-proof conversion on train (2026-09-30), written before launch: `train-conv-fde7891`
+
+**Why.**
+- The one solve on dev (#1213) came from discovery writing a complete, refereed informal proof, which the harness
+  then formalized for $2.28. The baseline without discovery failed on the same item.
+- Everywhere else, the steps left open are the hard cores. Neither allocation (iteration 3) nor cheap attempts
+  (the sweep replay, 0 of 9) converts them.
+- **The question:** when discovery writes a complete refereed proof, does the harness convert it?
+
+**Items.** The four train items where the train calibration's discovery wrote complete, refereed proofs:
+
+| item | answer | complete refereed proof in |
+|---|---|---|
+| #678 | yes | 3 of 3 rounds |
+| #435 | yes | 3 of 3 rounds |
+| #990 | no | 2 of 3 rounds |
+| #1037 | no | 2 of 3 rounds |
+
+#678, #990 and #1037 have never had a Lean run. #435 has, with 0–1 pieces at $8.
+
+**Protocol.**
+- `discover-v3` (v2's settings plus the calibrated 0.6 floor) on pin `fde7891`. That pin is `main` 6dd67e3: round
+  caps, `--refute changed`, `--premise-attack cheap`, the omitted-declaration repair, the audit in final
+  verification, and the sweep off.
+- **$16 per item**, twice the usual; 6 research cycles.
+- A solve now means the true direction verified AND passing the audit's Lean checks.
+- Train, so the transcripts may be read.
+
+**Write-ahead predictions.**
+- Discovery commits to the true direction on all 4: 0.75. The floor may send a less confident item to `--open`.
+- Discovery writes a complete refereed proof on at least 3 of 4: 0.7.
+- **Solves**, by item:
+  - #678 0.35: a CRT construction, elementary.
+  - #435 0.2: its Apéry/valuation core resisted twice.
+  - #990 0.2: an explicit lacunary polynomial plus the Vandermonde identity, intricate.
+  - #1037 0.1: needs a random graph with small cliques and independent sets, a probabilistic existence argument
+    that Mathlib lacks.
+  - That makes 0.85 expected, P(at least 1) = 0.6, P(at least 2) = 0.2.
+- About $50: an item stops early when it is solved or stalls.
+
+**How the result is used.**
+- **At least one converts:** build a blueprint mode, in which the skeleton follows the refereed proof step by step
+  and each hypothesis carries its step's informal proof. Route budget by whether discovery wrote a complete proof.
+  Then test that on dev, paired.
+- **None converts:** read these train transcripts for where conversion breaks, and fix that first. The suspects
+  are a plan that ignores the proof, a step too big for one attack, and a Mathlib gap.
+
+**Interim (2026-09-30): #435 and #678 did not convert, and #678 lost a solve to the deferral rule.**
+- **#435:** discovery wrote two complete refereed proofs (0.85, 0.9) and committed to TRUE.
+  - The harness certified 2 of 3 steps. `hyp_top` stayed open: X(n) − n is not representable, the Apéry-set
+    lower bound.
+  - Its recursive children's decompositions were judged not easier, or split-only, so nothing was spliced.
+  - $13.98.
+- **#678:** discovery wrote one complete refereed proof (0.9) and committed to TRUE.
+  - The harness certified **12 of 15** steps. Two of its six cycles were lost to skeletons that did not compile
+    (undefined names).
+  - The last three steps (`hyp_loss_hyp_small`, `hyp_loss_hyp_div`, `hyp_loss_hyp_p`) are elementary lemmas about
+    counting multiples. They are siblings of lemmas the run had just proved, and they were **never attacked**:
+    cycles 5 and 6 deferred them because a child needs `--min-child-budget` $2.50 and $4.85, then $2.44, was left.
+  - $13.56.
+- **The decisive replay:** the sweep's cheap one-shot attempt proved **all three** (`hyp_div` $0.17, `hyp_small`
+  $0.23, `hyp_p` $0.33). With $0.73 of the $2.44 it left unspent, #678 would have been solved.
+- **Reading, next to the 0-of-9 replay above:**
+  - Cheap attempts fail on deferred steps that are genuinely hard; 5 of those 9 were rated hard.
+  - They succeed on easy steps deferred only for budget.
+  - Counting only steps not rated hard, cheap attempts proved 3 of 7 deferred steps.
+  - The fix below targets exactly that case.
+
+**Assembled #678 (2026-09-30): a complete proof, but NOT an autonomous solve.**
+- **Assembly:** the run's final residual (12 certified steps) plus the three cheap-attempt proofs from the replay,
+  spliced mechanically (`splice_hypothesis`) and compiled with the run's own import header.
+- **The audit's Lean checks all pass:**
+  - compiles, with no `sorry`;
+  - axioms `[propext, Classical.choice, Quot.sound]`;
+  - kernel replay;
+  - the elaborated statement identical to the frozen one (`erdos_28730` and `Finset.lcmInterval`).
+- Kept at `evidence/678-assembled/`.
+- **What it is:**
+  - A Lean proof of #678's formal-conjectures statement, which says there are infinitely many cases where a longer
+    block of consecutive integers has a smaller lcm.
+  - Its last three steps came from a replay outside the run. By the honesty rules it is not a harness solve, and it
+    is not scored as one.
+  - It shows the cheap fallback below would have closed the run. Only a fresh run can show the fallback doing it.
+- **An audit bug the assembly exposed, fixed:**
+  - A frozen `def` inside a `namespace` (here `Finset.lcmInterval`) was looked up by its bare name. It was missing
+    from both elaborations, which read as a failed identity check.
+  - `frozen_names` now qualifies names by namespace. A test covers it.
+  - The #1213 and earlier audits are unaffected, because their frozen defs are top-level.
+
+**The fix: `--cheap-fallback on`, the default.**
+- After each cycle's depth attacks, every open step the depth phase did not fund gets ONE cheap one-shot attempt
+  with what is left: steps deferred for `--min-child-budget` or beyond `--hyps-per-cycle`.
+- Steps rated hard are skipped. Deferred hard steps went 0 of 5, and the plan's rating separates the cases (hard 1
+  of 20 proved, elementary 29 of 29).
+- It shares the sweep's once-per-statement memory.
+- `tests/test_sweep_and_caps.py`, class CheapFallback.
+- **To be confirmed:** a fresh #678 run on a pin carrying the fix, after the current lane.
+
+**Outcome (2026-09-30): 0 of 4 solved by the harness itself. $56.06.**
+
+| item | answer | discovery | true direction | $ |
+|---|---|---|---|---|
+| #435 | yes | 2 complete refereed proofs (0.85, 0.9), committed | 2 certified, 1 open: the Apéry lower bound `hyp_top`; its refinements were judged not easier | 13.98 |
+| #678 | yes | 1 complete refereed proof (0.9), committed | 12 certified, 3 open: never attacked, deferred for budget; assembled offline into an audit-passing proof | 13.56 |
+| #990 | no | no complete proof this time; both said TRUE (0.6, 0.45), so the floor blocked a WRONG commit | 2 certified, 1 open: the core construction `hyp_family`. Its key bound M ≤ 4m was twice judged "H restated" | 13.75 |
+| #1037 | no | no complete proof; both said FALSE (0.55, 0.5), so the floor sent it to `--open` | 1 certified, 1 open. The false direction was stopped as believed false | 14.77 |
+
+- **Against the predictions:**
+  - Solves 0 (expected 0.85; P(at least 1) was 0.6).
+  - Commits: 2 of 4, both correct (predicted all 4 correct at 0.75). The floor blocked two low-confidence answers.
+  - Complete refereed proofs on 2 of 4 (predicted at least 3 at 0.7). Discovery is stochastic: the calibration rounds
+    had complete proofs for #990 and #1037 in 2 of 3 rounds each, and this time neither did.
+  - Spend $56 (predicted ~$50).
+- **The three distinct conversion failures:**
+  1. **Budget deferral of easy last steps (#678).** Fixed by `--cheap-fallback on`. The replay and the assembled
+     proof show it would have closed #678. A fresh run must confirm it.
+  2. **No complete proof from discovery this time (#990, #1037).** Then the plan improvises a route. On #990 its
+     choice of exponents needs a bound that is at least as hard as the problem. Discovery is cheap ($0.4–1.1 a
+     round), and complete proofs appeared in 2 of 3 calibration rounds. **Retrying discovery until a refereed
+     complete proof appears** (capped) is the next lever.
+  3. **A genuinely hard core, even with a complete proof (#435).** The Apéry-set lower bound needs a finer
+     decomposition than the recursive children produce. This is blueprint work: the refereed proof's own sub-steps
+     become the hypotheses.
+- **The floor worked as designed.** It refused a wrong commit (#990) and cost nothing on #1037, where the harness
+  stopped the false direction itself.

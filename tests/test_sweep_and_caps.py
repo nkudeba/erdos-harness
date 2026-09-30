@@ -581,3 +581,87 @@ class RestoreOmittedFrozen(unittest.TestCase):
     def test_a_complete_attempt_is_unchanged(self):
         attempt = self.FROZEN + " by\n  intro k hk; omega\n"
         self.assertEqual(H.restore_omitted_frozen(attempt, self.FROZEN), attempt)
+
+
+class CheapFallback(Isolated):
+    """Train #678 (2026-09-30) certified 12 of 15 steps and ended with its last three elementary steps deferred for
+    want of --min-child-budget, $2.44 unspent. A cheap one-shot proved all three for $0.73. The fallback gives every
+    step the depth phase did not fund one cheap attempt with what is left, unless the plan rated it hard."""
+
+    def _harness(self, skeleton, **kw):
+        return _sweep_harness(self.root, skeleton, **{"sweep": "off", "cheap_fallback": "on", **kw})
+
+    def test_a_budget_deferred_step_gets_one_cheap_attempt_after_the_depth_phase(self):
+        h = self._harness(SKEL_THREE, min_child_budget=2.5, run_budget=5.0)
+        h.spent_usd = lambda: 2.0          # $3.00 left: one depth child affordable, the other two deferred
+        calls = []
+
+        def attack(sub, name, sdir, cycle, module, remaining, recursive=False, cheap=False, **kw):
+            calls.append((name, cheap))
+            return 3, argparse.Namespace(state={"attempts": [], "stop_reason": "rounds exhausted"})
+        h._attack_substatement = attack
+        h.run_program()
+        depth = [n for n, cheap in calls if not cheap]
+        cheap = [n for n, cheap in calls if cheap]
+        self.assertEqual(depth, ["erdos_99_hyp_a"])                        # the depth phase funded one
+        self.assertEqual(cheap, ["erdos_99_hyp_b", "erdos_99_hyp_c"])      # the deferred two, cheaply, in order
+        self.assertTrue(any(e[1] == "sweep" and e[2].get("via") == "fallback" for e in h.log.events))
+
+    def test_a_cheap_proof_is_banked_and_can_close_the_skeleton(self):
+        h = self._harness(SKEL_ONE, min_child_budget=2.5, run_budget=5.0)
+        h.spent_usd = lambda: 3.0          # $2.00 left: the depth phase can fund nothing
+        proof_state = {"proof": PROOF_A, "attempts": []}
+
+        def attack(sub, name, sdir, cycle, module, remaining, recursive=False, cheap=False, **kw):
+            self.assertTrue(cheap)         # only the fallback may run here
+            return 0, argparse.Namespace(state=proof_state)
+        h._attack_substatement = attack
+        def bank(*a, **k):
+            h.state["proof"] = a[2]        # as the real helper does when the skeleton closes
+            return {"ok": True, "skeleton": a[2], "parsed": {**a[3], "hypotheses": []}, "proved": True}
+        h._bank_certified = bank
+        h.stage_verify = lambda: {"all_clear": True}
+        h.run_program()
+        self.assertTrue(any(e[1] == "sweep" and e[2].get("proved") == 1 and e[2].get("via") == "fallback"
+                            for e in h.log.events))
+
+    def test_hard_rated_and_already_attacked_steps_are_skipped(self):
+        h = self._harness(SKEL_THREE, min_child_budget=2.5, run_budget=5.0)
+        h.spent_usd = lambda: 2.0
+        rated = {"erdos_99_hyp_c": "hard"}
+        orig = H.parse_residual
+
+        def parse(skel, pid, meta, main=None):
+            p = orig(skel, pid, meta, main=main)
+            for x in p["hypotheses"]:
+                if x["name"] in rated:
+                    x["difficulty"] = rated[x["name"]]
+            return p
+        calls = []
+
+        def attack(sub, name, sdir, cycle, module, remaining, recursive=False, cheap=False, **kw):
+            calls.append((name, cheap))
+            return 3, argparse.Namespace(state={"attempts": [], "stop_reason": "rounds exhausted"})
+        h._attack_substatement = attack
+        with patch.object(H, "parse_residual", side_effect=parse):
+            h.run_program()
+        cheap = [n for n, c in calls if c]
+        self.assertNotIn("erdos_99_hyp_c", cheap)                         # rated hard
+        self.assertNotIn("erdos_99_hyp_a", cheap)                         # the depth phase already tried it
+        self.assertEqual(cheap, ["erdos_99_hyp_b"])
+
+    def test_off_restores_deferral(self):
+        h = self._harness(SKEL_THREE, min_child_budget=2.5, run_budget=5.0, cheap_fallback="off")
+        h.spent_usd = lambda: 2.0
+        calls = []
+
+        def attack(sub, name, sdir, cycle, module, remaining, recursive=False, cheap=False, **kw):
+            calls.append((name, cheap))
+            return 3, argparse.Namespace(state={"attempts": [], "stop_reason": "rounds exhausted"})
+        h._attack_substatement = attack
+        h.run_program()
+        self.assertEqual([c for _, c in calls], [False])                  # one depth child, no cheap attempts
+
+    def test_cli_default_is_on(self):
+        args = H.build_parser().parse_args(["run", "--problem", "1"])
+        self.assertEqual(args.cheap_fallback, "on")

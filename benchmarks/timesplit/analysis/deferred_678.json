@@ -1,0 +1,32 @@
+[
+ {
+  "tag": "train-conv-fde7891",
+  "problem": "678",
+  "alias": 28730,
+  "run_dir": "runs/20260929-233721-998524-timesplit-erdos28730",
+  "skeleton": "programs/erdos_28730/Residual.lean",
+  "name": "erdos_28730_hyp_loss_hyp_small",
+  "direction": "pos",
+  "rating": "unrated"
+ },
+ {
+  "tag": "train-conv-fde7891",
+  "problem": "678",
+  "alias": 28730,
+  "run_dir": "runs/20260929-233721-998524-timesplit-erdos28730",
+  "skeleton": "programs/erdos_28730/Residual.lean",
+  "name": "erdos_28730_hyp_loss_hyp_div",
+  "direction": "pos",
+  "rating": "unrated"
+ },
+ {
+  "tag": "train-conv-fde7891",
+  "problem": "678",
+  "alias": 28730,
+  "run_dir": "runs/20260929-233721-998524-timesplit-erdos28730",
+  "skeleton": "programs/erdos_28730/Residual.lean",
+  "name": "erdos_28730_hyp_loss_hyp_p",
+  "direction": "pos",
+  "rating": "unrated"
+ }
+]

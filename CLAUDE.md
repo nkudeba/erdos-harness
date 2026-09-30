@@ -546,6 +546,20 @@ attempts per cycle, default 8:
   - Most misses compiled with `sorry` holes left: genuine difficulty, not formatting.
   - Turn it on only with a screen that shows otherwise.
 
+**Cheap fallback**, `--cheap-fallback {on,off}`, **default `on`** (2026-09-30). This is the sweep's cheap attempt, aimed
+where the evidence says it pays:
+- After each cycle's depth attacks, every open step the depth phase did not fund gets ONE cheap one-shot attempt
+  with what is left: steps deferred for `--min-child-budget` or beyond `--hyps-per-cycle`.
+- Steps the plan rated **hard** are skipped.
+- **Why:**
+  - Train #678 certified 12 of 15 steps. Its last three were elementary counting lemmas, siblings of ones it had
+    just proved, and they sat deferred with $2.44 unspent. The cheap attempt proved all three for $0.73, and the
+    assembled proof passes the audit (`benchmarks/timesplit/evidence/678-assembled/`).
+  - Deferred HARD steps went 0 of 5, and the plan's rating separates the two cases: hard 1 of 20 proved, elementary
+    29 of 29.
+- It shares the sweep's once-per-statement memory.
+- `off` restores plain deferral.
+
 **Change B**, `--attack-rounds` (default 2) / `--attack-decompose-rounds` (default 0): caps a normal (depth)
 child's `rounds`/`decompose_rounds` in `_attack_substatement`, freeing the tail budget for the sweep and for
 the next plan's response to the failure digest. `--attack-rounds 6 --attack-decompose-rounds 10` restores the

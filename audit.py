@@ -109,12 +109,38 @@ def strip_imports(src: str) -> str:
 
 
 def frozen_names(frozen: str) -> tuple[str | None, list[str]]:
-    """The frozen theorem's name and the names the frozen statement defines itself."""
+    """The frozen theorem's name and the names the frozen statement defines itself, FULLY QUALIFIED: a `def` inside
+    `namespace Finset ... end Finset` is the constant `Finset.lcmInterval` (train #678's statement), and looking up
+    the bare name finds nothing in either elaboration."""
     body = strip_comments(frozen)
-    thm = re.findall(r"(?m)^\s*theorem\s+([^\s:({\[]+)", body)
-    defs = re.findall(r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:noncomputable\s+|private\s+|protected\s+)*"
-                      r"(?:def|abbrev|structure|inductive|class)\s+([^\s:({\[]+)", body)
-    return (thm[-1] if thm else None), defs
+    stack: list[tuple[str, str]] = []                     # ("namespace" | "section", name)
+    thms, defs = [], []
+    decl = re.compile(r"^\s*(?:@\[[^\]]*\]\s*)?(?:noncomputable\s+|private\s+|protected\s+)*"
+                      r"(theorem|lemma|def|abbrev|structure|inductive|class)\s+([^\s:({\[]+)")
+    for line in body.splitlines():
+        s = line.strip()
+        m = re.match(r"namespace\s+(\S+)", s)
+        if m:
+            stack.append(("namespace", m.group(1)))
+            continue
+        m = re.match(r"(?:noncomputable\s+)?section\b\s*(\S*)", s)
+        if m and not s.startswith("section_"):
+            stack.append(("section", m.group(1)))
+            continue
+        m = re.match(r"end\b\s*(\S*)", s)
+        if m and stack:
+            stack.pop()
+            continue
+        m = decl.match(line)
+        if m:
+            kind, name = m.group(1), m.group(2)
+            if name.startswith("_root_."):
+                full = name[len("_root_."):]
+            else:
+                prefix = ".".join(n for k, n in stack if k == "namespace" and n)
+                full = f"{prefix}.{name}" if prefix else name
+            (thms if kind in ("theorem", "lemma") else defs).append(full)
+    return (thms[-1] if thms else None), defs
 
 
 def dump_code(roots: list[tuple[str, bool]]) -> str:
@@ -253,7 +279,9 @@ def lean_checks(candidate: str, frozen: str, frozen_imports: list[str], tag: str
         "detail": (f"the proved `{main}` and {len(defs)} frozen definition(s) are structurally identical to a clean "
                    f"elaboration of the frozen statement ({len(ref_dump)} constant(s) compared)") if same and kind_ok
         else ("reference did not elaborate: " + "; ".join(rerrs[:1])[:200] if rerrs
-              else f"differs at: {', '.join(diff[:6]) or '(no fingerprints)'}" + ("" if kind_ok else f"; `{main}` is not a theorem"))}
+              else (f"missing in the frozen elaboration: {', '.join(k for k, v in ref_dump.items() if 'MISSING' in v)}"
+                    if any("MISSING" in v for v in ref_dump.values()) else
+                    f"differs at: {', '.join(diff[:6]) or '(no fingerprints)'}") + ("" if kind_ok else f"; `{main}` is not a theorem"))}
     # 3. kernel replay of the proof as written
     checks["kernel_replay"] = kernel_replay(candidate, tag)
     return checks
