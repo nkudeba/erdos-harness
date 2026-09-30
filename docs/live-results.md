@@ -34,3 +34,40 @@ Stop with `launchctl bootout gui/$(id -u)/com.erdos-harness.results-publisher`; 
 ## Verification
 
 Python tests exercise allowlisting, offline retry/acknowledgement, restart/crash handling, and rejection of non-catalogue IDs. Site tests exercise schema validation, candidate versus solved labels, preservation of historical success, and sublemma scope. Production verification includes authorized ingestion/readback and unauthorized write rejection. Run completion does not certify mathematical correctness beyond the explicit recorded milestones.
+
+## The Atlas maintains itself (2026-09-30)
+
+The operator's rule: the Atlas is updated whatever we do, and it is always refreshed and deployed. The publisher's
+watch loop (the LaunchAgent above) now also runs `atlas_refresh.maybe_refresh()` after every sync:
+
+- **Re-rank** (`atlas-data/rank_problems.py`, about 3 s) whenever an input changed: a run's state, a recorded
+  finding, a brief, a saved proof, time-split results or evidence, a mask, the ranker's code. At most every 5 minutes.
+- **Commit and push** the Atlas's own files in this repository (`atlas-data/reviewed.json`, `rankings.json`,
+  `rankings.csv`, `briefs/`, `predictions.jsonl`), at most every 15 minutes.
+- **Deploy**: commit and push `erdos-atlas/app/data.json`, the site's baked snapshot, to the site's repository, at
+  most every 30 minutes. Between deploys the live overlay carries scores and runs within 30 seconds.
+
+**Benchmark runs are no longer invisible.** Time-split and masked deductive runs are filed under synthetic ids.
+`atlas_ids.py` resolves them to the catalogue number from the alias files (`benchmarks/timesplit/results/*.aliases.jsonl`,
+`benchmarks/*/masks/*.json`), and both the ranker and the publisher use it.
+- Only status is ever taken from such a run: counts, verified, certified, closed apart from published premises.
+  So a dev item's route never reaches the Atlas.
+- A blind benchmark proof kept in `benchmarks/timesplit/evidence/<n>/` with an audit PASS counts as verified
+  (Demonstrated). An assembled proof (`<n>-assembled`) does not.
+- Diagnostic replays (`runs/replay-*`) are neither ranked nor published.
+
+**Git safety.** A repository is committed to only on `main`, with no merge, rebase or index lock in progress, and
+only the listed paths are staged (`git commit -- <paths>`). A rejected push is recorded and retried, never forced.
+The per-alias research-guidance files are never committed.
+
+**Status.** `.result-feed/atlas-refresh.json` holds the last re-rank, commits and pushes, with any error.
+`python3 atlas_refresh.py --force` does it all now. The publisher restarts itself when `result_feed.py`,
+`atlas_ids.py` or `atlas_refresh.py` changes.
+
+**What is still manual:** the qualitative half, meaning a feasibility judgment or a route that worked. Record it with
+`atlas-data/record_finding.py`. Everything after that, including re-ranking, commit, push, the live overlay and the
+deploy, happens by itself.
+
+**Unverified assumption:** the site is taken to redeploy when its repository's `main` is pushed. Its platform
+configuration could not be inspected from here. If a push does not redeploy, the deploy step needs the platform's
+own command added to `atlas_refresh.py`.

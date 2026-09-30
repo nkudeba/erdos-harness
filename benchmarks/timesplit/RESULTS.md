@@ -1070,3 +1070,29 @@ The plan rated them hard 5, moderate 3, unrated 2.
   - P(solved: true direction verified and audit passing) = 0.55. Both known blockers are removed. A fresh run can
     still take a new route, lose cycles to skeletons that do not compile, or hit a genuinely hard step.
   - About $13.
+
+**Outcome of `discover-v4` (2026-09-30): 0 of 2 solved. $24.06.**
+- **#990:** 3 rounds and 6 attempts, ALL saying TRUE, which is wrong, at 0.4–0.6, and none complete. The floor
+  blocked a commit. The true direction ended with 3 certified and 2 open. $16.34.
+  - The retries bought nothing here. This session's four rounds on #990 produced no complete disproof, against 2 of
+    3 in the calibration. The per-round rate looks closer to 2 in 7 than 2 in 3.
+- **#1037:** round 1 already had a complete refereed disproof (0.88), so no retry was needed, and it committed
+  correctly to NO.
+  - The true direction: 3 certified, 0 open conjectures, and **1 published premise**, Erdős 1947 (Ramsey graphs
+    with no clique or independent set above C log r exist). $7.72.
+  - Pin `543fd9d` still had `--premise-attack cheap`, so the premise got only the free tactics. A full attack is
+    being replayed, as it was for #678's Ramanujan premise.
+- **Against the predictions:**
+  - A complete proof within 3 rounds: #990 no (0.75), #1037 yes (0.65).
+  - A correct commit: #990 no (0.65), #1037 yes (0.65).
+  - Solves: 0 (0.25, 0.1).
+  - $24 (predicted ~$30).
+- **Reading:** discovery retries do not reliably produce a complete proof on #990. The live blocker on #1037 is the
+  premise policy that has already been reverted.
+
+**#1037's premise, attacked in full (2026-09-30): proved for $2.70.**
+- A replayed full attack proved Erdős's 1947 Ramsey-graph bound in Lean.
+- Spliced into the run's residual, the disproof is complete and passes all 7 of the audit's Lean checks
+  (`evidence/1037-assembled/`, not an autonomous solve).
+- **The pattern:** #678 and #1037 both ended closed apart from one published premise that Mathlib lacks, and a full
+  attack proved each for about $3. `--premise-attack full`, the default again, would have run that attack in-run.

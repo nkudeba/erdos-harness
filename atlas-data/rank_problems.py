@@ -12,27 +12,57 @@ import yaml
 ROOT=Path(__file__).resolve().parent.parent
 sys.path.insert(0,str(ROOT))
 from harness import known_search_floor,SEARCH_REACH   # one definition of "a witness is out of reach"
+import atlas_ids   # benchmark runs are filed under synthetic ids; resolve them to the catalogue number
 DATA=ROOT/'atlas-data'
 def load(p): return json.loads(p.read_text())
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 def harness_evidence():
-    evidence={}
+    """Mechanical run evidence per catalogue number, benchmark runs included. A benchmark run is filed under a
+    synthetic id, so until 2026-09-30 every one was invisible here: #1213's two verified proofs, #678's near-solves.
+    Only STATUS is taken from a run (counts, verified, certified, closed apart from published premises), never its
+    text, so a dev item's route cannot reach the Atlas (CLAUDE.md, time-split quarantine)."""
+    evidence={};aliases=atlas_ids.benchmark_aliases(ROOT);seen=collections.defaultdict(set)
     for path in (ROOT/'runs').rglob('state.json'):
         if '.cache' in path.parts or 'current' in path.parts:continue
+        rel=path.relative_to(ROOT/'runs').parts
+        if rel[0].startswith('replay-'):continue   # diagnostic replays copy real runs' state; counting them would double it
         try: s=load(path)
         except (ValueError,OSError):continue
+        if s.get('direction')=='program':continue    # a research sub-statement: evidence about a lemma, not the problem
         inp=s.get('problem_input') or {}; pid=inp.get('id') if isinstance(inp,dict) else None
         if not pid:
             m=re.search(r'erdos(\d+)',str(path.parent));pid=m.group(1) if m else None
         if not str(pid).isdigit():continue
-        e=evidence.setdefault(int(pid),{'runs':0,'verified':0,'partial':False,'assessments':[],'failures':[]})
-        e['runs']+=1
-        e['verified']+=(s.get('verify') or s.get('verification') or {}).get('all_clear') is True
+        n,bench=atlas_ids.resolve(pid,aliases)
+        if n is None:continue
+        e=evidence.setdefault(n,{'runs':0,'verified':0,'partial':False,'assessments':[],'failures':[],
+                                 'benchmark_runs':0,'certified_max':0,'modulo_published':False})
+        top=rel[0]                                   # an --open run's pos/ and neg/ states belong to one run
+        if top not in seen[n]:
+            seen[n].add(top);e['runs']+=1;e['benchmark_runs']+=bool(bench)
+        v=s.get('verify') or s.get('verification') or {}
+        audit=load(path.parent/'AUDIT.json') if (path.parent/'AUDIT.json').exists() else None
+        # a proof the audit rejected is not verified, whatever the text-level check said (audit.py)
+        e['verified']+=v.get('all_clear') is True and not (isinstance(audit,dict) and audit.get('verdict')=='FAIL')
         e['partial']|=s.get('outcome')=='partial' or bool((s.get('program') or {}).get('certified_any'))
+        res=s.get('residual') if isinstance(s.get('residual'),dict) else {}
+        e['certified_max']=max(e['certified_max'],int(res.get('certified') or 0))
+        e['modulo_published']|=bool(res) and res.get('open')==0 and (res.get('published') or 0)>0
+        if bench:continue          # a benchmark run's assessment and stop reason may describe its route: status only
         if s.get('assessment'):e['assessments'].append(s['assessment'])
         if s.get('stop_reason'):e['failures'].append(str(s['stop_reason']))
     return evidence
+
+
+def evidence_summary(e,verified):
+    """The strongest mechanical evidence a problem has, for the row and the site: one word plus counts."""
+    best=('verified' if verified else 'closed apart from published premises' if e.get('modulo_published')
+          else 'partial' if e.get('partial') else 'attempted' if e.get('runs') else 'untried')
+    # 'verified' comes only from a SAVED, audited proof (knowledge/solved, or benchmark evidence with an audit
+    # PASS): a run's own all_clear may be the wrong direction of an --open run, or a sub-statement.
+    return {'best':best,'runs':e.get('runs',0),'benchmarkRuns':e.get('benchmark_runs',0),
+            'certifiedMax':e.get('certified_max',0)}
 
 # Library fit is a prior based on the current pipeline and recorded successes,
 # not a judgment of a field's intrinsic mathematical difficulty.
@@ -252,7 +282,7 @@ def assess(p,m,e,verified):
     if adjustment:signals.append({'label':'Score floor / ceiling','points':adjustment})
     if harness=='Verified':
         score=99;signals=[{'label':'Saved, regression-checked full harness proof', 'points':99}]
-        why=['A saved full proof passed the local Lean regression and standard-axiom audit.', 'This is demonstrated harness capability on its frozen formulation, not a calibrated probability of a fresh run.']
+        why=['A saved full proof passed the local Lean regression and standard-axiom audit (or a blind benchmark run\'s proof passed audit.py and is kept in benchmarks/timesplit/evidence).', 'This is demonstrated harness capability on its frozen formulation, not a calibrated probability of a fresh run.']
         req=['Replay the verified proof and preserve statement faithfulness when testing future harness changes.']
     formal='External Lean-verified resolution reported.' if '(lean)' in state and resolved else 'External formal statement reported; no completed external Lean resolution recorded.' if (m.get('formalized') or {}).get('state')=='yes' else 'No external Lean statement recorded in this metadata snapshot.'
     return {'id':p['id'],'statement':stmt,'status':status,'state':state,'tags':tags,'score':score,'harness':harness,'rationale':why,'requirements':list(dict.fromkeys(req)), 'formal':formal,'review':'Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.','signals':signals,'partial':partial,'url':f'https://www.erdosproblems.com/{p["id"]}','manual':False,'prize':m.get('prize','no')}
@@ -263,7 +293,11 @@ def main():
     assert all(p['page_status'].lower()==meta[p['id']]['status']['state'].lower() for p in pages),'Source status mismatch; reconcile before publishing'
     evidence=harness_evidence()
     verified={int(p.stem[5:]) for p in (ROOT/'knowledge/solved').glob('Erdos*.lean') if p.with_suffix('.json').exists()}
+    # a blind benchmark run's proof kept with an audit PASS is a saved, verified proof too (benchmarks/timesplit/evidence)
+    verified|=atlas_ids.audited_evidence(ROOT)
     rows=[assess(p,meta[p['id']],evidence.get(p['id'],{}),verified) for p in pages]
+    for r in rows:
+        r['evidence']=evidence_summary(evidence.get(r['id'],{}),r['id'] in verified)
     overrides=load(DATA/'reviewed.json') if (DATA/'reviewed.json').exists() else {}
     for r in rows:
         o=overrides.get(str(r['id']))

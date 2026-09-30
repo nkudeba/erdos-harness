@@ -13,6 +13,7 @@ import urllib.request
 import urllib.error
 import urllib.parse
 from solution_review import milestones, environment_snapshot, load_attestations
+import atlas_ids   # benchmark runs are filed under synthetic ids; resolve them to the catalogue number
 ROOT=Path(__file__).resolve().parent
 LOCAL=ROOT/'.result-feed'
 OUTCOMES={'regression_passed','regression_failed','running','proved','proved_unverified','not_proved','partial','budget_exhausted','budget_exhausted+partial','infrastructure_error','completed','stopped','unknown'}
@@ -38,13 +39,17 @@ def signature(run, root=ROOT):
     return [(p.stat().st_mtime_ns if p.exists() else 0) for p in files]
 
 
-def summarize(run, root=ROOT):
+def summarize(run, root=ROOT, aliases=None):
     state=read_json(run/'state.json',{})
     if not isinstance(state,dict):return None
     problem=state.get('problem_input') or {}
     pid=problem.get('id')
     if not str(pid).isdigit():
         m=re.search(r'erdos(\d+)',str(run.relative_to(root/'runs')));pid=m.group(1) if m else None
+    # A benchmark run (time-split or masked deductive) is filed under a synthetic id; publish it under its
+    # catalogue number. Only the allowlisted status fields below ever leave this machine, for any run.
+    if str(pid).isdigit() and not 1<=int(pid)<=1217:
+        pid,_=atlas_ids.resolve(pid,aliases if aliases is not None else atlas_ids.benchmark_aliases(root))
     if not str(pid).isdigit() or not 1<=int(pid)<=1217:return None
     last={}
     try:
@@ -161,13 +166,15 @@ def upload(config,rows,rankings=()):
 def sync(root=ROOT,local=LOCAL):
     config=read_json(local/'config.json')
     if not config:raise ValueError('Publisher not configured')
-    ack=read_json(local/'ack.json',{}) or {};changed=[]
+    ack=read_json(local/'ack.json',{}) or {};changed=[];aliases=atlas_ids.benchmark_aliases(root)
     for state in (root/'runs').rglob('state.json'):
         run=state.parent
         if state.is_symlink() or 'current' in run.parts or '.cache' in run.parts:continue
+        # diagnostic replays copy real runs' state; publishing them would show every such run twice
+        if run.relative_to(root/'runs').parts[0].startswith('replay-'):continue
         key=str(run.resolve());sig=signature(run,root)
         if ack.get(key)==sig:continue
-        try:row=summarize(run,root)
+        try:row=summarize(run,root,aliases)
         except (ValueError,TypeError,AttributeError,OSError):continue
         if row:changed.append((key,sig,row))
     # Score revisions ride the same channel; only rows whose content changed are sent.
@@ -201,9 +208,12 @@ def main():
     lock=(LOCAL/'publisher.lock').open('w')
     try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     except BlockingIOError:return
-    code_mtime=Path(__file__).stat().st_mtime_ns
+    # restart on a change to any module this loop runs, so a fix reaches the LaunchAgent without anyone restarting it
+    code=[Path(__file__),ROOT/'atlas_ids.py',ROOT/'atlas_refresh.py']
+    stamp=lambda:[p.stat().st_mtime_ns if p.exists() else 0 for p in code]
+    code_mtime=stamp()
     while True:
-        if Path(__file__).stat().st_mtime_ns != code_mtime:
+        if stamp() != code_mtime:
             import sys
             os.execv(sys.executable,[sys.executable,str(Path(__file__).resolve()),*sys.argv[1:]])
         try:
@@ -214,6 +224,13 @@ def main():
             atomic(LOCAL/'status.json',{'error':type(e).__name__,'http_status':getattr(e,'code',None),'at':dt.datetime.now(dt.timezone.utc).isoformat()})
             print('Publisher unavailable; results retained locally for retry',flush=True)
             if a.mode=='sync':raise SystemExit(1)
+        # The Atlas maintains itself (atlas_refresh.py): re-rank on any change, commit and push its files, deploy the
+        # site's baked snapshot. It records its own state and errors and never raises, so publishing always goes on.
+        try:
+            import atlas_refresh
+            atlas_refresh.maybe_refresh(ROOT)
+        except Exception:
+            print('Atlas refresh unavailable; publishing continues',flush=True)
         if a.mode=='sync':break
         time.sleep(max(5,a.interval))
 

@@ -6,6 +6,11 @@ feasibility ranking of the whole 1,217-problem catalogue.
 
 ## Keep the Atlas current — do this as you learn, not at the end
 
+**It now keeps itself current too.** The publisher LaunchAgent re-ranks on any change, commits and pushes
+`atlas-data/`, and deploys the site's baked snapshot (`atlas_refresh.py`, `docs/live-results.md`). Benchmark runs are
+attributed to their catalogue number through `atlas_ids.py`, as status only. What still needs you is the
+qualitative half below.
+
 The Atlas is the memory that decides what we attack next, so **every time a run or an assessment teaches us
 something about a problem, record it before moving on.** A finding that stays in a chat transcript is lost.
 

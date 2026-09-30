@@ -1,0 +1,12 @@
+[
+ {
+  "tag": "train-v4-543fd9d",
+  "problem": "1037",
+  "alias": 95105,
+  "run_dir": "runs/20260930-185504-050735-timesplit-erdos95105",
+  "skeleton": "programs/erdos_95105/Residual.lean",
+  "name": "erdos_95105_hyp_dense_ramsey_hyp_erdos_ramsey",
+  "direction": "neg",
+  "rating": "published"
+ }
+]

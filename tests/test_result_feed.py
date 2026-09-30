@@ -29,6 +29,24 @@ class FeedTests(unittest.TestCase):
   self.assertEqual(F.summarize(self.run,self.root)['outcome'],'running')
  def test_invalid_problem_not_exported(self):
   self.state['problem_input']['id']='9999';(self.run/'state.json').write_text(json.dumps(self.state));self.assertIsNone(F.summarize(self.run,self.root))
+ def test_a_benchmark_alias_publishes_under_its_catalogue_number(self):
+  # time-split and masked runs are filed under synthetic ids; until 2026-09-30 every one was dropped here
+  res=self.root/'benchmarks'/'timesplit'/'results';res.mkdir(parents=True)
+  (res/'t.aliases.jsonl').write_text(json.dumps({'alias':82251,'problem':'1213','run_dir':'runs/x'})+'\n')
+  self.state['problem_input']['id']='82251';(self.run/'state.json').write_text(json.dumps(self.state))
+  row=F.summarize(self.run,self.root)
+  self.assertEqual(row['problem'],1213)
+  self.assertNotIn('SECRET',json.dumps(row))                      # the same allowlist as any run
+  self.state['problem_input']['id']='55555';(self.run/'state.json').write_text(json.dumps(self.state))
+  self.assertIsNone(F.summarize(self.run,self.root))               # an unknown alias still publishes nothing
+ def test_diagnostic_replays_are_not_published(self):
+  rep=self.root/'runs'/'replay-sweep-x'/'copy';rep.mkdir(parents=True)
+  (rep/'state.json').write_text(json.dumps(self.state))
+  local=self.root/'local';local.mkdir();(local/'config.json').write_text('{"url":"https://example.invalid"}')
+  with patch.object(F,'upload') as upload:
+   F.sync(self.root,local)
+  rows=upload.call_args.args[1]
+  self.assertEqual(len(rows),1)                                    # the real run only, not its replay copy
 
 
 class RankingPublication(unittest.TestCase):
