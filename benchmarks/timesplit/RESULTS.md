@@ -1059,3 +1059,14 @@ The plan rated them hard 5, moderate 3, unrated 2.
   full attack has no better use for the money.
 - **Next:** a third fresh #678 run with both fixes, after the v4 lane. Pre-registered in the section below when it
   launches.
+
+## #678 fresh, both fixes (2026-09-30), written before launch: `train-678-both-f27eaff`
+
+- **Question:** with the cheap fallback AND `--premise-attack full`, does the harness close #678 by itself?
+  - The two earlier runs each ended one policy short.
+  - Both fixes are on by default in pin `f27eaff` (main cf2bc72).
+- **Protocol:** as before: `discover-v3`, $16, 6 cycles, a fresh alias. It launches after the v4 lane.
+- **Write-ahead:**
+  - P(solved: true direction verified and audit passing) = 0.55. Both known blockers are removed. A fresh run can
+    still take a new route, lose cycles to skeletons that do not compile, or hit a genuinely hard step.
+  - About $13.

@@ -93,6 +93,19 @@
     ],
     "score": 73
   },
+  "152": {
+    "score": 40,
+    "rationale": [
+      "An elementary double count of Sidon quadruples. The harness certified every step the discovery route supplied and stopped at the one step both discovery attempts named as missing (train diagnostic, 2026-09-24). The 2026-09-25 smoke run was lost to the since-fixed skeleton_context bug."
+    ],
+    "requirements": [
+      "Re-run on the fixed harness; the missing step is the local inequality 4N1 + N3 <= 3|X| + 2N2 on 0/1 patterns."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#candidate-discover-v2-2026-09-24-discover-v2-84f21c5"
+    ],
+    "assessed": "2026-09-30"
+  },
   "164": {
     "rationale": [
       "The primitive-set maximum theorem is a substantial analytic result even though a simpler proof is now reported."
@@ -369,6 +382,19 @@
     ],
     "score": 78
   },
+  "283": {
+    "score": 30,
+    "rationale": [
+      "The harness routes through Graham's 1963 partition theorem, and its core (a Graham-type completeness step) resisted every attack (train, 2026-09-25). The 2026 resolution uses local switching (1/D = 1/2D + 1/3D + 1/6D along a telescoping family), which the harness never proposed."
+    ],
+    "requirements": [
+      "Formalize the switching construction and its finite residue check, not Graham's general theorem."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#improvement-loop-iteration-3-written-2026-09-25-launches-after-the-dev-screen-alloc-budget-follows-the-core"
+    ],
+    "assessed": "2026-09-30"
+  },
   "287": {
     "assessed": "2026-09-10",
     "rationale": [
@@ -602,6 +628,19 @@
       "Formalize the recursive sparse construction and both its local congruence and global shift properties."
     ],
     "score": 48
+  },
+  "435": {
+    "score": 35,
+    "rationale": [
+      "Discovery writes complete refereed proofs (the Apéry set with respect to n, with C(n,p^j) acting as mixed-radix digits). The harness certifies the representability steps, but the lower bound, that X(n) - n is not representable, resisted: its recursive decompositions were judged not easier (train, 2026-09-29, $13.98)."
+    ],
+    "requirements": [
+      "Formalize the Apéry-set minimality argument as its own lemma chain: the p-adic valuations of C(n,p^j) and the digit bound."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+    ],
+    "assessed": "2026-09-30"
   },
   "440": {
     "rationale": [
@@ -862,12 +901,20 @@
   },
   "678": {
     "rationale": [
-      "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it."
+      "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it.",
+      "Two harness runs (train, 2026-09-29 and 2026-09-30) each ended one mechanical policy short of a complete proof, and both completions were assembled and pass audit.py (not autonomous solves).",
+      "Route A: a CRT construction with an admissible prime from Bertrand's postulate (Mathlib); the last three steps are counting-multiples lemmas, proved by cheap one-shots for $0.73. Route B: the same construction via Ramanujan's two primes in (x/2, x] for x >= 11, which a full attack proved in Lean for $3.22."
     ],
     "requirements": [
-      "Freeze the intended quantifiers and reconstruct the uniform large-k construction."
+      "Freeze the intended quantifiers and reconstruct the uniform large-k construction.",
+      "Expected to close unaided with --cheap-fallback on and --premise-attack full (pin f27eaff; a pre-registered run is queued)."
     ],
-    "score": 46
+    "score": 80,
+    "sources": [
+      "benchmarks/timesplit/evidence/678-assembled/README.md",
+      "benchmarks/timesplit/evidence/678-assembled-b/README.md"
+    ],
+    "assessed": "2026-09-30"
   },
   "686": {
     "score": 8,
@@ -1076,6 +1123,19 @@
       "atlas-data/forum/942.json"
     ]
   },
+  "990": {
+    "score": 30,
+    "rationale": [
+      "The disproof needs an explicit lacunary polynomial with a root of high multiplicity at 1 and bounded coefficient ratio M. The harness reduces to that construction (2 of 3 steps), but its own choice of exponents left the bound M <= 4m, judged as hard as the problem (train, 2026-09-30). Discovery writes the complete published construction (divided differences over exponents 0, 1, K, ..., K^N) in only some rounds."
+    ],
+    "requirements": [
+      "Follow the published exponents; formalize the divided-difference (Vandermonde) identity and the multiplicity-at-1 criterion."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+    ],
+    "assessed": "2026-09-30"
+  },
   "993": {
     "rationale": [
       "EXHAUSTIVELY VERIFIED TO n=32 by third parties (recorded 2026-09-11 from the forum thread, NOT rerun by us). All 109,972,410,221 free trees on 32 vertices checked with nauty/gentreeg plus an exact integer in/out subtree DP, zero unimodality failures, per-order counts matching OEIS A000055 end-to-end; n=30 and n=31 (14.8e9 and 40.3e9 trees) were done by two independent implementations in full agreement. A bounded tree search re-derives known ground - n=33 is ~300 billion trees.",
@@ -1092,6 +1152,19 @@
     "search_floor_kind": "exhaustive",
     "assessed": "2026-09-11"
   },
+  "997": {
+    "score": 15,
+    "rationale": [
+      "Reduces in Lean to ONE published premise, the Banks-Freiberg-Turnage-Butterbaugh theorem (consecutive primes in tuples, a Maynard-Tao consequence), on two separate runs; every conjecture was certified (train, 2026-09-25)."
+    ],
+    "requirements": [
+      "A complete proof needs BFT15 formalized, i.e. the Maynard-Tao sieve: far beyond current Mathlib."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#improvement-loop-iteration-2-2026-09-25-does-the-fixed-harness-convert-known-ideas"
+    ],
+    "assessed": "2026-09-30"
+  },
   "999": {
     "rationale": [
       "The full Duffin–Schaeffer theorem is a deep metric-number-theory result; the easy implication is only half the equivalence."
@@ -1100,6 +1173,19 @@
       "Provide the hard divergence direction with its measure-theoretic and arithmetic prerequisites."
     ],
     "score": 15
+  },
+  "1037": {
+    "score": 20,
+    "rationale": [
+      "The disproof needs graphs with small clique and independence numbers (a probabilistic existence argument Mathlib lacks). The harness certified 1 of 2 steps; discovery produced no complete proof in its round (train, 2026-09-30)."
+    ],
+    "requirements": [
+      "A Lean construction, or a probabilistic-method lemma, for Ramsey-type graphs with omega and alpha of order log n."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+    ],
+    "assessed": "2026-09-30"
   },
   "1039": {
     "assessed": "2026-09-11",
@@ -1150,6 +1236,19 @@
     ],
     "score": 65
   },
+  "1141": {
+    "score": 10,
+    "rationale": [
+      "The disproof needs a Pollack-type theorem, small primes p with chi(p) = 1 (Burgess plus Siegel, ineffective). The harness isolates exactly that analytic core and stops (train, 2026-09-25)."
+    ],
+    "requirements": [
+      "Formalizing Burgess-type character sum bounds and Siegel's theorem: out of reach."
+    ],
+    "sources": [
+      "benchmarks/timesplit/RESULTS.md#improvement-loop-iteration-3-written-2026-09-25-launches-after-the-dev-screen-alloc-budget-follows-the-core"
+    ],
+    "assessed": "2026-09-30"
+  },
   "1148": {
     "rationale": [
       "The known solution uses a form of Duke’s theorem. The simple-looking three-square equation masks a deep equidistribution dependency."
@@ -1176,5 +1275,19 @@
       "Preserve the intended natural-number convention and both density questions."
     ],
     "score": 99
+  },
+  "1213": {
+    "score": 90,
+    "rationale": [
+      "The formal-conjectures statement is proved in Lean by two blind, masked time-split benchmark runs (2026-09-25; $2.64 and $3.92 on pin 84f21c5, candidate discover-v2). Both pass audit.py: kernel replay, standard axioms, and the elaborated statement is identical to the frozen one. Baseline v2 without the discovery stage left it one step short."
+    ],
+    "requirements": [
+      "Nothing open: a reconstruction of the 2026-04-21 resolution, not new mathematics. The route is deliberately not recorded here (dev-split item)."
+    ],
+    "sources": [
+      "benchmarks/timesplit/evidence/1213/README.md",
+      "benchmarks/timesplit/RESULTS.md#stop-signal-dev-1213-solved-by-discover-v2-84f21c5"
+    ],
+    "assessed": "2026-09-30"
   }
 }

@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 87,
+    "manually_reviewed": 95,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "8b5a5b08da0eb6f474a52fc26b499cab89805b9f70a66697922f6f24e4090989",
+    "harness_sha256": "f27eaff0efc862ad5868a9c646ff6a3566777b0e19b34ce1bc2a0123db7dd7bb",
     "scorer_sha256": "300c6b13514fca65b66d0f85ddfa0c047fba7fa0749bf6c1dec8596ca9136876",
-    "manual_reviews_sha256": "4deecec4a1c78470a1016d7b4bae80c8f5c7a05947339591a0848408da8fe7a2"
+    "manual_reviews_sha256": "ed8dcb353a5987892fc65144233b5f7672ab0e9e7dbb1f3b5da873c984b23a27"
   },
   "problems": [
     {
@@ -756,6 +756,137 @@
       "tier": "Demonstrated"
     },
     {
+      "id": 1213,
+      "statement": "Let $a,K\\geq 1$. Does there exist $f(a,K)$ such that if\\[a=a_1<\\cdots <a_s\\]is a sequence of integers with $a_s> f(a,K)$ and with bounded gaps $a_{i+1}-a_i\\leq K$ then there are two distinct intervals $I$ and $J$ such that\\[\\sum_{i\\in I}a_i=\\sum_{j\\in J}a_j?\\]",
+      "status": "Solved",
+      "state": "proved",
+      "tags": [
+        "additive combinatorics"
+      ],
+      "score": 90,
+      "harness": "Untried",
+      "rationale": [
+        "The formal-conjectures statement is proved in Lean by two blind, masked time-split benchmark runs (2026-09-25; $2.64 and $3.92 on pin 84f21c5, candidate discover-v2). Both pass audit.py: kernel replay, standard axioms, and the elaborated statement is identical to the frozen one. Baseline v2 without the discovery stage left it one step short.",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "Finite set machinery is available; global additive structure can demand deep theorems."
+      ],
+      "requirements": [
+        "Nothing open: a reconstruction of the 2026-04-21 resolution, not new mathematics. The route is deliberately not recorded here (dev-split item).",
+        "Identify whether an explicit finite construction settles the full quantifiers."
+      ],
+      "formal": "No external Lean statement recorded in this metadata snapshot.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "Library fit: additive combinatorics",
+          "points": -3
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": 49
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/1213",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/evidence/1213/README.md",
+          "benchmarks/timesplit/RESULTS.md#stop-signal-dev-1213-solved-by-discover-v2-84f21c5"
+        ],
+        "searchFloor": null
+      },
+      "rank": 20,
+      "tier": "Promising"
+    },
+    {
+      "id": 678,
+      "statement": "Let $M(n,k)=[n+1,\\ldots,n+k]$ be the least common multiple of $\\{n+1,\\ldots,n+k\\}$. Are there infinitely many $m,n$ and $k\\geq 3$ with $m\\geq n+k$ such that\\[M(n,k)>M(m,k+1)?\\]",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "number theory"
+      ],
+      "score": 80,
+      "harness": "Untried",
+      "rationale": [
+        "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it.",
+        "Two harness runs (train, 2026-09-29 and 2026-09-30) each ended one mechanical policy short of a complete proof, and both completions were assembled and pass audit.py (not autonomous solves).",
+        "Route A: a CRT construction with an admissible prime from Bertrand's postulate (Mathlib); the last three steps are counting-multiples lemmas, proved by cheap one-shots for $0.73. Route B: the same construction via Ramanujan's two primes in (x/2, x] for x >= 11, which a full attack proved in Lean for $3.22.",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
+        "The solution discussion explicitly describes an elementary or short proof route.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Freeze the intended quantifiers and reconstruct the uniform large-k construction.",
+        "Expected to close unaided with --cheap-fallback on and --premise-attack full (pin f27eaff; a pre-registered run is queued).",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Construct and verify a uniform argument or an infinite family.",
+        "Check that the easy argument solves the full question, not merely a special case.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Unbounded quantifier",
+          "points": -5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Explicit easy-proof signal",
+          "points": 10
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": 12
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/678",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/evidence/678-assembled/README.md",
+          "benchmarks/timesplit/evidence/678-assembled-b/README.md"
+        ],
+        "searchFloor": null
+      },
+      "rank": 21,
+      "tier": "Promising"
+    },
+    {
       "id": 189,
       "statement": "If $\\mathbb{R}^2$ is finitely coloured then must there exist some colour class which contains the vertices of a rectangle of every area?",
       "status": "Solved",
@@ -816,7 +947,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 20,
+      "rank": 22,
       "tier": "Plausible"
     },
     {
@@ -888,7 +1019,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 21,
+      "rank": 23,
       "tier": "Plausible"
     },
     {
@@ -943,7 +1074,7 @@
       "url": "https://www.erdosproblems.com/56",
       "manual": false,
       "prize": "$10",
-      "rank": 22,
+      "rank": 24,
       "tier": "Plausible"
     },
     {
@@ -985,7 +1116,7 @@
       "url": "https://www.erdosproblems.com/194",
       "manual": false,
       "prize": "no",
-      "rank": 23,
+      "rank": 25,
       "tier": "Plausible"
     },
     {
@@ -1033,7 +1164,7 @@
       "url": "https://www.erdosproblems.com/231",
       "manual": false,
       "prize": "no",
-      "rank": 24,
+      "rank": 26,
       "tier": "Plausible"
     },
     {
@@ -1079,7 +1210,7 @@
       "url": "https://www.erdosproblems.com/246",
       "manual": false,
       "prize": "no",
-      "rank": 25,
+      "rank": 27,
       "tier": "Plausible"
     },
     {
@@ -1126,7 +1257,7 @@
       "url": "https://www.erdosproblems.com/250",
       "manual": false,
       "prize": "no",
-      "rank": 26,
+      "rank": 28,
       "tier": "Plausible"
     },
     {
@@ -1173,7 +1304,7 @@
       "url": "https://www.erdosproblems.com/277",
       "manual": false,
       "prize": "no",
-      "rank": 27,
+      "rank": 29,
       "tier": "Plausible"
     },
     {
@@ -1220,7 +1351,7 @@
       "url": "https://www.erdosproblems.com/403",
       "manual": false,
       "prize": "no",
-      "rank": 28,
+      "rank": 30,
       "tier": "Plausible"
     },
     {
@@ -1267,7 +1398,7 @@
       "url": "https://www.erdosproblems.com/419",
       "manual": false,
       "prize": "no",
-      "rank": 29,
+      "rank": 31,
       "tier": "Plausible"
     },
     {
@@ -1314,7 +1445,7 @@
       "url": "https://www.erdosproblems.com/427",
       "manual": false,
       "prize": "no",
-      "rank": 30,
+      "rank": 32,
       "tier": "Plausible"
     },
     {
@@ -1375,7 +1506,7 @@
       "url": "https://www.erdosproblems.com/728",
       "manual": false,
       "prize": "no",
-      "rank": 31,
+      "rank": 33,
       "tier": "Plausible"
     },
     {
@@ -1441,7 +1572,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 32,
+      "rank": 34,
       "tier": "Plausible"
     },
     {
@@ -1494,7 +1625,7 @@
       "url": "https://www.erdosproblems.com/707",
       "manual": false,
       "prize": "$1000",
-      "rank": 33,
+      "rank": 35,
       "tier": "Plausible"
     },
     {
@@ -1542,7 +1673,7 @@
       "url": "https://www.erdosproblems.com/825",
       "manual": false,
       "prize": "$25",
-      "rank": 34,
+      "rank": 36,
       "tier": "Plausible"
     },
     {
@@ -1605,7 +1736,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 35,
+      "rank": 37,
       "tier": "Plausible"
     },
     {
@@ -1648,7 +1779,7 @@
       "url": "https://www.erdosproblems.com/47",
       "manual": false,
       "prize": "$100",
-      "rank": 36,
+      "rank": 38,
       "tier": "Plausible"
     },
     {
@@ -1690,7 +1821,7 @@
       "url": "https://www.erdosproblems.com/123",
       "manual": false,
       "prize": "$250",
-      "rank": 37,
+      "rank": 39,
       "tier": "Plausible"
     },
     {
@@ -1733,7 +1864,7 @@
       "url": "https://www.erdosproblems.com/290",
       "manual": false,
       "prize": "no",
-      "rank": 38,
+      "rank": 40,
       "tier": "Plausible"
     },
     {
@@ -1776,7 +1907,7 @@
       "url": "https://www.erdosproblems.com/310",
       "manual": false,
       "prize": "no",
-      "rank": 39,
+      "rank": 41,
       "tier": "Plausible"
     },
     {
@@ -1819,7 +1950,7 @@
       "url": "https://www.erdosproblems.com/351",
       "manual": false,
       "prize": "no",
-      "rank": 40,
+      "rank": 42,
       "tier": "Plausible"
     },
     {
@@ -1862,7 +1993,7 @@
       "url": "https://www.erdosproblems.com/355",
       "manual": false,
       "prize": "no",
-      "rank": 41,
+      "rank": 43,
       "tier": "Plausible"
     },
     {
@@ -1905,7 +2036,7 @@
       "url": "https://www.erdosproblems.com/392",
       "manual": false,
       "prize": "no",
-      "rank": 42,
+      "rank": 44,
       "tier": "Plausible"
     },
     {
@@ -1947,7 +2078,7 @@
       "url": "https://www.erdosproblems.com/434",
       "manual": false,
       "prize": "no",
-      "rank": 43,
+      "rank": 45,
       "tier": "Plausible"
     },
     {
@@ -1989,7 +2120,7 @@
       "url": "https://www.erdosproblems.com/464",
       "manual": false,
       "prize": "no",
-      "rank": 44,
+      "rank": 46,
       "tier": "Plausible"
     },
     {
@@ -2041,7 +2172,7 @@
       "url": "https://www.erdosproblems.com/548",
       "manual": false,
       "prize": "no",
-      "rank": 45,
+      "rank": 47,
       "tier": "Plausible"
     },
     {
@@ -2084,7 +2215,7 @@
       "url": "https://www.erdosproblems.com/947",
       "manual": false,
       "prize": "no",
-      "rank": 46,
+      "rank": 48,
       "tier": "Plausible"
     },
     {
@@ -2133,7 +2264,7 @@
       "url": "https://www.erdosproblems.com/328",
       "manual": false,
       "prize": "no",
-      "rank": 47,
+      "rank": 49,
       "tier": "Plausible"
     },
     {
@@ -2195,7 +2326,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 48,
+      "rank": 50,
       "tier": "Plausible"
     },
     {
@@ -2248,7 +2379,7 @@
       "url": "https://www.erdosproblems.com/405",
       "manual": false,
       "prize": "no",
-      "rank": 49,
+      "rank": 51,
       "tier": "Plausible"
     },
     {
@@ -2291,7 +2422,7 @@
       "url": "https://www.erdosproblems.com/469",
       "manual": false,
       "prize": "no",
-      "rank": 50,
+      "rank": 52,
       "tier": "Plausible"
     },
     {
@@ -2349,7 +2480,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 51,
+      "rank": 53,
       "tier": "Plausible"
     },
     {
@@ -2402,7 +2533,7 @@
       "url": "https://www.erdosproblems.com/6",
       "manual": false,
       "prize": "$100",
-      "rank": 52,
+      "rank": 54,
       "tier": "Plausible"
     },
     {
@@ -2454,47 +2585,7 @@
       "url": "https://www.erdosproblems.com/48",
       "manual": false,
       "prize": "no",
-      "rank": 53,
-      "tier": "Plausible"
-    },
-    {
-      "id": 152,
-      "statement": "For any $M\\geq 1$, if $A\\subset \\mathbb{N}$ is a sufficiently large finite Sidon set then there are at least $M$ many $a\\in A+A$ such that $a+1,a-1\\not\\in A+A$.",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "sidon sets"
-      ],
-      "score": 61,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/152",
-      "manual": false,
-      "prize": "no",
-      "rank": 54,
+      "rank": 55,
       "tier": "Plausible"
     },
     {
@@ -2534,7 +2625,7 @@
       "url": "https://www.erdosproblems.com/259",
       "manual": false,
       "prize": "no",
-      "rank": 55,
+      "rank": 56,
       "tier": "Plausible"
     },
     {
@@ -2587,7 +2678,7 @@
       "url": "https://www.erdosproblems.com/300",
       "manual": false,
       "prize": "no",
-      "rank": 56,
+      "rank": 57,
       "tier": "Plausible"
     },
     {
@@ -2639,7 +2730,7 @@
       "url": "https://www.erdosproblems.com/457",
       "manual": false,
       "prize": "no",
-      "rank": 57,
+      "rank": 58,
       "tier": "Plausible"
     },
     {
@@ -2691,7 +2782,7 @@
       "url": "https://www.erdosproblems.com/608",
       "manual": false,
       "prize": "no",
-      "rank": 58,
+      "rank": 59,
       "tier": "Plausible"
     },
     {
@@ -2744,7 +2835,7 @@
       "url": "https://www.erdosproblems.com/646",
       "manual": false,
       "prize": "no",
-      "rank": 59,
+      "rank": 60,
       "tier": "Plausible"
     },
     {
@@ -2795,59 +2886,6 @@
       ],
       "partial": null,
       "url": "https://www.erdosproblems.com/888",
-      "manual": false,
-      "prize": "no",
-      "rank": 60,
-      "tier": "Plausible"
-    },
-    {
-      "id": 1141,
-      "statement": "Are there infinitely many $n$ such that $n-k^2$ is prime for all $k$ with $(n,k)=1$ and $k^2<n$?",
-      "status": "Solved",
-      "state": "disproved (lean)",
-      "tags": [
-        "number theory",
-        "primes"
-      ],
-      "score": 61,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Construct and verify a uniform argument or an infinite family."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Unbounded quantifier",
-          "points": -5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/1141",
       "manual": false,
       "prize": "no",
       "rank": 61,
@@ -2944,54 +2982,6 @@
       "tier": "Plausible"
     },
     {
-      "id": 435,
-      "statement": "Let $n\\in\\mathbb{N}$ with $n\\neq p^k$ for any prime $p$ and $k\\geq 0$. What is the largest integer not of the form\\[\\sum_{1\\leq i<n}c_i\\binom{n}{i}\\]where the $c_i\\geq 0$ are integers?",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "number theory"
-      ],
-      "score": 59,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "An optimal bound or classification is requested; a single construction may cover only one direction."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Separate upper and lower bounds and check that they meet the requested precision."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Optimality or full classification",
-          "points": -5
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/435",
-      "manual": false,
-      "prize": "no",
-      "rank": 64,
-      "tier": "Plausible"
-    },
-    {
       "id": 648,
       "statement": "Let $g(n)$ denote the largest $t$ such that there exist integers $2\\leq a_1<a_2<\\cdots <a_t <n$ such that\\[P(a_1)>P(a_2)>\\cdots >P(a_t)\\]where $P(m)$ is the greatest prime factor of $m$. Estimate $g(n)$.",
       "status": "Solved",
@@ -3036,7 +3026,7 @@
       "url": "https://www.erdosproblems.com/648",
       "manual": false,
       "prize": "no",
-      "rank": 65,
+      "rank": 64,
       "tier": "Plausible"
     },
     {
@@ -3084,7 +3074,7 @@
       "url": "https://www.erdosproblems.com/694",
       "manual": false,
       "prize": "no",
-      "rank": 66,
+      "rank": 65,
       "tier": "Plausible"
     },
     {
@@ -3133,7 +3123,7 @@
       "url": "https://www.erdosproblems.com/753",
       "manual": false,
       "prize": "no",
-      "rank": 67,
+      "rank": 66,
       "tier": "Plausible"
     },
     {
@@ -3182,55 +3172,7 @@
       "url": "https://www.erdosproblems.com/844",
       "manual": false,
       "prize": "no",
-      "rank": 68,
-      "tier": "Plausible"
-    },
-    {
-      "id": 1037,
-      "statement": "Let $G$ be a graph on $n$ vertices in which every degree occurs at most twice, and the number of distinct degree is $>(\\frac{1}{2}+\\epsilon)n$. Must $G$ contain a trivial (empty or complete) subgraph of size 'much larger' than $\\log n$?",
-      "status": "Solved",
-      "state": "disproved (lean)",
-      "tags": [
-        "graph theory"
-      ],
-      "score": 59,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
-        "A disproof may reduce to an exact counterexample; the quantifier structure still needs checking."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Build reusable graph encodings and isolate finite certificates from general graph theorems.",
-        "Extract the actual counterexample and certify every side condition."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: graph theory",
-          "points": -7
-        },
-        {
-          "label": "Potential finite counterexample",
-          "points": 7
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/1037",
-      "manual": false,
-      "prize": "no",
-      "rank": 69,
+      "rank": 67,
       "tier": "Plausible"
     },
     {
@@ -3278,7 +3220,7 @@
       "url": "https://www.erdosproblems.com/1080",
       "manual": false,
       "prize": "no",
-      "rank": 70,
+      "rank": 68,
       "tier": "Plausible"
     },
     {
@@ -3326,7 +3268,7 @@
       "url": "https://www.erdosproblems.com/1102",
       "manual": false,
       "prize": "no",
-      "rank": 71,
+      "rank": 69,
       "tier": "Plausible"
     },
     {
@@ -3375,7 +3317,7 @@
       "url": "https://www.erdosproblems.com/1190",
       "manual": false,
       "prize": "no",
-      "rank": 72,
+      "rank": 70,
       "tier": "Plausible"
     },
     {
@@ -3433,7 +3375,7 @@
       "url": "https://www.erdosproblems.com/418",
       "manual": false,
       "prize": "no",
-      "rank": 73,
+      "rank": 71,
       "tier": "Plausible"
     },
     {
@@ -3492,7 +3434,7 @@
       "url": "https://www.erdosproblems.com/459",
       "manual": false,
       "prize": "no",
-      "rank": 74,
+      "rank": 72,
       "tier": "Plausible"
     },
     {
@@ -3539,7 +3481,7 @@
       "url": "https://www.erdosproblems.com/586",
       "manual": false,
       "prize": "no",
-      "rank": 75,
+      "rank": 73,
       "tier": "Plausible"
     },
     {
@@ -3591,7 +3533,7 @@
       "url": "https://www.erdosproblems.com/13",
       "manual": false,
       "prize": "$100",
-      "rank": 76,
+      "rank": 74,
       "tier": "Plausible"
     },
     {
@@ -3644,7 +3586,7 @@
       "url": "https://www.erdosproblems.com/29",
       "manual": false,
       "prize": "$100",
-      "rank": 77,
+      "rank": 75,
       "tier": "Plausible"
     },
     {
@@ -3696,7 +3638,7 @@
       "url": "https://www.erdosproblems.com/220",
       "manual": false,
       "prize": "$500",
-      "rank": 78,
+      "rank": 76,
       "tier": "Plausible"
     },
     {
@@ -3748,7 +3690,7 @@
       "url": "https://www.erdosproblems.com/239",
       "manual": false,
       "prize": "no",
-      "rank": 79,
+      "rank": 77,
       "tier": "Plausible"
     },
     {
@@ -3801,7 +3743,7 @@
       "url": "https://www.erdosproblems.com/285",
       "manual": false,
       "prize": "no",
-      "rank": 80,
+      "rank": 78,
       "tier": "Plausible"
     },
     {
@@ -3854,7 +3796,7 @@
       "url": "https://www.erdosproblems.com/298",
       "manual": false,
       "prize": "no",
-      "rank": 81,
+      "rank": 79,
       "tier": "Plausible"
     },
     {
@@ -3907,7 +3849,7 @@
       "url": "https://www.erdosproblems.com/333",
       "manual": false,
       "prize": "no",
-      "rank": 82,
+      "rank": 80,
       "tier": "Plausible"
     },
     {
@@ -3959,7 +3901,7 @@
       "url": "https://www.erdosproblems.com/487",
       "manual": false,
       "prize": "no",
-      "rank": 83,
+      "rank": 81,
       "tier": "Plausible"
     },
     {
@@ -4011,7 +3953,7 @@
       "url": "https://www.erdosproblems.com/505",
       "manual": false,
       "prize": "no",
-      "rank": 84,
+      "rank": 82,
       "tier": "Plausible"
     },
     {
@@ -4058,7 +4000,7 @@
       "url": "https://www.erdosproblems.com/541",
       "manual": false,
       "prize": "no",
-      "rank": 85,
+      "rank": 83,
       "tier": "Plausible"
     },
     {
@@ -4111,7 +4053,7 @@
       "url": "https://www.erdosproblems.com/698",
       "manual": false,
       "prize": "no",
-      "rank": 86,
+      "rank": 84,
       "tier": "Plausible"
     },
     {
@@ -4164,7 +4106,7 @@
       "url": "https://www.erdosproblems.com/862",
       "manual": false,
       "prize": "no",
-      "rank": 87,
+      "rank": 85,
       "tier": "Plausible"
     },
     {
@@ -4208,7 +4150,7 @@
       "url": "https://www.erdosproblems.com/42",
       "manual": false,
       "prize": "no",
-      "rank": 88,
+      "rank": 86,
       "tier": "Plausible"
     },
     {
@@ -4261,7 +4203,7 @@
       "url": "https://www.erdosproblems.com/144",
       "manual": false,
       "prize": "$250",
-      "rank": 89,
+      "rank": 87,
       "tier": "Plausible"
     },
     {
@@ -4307,7 +4249,7 @@
       "url": "https://www.erdosproblems.com/199",
       "manual": false,
       "prize": "no",
-      "rank": 90,
+      "rank": 88,
       "tier": "Plausible"
     },
     {
@@ -4361,7 +4303,7 @@
       "url": "https://www.erdosproblems.com/369",
       "manual": false,
       "prize": "no",
-      "rank": 91,
+      "rank": 89,
       "tier": "Plausible"
     },
     {
@@ -4420,7 +4362,7 @@
       "url": "https://www.erdosproblems.com/613",
       "manual": false,
       "prize": "no",
-      "rank": 92,
+      "rank": 90,
       "tier": "Plausible"
     },
     {
@@ -4476,7 +4418,7 @@
       "url": "https://www.erdosproblems.com/794",
       "manual": false,
       "prize": "no",
-      "rank": 93,
+      "rank": 91,
       "tier": "Plausible"
     },
     {
@@ -4529,7 +4471,7 @@
       "url": "https://www.erdosproblems.com/964",
       "manual": false,
       "prize": "no",
-      "rank": 94,
+      "rank": 92,
       "tier": "Plausible"
     },
     {
@@ -4578,7 +4520,7 @@
       "url": "https://www.erdosproblems.com/35",
       "manual": false,
       "prize": "no",
-      "rank": 95,
+      "rank": 93,
       "tier": "Plausible"
     },
     {
@@ -4626,7 +4568,7 @@
       "url": "https://www.erdosproblems.com/38",
       "manual": false,
       "prize": "no",
-      "rank": 96,
+      "rank": 94,
       "tier": "Plausible"
     },
     {
@@ -4675,7 +4617,7 @@
       "url": "https://www.erdosproblems.com/125",
       "manual": false,
       "prize": "no",
-      "rank": 97,
+      "rank": 95,
       "tier": "Plausible"
     },
     {
@@ -4723,7 +4665,7 @@
       "url": "https://www.erdosproblems.com/126",
       "manual": false,
       "prize": "$250",
-      "rank": 98,
+      "rank": 96,
       "tier": "Plausible"
     },
     {
@@ -4771,7 +4713,7 @@
       "url": "https://www.erdosproblems.com/209",
       "manual": false,
       "prize": "no",
-      "rank": 99,
+      "rank": 97,
       "tier": "Plausible"
     },
     {
@@ -4820,7 +4762,7 @@
       "url": "https://www.erdosproblems.com/221",
       "manual": false,
       "prize": "no",
-      "rank": 100,
+      "rank": 98,
       "tier": "Plausible"
     },
     {
@@ -4869,7 +4811,7 @@
       "url": "https://www.erdosproblems.com/237",
       "manual": false,
       "prize": "no",
-      "rank": 101,
+      "rank": 99,
       "tier": "Plausible"
     },
     {
@@ -4918,7 +4860,7 @@
       "url": "https://www.erdosproblems.com/314",
       "manual": false,
       "prize": "no",
-      "rank": 102,
+      "rank": 100,
       "tier": "Plausible"
     },
     {
@@ -4967,7 +4909,7 @@
       "url": "https://www.erdosproblems.com/315",
       "manual": false,
       "prize": "no",
-      "rank": 103,
+      "rank": 101,
       "tier": "Plausible"
     },
     {
@@ -5016,7 +4958,7 @@
       "url": "https://www.erdosproblems.com/330",
       "manual": false,
       "prize": "no",
-      "rank": 104,
+      "rank": 102,
       "tier": "Plausible"
     },
     {
@@ -5065,7 +5007,7 @@
       "url": "https://www.erdosproblems.com/347",
       "manual": false,
       "prize": "no",
-      "rank": 105,
+      "rank": 103,
       "tier": "Plausible"
     },
     {
@@ -5113,7 +5055,7 @@
       "url": "https://www.erdosproblems.com/845",
       "manual": false,
       "prize": "no",
-      "rank": 106,
+      "rank": 104,
       "tier": "Plausible"
     },
     {
@@ -5161,7 +5103,7 @@
       "url": "https://www.erdosproblems.com/897",
       "manual": false,
       "prize": "no",
-      "rank": 107,
+      "rank": 105,
       "tier": "Plausible"
     },
     {
@@ -5209,7 +5151,7 @@
       "url": "https://www.erdosproblems.com/1096",
       "manual": false,
       "prize": "no",
-      "rank": 108,
+      "rank": 106,
       "tier": "Plausible"
     },
     {
@@ -5255,7 +5197,7 @@
       "url": "https://www.erdosproblems.com/24",
       "manual": false,
       "prize": "no",
-      "rank": 109,
+      "rank": 107,
       "tier": "Plausible"
     },
     {
@@ -5301,7 +5243,7 @@
       "url": "https://www.erdosproblems.com/69",
       "manual": false,
       "prize": "no",
-      "rank": 110,
+      "rank": 108,
       "tier": "Plausible"
     },
     {
@@ -5350,7 +5292,7 @@
       "url": "https://www.erdosproblems.com/192",
       "manual": false,
       "prize": "no",
-      "rank": 111,
+      "rank": 109,
       "tier": "Plausible"
     },
     {
@@ -5392,7 +5334,7 @@
       "url": "https://www.erdosproblems.com/266",
       "manual": false,
       "prize": "no",
-      "rank": 112,
+      "rank": 110,
       "tier": "Plausible"
     },
     {
@@ -5438,7 +5380,7 @@
       "url": "https://www.erdosproblems.com/387",
       "manual": false,
       "prize": "no",
-      "rank": 113,
+      "rank": 111,
       "tier": "Plausible"
     },
     {
@@ -5483,7 +5425,7 @@
       "url": "https://www.erdosproblems.com/402",
       "manual": false,
       "prize": "no",
-      "rank": 114,
+      "rank": 112,
       "tier": "Plausible"
     },
     {
@@ -5531,7 +5473,7 @@
       "url": "https://www.erdosproblems.com/497",
       "manual": false,
       "prize": "no",
-      "rank": 115,
+      "rank": 113,
       "tier": "Plausible"
     },
     {
@@ -5578,7 +5520,7 @@
       "url": "https://www.erdosproblems.com/571",
       "manual": false,
       "prize": "no",
-      "rank": 116,
+      "rank": 114,
       "tier": "Plausible"
     },
     {
@@ -5633,7 +5575,7 @@
       "url": "https://www.erdosproblems.com/762",
       "manual": false,
       "prize": "no",
-      "rank": 117,
+      "rank": 115,
       "tier": "Plausible"
     },
     {
@@ -5682,7 +5624,7 @@
       "url": "https://www.erdosproblems.com/884",
       "manual": false,
       "prize": "no",
-      "rank": 118,
+      "rank": 116,
       "tier": "Plausible"
     },
     {
@@ -5728,7 +5670,7 @@
       "url": "https://www.erdosproblems.com/905",
       "manual": false,
       "prize": "no",
-      "rank": 119,
+      "rank": 117,
       "tier": "Plausible"
     },
     {
@@ -5775,7 +5717,7 @@
       "url": "https://www.erdosproblems.com/923",
       "manual": false,
       "prize": "no",
-      "rank": 120,
+      "rank": 118,
       "tier": "Plausible"
     },
     {
@@ -5820,7 +5762,7 @@
       "url": "https://www.erdosproblems.com/1214",
       "manual": false,
       "prize": "no",
-      "rank": 121,
+      "rank": 119,
       "tier": "Plausible"
     },
     {
@@ -5875,7 +5817,7 @@
       "url": "https://www.erdosproblems.com/219",
       "manual": false,
       "prize": "no",
-      "rank": 122,
+      "rank": 120,
       "tier": "Plausible"
     },
     {
@@ -5924,7 +5866,7 @@
       "url": "https://www.erdosproblems.com/230",
       "manual": false,
       "prize": "no",
-      "rank": 123,
+      "rank": 121,
       "tier": "Plausible"
     },
     {
@@ -5977,7 +5919,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 124,
+      "rank": 122,
       "tier": "Plausible"
     },
     {
@@ -6025,7 +5967,7 @@
       "url": "https://www.erdosproblems.com/658",
       "manual": false,
       "prize": "no",
-      "rank": 125,
+      "rank": 123,
       "tier": "Plausible"
     },
     {
@@ -6083,7 +6025,7 @@
       "url": "https://www.erdosproblems.com/1026",
       "manual": false,
       "prize": "no",
-      "rank": 126,
+      "rank": 124,
       "tier": "Plausible"
     },
     {
@@ -6131,7 +6073,7 @@
       "url": "https://www.erdosproblems.com/1043",
       "manual": false,
       "prize": "no",
-      "rank": 127,
+      "rank": 125,
       "tier": "Plausible"
     },
     {
@@ -6179,7 +6121,7 @@
       "url": "https://www.erdosproblems.com/1047",
       "manual": false,
       "prize": "no",
-      "rank": 128,
+      "rank": 126,
       "tier": "Plausible"
     },
     {
@@ -6227,7 +6169,7 @@
       "url": "https://www.erdosproblems.com/1048",
       "manual": false,
       "prize": "no",
-      "rank": 129,
+      "rank": 127,
       "tier": "Plausible"
     },
     {
@@ -6286,7 +6228,7 @@
       "url": "https://www.erdosproblems.com/31",
       "manual": false,
       "prize": "no",
-      "rank": 130,
+      "rank": 128,
       "tier": "Plausible"
     },
     {
@@ -6345,7 +6287,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 131,
+      "rank": 129,
       "tier": "Plausible"
     },
     {
@@ -6393,7 +6335,7 @@
       "url": "https://www.erdosproblems.com/46",
       "manual": false,
       "prize": "no",
-      "rank": 132,
+      "rank": 130,
       "tier": "Plausible"
     },
     {
@@ -6451,7 +6393,7 @@
       "url": "https://www.erdosproblems.com/106",
       "manual": false,
       "prize": "no",
-      "rank": 133,
+      "rank": 131,
       "tier": "Plausible"
     },
     {
@@ -6509,7 +6451,7 @@
       "url": "https://www.erdosproblems.com/248",
       "manual": false,
       "prize": "no",
-      "rank": 134,
+      "rank": 132,
       "tier": "Plausible"
     },
     {
@@ -6568,7 +6510,7 @@
       "url": "https://www.erdosproblems.com/299",
       "manual": false,
       "prize": "no",
-      "rank": 135,
+      "rank": 133,
       "tier": "Plausible"
     },
     {
@@ -6626,7 +6568,7 @@
       "url": "https://www.erdosproblems.com/480",
       "manual": false,
       "prize": "no",
-      "rank": 136,
+      "rank": 134,
       "tier": "Plausible"
     },
     {
@@ -6673,7 +6615,7 @@
       "url": "https://www.erdosproblems.com/582",
       "manual": false,
       "prize": "$100",
-      "rank": 137,
+      "rank": 135,
       "tier": "Plausible"
     },
     {
@@ -6720,7 +6662,7 @@
       "url": "https://www.erdosproblems.com/639",
       "manual": false,
       "prize": "no",
-      "rank": 138,
+      "rank": 136,
       "tier": "Plausible"
     },
     {
@@ -6762,7 +6704,7 @@
       "url": "https://www.erdosproblems.com/666",
       "manual": false,
       "prize": "no",
-      "rank": 139,
+      "rank": 137,
       "tier": "Plausible"
     },
     {
@@ -6821,7 +6763,7 @@
       "url": "https://www.erdosproblems.com/729",
       "manual": false,
       "prize": "no",
-      "rank": 140,
+      "rank": 138,
       "tier": "Plausible"
     },
     {
@@ -6863,7 +6805,7 @@
       "url": "https://www.erdosproblems.com/904",
       "manual": false,
       "prize": "no",
-      "rank": 141,
+      "rank": 139,
       "tier": "Plausible"
     },
     {
@@ -6905,7 +6847,7 @@
       "url": "https://www.erdosproblems.com/1036",
       "manual": false,
       "prize": "no",
-      "rank": 142,
+      "rank": 140,
       "tier": "Plausible"
     },
     {
@@ -6951,7 +6893,7 @@
       "url": "https://www.erdosproblems.com/1051",
       "manual": false,
       "prize": "no",
-      "rank": 143,
+      "rank": 141,
       "tier": "Plausible"
     },
     {
@@ -7010,7 +6952,7 @@
       "url": "https://www.erdosproblems.com/26",
       "manual": false,
       "prize": "no",
-      "rank": 144,
+      "rank": 142,
       "tier": "Plausible"
     },
     {
@@ -7050,7 +6992,7 @@
       "url": "https://www.erdosproblems.com/407",
       "manual": false,
       "prize": "no",
-      "rank": 145,
+      "rank": 143,
       "tier": "Plausible"
     },
     {
@@ -7098,7 +7040,7 @@
       "url": "https://www.erdosproblems.com/441",
       "manual": false,
       "prize": "no",
-      "rank": 146,
+      "rank": 144,
       "tier": "Plausible"
     },
     {
@@ -7138,7 +7080,7 @@
       "url": "https://www.erdosproblems.com/473",
       "manual": false,
       "prize": "no",
-      "rank": 147,
+      "rank": 145,
       "tier": "Plausible"
     },
     {
@@ -7179,7 +7121,7 @@
       "url": "https://www.erdosproblems.com/496",
       "manual": false,
       "prize": "no",
-      "rank": 148,
+      "rank": 146,
       "tier": "Plausible"
     },
     {
@@ -7227,7 +7169,7 @@
       "url": "https://www.erdosproblems.com/847",
       "manual": false,
       "prize": "no",
-      "rank": 149,
+      "rank": 147,
       "tier": "Plausible"
     },
     {
@@ -7268,7 +7210,7 @@
       "url": "https://www.erdosproblems.com/941",
       "manual": false,
       "prize": "no",
-      "rank": 150,
+      "rank": 148,
       "tier": "Plausible"
     },
     {
@@ -7305,7 +7247,7 @@
       "url": "https://www.erdosproblems.com/1147",
       "manual": false,
       "prize": "no",
-      "rank": 151,
+      "rank": 149,
       "tier": "Plausible"
     },
     {
@@ -7354,7 +7296,7 @@
       "url": "https://www.erdosproblems.com/21",
       "manual": false,
       "prize": "$500",
-      "rank": 152,
+      "rank": 150,
       "tier": "Plausible"
     },
     {
@@ -7398,7 +7340,7 @@
       "url": "https://www.erdosproblems.com/45",
       "manual": false,
       "prize": "no",
-      "rank": 153,
+      "rank": 151,
       "tier": "Plausible"
     },
     {
@@ -7453,7 +7395,7 @@
       "url": "https://www.erdosproblems.com/49",
       "manual": false,
       "prize": "no",
-      "rank": 154,
+      "rank": 152,
       "tier": "Plausible"
     },
     {
@@ -7508,7 +7450,7 @@
       "url": "https://www.erdosproblems.com/121",
       "manual": false,
       "prize": "no",
-      "rank": 155,
+      "rank": 153,
       "tier": "Plausible"
     },
     {
@@ -7550,7 +7492,7 @@
       "url": "https://www.erdosproblems.com/154",
       "manual": false,
       "prize": "no",
-      "rank": 156,
+      "rank": 154,
       "tier": "Plausible"
     },
     {
@@ -7593,7 +7535,7 @@
       "url": "https://www.erdosproblems.com/191",
       "manual": false,
       "prize": "no",
-      "rank": 157,
+      "rank": 155,
       "tier": "Plausible"
     },
     {
@@ -7641,7 +7583,7 @@
       "url": "https://www.erdosproblems.com/214",
       "manual": false,
       "prize": "no",
-      "rank": 158,
+      "rank": 156,
       "tier": "Plausible"
     },
     {
@@ -7687,7 +7629,7 @@
       "url": "https://www.erdosproblems.com/215",
       "manual": false,
       "prize": "no",
-      "rank": 159,
+      "rank": 157,
       "tier": "Plausible"
     },
     {
@@ -7741,7 +7683,7 @@
       "url": "https://www.erdosproblems.com/253",
       "manual": false,
       "prize": "no",
-      "rank": 160,
+      "rank": 158,
       "tier": "Plausible"
     },
     {
@@ -7783,7 +7725,7 @@
       "url": "https://www.erdosproblems.com/258",
       "manual": false,
       "prize": "no",
-      "rank": 161,
+      "rank": 159,
       "tier": "Plausible"
     },
     {
@@ -7825,7 +7767,7 @@
       "url": "https://www.erdosproblems.com/262",
       "manual": false,
       "prize": "no",
-      "rank": 162,
+      "rank": 160,
       "tier": "Plausible"
     },
     {
@@ -7879,7 +7821,7 @@
       "url": "https://www.erdosproblems.com/268",
       "manual": false,
       "prize": "no",
-      "rank": 163,
+      "rank": 161,
       "tier": "Plausible"
     },
     {
@@ -7934,62 +7876,7 @@
       "url": "https://www.erdosproblems.com/281",
       "manual": false,
       "prize": "no",
-      "rank": 164,
-      "tier": "Plausible"
-    },
-    {
-      "id": 283,
-      "statement": "Let $p:\\mathbb{Z}\\to \\mathbb{Z}$ be a polynomial whose leading coefficient is positive and such that there exists no $d\\geq 2$ with $d\\mid p(n)$ for all $n\\geq 1$. Is it true that, for all sufficiently large $m$, there exist integers $1\\leq n_1<\\cdots <n_k$ such that\\[1=\\frac{1}{n_1}+\\cdots+\\frac{1}{n_k}\\]and\\[m=p(n_1)+\\cdots+p(n_k)?\\]",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "number theory",
-        "unit fractions"
-      ],
-      "score": 50,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
-        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Construct and verify a uniform argument or an infinite family.",
-        "Prove the asymptotic statement with its full quantifiers and error control."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Unbounded quantifier",
-          "points": -5
-        },
-        {
-          "label": "Asymptotic or density target",
-          "points": -9
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/283",
-      "manual": false,
-      "prize": "no",
-      "rank": 165,
+      "rank": 162,
       "tier": "Plausible"
     },
     {
@@ -8044,7 +7931,7 @@
       "url": "https://www.erdosproblems.com/296",
       "manual": false,
       "prize": "no",
-      "rank": 166,
+      "rank": 163,
       "tier": "Plausible"
     },
     {
@@ -8100,7 +7987,7 @@
       "url": "https://www.erdosproblems.com/358",
       "manual": false,
       "prize": "no",
-      "rank": 167,
+      "rank": 164,
       "tier": "Plausible"
     },
     {
@@ -8155,7 +8042,7 @@
       "url": "https://www.erdosproblems.com/391",
       "manual": false,
       "prize": "no",
-      "rank": 168,
+      "rank": 165,
       "tier": "Plausible"
     },
     {
@@ -8209,7 +8096,7 @@
       "url": "https://www.erdosproblems.com/443",
       "manual": false,
       "prize": "no",
-      "rank": 169,
+      "rank": 166,
       "tier": "Plausible"
     },
     {
@@ -8272,7 +8159,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 170,
+      "rank": 167,
       "tier": "Plausible"
     },
     {
@@ -8316,7 +8203,7 @@
       "url": "https://www.erdosproblems.com/484",
       "manual": false,
       "prize": "no",
-      "rank": 171,
+      "rank": 168,
       "tier": "Plausible"
     },
     {
@@ -8373,7 +8260,7 @@
       "url": "https://www.erdosproblems.com/540",
       "manual": false,
       "prize": "no",
-      "rank": 172,
+      "rank": 169,
       "tier": "Plausible"
     },
     {
@@ -8427,7 +8314,7 @@
       "url": "https://www.erdosproblems.com/615",
       "manual": false,
       "prize": "no",
-      "rank": 173,
+      "rank": 170,
       "tier": "Plausible"
     },
     {
@@ -8481,7 +8368,7 @@
       "url": "https://www.erdosproblems.com/793",
       "manual": false,
       "prize": "no",
-      "rank": 174,
+      "rank": 171,
       "tier": "Plausible"
     },
     {
@@ -8536,7 +8423,7 @@
       "url": "https://www.erdosproblems.com/868",
       "manual": false,
       "prize": "no",
-      "rank": 175,
+      "rank": 172,
       "tier": "Plausible"
     },
     {
@@ -8591,7 +8478,7 @@
       "url": "https://www.erdosproblems.com/958",
       "manual": false,
       "prize": "no",
-      "rank": 176,
+      "rank": 173,
       "tier": "Plausible"
     },
     {
@@ -8635,7 +8522,7 @@
       "url": "https://www.erdosproblems.com/966",
       "manual": false,
       "prize": "no",
-      "rank": 177,
+      "rank": 174,
       "tier": "Plausible"
     },
     {
@@ -8690,7 +8577,7 @@
       "url": "https://www.erdosproblems.com/1000",
       "manual": false,
       "prize": "no",
-      "rank": 178,
+      "rank": 175,
       "tier": "Plausible"
     },
     {
@@ -8744,7 +8631,7 @@
       "url": "https://www.erdosproblems.com/1134",
       "manual": false,
       "prize": "£10",
-      "rank": 179,
+      "rank": 176,
       "tier": "Plausible"
     },
     {
@@ -8797,7 +8684,7 @@
       "url": "https://www.erdosproblems.com/1",
       "manual": false,
       "prize": "$500",
-      "rank": 180,
+      "rank": 177,
       "tier": "Difficult"
     },
     {
@@ -8849,7 +8736,7 @@
       "url": "https://www.erdosproblems.com/4",
       "manual": false,
       "prize": "$10000",
-      "rank": 181,
+      "rank": 178,
       "tier": "Difficult"
     },
     {
@@ -8897,7 +8784,7 @@
       "url": "https://www.erdosproblems.com/53",
       "manual": false,
       "prize": "no",
-      "rank": 182,
+      "rank": 179,
       "tier": "Difficult"
     },
     {
@@ -8951,7 +8838,7 @@
       "url": "https://www.erdosproblems.com/63",
       "manual": false,
       "prize": "no",
-      "rank": 183,
+      "rank": 180,
       "tier": "Difficult"
     },
     {
@@ -8987,7 +8874,7 @@
       "url": "https://www.erdosproblems.com/235",
       "manual": false,
       "prize": "no",
-      "rank": 184,
+      "rank": 181,
       "tier": "Difficult"
     },
     {
@@ -9039,7 +8926,7 @@
       "url": "https://www.erdosproblems.com/321",
       "manual": false,
       "prize": "no",
-      "rank": 185,
+      "rank": 182,
       "tier": "Difficult"
     },
     {
@@ -9075,7 +8962,7 @@
       "url": "https://www.erdosproblems.com/360",
       "manual": false,
       "prize": "no",
-      "rank": 186,
+      "rank": 183,
       "tier": "Difficult"
     },
     {
@@ -9145,7 +9032,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 187,
+      "rank": 184,
       "tier": "Difficult"
     },
     {
@@ -9196,7 +9083,7 @@
       "url": "https://www.erdosproblems.com/587",
       "manual": false,
       "prize": "no",
-      "rank": 188,
+      "rank": 185,
       "tier": "Difficult"
     },
     {
@@ -9251,7 +9138,7 @@
       "url": "https://www.erdosproblems.com/692",
       "manual": false,
       "prize": "no",
-      "rank": 189,
+      "rank": 186,
       "tier": "Difficult"
     },
     {
@@ -9306,7 +9193,7 @@
       "url": "https://www.erdosproblems.com/696",
       "manual": false,
       "prize": "no",
-      "rank": 190,
+      "rank": 187,
       "tier": "Difficult"
     },
     {
@@ -9359,7 +9246,7 @@
       "url": "https://www.erdosproblems.com/730",
       "manual": false,
       "prize": "no",
-      "rank": 191,
+      "rank": 188,
       "tier": "Difficult"
     },
     {
@@ -9395,7 +9282,7 @@
       "url": "https://www.erdosproblems.com/783",
       "manual": false,
       "prize": "no",
-      "rank": 192,
+      "rank": 189,
       "tier": "Difficult"
     },
     {
@@ -9431,7 +9318,7 @@
       "url": "https://www.erdosproblems.com/843",
       "manual": false,
       "prize": "no",
-      "rank": 193,
+      "rank": 190,
       "tier": "Difficult"
     },
     {
@@ -9479,7 +9366,7 @@
       "url": "https://www.erdosproblems.com/865",
       "manual": false,
       "prize": "no",
-      "rank": 194,
+      "rank": 191,
       "tier": "Difficult"
     },
     {
@@ -9531,7 +9418,7 @@
       "url": "https://www.erdosproblems.com/867",
       "manual": false,
       "prize": "no",
-      "rank": 195,
+      "rank": 192,
       "tier": "Difficult"
     },
     {
@@ -9567,7 +9454,7 @@
       "url": "https://www.erdosproblems.com/1058",
       "manual": false,
       "prize": "no",
-      "rank": 196,
+      "rank": 193,
       "tier": "Difficult"
     },
     {
@@ -9603,7 +9490,7 @@
       "url": "https://www.erdosproblems.com/1180",
       "manual": false,
       "prize": "no",
-      "rank": 197,
+      "rank": 194,
       "tier": "Difficult"
     },
     {
@@ -9649,7 +9536,7 @@
       "url": "https://www.erdosproblems.com/226",
       "manual": false,
       "prize": "no",
-      "rank": 198,
+      "rank": 195,
       "tier": "Difficult"
     },
     {
@@ -9702,7 +9589,7 @@
       "url": "https://www.erdosproblems.com/362",
       "manual": false,
       "prize": "no",
-      "rank": 199,
+      "rank": 196,
       "tier": "Difficult"
     },
     {
@@ -9761,7 +9648,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 200,
+      "rank": 197,
       "tier": "Difficult"
     },
     {
@@ -9814,7 +9701,7 @@
       "url": "https://www.erdosproblems.com/490",
       "manual": false,
       "prize": "no",
-      "rank": 201,
+      "rank": 198,
       "tier": "Difficult"
     },
     {
@@ -9860,7 +9747,7 @@
       "url": "https://www.erdosproblems.com/519",
       "manual": false,
       "prize": "no",
-      "rank": 202,
+      "rank": 199,
       "tier": "Difficult"
     },
     {
@@ -9902,7 +9789,7 @@
       "url": "https://www.erdosproblems.com/898",
       "manual": false,
       "prize": "no",
-      "rank": 203,
+      "rank": 200,
       "tier": "Difficult"
     },
     {
@@ -9960,7 +9847,7 @@
       "url": "https://www.erdosproblems.com/937",
       "manual": false,
       "prize": "no",
-      "rank": 204,
+      "rank": 201,
       "tier": "Difficult"
     },
     {
@@ -10012,7 +9899,7 @@
       "url": "https://www.erdosproblems.com/946",
       "manual": false,
       "prize": "no",
-      "rank": 205,
+      "rank": 202,
       "tier": "Difficult"
     },
     {
@@ -10055,7 +9942,7 @@
       "url": "https://www.erdosproblems.com/1090",
       "manual": false,
       "prize": "no",
-      "rank": 206,
+      "rank": 203,
       "tier": "Difficult"
     },
     {
@@ -10097,7 +9984,7 @@
       "url": "https://www.erdosproblems.com/1121",
       "manual": false,
       "prize": "no",
-      "rank": 207,
+      "rank": 204,
       "tier": "Difficult"
     },
     {
@@ -10147,7 +10034,7 @@
       "url": "https://www.erdosproblems.com/1128",
       "manual": false,
       "prize": "$50",
-      "rank": 208,
+      "rank": 205,
       "tier": "Difficult"
     },
     {
@@ -10211,7 +10098,7 @@
       "url": "https://www.erdosproblems.com/1138",
       "manual": false,
       "prize": "no",
-      "rank": 209,
+      "rank": 206,
       "tier": "Difficult"
     },
     {
@@ -10265,7 +10152,7 @@
       "url": "https://www.erdosproblems.com/1196",
       "manual": false,
       "prize": "no",
-      "rank": 210,
+      "rank": 207,
       "tier": "Difficult"
     },
     {
@@ -10313,7 +10200,7 @@
       "url": "https://www.erdosproblems.com/22",
       "manual": false,
       "prize": "no",
-      "rank": 211,
+      "rank": 208,
       "tier": "Difficult"
     },
     {
@@ -10362,7 +10249,7 @@
       "url": "https://www.erdosproblems.com/37",
       "manual": false,
       "prize": "no",
-      "rank": 212,
+      "rank": 209,
       "tier": "Difficult"
     },
     {
@@ -10411,7 +10298,7 @@
       "url": "https://www.erdosproblems.com/71",
       "manual": false,
       "prize": "no",
-      "rank": 213,
+      "rank": 210,
       "tier": "Difficult"
     },
     {
@@ -10459,7 +10346,7 @@
       "url": "https://www.erdosproblems.com/134",
       "manual": false,
       "prize": "no",
-      "rank": 214,
+      "rank": 211,
       "tier": "Difficult"
     },
     {
@@ -10506,7 +10393,7 @@
       "url": "https://www.erdosproblems.com/202",
       "manual": false,
       "prize": "no",
-      "rank": 215,
+      "rank": 212,
       "tier": "Difficult"
     },
     {
@@ -10556,7 +10443,7 @@
       "url": "https://www.erdosproblems.com/337",
       "manual": false,
       "prize": "no",
-      "rank": 216,
+      "rank": 213,
       "tier": "Difficult"
     },
     {
@@ -10617,7 +10504,7 @@
       "url": "https://www.erdosproblems.com/401",
       "manual": false,
       "prize": "no",
-      "rank": 217,
+      "rank": 214,
       "tier": "Difficult"
     },
     {
@@ -10677,7 +10564,7 @@
       "url": "https://www.erdosproblems.com/433",
       "manual": false,
       "prize": "no",
-      "rank": 218,
+      "rank": 215,
       "tier": "Difficult"
     },
     {
@@ -10725,7 +10612,7 @@
       "url": "https://www.erdosproblems.com/619",
       "manual": false,
       "prize": "no",
-      "rank": 219,
+      "rank": 216,
       "tier": "Difficult"
     },
     {
@@ -10773,7 +10660,7 @@
       "url": "https://www.erdosproblems.com/621",
       "manual": false,
       "prize": "no",
-      "rank": 220,
+      "rank": 217,
       "tier": "Difficult"
     },
     {
@@ -10833,7 +10720,7 @@
       "url": "https://www.erdosproblems.com/650",
       "manual": false,
       "prize": "no",
-      "rank": 221,
+      "rank": 218,
       "tier": "Difficult"
     },
     {
@@ -10881,7 +10768,7 @@
       "url": "https://www.erdosproblems.com/705",
       "manual": false,
       "prize": "no",
-      "rank": 222,
+      "rank": 219,
       "tier": "Difficult"
     },
     {
@@ -10929,7 +10816,7 @@
       "url": "https://www.erdosproblems.com/741",
       "manual": false,
       "prize": "no",
-      "rank": 223,
+      "rank": 220,
       "tier": "Difficult"
     },
     {
@@ -10978,7 +10865,7 @@
       "url": "https://www.erdosproblems.com/751",
       "manual": false,
       "prize": "no",
-      "rank": 224,
+      "rank": 221,
       "tier": "Difficult"
     },
     {
@@ -11026,7 +10913,7 @@
       "url": "https://www.erdosproblems.com/818",
       "manual": false,
       "prize": "no",
-      "rank": 225,
+      "rank": 222,
       "tier": "Difficult"
     },
     {
@@ -11074,7 +10961,7 @@
       "url": "https://www.erdosproblems.com/1007",
       "manual": false,
       "prize": "no",
-      "rank": 226,
+      "rank": 223,
       "tier": "Difficult"
     },
     {
@@ -11129,7 +11016,7 @@
       "url": "https://www.erdosproblems.com/1022",
       "manual": false,
       "prize": "no",
-      "rank": 227,
+      "rank": 224,
       "tier": "Difficult"
     },
     {
@@ -11178,7 +11065,7 @@
       "url": "https://www.erdosproblems.com/1081",
       "manual": false,
       "prize": "no",
-      "rank": 228,
+      "rank": 225,
       "tier": "Difficult"
     },
     {
@@ -11239,7 +11126,7 @@
       "url": "https://www.erdosproblems.com/183",
       "manual": false,
       "prize": "$250",
-      "rank": 229,
+      "rank": 226,
       "tier": "Difficult"
     },
     {
@@ -11282,7 +11169,7 @@
       "url": "https://www.erdosproblems.com/229",
       "manual": false,
       "prize": "no",
-      "rank": 230,
+      "rank": 227,
       "tier": "Difficult"
     },
     {
@@ -11329,7 +11216,7 @@
       "url": "https://www.erdosproblems.com/294",
       "manual": false,
       "prize": "no",
-      "rank": 231,
+      "rank": 228,
       "tier": "Difficult"
     },
     {
@@ -11376,7 +11263,7 @@
       "url": "https://www.erdosproblems.com/297",
       "manual": false,
       "prize": "no",
-      "rank": 232,
+      "rank": 229,
       "tier": "Difficult"
     },
     {
@@ -11423,7 +11310,7 @@
       "url": "https://www.erdosproblems.com/320",
       "manual": false,
       "prize": "no",
-      "rank": 233,
+      "rank": 230,
       "tier": "Difficult"
     },
     {
@@ -11465,7 +11352,7 @@
       "url": "https://www.erdosproblems.com/482",
       "manual": false,
       "prize": "no",
-      "rank": 234,
+      "rank": 231,
       "tier": "Difficult"
     },
     {
@@ -11511,82 +11398,7 @@
       "url": "https://www.erdosproblems.com/641",
       "manual": false,
       "prize": "no",
-      "rank": 235,
-      "tier": "Difficult"
-    },
-    {
-      "id": 678,
-      "statement": "Let $M(n,k)=[n+1,\\ldots,n+k]$ be the least common multiple of $\\{n+1,\\ldots,n+k\\}$. Are there infinitely many $m,n$ and $k\\geq 3$ with $m\\geq n+k$ such that\\[M(n,k)>M(m,k+1)?\\]",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "number theory"
-      ],
-      "score": 46,
-      "harness": "Untried",
-      "rationale": [
-        "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it.",
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
-        "The solution discussion explicitly describes an elementary or short proof route.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
-      ],
-      "requirements": [
-        "Freeze the intended quantifiers and reconstruct the uniform large-k construction.",
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Construct and verify a uniform argument or an infinite family.",
-        "Check that the easy argument solves the full question, not merely a special case.",
-        "Freeze the corrected statement and record the scope choice."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Unbounded quantifier",
-          "points": -5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        },
-        {
-          "label": "Explicit easy-proof signal",
-          "points": 10
-        },
-        {
-          "label": "Statement-interpretation risk",
-          "points": -3
-        },
-        {
-          "label": "Problem-specific manual review adjustment",
-          "points": -22
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/678",
-      "manual": true,
-      "prize": "no",
-      "assessed": {
-        "on": null,
-        "sources": [],
-        "searchFloor": null
-      },
-      "rank": 236,
+      "rank": 232,
       "tier": "Difficult"
     },
     {
@@ -11632,51 +11444,7 @@
       "url": "https://www.erdosproblems.com/841",
       "manual": false,
       "prize": "no",
-      "rank": 237,
-      "tier": "Difficult"
-    },
-    {
-      "id": 997,
-      "statement": "Call $x_1,x_2,\\ldots \\in (0,1)$ well-distributed if, for every $\\epsilon>0$, if $k$ is sufficiently large then, for all $n>0$ and intervals $I\\subseteq [0,1]$,\\[\\lvert \\# \\{ n<m\\leq n+k : x_m\\in I\\} - \\lvert I\\rvert k\\rvert < \\epsilon k.\\]Is it true that, for every $\\alpha$, the sequence $\\{ \\alpha p_n\\}$ is not well-distributed, if $p_n$ is the sequence of primes?",
-      "status": "Solved",
-      "state": "proved (lean)",
-      "tags": [
-        "analysis",
-        "discrepancy",
-        "primes"
-      ],
-      "score": 46,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Limits, function spaces and analytic estimates create a larger formalization burden."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: analysis",
-          "points": -13
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/997",
-      "manual": false,
-      "prize": "no",
-      "rank": 238,
+      "rank": 233,
       "tier": "Difficult"
     },
     {
@@ -11722,7 +11490,7 @@
       "url": "https://www.erdosproblems.com/1140",
       "manual": false,
       "prize": "no",
-      "rank": 239,
+      "rank": 234,
       "tier": "Difficult"
     },
     {
@@ -11765,7 +11533,7 @@
       "url": "https://www.erdosproblems.com/1202",
       "manual": false,
       "prize": "no",
-      "rank": 240,
+      "rank": 235,
       "tier": "Difficult"
     },
     {
@@ -11818,7 +11586,7 @@
       "url": "https://www.erdosproblems.com/59",
       "manual": false,
       "prize": "no",
-      "rank": 241,
+      "rank": 236,
       "tier": "Difficult"
     },
     {
@@ -11871,7 +11639,7 @@
       "url": "https://www.erdosproblems.com/113",
       "manual": false,
       "prize": "$500",
-      "rank": 242,
+      "rank": 237,
       "tier": "Difficult"
     },
     {
@@ -11919,7 +11687,7 @@
       "url": "https://www.erdosproblems.com/178",
       "manual": false,
       "prize": "no",
-      "rank": 243,
+      "rank": 238,
       "tier": "Difficult"
     },
     {
@@ -11979,7 +11747,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 244,
+      "rank": 239,
       "tier": "Difficult"
     },
     {
@@ -12031,7 +11799,7 @@
       "url": "https://www.erdosproblems.com/224",
       "manual": false,
       "prize": "no",
-      "rank": 245,
+      "rank": 240,
       "tier": "Difficult"
     },
     {
@@ -12079,7 +11847,7 @@
       "url": "https://www.erdosproblems.com/255",
       "manual": false,
       "prize": "no",
-      "rank": 246,
+      "rank": 241,
       "tier": "Difficult"
     },
     {
@@ -12130,7 +11898,7 @@
       "url": "https://www.erdosproblems.com/270",
       "manual": false,
       "prize": "no",
-      "rank": 247,
+      "rank": 242,
       "tier": "Difficult"
     },
     {
@@ -12181,7 +11949,7 @@
       "url": "https://www.erdosproblems.com/421",
       "manual": false,
       "prize": "no",
-      "rank": 248,
+      "rank": 243,
       "tier": "Difficult"
     },
     {
@@ -12234,7 +12002,7 @@
       "url": "https://www.erdosproblems.com/765",
       "manual": false,
       "prize": "no",
-      "rank": 249,
+      "rank": 244,
       "tier": "Difficult"
     },
     {
@@ -12287,7 +12055,7 @@
       "url": "https://www.erdosproblems.com/775",
       "manual": false,
       "prize": "no",
-      "rank": 250,
+      "rank": 245,
       "tier": "Difficult"
     },
     {
@@ -12338,7 +12106,7 @@
       "url": "https://www.erdosproblems.com/822",
       "manual": false,
       "prize": "no",
-      "rank": 251,
+      "rank": 246,
       "tier": "Difficult"
     },
     {
@@ -12396,7 +12164,7 @@
       "url": "https://www.erdosproblems.com/109",
       "manual": false,
       "prize": "no",
-      "rank": 252,
+      "rank": 247,
       "tier": "Difficult"
     },
     {
@@ -12433,7 +12201,7 @@
       "url": "https://www.erdosproblems.com/207",
       "manual": false,
       "prize": "no",
-      "rank": 253,
+      "rank": 248,
       "tier": "Difficult"
     },
     {
@@ -12476,7 +12244,7 @@
       "url": "https://www.erdosproblems.com/308",
       "manual": false,
       "prize": "no",
-      "rank": 254,
+      "rank": 249,
       "tier": "Difficult"
     },
     {
@@ -12533,7 +12301,7 @@
       "url": "https://www.erdosproblems.com/372",
       "manual": false,
       "prize": "no",
-      "rank": 255,
+      "rank": 250,
       "tier": "Difficult"
     },
     {
@@ -12575,7 +12343,7 @@
       "url": "https://www.erdosproblems.com/437",
       "manual": false,
       "prize": "no",
-      "rank": 256,
+      "rank": 251,
       "tier": "Difficult"
     },
     {
@@ -12622,7 +12390,7 @@
       "url": "https://www.erdosproblems.com/549",
       "manual": false,
       "prize": "no",
-      "rank": 257,
+      "rank": 252,
       "tier": "Difficult"
     },
     {
@@ -12665,7 +12433,7 @@
       "url": "https://www.erdosproblems.com/632",
       "manual": false,
       "prize": "no",
-      "rank": 258,
+      "rank": 253,
       "tier": "Difficult"
     },
     {
@@ -12701,7 +12469,7 @@
       "url": "https://www.erdosproblems.com/702",
       "manual": false,
       "prize": "no",
-      "rank": 259,
+      "rank": 254,
       "tier": "Difficult"
     },
     {
@@ -12737,7 +12505,7 @@
       "url": "https://www.erdosproblems.com/722",
       "manual": false,
       "prize": "no",
-      "rank": 260,
+      "rank": 255,
       "tier": "Difficult"
     },
     {
@@ -12773,7 +12541,7 @@
       "url": "https://www.erdosproblems.com/732",
       "manual": false,
       "prize": "no",
-      "rank": 261,
+      "rank": 256,
       "tier": "Difficult"
     },
     {
@@ -12811,7 +12579,7 @@
       "url": "https://www.erdosproblems.com/780",
       "manual": false,
       "prize": "no",
-      "rank": 262,
+      "rank": 257,
       "tier": "Difficult"
     },
     {
@@ -12853,7 +12621,7 @@
       "url": "https://www.erdosproblems.com/795",
       "manual": false,
       "prize": "no",
-      "rank": 263,
+      "rank": 258,
       "tier": "Difficult"
     },
     {
@@ -12896,7 +12664,7 @@
       "url": "https://www.erdosproblems.com/869",
       "manual": false,
       "prize": "no",
-      "rank": 264,
+      "rank": 259,
       "tier": "Difficult"
     },
     {
@@ -12939,7 +12707,7 @@
       "url": "https://www.erdosproblems.com/882",
       "manual": false,
       "prize": "no",
-      "rank": 265,
+      "rank": 260,
       "tier": "Difficult"
     },
     {
@@ -12981,7 +12749,7 @@
       "url": "https://www.erdosproblems.com/896",
       "manual": false,
       "prize": "no",
-      "rank": 266,
+      "rank": 261,
       "tier": "Difficult"
     },
     {
@@ -13017,7 +12785,7 @@
       "url": "https://www.erdosproblems.com/903",
       "manual": false,
       "prize": "no",
-      "rank": 267,
+      "rank": 262,
       "tier": "Difficult"
     },
     {
@@ -13060,7 +12828,7 @@
       "url": "https://www.erdosproblems.com/1006",
       "manual": false,
       "prize": "no",
-      "rank": 268,
+      "rank": 263,
       "tier": "Difficult"
     },
     {
@@ -13114,7 +12882,7 @@
       "url": "https://www.erdosproblems.com/1077",
       "manual": false,
       "prize": "no",
-      "rank": 269,
+      "rank": 264,
       "tier": "Difficult"
     },
     {
@@ -13168,7 +12936,7 @@
       "url": "https://www.erdosproblems.com/1098",
       "manual": false,
       "prize": "no",
-      "rank": 270,
+      "rank": 265,
       "tier": "Difficult"
     },
     {
@@ -13210,7 +12978,7 @@
       "url": "https://www.erdosproblems.com/1205",
       "manual": false,
       "prize": "no",
-      "rank": 271,
+      "rank": 266,
       "tier": "Difficult"
     },
     {
@@ -13270,7 +13038,7 @@
       "url": "https://www.erdosproblems.com/206",
       "manual": false,
       "prize": "no",
-      "rank": 272,
+      "rank": 267,
       "tier": "Difficult"
     },
     {
@@ -13318,7 +13086,7 @@
       "url": "https://www.erdosproblems.com/353",
       "manual": false,
       "prize": "no",
-      "rank": 273,
+      "rank": 268,
       "tier": "Difficult"
     },
     {
@@ -13366,7 +13134,7 @@
       "url": "https://www.erdosproblems.com/426",
       "manual": false,
       "prize": "$25",
-      "rank": 274,
+      "rank": 269,
       "tier": "Difficult"
     },
     {
@@ -13414,7 +13182,7 @@
       "url": "https://www.erdosproblems.com/477",
       "manual": false,
       "prize": "no",
-      "rank": 275,
+      "rank": 270,
       "tier": "Difficult"
     },
     {
@@ -13463,7 +13231,7 @@
       "url": "https://www.erdosproblems.com/502",
       "manual": false,
       "prize": "no",
-      "rank": 276,
+      "rank": 271,
       "tier": "Difficult"
     },
     {
@@ -13516,7 +13284,7 @@
       "url": "https://www.erdosproblems.com/534",
       "manual": false,
       "prize": "no",
-      "rank": 277,
+      "rank": 272,
       "tier": "Difficult"
     },
     {
@@ -13569,7 +13337,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 278,
+      "rank": 273,
       "tier": "Difficult"
     },
     {
@@ -13616,7 +13384,7 @@
       "url": "https://www.erdosproblems.com/594",
       "manual": false,
       "prize": "no",
-      "rank": 279,
+      "rank": 274,
       "tier": "Difficult"
     },
     {
@@ -13664,7 +13432,7 @@
       "url": "https://www.erdosproblems.com/781",
       "manual": false,
       "prize": "no",
-      "rank": 280,
+      "rank": 275,
       "tier": "Difficult"
     },
     {
@@ -13712,7 +13480,7 @@
       "url": "https://www.erdosproblems.com/846",
       "manual": false,
       "prize": "no",
-      "rank": 281,
+      "rank": 276,
       "tier": "Difficult"
     },
     {
@@ -13759,7 +13527,7 @@
       "url": "https://www.erdosproblems.com/851",
       "manual": false,
       "prize": "no",
-      "rank": 282,
+      "rank": 277,
       "tier": "Difficult"
     },
     {
@@ -13823,7 +13591,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 283,
+      "rank": 278,
       "tier": "Difficult"
     },
     {
@@ -13876,7 +13644,7 @@
       "url": "https://www.erdosproblems.com/965",
       "manual": false,
       "prize": "no",
-      "rank": 284,
+      "rank": 279,
       "tier": "Difficult"
     },
     {
@@ -13924,7 +13692,7 @@
       "url": "https://www.erdosproblems.com/1034",
       "manual": false,
       "prize": "no",
-      "rank": 285,
+      "rank": 280,
       "tier": "Difficult"
     },
     {
@@ -13972,7 +13740,7 @@
       "url": "https://www.erdosproblems.com/1071",
       "manual": false,
       "prize": "no",
-      "rank": 286,
+      "rank": 281,
       "tier": "Difficult"
     },
     {
@@ -14028,7 +13796,7 @@
       "url": "https://www.erdosproblems.com/43",
       "manual": false,
       "prize": "$100",
-      "rank": 287,
+      "rank": 282,
       "tier": "Difficult"
     },
     {
@@ -14083,7 +13851,7 @@
       "url": "https://www.erdosproblems.com/140",
       "manual": false,
       "prize": "$500",
-      "rank": 288,
+      "rank": 283,
       "tier": "Difficult"
     },
     {
@@ -14141,7 +13909,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 289,
+      "rank": 284,
       "tier": "Difficult"
     },
     {
@@ -14194,7 +13962,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 290,
+      "rank": 285,
       "tier": "Difficult"
     },
     {
@@ -14241,7 +14009,7 @@
       "url": "https://www.erdosproblems.com/284",
       "manual": false,
       "prize": "no",
-      "rank": 291,
+      "rank": 286,
       "tier": "Difficult"
     },
     {
@@ -14288,7 +14056,7 @@
       "url": "https://www.erdosproblems.com/286",
       "manual": false,
       "prize": "no",
-      "rank": 292,
+      "rank": 287,
       "tier": "Difficult"
     },
     {
@@ -14335,7 +14103,7 @@
       "url": "https://www.erdosproblems.com/292",
       "manual": false,
       "prize": "no",
-      "rank": 293,
+      "rank": 288,
       "tier": "Difficult"
     },
     {
@@ -14382,7 +14150,7 @@
       "url": "https://www.erdosproblems.com/339",
       "manual": false,
       "prize": "no",
-      "rank": 294,
+      "rank": 289,
       "tier": "Difficult"
     },
     {
@@ -14429,7 +14197,7 @@
       "url": "https://www.erdosproblems.com/378",
       "manual": false,
       "prize": "no",
-      "rank": 295,
+      "rank": 290,
       "tier": "Difficult"
     },
     {
@@ -14476,7 +14244,7 @@
       "url": "https://www.erdosproblems.com/682",
       "manual": false,
       "prize": "no",
-      "rank": 296,
+      "rank": 291,
       "tier": "Difficult"
     },
     {
@@ -14524,7 +14292,7 @@
       "url": "https://www.erdosproblems.com/697",
       "manual": false,
       "prize": "no",
-      "rank": 297,
+      "rank": 292,
       "tier": "Difficult"
     },
     {
@@ -14570,7 +14338,7 @@
       "url": "https://www.erdosproblems.com/748",
       "manual": false,
       "prize": "no",
-      "rank": 298,
+      "rank": 293,
       "tier": "Difficult"
     },
     {
@@ -14624,7 +14392,7 @@
       "url": "https://www.erdosproblems.com/899",
       "manual": false,
       "prize": "no",
-      "rank": 299,
+      "rank": 294,
       "tier": "Difficult"
     },
     {
@@ -14681,7 +14449,7 @@
       "url": "https://www.erdosproblems.com/914",
       "manual": false,
       "prize": "no",
-      "rank": 300,
+      "rank": 295,
       "tier": "Difficult"
     },
     {
@@ -14727,7 +14495,7 @@
       "url": "https://www.erdosproblems.com/980",
       "manual": false,
       "prize": "no",
-      "rank": 301,
+      "rank": 296,
       "tier": "Difficult"
     },
     {
@@ -14787,7 +14555,7 @@
       "url": "https://www.erdosproblems.com/1023",
       "manual": false,
       "prize": "no",
-      "rank": 302,
+      "rank": 297,
       "tier": "Difficult"
     },
     {
@@ -14833,7 +14601,7 @@
       "url": "https://www.erdosproblems.com/1149",
       "manual": false,
       "prize": "no",
-      "rank": 303,
+      "rank": 298,
       "tier": "Difficult"
     },
     {
@@ -14882,7 +14650,7 @@
       "url": "https://www.erdosproblems.com/557",
       "manual": false,
       "prize": "no",
-      "rank": 304,
+      "rank": 299,
       "tier": "Difficult"
     },
     {
@@ -14929,7 +14697,7 @@
       "url": "https://www.erdosproblems.com/747",
       "manual": false,
       "prize": "no",
-      "rank": 305,
+      "rank": 300,
       "tier": "Difficult"
     },
     {
@@ -14981,7 +14749,7 @@
       "url": "https://www.erdosproblems.com/755",
       "manual": false,
       "prize": "no",
-      "rank": 306,
+      "rank": 301,
       "tier": "Difficult"
     },
     {
@@ -15034,7 +14802,7 @@
       "url": "https://www.erdosproblems.com/756",
       "manual": false,
       "prize": "no",
-      "rank": 307,
+      "rank": 302,
       "tier": "Difficult"
     },
     {
@@ -15082,7 +14850,7 @@
       "url": "https://www.erdosproblems.com/974",
       "manual": false,
       "prize": "no",
-      "rank": 308,
+      "rank": 303,
       "tier": "Difficult"
     },
     {
@@ -15131,7 +14899,7 @@
       "url": "https://www.erdosproblems.com/1014",
       "manual": false,
       "prize": "no",
-      "rank": 309,
+      "rank": 304,
       "tier": "Difficult"
     },
     {
@@ -15179,7 +14947,7 @@
       "url": "https://www.erdosproblems.com/1044",
       "manual": false,
       "prize": "no",
-      "rank": 310,
+      "rank": 305,
       "tier": "Difficult"
     },
     {
@@ -15219,43 +14987,7 @@
       "url": "https://www.erdosproblems.com/1161",
       "manual": false,
       "prize": "no",
-      "rank": 311,
-      "tier": "Difficult"
-    },
-    {
-      "id": 1213,
-      "statement": "Let $a,K\\geq 1$. Does there exist $f(a,K)$ such that if\\[a=a_1<\\cdots <a_s\\]is a sequence of integers with $a_s> f(a,K)$ and with bounded gaps $a_{i+1}-a_i\\leq K$ then there are two distinct intervals $I$ and $J$ such that\\[\\sum_{i\\in I}a_i=\\sum_{j\\in J}a_j?\\]",
-      "status": "Solved",
-      "state": "proved",
-      "tags": [
-        "additive combinatorics"
-      ],
-      "score": 41,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "Finite set machinery is available; global additive structure can demand deep theorems."
-      ],
-      "requirements": [
-        "Identify whether an explicit finite construction settles the full quantifiers."
-      ],
-      "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "Library fit: additive combinatorics",
-          "points": -3
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/1213",
-      "manual": false,
-      "prize": "no",
-      "rank": 312,
+      "rank": 306,
       "tier": "Difficult"
     },
     {
@@ -15298,7 +15030,7 @@
       "url": "https://www.erdosproblems.com/27",
       "manual": false,
       "prize": "$100",
-      "rank": 313,
+      "rank": 307,
       "tier": "Difficult"
     },
     {
@@ -15358,7 +15090,7 @@
       "url": "https://www.erdosproblems.com/57",
       "manual": false,
       "prize": "no",
-      "rank": 314,
+      "rank": 308,
       "tier": "Difficult"
     },
     {
@@ -15403,7 +15135,7 @@
       "url": "https://www.erdosproblems.com/67",
       "manual": false,
       "prize": "$500",
-      "rank": 315,
+      "rank": 309,
       "tier": "Difficult"
     },
     {
@@ -15462,7 +15194,7 @@
       "url": "https://www.erdosproblems.com/146",
       "manual": false,
       "prize": "$500",
-      "rank": 316,
+      "rank": 310,
       "tier": "Difficult"
     },
     {
@@ -15521,7 +15253,60 @@
       "url": "https://www.erdosproblems.com/147",
       "manual": false,
       "prize": "$500",
-      "rank": 317,
+      "rank": 311,
+      "tier": "Difficult"
+    },
+    {
+      "id": 152,
+      "statement": "For any $M\\geq 1$, if $A\\subset \\mathbb{N}$ is a sufficiently large finite Sidon set then there are at least $M$ many $a\\in A+A$ such that $a+1,a-1\\not\\in A+A$.",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "sidon sets"
+      ],
+      "score": 40,
+      "harness": "Untried",
+      "rationale": [
+        "An elementary double count of Sidon quadruples. The harness certified every step the discovery route supplied and stopped at the one step both discovery attempts named as missing (train diagnostic, 2026-09-24). The 2026-09-25 smoke run was lost to the since-fixed skeleton_context bug.",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success."
+      ],
+      "requirements": [
+        "Re-run on the fixed harness; the missing step is the local inequality 4N1 + N3 <= 3|X| + 2N2 on 0/1 patterns.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -21
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/152",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#candidate-discover-v2-2026-09-24-discover-v2-84f21c5"
+        ],
+        "searchFloor": null
+      },
+      "rank": 312,
       "tier": "Difficult"
     },
     {
@@ -15563,7 +15348,7 @@
       "url": "https://www.erdosproblems.com/491",
       "manual": false,
       "prize": "no",
-      "rank": 318,
+      "rank": 313,
       "tier": "Difficult"
     },
     {
@@ -15605,7 +15390,7 @@
       "url": "https://www.erdosproblems.com/542",
       "manual": false,
       "prize": "no",
-      "rank": 319,
+      "rank": 314,
       "tier": "Difficult"
     },
     {
@@ -15647,7 +15432,7 @@
       "url": "https://www.erdosproblems.com/771",
       "manual": false,
       "prize": "no",
-      "rank": 320,
+      "rank": 315,
       "tier": "Difficult"
     },
     {
@@ -15689,7 +15474,7 @@
       "url": "https://www.erdosproblems.com/823",
       "manual": false,
       "prize": "no",
-      "rank": 321,
+      "rank": 316,
       "tier": "Difficult"
     },
     {
@@ -15732,7 +15517,7 @@
       "url": "https://www.erdosproblems.com/880",
       "manual": false,
       "prize": "no",
-      "rank": 322,
+      "rank": 317,
       "tier": "Difficult"
     },
     {
@@ -15775,7 +15560,7 @@
       "url": "https://www.erdosproblems.com/1001",
       "manual": false,
       "prize": "no",
-      "rank": 323,
+      "rank": 318,
       "tier": "Difficult"
     },
     {
@@ -15834,7 +15619,7 @@
       "url": "https://www.erdosproblems.com/1028",
       "manual": false,
       "prize": "no",
-      "rank": 324,
+      "rank": 319,
       "tier": "Difficult"
     },
     {
@@ -15880,7 +15665,7 @@
       "url": "https://www.erdosproblems.com/1046",
       "manual": false,
       "prize": "no",
-      "rank": 325,
+      "rank": 320,
       "tier": "Difficult"
     },
     {
@@ -15937,7 +15722,7 @@
       "url": "https://www.erdosproblems.com/1064",
       "manual": false,
       "prize": "no",
-      "rank": 326,
+      "rank": 321,
       "tier": "Difficult"
     },
     {
@@ -15979,7 +15764,7 @@
       "url": "https://www.erdosproblems.com/58",
       "manual": false,
       "prize": "no",
-      "rank": 327,
+      "rank": 322,
       "tier": "Difficult"
     },
     {
@@ -16032,7 +15817,7 @@
       "url": "https://www.erdosproblems.com/116",
       "manual": false,
       "prize": "no",
-      "rank": 328,
+      "rank": 323,
       "tier": "Difficult"
     },
     {
@@ -16102,7 +15887,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 329,
+      "rank": 324,
       "tier": "Difficult"
     },
     {
@@ -16145,7 +15930,7 @@
       "url": "https://www.erdosproblems.com/381",
       "manual": false,
       "prize": "no",
-      "rank": 330,
+      "rank": 325,
       "tier": "Difficult"
     },
     {
@@ -16196,7 +15981,7 @@
       "url": "https://www.erdosproblems.com/438",
       "manual": false,
       "prize": "no",
-      "rank": 331,
+      "rank": 326,
       "tier": "Difficult"
     },
     {
@@ -16239,7 +16024,7 @@
       "url": "https://www.erdosproblems.com/446",
       "manual": false,
       "prize": "no",
-      "rank": 332,
+      "rank": 327,
       "tier": "Difficult"
     },
     {
@@ -16282,7 +16067,7 @@
       "url": "https://www.erdosproblems.com/449",
       "manual": false,
       "prize": "no",
-      "rank": 333,
+      "rank": 328,
       "tier": "Difficult"
     },
     {
@@ -16330,7 +16115,7 @@
       "url": "https://www.erdosproblems.com/498",
       "manual": false,
       "prize": "no",
-      "rank": 334,
+      "rank": 329,
       "tier": "Difficult"
     },
     {
@@ -16373,7 +16158,7 @@
       "url": "https://www.erdosproblems.com/673",
       "manual": false,
       "prize": "no",
-      "rank": 335,
+      "rank": 330,
       "tier": "Difficult"
     },
     {
@@ -16415,7 +16200,7 @@
       "url": "https://www.erdosproblems.com/703",
       "manual": false,
       "prize": "$250",
-      "rank": 336,
+      "rank": 331,
       "tier": "Difficult"
     },
     {
@@ -16456,7 +16241,7 @@
       "url": "https://www.erdosproblems.com/737",
       "manual": false,
       "prize": "no",
-      "rank": 337,
+      "rank": 332,
       "tier": "Difficult"
     },
     {
@@ -16504,7 +16289,7 @@
       "url": "https://www.erdosproblems.com/807",
       "manual": false,
       "prize": "no",
-      "rank": 338,
+      "rank": 333,
       "tier": "Difficult"
     },
     {
@@ -16544,7 +16329,7 @@
       "url": "https://www.erdosproblems.com/816",
       "manual": false,
       "prize": "no",
-      "rank": 339,
+      "rank": 334,
       "tier": "Difficult"
     },
     {
@@ -16585,7 +16370,7 @@
       "url": "https://www.erdosproblems.com/834",
       "manual": false,
       "prize": "no",
-      "rank": 340,
+      "rank": 335,
       "tier": "Difficult"
     },
     {
@@ -16626,7 +16411,7 @@
       "url": "https://www.erdosproblems.com/916",
       "manual": false,
       "prize": "no",
-      "rank": 341,
+      "rank": 336,
       "tier": "Difficult"
     },
     {
@@ -16679,7 +16464,7 @@
       "url": "https://www.erdosproblems.com/967",
       "manual": false,
       "prize": "no",
-      "rank": 342,
+      "rank": 337,
       "tier": "Difficult"
     },
     {
@@ -16719,7 +16504,7 @@
       "url": "https://www.erdosproblems.com/1010",
       "manual": false,
       "prize": "no",
-      "rank": 343,
+      "rank": 338,
       "tier": "Difficult"
     },
     {
@@ -16761,7 +16546,7 @@
       "url": "https://www.erdosproblems.com/1025",
       "manual": false,
       "prize": "no",
-      "rank": 344,
+      "rank": 339,
       "tier": "Difficult"
     },
     {
@@ -16804,7 +16589,7 @@
       "url": "https://www.erdosproblems.com/1099",
       "manual": false,
       "prize": "no",
-      "rank": 345,
+      "rank": 340,
       "tier": "Difficult"
     },
     {
@@ -16856,7 +16641,7 @@
       "url": "https://www.erdosproblems.com/1125",
       "manual": false,
       "prize": "no",
-      "rank": 346,
+      "rank": 341,
       "tier": "Difficult"
     },
     {
@@ -16915,7 +16700,7 @@
       "url": "https://www.erdosproblems.com/93",
       "manual": false,
       "prize": "no",
-      "rank": 347,
+      "rank": 342,
       "tier": "Difficult"
     },
     {
@@ -16969,7 +16754,7 @@
       "url": "https://www.erdosproblems.com/127",
       "manual": false,
       "prize": "no",
-      "rank": 348,
+      "rank": 343,
       "tier": "Difficult"
     },
     {
@@ -17024,7 +16809,7 @@
       "url": "https://www.erdosproblems.com/180",
       "manual": false,
       "prize": "no",
-      "rank": 349,
+      "rank": 344,
       "tier": "Difficult"
     },
     {
@@ -17078,7 +16863,7 @@
       "url": "https://www.erdosproblems.com/346",
       "manual": false,
       "prize": "no",
-      "rank": 350,
+      "rank": 345,
       "tier": "Difficult"
     },
     {
@@ -17137,7 +16922,7 @@
       "url": "https://www.erdosproblems.com/447",
       "manual": false,
       "prize": "no",
-      "rank": 351,
+      "rank": 346,
       "tier": "Difficult"
     },
     {
@@ -17179,7 +16964,7 @@
       "url": "https://www.erdosproblems.com/511",
       "manual": false,
       "prize": "no",
-      "rank": 352,
+      "rank": 347,
       "tier": "Difficult"
     },
     {
@@ -17232,7 +17017,7 @@
       "url": "https://www.erdosproblems.com/590",
       "manual": false,
       "prize": "$250",
-      "rank": 353,
+      "rank": 348,
       "tier": "Difficult"
     },
     {
@@ -17286,7 +17071,7 @@
       "url": "https://www.erdosproblems.com/618",
       "manual": false,
       "prize": "no",
-      "rank": 354,
+      "rank": 349,
       "tier": "Difficult"
     },
     {
@@ -17331,7 +17116,7 @@
       "url": "https://www.erdosproblems.com/633",
       "manual": false,
       "prize": "$25",
-      "rank": 355,
+      "rank": 350,
       "tier": "Difficult"
     },
     {
@@ -17389,7 +17174,7 @@
       "url": "https://www.erdosproblems.com/716",
       "manual": false,
       "prize": "no",
-      "rank": 356,
+      "rank": 351,
       "tier": "Difficult"
     },
     {
@@ -17444,7 +17229,7 @@
       "url": "https://www.erdosproblems.com/760",
       "manual": false,
       "prize": "no",
-      "rank": 357,
+      "rank": 352,
       "tier": "Difficult"
     },
     {
@@ -17498,7 +17283,7 @@
       "url": "https://www.erdosproblems.com/927",
       "manual": false,
       "prize": "no",
-      "rank": 358,
+      "rank": 353,
       "tier": "Difficult"
     },
     {
@@ -17556,7 +17341,7 @@
       "url": "https://www.erdosproblems.com/1008",
       "manual": false,
       "prize": "no",
-      "rank": 359,
+      "rank": 354,
       "tier": "Difficult"
     },
     {
@@ -17598,7 +17383,7 @@
       "url": "https://www.erdosproblems.com/1215",
       "manual": false,
       "prize": "no",
-      "rank": 360,
+      "rank": 355,
       "tier": "Difficult"
     },
     {
@@ -17634,7 +17419,7 @@
       "url": "https://www.erdosproblems.com/73",
       "manual": false,
       "prize": "no",
-      "rank": 361,
+      "rank": 356,
       "tier": "Difficult"
     },
     {
@@ -17683,7 +17468,7 @@
       "url": "https://www.erdosproblems.com/115",
       "manual": false,
       "prize": "no",
-      "rank": 362,
+      "rank": 357,
       "tier": "Difficult"
     },
     {
@@ -17747,7 +17532,7 @@
       "url": "https://www.erdosproblems.com/139",
       "manual": false,
       "prize": "$1000",
-      "rank": 363,
+      "rank": 358,
       "tier": "Difficult"
     },
     {
@@ -17796,7 +17581,7 @@
       "url": "https://www.erdosproblems.com/228",
       "manual": false,
       "prize": "no",
-      "rank": 364,
+      "rank": 359,
       "tier": "Difficult"
     },
     {
@@ -17849,7 +17634,7 @@
       "url": "https://www.erdosproblems.com/240",
       "manual": false,
       "prize": "no",
-      "rank": 365,
+      "rank": 360,
       "tier": "Difficult"
     },
     {
@@ -17897,7 +17682,7 @@
       "url": "https://www.erdosproblems.com/395",
       "manual": false,
       "prize": "no",
-      "rank": 366,
+      "rank": 361,
       "tier": "Difficult"
     },
     {
@@ -17945,7 +17730,7 @@
       "url": "https://www.erdosproblems.com/512",
       "manual": false,
       "prize": "no",
-      "rank": 367,
+      "rank": 362,
       "tier": "Difficult"
     },
     {
@@ -17993,7 +17778,7 @@
       "url": "https://www.erdosproblems.com/516",
       "manual": false,
       "prize": "no",
-      "rank": 368,
+      "rank": 363,
       "tier": "Difficult"
     },
     {
@@ -18034,7 +17819,7 @@
       "url": "https://www.erdosproblems.com/518",
       "manual": false,
       "prize": "no",
-      "rank": 369,
+      "rank": 364,
       "tier": "Difficult"
     },
     {
@@ -18075,7 +17860,7 @@
       "url": "https://www.erdosproblems.com/570",
       "manual": false,
       "prize": "no",
-      "rank": 370,
+      "rank": 365,
       "tier": "Difficult"
     },
     {
@@ -18111,7 +17896,7 @@
       "url": "https://www.erdosproblems.com/578",
       "manual": false,
       "prize": "no",
-      "rank": 371,
+      "rank": 366,
       "tier": "Difficult"
     },
     {
@@ -18148,7 +17933,7 @@
       "url": "https://www.erdosproblems.com/630",
       "manual": false,
       "prize": "no",
-      "rank": 372,
+      "rank": 367,
       "tier": "Difficult"
     },
     {
@@ -18184,7 +17969,7 @@
       "url": "https://www.erdosproblems.com/715",
       "manual": false,
       "prize": "no",
-      "rank": 373,
+      "rank": 368,
       "tier": "Difficult"
     },
     {
@@ -18221,7 +18006,7 @@
       "url": "https://www.erdosproblems.com/767",
       "manual": false,
       "prize": "no",
-      "rank": 374,
+      "rank": 369,
       "tier": "Difficult"
     },
     {
@@ -18259,7 +18044,7 @@
       "url": "https://www.erdosproblems.com/832",
       "manual": false,
       "prize": "no",
-      "rank": 375,
+      "rank": 370,
       "tier": "Difficult"
     },
     {
@@ -18297,7 +18082,7 @@
       "url": "https://www.erdosproblems.com/833",
       "manual": false,
       "prize": "no",
-      "rank": 376,
+      "rank": 371,
       "tier": "Difficult"
     },
     {
@@ -18334,7 +18119,7 @@
       "url": "https://www.erdosproblems.com/842",
       "manual": false,
       "prize": "no",
-      "rank": 377,
+      "rank": 372,
       "tier": "Difficult"
     },
     {
@@ -18382,7 +18167,7 @@
       "url": "https://www.erdosproblems.com/858",
       "manual": false,
       "prize": "no",
-      "rank": 378,
+      "rank": 373,
       "tier": "Difficult"
     },
     {
@@ -18430,7 +18215,7 @@
       "url": "https://www.erdosproblems.com/907",
       "manual": false,
       "prize": "no",
-      "rank": 379,
+      "rank": 374,
       "tier": "Difficult"
     },
     {
@@ -18467,7 +18252,7 @@
       "url": "https://www.erdosproblems.com/922",
       "manual": false,
       "prize": "no",
-      "rank": 380,
+      "rank": 375,
       "tier": "Difficult"
     },
     {
@@ -18508,55 +18293,7 @@
       "url": "https://www.erdosproblems.com/924",
       "manual": false,
       "prize": "no",
-      "rank": 381,
-      "tier": "Difficult"
-    },
-    {
-      "id": 990,
-      "statement": "Let $f=a_0+\\cdots+a_dx^d\\in \\mathbb{C}[x]$ be a polynomial. Is it true that, if $f$ has roots $z_1,\\ldots,z_d$ with corresponding arguments $\\theta_1,\\ldots,\\theta_d\\in [0,2\\pi]$, then for all intervals $I\\subseteq [0,2\\pi]$\\[\\left\\lvert (\\# \\theta_i \\in I) - \\frac{\\lvert I\\rvert}{2\\pi}d\\right\\rvert \\ll \\left(n\\log M\\right)^{1/2},\\]where $n$ is the number of non-zero coefficients of $f$ and\\[M=\\frac{\\lvert a_0\\rvert+\\cdots +\\lvert a_d\\rvert}{(\\lvert a_0\\rvert\\lvert a_d\\rvert)^{1/2}}.\\]",
-      "status": "Solved",
-      "state": "disproved (lean)",
-      "tags": [
-        "analysis"
-      ],
-      "score": 37,
-      "harness": "Untried",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Limits, function spaces and analytic estimates create a larger formalization burden.",
-        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas.",
-        "Prove the asymptotic statement with its full quantifiers and error control."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: analysis",
-          "points": -13
-        },
-        {
-          "label": "Asymptotic or density target",
-          "points": -9
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/990",
-      "manual": false,
-      "prize": "no",
-      "rank": 382,
+      "rank": 376,
       "tier": "Difficult"
     },
     {
@@ -18592,7 +18329,7 @@
       "url": "https://www.erdosproblems.com/1009",
       "manual": false,
       "prize": "no",
-      "rank": 383,
+      "rank": 377,
       "tier": "Difficult"
     },
     {
@@ -18629,7 +18366,7 @@
       "url": "https://www.erdosproblems.com/1018",
       "manual": false,
       "prize": "no",
-      "rank": 384,
+      "rank": 378,
       "tier": "Difficult"
     },
     {
@@ -18680,7 +18417,7 @@
       "url": "https://www.erdosproblems.com/1050",
       "manual": false,
       "prize": "no",
-      "rank": 385,
+      "rank": 379,
       "tier": "Difficult"
     },
     {
@@ -18728,7 +18465,7 @@
       "url": "https://www.erdosproblems.com/1126",
       "manual": false,
       "prize": "no",
-      "rank": 386,
+      "rank": 380,
       "tier": "Difficult"
     },
     {
@@ -18787,7 +18524,7 @@
       "url": "https://www.erdosproblems.com/135",
       "manual": false,
       "prize": "$250",
-      "rank": 387,
+      "rank": 381,
       "tier": "Difficult"
     },
     {
@@ -18829,7 +18566,7 @@
       "url": "https://www.erdosproblems.com/186",
       "manual": false,
       "prize": "no",
-      "rank": 388,
+      "rank": 382,
       "tier": "Difficult"
     },
     {
@@ -18882,7 +18619,7 @@
       "url": "https://www.erdosproblems.com/533",
       "manual": false,
       "prize": "no",
-      "rank": 389,
+      "rank": 383,
       "tier": "Difficult"
     },
     {
@@ -18928,7 +18665,7 @@
       "url": "https://www.erdosproblems.com/915",
       "manual": false,
       "prize": "no",
-      "rank": 390,
+      "rank": 384,
       "tier": "Difficult"
     },
     {
@@ -18982,7 +18719,7 @@
       "url": "https://www.erdosproblems.com/1092",
       "manual": false,
       "prize": "no",
-      "rank": 391,
+      "rank": 385,
       "tier": "Difficult"
     },
     {
@@ -19046,7 +18783,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 392,
+      "rank": 386,
       "tier": "Difficult"
     },
     {
@@ -19083,7 +18820,7 @@
       "url": "https://www.erdosproblems.com/54",
       "manual": false,
       "prize": "$100",
-      "rank": 393,
+      "rank": 387,
       "tier": "Difficult"
     },
     {
@@ -19143,7 +18880,7 @@
       "url": "https://www.erdosproblems.com/150",
       "manual": false,
       "prize": "no",
-      "rank": 394,
+      "rank": 388,
       "tier": "Difficult"
     },
     {
@@ -19192,7 +18929,7 @@
       "url": "https://www.erdosproblems.com/216",
       "manual": false,
       "prize": "no",
-      "rank": 395,
+      "rank": 389,
       "tier": "Difficult"
     },
     {
@@ -19241,7 +18978,7 @@
       "url": "https://www.erdosproblems.com/305",
       "manual": false,
       "prize": "no",
-      "rank": 396,
+      "rank": 390,
       "tier": "Difficult"
     },
     {
@@ -19301,7 +19038,7 @@
       "url": "https://www.erdosproblems.com/318",
       "manual": false,
       "prize": "no",
-      "rank": 397,
+      "rank": 391,
       "tier": "Difficult"
     },
     {
@@ -19349,7 +19086,68 @@
       "url": "https://www.erdosproblems.com/380",
       "manual": false,
       "prize": "no",
-      "rank": 398,
+      "rank": 392,
+      "tier": "Difficult"
+    },
+    {
+      "id": 435,
+      "statement": "Let $n\\in\\mathbb{N}$ with $n\\neq p^k$ for any prime $p$ and $k\\geq 0$. What is the largest integer not of the form\\[\\sum_{1\\leq i<n}c_i\\binom{n}{i}\\]where the $c_i\\geq 0$ are integers?",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "number theory"
+      ],
+      "score": 35,
+      "harness": "Untried",
+      "rationale": [
+        "Discovery writes complete refereed proofs (the Apéry set with respect to n, with C(n,p^j) acting as mixed-radix digits). The harness certifies the representability steps, but the lower bound, that X(n) - n is not representable, resisted: its recursive decompositions were judged not easier (train, 2026-09-29, $13.98).",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "An optimal bound or classification is requested; a single construction may cover only one direction."
+      ],
+      "requirements": [
+        "Formalize the Apéry-set minimality argument as its own lemma chain: the p-adic valuations of C(n,p^j) and the digit bound.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Separate upper and lower bounds and check that they meet the requested precision."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Optimality or full classification",
+          "points": -5
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -24
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/435",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+        ],
+        "searchFloor": null
+      },
+      "rank": 393,
       "tier": "Difficult"
     },
     {
@@ -19397,7 +19195,7 @@
       "url": "https://www.erdosproblems.com/465",
       "manual": false,
       "prize": "no",
-      "rank": 399,
+      "rank": 394,
       "tier": "Difficult"
     },
     {
@@ -19445,7 +19243,7 @@
       "url": "https://www.erdosproblems.com/466",
       "manual": false,
       "prize": "no",
-      "rank": 400,
+      "rank": 395,
       "tier": "Difficult"
     },
     {
@@ -19493,7 +19291,7 @@
       "url": "https://www.erdosproblems.com/492",
       "manual": false,
       "prize": "no",
-      "rank": 401,
+      "rank": 396,
       "tier": "Difficult"
     },
     {
@@ -19542,7 +19340,7 @@
       "url": "https://www.erdosproblems.com/651",
       "manual": false,
       "prize": "no",
-      "rank": 402,
+      "rank": 397,
       "tier": "Difficult"
     },
     {
@@ -19584,7 +19382,7 @@
       "url": "https://www.erdosproblems.com/664",
       "manual": false,
       "prize": "no",
-      "rank": 403,
+      "rank": 398,
       "tier": "Difficult"
     },
     {
@@ -19632,7 +19430,7 @@
       "url": "https://www.erdosproblems.com/690",
       "manual": false,
       "prize": "no",
-      "rank": 404,
+      "rank": 399,
       "tier": "Difficult"
     },
     {
@@ -19691,7 +19489,7 @@
       "url": "https://www.erdosproblems.com/785",
       "manual": false,
       "prize": "no",
-      "rank": 405,
+      "rank": 400,
       "tier": "Difficult"
     },
     {
@@ -19740,7 +19538,7 @@
       "url": "https://www.erdosproblems.com/861",
       "manual": false,
       "prize": "no",
-      "rank": 406,
+      "rank": 401,
       "tier": "Difficult"
     },
     {
@@ -19777,7 +19575,7 @@
       "url": "https://www.erdosproblems.com/894",
       "manual": false,
       "prize": "no",
-      "rank": 407,
+      "rank": 402,
       "tier": "Difficult"
     },
     {
@@ -19825,7 +19623,7 @@
       "url": "https://www.erdosproblems.com/1005",
       "manual": false,
       "prize": "no",
-      "rank": 408,
+      "rank": 403,
       "tier": "Difficult"
     },
     {
@@ -19867,7 +19665,7 @@
       "url": "https://www.erdosproblems.com/1027",
       "manual": false,
       "prize": "no",
-      "rank": 409,
+      "rank": 404,
       "tier": "Difficult"
     },
     {
@@ -19903,7 +19701,7 @@
       "url": "https://www.erdosproblems.com/1076",
       "manual": false,
       "prize": "no",
-      "rank": 410,
+      "rank": 405,
       "tier": "Difficult"
     },
     {
@@ -19943,7 +19741,7 @@
       "url": "https://www.erdosproblems.com/1124",
       "manual": false,
       "prize": "no",
-      "rank": 411,
+      "rank": 406,
       "tier": "Difficult"
     },
     {
@@ -19979,7 +19777,7 @@
       "url": "https://www.erdosproblems.com/1164",
       "manual": false,
       "prize": "no",
-      "rank": 412,
+      "rank": 407,
       "tier": "Difficult"
     },
     {
@@ -20037,7 +19835,7 @@
       "url": "https://www.erdosproblems.com/90",
       "manual": false,
       "prize": "$500",
-      "rank": 413,
+      "rank": 408,
       "tier": "Difficult"
     },
     {
@@ -20093,7 +19891,7 @@
       "url": "https://www.erdosproblems.com/94",
       "manual": false,
       "prize": "£25",
-      "rank": 414,
+      "rank": 409,
       "tier": "Difficult"
     },
     {
@@ -20139,7 +19937,7 @@
       "url": "https://www.erdosproblems.com/136",
       "manual": false,
       "prize": "no",
-      "rank": 415,
+      "rank": 410,
       "tier": "Difficult"
     },
     {
@@ -20188,7 +19986,7 @@
       "url": "https://www.erdosproblems.com/444",
       "manual": false,
       "prize": "no",
-      "rank": 416,
+      "rank": 411,
       "tier": "Difficult"
     },
     {
@@ -20241,7 +20039,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 417,
+      "rank": 412,
       "tier": "Difficult"
     },
     {
@@ -20287,7 +20085,7 @@
       "url": "https://www.erdosproblems.com/577",
       "manual": false,
       "prize": "no",
-      "rank": 418,
+      "rank": 413,
       "tier": "Difficult"
     },
     {
@@ -20333,7 +20131,7 @@
       "url": "https://www.erdosproblems.com/581",
       "manual": false,
       "prize": "no",
-      "rank": 419,
+      "rank": 414,
       "tier": "Difficult"
     },
     {
@@ -20380,7 +20178,7 @@
       "url": "https://www.erdosproblems.com/763",
       "manual": false,
       "prize": "no",
-      "rank": 420,
+      "rank": 415,
       "tier": "Difficult"
     },
     {
@@ -20427,7 +20225,7 @@
       "url": "https://www.erdosproblems.com/764",
       "manual": false,
       "prize": "no",
-      "rank": 421,
+      "rank": 416,
       "tier": "Difficult"
     },
     {
@@ -20481,7 +20279,7 @@
       "url": "https://www.erdosproblems.com/798",
       "manual": false,
       "prize": "no",
-      "rank": 422,
+      "rank": 417,
       "tier": "Difficult"
     },
     {
@@ -20527,7 +20325,7 @@
       "url": "https://www.erdosproblems.com/806",
       "manual": false,
       "prize": "no",
-      "rank": 423,
+      "rank": 418,
       "tier": "Difficult"
     },
     {
@@ -20574,7 +20372,7 @@
       "url": "https://www.erdosproblems.com/895",
       "manual": false,
       "prize": "no",
-      "rank": 424,
+      "rank": 419,
       "tier": "Difficult"
     },
     {
@@ -20621,7 +20419,7 @@
       "url": "https://www.erdosproblems.com/984",
       "manual": false,
       "prize": "no",
-      "rank": 425,
+      "rank": 420,
       "tier": "Difficult"
     },
     {
@@ -20663,7 +20461,7 @@
       "url": "https://www.erdosproblems.com/989",
       "manual": false,
       "prize": "no",
-      "rank": 426,
+      "rank": 421,
       "tier": "Difficult"
     },
     {
@@ -20710,7 +20508,7 @@
       "url": "https://www.erdosproblems.com/1024",
       "manual": false,
       "prize": "no",
-      "rank": 427,
+      "rank": 422,
       "tier": "Difficult"
     },
     {
@@ -20752,7 +20550,7 @@
       "url": "https://www.erdosproblems.com/1185",
       "manual": false,
       "prize": "no",
-      "rank": 428,
+      "rank": 423,
       "tier": "Difficult"
     },
     {
@@ -20795,7 +20593,7 @@
       "url": "https://www.erdosproblems.com/118",
       "manual": false,
       "prize": "no",
-      "rank": 429,
+      "rank": 424,
       "tier": "Difficult"
     },
     {
@@ -20831,7 +20629,7 @@
       "url": "https://www.erdosproblems.com/735",
       "manual": false,
       "prize": "no",
-      "rank": 430,
+      "rank": 425,
       "tier": "Difficult"
     },
     {
@@ -20886,7 +20684,7 @@
       "url": "https://www.erdosproblems.com/119",
       "manual": false,
       "prize": "$100",
-      "rank": 431,
+      "rank": 426,
       "tier": "Difficult"
     },
     {
@@ -20932,7 +20730,7 @@
       "url": "https://www.erdosproblems.com/157",
       "manual": false,
       "prize": "no",
-      "rank": 432,
+      "rank": 427,
       "tier": "Difficult"
     },
     {
@@ -20975,7 +20773,7 @@
       "url": "https://www.erdosproblems.com/631",
       "manual": false,
       "prize": "no",
-      "rank": 433,
+      "rank": 428,
       "tier": "Difficult"
     },
     {
@@ -21020,7 +20818,7 @@
       "url": "https://www.erdosproblems.com/718",
       "manual": false,
       "prize": "no",
-      "rank": 434,
+      "rank": 429,
       "tier": "Difficult"
     },
     {
@@ -21065,7 +20863,7 @@
       "url": "https://www.erdosproblems.com/746",
       "manual": false,
       "prize": "no",
-      "rank": 435,
+      "rank": 430,
       "tier": "Difficult"
     },
     {
@@ -21108,7 +20906,7 @@
       "url": "https://www.erdosproblems.com/758",
       "manual": false,
       "prize": "no",
-      "rank": 436,
+      "rank": 431,
       "tier": "Difficult"
     },
     {
@@ -21152,7 +20950,7 @@
       "url": "https://www.erdosproblems.com/772",
       "manual": false,
       "prize": "no",
-      "rank": 437,
+      "rank": 432,
       "tier": "Difficult"
     },
     {
@@ -21206,7 +21004,7 @@
       "url": "https://www.erdosproblems.com/784",
       "manual": false,
       "prize": "no",
-      "rank": 438,
+      "rank": 433,
       "tier": "Difficult"
     },
     {
@@ -21248,7 +21046,7 @@
       "url": "https://www.erdosproblems.com/814",
       "manual": false,
       "prize": "no",
-      "rank": 439,
+      "rank": 434,
       "tier": "Difficult"
     },
     {
@@ -21290,7 +21088,7 @@
       "url": "https://www.erdosproblems.com/815",
       "manual": false,
       "prize": "no",
-      "rank": 440,
+      "rank": 435,
       "tier": "Difficult"
     },
     {
@@ -21334,7 +21132,7 @@
       "url": "https://www.erdosproblems.com/863",
       "manual": false,
       "prize": "no",
-      "rank": 441,
+      "rank": 436,
       "tier": "Difficult"
     },
     {
@@ -21388,7 +21186,7 @@
       "url": "https://www.erdosproblems.com/981",
       "manual": false,
       "prize": "no",
-      "rank": 442,
+      "rank": 437,
       "tier": "Difficult"
     },
     {
@@ -21443,7 +21241,7 @@
       "url": "https://www.erdosproblems.com/987",
       "manual": false,
       "prize": "no",
-      "rank": 443,
+      "rank": 438,
       "tier": "Difficult"
     },
     {
@@ -21485,7 +21283,7 @@
       "url": "https://www.erdosproblems.com/1012",
       "manual": false,
       "prize": "no",
-      "rank": 444,
+      "rank": 439,
       "tier": "Difficult"
     },
     {
@@ -21528,7 +21326,7 @@
       "url": "https://www.erdosproblems.com/1019",
       "manual": false,
       "prize": "no",
-      "rank": 445,
+      "rank": 440,
       "tier": "Difficult"
     },
     {
@@ -21582,7 +21380,7 @@
       "url": "https://www.erdosproblems.com/1197",
       "manual": false,
       "prize": "no",
-      "rank": 446,
+      "rank": 441,
       "tier": "Difficult"
     },
     {
@@ -21652,7 +21450,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 447,
+      "rank": 442,
       "tier": "Difficult"
     },
     {
@@ -21713,7 +21511,7 @@
       "url": "https://www.erdosproblems.com/74",
       "manual": false,
       "prize": "$500",
-      "rank": 448,
+      "rank": 443,
       "tier": "Difficult"
     },
     {
@@ -21767,7 +21565,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 449,
+      "rank": 444,
       "tier": "Difficult"
     },
     {
@@ -21814,7 +21612,7 @@
       "url": "https://www.erdosproblems.com/193",
       "manual": false,
       "prize": "no",
-      "rank": 450,
+      "rank": 445,
       "tier": "Difficult"
     },
     {
@@ -21850,7 +21648,7 @@
       "url": "https://www.erdosproblems.com/225",
       "manual": false,
       "prize": "no",
-      "rank": 451,
+      "rank": 446,
       "tier": "Difficult"
     },
     {
@@ -21909,7 +21707,7 @@
       "url": "https://www.erdosproblems.com/610",
       "manual": false,
       "prize": "no",
-      "rank": 452,
+      "rank": 447,
       "tier": "Difficult"
     },
     {
@@ -21970,7 +21768,7 @@
       "url": "https://www.erdosproblems.com/659",
       "manual": false,
       "prize": "no",
-      "rank": 453,
+      "rank": 448,
       "tier": "Difficult"
     },
     {
@@ -22030,7 +21828,7 @@
       "url": "https://www.erdosproblems.com/750",
       "manual": false,
       "prize": "no",
-      "rank": 454,
+      "rank": 449,
       "tier": "Difficult"
     },
     {
@@ -22066,7 +21864,7 @@
       "url": "https://www.erdosproblems.com/1042",
       "manual": false,
       "prize": "no",
-      "rank": 455,
+      "rank": 450,
       "tier": "Difficult"
     },
     {
@@ -22119,7 +21917,75 @@
       "url": "https://www.erdosproblems.com/245",
       "manual": false,
       "prize": "no",
-      "rank": 456,
+      "rank": 451,
+      "tier": "Difficult"
+    },
+    {
+      "id": 283,
+      "statement": "Let $p:\\mathbb{Z}\\to \\mathbb{Z}$ be a polynomial whose leading coefficient is positive and such that there exists no $d\\geq 2$ with $d\\mid p(n)$ for all $n\\geq 1$. Is it true that, for all sufficiently large $m$, there exist integers $1\\leq n_1<\\cdots <n_k$ such that\\[1=\\frac{1}{n_1}+\\cdots+\\frac{1}{n_k}\\]and\\[m=p(n_1)+\\cdots+p(n_k)?\\]",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "number theory",
+        "unit fractions"
+      ],
+      "score": 30,
+      "harness": "Untried",
+      "rationale": [
+        "The harness routes through Graham's 1963 partition theorem, and its core (a Graham-type completeness step) resisted every attack (train, 2026-09-25). The 2026 resolution uses local switching (1/D = 1/2D + 1/3D + 1/6D along a telescoping family), which the harness never proposed.",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
+        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results."
+      ],
+      "requirements": [
+        "Formalize the switching construction and its finite residue check, not Graham's general theorem.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Construct and verify a uniform argument or an infinite family.",
+        "Prove the asymptotic statement with its full quantifiers and error control."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Unbounded quantifier",
+          "points": -5
+        },
+        {
+          "label": "Asymptotic or density target",
+          "points": -9
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -20
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/283",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#improvement-loop-iteration-3-written-2026-09-25-launches-after-the-dev-screen-alloc-budget-follows-the-core"
+        ],
+        "searchFloor": null
+      },
+      "rank": 452,
       "tier": "Difficult"
     },
     {
@@ -22165,7 +22031,7 @@
       "url": "https://www.erdosproblems.com/439",
       "manual": false,
       "prize": "no",
-      "rank": 457,
+      "rank": 453,
       "tier": "Difficult"
     },
     {
@@ -22208,7 +22074,7 @@
       "url": "https://www.erdosproblems.com/543",
       "manual": false,
       "prize": "no",
-      "rank": 458,
+      "rank": 454,
       "tier": "Difficult"
     },
     {
@@ -22255,7 +22121,7 @@
       "url": "https://www.erdosproblems.com/574",
       "manual": false,
       "prize": "no",
-      "rank": 459,
+      "rank": 455,
       "tier": "Difficult"
     },
     {
@@ -22301,7 +22167,7 @@
       "url": "https://www.erdosproblems.com/606",
       "manual": false,
       "prize": "no",
-      "rank": 460,
+      "rank": 456,
       "tier": "Difficult"
     },
     {
@@ -22347,7 +22213,7 @@
       "url": "https://www.erdosproblems.com/622",
       "manual": false,
       "prize": "no",
-      "rank": 461,
+      "rank": 457,
       "tier": "Difficult"
     },
     {
@@ -22391,7 +22257,7 @@
       "url": "https://www.erdosproblems.com/721",
       "manual": false,
       "prize": "no",
-      "rank": 462,
+      "rank": 458,
       "tier": "Difficult"
     },
     {
@@ -22433,7 +22299,7 @@
       "url": "https://www.erdosproblems.com/808",
       "manual": false,
       "prize": "no",
-      "rank": 463,
+      "rank": 459,
       "tier": "Difficult"
     },
     {
@@ -22476,7 +22342,7 @@
       "url": "https://www.erdosproblems.com/948",
       "manual": false,
       "prize": "no",
-      "rank": 464,
+      "rank": 460,
       "tier": "Difficult"
     },
     {
@@ -22518,7 +22384,68 @@
       "url": "https://www.erdosproblems.com/988",
       "manual": false,
       "prize": "no",
-      "rank": 465,
+      "rank": 461,
+      "tier": "Difficult"
+    },
+    {
+      "id": 990,
+      "statement": "Let $f=a_0+\\cdots+a_dx^d\\in \\mathbb{C}[x]$ be a polynomial. Is it true that, if $f$ has roots $z_1,\\ldots,z_d$ with corresponding arguments $\\theta_1,\\ldots,\\theta_d\\in [0,2\\pi]$, then for all intervals $I\\subseteq [0,2\\pi]$\\[\\left\\lvert (\\# \\theta_i \\in I) - \\frac{\\lvert I\\rvert}{2\\pi}d\\right\\rvert \\ll \\left(n\\log M\\right)^{1/2},\\]where $n$ is the number of non-zero coefficients of $f$ and\\[M=\\frac{\\lvert a_0\\rvert+\\cdots +\\lvert a_d\\rvert}{(\\lvert a_0\\rvert\\lvert a_d\\rvert)^{1/2}}.\\]",
+      "status": "Solved",
+      "state": "disproved (lean)",
+      "tags": [
+        "analysis"
+      ],
+      "score": 30,
+      "harness": "Untried",
+      "rationale": [
+        "The disproof needs an explicit lacunary polynomial with a root of high multiplicity at 1 and bounded coefficient ratio M. The harness reduces to that construction (2 of 3 steps), but its own choice of exponents left the bound M <= 4m, judged as hard as the problem (train, 2026-09-30). Discovery writes the complete published construction (divided differences over exponents 0, 1, K, ..., K^N) in only some rounds.",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Limits, function spaces and analytic estimates create a larger formalization burden.",
+        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results."
+      ],
+      "requirements": [
+        "Follow the published exponents; formalize the divided-difference (Vandermonde) identity and the multiplicity-at-1 criterion.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas.",
+        "Prove the asymptotic statement with its full quantifiers and error control."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: analysis",
+          "points": -13
+        },
+        {
+          "label": "Asymptotic or density target",
+          "points": -9
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -7
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/990",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+        ],
+        "searchFloor": null
+      },
+      "rank": 462,
       "tier": "Difficult"
     },
     {
@@ -22560,7 +22487,7 @@
       "url": "https://www.erdosproblems.com/992",
       "manual": false,
       "prize": "no",
-      "rank": 466,
+      "rank": 463,
       "tier": "Difficult"
     },
     {
@@ -22602,7 +22529,7 @@
       "url": "https://www.erdosproblems.com/1165",
       "manual": false,
       "prize": "no",
-      "rank": 467,
+      "rank": 464,
       "tier": "Difficult"
     },
     {
@@ -22645,7 +22572,7 @@
       "url": "https://www.erdosproblems.com/1198",
       "manual": false,
       "prize": "no",
-      "rank": 468,
+      "rank": 465,
       "tier": "Difficult"
     },
     {
@@ -22704,7 +22631,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 469,
+      "rank": 466,
       "tier": "Research"
     },
     {
@@ -22755,7 +22682,7 @@
       "url": "https://www.erdosproblems.com/977",
       "manual": false,
       "prize": "no",
-      "rank": 470,
+      "rank": 467,
       "tier": "Research"
     },
     {
@@ -22798,7 +22725,7 @@
       "url": "https://www.erdosproblems.com/72",
       "manual": false,
       "prize": "$100",
-      "rank": 471,
+      "rank": 468,
       "tier": "Research"
     },
     {
@@ -22845,7 +22772,7 @@
       "url": "https://www.erdosproblems.com/76",
       "manual": false,
       "prize": "no",
-      "rank": 472,
+      "rank": 469,
       "tier": "Research"
     },
     {
@@ -22887,7 +22814,7 @@
       "url": "https://www.erdosproblems.com/88",
       "manual": false,
       "prize": "$100",
-      "rank": 473,
+      "rank": 470,
       "tier": "Research"
     },
     {
@@ -22929,7 +22856,7 @@
       "url": "https://www.erdosproblems.com/133",
       "manual": false,
       "prize": "no",
-      "rank": 474,
+      "rank": 471,
       "tier": "Research"
     },
     {
@@ -22976,7 +22903,7 @@
       "url": "https://www.erdosproblems.com/163",
       "manual": false,
       "prize": "no",
-      "rank": 475,
+      "rank": 472,
       "tier": "Research"
     },
     {
@@ -23019,7 +22946,7 @@
       "url": "https://www.erdosproblems.com/223",
       "manual": false,
       "prize": "no",
-      "rank": 476,
+      "rank": 473,
       "tier": "Research"
     },
     {
@@ -23073,7 +23000,7 @@
       "url": "https://www.erdosproblems.com/343",
       "manual": false,
       "prize": "no",
-      "rank": 477,
+      "rank": 474,
       "tier": "Research"
     },
     {
@@ -23127,7 +23054,7 @@
       "url": "https://www.erdosproblems.com/344",
       "manual": false,
       "prize": "no",
-      "rank": 478,
+      "rank": 475,
       "tier": "Research"
     },
     {
@@ -23187,7 +23114,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 479,
+      "rank": 476,
       "tier": "Research"
     },
     {
@@ -23229,7 +23156,7 @@
       "url": "https://www.erdosproblems.com/504",
       "manual": false,
       "prize": "no",
-      "rank": 480,
+      "rank": 477,
       "tier": "Research"
     },
     {
@@ -23276,7 +23203,7 @@
       "url": "https://www.erdosproblems.com/546",
       "manual": false,
       "prize": "no",
-      "rank": 481,
+      "rank": 478,
       "tier": "Research"
     },
     {
@@ -23318,7 +23245,7 @@
       "url": "https://www.erdosproblems.com/717",
       "manual": false,
       "prize": "no",
-      "rank": 482,
+      "rank": 479,
       "tier": "Research"
     },
     {
@@ -23361,7 +23288,7 @@
       "url": "https://www.erdosproblems.com/777",
       "manual": false,
       "prize": "no",
-      "rank": 483,
+      "rank": 480,
       "tier": "Research"
     },
     {
@@ -23404,7 +23331,7 @@
       "url": "https://www.erdosproblems.com/799",
       "manual": false,
       "prize": "no",
-      "rank": 484,
+      "rank": 481,
       "tier": "Research"
     },
     {
@@ -23451,7 +23378,7 @@
       "url": "https://www.erdosproblems.com/800",
       "manual": false,
       "prize": "no",
-      "rank": 485,
+      "rank": 482,
       "tier": "Research"
     },
     {
@@ -23498,7 +23425,7 @@
       "url": "https://www.erdosproblems.com/801",
       "manual": false,
       "prize": "no",
-      "rank": 486,
+      "rank": 483,
       "tier": "Research"
     },
     {
@@ -23540,7 +23467,7 @@
       "url": "https://www.erdosproblems.com/926",
       "manual": false,
       "prize": "no",
-      "rank": 487,
+      "rank": 484,
       "tier": "Research"
     },
     {
@@ -23582,7 +23509,7 @@
       "url": "https://www.erdosproblems.com/1021",
       "manual": false,
       "prize": "no",
-      "rank": 488,
+      "rank": 485,
       "tier": "Research"
     },
     {
@@ -23624,7 +23551,7 @@
       "url": "https://www.erdosproblems.com/1031",
       "manual": false,
       "prize": "no",
-      "rank": 489,
+      "rank": 486,
       "tier": "Research"
     },
     {
@@ -23667,7 +23594,7 @@
       "url": "https://www.erdosproblems.com/1079",
       "manual": false,
       "prize": "no",
-      "rank": 490,
+      "rank": 487,
       "tier": "Research"
     },
     {
@@ -23710,7 +23637,7 @@
       "url": "https://www.erdosproblems.com/1091",
       "manual": false,
       "prize": "no",
-      "rank": 491,
+      "rank": 488,
       "tier": "Research"
     },
     {
@@ -23753,7 +23680,7 @@
       "url": "https://www.erdosproblems.com/1114",
       "manual": false,
       "prize": "no",
-      "rank": 492,
+      "rank": 489,
       "tier": "Research"
     },
     {
@@ -23801,7 +23728,7 @@
       "url": "https://www.erdosproblems.com/92",
       "manual": false,
       "prize": "$500",
-      "rank": 493,
+      "rank": 490,
       "tier": "Research"
     },
     {
@@ -23850,7 +23777,7 @@
       "url": "https://www.erdosproblems.com/656",
       "manual": false,
       "prize": "no",
-      "rank": 494,
+      "rank": 491,
       "tier": "Research"
     },
     {
@@ -23901,7 +23828,7 @@
       "url": "https://www.erdosproblems.com/745",
       "manual": false,
       "prize": "no",
-      "rank": 495,
+      "rank": 492,
       "tier": "Research"
     },
     {
@@ -23950,7 +23877,7 @@
       "url": "https://www.erdosproblems.com/874",
       "manual": false,
       "prize": "no",
-      "rank": 496,
+      "rank": 493,
       "tier": "Research"
     },
     {
@@ -23998,7 +23925,7 @@
       "url": "https://www.erdosproblems.com/877",
       "manual": false,
       "prize": "no",
-      "rank": 497,
+      "rank": 494,
       "tier": "Research"
     },
     {
@@ -24046,7 +23973,7 @@
       "url": "https://www.erdosproblems.com/991",
       "manual": false,
       "prize": "no",
-      "rank": 498,
+      "rank": 495,
       "tier": "Research"
     },
     {
@@ -24101,7 +24028,7 @@
       "url": "https://www.erdosproblems.com/1217",
       "manual": false,
       "prize": "no",
-      "rank": 499,
+      "rank": 496,
       "tier": "Research"
     },
     {
@@ -24144,7 +24071,7 @@
       "url": "https://www.erdosproblems.com/55",
       "manual": false,
       "prize": "$250",
-      "rank": 500,
+      "rank": 497,
       "tier": "Research"
     },
     {
@@ -24198,7 +24125,7 @@
       "url": "https://www.erdosproblems.com/494",
       "manual": false,
       "prize": "no",
-      "rank": 501,
+      "rank": 498,
       "tier": "Research"
     },
     {
@@ -24240,7 +24167,7 @@
       "url": "https://www.erdosproblems.com/515",
       "manual": false,
       "prize": "no",
-      "rank": 502,
+      "rank": 499,
       "tier": "Research"
     },
     {
@@ -24283,7 +24210,7 @@
       "url": "https://www.erdosproblems.com/565",
       "manual": false,
       "prize": "no",
-      "rank": 503,
+      "rank": 500,
       "tier": "Research"
     },
     {
@@ -24335,7 +24262,7 @@
       "url": "https://www.erdosproblems.com/591",
       "manual": false,
       "prize": "$250",
-      "rank": 504,
+      "rank": 501,
       "tier": "Research"
     },
     {
@@ -24378,7 +24305,7 @@
       "url": "https://www.erdosproblems.com/636",
       "manual": false,
       "prize": "no",
-      "rank": 505,
+      "rank": 502,
       "tier": "Research"
     },
     {
@@ -24421,7 +24348,7 @@
       "url": "https://www.erdosproblems.com/637",
       "manual": false,
       "prize": "no",
-      "rank": 506,
+      "rank": 503,
       "tier": "Research"
     },
     {
@@ -24464,7 +24391,7 @@
       "url": "https://www.erdosproblems.com/720",
       "manual": false,
       "prize": "$100",
-      "rank": 507,
+      "rank": 504,
       "tier": "Research"
     },
     {
@@ -24518,7 +24445,7 @@
       "url": "https://www.erdosproblems.com/920",
       "manual": false,
       "prize": "no",
-      "rank": 508,
+      "rank": 505,
       "tier": "Research"
     },
     {
@@ -24561,7 +24488,7 @@
       "url": "https://www.erdosproblems.com/925",
       "manual": false,
       "prize": "no",
-      "rank": 509,
+      "rank": 506,
       "tier": "Research"
     },
     {
@@ -24618,7 +24545,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 510,
+      "rank": 507,
       "tier": "Research"
     },
     {
@@ -24660,7 +24587,7 @@
       "url": "https://www.erdosproblems.com/1166",
       "manual": false,
       "prize": "no",
-      "rank": 511,
+      "rank": 508,
       "tier": "Research"
     },
     {
@@ -24703,7 +24630,7 @@
       "url": "https://www.erdosproblems.com/1216",
       "manual": false,
       "prize": "no",
-      "rank": 512,
+      "rank": 509,
       "tier": "Research"
     },
     {
@@ -24761,7 +24688,7 @@
       "url": "https://www.erdosproblems.com/110",
       "manual": false,
       "prize": "no",
-      "rank": 513,
+      "rank": 510,
       "tier": "Research"
     },
     {
@@ -24809,7 +24736,7 @@
       "url": "https://www.erdosproblems.com/179",
       "manual": false,
       "prize": "no",
-      "rank": 514,
+      "rank": 511,
       "tier": "Research"
     },
     {
@@ -24878,7 +24805,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 515,
+      "rank": 512,
       "tier": "Research"
     },
     {
@@ -24931,7 +24858,7 @@
       "url": "https://www.erdosproblems.com/752",
       "manual": false,
       "prize": "no",
-      "rank": 516,
+      "rank": 513,
       "tier": "Research"
     },
     {
@@ -24980,7 +24907,7 @@
       "url": "https://www.erdosproblems.com/921",
       "manual": false,
       "prize": "no",
-      "rank": 517,
+      "rank": 514,
       "tier": "Research"
     },
     {
@@ -25022,7 +24949,7 @@
       "url": "https://www.erdosproblems.com/210",
       "manual": false,
       "prize": "no",
-      "rank": 518,
+      "rank": 515,
       "tier": "Research"
     },
     {
@@ -25065,7 +24992,7 @@
       "url": "https://www.erdosproblems.com/526",
       "manual": false,
       "prize": "no",
-      "rank": 519,
+      "rank": 516,
       "tier": "Research"
     },
     {
@@ -25113,7 +25040,7 @@
       "url": "https://www.erdosproblems.com/599",
       "manual": false,
       "prize": "no",
-      "rank": 520,
+      "rank": 517,
       "tier": "Research"
     },
     {
@@ -25156,7 +25083,7 @@
       "url": "https://www.erdosproblems.com/605",
       "manual": false,
       "prize": "no",
-      "rank": 521,
+      "rank": 518,
       "tier": "Research"
     },
     {
@@ -25199,7 +25126,7 @@
       "url": "https://www.erdosproblems.com/652",
       "manual": false,
       "prize": "no",
-      "rank": 522,
+      "rank": 519,
       "tier": "Research"
     },
     {
@@ -25242,7 +25169,7 @@
       "url": "https://www.erdosproblems.com/754",
       "manual": false,
       "prize": "no",
-      "rank": 523,
+      "rank": 520,
       "tier": "Research"
     },
     {
@@ -25288,7 +25215,7 @@
       "url": "https://www.erdosproblems.com/909",
       "manual": false,
       "prize": "no",
-      "rank": 524,
+      "rank": 521,
       "tier": "Research"
     },
     {
@@ -25346,7 +25273,7 @@
       "url": "https://www.erdosproblems.com/1067",
       "manual": false,
       "prize": "no",
-      "rank": 525,
+      "rank": 522,
       "tier": "Research"
     },
     {
@@ -25400,7 +25327,7 @@
       "url": "https://www.erdosproblems.com/1105",
       "manual": false,
       "prize": "no",
-      "rank": 526,
+      "rank": 523,
       "tier": "Research"
     },
     {
@@ -25442,7 +25369,7 @@
       "url": "https://www.erdosproblems.com/1129",
       "manual": false,
       "prize": "no",
-      "rank": 527,
+      "rank": 524,
       "tier": "Research"
     },
     {
@@ -25492,7 +25419,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 528,
+      "rank": 525,
       "tier": "Research"
     },
     {
@@ -25541,7 +25468,7 @@
       "url": "https://www.erdosproblems.com/575",
       "manual": false,
       "prize": "no",
-      "rank": 529,
+      "rank": 526,
       "tier": "Research"
     },
     {
@@ -25590,7 +25517,7 @@
       "url": "https://www.erdosproblems.com/625",
       "manual": false,
       "prize": "$1000",
-      "rank": 530,
+      "rank": 527,
       "tier": "Research"
     },
     {
@@ -25639,7 +25566,7 @@
       "url": "https://www.erdosproblems.com/759",
       "manual": false,
       "prize": "no",
-      "rank": 531,
+      "rank": 528,
       "tier": "Research"
     },
     {
@@ -25688,7 +25615,7 @@
       "url": "https://www.erdosproblems.com/797",
       "manual": false,
       "prize": "no",
-      "rank": 532,
+      "rank": 529,
       "tier": "Research"
     },
     {
@@ -25736,7 +25663,7 @@
       "url": "https://www.erdosproblems.com/803",
       "manual": false,
       "prize": "no",
-      "rank": 533,
+      "rank": 530,
       "tier": "Research"
     },
     {
@@ -25784,7 +25711,7 @@
       "url": "https://www.erdosproblems.com/804",
       "manual": false,
       "prize": "no",
-      "rank": 534,
+      "rank": 531,
       "tier": "Research"
     },
     {
@@ -25838,7 +25765,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 535,
+      "rank": 532,
       "tier": "Research"
     },
     {
@@ -25880,7 +25807,7 @@
       "url": "https://www.erdosproblems.com/227",
       "manual": false,
       "prize": "no",
-      "rank": 536,
+      "rank": 533,
       "tier": "Research"
     },
     {
@@ -25924,7 +25851,7 @@
       "url": "https://www.erdosproblems.com/523",
       "manual": false,
       "prize": "no",
-      "rank": 537,
+      "rank": 534,
       "tier": "Research"
     },
     {
@@ -25968,7 +25895,7 @@
       "url": "https://www.erdosproblems.com/525",
       "manual": false,
       "prize": "no",
-      "rank": 538,
+      "rank": 535,
       "tier": "Research"
     },
     {
@@ -26010,7 +25937,7 @@
       "url": "https://www.erdosproblems.com/908",
       "manual": false,
       "prize": "no",
-      "rank": 539,
+      "rank": 536,
       "tier": "Research"
     },
     {
@@ -26057,7 +25984,7 @@
       "url": "https://www.erdosproblems.com/910",
       "manual": false,
       "prize": "no",
-      "rank": 540,
+      "rank": 537,
       "tier": "Research"
     },
     {
@@ -26100,7 +26027,7 @@
       "url": "https://www.erdosproblems.com/998",
       "manual": false,
       "prize": "no",
-      "rank": 541,
+      "rank": 538,
       "tier": "Research"
     },
     {
@@ -26142,7 +26069,7 @@
       "url": "https://www.erdosproblems.com/1116",
       "manual": false,
       "prize": "no",
-      "rank": 542,
+      "rank": 539,
       "tier": "Research"
     },
     {
@@ -26185,7 +26112,7 @@
       "url": "https://www.erdosproblems.com/1130",
       "manual": false,
       "prize": "no",
-      "rank": 543,
+      "rank": 540,
       "tier": "Research"
     },
     {
@@ -26228,7 +26155,7 @@
       "url": "https://www.erdosproblems.com/1153",
       "manual": false,
       "prize": "no",
-      "rank": 544,
+      "rank": 541,
       "tier": "Research"
     },
     {
@@ -26277,7 +26204,7 @@
       "url": "https://www.erdosproblems.com/79",
       "manual": false,
       "prize": "no",
-      "rank": 545,
+      "rank": 542,
       "tier": "Research"
     },
     {
@@ -26344,7 +26271,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 546,
+      "rank": 543,
       "tier": "Research"
     },
     {
@@ -26396,7 +26323,7 @@
       "url": "https://www.erdosproblems.com/166",
       "manual": false,
       "prize": "$250",
-      "rank": 547,
+      "rank": 544,
       "tier": "Research"
     },
     {
@@ -26445,7 +26372,7 @@
       "url": "https://www.erdosproblems.com/553",
       "manual": false,
       "prize": "no",
-      "rank": 548,
+      "rank": 545,
       "tier": "Research"
     },
     {
@@ -26493,7 +26420,7 @@
       "url": "https://www.erdosproblems.com/744",
       "manual": false,
       "prize": "no",
-      "rank": 549,
+      "rank": 546,
       "tier": "Research"
     },
     {
@@ -26540,7 +26467,7 @@
       "url": "https://www.erdosproblems.com/900",
       "manual": false,
       "prize": "no",
-      "rank": 550,
+      "rank": 547,
       "tier": "Research"
     },
     {
@@ -26592,7 +26519,7 @@
       "url": "https://www.erdosproblems.com/986",
       "manual": false,
       "prize": "no",
-      "rank": 551,
+      "rank": 548,
       "tier": "Research"
     },
     {
@@ -26641,7 +26568,7 @@
       "url": "https://www.erdosproblems.com/1179",
       "manual": false,
       "prize": "no",
-      "rank": 552,
+      "rank": 549,
       "tier": "Research"
     },
     {
@@ -26693,7 +26620,7 @@
       "url": "https://www.erdosproblems.com/1195",
       "manual": false,
       "prize": "no",
-      "rank": 553,
+      "rank": 550,
       "tier": "Research"
     },
     {
@@ -26742,7 +26669,7 @@
       "url": "https://www.erdosproblems.com/1211",
       "manual": false,
       "prize": "no",
-      "rank": 554,
+      "rank": 551,
       "tier": "Research"
     },
     {
@@ -26796,7 +26723,7 @@
       "url": "https://www.erdosproblems.com/190",
       "manual": false,
       "prize": "no",
-      "rank": 555,
+      "rank": 552,
       "tier": "Research"
     },
     {
@@ -26966,7 +26893,68 @@
         "searchFloor": 4.17e+19
       },
       "brief": "---\nproblem: 699\nupdated: 2026-09-12\nrun: 20260911-195529-727426-erdos699\noutcome: partial\nsolved: false\ncertified: 10\nsearch_floor: 4.17e+19\ncost_usd: 30.54\n---\n\n## What the problem asks\n\nFor any n and positions 1 ≤ i < j ≤ n/2, must the two binomial coefficients C(n,i) and C(n,j) share a prime factor at least i? A binomial coefficient counts choices of a given size. The prime is allowed to equal i. The full statement remains unproved here.\n\n## What we tried\n\nThe inherited research run ended with a session-limit failure in the positive direction and partial results in the negative direction. Its aggregate records contain 10 certified declaration names, 54 model calls, 83 Lean checks, and $30.54 spend. Those counts describe the harness run, not the later operator-assisted continuation. No additional paid harness calls were launched by Codex; Codex session cost is unavailable. The existing published search floor of roughly 4.17 × 10^19 candidate triples was preserved; it was not rerun.\n\nCodex continued directly in Lean using Mathlib's Lucas theorem. Claude repaired one failed proof tactic and moved the results into a shared binomial-coefficient library. This was assisted work, not an autonomous resolution.\n\n## What we found\n\nThe carry lemma and the stronger reduction are mechanically verified: if any number among n,n−1,…,n−i+1 has a prime factor greater than j, that prime divides both binomial coefficients. Therefore a counterexample would force every prime factor of every number in that block to be at most j. This property is called j-smoothness. It is a necessary condition for a counterexample, not a proof that counterexamples are impossible.\n\nThe proposed next route, Conjecture D, is false at (10,3,5). These binomial coefficients are 120 and 252; the shared prime 3 satisfies #699 but is missed by the proposed units-digit test. The test remains useful as a sufficient condition. It can also find primes between i and j, as p=5 at (16,3,7) demonstrates; only the narrower block-prime argument requires p>j.\n\nA later direct argument for i=3 rules out odd n and gives n ≤ (9/4)·4^r+1 for even n, where r counts factors of two in n. Its intermediate numerical checks passed, but it is a written argument for review, not a new Lean-certified result: the separate formal check timed out. It leaves r unbounded and does not address i≥4. Details are in experiments/699-higher-carries/REPORT.md.\n\n## What would move it\n\nFirst audit and finish formalizing the written i=3 localization argument; the prior Lean check timed out. Next bring n−2 into the simultaneous constraints from n and n−1, retaining higher-digit carries and the prime p=i=3. Seek a contradiction valid for every r=v₂(n), or prove an absolute cutoff with a feasible exhaustive check. If this route fails, record the exact obstruction before another research run. A bounded check of r cannot settle the unbounded argument; completing i=3 still leaves i≥4.\n\nThe harness automatically includes these next steps from atlas-data/research-guidance/699.md in its research and proof prompts, including resumed runs. Reuse the certified BinomialCoefficients library, reject the refuted Conjecture D, and preserve the published search floor. Full details and the distinction between certified results and drafts are in the linked research guidance and experiment reports.\n",
-      "rank": 556,
+      "rank": 553,
+      "tier": "Research"
+    },
+    {
+      "id": 1037,
+      "statement": "Let $G$ be a graph on $n$ vertices in which every degree occurs at most twice, and the number of distinct degree is $>(\\frac{1}{2}+\\epsilon)n$. Must $G$ contain a trivial (empty or complete) subgraph of size 'much larger' than $\\log n$?",
+      "status": "Solved",
+      "state": "disproved (lean)",
+      "tags": [
+        "graph theory"
+      ],
+      "score": 20,
+      "harness": "Untried",
+      "rationale": [
+        "The disproof needs graphs with small clique and independence numbers (a probabilistic existence argument Mathlib lacks). The harness certified 1 of 2 steps; discovery produced no complete proof in its round (train, 2026-09-30).",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
+        "A disproof may reduce to an exact counterexample; the quantifier structure still needs checking."
+      ],
+      "requirements": [
+        "A Lean construction, or a probabilistic-method lemma, for Ramsey-type graphs with omega and alpha of order log n.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Build reusable graph encodings and isolate finite certificates from general graph theorems.",
+        "Extract the actual counterexample and certify every side condition."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: graph theory",
+          "points": -7
+        },
+        {
+          "label": "Potential finite counterexample",
+          "points": 7
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -39
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/1037",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+        ],
+        "searchFloor": null
+      },
+      "rank": 554,
       "tier": "Research"
     },
     {
@@ -27017,7 +27005,7 @@
       "url": "https://www.erdosproblems.com/211",
       "manual": false,
       "prize": "$100",
-      "rank": 557,
+      "rank": 555,
       "tier": "Research"
     },
     {
@@ -27066,7 +27054,7 @@
       "url": "https://www.erdosproblems.com/957",
       "manual": false,
       "prize": "no",
-      "rank": 558,
+      "rank": 556,
       "tier": "Research"
     },
     {
@@ -27114,7 +27102,7 @@
       "url": "https://www.erdosproblems.com/960",
       "manual": false,
       "prize": "no",
-      "rank": 559,
+      "rank": 557,
       "tier": "Research"
     },
     {
@@ -27165,7 +27153,7 @@
       "url": "https://www.erdosproblems.com/1069",
       "manual": false,
       "prize": "no",
-      "rank": 560,
+      "rank": 558,
       "tier": "Research"
     },
     {
@@ -27214,7 +27202,7 @@
       "url": "https://www.erdosproblems.com/1089",
       "manual": false,
       "prize": "no",
-      "rank": 561,
+      "rank": 559,
       "tier": "Research"
     },
     {
@@ -27271,7 +27259,7 @@
       "url": "https://www.erdosproblems.com/182",
       "manual": false,
       "prize": "no",
-      "rank": 562,
+      "rank": 560,
       "tier": "Research"
     },
     {
@@ -27380,7 +27368,7 @@
         ],
         "searchFloor": 1e+22
       },
-      "rank": 563,
+      "rank": 561,
       "tier": "Research"
     },
     {
@@ -27498,7 +27486,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 564,
+      "rank": 562,
       "tier": "Research"
     },
     {
@@ -27599,7 +27587,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 565,
+      "rank": 563,
       "tier": "Research"
     },
     {
@@ -27709,7 +27697,7 @@
         "sources": [],
         "searchFloor": 9.17e+18
       },
-      "rank": 566,
+      "rank": 564,
       "tier": "Research"
     },
     {
@@ -27764,7 +27752,7 @@
       "url": "https://www.erdosproblems.com/1015",
       "manual": false,
       "prize": "no",
-      "rank": 567,
+      "rank": 565,
       "tier": "Research"
     },
     {
@@ -27821,7 +27809,7 @@
       "url": "https://www.erdosproblems.com/1078",
       "manual": false,
       "prize": "no",
-      "rank": 568,
+      "rank": 566,
       "tier": "Research"
     },
     {
@@ -27905,7 +27893,7 @@
       "url": "https://www.erdosproblems.com/10",
       "manual": false,
       "prize": "no",
-      "rank": 569,
+      "rank": 567,
       "tier": "Research"
     },
     {
@@ -27983,7 +27971,7 @@
       "url": "https://www.erdosproblems.com/68",
       "manual": false,
       "prize": "no",
-      "rank": 570,
+      "rank": 568,
       "tier": "Research"
     },
     {
@@ -28061,7 +28049,7 @@
       "url": "https://www.erdosproblems.com/249",
       "manual": false,
       "prize": "no",
-      "rank": 571,
+      "rank": 569,
       "tier": "Research"
     },
     {
@@ -28144,7 +28132,7 @@
       "url": "https://www.erdosproblems.com/251",
       "manual": false,
       "prize": "no",
-      "rank": 572,
+      "rank": 570,
       "tier": "Research"
     },
     {
@@ -28222,7 +28210,7 @@
       "url": "https://www.erdosproblems.com/252",
       "manual": false,
       "prize": "no",
-      "rank": 573,
+      "rank": 571,
       "tier": "Research"
     },
     {
@@ -28305,7 +28293,7 @@
       "url": "https://www.erdosproblems.com/288",
       "manual": false,
       "prize": "no",
-      "rank": 574,
+      "rank": 572,
       "tier": "Research"
     },
     {
@@ -28388,7 +28376,7 @@
       "url": "https://www.erdosproblems.com/377",
       "manual": false,
       "prize": "no",
-      "rank": 575,
+      "rank": 573,
       "tier": "Research"
     },
     {
@@ -28465,7 +28453,7 @@
       "url": "https://www.erdosproblems.com/389",
       "manual": false,
       "prize": "no",
-      "rank": 576,
+      "rank": 574,
       "tier": "Research"
     },
     {
@@ -28543,7 +28531,7 @@
       "url": "https://www.erdosproblems.com/406",
       "manual": false,
       "prize": "no",
-      "rank": 577,
+      "rank": 575,
       "tier": "Research"
     },
     {
@@ -28625,7 +28613,7 @@
       "url": "https://www.erdosproblems.com/445",
       "manual": false,
       "prize": "no",
-      "rank": 578,
+      "rank": 576,
       "tier": "Research"
     },
     {
@@ -28674,7 +28662,7 @@
       "url": "https://www.erdosproblems.com/485",
       "manual": false,
       "prize": "no",
-      "rank": 579,
+      "rank": 577,
       "tier": "Research"
     },
     {
@@ -28722,7 +28710,7 @@
       "url": "https://www.erdosproblems.com/733",
       "manual": false,
       "prize": "no",
-      "rank": 580,
+      "rank": 578,
       "tier": "Research"
     },
     {
@@ -28805,7 +28793,7 @@
       "url": "https://www.erdosproblems.com/849",
       "manual": false,
       "prize": "no",
-      "rank": 581,
+      "rank": 579,
       "tier": "Research"
     },
     {
@@ -28888,7 +28876,7 @@
       "url": "https://www.erdosproblems.com/1094",
       "manual": false,
       "prize": "no",
-      "rank": 582,
+      "rank": 580,
       "tier": "Research"
     },
     {
@@ -28936,7 +28924,7 @@
       "url": "https://www.erdosproblems.com/1115",
       "manual": false,
       "prize": "no",
-      "rank": 583,
+      "rank": 581,
       "tier": "Research"
     },
     {
@@ -28984,7 +28972,7 @@
       "url": "https://www.erdosproblems.com/1118",
       "manual": false,
       "prize": "no",
-      "rank": 584,
+      "rank": 582,
       "tier": "Research"
     },
     {
@@ -29033,7 +29021,7 @@
       "url": "https://www.erdosproblems.com/603",
       "manual": false,
       "prize": "no",
-      "rank": 585,
+      "rank": 583,
       "tier": "Research"
     },
     {
@@ -29116,7 +29104,7 @@
       "url": "https://www.erdosproblems.com/886",
       "manual": false,
       "prize": "no",
-      "rank": 586,
+      "rank": 584,
       "tier": "Research"
     },
     {
@@ -29199,7 +29187,7 @@
       "url": "https://www.erdosproblems.com/893",
       "manual": false,
       "prize": "no",
-      "rank": 587,
+      "rank": 585,
       "tier": "Research"
     },
     {
@@ -29293,7 +29281,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 588,
+      "rank": 586,
       "tier": "Research"
     },
     {
@@ -29372,7 +29360,7 @@
       "url": "https://www.erdosproblems.com/317",
       "manual": false,
       "prize": "no",
-      "rank": 589,
+      "rank": 587,
       "tier": "Research"
     },
     {
@@ -29451,7 +29439,7 @@
       "url": "https://www.erdosproblems.com/348",
       "manual": false,
       "prize": "no",
-      "rank": 590,
+      "rank": 588,
       "tier": "Research"
     },
     {
@@ -29525,7 +29513,7 @@
       "url": "https://www.erdosproblems.com/412",
       "manual": false,
       "prize": "no",
-      "rank": 591,
+      "rank": 589,
       "tier": "Research"
     },
     {
@@ -29599,7 +29587,7 @@
       "url": "https://www.erdosproblems.com/414",
       "manual": false,
       "prize": "no",
-      "rank": 592,
+      "rank": 590,
       "tier": "Research"
     },
     {
@@ -29672,7 +29660,7 @@
       "url": "https://www.erdosproblems.com/930",
       "manual": false,
       "prize": "no",
-      "rank": 593,
+      "rank": 591,
       "tier": "Research"
     },
     {
@@ -29751,7 +29739,7 @@
       "url": "https://www.erdosproblems.com/938",
       "manual": false,
       "prize": "no",
-      "rank": 594,
+      "rank": 592,
       "tier": "Research"
     },
     {
@@ -29799,7 +29787,64 @@
       "url": "https://www.erdosproblems.com/994",
       "manual": false,
       "prize": "no",
-      "rank": 595,
+      "rank": 593,
+      "tier": "Research"
+    },
+    {
+      "id": 997,
+      "statement": "Call $x_1,x_2,\\ldots \\in (0,1)$ well-distributed if, for every $\\epsilon>0$, if $k$ is sufficiently large then, for all $n>0$ and intervals $I\\subseteq [0,1]$,\\[\\lvert \\# \\{ n<m\\leq n+k : x_m\\in I\\} - \\lvert I\\rvert k\\rvert < \\epsilon k.\\]Is it true that, for every $\\alpha$, the sequence $\\{ \\alpha p_n\\}$ is not well-distributed, if $p_n$ is the sequence of primes?",
+      "status": "Solved",
+      "state": "proved (lean)",
+      "tags": [
+        "analysis",
+        "discrepancy",
+        "primes"
+      ],
+      "score": 15,
+      "harness": "Untried",
+      "rationale": [
+        "Reduces in Lean to ONE published premise, the Banks-Freiberg-Turnage-Butterbaugh theorem (consecutive primes in tuples, a Maynard-Tao consequence), on two separate runs; every conjecture was certified (train, 2026-09-25).",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Limits, function spaces and analytic estimates create a larger formalization burden."
+      ],
+      "requirements": [
+        "A complete proof needs BFT15 formalized, i.e. the Maynard-Tao sieve: far beyond current Mathlib.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: analysis",
+          "points": -13
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -31
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/997",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#improvement-loop-iteration-2-2026-09-25-does-the-fixed-harness-convert-known-ideas"
+        ],
+        "searchFloor": null
+      },
+      "rank": 594,
       "tier": "Research"
     },
     {
@@ -29859,7 +29904,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 596,
+      "rank": 595,
       "tier": "Research"
     },
     {
@@ -29937,7 +29982,7 @@
       "url": "https://www.erdosproblems.com/1004",
       "manual": false,
       "prize": "no",
-      "rank": 597,
+      "rank": 596,
       "tier": "Research"
     },
     {
@@ -30016,7 +30061,7 @@
       "url": "https://www.erdosproblems.com/1107",
       "manual": false,
       "prize": "no",
-      "rank": 598,
+      "rank": 597,
       "tier": "Research"
     },
     {
@@ -30090,7 +30135,7 @@
       "url": "https://www.erdosproblems.com/1108",
       "manual": false,
       "prize": "no",
-      "rank": 599,
+      "rank": 598,
       "tier": "Research"
     },
     {
@@ -30169,7 +30214,7 @@
       "url": "https://www.erdosproblems.com/1113",
       "manual": false,
       "prize": "no",
-      "rank": 600,
+      "rank": 599,
       "tier": "Research"
     },
     {
@@ -30263,7 +30308,7 @@
       "url": "https://www.erdosproblems.com/11",
       "manual": false,
       "prize": "no",
-      "rank": 601,
+      "rank": 600,
       "tier": "Frontier"
     },
     {
@@ -30351,7 +30396,7 @@
       "url": "https://www.erdosproblems.com/23",
       "manual": false,
       "prize": "no",
-      "rank": 602,
+      "rank": 601,
       "tier": "Frontier"
     },
     {
@@ -30441,7 +30486,7 @@
       "url": "https://www.erdosproblems.com/324",
       "manual": false,
       "prize": "no",
-      "rank": 603,
+      "rank": 602,
       "tier": "Frontier"
     },
     {
@@ -30513,7 +30558,7 @@
       "url": "https://www.erdosproblems.com/334",
       "manual": false,
       "prize": "no",
-      "rank": 604,
+      "rank": 603,
       "tier": "Frontier"
     },
     {
@@ -30581,7 +30626,7 @@
       "url": "https://www.erdosproblems.com/411",
       "manual": false,
       "prize": "no",
-      "rank": 605,
+      "rank": 604,
       "tier": "Frontier"
     },
     {
@@ -30635,7 +30680,7 @@
       "url": "https://www.erdosproblems.com/559",
       "manual": false,
       "prize": "no",
-      "rank": 606,
+      "rank": 605,
       "tier": "Frontier"
     },
     {
@@ -30737,7 +30782,7 @@
         ],
         "searchFloor": 1006700565.0
       },
-      "rank": 607,
+      "rank": 606,
       "tier": "Frontier"
     },
     {
@@ -30835,7 +30880,7 @@
       "url": "https://www.erdosproblems.com/742",
       "manual": false,
       "prize": "no",
-      "rank": 608,
+      "rank": 607,
       "tier": "Frontier"
     },
     {
@@ -30914,7 +30959,7 @@
       "url": "https://www.erdosproblems.com/885",
       "manual": false,
       "prize": "no",
-      "rank": 609,
+      "rank": 608,
       "tier": "Frontier"
     },
     {
@@ -31021,7 +31066,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 610,
+      "rank": 609,
       "tier": "Frontier"
     },
     {
@@ -31105,7 +31150,7 @@
       "url": "https://www.erdosproblems.com/17",
       "manual": false,
       "prize": "no",
-      "rank": 611,
+      "rank": 610,
       "tier": "Frontier"
     },
     {
@@ -31176,7 +31221,7 @@
       "url": "https://www.erdosproblems.com/197",
       "manual": false,
       "prize": "no",
-      "rank": 612,
+      "rank": 611,
       "tier": "Frontier"
     },
     {
@@ -31253,7 +31298,7 @@
       "url": "https://www.erdosproblems.com/203",
       "manual": false,
       "prize": "no",
-      "rank": 613,
+      "rank": 612,
       "tier": "Frontier"
     },
     {
@@ -31322,7 +31367,7 @@
       "url": "https://www.erdosproblems.com/222",
       "manual": false,
       "prize": "no",
-      "rank": 614,
+      "rank": 613,
       "tier": "Frontier"
     },
     {
@@ -31376,7 +31421,7 @@
       "url": "https://www.erdosproblems.com/232",
       "manual": false,
       "prize": "no",
-      "rank": 615,
+      "rank": 614,
       "tier": "Frontier"
     },
     {
@@ -31512,7 +31557,7 @@
         "searchFloor": 110880.0
       },
       "brief": "---\nproblem: 273\nupdated: 2026-09-11\nrun: 20260911-105339-682432-erdos273\noutcome: not_proved\nsolved: false\ncertified: 0\nsearch_floor: 110880.0\nsearch_floor_kind: exhaustive\ncandidates_below_400000: 29\ncandidates_eliminated: 20\ncandidates_surviving: 9\ncost_usd: 12.84\n---\n\n## What the problem asks\n\nA \"covering system\" is a finite list of rules like \"numbers that leave remainder 3 when divided by 8\". Each rule has a divisor, called its modulus, and a remainder. The list covers if every whole number, positive or negative, obeys at least one rule. The question asks whether such a list exists when every modulus is one less than a prime number of at least 5 — so the allowed moduli are 4, 6, 10, 12, 16, 18, and so on. The moduli must all be different; reusing a modulus with a new remainder is not allowed. This problem is open on the published catalogue. Nobody knows the answer, yes or no.\n\n## What we tried\n\nOne automated run in search-first mode, costing $12.84, which found nothing and produced no certified results. Three earlier attempts had all attacked the same candidate size and all timed out. After that run, a hand analysis costing nothing — no model calls, milliseconds of computation — replaced the search with an algebraic test. Every modulus in such a list must divide one number, the least common multiple, and only 29 values of that number below 400,000 are even arithmetically possible. The test asks, for each one, whether the rules could fit together at all, without ever choosing remainders.\n\n## What we found\n\n**Twenty of the 29 possible sizes are impossible.** The argument counts how much the rules overlap. Sort the whole numbers into groups by their remainder when divided by some number `d`. A rule whose modulus is a multiple of `d` sits inside a single group; every other rule spreads evenly across groups and cancels out when you weigh the groups against each other. So the imbalance between groups has to be paid for entirely out of the overlap — the amount by which the rules double-cover. When the arithmetic is tight, there is almost no overlap to spend, and one heavy rule cannot be balanced.\n\nThe two sizes that had consumed all five previous attempts, 55,440 and 100,800, both fail this way in under a millisecond. For 100,800 the overlap can be at most 9, while the imbalance is at least 1,903. Four solver runs had previously failed to settle these two, one of them running 37 minutes without an answer.\n\n**So no such list exists with least common multiple below 110,880** — and that is now settled by proof rather than by a filter, which is what the previous record at 55,440 was.\n\nThe test is also provably finished. Its tightest form can be decided completely, without trying combinations, and on the nine remaining sizes it rules out nothing at all: those sizes have loose arithmetic, leaving thousands of units of overlap to absorb any imbalance. The nearest miss, 302,400, falls short by 1,944. This is not a matter of searching harder.\n\nThe same test was checked against 3,130 genuine covering systems built by hand and never wrongly rejected one, and the two closest calls were recomputed in exact fractions rather than decimals.\n\n## What would move it\n\nOnly a witness, or an argument that works for all sizes at once. The nine remaining candidates need a satisfiability solver — software that decides whether a set of constraints can be met — and they are harder targets than the ones already tried, being both larger and looser. The list of 29 stops at 400,000 because that is where the computation stopped, not because of any theorem, so a covering system could exist at a far larger size. **This work removed candidates; it did not answer the question, and it made the remaining ones look worse rather than better.**\n\n*Written by hand on 2026-09-11 from `knowledge/reductions/273/FOURIER-ELIMINATION.md`, replacing the brief generated at the end of run `20260911-105339-682432-erdos273`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 616,
+      "rank": 615,
       "tier": "Frontier"
     },
     {
@@ -31603,7 +31648,7 @@
       "url": "https://www.erdosproblems.com/279",
       "manual": false,
       "prize": "no",
-      "rank": 617,
+      "rank": 616,
       "tier": "Frontier"
     },
     {
@@ -31697,7 +31742,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 618,
+      "rank": 617,
       "tier": "Frontier"
     },
     {
@@ -31782,7 +31827,7 @@
       "url": "https://www.erdosproblems.com/312",
       "manual": false,
       "prize": "no",
-      "rank": 619,
+      "rank": 618,
       "tier": "Frontier"
     },
     {
@@ -31866,7 +31911,7 @@
       "url": "https://www.erdosproblems.com/313",
       "manual": false,
       "prize": "no",
-      "rank": 620,
+      "rank": 619,
       "tier": "Frontier"
     },
     {
@@ -31935,7 +31980,7 @@
       "url": "https://www.erdosproblems.com/338",
       "manual": false,
       "prize": "no",
-      "rank": 621,
+      "rank": 620,
       "tier": "Frontier"
     },
     {
@@ -32034,7 +32079,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 622,
+      "rank": 621,
       "tier": "Frontier"
     },
     {
@@ -32122,7 +32167,7 @@
       "url": "https://www.erdosproblems.com/422",
       "manual": false,
       "prize": "no",
-      "rank": 623,
+      "rank": 622,
       "tier": "Frontier"
     },
     {
@@ -32190,7 +32235,7 @@
       "url": "https://www.erdosproblems.com/430",
       "manual": false,
       "prize": "no",
-      "rank": 624,
+      "rank": 623,
       "tier": "Frontier"
     },
     {
@@ -32274,7 +32319,7 @@
       "url": "https://www.erdosproblems.com/431",
       "manual": false,
       "prize": "no",
-      "rank": 625,
+      "rank": 624,
       "tier": "Frontier"
     },
     {
@@ -32362,7 +32407,7 @@
       "url": "https://www.erdosproblems.com/452",
       "manual": false,
       "prize": "no",
-      "rank": 626,
+      "rank": 625,
       "tier": "Frontier"
     },
     {
@@ -32445,7 +32490,7 @@
       "url": "https://www.erdosproblems.com/479",
       "manual": false,
       "prize": "no",
-      "rank": 627,
+      "rank": 626,
       "tier": "Frontier"
     },
     {
@@ -32499,7 +32544,7 @@
       "url": "https://www.erdosproblems.com/527",
       "manual": false,
       "prize": "no",
-      "rank": 628,
+      "rank": 627,
       "tier": "Frontier"
     },
     {
@@ -32552,7 +32597,7 @@
       "url": "https://www.erdosproblems.com/607",
       "manual": false,
       "prize": "$250",
-      "rank": 629,
+      "rank": 628,
       "tier": "Frontier"
     },
     {
@@ -32652,7 +32697,7 @@
       "url": "https://www.erdosproblems.com/628",
       "manual": false,
       "prize": "no",
-      "rank": 630,
+      "rank": 629,
       "tier": "Frontier"
     },
     {
@@ -32741,7 +32786,7 @@
       "url": "https://www.erdosproblems.com/727",
       "manual": false,
       "prize": "no",
-      "rank": 631,
+      "rank": 630,
       "tier": "Frontier"
     },
     {
@@ -32829,7 +32874,7 @@
       "url": "https://www.erdosproblems.com/821",
       "manual": false,
       "prize": "no",
-      "rank": 632,
+      "rank": 631,
       "tier": "Frontier"
     },
     {
@@ -32912,7 +32957,7 @@
       "url": "https://www.erdosproblems.com/828",
       "manual": false,
       "prize": "no",
-      "rank": 633,
+      "rank": 632,
       "tier": "Frontier"
     },
     {
@@ -32981,7 +33026,7 @@
       "url": "https://www.erdosproblems.com/870",
       "manual": false,
       "prize": "no",
-      "rank": 634,
+      "rank": 633,
       "tier": "Frontier"
     },
     {
@@ -33076,7 +33121,7 @@
       "url": "https://www.erdosproblems.com/872",
       "manual": false,
       "prize": "no",
-      "rank": 635,
+      "rank": 634,
       "tier": "Frontier"
     },
     {
@@ -33164,7 +33209,7 @@
       "url": "https://www.erdosproblems.com/913",
       "manual": false,
       "prize": "no",
-      "rank": 636,
+      "rank": 635,
       "tier": "Frontier"
     },
     {
@@ -33253,7 +33298,7 @@
       "url": "https://www.erdosproblems.com/931",
       "manual": false,
       "prize": "no",
-      "rank": 637,
+      "rank": 636,
       "tier": "Frontier"
     },
     {
@@ -33346,7 +33391,7 @@
       "url": "https://www.erdosproblems.com/932",
       "manual": false,
       "prize": "no",
-      "rank": 638,
+      "rank": 637,
       "tier": "Frontier"
     },
     {
@@ -33440,7 +33485,7 @@
       "url": "https://www.erdosproblems.com/951",
       "manual": false,
       "prize": "no",
-      "rank": 639,
+      "rank": 638,
       "tier": "Frontier"
     },
     {
@@ -33533,7 +33578,7 @@
       "url": "https://www.erdosproblems.com/961",
       "manual": false,
       "prize": "no",
-      "rank": 640,
+      "rank": 639,
       "tier": "Frontier"
     },
     {
@@ -33621,7 +33666,7 @@
       "url": "https://www.erdosproblems.com/972",
       "manual": false,
       "prize": "no",
-      "rank": 641,
+      "rank": 640,
       "tier": "Frontier"
     },
     {
@@ -33706,7 +33751,7 @@
       "url": "https://www.erdosproblems.com/1020",
       "manual": false,
       "prize": "no",
-      "rank": 642,
+      "rank": 641,
       "tier": "Frontier"
     },
     {
@@ -33790,7 +33835,7 @@
       "url": "https://www.erdosproblems.com/1059",
       "manual": false,
       "prize": "no",
-      "rank": 643,
+      "rank": 642,
       "tier": "Frontier"
     },
     {
@@ -33878,7 +33923,7 @@
       "url": "https://www.erdosproblems.com/1063",
       "manual": false,
       "prize": "no",
-      "rank": 644,
+      "rank": 643,
       "tier": "Frontier"
     },
     {
@@ -33961,7 +34006,7 @@
       "url": "https://www.erdosproblems.com/1065",
       "manual": false,
       "prize": "no",
-      "rank": 645,
+      "rank": 644,
       "tier": "Frontier"
     },
     {
@@ -34055,7 +34100,7 @@
       "url": "https://www.erdosproblems.com/1095",
       "manual": false,
       "prize": "no",
-      "rank": 646,
+      "rank": 645,
       "tier": "Frontier"
     },
     {
@@ -34144,7 +34189,7 @@
       "url": "https://www.erdosproblems.com/1142",
       "manual": false,
       "prize": "no",
-      "rank": 647,
+      "rank": 646,
       "tier": "Frontier"
     },
     {
@@ -34212,7 +34257,7 @@
       "url": "https://www.erdosproblems.com/1181",
       "manual": false,
       "prize": "no",
-      "rank": 648,
+      "rank": 647,
       "tier": "Frontier"
     },
     {
@@ -34276,7 +34321,7 @@
       "url": "https://www.erdosproblems.com/1200",
       "manual": false,
       "prize": "no",
-      "rank": 649,
+      "rank": 648,
       "tier": "Frontier"
     },
     {
@@ -34359,7 +34404,7 @@
       "url": "https://www.erdosproblems.com/167",
       "manual": false,
       "prize": "no",
-      "rank": 650,
+      "rank": 649,
       "tier": "Frontier"
     },
     {
@@ -34475,7 +34520,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 651,
+      "rank": 650,
       "tier": "Frontier"
     },
     {
@@ -34569,7 +34614,7 @@
         ],
         "searchFloor": 10700000000.0
       },
-      "rank": 652,
+      "rank": 651,
       "tier": "Frontier"
     },
     {
@@ -34663,7 +34708,7 @@
       "url": "https://www.erdosproblems.com/855",
       "manual": false,
       "prize": "no",
-      "rank": 653,
+      "rank": 652,
       "tier": "Frontier"
     },
     {
@@ -34741,7 +34786,7 @@
       "url": "https://www.erdosproblems.com/1052",
       "manual": false,
       "prize": "$10",
-      "rank": 654,
+      "rank": 653,
       "tier": "Frontier"
     },
     {
@@ -34818,7 +34863,7 @@
       "url": "https://www.erdosproblems.com/196",
       "manual": false,
       "prize": "no",
-      "rank": 655,
+      "rank": 654,
       "tier": "Frontier"
     },
     {
@@ -34920,7 +34965,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 656,
+      "rank": 655,
       "tier": "Frontier"
     },
     {
@@ -35000,7 +35045,7 @@
       "url": "https://www.erdosproblems.com/276",
       "manual": false,
       "prize": "no",
-      "rank": 657,
+      "rank": 656,
       "tier": "Frontier"
     },
     {
@@ -35085,7 +35130,7 @@
       "url": "https://www.erdosproblems.com/282",
       "manual": false,
       "prize": "no",
-      "rank": 658,
+      "rank": 657,
       "tier": "Frontier"
     },
     {
@@ -35175,7 +35220,7 @@
       "url": "https://www.erdosproblems.com/289",
       "manual": false,
       "prize": "no",
-      "rank": 659,
+      "rank": 658,
       "tier": "Frontier"
     },
     {
@@ -35260,7 +35305,7 @@
       "url": "https://www.erdosproblems.com/322",
       "manual": false,
       "prize": "no",
-      "rank": 660,
+      "rank": 659,
       "tier": "Frontier"
     },
     {
@@ -35339,7 +35384,7 @@
       "url": "https://www.erdosproblems.com/341",
       "manual": false,
       "prize": "no",
-      "rank": 661,
+      "rank": 660,
       "tier": "Frontier"
     },
     {
@@ -35423,7 +35468,7 @@
       "url": "https://www.erdosproblems.com/361",
       "manual": false,
       "prize": "no",
-      "rank": 662,
+      "rank": 661,
       "tier": "Frontier"
     },
     {
@@ -35524,7 +35569,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 663,
+      "rank": 662,
       "tier": "Frontier"
     },
     {
@@ -35603,7 +35648,7 @@
       "url": "https://www.erdosproblems.com/538",
       "manual": false,
       "prize": "no",
-      "rank": 664,
+      "rank": 663,
       "tier": "Frontier"
     },
     {
@@ -35688,7 +35733,7 @@
       "url": "https://www.erdosproblems.com/680",
       "manual": false,
       "prize": "no",
-      "rank": 665,
+      "rank": 664,
       "tier": "Frontier"
     },
     {
@@ -35767,7 +35812,7 @@
       "url": "https://www.erdosproblems.com/701",
       "manual": false,
       "prize": "no",
-      "rank": 666,
+      "rank": 665,
       "tier": "Frontier"
     },
     {
@@ -35852,7 +35897,7 @@
       "url": "https://www.erdosproblems.com/881",
       "manual": false,
       "prize": "no",
-      "rank": 667,
+      "rank": 666,
       "tier": "Frontier"
     },
     {
@@ -35936,7 +35981,7 @@
       "url": "https://www.erdosproblems.com/891",
       "manual": false,
       "prize": "no",
-      "rank": 668,
+      "rank": 667,
       "tier": "Frontier"
     },
     {
@@ -36031,7 +36076,7 @@
       "url": "https://www.erdosproblems.com/982",
       "manual": false,
       "prize": "no",
-      "rank": 669,
+      "rank": 668,
       "tier": "Frontier"
     },
     {
@@ -36116,7 +36161,7 @@
       "url": "https://www.erdosproblems.com/1055",
       "manual": false,
       "prize": "no",
-      "rank": 670,
+      "rank": 669,
       "tier": "Frontier"
     },
     {
@@ -36209,6 +36254,72 @@
         "sources": [
           "experiments/open-viability-2026-09-16/ASSESSMENT.md",
           "https://www.erdosproblems.com/forum/thread/1056"
+        ],
+        "searchFloor": null
+      },
+      "rank": 670,
+      "tier": "Frontier"
+    },
+    {
+      "id": 1141,
+      "statement": "Are there infinitely many $n$ such that $n-k^2$ is prime for all $k$ with $(n,k)=1$ and $k^2<n$?",
+      "status": "Solved",
+      "state": "disproved (lean)",
+      "tags": [
+        "number theory",
+        "primes"
+      ],
+      "score": 10,
+      "harness": "Untried",
+      "rationale": [
+        "The disproof needs a Pollack-type theorem, small primes p with chi(p) = 1 (Burgess plus Siegel, ineffective). The harness isolates exactly that analytic core and stops (train, 2026-09-25).",
+        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
+        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it."
+      ],
+      "requirements": [
+        "Formalizing Burgess-type character sum bounds and Siegel's theorem: out of reach.",
+        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Construct and verify a uniform argument or an infinite family."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: known resolution",
+          "points": 44
+        },
+        {
+          "label": "External Lean proof exists",
+          "points": 15
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Unbounded quantifier",
+          "points": -5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Problem-specific manual review adjustment",
+          "points": -51
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/1141",
+      "manual": true,
+      "prize": "no",
+      "assessed": {
+        "on": "2026-09-30",
+        "sources": [
+          "benchmarks/timesplit/RESULTS.md#improvement-loop-iteration-3-written-2026-09-25-launches-after-the-dev-screen-alloc-budget-follows-the-core"
         ],
         "searchFloor": null
       },
