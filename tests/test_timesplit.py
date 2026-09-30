@@ -680,3 +680,51 @@ class DiscoverV3(unittest.TestCase):
             attempts = [{"answer": "true", "confidence": c, "complete": False} for c in confs]
             self.assertIsNotNone(T.decide_direction(attempts, single_confident=0.75)["commit"])
             self.assertIsNone(T.decide_direction(attempts, single_confident=0.75, floor=0.6)["commit"])
+
+
+class DiscoverV4(unittest.TestCase):
+    """discover-v4: more rounds until a refereed complete proof appears (the conversion screen's #990 and #1037 got
+    none in one round, where the calibration had them in 2 of 3 rounds each)."""
+    INCOMPLETE = {"answer": "true", "confidence": 0.6, "complete": False, "cost": 0.3}
+    REFEREED = {"answer": "false", "confidence": 0.9, "complete": True, "critic": {"valid": True}, "cost": 0.5}
+
+    def _rounds(self, results):
+        calls = []
+
+        def run_round(r):
+            calls.append(r)
+            return [dict(x) for x in results[len(calls) - 1]]
+        return run_round, calls
+
+    def test_stops_at_the_first_refereed_complete_proof(self):
+        run_round, calls = self._rounds([[self.REFEREED], [self.INCOMPLETE]])
+        att, rounds, spent = T.run_more_rounds([dict(self.INCOMPLETE)], run_round, 3, 3.0, 0.3)
+        self.assertEqual((rounds, len(calls)), (2, 1))
+        self.assertEqual(att[-1]["round"], 2)
+        self.assertAlmostEqual(spent, 0.8)
+
+    def test_no_extra_round_when_the_first_already_has_one(self):
+        run_round, calls = self._rounds([])
+        att, rounds, _ = T.run_more_rounds([dict(self.REFEREED)], run_round, 3, 3.0, 0.5)
+        self.assertEqual((rounds, calls), (1, []))
+
+    def test_max_rounds_and_the_cost_cap(self):
+        run_round, calls = self._rounds([[self.INCOMPLETE]] * 5)
+        _, rounds, _ = T.run_more_rounds([dict(self.INCOMPLETE)], run_round, 3, 10.0, 0.3)
+        self.assertEqual(rounds, 3)                                   # max_rounds in all
+        run_round, calls = self._rounds([[{**self.INCOMPLETE, "cost": 1.2}]] * 5)
+        _, rounds, spent = T.run_more_rounds([{**self.INCOMPLETE, "cost": 1.2}], run_round, 5, 3.0, 1.2)
+        self.assertEqual(rounds, 2)                                   # a third round would pass the $3 cap
+        self.assertAlmostEqual(spent, 2.4)
+
+    def test_an_unrefereed_or_rejected_complete_proof_does_not_stop_the_rounds(self):
+        self.assertFalse(T.has_refereed_complete([{"answer": "true", "complete": True, "critic": {"valid": False}}]))
+        self.assertFalse(T.has_refereed_complete([{"answer": "true", "complete": True}]))
+        self.assertTrue(T.has_refereed_complete([self.REFEREED]))
+
+    def test_v4_settings(self):
+        import argparse
+        a = argparse.Namespace(candidate="discover-v4", commit_floor=None)
+        T.apply_candidate_settings(a)
+        self.assertEqual((a.discover_rounds, a.discover_total_budget, a.commit_floor, a.discover_effort),
+                         (3, 3.0, 0.6, "medium"))

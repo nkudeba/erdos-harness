@@ -986,3 +986,40 @@ The plan rated them hard 5, moderate 3, unrated 2.
      become the hypotheses.
 - **The floor worked as designed.** It refused a wrong commit (#990) and cost nothing on #1037, where the harness
   stopped the false direction itself.
+
+## #678 fresh, with the cheap fallback (2026-09-30), written before launch: `train-678-fallback-543fd9d`
+
+- **Question:** does the harness now close #678 by itself? The previous run left three easy steps deferred with
+  budget unspent.
+- **Protocol:** the same as `train-conv-fde7891` (`discover-v3`, $16, 6 cycles), on pin `543fd9d`, which is `main`
+  041f352 with `--cheap-fallback on`. A fresh alias; discovery and plans are drawn anew.
+- **Write-ahead:**
+  - P(solved, meaning the true direction verified with the audit passing) = 0.45. The last run's route and budget
+    would now close, but a fresh run can take another route, lose cycles to skeletons that do not compile, or get
+    no complete proof from discovery (it did in 1 of 2 attempts last time).
+  - P(the fallback fires at least once and proves something) = 0.7.
+  - About $14.
+
+## `discover-v4` on #990 and #1037 (train, 2026-09-30), written before launch: `train-v4-543fd9d`
+
+- **Why:**
+  - In the conversion screen, discovery's single round produced no complete proof for #990 or #1037. The train
+    calibration had one in 2 of 3 rounds for each.
+  - Without one, the plan improvised. On #990 its key bound was twice judged as hard as the problem.
+- **Candidate `discover-v4`:**
+  - `discover-v3` plus further rounds of the same two parallel attempts until one yields a complete proof its referee
+    accepts: up to 3 rounds, never starting a round that would take discovery past $3.
+  - Rounds are pooled for the direction decision, and the floor still applies.
+  - Unit-tested in `tests/test_timesplit.py`, class DiscoverV4.
+- **Protocol:**
+  - Pin `543fd9d`, the same harness as the #678 rerun; the only change is the runner's discovery.
+  - $16, 6 cycles.
+  - It launches when the #678 rerun ends.
+- **Write-ahead:**
+  - A refereed complete proof within 3 rounds: #990 0.75, #1037 0.65.
+  - A commit to the true direction (NO) on each: 0.65.
+  - Solved: #990 0.25. Even with the construction written out, the multiplicity-at-1 argument and the M ≤ 4m bound
+    are intricate Lean.
+  - Solved: #1037 0.1. It needs graphs with small clique and independence numbers, a probabilistic existence
+    argument that Mathlib lacks.
+  - Discovery spend $1–3 an item, about $30 in all.

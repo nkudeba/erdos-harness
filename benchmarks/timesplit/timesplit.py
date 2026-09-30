@@ -1083,14 +1083,23 @@ def discover(item: dict, statement: str, run_dir: Path, args) -> dict:
         a["cost"] = round(inner.total_cost_usd, 4)        # every call this attempt made, failed ones included
         return a
 
-    v2 = getattr(args, "candidate", None) in ("discover-v2", "discover-v3")
+    v2 = getattr(args, "candidate", None) in ("discover-v2", "discover-v3", "discover-v4")
     # alloc: v2's first round and its single-confident rule, the calibrated floor, and no gap round (iteration 3)
     alloc = getattr(args, "candidate", None) == "alloc"
-    v3floor = getattr(args, "candidate", None) == "discover-v3"
+    v3floor = getattr(args, "candidate", None) in ("discover-v3", "discover-v4")
     frames = DISCOVER_FRAMES[: args.discover_attempts]
-    with ThreadPoolExecutor(max_workers=len(frames)) as ex:
-        attempts = list(ex.map(lambda kf: one(*kf), enumerate(frames)))
+
+    def run_round(_r: int = 0) -> list[dict]:
+        with ThreadPoolExecutor(max_workers=len(frames)) as ex:
+            return list(ex.map(lambda kf: one(*kf), enumerate(frames)))
+    attempts = run_round()
+    for a in attempts:
+        a["round"] = 1
     spent = sum(a.get("cost") or 0.0 for a in attempts)
+    rounds_run = 1
+    if getattr(args, "candidate", None) == "discover-v4":
+        attempts, rounds_run, spent = run_more_rounds(attempts, run_round, int(args.discover_rounds),
+                                                      float(args.discover_total_budget), spent)
     floor = getattr(args, "commit_floor", None)
     d = decide_direction(attempts, single_confident=0.75 if (v2 or alloc) else None,
                          floor=floor if floor is not None else (0.6 if (alloc or v3floor) else None))
@@ -1121,11 +1130,12 @@ def discover(item: dict, statement: str, run_dir: Path, args) -> dict:
         guidance += (("\n\nThe first-round attempt in full (unverified):\n" + best.get("text", "")[-3500:]) if (v2 or alloc)
                      else "\n\nThe attempt in full (unverified):\n" + best.get("text", "")[-6000:])
     (run_dir / "discovery.json").write_text(json.dumps({"decision": {k: v for k, v in d.items() if k != "best"},
-                                                        "best_frame": best.get("frame"), "attempts": attempts,
+                                                        "best_frame": best.get("frame"), "rounds": rounds_run,
+                                                        "attempts": attempts,
                                                         "gap_attempt": gap_attempt, "spend": round(spent, 4)},
                                                        indent=1, ensure_ascii=False))
     return {"commit": d["commit"], "answer": d.get("answer"), "share": d["share"], "guidance": guidance,
-            "spend": round(spent, 4), "gap_proved": bool(gap_attempt and gap_attempt.get("proved")
+            "rounds": rounds_run, "spend": round(spent, 4), "gap_proved": bool(gap_attempt and gap_attempt.get("proved")
                                                          and (gap_attempt.get("critic") or {}).get("valid"))}
 
 
@@ -1344,14 +1354,43 @@ def default_tag(proto: dict) -> str:
 # 0.55, #871 at 0.33) sat below it, each spending a whole run on a false statement.
 DISCOVER_V3 = {"discover_attempts": 2, "discover_effort": "medium", "discover_budget": 0.8, "critic_budget": 0.3,
                "gap_budget": 1.2, "gap_effort": "medium", "commit_floor": 0.6}
-DISCOVERY_KEYS = tuple(DISCOVER_V3)
+# discover-v4 = v3 plus rounds until a refereed complete proof appears. Discovery is stochastic: on the train
+# calibration #990 and #1037 had complete refereed proofs in 2 of 3 rounds each, and the conversion screen's single
+# round got none for either, so the plan improvised a route whose key bound is as hard as the problem (#990). The
+# one dev solve (#1213) came from a round that did produce one. A round costs $0.4-1.1; the cap keeps it bounded.
+DISCOVER_V4 = {**DISCOVER_V3, "discover_rounds": 3, "discover_total_budget": 3.0}
+DISCOVERY_KEYS = tuple(DISCOVER_V4)
 
 
 def apply_candidate_settings(args) -> None:
-    if getattr(args, "candidate", None) == "discover-v3":
-        for k, v in DISCOVER_V3.items():
-            if k != "commit_floor" or getattr(args, k, None) is None:
-                setattr(args, k, v)
+    settings = {"discover-v3": DISCOVER_V3, "discover-v4": DISCOVER_V4}.get(getattr(args, "candidate", None))
+    for k, v in (settings or {}).items():
+        if k != "commit_floor" or getattr(args, k, None) is None:
+            setattr(args, k, v)
+
+
+def has_refereed_complete(attempts: list[dict]) -> bool:
+    return any(a.get("complete") and a.get("answer") in ("true", "false") and (a.get("critic") or {}).get("valid")
+               for a in attempts)
+
+
+def run_more_rounds(first: list[dict], run_round, max_rounds: int, cap: float, spent: float):
+    """discover-v4: further rounds of the same parallel attempts until one yields a complete proof its referee
+    accepts, `max_rounds` in all. A round is never started when the previous round's cost would take the total past
+    `cap`. All rounds are pooled for the direction decision, and every attempt records its round."""
+    attempts, rounds, last = list(first), 1, spent
+    while rounds < max_rounds and not has_refereed_complete(attempts):
+        if spent + last > cap:
+            break
+        more = run_round(rounds)
+        cost = sum(a.get("cost") or 0.0 for a in more)
+        for a in more:
+            a["round"] = rounds + 1
+        attempts += more
+        spent += cost
+        last = cost
+        rounds += 1
+    return attempts, rounds, spent
 
 
 def run(args) -> int:
@@ -1439,7 +1478,7 @@ def run_item(item: dict, tag: str, proto: dict, args, taken: set[int]) -> dict:
     pfile = run_dir / "problem.json"          # per evaluation, inside the (gitignored) run dir, never in the tree
     pfile.write_text(json.dumps(prob, indent=2, ensure_ascii=False))
     discovery, committed, budget, guidance_file = None, None, args.budget, None
-    if getattr(args, "candidate", None) in ("discover-v1", "discover-v2", "discover-v3", "alloc") and not args.dry_run:
+    if getattr(args, "candidate", None) in ("discover-v1", "discover-v2", "discover-v3", "discover-v4", "alloc") and not args.dry_run:
         discovery = discover(item, statement, run_dir, args)
         budget = round(max(args.budget - discovery["spend"], 1.0), 2)       # the same $8 in total as the baseline
         committed = discovery["commit"]
@@ -2450,11 +2489,13 @@ def main() -> int:
     r.add_argument("--compile-workers", type=int, default=2, help="ERDOS_COMPILE_WORKERS for the run (a shared machine)")
     r.add_argument("--item-hours", type=float, default=3.0, help="wall-clock cap per item; a kill is infrastructure")
     r.add_argument("--limit-waits", type=int, default=4, help="usage-limit waits per item before giving up on it")
-    r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "discover-v3", "v3", "alloc"],
+    r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "discover-v3", "discover-v4", "v3",
+                                           "alloc"],
                    default="baseline",
                    help="discover-v1: informal attempts + referee first, then commit to one direction (same total budget); "
                         "discover-v2: + a second round on the named missing step, and one confident answer may commit; "
                         "discover-v3: discover-v2 with its settings fixed in code and the calibrated 0.6 commit floor; "
+                        "discover-v4: v3 plus up to --discover-rounds rounds until a refereed complete proof appears; "
                         "v3: no external discovery, the harness's own discovery options instead (V3_FLAGS)")
     r.add_argument("--v3-flags", help="override V3_FLAGS for candidate v3 (one string, shell-split)")
     r.add_argument("--commit-floor", type=float, default=None,
@@ -2464,6 +2505,8 @@ def main() -> int:
     # medium, not high: a capped call returns nothing, and on #1148 a high-effort gap attempt overran even $1.50
     r.add_argument("--gap-effort", default="medium", choices=["low", "medium", "high"])
     r.add_argument("--discover-budget", type=float, default=1.2, help="cap per informal attempt")
+    r.add_argument("--discover-rounds", type=int, default=1, help="discover-v4: rounds until a refereed complete proof")
+    r.add_argument("--discover-total-budget", type=float, default=3.0, help="discover-v4: cap on all rounds together")
     r.add_argument("--discover-attempts", type=int, default=2, choices=[1, 2, 3], help="parallel informal attempts")
     r.add_argument("--discover-effort", default="high", choices=["low", "medium", "high"])
     r.add_argument("--critic-budget", type=float, default=0.3, help="cap per referee call")
