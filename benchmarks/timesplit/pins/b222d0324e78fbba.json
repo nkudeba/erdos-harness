@@ -1,0 +1,10 @@
+{
+ "harness": "pin_b222d0324e78fbba_harness.py",
+ "harness_sha": "b222d0324e78fbba",
+ "knowledge": "benchmarks/timesplit/pins/knowledge-b222d0324e78fbba",
+ "git": {
+  "commit": "3347132e4b1bd8e5127a4bc12d679ad6c77cc766",
+  "dirty": true
+ },
+ "at": "2026-10-01T04:10:08Z"
+}

@@ -1,0 +1,93 @@
+{
+ "built": "2026-10-01T04:29:29Z",
+ "cutoff_exclusive": "2026-01-19",
+ "excludes": [
+  "erdosproblems\\.com/(?:forum/thread/|latex/)?1179\\b",
+  "Erd(?:ő|o|ö|\\\\H\\{o\\})s\\s+problem\\s*(?:#|no\\.?|number)?\\s*1179\\b",
+  "\\bproblem\\s*#\\s*1179\\b"
+ ],
+ "model": "claude-opus-5-5",
+ "source": "OpenAlex search; arXiv full text as version 1 only",
+ "statement_sha": "55d9b5267886b765",
+ "queries": [
+  "random subset sums abelian group equidistribution",
+  "Erdős Rényi probabilistic group theory subset sums",
+  "subset sum distribution random sets finite groups",
+  "Erdős Rényi log2 N random subset",
+  "local limit theorem subset sums groups",
+  "uniform distribution subset sums Fourier analysis",
+  "random Cayley graph generating sets",
+  "anticoncentration subset sums abelian groups"
+ ],
+ "candidates": 117,
+ "dropped": [],
+ "chosen": [
+  {
+   "id": "W2018047324",
+   "title": "Expander graphs and their applications",
+   "date": "2006-08-07",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1090/s0273-0979-06-01126-8",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "16150b181b2fb804",
+   "chars": 1736
+  },
+  {
+   "id": "W1891181203",
+   "title": "Analysis of Boolean Functions",
+   "date": "2014-06-05",
+   "arxiv": "2105.10386",
+   "doi": "https://doi.org/10.1017/cbo9781139814782",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/2105.10386v1",
+   "sha256": "3817a58cee62a9d0",
+   "chars": 120000
+  },
+  {
+   "id": "W1938444229",
+   "title": "An Introduction to Matrix Concentration Inequalities",
+   "date": "2015-01-01",
+   "arxiv": "1501.01571",
+   "doi": "https://doi.org/10.1561/2200000048",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/1501.01571v1",
+   "sha256": "61615709315acf9d",
+   "chars": 120000
+  },
+  {
+   "id": "W2146261818",
+   "title": "Randomness-efficient low degree tests and short PCPs via epsilon-biased sets",
+   "date": "2003-06-09",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1145/780542.780631",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "bce35bc909fa8ed9",
+   "chars": 968
+  },
+  {
+   "id": "W2069084184",
+   "title": "Uniform expansion bounds for Cayley graphs of SL 2 (𝔽 p )",
+   "date": "2008-03-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.4007/annals.2008.167.625",
+   "full_text": true,
+   "text_source": "http://annals.math.princeton.edu/wp-content/uploads/annals-v167-n2-p07.pdf",
+   "sha256": "05f1ed49e5abc5a2",
+   "chars": 29805
+  },
+  {
+   "id": "W2131172946",
+   "title": "Introduction to the non-asymptotic analysis of random matrices",
+   "date": "2012-05-17",
+   "arxiv": "1011.3027",
+   "doi": "https://doi.org/10.1017/cbo9780511794308.006",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/1011.3027v1",
+   "sha256": "2d5576b3f14a782e",
+   "chars": 120000
+  }
+ ],
+ "cost_usd": 1.5892
+}

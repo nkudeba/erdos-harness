@@ -1,0 +1,93 @@
+{
+ "built": "2026-10-01T04:25:19Z",
+ "cutoff_exclusive": "2026-06-02",
+ "excludes": [
+  "erdosproblems\\.com/(?:forum/thread/|latex/)?619\\b",
+  "Erd(?:ő|o|ö|\\\\H\\{o\\})s\\s+problem\\s*(?:#|no\\.?|number)?\\s*619\\b",
+  "\\bproblem\\s*#\\s*619\\b"
+ ],
+ "model": "claude-opus-5-5",
+ "source": "OpenAlex search; arXiv full text as version 1 only",
+ "statement_sha": "722978dfe23d0d46",
+ "queries": [
+  "triangle-free graphs adding edges diameter",
+  "saturated triangle-free graphs diameter two",
+  "minimum edges added reduce diameter",
+  "triangle-free diameter augmentation Erdős problem",
+  "maximal triangle-free graphs diameter",
+  "diameter critical triangle-free graphs",
+  "graph augmentation diameter constraint",
+  "triangle-free completion diameter four"
+ ],
+ "candidates": 100,
+ "dropped": [],
+ "chosen": [
+  {
+   "id": "W2059872504",
+   "title": "On the non-(p-1)-partite K_{p}-free graphs",
+   "date": "2012-11-27",
+   "arxiv": null,
+   "doi": "https://doi.org/10.7151/dmgt.1654",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "a343b7b9bb5e6c93",
+   "chars": 307
+  },
+  {
+   "id": "W1580292412",
+   "title": "Minimizing the Diameter of a Network Using Shortcut Edges",
+   "date": "2010-01-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1007/978-3-642-13731-0_39",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  },
+  {
+   "id": "W1973394376",
+   "title": "Improved approximability and non-approximability results for graph diameter decreasing problems",
+   "date": "2011-05-22",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1016/j.tcs.2011.05.014",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  },
+  {
+   "id": "W3179424942",
+   "title": "$C_4$-saturated graphs of minimum size",
+   "date": "1989-01-01",
+   "arxiv": null,
+   "doi": null,
+   "full_text": false,
+   "text_source": "",
+   "sha256": "1204a355613fdefa",
+   "chars": 1303
+  },
+  {
+   "id": "W2077326803",
+   "title": "Independent domination in graphs: A survey and recent results",
+   "date": "2013-01-22",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1016/j.disc.2012.11.031",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  },
+  {
+   "id": "W2795459024",
+   "title": "Improved approximation for tree augmentation: saving by rewiring",
+   "date": "2018-06-20",
+   "arxiv": "1804.02242",
+   "doi": "https://doi.org/10.1145/3188745.3188898",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/1804.02242v1",
+   "sha256": "c388e44f4cd9cccf",
+   "chars": 101567
+  }
+ ],
+ "cost_usd": 0.583
+}

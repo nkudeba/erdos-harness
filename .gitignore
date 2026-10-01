@@ -40,3 +40,7 @@ pin_*_harness.py
 # ...except a pin whose exact contents are in no commit and that produced a recorded result: 84f21c5 ran both
 # verified #1213 solves (benchmarks/timesplit/evidence/1213). The other pins are recoverable from history.
 !pin_84f21c561c540e02_harness.py
+
+# timesplit literature libraries: raw third-party paper texts stay local (manifest.json records id, date and sha256,
+# so `timesplit.py library` can rebuild them); manifests, digests and statements are committed
+benchmarks/timesplit/library/*/papers/

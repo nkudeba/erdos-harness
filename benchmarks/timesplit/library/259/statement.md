@@ -1,0 +1,1 @@
+Is the sum\[\sum_{n} \mu(n)^2\frac{n}{2^n}\]irrational?

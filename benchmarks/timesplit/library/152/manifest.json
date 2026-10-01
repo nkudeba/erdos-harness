@@ -1,0 +1,102 @@
+{
+ "built": "2026-10-01T04:20:11Z",
+ "cutoff_exclusive": "2026-03-27",
+ "excludes": [
+  "erdosproblems\\.com/(?:forum/thread/|latex/)?152\\b",
+  "Erd(?:ő|o|ö|\\\\H\\{o\\})s\\s+problem\\s*(?:#|no\\.?|number)?\\s*152\\b",
+  "\\bproblem\\s*#\\s*152\\b"
+ ],
+ "model": "claude-opus-5-5",
+ "source": "OpenAlex search; arXiv full text as version 1 only",
+ "statement_sha": "3672bfb9fbd7412a",
+ "queries": [
+  "Sidon set sumset structure",
+  "Sidon set isolated elements sumset",
+  "B2 sequences sumset gaps",
+  "Sidon sets intervals in A+A",
+  "Erdős problems Sidon sets",
+  "sumset contains long arithmetic progressions",
+  "Sidon set sumset complement density",
+  "Erdős Freud Sidon sumset problem"
+ ],
+ "candidates": 90,
+ "dropped": [
+  {
+   "id": "W7196935084",
+   "why": "placeholder date 2026-01-01"
+  },
+  {
+   "id": "W7133350380",
+   "why": "arXiv 2603.00889 posted in or after the cutoff month"
+  }
+ ],
+ "chosen": [
+  {
+   "id": "W836876136",
+   "title": "Sumsets of Sidon sets",
+   "date": "1996-01-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.4064/aa-77-4-353-359",
+   "full_text": true,
+   "text_source": "https://www.impan.pl/shop/publication/transaction/download/product/109059?download.pdf",
+   "sha256": "7744e070392a7c3b",
+   "chars": 13087
+  },
+  {
+   "id": "W104057383",
+   "title": "Gaps in Dense Sidon Sets",
+   "date": "2000-08-24",
+   "arxiv": null,
+   "doi": "https://doi.org/10.5281/zenodo.7554448",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "8a795162a563dc02",
+   "chars": 390
+  },
+  {
+   "id": "W2620155147",
+   "title": "Additive Combinatorics: A Menu of Research Problems",
+   "date": "2017-05-21",
+   "arxiv": "1705.07444",
+   "doi": "https://doi.org/10.48550/arxiv.1705.07444",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/1705.07444v1",
+   "sha256": "f9d32e819567e130",
+   "chars": 120000
+  },
+  {
+   "id": "W1883713431",
+   "title": "On suprema of autoconvolutions with an application to Sidon sets",
+   "date": "2017-02-23",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1090/proc/13690",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "17d801a90aa49584",
+   "chars": 783
+  },
+  {
+   "id": "W1996343449",
+   "title": "Well Distribution of Sidon Sets in Residue Classes",
+   "date": "1998-04-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1006/jnth.1997.2217",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  },
+  {
+   "id": "W2087699257",
+   "title": "Erdős and the Integers",
+   "date": "1999-11-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1006/jnth.1999.2395",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  }
+ ],
+ "cost_usd": 0.7064
+}

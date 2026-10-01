@@ -1288,6 +1288,22 @@ V3_FLAGS = ["--explore", "on", "--explore-budget", "1.5", "--explore-core", "on"
 ALLOC_FLAGS = ["--attack-order", "core-first", "--refute", "changed", "--premise-attack", "cheap"]
 
 
+# In-run discovery (2026-09-30): the harness runs discovery itself (`--discover on`), so the runner launches it with
+# --open and the harness commits to a direction. discover-v5 = discover-v3's settings with the best refereed proof
+# passed WHOLE (the runner passed its last 3,500 characters). blueprint = v5 + the proof as numbered steps the plan
+# builds on, each child handed its step, and an outline view of long residuals. crossfed = a synthesis between
+# rounds and a ladder of three easier variants (OpenAI's Navier-Stokes structure, at this budget).
+IN_RUN_FLAGS = {
+    "discover-v5": ["--discover", "on"],
+    "blueprint": ["--discover", "on", "--blueprint", "on", "--residual-view", "outline"],
+    "crossfed": ["--discover", "on", "--discover-mode", "crossfed", "--discover-rounds", "2", "--discover-ladder", "3",
+                 "--discover-total-budget", "6"],
+    "crossfed-blueprint": ["--discover", "on", "--discover-mode", "crossfed", "--discover-rounds", "2",
+                           "--discover-ladder", "3", "--discover-total-budget", "6", "--blueprint", "on",
+                           "--residual-view", "outline"],
+}
+
+
 def candidate_flags(args) -> list[str]:
     """Extra harness flags a candidate adds to the fixed protocol (empty for baseline and the discover arms)."""
     import shlex
@@ -1295,6 +1311,8 @@ def candidate_flags(args) -> list[str]:
         return shlex.split(args.v3_flags) if getattr(args, "v3_flags", None) else list(V3_FLAGS)
     if getattr(args, "candidate", None) == "alloc":
         return list(ALLOC_FLAGS)
+    if getattr(args, "candidate", None) in IN_RUN_FLAGS:
+        return list(IN_RUN_FLAGS[args.candidate])
     return []
 
 
@@ -1560,6 +1578,16 @@ def launch(item: dict, tag: str, proto: dict, args, ctx: dict) -> dict:
         rec["spend"] = round((rec["spend"] or 0.0) + discovery["spend"], 2)
         rec["discovery"] = {k: v for k, v in discovery.items() if k != "guidance"}
         rec["committed"] = committed
+    elif (run_dir / "discovery.json").exists():
+        # in-run discovery (`--discover on`): its calls are in the harness's own log, so rec["spend"] already holds
+        # them; a commit happened inside run_open, so the record reads both pos/ and neg/ as an --open run does
+        try:
+            dj = json.loads((run_dir / "discovery.json").read_text())
+            rec["discovery"] = {"in_run": True, "decision": dj.get("decision"), "refereed_complete": dj.get("refereed_complete"),
+                                "rounds": dj.get("rounds"), "spend": dj.get("spend")}
+            rec["committed_in_run"] = (dj.get("decision") or {}).get("commit")
+        except (OSError, ValueError):
+            pass
     try:
         done = json.loads((run_dir / "DONE").read_text())
     except (OSError, ValueError):
@@ -2155,6 +2183,131 @@ def explore_screen(args) -> int:
     return 0
 
 
+def library_spec(item: dict, margin_days: int = 7) -> dict:
+    """The cutoff and exclusions for an item's dated library: strictly before the resolution's first public date,
+    minus a margin, and nothing that names the problem (its identity must not reach a masked run)."""
+    from datetime import date, timedelta
+    n = str(item["problem"])
+    first = date.fromisoformat(str(item["first_public"])[:10])
+    return {"cutoff": (first - timedelta(days=margin_days)).isoformat(),
+            "exclude": [rf"erdosproblems\.com/(?:forum/thread/|latex/)?{n}\b", rf"Erd(?:ő|o|ö|\\H\{{o\}})s\s+problem\s*(?:#|no\.?|number)?\s*{n}\b",
+                        rf"\bproblem\s*#\s*{n}\b"]}
+
+
+def library_cmd(args) -> int:
+    """Build each item's dated literature library (library.py) under benchmarks/timesplit/library/<n>/, from the
+    item's MASKED statement. A library is an input to a run (`--library`), never a reference: unlike ideas/ it holds
+    nothing published on or after the resolution."""
+    import library as L
+    items = [i for i in load_pool()["items"] if (not args.items or i["problem"] in args.items) and (i.get("mask") or {}).get("ok")
+             and (args.items or i["split"] == args.split)]
+    for item in items:
+        out = HERE / "library" / str(item["problem"])
+        if (out / "DIGEST.md").exists() and not args.redo:
+            print(f"#{item['problem']}: library exists ({out.relative_to(ROOT)})", flush=True)
+            continue
+        mask = json.loads((ROOT / item["mask"]["file"]).read_text())
+        spec = library_spec(item, args.margin_days)
+        sfile = out / "statement.md"
+        out.mkdir(parents=True, exist_ok=True)
+        sfile.write_text(mask["statement_en"])
+        argv = ["build", "--statement-file", str(sfile), "--cutoff", spec["cutoff"], "--out", str(out),
+                "--papers", str(args.papers), "--model", args.model]
+        for p in spec["exclude"]:
+            argv += ["--exclude", p]
+        print(f"#{item['problem']}: building, cutoff {spec['cutoff']} (first public {item['first_public']})", flush=True)
+        try:
+            L.main(argv)
+        except Exception as e:                                  # noqa: BLE001 - one item never stops the batch
+            print(f"#{item['problem']}: FAILED {type(e).__name__}: {str(e)[:200]}", flush=True)
+    return 0
+
+
+def discover_screen(args) -> int:
+    """The no-Lean screen for changes to discovery: the in-run stage alone (`harness.py --stop-after discover`) on
+    each item, recorded in the result-record shape so `ideas --tag <tag>` grades it, plus what decides conversion
+    downstream: the direction the stage commits to, and whether a complete proof of the TRUE direction survived the
+    referee (the #1213 solve came from exactly that)."""
+    items = [i for i in load_pool()["items"] if i["split"] == args.split and (not args.items or i["problem"] in args.items)
+             and (i.get("mask") or {}).get("ok")]
+    done = set(load_results(args.tag))
+    taken = taken_aliases()
+    out = RESULTS / f"{args.tag}.jsonl"
+    flags = ["--discover-mode", args.discover_mode, "--discover-attempts", str(args.discover_attempts),
+             "--discover-effort", args.discover_effort, "--discover-budget", str(args.discover_budget),
+             "--discover-rounds", str(args.discover_rounds), "--discover-total-budget", str(args.discover_total_budget),
+             "--discover-ladder", str(args.discover_ladder), "--discover-commit-floor", str(args.commit_floor),
+             "--discover-gap-round", args.gap_round]
+    print(f"discover-screen {args.tag}: {len([i for i in items if i['problem'] not in done])} item(s); {' '.join(flags)}",
+          flush=True)
+    for item in items:
+        if item["problem"] in done:
+            continue
+        mask = json.loads((ROOT / item["mask"]["file"]).read_text())
+        alias = alias_for(item["problem"], f"discover-{args.tag}", taken)
+        statement = re.sub(rf"\berdos_{mask['alias_id']}\b", f"erdos_{alias}", mask["statement_lean"])
+        run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-discover-erdos{alias}"
+        run_dir.mkdir(parents=True)
+        prob = {"id": str(alias), "statement": mask["statement_en"], "tags": mask.get("tags") or [], "imports": mask["imports"],
+                "benchmark": {"kind": "time-split", "reference": "withheld (benchmarks/timesplit/pool.json)"}}
+        (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
+        (run_dir / "state.json").write_text(json.dumps({"statement": statement, "problem_input": prob, "mode": "research",
+                                                        "invocations": [], "benchmark": True}, indent=2, ensure_ascii=False))
+        with (RESULTS / f"{args.tag}.aliases.jsonl").open("a") as f:
+            f.write(json.dumps({"alias": alias, "problem": item["problem"], "run_dir": str(run_dir.relative_to(ROOT))}) + "\n")
+        lib_flags, lib = [], None
+        if args.library_root:
+            lib = ROOT / args.library_root / str(item["problem"])
+            if (lib / "DIGEST.md").exists():
+                lib_flags = ["--library", str(lib)]
+            else:
+                print(f"#{item['problem']}: no library at {lib}; screened without one", flush=True)
+                lib = None
+        cmd = [sys.executable, str(harness_file(args)), "run", "--problem", str(run_dir / "problem.json"), "--resume",
+               str(run_dir), "--mode", "research", "--allow-research", "--benchmark", "--masked", "--no-brief",
+               "--skip-literature", "--stop-after", "discover", *flags, *lib_flags,
+               "--run-budget", str(round(args.discover_total_budget + 1.5, 2)), "--backend", "claude-cli", "--model", args.model]
+        env = dict(os.environ, **({"ERDOS_KNOWLEDGE": str((ROOT / args.knowledge).resolve())} if args.knowledge else {}))
+        for attempt in range(4):
+            with (run_dir / "lane.log").open("a") as log:
+                rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                    env=env, timeout=3 * 3600).returncode
+            text = (run_dir / "lane.log").read_text(errors="replace")[-6000:]
+            if rc != 1 or not LIMIT_RE.search(text):
+                break
+            wait = seconds_until_reset(text)
+            print(f"#{item['problem']}: usage limit; waiting {wait / 60:.0f} min, then resuming", flush=True)
+            time.sleep(wait)
+        else:
+            print(f"#{item['problem']}: still limited after 4 waits; not recorded (rerun the command)", flush=True)
+            continue
+        import harness as H
+        facts = H.collect_run_facts(run_dir, str(alias))
+        try:
+            dj = json.loads((run_dir / "discovery.json").read_text())
+        except (OSError, ValueError):
+            dj = {}
+        truth = "true" if item["answer"] else "false"
+        atts = dj.get("attempts") or []
+        refereed = [a for a in atts if a.get("complete") and (a.get("critic") or {}).get("valid") and a.get("answer") in ("true", "false")]
+        dec = dj.get("decision") or {}
+        rec = {"problem": item["problem"], "tag": args.tag, "alias": alias, "run_dir": str(run_dir.relative_to(ROOT)),
+               "answer": item["answer"], "split": item["split"], "returncode": rc, "solved": False, "contradiction": False,
+               "spend": round(facts.get("spend") or 0.0, 2), "screen": "discover-only",
+               "decision": dec, "direction_correct": dec.get("answer") == truth if dec.get("answer") else None,
+               "commit_correct": (dec.get("commit") == ("pos" if item["answer"] else "neg")) if dec.get("commit") else None,
+               "refereed_true": sum(1 for a in refereed if a["answer"] == truth),
+               "refereed_false": sum(1 for a in refereed if a["answer"] != truth),
+               "attempts": len(atts), "rounds": dj.get("rounds"), "rungs": sum(1 for r in (dj.get("ladder") or []) if r.get("rung")),
+               "syntheses": len(dj.get("syntheses") or []), "library": str(lib.relative_to(ROOT)) if lib else None,
+               "protocol": {**protocol(args), "screen": "discover-only", "discovery_flags": flags + lib_flags}}
+        with out.open("a") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        print(f"#{item['problem']}: truth={truth} decided={dec.get('answer')} commit={dec.get('commit')} "
+              f"refereed_true={rec['refereed_true']} refereed_false={rec['refereed_false']} ${rec['spend']}", flush=True)
+    return 0
+
+
 def calibration_as_records(tag: str, rnd: int = 0) -> dict[str, dict]:
     """One calibration round per item, in the result-record shape, so the idea judge can grade tool-less discovery
     on the same items as an exploration screen."""
@@ -2490,7 +2643,7 @@ def main() -> int:
     r.add_argument("--item-hours", type=float, default=3.0, help="wall-clock cap per item; a kill is infrastructure")
     r.add_argument("--limit-waits", type=int, default=4, help="usage-limit waits per item before giving up on it")
     r.add_argument("--candidate", choices=["baseline", "discover-v1", "discover-v2", "discover-v3", "discover-v4", "v3",
-                                           "alloc"],
+                                           "alloc", *IN_RUN_FLAGS],
                    default="baseline",
                    help="discover-v1: informal attempts + referee first, then commit to one direction (same total budget); "
                         "discover-v2: + a second round on the named missing step, and one confident answer may commit; "
@@ -2551,6 +2704,33 @@ def main() -> int:
     es.add_argument("--literature", default="on", help=argparse.SUPPRESS)
     es.add_argument("--lean-timeout", type=int, default=0, help=argparse.SUPPRESS)
     es.add_argument("--compile-workers", type=int, default=0, help=argparse.SUPPRESS)
+    ds = sub.add_parser("discover-screen")
+    ds.add_argument("--tag", required=True)
+    ds.add_argument("--split", default="train", choices=["train", "dev", "test"])
+    ds.add_argument("--items", nargs="*")
+    ds.add_argument("--harness", help="a pinned copy from `pin` (default: the live harness.py)")
+    ds.add_argument("--knowledge")
+    ds.add_argument("--model", default=DEFAULT_MODEL)
+    ds.add_argument("--discover-mode", default="independent", choices=["independent", "crossfed"])
+    ds.add_argument("--discover-attempts", type=int, default=2)
+    ds.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
+    ds.add_argument("--discover-budget", type=float, default=0.8)
+    ds.add_argument("--discover-rounds", type=int, default=1)
+    ds.add_argument("--discover-total-budget", type=float, default=3.0)
+    ds.add_argument("--discover-ladder", type=int, default=0)
+    ds.add_argument("--commit-floor", type=float, default=0.6)
+    ds.add_argument("--gap-round", default="on", choices=["on", "off"])
+    ds.add_argument("--library-root", help="per-item libraries at <root>/<n>/DIGEST.md (timesplit.py library)")
+    for hidden, default in (("--budget", 0.0), ("--research-cycles", 0), ("--hyps-per-cycle", 0), ("--literature", "off"),
+                            ("--lean-timeout", 0), ("--compile-workers", 0)):
+        ds.add_argument(hidden, default=default, help=argparse.SUPPRESS)
+    lb = sub.add_parser("library")
+    lb.add_argument("--items", nargs="*")
+    lb.add_argument("--split", default="train", choices=["train", "dev", "test"])
+    lb.add_argument("--papers", type=int, default=6)
+    lb.add_argument("--margin-days", type=int, default=7)
+    lb.add_argument("--model", default=DEFAULT_MODEL)
+    lb.add_argument("--redo", action="store_true")
     pg = sub.add_parser("progress")
     pg.add_argument("--tag", required=True)
     pg.add_argument("--items", nargs="*")
@@ -2575,7 +2755,8 @@ def main() -> int:
     args = ap.parse_args()
     return {"build": build, "probe": probe, "freeze": freeze, "judge": judge_cmd, "run": run, "score": score,
             "status": status, "pin": pin, "rescore": rescore, "topup": topup, "progress": progress_cmd,
-            "calibrate": calibrate, "ideas": ideas_cmd, "explore-screen": explore_screen, "rerun": rerun}[args.cmd](args)
+            "calibrate": calibrate, "ideas": ideas_cmd, "explore-screen": explore_screen, "rerun": rerun,
+            "discover-screen": discover_screen, "library": library_cmd}[args.cmd](args)
 
 
 if __name__ == "__main__":

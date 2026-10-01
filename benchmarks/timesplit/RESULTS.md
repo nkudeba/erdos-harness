@@ -1181,3 +1181,97 @@ has gained:
 - Over 17 pairs, if extended: 0.3 solves expected, P(at least one) = 0.25; P(main replaces the baseline) = 0.12.
 - The cheap fallback fires on at least one screen item: 0.6. The premise endgame fires on at least one: 0.15.
 - Spend: about $5.5 an item, the baseline's average being $5.57. That is $28 for the screen and about $95 for all 17.
+
+## Navier–Stokes lessons, built and screened (written 2026-10-01, before any launch)
+
+**Why.** OpenAI's report on its Navier–Stokes blowup proof (openai.com/index/navier-stokes-solution, 2026-09-08)
+describes the search's structure:
+- agent groups seeded with every variant of the problem, both directions included;
+- "easier" problems tried first; the one that fell, unforced Euler, then seeded the main attack;
+- a consolidator (Codex) cross-pollinating the groups with their own intermediate results;
+- agents that could read a cached web.
+
+The route itself was a published programme (Córdoba–Martínez-Zoroa's forced blowup), which Buckmaster–Alpöge also
+extended. Its scale (about 130 billion output tokens on Navier–Stokes alone) is not transferable; its structure may be.
+The harness's discovery had none of the four:
+- two independent attempts and no synthesis;
+- no warm-ups;
+- no literature (every idea stage runs with no tools);
+- discover-v4's retries were independent, and on #990 six attempts over three rounds produced no complete proof.
+
+**What was built** (pin `pin_b222d0324e78fbba_harness.py`, main 3347132 plus uncommitted work, all default OFF):
+- `--discover on`: the runner's discover-v3 moved into harness.py.
+  - The prompts and the decision rule are verbatim (tested).
+  - The best refereed proof reaches every stage WHOLE. The runner passed `text[-3500:]`, labelled "in full"; on the #678
+    run (alias 81727) that dropped the first ~1,000 of 4,532 characters, and the second refereed proof was not passed.
+- `--discover-mode crossfed`: after a round, a synthesis call writes what is established, the route, the gaps, the dead
+  ends and k assignments, and the next round starts from it.
+- `--discover-ladder k`: k easier variants, solved bottom-up, seed the main attempts.
+- `--blueprint on` plus `--residual-view outline`:
+  - a refereed proof becomes numbered steps; the plan maps hypotheses onto them (`blueprint_steps`), each child gets
+    its step's informal proof, and a sub-residual first expands its step;
+  - re-plans see an outline with certified proofs elided. They used to see the last 6,000 characters: 16% of #678's
+    38,045-character residual.
+- `library.py` plus `--library`: a dated literature digest (OpenAlex; arXiv full text as version 1 only; nothing on or
+  after the cutoff; the problem's own number patterns excluded).
+
+### Screen A, cross-fed rounds plus a ladder (no Lean): `train-crossfed-b222d03`
+
+- **Command:** `discover-screen --discover-mode crossfed --discover-rounds 2 --discover-ladder 3 --discover-total-budget 6`.
+  Masked, with the literature memo off, exactly as the runner's discovery ran.
+- **Items:** the 10 train items where `calibration-train-v2r1` (three independent v2 rounds, six attempts) was weakest.
+  - Never a refereed complete proof: #152, #258, #259, #283, #387, #884, #1148 and #1179.
+  - One in three rounds: #619 and #1141.
+- **Baselines:**
+  - complete proofs: the calibration's three rounds pooled per item, spend-comparable at $0.6–4.7 an item;
+  - ideas: the best `ideas` grade over calibration rounds 0–2, a generous baseline, because round 0 alone saw only two
+    attempts. Round 0 graded 3 hits (#259, #283, #1141) and 7 partials. Rounds 1 and 2 are graded under
+    `calib-ideas-r1` and `calib-ideas-r2`.
+- **Measured per item:**
+  - a referee-accepted complete proof of the TRUE direction (`refereed_true`);
+  - one of the FALSE direction (`refereed_false`, a fooled referee);
+  - the decided direction and the commit;
+  - the idea grade;
+  - spend.
+- **Gate:** crossfed+ladder goes to a Lean screen only if all three hold:
+  - `refereed_true` on at least 3 of the 8 never-complete items;
+  - `refereed_false` on at most 1 item;
+  - idea grades W − L ≥ 0 against the pooled baseline.
+- **Write-ahead predictions:**
+  - `refereed_true` on the 8: expected 2, range 0–4; P(≥ 3) = 0.30.
+  - On #619 and #1141: at least one: 0.5.
+  - `refereed_false` on 2 or more items: 0.10.
+  - Direction decided correctly on 7 of 10, the same as the baseline's majority (wrong on #387, #884 and #619, all FALSE
+    statements called true). P(it corrects at least one of those three) = 0.3.
+  - Ideas against the pooled baseline: 1 win, 1 loss, 8 ties expected; P(W − L ≥ 1) = 0.3.
+  - Spend $3–6 an item, about $45 in all.
+
+### Screen B, the same plus a dated library: `train-crossfed-lib-b222d03`
+
+- **Items:** those of Screen A whose resolution is recent enough for pre-resolution arXiv literature: #152, #259, #884,
+  #1179 and #619. The cutoff is the resolution's first public date minus 7 days.
+- **Built by:** `timesplit.py library`, then the screen with `--library-root benchmarks/timesplit/library`, paired with
+  Screen A on the same items.
+- **Contamination check before launch:** every chosen document dated before its cutoff (manifest.json), and none
+  matching the problem's number patterns.
+- **Write-ahead predictions:**
+  - A library holds at least 3 relevant papers on 4 of 5 items: 0.6.
+  - `refereed_true` improves on at least 1 item over Screen A: 0.35.
+  - Idea grades 1 win and 0 losses against Screen A: 0.35.
+  - About $1.5 a library, plus Screen A's cost again.
+
+### Run C, blueprint conversion (Lean): `train-blueprint-b222d03`
+
+- **Candidate:** `blueprint` (`--discover on --blueprint on --residual-view outline`) on #435 and #678, train, $16, 6
+  cycles, fresh aliases.
+- **When:** only after the operator lane `dev-main-a88fab5` finishes, so its compile times stay untouched.
+- **Compared with:**
+  - `train-conv-fde7891`: #435 2 of 3 certified with the Apéry bound open; #678 12 of 15 certified, last three deferred;
+  - the #678 third run (alias 81727, partial, `hyp_nagura` and `hyp_nair` open).
+- **Write-ahead predictions:**
+  - A blueprint is extracted on both: 0.85.
+  - Ledger entries carrying `blueprint_steps`: at least 80% on both: 0.6.
+  - #678 solved, the true direction verified and the audit passing: 0.35. The refereed proof may again rest on Nagura
+    1952, whose core a replay could not prove.
+  - #435 solved: 0.15.
+  - About $30.

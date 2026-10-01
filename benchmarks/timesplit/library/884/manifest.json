@@ -1,0 +1,98 @@
+{
+ "built": "2026-10-01T04:27:10Z",
+ "cutoff_exclusive": "2025-08-25",
+ "excludes": [
+  "erdosproblems\\.com/(?:forum/thread/|latex/)?884\\b",
+  "Erd(?:ő|o|ö|\\\\H\\{o\\})s\\s+problem\\s*(?:#|no\\.?|number)?\\s*884\\b",
+  "\\bproblem\\s*#\\s*884\\b"
+ ],
+ "model": "claude-opus-5-5",
+ "source": "OpenAlex search; arXiv full text as version 1 only",
+ "statement_sha": "71dafddda859fe6d",
+ "queries": [
+  "reciprocal differences of divisors sum",
+  "consecutive divisors gaps Erdős",
+  "divisors close together Erdős Tenenbaum",
+  "distribution of consecutive divisor ratios",
+  "Erdős Hall divisor differences",
+  "Hooley Delta function divisors concentration",
+  "sums over divisor pairs reciprocal gaps",
+  "Tenenbaum divisors integers survey"
+ ],
+ "candidates": 106,
+ "dropped": [
+  {
+   "id": "W4411962705",
+   "why": "placeholder date 2025-01-01"
+  }
+ ],
+ "chosen": [
+  {
+   "id": "W2159774990",
+   "title": "The distribution of integers with a divisor in a given interval",
+   "date": "2008-09-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.4007/annals.2008.168.367",
+   "full_text": true,
+   "text_source": "http://annals.math.princeton.edu/wp-content/uploads/annals-v168-n2-p01.pdf",
+   "sha256": "6981f4e65cd0c987",
+   "chars": 110629
+  },
+  {
+   "id": "W2965929356",
+   "title": "Equal sums in random sets and the concentration of divisors",
+   "date": "2023-03-29",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1007/s00222-022-01177-y",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "17c47209af78e8de",
+   "chars": 1294
+  },
+  {
+   "id": "W2114857057",
+   "title": "PRACTICAL NUMBERS AND THE DISTRIBUTION OF DIVISORS",
+   "date": "2015-03-18",
+   "arxiv": "1405.2585",
+   "doi": "https://doi.org/10.1093/qmath/hav006",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/1405.2585v1",
+   "sha256": "e934db132a3f163c",
+   "chars": 25182
+  },
+  {
+   "id": "W3125503648",
+   "title": "The number of prime factors of integers with dense divisors",
+   "date": "2021-12-22",
+   "arxiv": "2101.11585",
+   "doi": "https://doi.org/10.1016/j.jnt.2021.11.003",
+   "full_text": true,
+   "text_source": "https://arxiv.org/pdf/2101.11585v1",
+   "sha256": "645f403007c36ec3",
+   "chars": 31516
+  },
+  {
+   "id": "W2087699257",
+   "title": "Erdős and the Integers",
+   "date": "1999-11-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1006/jnth.1999.2395",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  },
+  {
+   "id": "W4212875219",
+   "title": "An introduction to the theory of numbers",
+   "date": "1929-01-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1090/s0002-9904-1929-04793-1",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "cb77724d3e64369f",
+   "chars": 139
+  }
+ ],
+ "cost_usd": 1.063
+}

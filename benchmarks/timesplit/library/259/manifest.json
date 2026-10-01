@@ -1,0 +1,93 @@
+{
+ "built": "2026-10-01T04:22:15Z",
+ "cutoff_exclusive": "2026-04-14",
+ "excludes": [
+  "erdosproblems\\.com/(?:forum/thread/|latex/)?259\\b",
+  "Erd(?:ő|o|ö|\\\\H\\{o\\})s\\s+problem\\s*(?:#|no\\.?|number)?\\s*259\\b",
+  "\\bproblem\\s*#\\s*259\\b"
+ ],
+ "model": "claude-opus-5-5",
+ "source": "OpenAlex search; arXiv full text as version 1 only",
+ "statement_sha": "bc6f8be506d054dc",
+ "queries": [
+  "squarefree numbers binary expansion irrationality",
+  "irrationality of Lambert series",
+  "Erdős irrationality power series arithmetic functions",
+  "squarefree integers in arithmetic progressions",
+  "sums of arithmetic functions over 2^n",
+  "irrationality measure series sum f(n)/2^n",
+  "gaps between squarefree numbers",
+  "Möbius function power series irrationality"
+ ],
+ "candidates": 118,
+ "dropped": [],
+ "chosen": [
+  {
+   "id": "W2012375297",
+   "title": "On the irrationality of certain series",
+   "date": "1974-11-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.2140/pjm.1974.55.85",
+   "full_text": true,
+   "text_source": "http://msp.org/pjm/1974/55-1/pjm-v55-n1-p08-s.pdf",
+   "sha256": "fcbf127cb512a8c6",
+   "chars": 14651
+  },
+  {
+   "id": "W2030542144",
+   "title": "Some number theoretic results",
+   "date": "1971-03-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.2140/pjm.1971.36.635",
+   "full_text": true,
+   "text_source": "http://msp.org/pjm/1971/36-3/pjm-v36-n3-p07-s.pdf",
+   "sha256": "0e0747704f9eca43",
+   "chars": 23787
+  },
+  {
+   "id": "W2102041446",
+   "title": "Transcendence of power series for some number theoretic functions",
+   "date": "2008-10-28",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1090/s0002-9939-08-09737-2",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "5b71ee0c0e1b86fa",
+   "chars": 644
+  },
+  {
+   "id": "W2035769951",
+   "title": "On Gaps between Squarefree Numbers",
+   "date": "1990-01-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1007/978-1-4612-3464-7_15",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "7d1f8a37a96c1885",
+   "chars": 1453
+  },
+  {
+   "id": "W4210902679",
+   "title": "On Gaps Between Squarefree Numbers II",
+   "date": "1992-04-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1112/jlms/s2-45.2.215",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "9b7f876e1370e883",
+   "chars": 1747
+  },
+  {
+   "id": "W2083855004",
+   "title": "Irrationality of Certain Lambert Series",
+   "date": "2004-06-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.3836/tjm/1244208475",
+   "full_text": true,
+   "text_source": "https://projecteuclid.org/journals/tokyo-journal-of-mathematics/volume-27/issue-1/Irrationality-of-Certain-Lambert-Series/10.3836/tjm/1244208475.pdf",
+   "sha256": "f496d6eafc509e17",
+   "chars": 17780
+  }
+ ],
+ "cost_usd": 0.6384
+}

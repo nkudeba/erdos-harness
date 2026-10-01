@@ -723,3 +723,64 @@ them.
 ## Current research guidance reaches the model
 
 Store concise operator next steps in `atlas-data/research-guidance/<id>.md`, and link the file from an Atlas finding. The harness reloads this file for assessment, reduction, experiments, planning, ordinary and agentic proving, refinement, decomposition, criticism, search and construction. It applies to fresh runs, resumed checkpoints and research children without modifying the frozen problem input. Guidance is labelled unverified operator context, logged with its source and hash, and preserved in the actual prompt transcript (also TASK.md for agentic attempts). It is excluded from formalization and blind verification prompts. Record new results, open obligations and refuted routes with explicit status; do not promote a draft or numerical check into a proved premise.
+
+Operator guidance now also reaches the in-run discovery stage's own calls (`discover`, `discover-ladder`,
+`discover-rung`, `discover-synthesis`, `discover-gap`), never its referee.
+
+## In-run discovery, blueprints and dated libraries (2026-10-01)
+
+Built after OpenAI's Navier–Stokes report (2026-09-08). Its transferable lesson is structure, not scale:
+- groups seeded with every variant;
+- easier problems first, whose solution seeded the main attack;
+- a consolidator cross-feeding intermediate results;
+- agents that could read the literature.
+
+Strategy and ranking: `docs/ns-capacity-2026-10-01.md`. Evidence: `benchmarks/timesplit/RESULTS.md`, "Navier–Stokes
+lessons, built and screened". **Every flag below is OFF by default.**
+
+- **`--discover on`**: the runner's discover-v3, moved into harness.py (the section "informal discovery (in-run)").
+  - It runs once per run, after the statement is frozen. Under `--open` a confident decision commits the run to ONE
+    direction with the whole budget (`--discover-commit off` keeps both).
+  - Its guidance reaches every research stage through `_with_research_guidance`, and every child through its state.
+    Children run with `--discover off`.
+  - The prompts and the decision rule are the runner's verbatim, and `tests/test_discovery.py` fails if they drift.
+  - The best refereed proof is passed WHOLE, head and tail beyond 14,000 characters. The runner's v2–v4 still pass
+    `text[-3500:]`, which cut #678's opening lemma; that is kept for their protocol and fixed only in the in-run stage.
+  - Parallel calls each use their own backend (`_fresh_backend`), so every cost is logged against the call that made
+    it and `spent_usd` counts discovery.
+- **`--discover-mode crossfed`**: after each round, a synthesis writes what is established, the route, the gaps, the
+  dead ends and k assignments, and the next round starts from it. **`--discover-ladder k`**: k easier variants are
+  solved bottom-up first, and their methods seed the main attempts.
+  - `--stop-after discover` runs this stage alone. `timesplit.py discover-screen` is its no-Lean screen; `ideas
+    --tag` grades it.
+  - First datum (train #152): the calibration never wrote a complete proof. With the ladder, a complete refereed proof
+    by the published k = 1, 2, 3 energy route, for $1.40.
+- **`--blueprint on`**: discovery's refereed complete proof, for THIS direction, becomes numbered steps (`=== STEP
+  S1` blocks, robust to LaTeX). Then:
+  - the plan maps each hypothesis to steps (`"blueprint_steps"` in its ledger);
+  - each child's literature opens with its step's informal proof;
+  - a sub-residual first EXPANDS its step into smaller steps (`blueprint-expand`), so depth follows the proof instead
+    of improvising (the #435 failure).
+- **`--residual-view outline`**: re-plans see the skeleton with every certified proof namespace elided (`restore_spliced`
+  puts them back), head and tail kept. The default `tail` shows the last 6,000 characters: 16% of #678's 38,045.
+- **`--library DIR`**: a dated literature digest (`library.py`, `timesplit.py library`) joins the discovery prompts
+  and the plan.
+  - Nothing in it is dated on or after the cutoff (the first public date minus 7 days for a benchmark item), and
+    OpenAlex's placeholder 1 January dates are dropped.
+  - arXiv texts are always version 1, so no later version can cite the resolution.
+  - A document that names the problem is excluded.
+  - Digests read only the supplied text: a paper with no text is cited, not summarised, because a summary from memory
+    has no date.
+  - The arXiv export API rate-limits this machine; search goes through OpenAlex.
+- **Runner candidates:**
+  - `discover-v5` = in-run discovery;
+  - `blueprint` = v5 + blueprint + outline;
+  - `crossfed` = crossfed + ladder 3 + a $6 discovery cap;
+  - `crossfed-blueprint` = both.
+  The runner launches them with `--open`, and the harness commits.
+
+Two operating notes:
+- A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses
+  to start items while it is live. Pass `--allow-concurrent` deliberately.
+- Lean runs share the machine's compile capacity with any other lane, and a saturated machine turns compile timeouts
+  into apparent mathematical failures.

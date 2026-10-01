@@ -1,0 +1,1 @@
+For any $M\geq 1$, if $A\subset \mathbb{N}$ is a sufficiently large finite Sidon set then there are at least $M$ many $a\in A+A$ such that $a+1,a-1\not\in A+A$.
