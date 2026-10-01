@@ -40370,10 +40370,10 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "partial",
+        "best": "closed apart from published premises",
         "runs": 5,
         "benchmarkRuns": 5,
-        "certifiedMax": 2
+        "certifiedMax": 10
       },
       "assessed": {
         "on": "2026-09-30",
