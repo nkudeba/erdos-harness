@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "a88fab528c17c99901803c6634980eaaa27efc2b4b0c28eb3438610ff49bf8f8",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "61439c381402873a1c034db7b1019a2ae717a748e752f7eeb0d608b28dadd189"
+    "manual_reviews_sha256": "6808e4858122e6c35c93cd85e9350793885bea5455e65348561ecdf95d15a8b7"
   },
   "problems": [
     {
