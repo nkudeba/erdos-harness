@@ -1149,3 +1149,35 @@ Each replay used `analysis/replay_sweep.py --full --budget 4`, with the list in 
      skeleton that removes it can be adopted.
   2. After a failed premise attack, let the endgame re-plan with the failure digest instead of attacking the same
      premise again.
+
+## Dev measurement of main (written 2026-09-30, before launch): `dev-main-a88fab5`
+
+**Why.** The operator asked to measure the fixes now on main against the baseline. Since `baseline-v2-84f21c5`, main
+has gained:
+- every fix in `dev-fixes-ea6d987`'s pin: the guarded cascade, sub-statement `open`s, plan repair, hoisting,
+  over-cap recovery, no MCP connectors;
+- `--refute changed` and the round caps (`--attack-rounds 2`, `--attack-decompose-rounds 0`);
+- the cheap fallback, `--premise-attack full` and the premise endgame;
+- the omitted-declaration repair and the audit in final verification.
+
+**Protocol.**
+- Candidate `baseline` (no discovery flags) on `pin_a88fab528c17c999_harness.py`, which is main at 5cb6bd0, with
+  `pins/knowledge-a88fab528c17c999`.
+- `--open`, masked, $8 per item, **2 research cycles**: the baseline's own protocol, so the harness is the only
+  difference. `dev-fixes-ea6d987` ran 6 cycles and lost its screen 0-2-3, so this arm does not repeat that bundle.
+- Paired with `baseline-v2-84f21c5`, and #1213 with `baseline-v2-84f21c5-1213`.
+
+**Order and gate** (the README's screen-first rule, automated in `loop/chain-devmain.sh` and `loop/gate_screen.py`):
+- Screen: #150, #202, #204, #392, #401, the same 5 as `dev-fixes-ea6d987`.
+- Extend to the other 12 pairable items (#419, #457, #570, #618, #729, #825, #865, #871, #888, #1125, #1180, #1213)
+  only if the screen loses no solve, produces no contradiction, and has W ≥ L on the dense rule.
+- #537 is left out: its baseline record lost both directions, so it cannot be paired.
+- Over all pairs, main replaces the baseline if it loses no solve and either solves more or wins the dense sign test
+  at one-sided p ≤ 0.05.
+
+**Write-ahead predictions.**
+- Screen: P(at least one solve) = 0.08. Dense calls: 1 win, 1 loss, 3 ties expected; P(W ≥ L) = 0.55.
+- P(the extension runs) = 0.55.
+- Over 17 pairs, if extended: 0.3 solves expected, P(at least one) = 0.25; P(main replaces the baseline) = 0.12.
+- The cheap fallback fires on at least one screen item: 0.6. The premise endgame fires on at least one: 0.15.
+- Spend: about $5.5 an item, the baseline's average being $5.57. That is $28 for the screen and about $95 for all 17.
