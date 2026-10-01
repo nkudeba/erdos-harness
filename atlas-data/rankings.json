@@ -21589,7 +21589,7 @@
         "best": "partial",
         "runs": 5,
         "benchmarkRuns": 5,
-        "certifiedMax": 2
+        "certifiedMax": 5
       },
       "assessed": {
         "on": "2026-09-30",
