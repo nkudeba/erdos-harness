@@ -581,6 +581,14 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
   (`benchmarks/timesplit/evidence/678-assembled-b/`).
 - `--refute auto --premise-attack cheap` gives the other combinations.
 
+**Premise endgame** (2026-10-01, on with `--premise-attack full`):
+- Once every conjecture is certified and only published premises are open, a cycle skips the refutation script and
+  the plan, and spends what is left on the premises.
+- The last premise attack is funded with whatever remains, at least $1, rather than deferred for
+  `--min-child-budget`.
+- Train #678's third run certified all 8 conjectures with $2.70 left. It spent that on two re-plans of a closed
+  skeleton, then deferred both premises (Nair 1982, Nagura 1952) at $1.33 and $0.48.
+
 **Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
 was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def
 Condition`, all three one-shot attempts dropped it, and the frozen guard rejected each without compiling it

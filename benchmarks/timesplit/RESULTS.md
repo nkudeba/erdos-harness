@@ -1096,3 +1096,22 @@ The plan rated them hard 5, moderate 3, unrated 2.
   (`evidence/1037-assembled/`, not an autonomous solve).
 - **The pattern:** #678 and #1037 both ended closed apart from one published premise that Mathlib lacks, and a full
   attack proved each for about $3. `--premise-attack full`, the default again, would have run that attack in-run.
+
+**Outcome (2026-10-01): not solved. Every conjecture certified, closed apart from TWO published premises, $15.52.**
+- **Discovery:** two complete refereed proofs (0.88, 0.88), committed to TRUE.
+- **The cheap fallback worked in-run for the first time:** in cycle 3 it proved **4 of 4** deferred steps for $1.47.
+  With them, 8 certified and 0 open conjectures.
+- **What stayed open:** Nagura 1952 (a prime in (n, 6n/5] for n ≥ 25) and Nair 1982 (lcm(1..n) ≥ 2^n for n ≥ 7).
+  Neither is in Mathlib.
+- **Why it stopped:**
+  - `--premise-attack full` did choose to attack both premises (`premises_attacked`, cycles 4 and 5).
+  - But cycles 4 and 5 first spent the last $2.70 on experiments and two re-plans of a skeleton that was already
+    closed.
+  - Both premises were then deferred at $1.33 and $0.48, below `--min-child-budget` $2.50, and two stalled cycles
+    ended the run.
+- **Against the prediction:** solved no (0.55). Spend $15.52 (predicted ~$13).
+- **The fix, `premise endgame`, on by default with `--premise-attack full`:** once only published premises are open,
+  - a cycle no longer runs the refutation script or re-plans;
+  - the last premise attack is funded with whatever is left, at least $1, instead of being deferred.
+  - Tests: `tests/test_allocation_options.py`, class PremiseEndgame.
+  - Replays of full attacks on Nair and Nagura are running.

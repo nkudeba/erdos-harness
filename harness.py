@@ -5829,9 +5829,18 @@ for the SAT solver instead of enumerating it.
                         and int(self.state.get("stall_cycles") or 0) >= 1):
                     self._explore_core(pdir, parsed, skeleton)
                 refutations = load_refutations(pid)
+                # Premise endgame (2026-10-01): with every conjecture certified and only published premises open,
+                # there is nothing to refute or re-plan, and the premises are the only path to a proof. Train #678's
+                # third run reached this state with $2.70 left. Cycles 4 and 5 then spent it on experiments and two
+                # re-plans of a closed skeleton, so both premises (Nair 1982, Nagura 1952) were deferred at $1.33
+                # and $0.48, below --min-child-budget. Skip (a) and (b) and spend what is left on the premises.
+                endgame = (getattr(self.args, "premise_attack", "full") == "full" and bool(parsed)
+                           and parsed["metric"]["open_conjectures"] == 0 and parsed["metric"]["published"] > 0)
+                if endgame:
+                    self.log.event("program", "premise_endgame", cycle=cycle, published=parsed["metric"]["published"])
                 # (a) refute first; a witness against an open hypothesis kills the skeleton in force
                 exp_out, rf = "", {"refuted": [], "clear": [], "invariants": []}
-                if refute_pol != "off":
+                if refute_pol != "off" and not endgame:
                     open_h = [h for h in (parsed or {}).get("hypotheses", []) if h["open"] and h["kind"] == "conjecture"]
                     hyp_txt = ("\n".join(f"- {h['name']} : {h['statement']}" for h in open_h)
                                or "(none yet -- this cycle, only extract necessary conditions on a counterexample to the target)")
@@ -5880,8 +5889,8 @@ for the SAT solver instead of enumerating it.
                     ledger=ledger_txt[-3000:] or "(empty)", cycle=cycle)
                 stalled = int(self.state.get("stall_cycles") or 0) >= 1
                 allow_switch = bool(parsed) and stalled and int(getattr(self.args, "routes", 1) or 1) > 1
-                responses = self._plan_calls(pdir, plan_prompt, cycle, stalled=stalled)
-                new_meta = json_block(responses[0]) or {}
+                responses = [] if endgame else self._plan_calls(pdir, plan_prompt, cycle, stalled=stalled)
+                new_meta = (json_block(responses[0]) or {}) if responses else {}
                 # The plan's ratings, derivations and failure moves for hypotheses ALREADY in force are kept even
                 # when its skeleton is not adopted: a rating is information about the argument, not about the
                 # candidate skeleton (the first masked #275 run lost its ratings this way).
@@ -5929,7 +5938,9 @@ for the SAT solver instead of enumerating it.
                                                str(o["meta"].get("route") or ""))
                     verdict, cand, new_meta = options[pick]["verdict"], options[pick]["cand"], options[pick]["meta"]
                 if verdict is None:
-                    self.log.event("program", "skeleton", cycle=cycle, adopted=False, reason="no skeleton block in the plan")
+                    self.log.event("program", "skeleton", cycle=cycle, adopted=False,
+                                   reason=("premise endgame: only published premises are open, not re-planned" if endgame
+                                           else "no skeleton block in the plan"))
                 else:
                     self.log.event("program", "skeleton", cycle=cycle, adopted=bool(verdict.get("adopted")),
                                    reason=verdict.get("reason"), candidates=verdict.get("n_candidates"),
@@ -5990,6 +6001,7 @@ for the SAT solver instead of enumerating it.
                         proved = proved or sr["proved"]
                         fails = failure_counts(pdir)     # sweep failures are excluded; re-read for clarity
                     todo = [h for h in attack_order(parsed["hypotheses"], fails) if h["name"] not in false_names]
+                    premise_phase = False
                     core = None
                     if getattr(self.args, "attack_order", "easiest") == "core-first" and len(todo) > 1:
                         # The core used to get what was left after the scaffolding, and runs stalled exactly there
@@ -6049,6 +6061,7 @@ for the SAT solver instead of enumerating it.
                             # leaves the theorem's trust boundary; one that is genuinely deep just fails and stays
                             # a premise.
                             todo = sorted(published_open, key=lambda h: (fails.get(h["name"], 0), h["complexity"]))[:per_cycle]
+                            premise_phase = bool(todo)
                             if todo:
                                 self.log.event("program", "premises_attacked", cycle=cycle, names=[h["name"] for h in todo])
                     # A child needs one prove round plus its Lean checks; a share below that buys a single
@@ -6058,6 +6071,10 @@ for the SAT solver instead of enumerating it.
                     if self.args.run_budget and min_child > 0:
                         left = self.args.run_budget - self.spent_usd()
                         affordable = int(left // min_child)
+                        if premise_phase and affordable == 0 and left >= 1.0:
+                            # the premises are the last thing between this run and a proof: one attack with all
+                            # that is left beats deferring every one of them (#678's third run, $1.33 unspent)
+                            affordable = 1
                         if affordable < len(todo):
                             skipped = [h["name"] for h in todo[affordable:]]
                             todo = todo[:affordable]

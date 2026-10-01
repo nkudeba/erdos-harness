@@ -209,5 +209,53 @@ class PremiseAttack(Isolated):
         self.assertEqual(h._attacked, ["erdos_99_hyp_rs"])
 
 
+
+class PremiseEndgame(Isolated):
+    """Train #678's third run (2026-10-01) certified every conjecture with two published premises left (Nair 1982,
+    Nagura 1952). Cycles 4 and 5 spent its last $2.70 on experiments and re-plans of a closed skeleton, then deferred
+    both premises at $1.33 and $0.48. In the endgame the loop no longer refutes or re-plans, and the last premise
+    attack is funded with whatever is left (at least $1), instead of being deferred."""
+
+    def _run(self, spent: float):
+        h = _stub(self.root / "run")
+        h.args.premise_attack = "full"
+        h.args.refute = "auto"                     # would run the experiments, were it not the endgame
+        h.args.research_cycles = 1
+        h.args.min_child_budget = 2.5
+        h.spent_usd = lambda: spent
+        h._install_lemmas_module = lambda pdir: None
+        h.stage_verify = lambda: None
+        pdir = self.pdir()
+        pdir.mkdir(parents=True, exist_ok=True)
+        (pdir / "Residual.lean").write_text(ONLY_PREMISE_OPEN)
+        purposes, experiments, attacked = [], [], []
+        h.ask = _judged(lambda purpose, prompt, **kw: purposes.append(purpose) or plan_reply(ONLY_PREMISE_OPEN))
+        h._deductive_experiments = (lambda *a, **k: experiments.append(1)
+                                    or ("", {"refuted": [], "clear": [], "invariants": []}))
+
+        def attack(sub, name, sdir, cycle, module, remaining, recursive=False, **kw):
+            attacked.append(name)
+            return 3, argparse.Namespace(state={})
+        h._attack_substatement = attack
+        h.run_program()
+        return h, attacked, purposes, experiments
+
+    def test_no_refutation_and_no_replan_in_the_endgame(self):
+        h, attacked, purposes, experiments = self._run(spent=1.0)
+        self.assertEqual(experiments, [])
+        self.assertNotIn("plan", purposes)
+        self.assertTrue(any(e[1] == "premise_endgame" for e in h.log.events))
+        self.assertEqual(attacked, ["erdos_99_hyp_rs"])
+
+    def test_the_last_premise_is_attacked_with_what_is_left(self):
+        _, attacked, _, _ = self._run(spent=3.67)   # $1.33 left: below --min-child-budget, above the $1 floor
+        self.assertEqual(attacked, ["erdos_99_hyp_rs"])
+
+    def test_below_a_dollar_it_is_still_deferred(self):
+        _, attacked, _, _ = self._run(spent=4.52)   # $0.48 left
+        self.assertEqual(attacked, [])
+
+
 if __name__ == "__main__":
     unittest.main()
+

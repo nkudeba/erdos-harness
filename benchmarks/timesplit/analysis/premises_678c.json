@@ -1,0 +1,22 @@
+[
+ {
+  "tag": "train-678-both-f27eaff",
+  "problem": "678",
+  "alias": 81727,
+  "run_dir": "runs/20260930-194040-857690-timesplit-erdos81727",
+  "skeleton": "programs/erdos_81727/Residual.lean",
+  "name": "erdos_81727_hyp_nair",
+  "direction": "pos",
+  "rating": "published"
+ },
+ {
+  "tag": "train-678-both-f27eaff",
+  "problem": "678",
+  "alias": 81727,
+  "run_dir": "runs/20260930-194040-857690-timesplit-erdos81727",
+  "skeleton": "programs/erdos_81727/Residual.lean",
+  "name": "erdos_81727_hyp_nagura",
+  "direction": "pos",
+  "rating": "published"
+ }
+]
