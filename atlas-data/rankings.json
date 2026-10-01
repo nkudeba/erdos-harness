@@ -2998,7 +2998,7 @@
         "irrationality"
       ],
       "score": 61,
-      "harness": "Attempted",
+      "harness": "Partial result",
       "rationale": [
         "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
         "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
@@ -3028,7 +3028,7 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "attempted",
+        "best": "partial",
         "runs": 5,
         "benchmarkRuns": 5,
         "certifiedMax": 3
@@ -40371,8 +40371,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 4,
-        "benchmarkRuns": 4,
+        "runs": 5,
+        "benchmarkRuns": 5,
         "certifiedMax": 2
       },
       "assessed": {
