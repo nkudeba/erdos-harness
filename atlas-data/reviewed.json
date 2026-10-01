@@ -1175,15 +1175,18 @@
     "score": 15
   },
   "1037": {
-    "score": 20,
+    "score": 70,
     "rationale": [
-      "The disproof needs graphs with small clique and independence numbers (a probabilistic existence argument Mathlib lacks). The harness certified 1 of 2 steps; discovery produced no complete proof in its round (train, 2026-09-30)."
+      "The disproof needs graphs with small clique and independence numbers (a probabilistic existence argument Mathlib lacks). The harness certified 1 of 2 steps; discovery produced no complete proof in its round (train, 2026-09-30).",
+      "Train run train-v4-543fd9d (2026-09-30) committed to NO on a refereed complete disproof, certified every conjecture and kept one published premise, Erdős 1947: Ramsey graphs with no clique or independent set above C log r exist. A replayed full attack proved that premise in Lean for $2.70, and the assembled disproof passes audit.py (not an autonomous solve)."
     ],
     "requirements": [
-      "A Lean construction, or a probabilistic-method lemma, for Ramsey-type graphs with omega and alpha of order log n."
+      "A Lean construction, or a probabilistic-method lemma, for Ramsey-type graphs with omega and alpha of order log n.",
+      "With --premise-attack full (the default again) the run should close unaided: the last premise is provable in Lean."
     ],
     "sources": [
-      "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891"
+      "benchmarks/timesplit/RESULTS.md#complete-proof-conversion-on-train-2026-09-30-written-before-launch-train-conv-fde7891",
+      "benchmarks/timesplit/evidence/1037-assembled/README.md"
     ],
     "assessed": "2026-09-30"
   },
