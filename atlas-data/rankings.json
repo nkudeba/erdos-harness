@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "f27eaff0efc862ad5868a9c646ff6a3566777b0e19b34ce1bc2a0123db7dd7bb",
+    "harness_sha256": "a88fab528c17c99901803c6634980eaaa27efc2b4b0c28eb3438610ff49bf8f8",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "4d6df063bf580bdacb0f332ef49aa1d9d00c16995d68dded8580fe28e2585577"
+    "manual_reviews_sha256": "61439c381402873a1c034db7b1019a2ae717a748e752f7eeb0d608b28dadd189"
   },
   "problems": [
     {
@@ -931,6 +931,7 @@
         "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it.",
         "Two harness runs (train, 2026-09-29 and 2026-09-30) each ended one mechanical policy short of a complete proof, and both completions were assembled and pass audit.py (not autonomous solves).",
         "Route A: a CRT construction with an admissible prime from Bertrand's postulate (Mathlib); the last three steps are counting-multiples lemmas, proved by cheap one-shots for $0.73. Route B: the same construction via Ramanujan's two primes in (x/2, x] for x >= 11, which a full attack proved in Lean for $3.22.",
+        "Third run (train, 2026-09-30, $15.52): every conjecture certified (the cheap fallback proved 4 of 4 deferred steps), closed apart from two published premises. A replayed full attack proved Nair 1982 for $1.53; Nagura 1952 stayed open past its small cases (25 <= n <= 130).",
         "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
         "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -941,7 +942,7 @@
       ],
       "requirements": [
         "Freeze the intended quantifiers and reconstruct the uniform large-k construction.",
-        "Expected to close unaided with --cheap-fallback on and --premise-attack full (pin f27eaff; a pre-registered run is queued).",
+        "Choose a route whose premises Lean can reach: Bertrand (in Mathlib) or Ramanujan's two primes (provable for about $3). A third run (pin f27eaff, $15.52) took Nagura's prime in (n, 6n/5] instead and ended with its analytic core (n >= 131) unproved; the adoption rule refused the plan's own switch to Ramanujan.",
         "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family.",
@@ -998,7 +999,8 @@
         "on": "2026-09-30",
         "sources": [
           "benchmarks/timesplit/evidence/678-assembled/README.md",
-          "benchmarks/timesplit/evidence/678-assembled-b/README.md"
+          "benchmarks/timesplit/evidence/678-assembled-b/README.md",
+          "benchmarks/timesplit/RESULTS.md"
         ],
         "searchFloor": null
       },

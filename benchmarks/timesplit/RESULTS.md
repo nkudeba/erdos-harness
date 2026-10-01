@@ -1097,7 +1097,7 @@ The plan rated them hard 5, moderate 3, unrated 2.
 - **The pattern:** #678 and #1037 both ended closed apart from one published premise that Mathlib lacks, and a full
   attack proved each for about $3. `--premise-attack full`, the default again, would have run that attack in-run.
 
-**Outcome (2026-10-01): not solved. Every conjecture certified, closed apart from TWO published premises, $15.52.**
+**Outcome (2026-09-30): not solved. Every conjecture certified, closed apart from TWO published premises, $15.52.**
 - **Discovery:** two complete refereed proofs (0.88, 0.88), committed to TRUE.
 - **The cheap fallback worked in-run for the first time:** in cycle 3 it proved **4 of 4** deferred steps for $1.47.
   With them, 8 certified and 0 open conjectures.
@@ -1115,3 +1115,37 @@ The plan rated them hard 5, moderate 3, unrated 2.
   - the last premise attack is funded with whatever is left, at least $1, instead of being deferred.
   - Tests: `tests/test_allocation_options.py`, class PremiseEndgame.
   - Replays of full attacks on Nair and Nagura are running.
+
+**The two premises, attacked in full (2026-09-30): Nair proved, Nagura not. $3.03 in total.**
+Each replay used `analysis/replay_sweep.py --full --budget 4`, with the list in `analysis/premises_678c.json`.
+- **Nair 1982** (lcm(1..n) ≥ 2^n for n ≥ 7): proved for $1.53.
+- **Nagura 1952** (a prime in (n, 6n/5] for n ≥ 25): not proved, $1.50, stopped by the round caps (2 rounds,
+  0 decompose rounds).
+  - The small cases 25 ≤ n ≤ 130 are proved by computation and saved as a partial.
+  - The hole left is the whole analytic core: a prime in (n, 6n/5] for every n ≥ 131. That needs explicit Chebyshev
+    bounds, which Mathlib lacks (its Bertrand proof gives only (n, 2n]).
+- **So the endgame alone would probably not have closed this run.** It would have certified Nair. The replay is a
+  direct attack (`recursive=False`), whereas in-run a premise the plan rates `hard` gets its own sub-residual one
+  level down. The replay does not measure that path, but only $1.17 would have been left for it after Nair.
+- **The route decided the outcome**, across three runs of the same item:
+  - Route A rests on Bertrand, which is in Mathlib. Closable.
+  - Route B rests on Ramanujan 1919, proved by a full attack for $3.22. Closable.
+  - This run's route rests on Nagura 1952, whose core went unproved.
+- **The plan saw it coming, and the adoption rule overruled it.**
+  - Every plan rated Nagura `hard` and Nair `moderate`. The adoption metric ignores a premise's rating:
+    `max_complexity` counts open conjectures only, and premises count only by number.
+  - In cycle 4, before any premise was attacked, the plan proposed replacing Nagura with Ramanujan, at the cost of
+    2 open conjectures. It was refused: "no improvement over the skeleton in force", which had 0 open conjectures.
+  - This is the second premise-for-conjectures trade refused on #678 (run 2 was the first).
+  - The rating would not have separated the two routes on its own: the plan rated Ramanujan `hard` too, yet it is
+    provable for $3.22. The reliable signal is a failed full attack.
+- **Budget was binding as well.** Even the cycle-4 re-route needed roughly $5 more: two counting conjectures,
+  Ramanujan at about $3.22, Nair at about $1.53. Only $2.70 was left.
+- **What the endgame costs, as implemented.** It skips the plan whenever only premises are open, so it would have
+  skipped cycle 4's re-route. Under today's adoption rule that loses nothing, because the re-route was refused anyway.
+  If the rule changes, the endgame must re-plan after a premise attack fails.
+- **Candidates, not implemented** (both rest on this one item):
+  1. In `residual_improves`, count a published premise whose full attack FAILED as an open hard conjecture, so a
+     skeleton that removes it can be adopted.
+  2. After a failed premise attack, let the endgame re-plan with the failure digest instead of attacking the same
+     premise again.

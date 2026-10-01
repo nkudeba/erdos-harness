@@ -903,16 +903,18 @@
     "rationale": [
       "The intended target has infinitely many triples, with a growing length parameter. The two small LCM examples and alternative fixed-k formulations do not settle it.",
       "Two harness runs (train, 2026-09-29 and 2026-09-30) each ended one mechanical policy short of a complete proof, and both completions were assembled and pass audit.py (not autonomous solves).",
-      "Route A: a CRT construction with an admissible prime from Bertrand's postulate (Mathlib); the last three steps are counting-multiples lemmas, proved by cheap one-shots for $0.73. Route B: the same construction via Ramanujan's two primes in (x/2, x] for x >= 11, which a full attack proved in Lean for $3.22."
+      "Route A: a CRT construction with an admissible prime from Bertrand's postulate (Mathlib); the last three steps are counting-multiples lemmas, proved by cheap one-shots for $0.73. Route B: the same construction via Ramanujan's two primes in (x/2, x] for x >= 11, which a full attack proved in Lean for $3.22.",
+      "Third run (train, 2026-09-30, $15.52): every conjecture certified (the cheap fallback proved 4 of 4 deferred steps), closed apart from two published premises. A replayed full attack proved Nair 1982 for $1.53; Nagura 1952 stayed open past its small cases (25 <= n <= 130)."
     ],
     "requirements": [
       "Freeze the intended quantifiers and reconstruct the uniform large-k construction.",
-      "Expected to close unaided with --cheap-fallback on and --premise-attack full (pin f27eaff; a pre-registered run is queued)."
+      "Choose a route whose premises Lean can reach: Bertrand (in Mathlib) or Ramanujan's two primes (provable for about $3). A third run (pin f27eaff, $15.52) took Nagura's prime in (n, 6n/5] instead and ended with its analytic core (n >= 131) unproved; the adoption rule refused the plan's own switch to Ramanujan."
     ],
     "score": 80,
     "sources": [
       "benchmarks/timesplit/evidence/678-assembled/README.md",
-      "benchmarks/timesplit/evidence/678-assembled-b/README.md"
+      "benchmarks/timesplit/evidence/678-assembled-b/README.md",
+      "benchmarks/timesplit/RESULTS.md"
     ],
     "assessed": "2026-09-30"
   },

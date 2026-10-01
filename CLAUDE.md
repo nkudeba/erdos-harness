@@ -581,13 +581,22 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
   (`benchmarks/timesplit/evidence/678-assembled-b/`).
 - `--refute auto --premise-attack cheap` gives the other combinations.
 
-**Premise endgame** (2026-10-01, on with `--premise-attack full`):
+**Premise endgame** (2026-09-30, on with `--premise-attack full`):
 - Once every conjecture is certified and only published premises are open, a cycle skips the refutation script and
   the plan, and spends what is left on the premises.
 - The last premise attack is funded with whatever remains, at least $1, rather than deferred for
   `--min-child-budget`.
 - Train #678's third run certified all 8 conjectures with $2.70 left. It spent that on two re-plans of a closed
   skeleton, then deferred both premises (Nair 1982, Nagura 1952) at $1.33 and $0.48.
+- The endgame alone would not have saved that run. A replayed full attack proved Nair for $1.53, but left Nagura's
+  core unproved: a prime in (n, 6n/5] for n ≥ 131, which needs explicit Chebyshev bounds that Mathlib lacks.
+- A published premise is not free when Mathlib lacks it.
+  - The plan rated Nagura `hard` every cycle. In cycle 4 it proposed trading Nagura for Ramanujan, which is provable
+    for $3.22, at the cost of 2 open conjectures.
+  - `residual_improves` refused that trade, because it ignores premise ratings and ranks any premise below any open
+    conjecture.
+  - The endgame skips such a re-plan. That is harmless only while the adoption rule refuses the trade.
+  - Two candidate fixes are in `benchmarks/timesplit/RESULTS.md`; neither is implemented.
 
 **Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
 was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def
