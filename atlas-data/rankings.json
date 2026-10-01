@@ -15,7 +15,7 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "710dfc814b1887af24198c35f355f4a422a96862309a425b01748065a3c24692",
+    "harness_sha256": "1bb3db04a7357a9b42a05aa77010f4b3fc4e5f1a7988d4b1b711b54a6e432b27",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
     "manual_reviews_sha256": "6808e4858122e6c35c93cd85e9350793885bea5455e65348561ecdf95d15a8b7"
   },
@@ -17255,8 +17255,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 5,
-        "benchmarkRuns": 5,
+        "runs": 6,
+        "benchmarkRuns": 6,
         "certifiedMax": 2
       },
       "assessed": {
