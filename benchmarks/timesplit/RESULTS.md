@@ -1275,3 +1275,49 @@ The harness's discovery had none of the four:
     1952, whose core a replay could not prove.
   - #435 solved: 0.15.
   - About $30.
+
+### Outcome of the dev measurement of main (2026-10-01): `dev-main-a88fab5`
+
+**Main LOSES the screen: 0 wins, 3 losses (#202, #204, #392), 2 ties. The gate said STOP, so the extension did not
+run. $21.43, against $20.56 for `baseline-v2-84f21c5` on the same 5 items.**
+
+| item | main (pieces / size / open) | baseline (pieces / size / open) | call |
+|---|---|---|---|
+| #150 | 0 / 0 / 1 | 0 / 0 / 2 | tie |
+| #202 | 1 / 621 / 0 | 2 / 1305 / 0 | loss |
+| #204 | 2 / 1500 / 1 | 3 / 3073 / 7 | loss |
+| #392 | 1 / 1100 / 1 | 3 / 4384 / 1 | loss |
+| #401 | 1 / 2492 / 1 | 2 / 855 / 1 | tie: fewer pieces, larger size |
+
+- **Protocol amendment, made before any outcome was read:**
+  - Another session's Lean-free discovery lane started while #150 was running.
+  - The runner's per-item lane guard would have refused #202, so the lane was relaunched with `--allow-concurrent`
+    (`loop/chain-devmain2.sh`).
+  - Same tag, pin, budget, cycle count and gate. That other lane ran no Lean, so compile capacity was not shared.
+- **Against the predictions:**
+  - no solve (P of at least one was 0.08);
+  - W ≥ L did not hold (0.55);
+  - the extension did not run (0.55);
+  - the cheap fallback fired on 3 items and proved 5 of its 7 attempts (at least one item: 0.6);
+  - the premise endgame never fired (0.15);
+  - spend $21.43 (predicted $28).
+- **Why, from aggregates only.** These are spend by direction and by call purpose plus event counts, from
+  `analysis/spend_breakdown.py`. No dev transcript was read.
+  - **Not the false direction.** True and false spend were $12.45 and $8.51 for main, against $11.72 and $8.42.
+  - **Proving got less.**
+    - `prove` plus `prove-agentic`: $5.64 against $7.86.
+    - Agentic proving alone: $1.86 against $4.92.
+    - Planning and experiments took the difference: plan $7.20 against $5.54, experiments $5.69 against $4.80.
+    - Two candidates fit, and this screen cannot separate them: the round caps of 2026-09-26 (`--attack-rounds 2`,
+      `--attack-decompose-rounds 0`), which cut a child's agentic rounds; and plan repair, which adds plan calls.
+  - **The fallback's proofs did not become pieces on #392.** It proved 3 true-direction steps there, and the item
+    scored 1 piece against the baseline's 3. Aggregates cannot say why.
+- **Reading.**
+  - This is the second screen in a row in which a newer harness loses to `baseline-v2-84f21c5` on these 5 items
+    (`dev-fixes-ea6d987` went 0-2-3).
+  - Both compared against the SAME single baseline run per item. A lucky baseline would make every candidate lose.
+  - 0-3 on its own is one-sided p = 0.125 for "main is worse".
+- **Next, not run:**
+  1. Replicate the baseline pin on these 5 items (about $20) to measure its run-to-run spread before blaming the
+     harness.
+  2. If the loss holds, ablate the round caps on main's pin (`--attack-rounds 6 --attack-decompose-rounds 10`).
