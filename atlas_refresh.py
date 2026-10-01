@@ -15,7 +15,11 @@ publisher calls `maybe_refresh()` after every sync, and nothing here makes a mod
   a brief, a saved proof, benchmark results or evidence, the ranker's code. At most every RERANK_EVERY seconds.
 - **Commit and push** the Atlas's own files in this repo, and nothing else, at most every COMMIT_EVERY seconds.
 - **Deploy** the site by committing and pushing `erdos-atlas/app/data.json` to its repository, at most every
-  DEPLOY_EVERY seconds. Between deploys the live overlay carries scores and runs.
+  DEPLOY_EVERY seconds. That repository is the ChatGPT Sites source, and Sites deploys only from the ChatGPT app, so
+  this keeps the source current but does not put it live.
+- **Publish** the encrypted GitHub Pages site (`atlas_pages.py`): rebuild, encrypt and push when the snapshot, the run
+  feed or the page changed, at most every PAGES_EVERY seconds, plus an hourly heartbeat. This is the deploy that puts
+  the Atlas live.
 
 Git safety: a repository is committed to only when it is on `main` with no merge, rebase or index lock in
 progress. Only the listed paths are staged and committed (`git commit -- <paths>`), so anyone's other work in the
@@ -29,7 +33,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 STATE = ROOT / ".result-feed" / "atlas-refresh.json"
 SITE = ROOT / "erdos-atlas"
-RERANK_EVERY, COMMIT_EVERY, DEPLOY_EVERY = 300, 900, 1800
+RERANK_EVERY, COMMIT_EVERY, DEPLOY_EVERY, PAGES_EVERY = 300, 900, 1800, 600
 HARNESS_PATHS = ["atlas-data/reviewed.json", "atlas-data/rankings.json", "atlas-data/rankings.csv",
                  "atlas-data/briefs", "atlas-data/predictions.jsonl"]
 SITE_PATHS = ["app/data.json"]
@@ -148,6 +152,11 @@ def maybe_refresh(root: Path = ROOT, now: float | None = None, force: bool = Fal
             if do_push and ("commit" in c or c.get("skipped") == "nothing changed"):
                 out["site_push"] = push(site)      # the site deploys from its repository
             st["deployed_at"] = now
+        if force or now - st.get("pages_at", 0) >= PAGES_EVERY:
+            import atlas_pages
+            if atlas_pages.configured(root):
+                out["pages"] = atlas_pages.deploy(root, now=now, force=force, do_push=do_push)
+            st["pages_at"] = now
     except Exception as e:                          # noqa: BLE001 - the publisher loop must keep publishing
         out["error"] = f"{type(e).__name__}: {str(e)[:200]}"
     st["last"] = out

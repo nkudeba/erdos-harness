@@ -209,7 +209,7 @@ def main():
     try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     except BlockingIOError:return
     # restart on a change to any module this loop runs, so a fix reaches the LaunchAgent without anyone restarting it
-    code=[Path(__file__),ROOT/'atlas_ids.py',ROOT/'atlas_refresh.py']
+    code=[Path(__file__),ROOT/'atlas_ids.py',ROOT/'atlas_refresh.py',ROOT/'atlas_pages.py']
     stamp=lambda:[p.stat().st_mtime_ns if p.exists() else 0 for p in code]
     code_mtime=stamp()
     while True:

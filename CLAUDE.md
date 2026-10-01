@@ -7,9 +7,14 @@ feasibility ranking of the whole 1,217-problem catalogue.
 ## Keep the Atlas current — do this as you learn, not at the end
 
 **It now keeps itself current too.** The publisher LaunchAgent re-ranks on any change, commits and pushes
-`atlas-data/`, and deploys the site's baked snapshot (`atlas_refresh.py`, `docs/live-results.md`). Benchmark runs are
-attributed to their catalogue number through `atlas_ids.py`, as status only. What still needs you is the
-qualitative half below.
+`atlas-data/`, and puts the Atlas live (`atlas_refresh.py`, `docs/live-results.md`). Benchmark runs are attributed to
+their catalogue number through `atlas_ids.py`, as status only. What still needs you is the qualitative half below.
+
+**The live Atlas is the encrypted GitHub Pages site** (2026-10-01): https://nkudeba.github.io/erdos-atlas-site/.
+- The passphrase is in `.result-feed/pages-passphrase`, and nothing should ever print or commit it.
+- `atlas_pages.py` rebuilds, encrypts and pushes it at most every 10 minutes when anything changed.
+- ChatGPT Sites deploys only from the ChatGPT app (no CLI, API or git hook). Its source repository, `erdos-atlas`, is
+  kept current but goes live there only when someone deploys it by hand.
 
 The Atlas is the memory that decides what we attack next, so **every time a run or an assessment teaches us
 something about a problem, record it before moving on.** A finding that stays in a chat transcript is lost.
@@ -46,7 +51,8 @@ File it in enumerable-object units, not the problem's own parameter; see the flo
 **The live site picks these up on its own.** Revised scores ride the same 30-second channel as run evidence:
 `result_feed.py` publishes every reviewed problem's score, reasons and requirements to `/api/results`, and
 the page overlays them on its baked snapshot, re-sorting ranks and recomputing tiers. So recording a finding
-is the whole job — no rebuild, no redeploy. `.result-feed/status.json` shows `revised_scores` (accepted) and
+is the whole job — no rebuild, no redeploy. The Pages site gets the same data with its next deploy, within about
+10 minutes. `.result-feed/status.json` shows `revised_scores` (accepted) and
 `pending_scores` (queued). If `pending_scores` stays non-zero, the deployed build predates live rankings and
 the site needs one redeploy; the publisher keeps run evidence flowing meanwhile and starts sending scores by
 itself once the new build is up.

@@ -68,12 +68,50 @@ The per-alias research-guidance files are never committed.
 `atlas-data/record_finding.py`. Everything after that, including re-ranking, commit, push, the live overlay and the
 deploy, happens by itself.
 
-**Unverified, and now doubtful:** the site is taken to redeploy when its repository's `main` is pushed.
-- Its platform configuration could not be inspected from here.
-- Checked on 2026-09-30, the GitHub repository shows no sign of a push-triggered deploy: no deployments, no workflows,
-  no commit statuses and no check runs. The site is a Sites-managed Cloudflare build (`vinext build`, `wrangler`).
-- So the baked snapshot reaches GitHub on every deploy step, but may reach the live site only when it is redeployed
-  through the Sites platform.
-- The live overlay does not depend on a redeploy. It carries scores, ranks, tiers, reasons, requirements, briefs and
-  run evidence.
-- If a push does not redeploy, the platform's own deploy command belongs in `atlas_refresh.py`'s deploy step.
+**ChatGPT Sites cannot be deployed by script, so the live Atlas is now on GitHub Pages (2026-10-01).**
+- Per the Sites documentation (learn.chatgpt.com/docs/sites), Sites has no CLI, API or git integration: a version is
+  saved and deployed only from the ChatGPT app. The GitHub repository behind it shows no deployments, workflows,
+  commit statuses or check runs.
+- So the deploy step above keeps the Sites source repository current, but never puts it live. The Sites page still
+  receives the live overlay (scores, briefs, run evidence) every 30 seconds.
+
+## The encrypted Atlas on GitHub Pages (2026-10-01)
+
+**Where:** https://nkudeba.github.io/erdos-atlas-site/, built from the public, deploy-only repository
+`nkudeba/erdos-atlas-site`. Free-plan Pages sites are public, so everything with content is encrypted; the operator
+chose this over a new Cloudflare account and over manual Sites redeploys.
+
+**Opening it:** the passphrase is in `.result-feed/pages-passphrase` (mode 600, generated once, never printed or
+committed). With "Remember on this device", the derived key stays in that browser's localStorage, so the passphrase
+is typed once per device; the Lock button forgets it.
+
+**What is public, and what is not:**
+- Encrypted, as IV || AES-256-GCM(gzip(content)) under PBKDF2-SHA256 (600,000 iterations, a random 16-byte salt):
+  - the page's code and styles (`app.enc`);
+  - the ranking snapshot (`data.enc`);
+  - the run feed (`live.enc`).
+- Plaintext:
+  - the unlock page, which holds no content;
+  - `meta.json`: the salt, the iteration count, a check value, file names and the deploy time;
+  - the KaTeX fonts;
+  - `robots.txt`, which disallows everything.
+- The passphrase has about 148 bits of entropy, so an offline attack on the public ciphertext is not a practical
+  concern.
+
+**How it stays current.** `atlas_refresh.maybe_refresh()` calls `atlas_pages.deploy()` at most every 10 minutes.
+- It deploys only when something changed: the snapshot, the run feed's content, the page's build inputs, the unlock
+  page or the encryptor. It also deploys an hourly heartbeat, so a dead publisher shows on the page after 75 minutes.
+- The page polls `live.enc` every minute.
+- The feed reproduces `/api/results` on Sites: the latest five runs per problem plus the strongest evidence, run
+  counts, and score revisions. It carries status only, so a benchmark run's route is never published.
+- Each deploy is one parentless commit force-pushed to the deploy repo's `main`. Re-encryption changes every byte,
+  and normal history would grow by the whole site each time. It is the only force-push in the Atlas tooling, and it
+  targets only that deploy-only repository.
+- Deploy commits carry the GitHub noreply address, never the operator's email.
+
+**Operations:**
+- `python3 atlas_pages.py status` shows the last commit and time; `python3 atlas_pages.py deploy --force` deploys now.
+- **Rotating the passphrase:** delete `.result-feed/pages-passphrase` and the `salt` key in
+  `.result-feed/pages-state.json`, then run `deploy --force`. Every remembered key stops working.
+- The build is `npm run build:static` in `erdos-atlas`. It runs by itself when the page's sources change.
+- Covered by `tests/test_atlas_pages.py`, which decrypts what it pushed exactly as the browser does.
