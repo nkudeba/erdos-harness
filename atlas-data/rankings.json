@@ -3031,7 +3031,7 @@
         "best": "attempted",
         "runs": 5,
         "benchmarkRuns": 5,
-        "certifiedMax": 0
+        "certifiedMax": 3
       },
       "rank": 57,
       "tier": "Plausible"
