@@ -29917,7 +29917,7 @@
         "probability"
       ],
       "score": 21,
-      "harness": "Attempted",
+      "harness": "Partial result",
       "rationale": [
         "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
         "Probabilistic estimates need measure-theoretic setup and careful finite/infinite distinctions.",
@@ -29955,7 +29955,7 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "attempted",
+        "best": "partial",
         "runs": 5,
         "benchmarkRuns": 5,
         "certifiedMax": 1
