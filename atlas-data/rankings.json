@@ -991,8 +991,8 @@
       "prize": "no",
       "evidence": {
         "best": "closed apart from published premises",
-        "runs": 4,
-        "benchmarkRuns": 4,
+        "runs": 5,
+        "benchmarkRuns": 5,
         "certifiedMax": 12
       },
       "assessed": {
