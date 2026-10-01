@@ -15,7 +15,7 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "a88fab528c17c99901803c6634980eaaa27efc2b4b0c28eb3438610ff49bf8f8",
+    "harness_sha256": "b16d13ef6eda1ae68ce0b0c5123c303ad503b35a6b9b2ab370775ca75bff6054",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
     "manual_reviews_sha256": "6808e4858122e6c35c93cd85e9350793885bea5455e65348561ecdf95d15a8b7"
   },
