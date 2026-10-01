@@ -68,6 +68,12 @@ The per-alias research-guidance files are never committed.
 `atlas-data/record_finding.py`. Everything after that, including re-ranking, commit, push, the live overlay and the
 deploy, happens by itself.
 
-**Unverified assumption:** the site is taken to redeploy when its repository's `main` is pushed. Its platform
-configuration could not be inspected from here. If a push does not redeploy, the deploy step needs the platform's
-own command added to `atlas_refresh.py`.
+**Unverified, and now doubtful:** the site is taken to redeploy when its repository's `main` is pushed.
+- Its platform configuration could not be inspected from here.
+- Checked on 2026-09-30, the GitHub repository shows no sign of a push-triggered deploy: no deployments, no workflows,
+  no commit statuses and no check runs. The site is a Sites-managed Cloudflare build (`vinext build`, `wrangler`).
+- So the baked snapshot reaches GitHub on every deploy step, but may reach the live site only when it is redeployed
+  through the Sites platform.
+- The live overlay does not depend on a redeploy. It carries scores, ranks, tiers, reasons, requirements, briefs and
+  run evidence.
+- If a push does not redeploy, the platform's own deploy command belongs in `atlas_refresh.py`'s deploy step.
