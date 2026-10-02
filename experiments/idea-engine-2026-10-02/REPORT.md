@@ -96,3 +96,33 @@ the core. The bar stands.
 - Proved and judged at significance ≤ 1: yes, but the session went past it to 0.800.
 - No validated core progress: yes.
 - Cost $20–30: no, $15.42.
+
+### v1.1 on #1203: $22.10, 103 min (`runs/20261002-054831-996193-erdos1203`)
+
+v1.1 is v1 plus the parser fix, the literature check, cost-based sizing and a $5 frontier cap.
+- **A first attempt failed.** Under the old $2 cap the frontier map was cut off mid-answer: $2.60 lost
+  (`runs/20261002-052159-979147-erdos1203`).
+- **#153 was stopped early.** Its v1.1 run (`runs/20261002-054707-230028-erdos153`) was killed to move it to v2. The
+  interrupted call's cost is unavailable.
+- **The map** ran 252,030 tokens over 49 minutes ($5.13). It names exact ceilings for whole families of methods: about
+  1.3840 using small primes only, about 1.5858 for one-large-prime arguments, an HL barrier, and a ceiling of
+  N·exp(−(log N)^{1−ε}) for counting methods.
+
+**19 claims:** 4 validated-new, all significance 1. Every one also passed the literature check, with the judge noting
+that absence from the search is weak evidence.
+
+| claim | this session's check |
+|---|---|
+| liminf F(n) ≥ 7·w(30046) = **1.58403** (r1s2/C1), against the known 1 − o(1); a CRT window plus Størmer–Mahler S-unit finiteness. r1s3 found 1.5835 by the same route; the novelty judge called that one routine. | **Holds**: every case checked by hand, and both numerical values recomputed. |
+| sharpened to liminf F ≥ 7·w(30033) = **1.58407** (r2s2/C1). The method's ceiling is pinned to [7w(30033), 7w(30032)], width 3·10⁻⁶. Under Dickson's conjecture, the HL barrier constant is ≤ 6w(2312), below the 6w(2310) quoted in KNOWN. | not re-checked |
+| #{n ≤ N : F(n) < C} ≤ N·exp(−(log N)^{1−ε}) (r1s1/C1), by a uniform-dimension Rankin–Brun sieve | not re-checked |
+| #{n ≤ N : F(n) < C} ≤ N·exp(−(log N)^{1−(C+o(1))/logloglog N}) (r2s1/C1). Found independently by r2s3 and r2s4, and it refutes the map's own "counting caps at exp(−(log N)^{1−ε})". | not re-checked |
+
+**The same two weaknesses as #455:**
+- **Duplication.** In round 2, three of four sessions proved the same bound.
+- **The novelty judge varies.** It called the same 1.584 constant new once and routine once.
+
+v2 targets both, plus significance.
+
+**Against the criteria: still 0.** Six claims are validated-new across #455 and #1203, and I checked two independently.
+All six are rated significance 1: constants pushed to their method's ceiling, sharper exceptional sets, and barriers.

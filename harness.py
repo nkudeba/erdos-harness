@@ -3851,6 +3851,40 @@ def engine_literature_check(call, search, s: "EngineSettings", statement: str, c
     return rec
 
 
+DEEP_PLAN_PROMPT = """You lead a research team on an OPEN problem. The team has finished its rounds. One researcher now gets a much larger
+budget than any session so far, for ONE line of attack. Choose the line with the best chance of a result an expert would
+call significant: a solid partial result (significance 2) or major progress (3), never another constant inside a method's
+known ceiling. Choose a line, not a wish: the team's validated results and the barriers must make it plausible.
+
+PROBLEM:
+{statement}
+
+THE FRONTIER MAP:
+{frontier}
+
+EVERYTHING THE TEAM PRODUCED (each claim with its referee, adversary and novelty verdicts):
+{results}
+
+Write exactly these sections, each starting with its === line:
+=== GOAL
+One precise statement to prove (or refute), and why an expert would rate it 2 or 3.
+=== WHY THIS LINE
+Why this line can succeed where the barriers stop others; which validated results it builds on.
+=== PLAN
+The steps, in order, each precise enough to start on. Mark which steps the team has already established.
+=== PITFALLS
+The errors the referees found in this team's work that this line must avoid, and the barriers it must not walk into."""
+
+DEEP_ASSIGNMENT = """DEEP DIVE. You have the largest budget of anyone on the team, for ONE line of attack chosen by the team lead after
+reading everything the team produced. The files in prior/ are the team's notebooks: read the ones the plan names before
+you start, and reuse their results instead of re-deriving them.
+
+{plan}
+
+Do not stop at the first result. Once you have one, push it further, toward the GOAL. Stop only when the GOAL is proved or
+refuted, or when your budget runs out. A smaller result that is new and fully proved is still worth recording."""
+
+
 @dataclasses.dataclass
 class EngineSettings:
     """What one run of the research engine does. A session is a tool-using agent with a Python sandbox; everything
@@ -3863,7 +3897,7 @@ class EngineSettings:
     session_budget: float = 3.0
     session_turns: int = 80
     session_effort: str = "high"
-    frontier_budget: float = 5.0     # #455's map ran $2.32 (112k tokens); #1203's hit a $2 cap mid-answer and was lost
+    frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
     judge_effort: str = "high"
@@ -3871,6 +3905,9 @@ class EngineSettings:
     meta_budget: float = 2.0
     validate_max: int = 8            # claims validated per round, strongest first
     total_budget: float = 30.0
+    deep_budget: float = 0.0         # > 0: after the rounds, ONE long session on the line most likely to matter (v3)
+    deep_turns: int = 200
+    deep_effort: str = "high"
     library: str = ""
     blackboard: str = ""
     context: str = ""
@@ -4189,6 +4226,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                     c["validation"]["status"] = f"valid-{lit['verdict']}"
         ledger += claims
         rec = {"round": rnd, "sessions": [{k: v for k, v in x.items() if k != "notebook"} for x in sessions],
+               "_sessions": [{"label": x["label"], "notebook": x.get("notebook") or ""} for x in sessions],
                "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
         assignments = []
         if rnd < s.rounds and spend.room(s.meta_budget + s.session_budget):
@@ -4210,13 +4248,65 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 meta = {"error": merr, "cost": round(mc, 4)}
             rec["meta"] = {k: v for k, v in (meta or {}).items() if k != "text"}
         rounds.append(rec)
+    deep = None
+    if s.deep_budget > 0 and ledger and spend.room(s.meta_budget + s.deep_budget):
+        deep = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend, search)
     validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
     ans, conf = f.get("answer"), f.get("confidence")
     decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
                 "commit": ("pos" if ans == "true" else "neg") if ans and (conf or 0) >= 0.8 else None}
+    rounds = [{k: v for k, v in r.items() if k != "_sessions"} for r in rounds]   # the notebooks live in the sandboxes
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
-            "meta": meta, "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(),
+            "meta": meta, "deep": deep, "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(),
             "guidance": engine_guidance(f, ledger, meta)}
+
+
+def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
+                     known: str, ledger: list, rounds: list, spend: _DiscoverySpend, search=None) -> dict:
+    """v3: one long session on the single line most likely to produce a result an expert would rate 2 or more. Every
+    round's notebook goes into its sandbox under prior/. Its claims join the ledger and are validated like any other.
+    Why: v1 and v2 sessions stopped at $1-2 of their $3 caps once they had a result, and every validated result was a
+    significance-1 constant inside its method's ceiling; the lines that might matter never got real depth."""
+    pt, pc, perr = _discovery_call(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
+        statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort, s.meta_budget)
+    spend.add(pc)
+    rec: dict = {"plan_cost": round(pc, 4)}
+    if not pt:
+        rec["error"] = perr
+        return rec
+    secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
+    rec["goal"] = (secs.get("GOAL") or "")[:2000]
+    plan = "\n\n".join(f"{k}:\n{secs[k]}" for k in ("GOAL", "WHY THIS LINE", "PLAN", "PITFALLS") if secs.get(k)) or pt
+    files = {f"prior/{x['label']}.md": x.get("notebook") or "" for r in rounds for x in (r.get("_sessions") or [])}
+    prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                   assignment=DEEP_ASSIGNMENT.format(plan=clip_middle(plan, 9000)), teammates="",
+                                   modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+    try:
+        reply, notebook, cost = session("engine-session", prompt, "deep", s.deep_turns, s.deep_budget, s.deep_effort,
+                                        files=files)
+    except DiscoveryCallFailed as e:
+        spend.add(e.cost)
+        rec.update({"error": str(e)[:300], "cost": round(e.cost, 4)})
+        return rec
+    spend.add(cost)
+    claims = parse_claims(notebook)
+    for c in claims:
+        c["session"], c["_kind"] = "deep", "deep"
+    for c in sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)[: s.validate_max]:
+        if not spend.room(2 * s.judge_budget):
+            c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
+            continue
+        c["validation"] = engine_validate(call, s, statement, known, c, spend)
+        if search is not None and c["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
+            lit = engine_literature_check(call, search, s, statement, c)
+            spend.add(lit.get("cost"))
+            c["validation"]["literature"] = lit
+            if lit.get("verdict") in ("known", "routine"):
+                c["validation"]["status"] = f"valid-{lit['verdict']}"
+    ledger += claims
+    rec.update({"cost": round(float(cost or 0.0), 4), "claims": len(claims), "reply": (reply or "")[-3000:],
+                "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")})
+    return rec
 
 
 def engine_report(res: dict, title: str) -> str:
@@ -4244,6 +4334,8 @@ def engine_report(res: dict, title: str) -> str:
     lines.append("## Frontier map\n\n" + (f.get("text") or "(none)"))
     if (res.get("meta") or {}).get("text"):
         lines.append("\n## Meta-review\n\n" + res["meta"]["text"])
+    if (res.get("deep") or {}).get("goal"):
+        lines.append("\n## Deep dive\n\nGOAL: " + res["deep"]["goal"])
     return "\n".join(lines) + "\n"
 
 
@@ -4520,7 +4612,7 @@ class Harness:
     # the in-run discovery stage's own calls: they see operator guidance (a human's route hint is worth most here)
     # but never discovery's guidance, which they are producing
     DISCOVERY_PURPOSES = {"discover", "discover-ladder", "discover-rung", "discover-synthesis", "discover-gap",
-                          "engine-frontier", "engine-session", "engine-meta"}    # never the referee, adversary or novelty judge
+                          "engine-frontier", "engine-session", "engine-meta", "engine-deep-plan"}   # never the judges
 
     def _with_research_guidance(self, purpose: str, prompt: str) -> str:
         """Load current operator guidance even for old checkpoints and research children, and the in-run discovery
@@ -4773,7 +4865,9 @@ class Harness:
                            session_effort=str(g("engine_session_effort", "high")), judge_effort=str(g("engine_judge_effort", "high")),
                            targets=int(g("engine_targets", 10)), angles=int(g("engine_angles", 6)),
                            core_share=float(g("engine_core_share", 0.5)), total_budget=float(g("engine_total_budget", 30.0)),
-                           frontier_budget=float(g("engine_frontier_budget", 5.0)))
+                           frontier_budget=float(g("engine_frontier_budget", 8.0)),
+                           deep_budget=float(g("engine_deep_budget", 0.0)), deep_turns=int(g("engine_deep_turns", 200)),
+                           deep_effort=str(g("engine_deep_effort", "high")))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         return s
@@ -4784,7 +4878,7 @@ class Harness:
         their own costs. Budget-checked and logged like every call; a cut-off session still yields its notebook."""
         lock = threading.Lock()
 
-        def session(purpose, prompt, label, turns, budget, effort):
+        def session(purpose, prompt, label, turns, budget, effort, files=None):
             self._check_run_budget(purpose)
             prompt = self._outbound(self._with_research_guidance(purpose, prompt))
             run_budget = getattr(self.args, "run_budget", None)
@@ -4801,6 +4895,11 @@ class Harness:
             run_sh.chmod(0o755)
             (sb / "NOTEBOOK.md").write_text("## Result\n(not yet)\n")
             (sb / "TASK.md").write_text(prompt)
+            for rel, body in (files or {}).items():          # e.g. prior/<label>.md for the deep dive; never outside sb
+                dest = (sb / rel).resolve()
+                if sb.resolve() in dest.parents:
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_text(body)
             self.log.event("llm", "request", purpose=purpose, chars=len(prompt), effort=effort, budget=budget, label=label)
             t0, text = time.time(), ""
             try:
@@ -10478,7 +10577,11 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-core-share", type=float, default=0.5,
                       help="share of round-1 sessions that attack the core through an angle; the rest take targets")
     runp.add_argument("--engine-total-budget", type=float, default=30.0, help="USD cap for the whole engine")
-    runp.add_argument("--engine-frontier-budget", type=float, default=5.0, help="USD cap for the frontier map")
+    runp.add_argument("--engine-frontier-budget", type=float, default=8.0, help="USD cap for the frontier map")
+    runp.add_argument("--engine-deep-budget", type=float, default=0.0,
+                      help="> 0: after the rounds, one long session (this USD cap) on the line most likely to matter")
+    runp.add_argument("--engine-deep-turns", type=int, default=200)
+    runp.add_argument("--engine-deep-effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")

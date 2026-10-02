@@ -86,9 +86,11 @@ class FakeSession:
     def __init__(self, notebooks, cost=1.0):
         self.notebooks, self.cost, self.calls, self.lock = notebooks, cost, [], threading.Lock()
 
-    def __call__(self, purpose, prompt, label, turns, budget, effort):
+    def __call__(self, purpose, prompt, label, turns, budget, effort, files=None):
         with self.lock:
             self.calls.append((label, prompt))
+            self.files = getattr(self, "files", {})
+            self.files[label] = dict(files or {})
         nb = self.notebooks(label, prompt)
         if isinstance(nb, Exception):
             raise nb
@@ -224,7 +226,7 @@ class EngineRun(unittest.TestCase):
         sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
         res = H.engine_run(Rec(script), sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50))
         self.assertNotIn("error", res)
-        self.assertEqual([b for p, b in budgets if p == "engine-frontier"], [5.0, 7.5])
+        self.assertEqual([b for p, b in budgets if p == "engine-frontier"], [8.0, 12.0])
         self.assertGreaterEqual(res["frontier"]["cost"], 2.6)
 
     def test_a_failed_session_and_a_failed_frontier(self):
@@ -238,6 +240,48 @@ class EngineRun(unittest.TestCase):
         bad = FakeCall(lambda purpose, prompt, n: H.DiscoveryCallFailed("down", cost=0.0))
         res = H.engine_run(bad, sess, "PROBLEM", LEAN, H.EngineSettings())
         self.assertEqual((res["error"], res["ledger"]), ("down", []))
+
+
+DEEP_PLAN = """=== GOAL
+Prove liminf q_n/n^2 >= 1 + delta (beyond the profinite cap), significance 2.
+=== WHY THIS LINE
+The discriminant walk couples size with residues.
+=== PLAN
+1. [established] liminf >= 0.54. 2. Couple the walk with least split primes.
+=== PITFALLS
+The r1s2 exponent swap.
+"""
+
+
+class DeepDive(unittest.TestCase):
+    def test_one_long_session_on_the_chosen_line_with_the_notebooks(self):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-deep-plan":
+                return DEEP_PLAN
+            return judge(purpose)
+        call = FakeCall(script, cost=0.1)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim from {label}")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=2, rounds=1, total_budget=50,
+                                                                         deep_budget=8.0), workers=2)
+        labels = [label for label, p in sess.calls]
+        self.assertEqual(labels[-1], "deep")
+        deep_prompt = dict(sess.calls)["deep"]
+        self.assertIn("DEEP DIVE", deep_prompt)
+        self.assertIn("beyond the profinite cap", deep_prompt)
+        self.assertEqual(sorted(sess.files["deep"]), ["prior/r1s1.md", "prior/r1s2.md"])
+        self.assertIn("claim from r1s1", sess.files["deep"]["prior/r1s1.md"])
+        self.assertEqual(res["deep"]["validated"], 1)
+        self.assertIn("deep", {c["session"] for c in res["validated"]})
+        self.assertTrue(all("_sessions" not in r for r in res["rounds"]))      # notebooks are not copied into engine.json
+
+    def test_off_by_default(self):
+        call = FakeCall(lambda purpose, prompt, n: FRONTIER if purpose == "engine-frontier" else judge(purpose))
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50))
+        self.assertIsNone(res["deep"])
+        self.assertNotIn("deep", [label for label, p in sess.calls])
 
 
 class Panel(unittest.TestCase):
