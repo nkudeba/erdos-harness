@@ -284,6 +284,94 @@ class DeepDive(unittest.TestCase):
         self.assertNotIn("deep", [label for label, p in sess.calls])
 
 
+class Crash(Exception):
+    """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
+
+
+class Resume(unittest.TestCase):
+    """2026-10-02: the Mac's battery died seven minutes into a v3 run, and an idle sleep earlier hung two judge calls for
+    6.5 hours. A frontier map alone has cost $9, so a cut-off run must resume without buying anything twice."""
+
+    def _call(self, crash_on=None):
+        def script(purpose, prompt, n):
+            if crash_on and crash_on(purpose, n):
+                raise Crash(purpose)
+            return FRONTIER if purpose == "engine-frontier" else META if purpose == "engine-meta" else judge(purpose)
+        return FakeCall(script, cost=0.1)
+
+    def _store(self):
+        box = {}
+
+        def save(ck):
+            box["ck"] = json.loads(json.dumps(ck))       # what a reload from disk would see
+        return box, save
+
+    def test_a_crash_mid_round_keeps_the_map_and_the_finished_sessions(self):
+        box, save = self._store()
+        first = self._call()
+        crashing = FakeSession(lambda label, prompt: Crash(label) if label == "r1s2" else notebook(("PROVED", "QUANT", label)))
+        s = H.EngineSettings(sessions=2, rounds=1, total_budget=50)
+        with self.assertRaises(Crash):
+            H.engine_run(first, crashing, "PROBLEM", LEAN, s, workers=1, save=save)
+        self.assertEqual(sorted(box["ck"]["partial"]["done"]), ["r1s1"])
+        again = self._call()
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", label)))
+        res = H.engine_run(again, sess, "PROBLEM", LEAN, s, workers=1, checkpoint=box["ck"], save=save)
+        self.assertEqual(again.prompts("engine-frontier"), [])            # the map is not bought twice
+        self.assertEqual([label for label, p in sess.calls], ["r1s2"])     # nor the finished session
+        self.assertEqual(sorted(c["statement"] for c in res["ledger"]), ["r1s1", "r1s2"])
+        self.assertGreaterEqual(res["spend"], box["ck"]["spend"] - 1e-9)
+        self.assertNotIn("partial", box["ck"])
+
+    def test_verdicts_already_reached_are_not_judged_again(self):
+        box, save = self._store()
+        s = H.EngineSettings(sessions=1, rounds=1, total_budget=50)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "a"), ("PROVED", "QUANT", "b")))
+        with self.assertRaises(Crash):          # the third referee call is the second claim's... crash on the 2nd referee
+            H.engine_run(self._call(lambda purpose, n: purpose == "engine-referee" and n == 1), sess, "PROBLEM", LEAN, s,
+                         workers=1, save=save)
+        judged = [c for c in box["ck"]["partial"]["done"]["r1s1"]["claims"] if c.get("validation")]
+        self.assertEqual(len(judged), 1)
+        again = self._call()
+        res = H.engine_run(again, FakeSession(lambda label, prompt: notebook()), "PROBLEM", LEAN, s, workers=1,
+                           checkpoint=box["ck"], save=save)
+        self.assertEqual(len(again.prompts("engine-referee")), 1)          # only the claim not yet judged
+        self.assertEqual(len([c for c in res["ledger"] if (c.get("validation") or {}).get("status") == "validated-new"]), 2)
+
+    def test_a_finished_round_is_never_rerun(self):
+        box, save = self._store()
+        s = H.EngineSettings(sessions=2, rounds=2, total_budget=50)
+        crashing = FakeSession(lambda label, prompt: Crash(label) if label.startswith("r2") else notebook(("PROVED", "QUANT", label)))
+        with self.assertRaises(Crash):
+            H.engine_run(self._call(), crashing, "PROBLEM", LEAN, s, workers=1, save=save)
+        self.assertEqual(len(box["ck"]["rounds"]), 1)
+        self.assertTrue(box["ck"]["next"])
+        again = self._call()
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", label)))
+        res = H.engine_run(again, sess, "PROBLEM", LEAN, s, workers=1, checkpoint=box["ck"], save=save)
+        self.assertEqual([label for label, p in sess.calls], ["r2s1", "r2s2"])
+        self.assertTrue(all("NEXT-ROUND ASSIGNMENT" in p for label, p in sess.calls))
+        self.assertEqual(again.prompts("engine-meta"), [])
+        self.assertEqual(len(res["rounds"]), 2)
+
+    def test_the_deep_dive_session_is_kept_before_it_is_judged(self):
+        box, save = self._store()
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-referee" and "from deep" in prompt:
+                raise Crash(purpose)
+            return (FRONTIER if purpose == "engine-frontier" else DEEP_PLAN if purpose == "engine-deep-plan" else judge(purpose))
+        s = H.EngineSettings(sessions=1, rounds=1, total_budget=50, deep_budget=8.0)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim from {label}")))
+        with self.assertRaises(Crash):
+            H.engine_run(FakeCall(script, cost=0.1), sess, "PROBLEM", LEAN, s, workers=1, save=save)
+        self.assertIn("deep_partial", box["ck"])
+        sess2 = FakeSession(lambda label, prompt: notebook())
+        res = H.engine_run(self._call(), sess2, "PROBLEM", LEAN, s, workers=1, checkpoint=box["ck"], save=save)
+        self.assertEqual(sess2.calls, [])                                  # neither a round nor the deep session again
+        self.assertEqual(res["deep"]["validated"], 1)
+
+
 class Panel(unittest.TestCase):
     def test_the_conservative_verdict_wins(self):
         P = H.engine_novelty_panel

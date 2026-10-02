@@ -4136,13 +4136,32 @@ def engine_guidance(f: dict, ledger: list[dict], meta: dict | None, room: int = 
 
 
 def engine_run(call, session, statement: str, lean: str, s: EngineSettings | None = None, workers: int = 4,
-               search=None) -> dict:
-    """Frontier map, then `rounds` x (parallel research sessions, validation, meta-review). `call(purpose, prompt,
-    effort, budget) -> (text, cost)` as in discovery; `session(purpose, prompt, label, turns, budget, effort) ->
-    (reply, notebook, cost)` runs one tool-using session and may raise DiscoveryCallFailed. With `search`, a claim the
-    judges call new is also checked against a literature search, and loses `validated-new` if a paper has it."""
+               search=None, checkpoint: dict | None = None, save=None) -> dict:
+    """Frontier map, then `rounds` x (parallel research sessions, validation, meta-review), then the optional deep dive.
+    `call(purpose, prompt, effort, budget) -> (text, cost)` as in discovery; `session(purpose, prompt, label, turns,
+    budget, effort) -> (reply, notebook, cost)` runs one tool-using session and may raise DiscoveryCallFailed. With
+    `search`, a claim the judges call new is also checked against a literature search, and loses `validated-new` if a
+    paper has it.
+
+    `checkpoint` / `save(ck)`: the state to resume from and a callback that persists it after the frontier map, after
+    every session, after every verdict, after every round and after the deep dive's session. A run cut off part way
+    (a dead battery on 2026-10-02, an idle sleep that hung two judge calls for 6.5 hours) resumes without buying any of
+    them again; a map alone has cost up to $9."""
     s = s or EngineSettings()
+    ck = checkpoint if isinstance(checkpoint, dict) else {}
     spend = _DiscoverySpend(s.total_budget)
+    spend.total = float(ck.get("spend") or 0.0)
+    lock = threading.RLock()
+
+    def keep():
+        if save is None:
+            return
+        with lock:
+            ck["spend"] = round(spend.total, 4)
+            try:
+                save(ck)
+            except Exception:                            # noqa: BLE001 - a checkpoint write must not cost the run
+                pass
     parts = []
     if s.blackboard.strip():
         parts.append("CAMPAIGN BLACKBOARD: what earlier runs on this problem learned. Items marked [Lean] were machine-checked; "
@@ -4153,37 +4172,54 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     if s.context.strip():
         parts.append(s.context.strip())
     context = ("\n" + "\n\n".join(parts) + "\n") if parts else ""
-    fprompt = FRONTIER_PROMPT.format(statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles)
-    ft, fc, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, s.frontier_budget)
-    spend.add(fc)
-    if ft is None and "budget" in str(ferr) and spend.room(1.5 * s.frontier_budget):
-        # cut off mid-answer: the text is lost whatever it cost, and nothing downstream can run without the map
-        ft, fc2, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, round(1.5 * s.frontier_budget, 2))
-        spend.add(fc2)
-        fc += fc2
-    if ft is None:
-        return {"error": ferr, "spend": round(spend.total, 4), "rounds": [], "ledger": [], "validated": [],
-                "decision": {"commit": None, "answer": None, "share": 0.0}, "guidance": "", "settings": s.as_dict()}
-    f = {**parse_frontier(ft), "text": ft, "cost": round(fc, 4)}
+    if isinstance(ck.get("frontier"), dict) and ck["frontier"].get("text"):
+        f = ck["frontier"]
+    else:
+        fprompt = FRONTIER_PROMPT.format(statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles)
+        ft, fc, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, s.frontier_budget)
+        spend.add(fc)
+        if ft is None and "budget" in str(ferr) and spend.room(1.5 * s.frontier_budget):
+            # cut off mid-answer: the text is lost whatever it cost, and nothing downstream can run without the map
+            ft, fc2, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, round(1.5 * s.frontier_budget, 2))
+            spend.add(fc2)
+            fc += fc2
+        if ft is None:
+            keep()
+            return {"error": ferr, "spend": round(spend.total, 4), "rounds": [], "ledger": [], "validated": [],
+                    "decision": {"commit": None, "answer": None, "share": 0.0}, "guidance": "", "settings": s.as_dict()}
+        f = {**parse_frontier(ft), "text": ft, "cost": round(fc, 4)}
+        ck["frontier"] = f
+        keep()
     fblock = frontier_block(f)
     known = clip_middle(fblock + ("\n\nLITERATURE:\n" + s.library if s.library.strip() else ""), 16000)
     sess_context = ("\n" + clip_middle(context, 12000) + "\n") if context else ""
-    assignments = engine_assignments(f, s.sessions, s.core_share)
-    rounds, ledger, meta = [], [], None
-    seen_sessions, seen_judging, seen_judged = [], 0.0, 0
-    for rnd in range(1, max(1, s.rounds) + 1):
+    rounds = list(ck.get("rounds") or [])
+    ledger = [c for r in rounds for x in r.get("sessions") or [] for c in x.get("claims") or []]
+    meta = ck.get("meta")
+    seen_sessions = [float(x.get("cost") or 0.0) for r in rounds for x in r.get("sessions") or [] if not x.get("error")]
+    judged = [c["validation"] for c in ledger if isinstance(c.get("validation"), dict) and "cost" in c["validation"]]
+    seen_judging, seen_judged = sum(float(v.get("cost") or 0.0) for v in judged), len(judged)
+    assignments = ck["next"] if "next" in ck else engine_assignments(f, s.sessions, s.core_share)
+    for rnd in range(len(rounds) + 1, max(1, s.rounds) + 1):
         if not assignments:
             break
-        # Round 1 sizes itself from the caps. Later rounds use what round 1 actually cost: on #455 a session cost $1.2-2.0
-        # against its $3 cap and judging a claim $0.31 against the $1.10 the caps implied, so the cap-based reserve ran
-        # only 2 of round 2's 4 sessions and dropped the two boldest assignments.
-        per_claim = (seen_judging / seen_judged) if seen_judged else (2 * s.judge_budget + s.novelty_budget) * 0.5
-        per_session = (sum(seen_sessions) / len(seen_sessions)) if seen_sessions else s.session_budget
-        reserve = min(s.validate_max, 2 * len(assignments)) * per_claim + s.meta_budget
-        fit = int(max(0.0, s.total_budget - spend.total - reserve) // max(min(per_session * 1.25, s.session_budget), 0.01))
-        todo = assignments[: max(fit, 1 if rnd == 1 and spend.room(s.session_budget) else 0)]
-        if not todo:
-            break
+        partial = ck.get("partial") if (ck.get("partial") or {}).get("round") == rnd else None
+        if partial:
+            todo = partial["todo"]                       # sized once: a resume never re-sizes a round
+        else:
+            # Round 1 sizes itself from the caps. Later rounds use what round 1 actually cost: on #455 a session cost
+            # $1.2-2.0 against its $3 cap and judging a claim $0.31 against the $1.10 the caps implied, so the cap-based
+            # reserve ran only 2 of round 2's 4 sessions and dropped the two boldest assignments.
+            per_claim = (seen_judging / seen_judged) if seen_judged else (2 * s.judge_budget + s.novelty_budget) * 0.5
+            per_session = (sum(seen_sessions) / len(seen_sessions)) if seen_sessions else s.session_budget
+            reserve = min(s.validate_max, 2 * len(assignments)) * per_claim + s.meta_budget
+            fit = int(max(0.0, s.total_budget - spend.total - reserve) // max(min(per_session * 1.25, s.session_budget), 0.01))
+            todo = assignments[: max(fit, 1 if rnd == 1 and spend.room(s.session_budget) else 0)]
+            if not todo:
+                break
+            ck["partial"] = partial = {"round": rnd, "todo": todo, "done": {}}
+            keep()
+        done = partial["done"]
 
         def one(ia):
             i, a = ia
@@ -4197,22 +4233,30 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                                            modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
             try:
                 reply, notebook, cost = session("engine-session", prompt, label, s.session_turns, s.session_budget, s.session_effort)
+                claims = parse_claims(notebook)
+                for c in claims:
+                    c["session"], c["_kind"] = label, a.get("kind")
+                x = {"label": label, "assignment": a, "reply": (reply or "")[-3000:], "notebook": notebook,
+                     "claims": claims, "cost": round(float(cost or 0.0), 4)}
             except DiscoveryCallFailed as e:
-                return {"label": label, "assignment": a, "error": str(e)[:300], "cost": round(e.cost, 4), "claims": []}
-            claims = parse_claims(notebook)
-            for c in claims:
-                c["session"], c["_kind"] = label, a.get("kind")
-            return {"label": label, "assignment": a, "reply": (reply or "")[-3000:], "notebook": notebook,
-                    "claims": claims, "cost": round(float(cost or 0.0), 4)}
-        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(todo)))) as ex:
-            sessions = list(ex.map(one, list(enumerate(todo, 1))))
-        for x in sessions:
-            spend.add(x.get("cost"))
-            if not x.get("error"):
-                seen_sessions.append(float(x.get("cost") or 0.0))
+                x = {"label": label, "assignment": a, "error": str(e)[:300], "cost": round(e.cost, 4), "claims": []}
+            with lock:
+                spend.add(x["cost"])
+                if not x.get("error"):
+                    seen_sessions.append(float(x["cost"]))
+                done[label] = x
+            keep()
+            return x
+        pending = [(i, a) for i, a in enumerate(todo, 1) if f"r{rnd}s{i}" not in done]
+        if pending:
+            with ThreadPoolExecutor(max_workers=max(1, min(workers, len(pending)))) as ex:
+                list(ex.map(one, pending))
+        sessions = [done[f"r{rnd}s{i}"] for i in range(1, len(todo) + 1)]
         claims = [c for x in sessions for c in x["claims"]]
         checkable = sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)
         for c in checkable[: s.validate_max]:
+            if c.get("validation"):                      # judged before a resume
+                continue
             if not spend.room(2 * s.judge_budget):
                 c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
                 continue
@@ -4224,6 +4268,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 c["validation"]["literature"] = lit
                 if lit.get("verdict") in ("known", "routine"):
                     c["validation"]["status"] = f"valid-{lit['verdict']}"
+            keep()
         ledger += claims
         rec = {"round": rnd, "sessions": [{k: v for k, v in x.items() if k != "notebook"} for x in sessions],
                "_sessions": [{"label": x["label"], "notebook": x.get("notebook") or ""} for x in sessions],
@@ -4248,51 +4293,70 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 meta = {"error": merr, "cost": round(mc, 4)}
             rec["meta"] = {k: v for k, v in (meta or {}).items() if k != "text"}
         rounds.append(rec)
-    deep = None
-    if s.deep_budget > 0 and ledger and spend.room(s.meta_budget + s.deep_budget):
-        deep = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend, search)
+        ck.update({"rounds": rounds, "meta": meta, "next": assignments})
+        ck.pop("partial", None)
+        keep()
+    deep = ck.get("deep")
+    if deep is None and s.deep_budget > 0 and ledger and spend.room(s.meta_budget + s.deep_budget):
+        deep = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend,
+                                search, ck=ck, keep=keep)
+        ck["deep"] = deep
+        ck.pop("deep_partial", None)
+        keep()
+    ledger = ledger + list((deep or {}).get("claims_list") or [])
     validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
     ans, conf = f.get("answer"), f.get("confidence")
     decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
                 "commit": ("pos" if ans == "true" else "neg") if ans and (conf or 0) >= 0.8 else None}
     rounds = [{k: v for k, v in r.items() if k != "_sessions"} for r in rounds]   # the notebooks live in the sandboxes
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
-            "meta": meta, "deep": deep, "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(),
+            "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k != "claims_list"} if deep else None,
+            "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(),
             "guidance": engine_guidance(f, ledger, meta)}
 
 
 def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
-                     known: str, ledger: list, rounds: list, spend: _DiscoverySpend, search=None) -> dict:
+                     known: str, ledger: list, rounds: list, spend: _DiscoverySpend, search=None, ck: dict | None = None,
+                     keep=None) -> dict:
     """v3: one long session on the single line most likely to produce a result an expert would rate 2 or more. Every
-    round's notebook goes into its sandbox under prior/. Its claims join the ledger and are validated like any other.
+    round's notebook goes into its sandbox under prior/. Its claims (`claims_list`) join the ledger and are validated
+    like any other. The session's output is checkpointed (`ck["deep_partial"]`) before it is judged: it is the most
+    expensive call in the engine.
     Why: v1 and v2 sessions stopped at $1-2 of their $3 caps once they had a result, and every validated result was a
     significance-1 constant inside its method's ceiling; the lines that might matter never got real depth."""
-    pt, pc, perr = _discovery_call(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
-        statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort, s.meta_budget)
-    spend.add(pc)
-    rec: dict = {"plan_cost": round(pc, 4)}
-    if not pt:
-        rec["error"] = perr
-        return rec
-    secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
-    rec["goal"] = (secs.get("GOAL") or "")[:2000]
-    plan = "\n\n".join(f"{k}:\n{secs[k]}" for k in ("GOAL", "WHY THIS LINE", "PLAN", "PITFALLS") if secs.get(k)) or pt
-    files = {f"prior/{x['label']}.md": x.get("notebook") or "" for r in rounds for x in (r.get("_sessions") or [])}
-    prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
-                                   assignment=DEEP_ASSIGNMENT.format(plan=clip_middle(plan, 9000)), teammates="",
-                                   modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
-    try:
-        reply, notebook, cost = session("engine-session", prompt, "deep", s.deep_turns, s.deep_budget, s.deep_effort,
-                                        files=files)
-    except DiscoveryCallFailed as e:
-        spend.add(e.cost)
-        rec.update({"error": str(e)[:300], "cost": round(e.cost, 4)})
-        return rec
-    spend.add(cost)
-    claims = parse_claims(notebook)
-    for c in claims:
-        c["session"], c["_kind"] = "deep", "deep"
+    ck = ck if ck is not None else {}
+    keep = keep or (lambda: None)
+    dp = ck.get("deep_partial") if isinstance(ck.get("deep_partial"), dict) else None
+    if dp is None:
+        pt, pc, perr = _discovery_call(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
+            statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort, s.meta_budget)
+        spend.add(pc)
+        if not pt:
+            return {"plan_cost": round(pc, 4), "error": perr}
+        secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
+        plan = "\n\n".join(f"{k}:\n{secs[k]}" for k in ("GOAL", "WHY THIS LINE", "PLAN", "PITFALLS") if secs.get(k)) or pt
+        files = {f"prior/{x['label']}.md": x.get("notebook") or "" for r in rounds for x in (r.get("_sessions") or [])}
+        prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                       assignment=DEEP_ASSIGNMENT.format(plan=clip_middle(plan, 9000)), teammates="",
+                                       modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+        dp = {"plan_cost": round(pc, 4), "goal": (secs.get("GOAL") or "")[:2000]}
+        try:
+            reply, notebook, cost = session("engine-session", prompt, "deep", s.deep_turns, s.deep_budget, s.deep_effort,
+                                            files=files)
+        except DiscoveryCallFailed as e:
+            spend.add(e.cost)
+            return {**dp, "error": str(e)[:300], "cost": round(e.cost, 4)}
+        spend.add(cost)
+        claims = parse_claims(notebook)
+        for c in claims:
+            c["session"], c["_kind"] = "deep", "deep"
+        dp.update({"cost": round(float(cost or 0.0), 4), "reply": (reply or "")[-3000:], "claims_list": claims})
+        ck["deep_partial"] = dp
+        keep()
+    claims = dp.get("claims_list") or []
     for c in sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)[: s.validate_max]:
+        if c.get("validation"):
+            continue
         if not spend.room(2 * s.judge_budget):
             c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
             continue
@@ -4303,10 +4367,9 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
             c["validation"]["literature"] = lit
             if lit.get("verdict") in ("known", "routine"):
                 c["validation"]["status"] = f"valid-{lit['verdict']}"
-    ledger += claims
-    rec.update({"cost": round(float(cost or 0.0), 4), "claims": len(claims), "reply": (reply or "")[-3000:],
-                "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")})
-    return rec
+        keep()
+    return {**dp, "claims": len(claims),
+            "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
 
 
 def engine_report(res: dict, title: str) -> str:
@@ -4948,10 +5011,26 @@ class Harness:
                            sha256=hashlib.sha256(s.library.encode()).hexdigest()[:16], path=str(getattr(self.args, "library", "")))
         if s.blackboard:
             self.log.event("blackboard", "read", where="engine", chars=len(s.blackboard))
-        res = engine_run(self._discovery_caller(), self._engine_session_caller(), self.problem["statement"],
-                         self.state["statement"], s, workers=max(1, s.sessions), search=self._engine_search())
         out = self.run_dir / "engine"
         out.mkdir(exist_ok=True)
+        ckpath = out / "checkpoint.json"
+        checkpoint = None
+        try:
+            checkpoint = json.loads(ckpath.read_text())
+            self.log.event("engine", "resumed", frontier=bool(checkpoint.get("frontier")),
+                           rounds=len(checkpoint.get("rounds") or []),
+                           sessions_done=len((checkpoint.get("partial") or {}).get("done") or {}),
+                           deep=bool(checkpoint.get("deep") or checkpoint.get("deep_partial")), spend=checkpoint.get("spend"))
+        except (OSError, ValueError):
+            pass
+
+        def save(ck):                                    # whole file or old file: never a half-written checkpoint
+            tmp = ckpath.with_suffix(".tmp")
+            tmp.write_text(json.dumps(ck, ensure_ascii=False))
+            os.replace(tmp, ckpath)
+        res = engine_run(self._discovery_caller(), self._engine_session_caller(), self.problem["statement"],
+                         self.state["statement"], s, workers=max(1, s.sessions), search=self._engine_search(),
+                         checkpoint=checkpoint, save=save)
         (out / "engine.json").write_text(json.dumps({k: v for k, v in res.items() if k != "guidance"}, indent=1, ensure_ascii=False))
         (out / "IDEAS.md").write_text(engine_report(res, f"problem {self.problem['id']}, run {self.run_dir.name}"))
         keep = {"decision": res.get("decision"), "guidance": res.get("guidance"), "spend": res.get("spend"),

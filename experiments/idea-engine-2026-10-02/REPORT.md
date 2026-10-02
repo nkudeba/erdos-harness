@@ -126,3 +126,47 @@ v2 targets both, plus significance.
 
 **Against the criteria: still 0.** Six claims are validated-new across #455 and #1203, and I checked two independently.
 All six are rated significance 1: constants pushed to their method's ceiling, sharper exceptional sets, and barriers.
+
+### v2 on #153: $23.36 (`runs/20261002-073216-923101-erdos153`)
+
+v2 adds three things: significance-ranked targets, teammate awareness, and a two-judge novelty panel that keeps the
+conservative verdict.
+- **The frontier map was cut off at its $5 cap** ($5.25, lost), then succeeded on the 1.5× retry ($3.81, 139k tokens).
+  That is $9.06 in all, so round 1 could afford only 3 sessions.
+- **The Mac idle-slept with two judge calls in flight.** macOS stops the monotonic clock behind Python's subprocess
+  timeouts, so the calls hung for 6.5 hours until they were killed by hand. That claim is `unjudged`.
+  - Runs now hold `caffeinate -i -w <screen pid>`, a temporary assertion that ends with the process, plus the app's
+    keep-awake.
+  - The 517-minute wall time is almost all sleep.
+- **Teammate awareness worked.** Sessions took distinct lines (A1, A2, T4, and in round 2 four different
+  assignments), and no constant was duplicated.
+
+**12 claims:** 2 validated-new. Both judges agreed on significance 1 for each, and the literature check found both
+new.
+- **r2s2/C1.** A Sidon set made of at most K affine images of Singer difference sets, plus n^{1−ε} exceptional
+  elements, has Q(A) → ∞. The engine typed it NEGATIVE; it is really a special case.
+- **r2s1/C1.** A negative result: the weighted (fractional) relaxation of edge loading cannot beat the known bound.
+
+The rest were 4 routine, 4 broken, and one significance-3 target (T4: C* > 1) not proved. Its session instead proved,
+in a continuum model, that the known c·log(1/δ) bound is sharp for every profile-plus-pair argument.
+
+**After three problems: 10 validated-new claims, every one significance 1.** The engine reliably generates novel,
+refereed results of two kinds: constants pushed to the ceiling of their method, and precise barrier or special-case
+theorems. It has not produced a significance-2 result. v3 adds the deep dive.
+
+### Interruptions, and checkpointing (2026-10-02, 20:17 UTC)
+
+The Mac's battery died seven minutes after v3 launched. Its #455 continuation
+(`runs/20261002-160957-739019-erdos455`) lost the frontier call in flight, at a cost that is unavailable. Together with
+the earlier idle-sleep stall, that settles it: a run that keeps nothing until it finishes re-buys everything after any
+interruption, and a map alone has cost $9.
+
+`engine_run` now checkpoints to `engine/checkpoint.json` after:
+- the frontier map;
+- every session, as it finishes;
+- every verdict;
+- every round;
+- the deep dive's session, before it is judged.
+
+Resuming the same run dir picks up from the checkpoint. `screen.py --resume RUN_DIR` drives it. `tests/test_engine.py`
+class Resume covers four cases: a crash mid-round, mid-validation, between rounds, and inside the deep dive.

@@ -53,6 +53,8 @@ def main() -> int:
     ap.add_argument("--total", type=float, default=30.0, help="engine budget per problem, USD")
     ap.add_argument("--flags", default="", help="extra harness flags, one string")
     ap.add_argument("--record", default=None, help="only write the results row for this finished run dir")
+    ap.add_argument("--resume", nargs="*", default=[], help="run dirs of cut-off runs to resume first (the engine "
+                    "picks up from engine/checkpoint.json)")
     args = ap.parse_args()
     if args.record:
         rd = (ROOT / args.record).resolve()
@@ -60,31 +62,34 @@ def main() -> int:
         print(json.dumps(rec, ensure_ascii=False)[:600] if rec else "no engine record")
         return 0
     ranks = {str(p["id"]): p for p in json.loads((ROOT / "atlas-data" / "rankings.json").read_text())["problems"]}
-    for n in args.problems:
-        fc = T.parse_fc((PREV / "fc" / f"{n}.lean").read_text(), int(n))
-        if fc.get("error"):
-            print(f"#{n}: formal-conjectures parse failed: {fc['error']}", flush=True)
-            continue
-        statement = T.frozen_statement(fc, int(n))
+    jobs = [((ROOT / r).resolve().name.split("erdos")[-1], (ROOT / r).resolve()) for r in args.resume]
+    jobs += [(n, None) for n in args.problems]
+    for n, run_dir in jobs:
         lib = PREV / "library" / (f"{n}-full" if (PREV / "library" / f"{n}-full").exists() else n)
-        run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-erdos{n}"
-        run_dir.mkdir(parents=True)
-        prob = {"id": n, "statement": ranks[n]["statement"], "tags": ranks[n].get("tags") or [],
-                "url": f"https://www.erdosproblems.com/{n}",
-                "notes": "OPEN problem on erdosproblems.com. Frozen statement: formal-conjectures main theorem, answer "
-                         f"stripped ({fc.get('form')}). Research engine screen {args.tag} (no Lean)."}
-        (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
-        (run_dir / "state.json").write_text(json.dumps({"statement": statement, "problem_input": prob, "mode": "research",
-                                                        "invocations": [], "statement_source": "formal-conjectures main "
-                                                        "theorem, answer stripped, via timesplit.parse_fc"}, indent=2,
-                                                       ensure_ascii=False))
+        if run_dir is None:
+            fc = T.parse_fc((PREV / "fc" / f"{n}.lean").read_text(), int(n))
+            if fc.get("error"):
+                print(f"#{n}: formal-conjectures parse failed: {fc['error']}", flush=True)
+                continue
+            statement = T.frozen_statement(fc, int(n))
+            run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-erdos{n}"
+            run_dir.mkdir(parents=True)
+            prob = {"id": n, "statement": ranks[n]["statement"], "tags": ranks[n].get("tags") or [],
+                    "url": f"https://www.erdosproblems.com/{n}",
+                    "notes": "OPEN problem on erdosproblems.com. Frozen statement: formal-conjectures main theorem, answer "
+                             f"stripped ({fc.get('form')}). Research engine screen {args.tag} (no Lean)."}
+            (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
+            (run_dir / "state.json").write_text(json.dumps({"statement": statement, "problem_input": prob, "mode": "research",
+                                                            "invocations": [], "statement_source": "formal-conjectures main "
+                                                            "theorem, answer stripped, via timesplit.parse_fc"}, indent=2,
+                                                           ensure_ascii=False))
         cmd = [sys.executable, str(ROOT / "harness.py"), "run", "--problem", str(run_dir / "problem.json"), "--resume",
                str(run_dir), "--mode", "research", "--allow-research", "--no-brief", "--skip-literature",
                "--stop-after", "discover", "--discover", "on", "--discover-mode", "engine",
                "--engine-total-budget", str(args.total), "--blackboard", "on", "--library", str(lib),
                "--run-budget", str(args.total + 5), "--backend", "claude-cli", "--model", "claude-opus-5-5", "--llm-timeout", "5400",
                *args.flags.split()]
-        with (run_dir / "lane.log").open("w") as log:
+        with (run_dir / "lane.log").open("a") as log:
             rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                                 timeout=6 * 3600).returncode
         rec = record(run_dir, n, args.tag, rc)
