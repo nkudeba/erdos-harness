@@ -715,15 +715,20 @@
     "rationale": [
       "Discovery screen 2026-10-02: believed TRUE; gaps must tend to infinity (no infinite prime AP), and liminf q_n/n² > 0 was reproved informally (weaker than Richter 1976).",
       "Full run 2026-10-02 ($18.99, Opus 5.5; in-run discovery 3 draws, rediscovery, blackboard): Lean-certified and audited (kernel replay, standard axioms, statement identity) that in any finite chain of primes with nondecreasing gaps the i-th gap is at least i/6, so q_n >= n(n-1)/12 (a weaker form of Richter 1976's 0.352). Mechanically verified reconstruction of a weaker published bound, not new mathematics.",
-      "The residual's single open step (no convex chain of n/2+1 primes below Cn^2 with gaps <= 2Cn) implies #455. The refinement judge refused three splits of it as restatements (a first-gap lower bound and flatness come free from gap_i >= i/6), and a Lean-informed rediscovery found no proof; descent stalled at cycle 3 of 6."
+      "The residual's single open step (no convex chain of n/2+1 primes below Cn^2 with gaps <= 2Cn) implies #455. The refinement judge refused three splits of it as restatements (a first-gap lower bound and flatness come free from gap_i >= i/6), and a Lean-informed rediscovery found no proof; descent stalled at cycle 3 of 6.",
+      "Research engine v1 (2026-10-02, $15.42, informal): liminf q_n/n^2 >= 0.80024 for every convex prime sequence, by a max-plus certificate for joint residue run-counting mod 15015 (two sessions found it independently; the certificate was re-run and reproduces exactly; no improvement on Richter's 0.352 was found in an OpenAlex search). Not Lean-checked and not human-reviewed. Congruence-only arguments are capped at 1 by the profinite barrier.",
+      "Barrier, unvalidated (engine frontier map): the finite window form of the core that the Lean run left open implies Heilbronn-Linfoot-type finiteness of class-number-one fields 1-4A, since Euler polynomials x^2+x+A give long convex prime chains. A proof of that core needs class-number-strength input."
     ],
     "requirements": [
       "Prove that small gap values along a convex prime sequence have zero density (M(x) = o(x)): a uniform upper-bound sieve for long almost-quadratic prime patterns.",
-      "Show U(x)=o(x): the gap sequence of a convex prime sequence takes almost no even values (equivalently a uniform sieve upper bound for long nearly-quadratic prime patterns). Splits that add side conditions implied by gap_i >= i/6 are not progress."
+      "Show U(x)=o(x): the gap sequence of a convex prime sequence takes almost no even values (equivalently a uniform sieve upper bound for long nearly-quadratic prime patterns). Splits that add side conditions implied by gap_i >= i/6 are not progress.",
+      "Going past liminf >= 1 needs coupling of size with residues, e.g. least-split-prime bounds along the discriminant walk; congruence-only arguments stop at 1."
     ],
     "sources": [
       "experiments/open-discovery-2026-10-02/REPORT.md",
-      "experiments/open-discovery-2026-10-02/evidence/455_gap_lower.lean"
+      "experiments/open-discovery-2026-10-02/evidence/455_gap_lower.lean",
+      "experiments/idea-engine-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/evidence/455/r1s1-NOTEBOOK.md"
     ],
     "assessed": "2026-10-02",
     "brief_updated": "2026-10-02",
