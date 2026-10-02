@@ -201,6 +201,20 @@ class OverBudgetRecovery(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "error_max_budget_usd"):
                 H.ClaudeCliBackend(None, 10).complete_agentic("prove-agentic", "x", Path("/tmp"), 5)
 
+    def test_a_continued_answer_is_kept_whole(self):
+        """A text answer past the per-message cap continues in a second message, and `result` holds only that one."""
+        ok = {"subtype": "success", "is_error": False, "result": "=== TARGET T9\nthe rest", "total_cost_usd": 3.6,
+              "num_turns": 2}
+        with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["=== DIRECTION\nTRUE\n",
+                                                                                       "=== TARGET T9\nthe rest"]))):
+            self.assertEqual(H.ClaudeCliBackend(None, 10).complete("engine-frontier", "x"),
+                             "=== DIRECTION\nTRUE\n=== TARGET T9\nthe rest")
+
+    def test_a_tool_session_still_returns_its_final_reply(self):
+        ok = {"subtype": "success", "is_error": False, "result": "FINAL", "total_cost_usd": 0.5, "num_turns": 4}
+        with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["I will run a script", "FINAL"]))):
+            self.assertEqual(H.ClaudeCliBackend(None, 10).complete_agentic("prove-agentic", "x", Path("/tmp"), 5), "FINAL")
+
     def test_a_normal_stream_returns_the_result(self):
         ok = {"subtype": "success", "is_error": False, "result": "PONG", "total_cost_usd": 0.01, "num_turns": 1}
         with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["PONG"]))):

@@ -269,6 +269,11 @@ class ClaudeCliBackend:
                                  and d.get("stop_reason") == "end_turn" and streamed and streamed[-1].strip())
                 if recovered:
                     text = streamed[-1]
+                if text_only and len(streamed) > 1:
+                    # A long answer that hits the per-message output cap continues in a second assistant message, and
+                    # `result` holds only the LAST one. #455's v3 frontier map (turns=2) came back as its final 9,904
+                    # characters, from target T9 on: the direction, known results, barriers, core and T1-T8 were gone.
+                    text = "".join(streamed)
                 mu = d.get("modelUsage") or {}
                 tokens = {"in": sum(int(v.get("inputTokens") or 0) for v in mu.values()),
                           "out": sum(int(v.get("outputTokens") or 0) for v in mu.values()),
