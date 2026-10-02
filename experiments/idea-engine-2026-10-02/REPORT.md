@@ -170,3 +170,17 @@ interruption, and a map alone has cost $9.
 
 Resuming the same run dir picks up from the checkpoint. `screen.py --resume RUN_DIR` drives it. `tests/test_engine.py`
 class Resume covers four cases: a crash mid-round, mid-validation, between rounds, and inside the deep dive.
+
+### A truncated frontier map, caught on resume (20:47 UTC)
+
+v3's first #455 map came back with `turns=2` as its final 9,904 characters, from target T9 on, and was checkpointed
+like that. The cause: a text answer past the per-message output cap continues in a second message, and the CLI's
+`result` holds only that second message.
+
+The run was stopped two minutes into its sessions, which had started from a near-empty map. Those four sessions' cost
+is unavailable. The map ($3.68) was dropped from the checkpoint, and the run resumed.
+
+`_run` now joins every assistant text of a text-only call (`d285928`, `tests/test_backend_retry.py`).
+
+The bug was rare elsewhere: 11 of 3,642 text calls on disk ran past one message, and 4 of those were frontier maps.
+#1203's and #153's maps also ran to two turns but parsed whole. Their first message most likely held only thinking.

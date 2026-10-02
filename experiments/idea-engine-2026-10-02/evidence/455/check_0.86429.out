@@ -1,0 +1,3 @@
+/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/evidence/455/check_0.86429.py:26: RuntimeWarning: invalid value encountered in subtract
+  V=W1-W1.max(); M,W2=one_period(17,V); D=(W2-V)[fin]
+z=17 bracket: 295318 <= G <= 295318 ; rho<=1.157020 1/rho>=0.86429 t=88.9

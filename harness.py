@@ -4001,7 +4001,10 @@ def assignment_text(a: dict) -> str:
     return str(a.get("text") or "")
 
 
-CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF)[*_]*[ \t]*[:.][*_]*[ \t]*")
+# `STATEMENT (method barrier):` and `EVIDENCE/MECHANISM:` occur in practice (the #455 deep dive); EVIDENCE stands in for a
+# conjecture's PROOF.
+CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF|EVIDENCE)(?:/[A-Z]+)?[*_]*"
+                            r"(?:[ \t]*\([^)\n]*\))?[ \t]*[:.][*_]*[ \t]*")
 
 
 def _claim_fields(block: str) -> dict:
@@ -4017,22 +4020,46 @@ def _claim_fields(block: str) -> dict:
 
 
 def parse_claims(notebook: str) -> list[dict]:
-    """`### C<k>` blocks under `## Claims`. Status is normalised to PROVED / CONJECTURED / REFUTED / OTHER."""
-    m = re.search(r"(?ms)^##\s*Claims\s*$(.*?)(?=^##\s|\Z)", notebook or "")
-    body = m.group(1) if m else (notebook or "")
-    parts = re.split(r"(?m)^###\s*(C\d+)\b.*$", body)
-    claims = []
-    for i in range(1, len(parts) - 1, 2):
-        f = _claim_fields(parts[i + 1])
+    """Every `### C<k>` block in the notebook, wherever it sits, with any `## Proof of C<k>` section attached to its
+    proof. Status is normalised to PROVED / CONJECTURED / REFUTED / OTHER.
+    The #455 deep dive wrote `### C1` under `## Claims` with "see Proof of C1 below", then `## Proof of C1`, then
+    C2-C4 under that section. Reading `## Claims` alone kept one claim of four, without its proof, and the referee
+    failed it for a proof that "is missing"."""
+    text = notebook or ""
+    heads = list(re.finditer(r"(?m)^(#{2,3})[ \t]+(.*?)[ \t]*$", text))
+    claims, proofs = [], {}
+    for k, h in enumerate(heads):
+        body = text[h.end(): heads[k + 1].start() if k + 1 < len(heads) else len(text)]
+        title = h.group(2)
+        cm = re.match(r"\**\s*(C\d+)\b", title)
+        pm = re.search(r"(?i)\bproofs?\b.*?\b(C\d+)\b|\b(C\d+)\b.*?\bproofs?\b", title)
+        if pm and not (cm and h.group(1) == "###" and not re.search(r"(?i)proof", title.split(cm.group(1), 1)[1][:3] or "x")):
+            if not cm:
+                cid = pm.group(1) or pm.group(2)
+                proofs[cid] = (proofs.get(cid, "") + "\n" + body).strip()
+                continue
+        if not cm or h.group(1) != "###":
+            continue
+        f = _claim_fields(body)
         st = f.get("STATEMENT")
         if not st:
             continue
         status, ty = _first_word(f.get("STATUS", "")), _first_word(f.get("TYPE", ""))
-        claims.append({"id": parts[i], "statement": st[:3000],
+        claims.append({"id": cm.group(1), "statement": st[:3000],
                        "status": status if status in ("PROVED", "CONJECTURED", "REFUTED") else "OTHER",
                        "type": ty if ty in ENGINE_TYPES else "OTHER", "beyond": f.get("BEYOND", "")[:1500],
-                       "proof": f.get("PROOF", "")})
-    return claims
+                       "proof": f.get("PROOF") or f.get("EVIDENCE", "")})
+    seen = set()
+    out = []
+    for c in claims:                                     # the same claim restated later keeps its first block
+        key = (c["id"], " ".join(c["statement"].split())[:200])
+        if key in seen:
+            continue
+        seen.add(key)
+        if proofs.get(c["id"]):
+            c["proof"] = (c["proof"] + "\n\n" + proofs[c["id"]]).strip()
+        out.append(c)
+    return out
 
 
 def engine_status(v: dict) -> str:
@@ -4302,7 +4329,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         ck.pop("partial", None)
         keep()
     deep = ck.get("deep")
-    if deep is None and s.deep_budget > 0 and ledger and spend.room(s.meta_budget + s.deep_budget):
+    if deep is None and s.deep_budget > 0 and ledger and (ck.get("deep_partial") or spend.room(s.meta_budget + s.deep_budget)):
         deep = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend,
                                 search, ck=ck, keep=keep)
         ck["deep"] = deep

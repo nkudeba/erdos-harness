@@ -142,6 +142,23 @@ class Claims(unittest.TestCase):
         self.assertTrue(c1["proof"].endswith("Therefore the bound holds."))
         self.assertEqual((c2["statement"], c2["status"], c2["proof"]), ("a second claim", "CONJECTURED", "data only"))
 
+    def test_claims_anywhere_and_proof_sections_attached(self):
+        """The #455 deep dive: C1 under ## Claims pointing at "Proof of C1 below", then ## Proof of C1, then C2-C4 under
+        that section, with `STATEMENT (method barrier):` and `EVIDENCE/MECHANISM:` headers. One claim of four was read,
+        with no proof, and the referee failed it."""
+        nb = ("## Result\nx\n## Claims\n### C1\nSTATEMENT: theta < 3/4 suffices.\nSTATUS: PROVED\nTYPE: STRUCTURE\n"
+              "PROOF: see Proof of C1 below.\n## Proof of C1\nStep 1. The stay count.\nStep 5. Siegel, once per field.\n"
+              "### C2\nSTATEMENT (beyond 3/4): theta < 5/6 gives liminf >= 2.\nSTATUS: PROVED\nTYPE: QUANT\nPROOF. As in C1.\n"
+              "### C3\nSTATEMENT (method barrier): 3/4 is the limit.\nSTATUS: CONJECTURED\nTYPE: NEGATIVE\n"
+              "EVIDENCE/MECHANISM: the recursion's fixed point.\n## Data\n### D1\nnothing\n")
+        cs = {c["id"]: c for c in H.parse_claims(nb)}
+        self.assertEqual(sorted(cs), ["C1", "C2", "C3"])
+        self.assertIn("Siegel, once per field", cs["C1"]["proof"])
+        self.assertEqual(cs["C2"]["statement"], "theta < 5/6 gives liminf >= 2.")
+        self.assertEqual((cs["C3"]["status"], cs["C3"]["proof"]), ("CONJECTURED", "the recursion's fixed point."))
+        two = "## Claims\n### C2\nSTATEMENT: one claim\nSTATUS: PROVED\n### C2\nSTATEMENT: another claim\nSTATUS: PROVED\n"
+        self.assertEqual(len(H.parse_claims(two)), 2)                     # one label, two different claims: both kept
+
     def test_status_needs_both_judges_and_a_new_verdict(self):
         st = H.engine_status
         self.assertEqual(st({"referee": {"valid": False}, "adversary": {"broken": False}}), "broken")

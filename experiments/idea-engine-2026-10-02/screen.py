@@ -53,8 +53,8 @@ def main() -> int:
     ap.add_argument("--total", type=float, default=30.0, help="engine budget per problem, USD")
     ap.add_argument("--flags", default="", help="extra harness flags, one string")
     ap.add_argument("--record", default=None, help="only write the results row for this finished run dir")
-    ap.add_argument("--resume", nargs="*", default=[], help="run dirs of cut-off runs to resume first (the engine "
-                    "picks up from engine/checkpoint.json)")
+    ap.add_argument("--resume", action="append", default=[], help="a cut-off run dir to resume first, repeatable (the "
+                    "engine picks up from engine/checkpoint.json); one value per flag, so it never swallows the problems")
     args = ap.parse_args()
     if args.record:
         rd = (ROOT / args.record).resolve()
