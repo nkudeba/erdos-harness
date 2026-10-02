@@ -713,15 +713,44 @@
   },
   "455": {
     "rationale": [
-      "Discovery screen 2026-10-02: believed TRUE; gaps must tend to infinity (no infinite prime AP), and liminf q_n/n² > 0 was reproved informally (weaker than Richter 1976)."
+      "Discovery screen 2026-10-02: believed TRUE; gaps must tend to infinity (no infinite prime AP), and liminf q_n/n² > 0 was reproved informally (weaker than Richter 1976).",
+      "Full run 2026-10-02 ($18.99, Opus 5.5; in-run discovery 3 draws, rediscovery, blackboard): Lean-certified and audited (kernel replay, standard axioms, statement identity) that in any finite chain of primes with nondecreasing gaps the i-th gap is at least i/6, so q_n >= n(n-1)/12 (a weaker form of Richter 1976's 0.352). Mechanically verified reconstruction of a weaker published bound, not new mathematics.",
+      "The residual's single open step (no convex chain of n/2+1 primes below Cn^2 with gaps <= 2Cn) implies #455. The refinement judge refused three splits of it as restatements (a first-gap lower bound and flatness come free from gap_i >= i/6), and a Lean-informed rediscovery found no proof; descent stalled at cycle 3 of 6."
     ],
     "requirements": [
-      "Prove that small gap values along a convex prime sequence have zero density (M(x) = o(x)): a uniform upper-bound sieve for long almost-quadratic prime patterns."
+      "Prove that small gap values along a convex prime sequence have zero density (M(x) = o(x)): a uniform upper-bound sieve for long almost-quadratic prime patterns.",
+      "Show U(x)=o(x): the gap sequence of a convex prime sequence takes almost no even values (equivalently a uniform sieve upper bound for long nearly-quadratic prime patterns). Splits that add side conditions implied by gap_i >= i/6 are not progress."
     ],
     "sources": [
-      "experiments/open-discovery-2026-10-02/REPORT.md"
+      "experiments/open-discovery-2026-10-02/REPORT.md",
+      "experiments/open-discovery-2026-10-02/evidence/455_gap_lower.lean"
     ],
-    "assessed": "2026-10-01"
+    "assessed": "2026-10-02",
+    "brief_updated": "2026-10-02",
+    "residual": {
+      "run": "20261001-230105-000000-erdos455",
+      "cycle": 3,
+      "open": 1,
+      "published": 0,
+      "certified": 1,
+      "hypotheses": [
+        {
+          "name": "erdos_455_hyp_convex_tail",
+          "kind": "conjecture",
+          "open": false
+        },
+        {
+          "name": "erdos_455_hyp_no_short_convex_chain",
+          "kind": "conjecture",
+          "open": true
+        }
+      ],
+      "also_certified_below": [
+        "erdos_455_hyp_no_short_convex_chain_hyp_gap_lower: in any finite convex prime chain, i <= 6 * gap_i (audited; its refinement was refused as not easier)"
+      ]
+    },
+    "residual_recorded": "2026-10-02",
+    "residual_history": []
   },
   "458": {
     "rationale": [
