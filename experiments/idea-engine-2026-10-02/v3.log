@@ -10,3 +10,4 @@ Traceback (most recent call last):
     return io.open(self, mode, buffering, encoding, errors, newline)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 FileNotFoundError: [Errno 2] No such file or directory: '/Users/nicolas.kudeba/workspace/erdos-harness/1203/lane.log'
+#455 [v3]: 4 validated new of 25 claims; {'valid-routine': 6, 'broken': 9, 'validated-new': 4, 'unvalidated-conjectured': 2, 'unvalidated-proved': 4}; significance [1, 1, 1, 1]; $36.105516000000016

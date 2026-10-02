@@ -184,3 +184,43 @@ is unavailable. The map ($3.68) was dropped from the checkpoint, and the run res
 
 The bug was rare elsewhere: 11 of 3,642 text calls on disk ran past one message, and 4 of those were frontier maps.
 #1203's and #153's maps also ran to two turns but parsed whole. Their first message most likely held only thinking.
+
+### v3 on #455, a continuation from the blackboard: $36.11 (`runs/20261002-160957-739019-erdos455`)
+
+This run includes $3.68 for the truncated map and two resumes. It started from v1's results on the blackboard, so the
+new map already listed 0.80024 under KNOWN and aimed past it: liminf ≥ 1, a conditional target, limsup = ∞, and the
+glitch theorem for θ < 1.
+
+**Rounds 1–2: 8 sessions.**
+- **The congruence game at z = 17** (r1s2, r1s3, independently): liminf q_n/n² ≥ **0.86429**. The z = 17 game value is
+  exactly 295,318 per period of 255,255. I re-ran r1s3's certificate here and it reproduces exactly in 89 s
+  (`evidence/455/check_0.86429.*`).
+  - The bound is monotone: as z grows, the bounds only improve and converge to a limit in [1, 1.157].
+  - Growing z with n cannot beat 1 while z ≤ (2−ε) log n.
+- **The few-glitch theorem extended to θ < 2/3** (r2s2), using new normal forms: every long e = 2 run is a segment of
+  an Euler polynomial with a fundamental discriminant.
+- **Refutations and broken claims.**
+  - The conditional target's hypothesis (uniform Hardy–Littlewood) was refuted outright.
+  - Several structural claims were broken by the judges.
+
+**The deep dive** ($2.08 to plan, $5.37 for the session, 165k tokens). The plan chose θ < 1 for the glitch theorem.
+The session produced four claims:
+- **C1, θ < 3/4, unconditional: validated-new**, significance 1 from both judges, literature new. It uses a new
+  mechanism, a large sieve per "stay" on one discriminant row, which goes past the per-run Linnik–Vinogradov barrier.
+- **C2, θ < 5/6 implies liminf ≥ 2: broken.** One sieve step's range may be empty; the argument still supports θ < 4/5.
+- **C4, θ < 1 under a split-density hypothesis that GRH implies: broken.** It assumes uniformity in a parameter that
+  grows with n.
+- **C3: a conjectured barrier at 3/4**, the Burgess exponent.
+
+On the first parse the deep dive's C1 was read without its proof and marked broken. The session had written "see
+Proof of C1 below" and put C2–C4 under that section. `parse_claims` now reads claims anywhere and attaches proof
+sections. Replayed on all 30 notebooks, 12 gain claims and none loses one. The deep dive was re-judged from its
+checkpoint, with no session re-run.
+
+**The judges' reason for significance 1** on the θ < 3/4 result: it goes "beyond the single-run Linnik–Vinogradov
+barrier" with "a genuinely joint multi-discriminant argument", but it "leaves the core untouched". Their bar for 2 is
+contact with the core, not a new mechanism.
+
+**After four engine runs (#455 twice, #1203, #153): 14 validated-new claims, all significance 1.** I checked three
+independently: 0.80024, 0.86429 and 1.584. The deep dive did what it was built for, a longer push down the most
+promising line, and moved the glitch threshold from 2/3 to 3/4. That still did not reach significance 2.
