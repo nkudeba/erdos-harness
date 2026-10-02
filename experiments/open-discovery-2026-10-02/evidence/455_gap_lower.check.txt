@@ -1,0 +1,7 @@
+../experiments/open-discovery-2026-10-02/evidence/455_gap_lower.lean:37:6: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+../experiments/open-discovery-2026-10-02/evidence/455_gap_lower.lean:37:6: warning: 'simp' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+'erdos_455_hyp_no_short_convex_chain_hyp_gap_lower' depends on axioms: [propext, Classical.choice, Quot.sound]

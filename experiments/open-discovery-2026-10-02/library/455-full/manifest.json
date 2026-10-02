@@ -1,0 +1,89 @@
+{
+ "built": "2026-10-02T02:56:33Z",
+ "cutoff_exclusive": "2026-10-02",
+ "excludes": [],
+ "model": "claude-opus-5-5",
+ "source": "OpenAlex search; arXiv full text as version 1 only",
+ "statement_sha": "035ac83e8a6cfa07",
+ "queries": [
+  "primes with nondecreasing gaps",
+  "convex sequences of primes",
+  "Richter convex prime sequence growth",
+  "Erdős problem increasing prime gaps",
+  "sequences with monotone differences density",
+  "primes in short intervals Baker Harman Pintz",
+  "convex sequences integer points counting",
+  "prime k-tuples consecutive gaps distribution"
+ ],
+ "candidates": 113,
+ "dropped": [],
+ "chosen": [
+  {
+   "id": "W2064469747",
+   "title": "Linear equations in primes",
+   "date": "2010-04-25",
+   "arxiv": null,
+   "doi": "https://doi.org/10.4007/annals.2010.171.1753",
+   "full_text": true,
+   "text_source": "http://annals.math.princeton.edu/wp-content/uploads/annals-v171-n3-p08-p.pdf",
+   "sha256": "b403268f1b005638",
+   "chars": 120000
+  },
+  {
+   "id": "W2060291661",
+   "title": "Variants of the Selberg sieve, and bounded intervals containing many primes",
+   "date": "2014-10-16",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1186/s40687-014-0012-7",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  },
+  {
+   "id": "W2150462872",
+   "title": "Bounded gaps between primes",
+   "date": "2014-02-20",
+   "arxiv": null,
+   "doi": "https://doi.org/10.4007/annals.2014.179.3.7",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "88c3c57976e2dd2d",
+   "chars": 382
+  },
+  {
+   "id": "W3022553145",
+   "title": "Primes in tuples I",
+   "date": "2009-09-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.4007/annals.2009.170.819",
+   "full_text": true,
+   "text_source": "http://annals.math.princeton.edu/wp-content/uploads/annals-v170-n2-p10-p.pdf",
+   "sha256": "d45cbdba4f073b41",
+   "chars": 76849
+  },
+  {
+   "id": "W2097249100",
+   "title": "Primes in tuples II",
+   "date": "2010-01-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1007/s11511-010-0044-9",
+   "full_text": true,
+   "text_source": "https://projecteuclid.org/journals/acta-mathematica/volume-204/issue-1/Primes-in-tuples-II/10.1007/s11511-010-0044-9.pdf",
+   "sha256": "6dea7dffc9e98b5f",
+   "chars": 75946
+  },
+  {
+   "id": "W2095527188",
+   "title": "Very Large Gaps between Consecutive Primes",
+   "date": "1997-04-01",
+   "arxiv": null,
+   "doi": "https://doi.org/10.1006/jnth.1997.2081",
+   "full_text": false,
+   "text_source": "",
+   "sha256": "e3b0c44298fc1c14",
+   "chars": 0
+  }
+ ],
+ "cost_usd": 1.3438
+}

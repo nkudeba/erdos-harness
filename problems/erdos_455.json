@@ -1,0 +1,14 @@
+{
+  "id": "455",
+  "statement": "Let $q_1<q_2<\\cdots$ be a sequence of primes such that\\[q_{n+1}-q_n\\geq q_n-q_{n-1}.\\]Must\\[\\lim_n \\frac{q_n}{n^2}=\\infty?\\]",
+  "status": "OPEN (open; cannot be resolved with a finite computation)",
+  "notes": "OPEN problem on erdosproblems.com (checked 2026-10-02; no proof claims). Known: Richter 1976 proved liminf q_n/n^2 > 0.352. Frozen statement: formal-conjectures main theorem erdos_455, answer stripped (YES reading). Nothing here is resolved.",
+  "url": "https://www.erdosproblems.com/455",
+  "open": true,
+  "class": "open",
+  "tags": [
+    "number theory"
+  ],
+  "comments": 0,
+  "flags": []
+}

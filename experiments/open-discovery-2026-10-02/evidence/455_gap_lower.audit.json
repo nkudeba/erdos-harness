@@ -1,0 +1,35 @@
+{
+ "lemma": "erdos_455_hyp_no_short_convex_chain_hyp_gap_lower",
+ "frozen": "open Filter ENNReal\n\ndef Erdos455ConvexChain (p : ℕ → ℕ) (L : ℕ) : Prop :=\n  (∀ i, i ≤ L → (p i).Prime) ∧ (∀ i, i < L → p i < p (i + 1)) ∧\n    (∀ i, i + 2 ≤ L → p (i + 1) - p i ≤ p (i + 2) - p (i + 1))\n\ntheorem erdos_455_hyp_no_short_convex_chain_hyp_gap_lower :\n    ∀ L : ℕ, ∀ p : ℕ → ℕ, Erdos455ConvexChain p L →\n      ∀ i, i < L → i ≤ 6 * (p (i + 1) - p i) := by\n  sorry\n",
+ "checks": {
+  "source_scan": {
+   "ok": true,
+   "detail": "no sorry, kernel bypass or elaboration-time code"
+  },
+  "imports": {
+   "ok": true,
+   "detail": "1 import(s), all Mathlib, Formal.Library or the statement's own"
+  },
+  "compiles": {
+   "ok": true,
+   "detail": "no errors"
+  },
+  "no_sorry_warning": {
+   "ok": true,
+   "detail": "0 sorry warning(s)"
+  },
+  "axioms": {
+   "ok": true,
+   "detail": "[Classical.choice, Quot.sound, propext]"
+  },
+  "statement_identity": {
+   "ok": true,
+   "detail": "the proved `erdos_455_hyp_no_short_convex_chain_hyp_gap_lower` and 1 frozen definition(s) are structurally identical to a clean elaboration of the frozen statement (2 constant(s) compared)"
+  },
+  "kernel_replay": {
+   "ok": true,
+   "detail": "all declarations replayed"
+  }
+ },
+ "source": "programs/erdos_455/pos/sub/erdos_455_hyp_no_short_convex_chain/Residual.lean (run 20261001-230105-000000-erdos455)"
+}
