@@ -1321,3 +1321,41 @@ run. $21.43, against $20.56 for `baseline-v2-84f21c5` on the same 5 items.**
   1. Replicate the baseline pin on these 5 items (about $20) to measure its run-to-run spread before blaming the
      harness.
   2. If the loss holds, ablate the round caps on main's pin (`--attack-rounds 6 --attack-decompose-rounds 10`).
+
+### Baseline replicate (written 2026-10-01, before launch): `baseline-v2-84f21c5-rep1`
+
+**Why.**
+- `dev-main-a88fab5` lost its screen 0-3-2, and `dev-fixes-ea6d987` lost the same screen 0-2-3.
+- Both were compared against the SAME single run per item of `baseline-v2-84f21c5`.
+- A lucky baseline would make every candidate lose. So the baseline's own run-to-run spread is measured before any
+  harness change is blamed.
+
+**Protocol: exactly `baseline-v2-84f21c5`'s.**
+- `pin_84f21c561c540e02_harness.py` and `pins/knowledge-8b5a5b08da0eb6f4`.
+- Candidate `baseline`, `--open`, masked, $8, 2 research cycles, 3 hypotheses per cycle, literature on.
+- The 5 screen items (#150, #202, #204, #392, #401), fresh aliases.
+- Launched by today's runner. A dry run confirmed that the old pin accepts every flag it passes.
+- One lane, with nothing else live at launch. `--allow-concurrent` is set so that a Lean-free lane elsewhere cannot
+  stop it, and the other session is asked to hold Lean lanes until it ends.
+- **One measurement code for all three arms.** At the end, the original baseline and `dev-main-a88fab5` are
+  re-measured on these 5 items with `progress --redo`, the same code that measures the replicate. Earlier
+  measurements stay in the files, and any drift between the old and new measurement of the same run is reported.
+
+**How it is read** (decided now):
+1. Spread: `score --tag baseline-v2-84f21c5-rep1 --baseline baseline-v2-84f21c5`. Both are the same harness, so any
+   call here is run-to-run noise.
+2. Main against the replicate: `score --tag dev-main-a88fab5 --baseline baseline-v2-84f21c5-rep1`.
+3. Decision:
+   - **The replicate loses to the original by L − W ≥ 2:** the original was a lucky draw, and main's loss is not
+     evidence against main. No ablation.
+   - **The replicate ties the original (|W − L| ≤ 1) and main also loses to the replicate (L > W):** the loss holds.
+     The round-caps ablation (`--attack-rounds 6 --attack-decompose-rounds 10` on main's pin) is next, and runs only on
+     the operator's go-ahead.
+   - **Anything else:** report both comparisons and stop.
+
+**Write-ahead predictions.**
+- Replicate pieces on the 5 items: about 7, range 4–11, against the original's 10 and main's 5.
+- Replicate against the original: 1 win, 2 losses, 2 ties expected; P(L − W ≥ 2) = 0.35.
+- Main against the replicate: P(W ≥ L) = 0.4.
+- No solve: P(at least one) = 0.05.
+- About $20; the original spent $20.56 on these 5.
