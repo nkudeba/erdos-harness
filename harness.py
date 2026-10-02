@@ -3609,10 +3609,15 @@ TYPE: QUANT | SPECIAL | CONDITIONAL | STRUCTURE | ANALOGUE | NEGATIVE | REDUCTIO
 STATEMENT: <a precise, self-contained statement>
 BEYOND: <the item of KNOWN it strictly improves, and why it is not already known>
 VALUE: <how proving it moves toward CORE>
+SIGNIFICANCE: <0-3: how an expert in the field would rate a proof of it; 0 trivial, 1 a minor improvement, 2 a solid
+partial result an expert would note, 3 major progress>
 TEST: <how to test it by computation, or "none">
 
 A target is a statement strictly beyond KNOWN that a strong mathematician might prove in weeks. It is never a
-restatement of CORE. Use every type at least once where it makes sense:
+restatement of CORE. Rate SIGNIFICANCE honestly: a better constant inside a method's known ceiling is usually 1. At
+least three targets should be rated 2 or more. If no conditional proof of the whole statement is known, one CONDITIONAL
+target must be exactly that: the full statement under a standard, named conjecture (GRH, Hardy-Littlewood, Elliott-
+Halberstam, abc, Schinzel's Hypothesis H, ...). Use every type at least once where it makes sense:
 - QUANT: a better constant, exponent or bound than any in KNOWN. Check whether a sharper version of a KNOWN argument
   already beats the published constant; this is often missed.
 - SPECIAL: the full conclusion for a natural restricted class that KNOWN does not cover.
@@ -3649,7 +3654,7 @@ THE TEAM'S FRONTIER MAP (what is known, what blocks the known methods, what rema
 {context}
 YOUR ASSIGNMENT:
 {assignment}
-
+{teammates}
 WHAT COUNTS is a result that is NEW: strictly beyond everything under KNOWN. In order of value:
 1. a complete, checked proof of your assignment;
 2. a complete proof of a weaker statement that is still new;
@@ -3858,12 +3863,12 @@ class EngineSettings:
     session_budget: float = 3.0
     session_turns: int = 80
     session_effort: str = "high"
-    frontier_budget: float = 2.0
+    frontier_budget: float = 5.0     # #455's map ran $2.32 (112k tokens); #1203's hit a $2 cap mid-answer and was lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
     judge_effort: str = "high"
     novelty_budget: float = 0.6
-    meta_budget: float = 1.0
+    meta_budget: float = 2.0
     validate_max: int = 8            # claims validated per round, strongest first
     total_budget: float = 30.0
     library: str = ""
@@ -3891,9 +3896,11 @@ def parse_frontier(text: str) -> dict:
             st = section_field(body, "STATEMENT")
             if st:
                 ty = _first_word(section_field(body, "TYPE"))
+                sig = re.search(r"[0-3]", section_field(body, "SIGNIFICANCE"))
                 out["targets"].append({"id": (title.split() + ["T"])[1][:8], "type": ty if ty in ENGINE_TYPES else "OTHER",
                                        "statement": st[:2500], "beyond": section_field(body, "BEYOND")[:1200],
-                                       "value": section_field(body, "VALUE")[:800], "test": section_field(body, "TEST")[:800]})
+                                       "value": section_field(body, "VALUE")[:800], "test": section_field(body, "TEST")[:800],
+                                       "significance": int(sig.group(0)) if sig else None})
         elif t.startswith("ANGLE"):
             idea = section_field(body, "IDEA")
             if idea:
@@ -3922,11 +3929,12 @@ def engine_assignments(f: dict, n: int, core_share: float) -> list[dict]:
     of distinct TYPEs first (broad). Either list tops up the other when it runs short."""
     angles, targets = list(f.get("angles") or []), list(f.get("targets") or [])
     by_type: dict = {}
-    for t in targets:
+    for t in sorted(targets, key=lambda t: -(t.get("significance") or 0)):   # stable: map order breaks ties
         by_type.setdefault(t["type"], []).append(t)
+    order = sorted(by_type, key=lambda ty: -(by_type[ty][0].get("significance") or 0))
     spread = []
-    while any(by_type.values()):                 # one of each type before a second of any
-        for ty in list(by_type):
+    while any(by_type.values()):                 # one of each type before a second of any; the most significant first
+        for ty in order:
             if by_type[ty]:
                 spread.append(by_type[ty].pop(0))
     n_core = min(len(angles), max(1 if angles else 0, round(n * core_share)))
@@ -3943,7 +3951,8 @@ def assignment_text(a: dict) -> str:
                 "Take the angle seriously and push it as far as it goes. If it fails, find out exactly where and why, and "
                 "prove the strongest NEW statement it does give.")
     if a.get("kind") == "target":
-        return (f"PROVE THIS TARGET ({a.get('id')}, type {a.get('type')}).\nSTATEMENT: {a.get('statement')}\n"
+        return (f"PROVE THIS TARGET ({a.get('id')}, type {a.get('type')}, significance {a.get('significance', '?')} of 3)."
+                f"\nSTATEMENT: {a.get('statement')}\n"
                 f"BEYOND: {a.get('beyond')}\nVALUE: {a.get('value')}\nTEST: {a.get('test')}\n"
                 "Test it by computation first. If it is false, refute it explicitly. If it is too hard, prove the strongest "
                 "NEW special case, and then try to push past the target.")
@@ -4014,14 +4023,36 @@ def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict
     spend.add(rc + ac)
     v: dict = {"referee": json_tail_any(rt) if rt else {"error": rerr},
                "adversary": json_tail_any(at) if at else {"error": aerr}, "cost": round(rc + ac, 4)}
-    if (v["referee"].get("valid") is True and v["adversary"].get("broken") is False and spend.room(s.novelty_budget)):
-        nt, nc, nerr = _discovery_call(call, "engine-novelty", NOVELTY_PROMPT.format(statement=statement, known=known, claim=claim),
-                                       s.judge_effort, s.novelty_budget)
-        spend.add(nc)
-        v["novelty"] = json_tail_any(nt) if nt else {"error": nerr}
-        v["cost"] = round(v["cost"] + nc, 4)
+    if (v["referee"].get("valid") is True and v["adversary"].get("broken") is False and spend.room(2 * s.novelty_budget)):
+        # Two judges and the conservative verdict: on #1203 one call called a result new and another, for the same
+        # constant by the same route, routine.
+        nprompt = NOVELTY_PROMPT.format(statement=statement, known=known, claim=claim)
+        with ThreadPoolExecutor(max_workers=2) as ex:
+            outs = list(ex.map(lambda _: _discovery_call(call, "engine-novelty", nprompt, s.judge_effort, s.novelty_budget),
+                               range(2)))
+        judges = [json_tail_any(t) if t else {"error": e} for t, c, e in outs]
+        cost = sum(c for t, c, e in outs)
+        spend.add(cost)
+        v["novelty"] = engine_novelty_panel(judges)
+        v["cost"] = round(v["cost"] + cost, 4)
     v["status"] = engine_status(v)
     return v
+
+
+def engine_novelty_panel(judges: list[dict]) -> dict:
+    """The conservative reading of several novelty verdicts: `new` only when every judge that answered says new, and the
+    lowest significance. A judge that did not answer withholds `new`."""
+    rank = {"restatement": 0, "known": 1, "routine": 2, "new": 3}
+    answered = [j for j in judges if str(j.get("verdict") or "").lower() in rank]
+    if not answered:
+        return {"error": "no novelty verdict", "panel": judges}
+    worst = min(answered, key=lambda j: rank[str(j["verdict"]).lower()])
+    verdict = str(worst["verdict"]).lower()
+    if verdict == "new" and len(answered) < len(judges):
+        verdict = "unrated"
+    sigs = [j.get("significance") for j in answered if isinstance(j.get("significance"), (int, float))]
+    return {"verdict": verdict, "significance": min(sigs) if sigs else None, "cite": worst.get("cite"),
+            "why": worst.get("why"), "panel": judges}
 
 
 def _claim_rank(c: dict) -> tuple:
@@ -4085,9 +4116,14 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     if s.context.strip():
         parts.append(s.context.strip())
     context = ("\n" + "\n\n".join(parts) + "\n") if parts else ""
-    ft, fc, ferr = _discovery_call(call, "engine-frontier", FRONTIER_PROMPT.format(
-        statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles), s.frontier_effort, s.frontier_budget)
+    fprompt = FRONTIER_PROMPT.format(statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles)
+    ft, fc, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, s.frontier_budget)
     spend.add(fc)
+    if ft is None and "budget" in str(ferr) and spend.room(1.5 * s.frontier_budget):
+        # cut off mid-answer: the text is lost whatever it cost, and nothing downstream can run without the map
+        ft, fc2, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, round(1.5 * s.frontier_budget, 2))
+        spend.add(fc2)
+        fc += fc2
     if ft is None:
         return {"error": ferr, "spend": round(spend.total, 4), "rounds": [], "ledger": [], "validated": [],
                 "decision": {"commit": None, "answer": None, "share": 0.0}, "guidance": "", "settings": s.as_dict()}
@@ -4115,9 +4151,13 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         def one(ia):
             i, a = ia
             label = f"r{rnd}s{i}"
+            mates = [f"- r{rnd}s{j}: " + " ".join(assignment_text(b).split())[:300] for j, b in enumerate(todo, 1) if j != i]
+            # On #455 and #1203 two of four sessions drifted onto the same tractable target and proved the same constant.
+            teammates = ("\nYOUR TEAMMATES THIS ROUND, working in parallel (do not duplicate them; if your work meets "
+                         "theirs, cite it and push past it):\n" + "\n".join(mates) + "\n") if mates else ""
             prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
-                                           assignment=assignment_text(a), modules=", ".join(sorted(EXPLORE_MODULES)),
-                                           seconds=EXPLORE_SECONDS)
+                                           assignment=assignment_text(a), teammates=teammates,
+                                           modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
             try:
                 reply, notebook, cost = session("engine-session", prompt, label, s.session_turns, s.session_budget, s.session_effort)
             except DiscoveryCallFailed as e:
@@ -4732,7 +4772,8 @@ class Harness:
                            session_budget=float(g("engine_session_budget", 3.0)), session_turns=int(g("engine_session_turns", 80)),
                            session_effort=str(g("engine_session_effort", "high")), judge_effort=str(g("engine_judge_effort", "high")),
                            targets=int(g("engine_targets", 10)), angles=int(g("engine_angles", 6)),
-                           core_share=float(g("engine_core_share", 0.5)), total_budget=float(g("engine_total_budget", 30.0)))
+                           core_share=float(g("engine_core_share", 0.5)), total_budget=float(g("engine_total_budget", 30.0)),
+                           frontier_budget=float(g("engine_frontier_budget", 5.0)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         return s
@@ -10437,6 +10478,7 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-core-share", type=float, default=0.5,
                       help="share of round-1 sessions that attack the core through an angle; the rest take targets")
     runp.add_argument("--engine-total-budget", type=float, default=30.0, help="USD cap for the whole engine")
+    runp.add_argument("--engine-frontier-budget", type=float, default=5.0, help="USD cap for the frontier map")
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")

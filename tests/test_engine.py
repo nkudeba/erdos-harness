@@ -27,6 +27,7 @@ TYPE: QUANT
 STATEMENT: liminf q_n/n^2 >= 0.54.
 BEYOND: improves Richter's 0.352.
 VALUE: a sharper count of repeated gaps.
+SIGNIFICANCE: 1
 TEST: greedy sequences up to 10^6.
 === TARGET T2
 TYPE: QUANT
@@ -39,6 +40,7 @@ TYPE: SPECIAL
 STATEMENT: the conclusion holds when every gap is a multiple of 6.
 BEYOND: no special case is known.
 VALUE: isolates the mod-5 obstruction.
+SIGNIFICANCE: 2 (an expert would note it)
 TEST: none
 === ANGLE A1
 TECHNIQUE: entropy compression
@@ -109,9 +111,10 @@ class Frontier(unittest.TestCase):
 
     def test_assignments_are_bold_and_broad(self):
         f = H.parse_frontier(FRONTIER)
+        self.assertEqual([t["significance"] for t in f["targets"]], [1, None, 2])
         picks = H.engine_assignments(f, 4, 0.5)
         self.assertEqual([p["kind"] for p in picks], ["angle", "angle", "target", "target"])
-        self.assertEqual({p["type"] for p in picks if p["kind"] == "target"}, {"QUANT", "SPECIAL"})   # one of each first
+        self.assertEqual([p["type"] for p in picks if p["kind"] == "target"], ["SPECIAL", "QUANT"])   # most significant first
         self.assertIn("ATTACK THE CORE", H.assignment_text(picks[0]))
         self.assertIn("PROVE THIS TARGET", H.assignment_text(picks[2]))
         many = H.engine_assignments(f, 7, 0.5)                      # more sessions than targets + angles: no repeats
@@ -175,8 +178,8 @@ class EngineRun(unittest.TestCase):
         self.assertIsNone(statuses[("r1s1", "U(x) = o(x)")])           # a conjecture is not validated
         self.assertEqual(res["decision"]["commit"], "pos")
         self.assertIn("NEW (QUANT): liminf >= 0.54", res["guidance"])
-        # novelty is judged only after both referees pass, and never for the broken claim
-        self.assertEqual(len(call.prompts("engine-novelty")), 2)
+        # novelty is judged (by two judges) only after both referees pass, and never for the broken claim
+        self.assertEqual(len(call.prompts("engine-novelty")), 4)
         self.assertTrue(all("0.6" not in p.split("THE CLAIM:")[1] for p in call.prompts("engine-novelty")))
         # judges see the frontier and the claim, never the operator guidance (checked at the Harness level)
         self.assertIn("Richter 1976", call.prompts("engine-novelty")[0])
@@ -205,6 +208,25 @@ class EngineRun(unittest.TestCase):
         self.assertEqual([len(r["sessions"]) for r in res["rounds"]], [4, 4])
         self.assertTrue(any("no-dip subclass" in p for label, p in sess.calls if label == "r2s3"))
 
+    def test_a_frontier_cut_off_by_its_cap_is_retried_once(self):
+        """#1203: the map hit its cap mid-answer, the text was lost, and the whole engine stopped after $2.60."""
+        budgets = []
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return H.DiscoveryCallFailed("error_max_budget_usd: over cap", cost=2.6) if n == 0 else FRONTIER
+            return judge(purpose)
+
+        class Rec(FakeCall):
+            def __call__(self, purpose, prompt, effort, budget):
+                budgets.append((purpose, budget))
+                return super().__call__(purpose, prompt, effort, budget)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
+        res = H.engine_run(Rec(script), sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50))
+        self.assertNotIn("error", res)
+        self.assertEqual([b for p, b in budgets if p == "engine-frontier"], [5.0, 7.5])
+        self.assertGreaterEqual(res["frontier"]["cost"], 2.6)
+
     def test_a_failed_session_and_a_failed_frontier(self):
         call = self._call()
         sess = FakeSession(lambda label, prompt: H.DiscoveryCallFailed("over cap", cost=0.5) if label == "r1s1"
@@ -216,6 +238,25 @@ class EngineRun(unittest.TestCase):
         bad = FakeCall(lambda purpose, prompt, n: H.DiscoveryCallFailed("down", cost=0.0))
         res = H.engine_run(bad, sess, "PROBLEM", LEAN, H.EngineSettings())
         self.assertEqual((res["error"], res["ledger"]), ("down", []))
+
+
+class Panel(unittest.TestCase):
+    def test_the_conservative_verdict_wins(self):
+        P = H.engine_novelty_panel
+        self.assertEqual(P([{"verdict": "new", "significance": 2}, {"verdict": "routine", "significance": 1}])["verdict"], "routine")
+        both = P([{"verdict": "new", "significance": 2}, {"verdict": "new", "significance": 1}])
+        self.assertEqual((both["verdict"], both["significance"]), ("new", 1))
+        self.assertEqual(P([{"verdict": "new", "significance": 2}, {"error": "over cap"}])["verdict"], "unrated")
+        self.assertIn("error", P([{"error": "a"}, {"error": "b"}]))
+
+    def test_sessions_see_their_teammates(self):
+        sess = FakeSession(lambda label, prompt: notebook(("CONJECTURED", "QUANT", "x")))
+        call = FakeCall(lambda purpose, prompt, n: FRONTIER if purpose == "engine-frontier" else judge(purpose))
+        H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=3, rounds=1, total_budget=50), workers=3)
+        prompts = dict(sess.calls)
+        self.assertIn("YOUR TEAMMATES THIS ROUND", prompts["r1s1"])
+        self.assertIn("r1s2:", prompts["r1s1"])
+        self.assertNotIn("r1s1:", prompts["r1s1"])
 
 
 class Literature(unittest.TestCase):
