@@ -106,6 +106,30 @@
     ],
     "assessed": "2026-09-30"
   },
+  "153": {
+    "rationale": [
+      "Discovery screen 2026-10-02: believed TRUE; reproved the forum's asymptotically-maximum case and a bound above the Cauchy–Schwarz value 4; the open regime matches the forum's (diameter in [(1+δ)n², Cn²])."
+    ],
+    "requirements": [
+      "A multiscale edge/bulk sparsity lemma for Sidon sets with diameter between (1+δ)n² and Cn²."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-01"
+  },
+  "156": {
+    "rationale": [
+      "Discovery screen 2026-10-02: believed TRUE; reproved the greedy N^{1/3} lower bound; informally found maximal Sidon sets of size O(n^{1/3}) in ℤ_n for n = p², p²−1, p³ (unchecked, possibly new)."
+    ],
+    "requirements": [
+      "Construct a Sidon set Y of size O(√L) with [1, L] ⊆ Y − Y, or otherwise emulate the Singer wrap-around in the integers."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-01"
+  },
   "164": {
     "rationale": [
       "The primitive-set maximum theorem is a substantial analytic result even though a simpler proof is now reported."
@@ -687,6 +711,18 @@
     ],
     "score": 50
   },
+  "455": {
+    "rationale": [
+      "Discovery screen 2026-10-02: believed TRUE; gaps must tend to infinity (no infinite prime AP), and liminf q_n/n² > 0 was reproved informally (weaker than Richter 1976)."
+    ],
+    "requirements": [
+      "Prove that small gap values along a convex prime sequence have zero density (M(x) = o(x)): a uniform upper-bound sieve for long almost-quadratic prime patterns."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-01"
+  },
   "458": {
     "rationale": [
       "The source explicitly connects the obstacle to prime gaps and Legendre’s conjecture. The compact LCM inequality is misleading."
@@ -695,6 +731,18 @@
       "Prove the required uniform control on prime powers between consecutive primes."
     ],
     "score": 4
+  },
+  "463": {
+    "rationale": [
+      "Discovery screen 2026-10-02: believed TRUE; solutions reduce to m = p(⌊n/p⌋+1); 'almost every n' (f = log n) and the statement under Elliott–Halberstam were proved informally."
+    ],
+    "requirements": [
+      "An unconditional pointwise lower bound, for every large n, on primes p with ⌊n/p⌋+1 free of prime factors below p: a parity-barrier sieve problem."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-01"
   },
   "471": {
     "rationale": [
@@ -1094,6 +1142,19 @@
       "atlas-data/forum/848.json"
     ]
   },
+  "859": {
+    "rationale": [
+      "Third-party claim, UNVERIFIED: conjectures.io posted a full Lean formalisation of the main question (proof-claims page, 2026-09-27). Discovery screen 2026-10-02 reproved existence of d_t (periodicity mod lcm(1..t)) and Erdős's two-sided bounds, not the asymptotic."
+    ],
+    "requirements": [
+      "Audit the conjectures.io formalisation (statement faithfulness, axioms) before any attempt; otherwise prove d_t ~ c₁/(log t)^{c₂} via a uniform window-hitting bound plus a renewal argument."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md",
+      "https://www.erdosproblems.com/forum/thread/859/proof-claims"
+    ],
+    "assessed": "2026-10-01"
+  },
   "871": {
     "rationale": [
       "The counterexample modifies a construction of additive bases with growing representation counts. It is an infinite construction, not a finite partition witness."
@@ -1272,6 +1333,18 @@
     ],
     "score": 24
   },
+  "1192": {
+    "rationale": [
+      "Discovery screen 2026-10-02: believed TRUE; r = 2 is Ruzsa's theorem; a probabilistic thin basis gives weaker bounds for every r."
+    ],
+    "requirements": [
+      "A 'block lemma' for r ≥ 3: digit curves whose r-fold sum map covers exactly with bounded fibres (Ruzsa's factorisation does not extend)."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-01"
+  },
   "1193": {
     "rationale": [
       "The literal formulation has a simple A=N counterexample, but its liminf/cardinality encoding required agentic repair."
@@ -1280,6 +1353,18 @@
       "Preserve the intended natural-number convention and both density questions."
     ],
     "score": 99
+  },
+  "1203": {
+    "rationale": [
+      "Discovery screen 2026-10-02 (crossfed + ladder, no Lean): believed TRUE; the ladder proved informally limsup F = ∞, liminf F ≥ 1 and F → ∞ on a density-one set, but every attempt stops at the same core."
+    ],
+    "requirements": [
+      "Show that EVERY short interval (n, n+K], K = n^{o(1)}, contains an integer with ≥ C·log K/log log K distinct prime factors: control of large prime divisors in arbitrary short intervals, beyond current sieve methods."
+    ],
+    "sources": [
+      "experiments/open-discovery-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-01"
   },
   "1213": {
     "score": 90,
