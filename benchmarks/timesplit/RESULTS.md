@@ -1246,6 +1246,45 @@ The harness's discovery had none of the four:
   - Ideas against the pooled baseline: 1 win, 1 loss, 8 ties expected; P(W − L ≥ 1) = 0.3.
   - Spend $3–6 an item, about $45 in all.
 
+**Screen A outcome (2026-10-01): the gate PASSES. 10 items, $21.15.**
+
+| item | truth | refereed proofs, TRUE side (baseline, 3 rounds pooled) | false side | direction (baseline) | idea (pooled baseline) | $ (baseline) |
+|---|---|---|---|---|---|---|
+| #152 | yes | **1** (0) | 0 | right (right) | **hit** (partial) | 1.40 (1.74) |
+| #258 | yes | 0 (0) | 0 | right (right) | partial (partial) | 1.79 (1.48) |
+| #259 | yes | **2** (0) | 0 | right (right) | hit (hit) | 1.83 (1.30) |
+| #283 | yes | 0 (0) | 0 | right (right) | hit (hit) | 3.92 (0.63) |
+| #387 | no | 0 (0) | 0 | wrong, not committed (wrong) | partial (partial) | 2.45 (1.27) |
+| #619 | no | 0 (1) | 0 | wrong, not committed (wrong) | partial (**hit**) | 1.82 (2.70) |
+| #884 | no | 0 (0) | 0 | wrong, not committed (wrong) | partial (partial) | 1.70 (1.42) |
+| #1141 | no | **2** (1) | 0 | right, committed NO (right) | hit (hit) | 1.91 (0.94) |
+| #1148 | yes | 0 (0) | 0 | right (right) | **hit** (partial) | 1.98 (2.63) |
+| #1179 | yes | **1** (0) | 0 | right (right) | **hit** (partial) | 2.35 (2.40) |
+
+- **Gate:**
+  - refereed proofs of the true side on 3 of the 8 never-complete items (needed 3): #152, #259 and #1179;
+  - no item with a refereed proof of the false side (allowed 1);
+  - ideas W 3, L 1 against the pooled baseline (needed W − L ≥ 0).
+  Crossfed with the ladder goes to a Lean screen.
+- **Against the predictions:**
+  - refereed proofs on the 8: 3 (expected 2; P(≥ 3) was 0.30);
+  - #619 or #1141: yes, #1141 (0.5);
+  - fooled referee on 2 or more items: no (0.10);
+  - direction 7 of 10, unchanged (predicted 7; P(a correction) was 0.3);
+  - ideas W − L = +2 (P(≥ 1) was 0.3);
+  - spend $2.12 an item (predicted $3–6).
+- **What the transcripts show** (train, so readable):
+  - On #152 the ladder's rungs 2 and 3 solved easier variants by bounding the shifted additive energy. The main
+    attempt then wrote the published k = 1, 2, 3 counting argument in ROUND ONE, with no synthesis needed. The
+    calibration's attempts never got past k = 1.
+  - That is the "easier problem first, then seed the main attack" effect, observed directly.
+- **Read with care:**
+  - Ten items; a single medium-effort referee, so a refereed proof is a candidate, not a proof; and an idea judge
+    whose grade moves between rounds (#283: hit, partial, hit).
+  - The three FALSE statements called true by the baseline (#387, #619 and #884) were still called true. The floor
+    withheld every commit, so nothing was wasted, but direction remains the weak point.
+  - Only Lean conversion counts: the next screen is a conversion test.
+
 ### Screen B, the same plus a dated library: `train-crossfed-lib-b222d03`
 
 - **Items:** those of Screen A whose resolution is recent enough for pre-resolution arXiv literature: #152, #259, #884,
@@ -1259,6 +1298,40 @@ The harness's discovery had none of the four:
   - `refereed_true` improves on at least 1 item over Screen A: 0.35.
   - Idea grades 1 win and 0 losses against Screen A: 0.35.
   - About $1.5 a library, plus Screen A's cost again.
+
+**Screen B outcome (2026-10-01), paired with Screen A on the same 5 items: $12.39, against $9.10.** The libraries
+cost $4.58 more, once.
+
+| item | truth | refereed proofs, TRUE side (Screen A) | direction (Screen A) | idea (Screen A) | $ (Screen A) |
+|---|---|---|---|---|---|
+| #152 | yes | 1 (1) | right (right) | hit (hit) | 1.84 (1.40) |
+| #259 | yes | 0 (**2**) | right (right) | partial (**hit**) | 1.87 (1.83) |
+| #619 | no | **2** (0) | **right, committed NO** (wrong) | **hit** (partial) | 2.63 (1.82) |
+| #884 | no | 0 (0) | **right**, not committed (wrong) | **hit** (partial) | 2.58 (1.70) |
+| #1179 | yes | 0 (**1**) | right (right) | partial (**hit**) | 3.47 (2.35) |
+
+- **Contamination check before launch:**
+  - every chosen document is dated before its cutoff;
+  - no identity pattern matches in any paper text or digest;
+  - the only year at or after 2026 in any digest is the cutoff in its own header.
+- **Against the predictions:**
+  - Relevant libraries on at least 4 of 5 items: yes (0.6). #619's library, mostly on graph diameter, read as off-topic
+    to me and turned out to carry the construction.
+  - Refereed proofs improve on at least 1 item: yes, #619 (0.35).
+  - Ideas 1 win, 0 losses: no; it was 2 wins and 2 losses (0.35).
+  - About $1.5 a library: $0.92 (yes).
+- **Reading:**
+  - The library's one consistent effect is on DIRECTION. Both FALSE statements that the baseline and Screen A called
+    true were called false.
+    - On #619 the run committed to NO and wrote two refereed disproofs by the published construction.
+    - On #884 it found the published prime-cluster construction, below the commit floor.
+    - That is the weak point Screen A left (three false statements called true), and the mechanism is plausible: the
+      literature on a problem's objects carries the constructions that refute it.
+  - Two of five lost their refereed proofs (#259 and #1179). At n = 5 that is indistinguishable from discovery's
+    round-to-round variance (#259 itself had 0 refereed proofs in three calibration rounds, then 2 in Screen A), so the
+    library is not shown to help proof-finding.
+  - **Next, if pursued:** the library on the false-statement items only, with more of them. Train has six false items,
+    and #387 has no recent literature, so this needs dev.
 
 ### Run C, blueprint conversion (Lean): `train-blueprint-b222d03`
 
@@ -1275,6 +1348,80 @@ The harness's discovery had none of the four:
     1952, whose core a replay could not prove.
   - #435 solved: 0.15.
   - About $30.
+
+**Screen B's pin changed before its first real item (2026-10-01).**
+- On `b222d03`, every `--library` run crashed before its first model call. `stage_discover` logged `stage="discover"`,
+  a second value for `RunLog.event`'s own first argument.
+- `discover-screen` also recorded those five crashes as $0 results. They are set aside, not deleted, in
+  `results/train-crossfed-lib-b222d03.crashed.jsonl`.
+- Fixes:
+  - the logging keyword (now `where=`), with a regression test;
+  - the screen records an infrastructure failure only in `<tag>.infra.jsonl`, never as a result.
+- Screen B now runs on `pin_710dfc814b1887af_harness.py`. It differs from `b222d03` only by that one logging line, so
+  a run without `--library` behaves identically. The tag stays `train-crossfed-lib-b222d03`, so it pairs with Screen A.
+  The predictions above are unchanged.
+
+**Run C outcome (2026-10-01, tag `train-blueprint-710dfc8`): 0 of 2 solved, $29.95. The pipeline worked end to end.**
+
+| item | discovery | blueprint | true direction at the end | pieces / certified size | the closest earlier run | $ |
+|---|---|---|---|---|---|---|
+| #435 | TRUE, refereed, committed | 19 steps; 10 of 10 hypotheses mapped to steps | 5 certified, 5 open conjectures (2 rated hard) | 4 / 9,460 | `train-conv-fde7891`: 2 / 10,321, 1 open (the Apéry bound) | 16.42 |
+| #678 | TRUE, refereed, committed; the proof uses Nagura 1952 and Nair 1982 | 15 steps; 8 of 8 mapped | **every conjecture certified within 2 cycles**; Nagura and Nair open as published premises | 6 / 20,653 | `train-678-both-f27eaff`: 8 / 17,722, the same two premises open, $15.52 | 13.53 |
+
+- **Mechanics, first live use:**
+  - in-run discovery, then the commit inside `run_open` (one direction, the whole budget);
+  - the blueprint, then step-mapped hypotheses, with each child handed its step (`blueprint/step_to_child`);
+  - a sub-residual expanding its step (`blueprint-expand`, on #678's Nair premise).
+  - Separately, the circularity gate refused a plan that would have proved Nagura from Dusart's explicit bounds as a
+    "published" premise: the target followed from it alone. The honesty gate worked as designed.
+- **Against the predictions:**
+  - blueprints extracted on both: yes (0.85);
+  - at least 80% of ledger entries mapped, on both: yes, 100% (0.6);
+  - #678 solved: no (0.35); #435 solved: no (0.15);
+  - $30 predicted, $29.95 spent.
+- **Paired, under the dense rule** (more pieces AND a larger certified size): both items tie.
+  - #435 has more pieces and a smaller size.
+  - #678 has fewer pieces and a larger size. It closed its conjectures in 2 cycles for $13.53, against 5 cycles and
+    $15.52, then stopped at the same wall.
+- **What this run teaches:**
+  1. **The wall on #678 is the ROUTE, not the conversion.**
+     - Discovery chose a proof that needs a prime in ((k+1)/2, k−1], and cited Nagura for it. Bertrand alone does not
+       give that interval. The first #678 run had found a different construction that needs only Bertrand, which is
+       in Mathlib.
+     - So a blueprint step tagged `published` that is NOT in Mathlib should trigger one more discovery round,
+       assigned "find a variant of this proof that avoids <premise>, using only what Mathlib has". That is
+       premise-aware discovery. Not built yet.
+  2. **Plans still merge steps.**
+     - #678's `hyp_nside` covers seven blueprint steps and #435's `hyp_digits_exist` five, despite the instruction to
+       merge only short steps.
+     - Merged hypotheses are what fail (#435's open five average 2.6 steps each).
+     - A cap on steps per hypothesis, enforced at adoption, is the next mechanical fix.
+  3. **Expansion arrives a cycle late.**
+     - A cheap-fallback miss is excluded from the failure count, so a blueprint step that failed its first attempt was
+       attacked a second time without recursion (#435's `hyp_lemma5_large`).
+     - Under `--blueprint on`, any failed step could be expanded at once.
+
+### Screen D, Lean conversion of cross-fed discovery (written 2026-10-01, before launch): `train-crossfed-blueprint-710dfc8`
+
+- **Why:** Screen A passed its gate, but a referee's verdict is not a proof. The question is whether the harness
+  converts these discoveries in Lean, end to end, on its own.
+- **Candidate:** `crossfed-blueprint`, i.e. in-run crossfed discovery with a ladder of 3 and a $6 discovery cap,
+  followed by `--blueprint on --residual-view outline`.
+  - Pin `pin_710dfc814b1887af_harness.py`, $16 an item, 6 research cycles, `--open` (the harness commits), fresh
+    aliases.
+  - Discovery is drawn anew. It is stochastic, so a run may not reproduce Screen A's proof, and that counts against
+    the arm.
+- **Items:** the four where Screen A wrote refereed proofs of the true side: #152, #259, #1179 and #1141.
+- **When:** after the operator lane `dev-main-a88fab5` finishes, and with Run C, one lane, items in sequence.
+- **Write-ahead predictions:**
+  - A refereed proof of the true side again on each item: 0.6.
+  - Solved (true direction verified, audit passing): #152 0.30; #259 0.20; #1179 0.15; #1141 0.10.
+    - #1141's earlier routes rest on Burgess with Siegel, and its blueprint will carry that as a premise.
+    - Expected 0.75 solves; P(at least 1) = 0.55.
+  - At least one item closed apart from published premises: 0.6.
+  - About $60.
+- **Reading, fixed now:** each outcome is attributed to the bundle (crossfed + ladder + blueprint + outline), not to
+  one part. A solve here is a train solve: evidence for a dev screen, never a dev result.
 
 ### Outcome of the dev measurement of main (2026-10-01): `dev-main-a88fab5`
 
@@ -1321,6 +1468,50 @@ run. $21.43, against $20.56 for `baseline-v2-84f21c5` on the same 5 items.**
   1. Replicate the baseline pin on these 5 items (about $20) to measure its run-to-run spread before blaming the
      harness.
   2. If the loss holds, ablate the round caps on main's pin (`--attack-rounds 6 --attack-decompose-rounds 10`).
+
+**Lean lane launched (2026-10-01).** Run C and Screen D, in sequence, through `loop/chain-ns-lean.sh`.
+- Both on `pin_710dfc814b1887af_harness.py`. Without `--library` it behaves exactly like `b222d03`; see the Screen B pin
+  note.
+- Run C's tag is therefore `train-blueprint-710dfc8`, not `train-blueprint-b222d03`. Its predictions are unchanged.
+- It started after `dev-main-a88fab5` finished. That lane's gate stopped at W0 L3 T2, with no extension.
+
+**Screen D outcome (2026-10-01): 0 of 4 solved, $57.02. One item closed apart from a published premise.**
+
+| item | truth | refereed proof this draw (Screen A's draw) | true direction at the end | pieces / size | earlier Lean runs on the item | $ |
+|---|---|---|---|---|---|---|
+| #152 | yes | no (yes) | 8 certified, 2 open | 7 / 16,453 | `train-diag-discover-v1` 2 / 12,347 ($5.62); `train-v3-smoke` 0 / 0 ($8.22) | 16.58 |
+| #259 | yes | no (yes) | 3 certified, 1 open | 1 / 4,071 | none | 12.34 |
+| #1141 | no | **yes** (yes): committed NO, 11-step blueprint | **16 certified, 0 open conjectures, 1 published premise** | 4 / 28,395 | `train-fixes-conv` 2 / 675 ($8.03); `train-alloc-00e9304` 0 / 0 ($7.26) | 15.83 |
+| #1179 | yes | no (yes) | 1 certified, 1 open | 1 / 1,936 | none | 12.27 |
+
+- **Against the predictions:**
+  - a refereed proof again on each item: 1 of 4 (predicted 0.6 each);
+  - solves: 0 (expected 0.75; P(≥ 1) was 0.55);
+  - an item closed apart from published premises: yes, #1141 (0.6);
+  - $57 against about $60.
+- **The main finding is REGRESSION TO THE MEAN in discovery.**
+  - These four were chosen because Screen A's single draw had a refereed proof, and a second draw reproduced it on only
+    one.
+  - An unbiased per-draw estimate on the eight never-complete train items pools every draw not used to select:
+    - Screen A's 3 of 8;
+    - Screen B's 1 of 3 on #152, #259 and #1179;
+    - Screen D's 0 of 3.
+    That gives about 4 of 14, 0.29 a draw, against 0 of 24 calibration rounds for the baseline (Fisher exact,
+    one-sided, p = 0.014).
+  - A draw here costs about $2, against $0.54 for a baseline round, so per dollar it is 4 in $28 against 0 in $12.87.
+    A real lift, but far from reliable on one draw.
+  - Next: draw discovery until a refereed proof appears, as v4 did, but with crossfed and the ladder. At about $2 a
+    draw, three draws give roughly a 64% chance at about $6. That is the scaling-curve experiment in
+    docs/ns-capacity-2026-10-01.md.
+- **Conversion, when a refereed proof exists:** #1141's blueprint went from a skeleton to 16 certified steps in three
+  cycles. With Run C's #678 that makes 2 of 2 runs whose blueprinted conjectures were all certified, both stopped by
+  published premises that Mathlib lacks.
+  - The paired items (#152 and #1141) both gained pieces AND certified size over every earlier Lean run, at twice the
+    budget, so neither is a clean win.
+- **Reading:** across Runs C and D, every closure attempt stopped at one of two walls:
+  - a published premise outside Mathlib (#678, #1141);
+  - a hard core with no refereed proof to follow (#152, #259, #1179).
+  Premise-aware rerouting and repeated discovery draws are the two responses the evidence names.
 
 ### Baseline replicate (written 2026-10-01, before launch): `baseline-v2-84f21c5-rep1`
 

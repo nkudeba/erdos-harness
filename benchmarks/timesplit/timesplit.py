@@ -2281,6 +2281,15 @@ def discover_screen(args) -> int:
         else:
             print(f"#{item['problem']}: still limited after 4 waits; not recorded (rerun the command)", flush=True)
             continue
+        if rc == 1 or not (run_dir / "discovery.json").exists():
+            # an infrastructure failure is never a result (the runner's rule): on 2026-10-01 a logging bug crashed
+            # every --library run before its first call, and five $0 non-results were recorded as screened items
+            with (RESULTS / f"{args.tag}.infra.jsonl").open("a") as f:
+                f.write(json.dumps({"problem": item["problem"], "run_dir": str(run_dir.relative_to(ROOT)), "returncode": rc,
+                                    "tail": text[-400:], "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}) + "\n")
+            print(f"#{item['problem']}: INFRASTRUCTURE (exit {rc}); not recorded, see {run_dir.relative_to(ROOT)}/lane.log",
+                  flush=True)
+            continue
         import harness as H
         facts = H.collect_run_facts(run_dir, str(alias))
         try:

@@ -36,6 +36,8 @@ is closer to ours.
 - Iteration 2's extra cycles fed the false direction.
 
 A harness whose results do not grow with spend cannot grow into larger problems, however much compute it is given.
+Today's screens are the first evidence that this structure changes the answer. A crossfed draw on the hardest train
+items finds a refereed proof about 29% of the time, against 0 in 24 baseline rounds (section 3).
 
 ## 3. What was built today, and the first evidence
 
@@ -47,22 +49,45 @@ All of it is behind default-off flags; see CLAUDE.md, "In-run discovery, bluepri
    - The runner also passed the last 3,500 characters of the proof, cutting #678's opening lemma.
 2. **Cross-fed rounds and a ladder** (`--discover-mode crossfed --discover-ladder 3`): OpenAI's structure at a
    few dollars.
-   - First datum, train #152. The three calibration rounds never produced a complete proof, and their notes graded
-     `partial` (the k = 1 double count only).
-   - With the ladder, the rungs found the shifted-energy method on easier variants. The main attempt then wrote a
-     complete, refereed proof by the published route, the k = 1, 2, 3 counts with Sidon uniqueness of differences,
-     for $1.40. That is one item, and Screen A's full results are in RESULTS.md.
-3. **Blueprint mode** (`--blueprint on --residual-view outline`).
+   - Screen A, 10 train items where discovery was weakest, no Lean, against three pooled calibration rounds:
+     - refereed complete proofs of the true side on 3 of the 8 items that had never had one: #152, #259 and #1179;
+     - no fooled referee;
+     - key-idea grades 3 wins, 1 loss;
+     - $2.12 an item, against $1.65.
+     The gate passed.
+   - On #152 the ladder's rungs found the shifted-energy method on easier variants, and the main attempt wrote the
+     published k = 1, 2, 3 argument in its first round. That is the curriculum effect, observed directly.
+   - What it did not fix: three FALSE statements were still called true. The commit floor withheld every commit.
+   - Screen D re-drew discovery on four of those items and reproduced a refereed proof on only one: regression to
+     the mean. The unbiased per-draw rate on the never-complete items is about 0.29, against 0 in 24 baseline rounds
+     (one-sided Fisher p = 0.014). A real lift, not a reliable one.
+3. **The dated library adds direction.** Screen B, 5 items paired with Screen A:
+   - direction right on 5 of 5, against 3 of 5: both false statements called true were corrected, one of them with
+     two refereed disproofs by the published construction;
+   - proof-finding not shown to improve: it gained one item and lost two, within noise.
+   The literature carries the constructions that refute a false statement. That is the mechanism to test next.
+4. **Blueprint mode** (`--blueprint on --residual-view outline`).
    - The refereed proof becomes numbered steps, each child gets its step's proof, and sub-residuals expand their
      step before planning.
    - Re-plans see an outline with certified proofs elided. Before, they saw the last 6,000 characters of a residual
      that reached 38,045 on #678.
-4. **A dated literature library** (`library.py`, `--library`). Nothing in it is dated on or after the item's
-   resolution; arXiv full texts are version 1 only; the problem's own identity patterns are excluded.
+   - Run C (train #435 and #678, Lean, $29.95): the pipeline worked end to end, but solved neither item, and both tie
+     under the dense rule.
+     - #678 certified every conjecture of its blueprint within two cycles, then stopped at two published premises.
+     - #435 certified 4 non-trivial pieces against 2 before, with its hard core still open.
+   - Screen D (crossfed + blueprint, 4 items, $57): no solves.
+     - #1141 went from a skeleton to 16 certified steps, closed apart from one published premise.
+     - Whenever a refereed proof existed, every conjecture of its blueprint was certified (2 of 2 runs). Every
+       failure to close stopped at a published premise Mathlib lacks, or at a hard core with no proof to follow.
+5. **The library itself** (`library.py`, `--library`). Nothing in it is dated on or after the item's resolution;
+   arXiv full texts are version 1 only; the problem's own identity patterns are excluded. A digest reads only the
+   supplied text, because a summary from memory has no date.
 
 ## 4. What would move capacity further, ranked by expected value per dollar
 
-1. **Measure the scaling curve before building more.**
+1. **Measure the scaling curve before building more.** Today's evidence makes this concrete. A crossfed+ladder
+   draw yields a refereed proof on a hard item about 29% of the time, at about $2. Three draws per item
+   (≈ 64% success, ≈ $6) are the first point of the curve, and they feed the conversion step that already works.
    - On the hard tier (the 8 train items where discovery never wrote a complete proof), run crossfed discovery at
      1×, 3× and 10× breadth (attempts per round × rounds) and plot:
      - P(refereed complete proof of the true direction);
@@ -75,8 +100,9 @@ All of it is behind default-off flags; see CLAUDE.md, "In-run discovery, bluepri
    - This is the single most informative experiment available, because it tells us which of the levers below to buy.
 2. **Make conversion scale with proof length: a blueprint graph, not a list.**
    - A 166-page proof was formalized in 17 hours because the informal proof was the plan.
-   - Here the bottleneck after a correct informal proof is conversion: #435 and #678 each had complete refereed proofs
-     and did not close.
+   - Here, with a refereed proof in hand, conversion of the conjectures now works: #678 and #1141 certified every
+     blueprinted conjecture. What does not convert is a hard core (#435's Apéry bound), which needs finer steps than
+     the proof states, and published premises outside Mathlib (lever 3).
    - Next step after Run C:
      - steps carry dependency edges (`USES`, already extracted);
      - independent leaves are attacked in parallel under the cheap-first policy ($0.22 median success);
@@ -92,7 +118,17 @@ All of it is behind default-off flags; see CLAUDE.md, "In-run discovery, bluepri
        population at the open ones.
      - This is AlphaEvolve's recipe (model mutation plus an automatic evaluator), applied to proofs rather than
        constructions, at about $10–20 a generation.
-3. **Persistent campaigns with a blackboard: time instead of parallelism.**
+3. **Choose routes the formal library can carry.** This is the Navier–Stokes lesson in its local form: OpenAI and
+   Buckmaster–Alpöge took the alternative whose freedom their tools could exploit (the forced problem).
+   - Run C's #678 certified every conjecture of its blueprint within two cycles, then stopped at Nagura 1952, a
+     published premise Mathlib lacks. An earlier run had found a route that needs only Bertrand, which Mathlib has.
+   - So the wall was the ROUTE, not the conversion. Proposed:
+     - when a blueprint step tagged `published` is not found in Mathlib, run one cross-fed round assigned "a variant of
+       this proof avoiding <premise>, using only what Mathlib has";
+     - re-extract the blueprint if the referee accepts the variant.
+   - About $1–2 a problem, and aimed at the failure that has now ended four time-split runs: BFT15, Burgess plus
+     Siegel, Ramanujan, Nagura.
+4. **Persistent campaigns with a blackboard: time instead of parallelism.**
    - OpenAI's groups shared intermediate results for 88 hours. A campaign here can run for weeks at a few dollars a
      day if each run starts from what the last one learned.
    - Today each run's discovery starts from scratch, with only operator guidance and the program's Lean residual.
@@ -102,7 +138,7 @@ All of it is behind default-off flags; see CLAUDE.md, "In-run discovery, bluepri
      - the next run's discovery reads it as its round-0 synthesis;
      - refuted routes already persist in `knowledge/refuted/`, and certified lemmas in `Lemmas.lean`.
    - Cheap to build, and it is the only lever that turns a small daily budget into accumulated search.
-4. **Stand on published programmes: reproduce, then extend.**
+5. **Stand on published programmes: reproduce, then extend.**
    - Buckmaster–Alpöge began by having Claude reproduce Córdoba–Martínez-Zoroa's argument, then extended it rung by
      rung.
    - The Atlas analogue is a target class of its own: open problems whose best partial result has a published method
@@ -112,7 +148,7 @@ All of it is behind default-off flags; see CLAUDE.md, "In-run discovery, bluepri
      rungs are the intermediate cases.
    - This is the closest honest analogue to what happened with Navier–Stokes, and it suits problems that are hard
      rather than neglected.
-5. **The strongest model for the few calls that choose the route.**
+6. **The strongest model for the few calls that choose the route.**
    - OpenAI's result needed a model beyond its released best, and OpenAI's own post says the forced-Euler result came
      from an internal Anthropic model.
    - Here, discovery attempts, the synthesis and the first plan are about ten calls per problem.
@@ -121,19 +157,19 @@ All of it is behind default-off flags; see CLAUDE.md, "In-run discovery, bluepri
      - a no-Lean screen on the hard tier, paired against Opus 5.5, before any adoption.
    - The account's usage limit, not dollars, is the constraint (Fable stops runs at the first stage when it is the
      default), so this needs the operator's go-ahead.
-6. **Computation where recall fails.**
+7. **Computation where recall fails.**
    - Exploration lost to tool-less discovery on train (W1 L3 T11), because train items are recall-dominated.
    - On the hard tier and on open problems, computation is the main source of new information: the DeepMind
      singularity work found its objects numerically before any proof.
    - Keep `--explore` for constructions and counterexamples, its one measured strength (#990's Vandermonde family).
      Test it on the hard tier, not the easy one.
-7. **Referees that scale with proof length.**
+8. **Referees that scale with proof length.**
    - The referee is one medium-effort call. A fooled referee costs a whole run committed to a false statement, and the
      risk grows with length.
    - For proofs longer than about 8,000 characters:
      - two independent referees, which must agree;
      - the blueprint extraction as a structural check (a step that cannot be stated precisely is a gap).
-8. **Human route hints are the highest-leverage input there is.**
+9. **Human route hints are the highest-leverage input there is.**
    - The dispute itself is the evidence: one word, "forced", may have collapsed a search worth millions.
    - `atlas-data/research-guidance/<n>.md` already reaches every research stage. Discovery now reads it too.
    - For a flagship problem, an expert's one-paragraph route hint is worth more than any budget here. It is recorded

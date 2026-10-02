@@ -753,14 +753,30 @@ lessons, built and screened". **Every flag below is OFF by default.**
   solved bottom-up first, and their methods seed the main attempts.
   - `--stop-after discover` runs this stage alone. `timesplit.py discover-screen` is its no-Lean screen; `ideas
     --tag` grades it.
-  - First datum (train #152): the calibration never wrote a complete proof. With the ladder, a complete refereed proof
-    by the published k = 1, 2, 3 energy route, for $1.40.
+  - Screen A, 10 weak train items, no Lean:
+    - refereed proofs of the true side on 3 of 8 items that never had one;
+    - no fooled referee;
+    - ideas W3 L1;
+    - $2.12 an item.
+    On #152 the ladder's rungs found the published method, which the main attempt then used in its first round.
+  - Screen B adds `--library`: direction right on 5 of 5 against 3 of 5. Both FALSE statements called true were
+    corrected. Proof-finding is not shown to change.
+  - Screen D re-drew four of Screen A's items: a refereed proof only on 1 of 4. On the never-complete items, a
+    crossfed draw finds a refereed proof about 0.29 of the time, against 0 in 24 baseline rounds. So DRAW AGAIN
+    before concluding: a single draw is not the item's rate.
 - **`--blueprint on`**: discovery's refereed complete proof, for THIS direction, becomes numbered steps (`=== STEP
   S1` blocks, robust to LaTeX). Then:
   - the plan maps each hypothesis to steps (`"blueprint_steps"` in its ledger);
   - each child's literature opens with its step's informal proof;
   - a sub-residual first EXPANDS its step into smaller steps (`blueprint-expand`), so depth follows the proof instead
-    of improvising (the #435 failure).
+    of improvising (the #435 failure);
+  - a hypothesis mapped to 3 or more steps is decomposed at once (`_blueprint_merged`). Plans merge steps despite the
+    instruction (#678's `hyp_nside` covered seven), and merged hypotheses are the ones that fail.
+  - Run C, train #435 and #678: the pipeline worked end to end.
+    - #678 certified every conjecture within 2 cycles, then stopped at two published premises (Nagura, Nair).
+    - Its wall is the ROUTE discovery chose: Nagura is not in Mathlib, and an earlier run found a Bertrand-only route.
+    - So a `published` blueprint step outside Mathlib should trigger a reroute round. That is not built yet; see
+      docs/ns-capacity-2026-10-01.md.
 - **`--residual-view outline`**: re-plans see the skeleton with every certified proof namespace elided (`restore_spliced`
   puts them back), head and tail kept. The default `tail` shows the last 6,000 characters: 16% of #678's 38,045.
 - **`--library DIR`**: a dated literature digest (`library.py`, `timesplit.py library`) joins the discovery prompts
@@ -778,6 +794,39 @@ lessons, built and screened". **Every flag below is OFF by default.**
   - `crossfed` = crossfed + ladder 3 + a $6 discovery cap;
   - `crossfed-blueprint` = both.
   The runner launches them with `--open`, and the harness commits.
+
+**Four more (2026-10-02), the ranked ideas in docs/ns-capacity-2026-10-01.md, all OFF by default**
+(`tests/test_discovery.py`):
+- **`--discover-draws N`**: independent draws, sharing the ladder, until a refereed complete proof appears.
+- **`--blueprint-reroute on`**: every cited blueprint step gets a VERIFIED Mathlib name, or is marked missing.
+  - A claimed name must exist in the local declaration index (`find_decl`); an unsure or invented name counts as
+    missing.
+  - When a step is missing, a variant proof avoiding it is requested, refereed, and adopted only if it leaves strictly
+    fewer missing premises.
+  - The plan's blueprint shows `MATHLIB HAS IT` or `NOT IN MATHLIB` per step.
+- **`--rediscover N`**: Lean inside the discovery loop.
+  - A conjecture that failed a Lean attack, or whose refinement was refused, gets ONE cross-fed discovery of its own.
+    It is told the Lean-certified facts around the step and what broke.
+  - A refereed proof becomes that step's blueprint (`_blueprint_for_name` returns "R"), and its next attack is
+    recursive.
+  - A refereed DISPROOF is recorded as a `rediscover` failure the next plan must answer.
+- **`--blackboard on`**: campaign memory in `programs/erdos_<n>/BLACKBOARD.md`.
+  - Each run appends its discovery synthesis, its [Lean]-certified facts, its open steps and its failures, under a lock
+    shared by both `--open` directions.
+  - The next run's discovery reads the newest whole entries.
+  - Benchmark aliases are fresh per evaluation, so nothing leaks between evaluations.
+- **`--discover-model`**: routes discovery, synthesis and blueprint calls to another model. The usage limit, not
+  dollars, decides whether to use Fable.
+
+First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
+- A no-Lean screen of 7 open problems ($12.90) produced no refereed proof.
+- On every problem it reconstructed the published partial results and named the same open core as the forum.
+- #455 then got the full pipeline: $18.99, stalled at cycle 3 of 6.
+  - It certified and audited `i ≤ 6·gap_i` for convex prime chains, a weaker form of Richter 1976, and left the core
+    open.
+  - Rediscovery and the blackboard fired; the reroute never did (no refereed proof).
+  - Facts certified inside a sub-residual now reach the blackboard (`_blackboard_sub_facts`), even under a refused
+    refinement. The automatic brief still misses them.
 
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses

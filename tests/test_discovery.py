@@ -289,6 +289,19 @@ class HarnessStage(unittest.TestCase):
         self.h.stage_discover()
         self.assertEqual(len(call.calls), n)                              # resumed: not run again
 
+    def test_a_library_reaches_every_discovery_prompt(self):
+        # regression (2026-10-01): stage_discover logged `stage="discover"`, a second value for RunLog.event's own
+        # first argument, so every --library run crashed before its first call
+        lib = self.root / "lib"
+        lib.mkdir()
+        (lib / "DIGEST.md").write_text("## Sumsets of Sidon sets (1996)\nThe energy identity E = 2n^2 - n.")
+        self.h.args.library = str(lib)
+        call = FakeCall(self.script)
+        self.h._discovery_caller = lambda: call
+        self.h.stage_discover()
+        self.assertTrue(all("LITERATURE LIBRARY" in p and "energy identity" in p for p in call.prompts("discover")))
+        self.assertTrue(any(e[:2] == ("library", "used") for e in self.h.log.events))
+
     def test_off_by_default(self):
         self.h.args.discover = "off"
         self.h._discovery_caller = lambda: self.fail("no call expected")
@@ -391,6 +404,17 @@ class BlueprintMode(unittest.TestCase):
         self.h.args.blueprint = "off"
         self.assertEqual(self.h._blueprint_for_name("erdos_99_hyp_a"), ("", []))
 
+    def test_a_merged_hypothesis_is_decomposed_at_once(self):
+        self.h.state["blueprint"] = {"steps": H.parse_blueprint(BlueprintParsing.TEXT), "source": "proof"}
+        self.h._plan_meta = {"hypotheses": [{"name": "erdos_99_hyp_all", "blueprint_steps": ["S1", "S2", "S3"]},
+                                            {"name": "erdos_99_hyp_two", "blueprint_steps": ["S1", "S2"]}]}
+        self.assertTrue(self.h._blueprint_merged("erdos_99_hyp_all"))
+        self.assertFalse(self.h._blueprint_merged("erdos_99_hyp_two"))
+        self.h.args.blueprint = "off"
+        self.assertFalse(self.h._blueprint_merged("erdos_99_hyp_all"))
+        import inspect
+        self.assertIn("self._blueprint_merged(h[\"name\"])", inspect.getsource(H.Harness._run_program_deductive))
+
     def test_the_child_state_carries_its_step_and_the_guidance(self):
         self.h.state["blueprint"] = {"steps": H.parse_blueprint(BlueprintParsing.TEXT), "source": "proof"}
         self.h.state["discovery"] = {"guidance": "G", "decision": {"commit": "pos"}, "best_proof": {"text": "P"}}
@@ -453,3 +477,229 @@ class RunnerCandidates(unittest.TestCase):
         self.assertTrue(any(re.search(p, "erdosproblems.com/forum/thread/152", re.I) for p in spec["exclude"]))
         self.assertTrue(any(re.search(p, "This is Erdős Problem #152.", re.I) for p in spec["exclude"]))
         self.assertFalse(any(re.search(p, "Erdős Problem #1520", re.I) for p in spec["exclude"]))
+
+
+class Draws(unittest.TestCase):
+    """--discover-draws: independent draws (ladder shared) until a refereed complete proof appears."""
+
+    def test_a_second_draw_runs_only_while_no_refereed_proof_exists(self):
+        def script(purpose, prompt, n):
+            if purpose == "discover":
+                return answer(complete=n >= 2)          # draw 1's two attempts incomplete, draw 2's complete
+            return referee(True)
+        call = FakeCall(script)
+        res = H.discovery_run(call, "Q", LEAN, H.DiscoverySettings(draws=3, total_budget=10.0, gap_round=False))
+        self.assertEqual(res["draws"], 2)
+        self.assertEqual(sorted({a["draw"] for a in res["attempts"]}), [1, 2])
+        self.assertTrue(res["refereed_complete"])
+        self.assertEqual(len(call.prompts("discover")), 4)
+
+    def test_the_cap_stops_draws_and_one_draw_is_the_old_behaviour(self):
+        call = FakeCall(lambda p, q, n: answer(complete=False), cost=1.0)
+        res = H.discovery_run(call, "Q", LEAN, H.DiscoverySettings(draws=3, total_budget=3.0, gap_round=False))
+        self.assertEqual(res["draws"], 1)                 # a second draw would cost ~$2 more than the $3 cap allows
+        call = FakeCall(lambda p, q, n: answer(complete=False))
+        res = H.discovery_run(call, "Q", LEAN, H.DiscoverySettings(gap_round=False))
+        self.assertEqual((res["draws"], len(res["attempts"])), (1, 2))
+
+    def test_the_ladder_is_shared_across_draws(self):
+        variants = "=== VARIANT 1\nSTATEMENT: the case k = 1.\nTEACHES: counting.\n"
+
+        def script(purpose, prompt, n):
+            if purpose == "discover-ladder":
+                return variants
+            if purpose == "discover-rung":
+                return "ok\n```json\n" + json.dumps({"answer": "true", "complete": True, "method": "count"}) + "\n```"
+            return answer(complete=False)
+        call = FakeCall(script)
+        H.discovery_run(call, "Q", LEAN, H.DiscoverySettings(draws=2, ladder=1, total_budget=20.0, gap_round=False))
+        self.assertEqual(len(call.prompts("discover-ladder")), 1)
+        self.assertEqual(len(call.prompts("discover-rung")), 1)
+        self.assertEqual(len(call.prompts("discover")), 4)
+
+
+class Blackboard(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        p = patch.object(H, "ROOT", self.root)
+        p.start()
+        self.addCleanup(p.stop)
+        self.h = _stub(self.tmp.name)
+        self.h.args.blackboard = "on"
+
+    def test_append_and_read_keep_the_newest_whole_entries(self):
+        for i in range(30):
+            self.h._blackboard_append(f"entry {i}", [f"- fact {i} " + "x" * 300])
+        text = self.h._read_blackboard(2000)
+        self.assertIn("entry 29", text)
+        self.assertNotIn("entry 0 ", text)
+        self.assertIn("earlier entries omitted", text)
+        self.assertTrue(text.startswith("# Campaign blackboard: problem 99"))
+        self.h.args.blackboard = "off"
+        self.assertEqual(self.h._read_blackboard(), "")
+
+    def test_discovery_reads_it_and_writes_back(self):
+        self.h._blackboard_append("Lean residual, direction pos", ["- [Lean] erdos_99_hyp_a: base case holds"])
+        self.h.args.discover = "on"
+        call = FakeCall(lambda p, q, n: referee(True) if p == "discover-critic" else answer(body=LONG_PROOF))
+        self.h._discovery_caller = lambda: call
+        self.h.save = lambda: None
+        self.h.stage_discover()
+        self.assertTrue(all("CAMPAIGN BLACKBOARD" in p and "base case holds" in p for p in call.prompts("discover")))
+        board = (self.root / "programs" / "erdos_99" / "BLACKBOARD.md").read_text()
+        self.assertIn("discovery decided TRUE", board)
+        self.assertIn("refereed complete proof: yes", board)
+
+    def test_the_program_writes_its_lean_facts(self):
+        parsed = H.parse_residual(SPLICED, 99)
+        pdir = self.root / "programs" / "erdos_99"
+        pdir.mkdir(parents=True, exist_ok=True)
+        self.h._blackboard_program(pdir, parsed, [])
+        board = (pdir / "BLACKBOARD.md").read_text()
+        self.assertIn("[Lean] the frozen target follows", board)
+        self.assertIn("[Lean] erdos_99_hyp_a", board)
+        self.assertIn("open conjecture", board)
+
+    def test_facts_certified_in_a_sub_residual_reach_the_board(self):
+        """#455: the gap bound was certified inside the attack on the core, under a refinement the parent refused,
+        and the board's Lean entry left it out. A direction child's entry also read 'run pos'."""
+        pdir = self.root / "programs" / "erdos_99"
+        sub = pdir / "sub" / "erdos_99_hyp_b"
+        sub.mkdir(parents=True)
+        (sub / "Residual.lean").write_text(
+            "def Chain (n : ℕ) : Prop := n = n\n\n"
+            "namespace erdos_99_hyp_b_hyp_c_ns\ndef Chain (n : ℕ) : Prop := n = n\n"
+            "theorem erdos_99_hyp_b_hyp_c : ∀ n : ℕ, Chain n := by\n  intro n\n  rfl\nend erdos_99_hyp_b_hyp_c_ns\n\n"
+            "theorem erdos_99_hyp_b_hyp_c : ∀ n : ℕ, Chain n := by\n  exact erdos_99_hyp_b_hyp_c_ns.erdos_99_hyp_b_hyp_c\n\n"
+            "theorem erdos_99_hyp_b_hyp_d : ∀ n : ℕ, n + 0 = n := by\n  sorry\n\n"
+            "theorem erdos_99_hyp_b : ∀ n : ℕ, n + 0 = n := by\n  exact erdos_99_hyp_b_hyp_d\n")
+        self.h.run_dir = self.root / "20261002-000000-000000-erdos99" / "pos"
+        self.h._blackboard_program(pdir, H.parse_residual(SPLICED, 99), [])
+        board = (pdir / "BLACKBOARD.md").read_text()
+        self.assertIn("[Lean] erdos_99_hyp_b_hyp_c (proved while attacking erdos_99_hyp_b)", board)
+        self.assertIn("where def Chain (n : ℕ) : Prop := n = n", board)
+        self.assertNotIn("[Lean] erdos_99_hyp_b_hyp_d", board)          # still open below
+        self.assertIn("run 20261002-000000-000000-erdos99/pos", board)
+        self.assertIn("erdos_99_hyp_b_hyp_c", self.h._read_blackboard())
+
+
+class Reroute(unittest.TestCase):
+    STEPS = ("=== STEP S1: setup\nKIND: lemma\nSTATEMENT: a.\nUSES: none\nPROOF: b.\n"
+             "=== STEP S2: a prime in a short window\nKIND: published\nSTATEMENT: for x >= 25 a prime lies in (x, 6x/5].\n"
+             "USES: none\nPROOF: Nagura 1952.\n"
+             "=== STEP S3: glue\nKIND: glue\nSTATEMENT: the theorem.\nUSES: S1, S2\nPROOF: combine.\n")
+    NEW = ("=== STEP S1: setup\nKIND: lemma\nSTATEMENT: a.\nUSES: none\nPROOF: b.\n"
+           "=== STEP S2: Bertrand\nKIND: published\nSTATEMENT: a prime lies in (n, 2n].\nUSES: none\nPROOF: Chebyshev.\n"
+           "=== STEP S3: glue\nKIND: glue\nSTATEMENT: the theorem.\nUSES: S1, S2\nPROOF: combine.\n")
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.h = _stub(self.tmp.name)
+        self.pdir = Path(self.tmp.name)
+
+    def test_mathlib_names_are_verified_not_trusted(self):
+        steps = H.parse_blueprint(self.STEPS)
+        with patch.object(H, "find_decl", lambda n: ("Mathlib.NumberTheory.Bertrand", "sig") if n == "Nat.real" else None):
+            missing = H.blueprint_mark_mathlib(steps, {"S2": "Nat.invented_name"})
+        self.assertEqual(missing, ["S2"])
+        self.assertIn("NOT IN MATHLIB", H.blueprint_text(steps))
+
+    def test_a_refereed_variant_with_fewer_missing_premises_is_adopted(self):
+        def script(purpose, prompt, n):
+            if purpose == "blueprint-reroute" and n == 0:
+                return ('```json\n{"mathlib": {"S2": null}, "variant": true, "avoids": ["S2"]}\n```\n=== VARIANT PROOF\n'
+                        + "Use Bertrand's postulate twice instead of Nagura. " * 20)
+            if purpose == "blueprint-reroute":
+                return '```json\n{"mathlib": {"S2": "Nat.exists_prime_lt_and_le_two_mul"}, "variant": false}\n```'
+            if purpose == "discover-critic":
+                return referee(True)
+            if purpose == "blueprint":
+                return self.NEW
+            raise AssertionError(purpose)
+        self.h._discovery_caller = lambda: FakeCall(script)
+        bertrand = lambda n: ("Mathlib.NumberTheory.Bertrand", "theorem ...") if n == "Nat.exists_prime_lt_and_le_two_mul" else None
+        with patch.object(H, "find_decl", bertrand):
+            steps, rec = self.h._blueprint_reroute(self.pdir, H.parse_blueprint(self.STEPS), "proof", "a proof", "medium", 0.6)
+        self.assertTrue(rec["adopted"])
+        self.assertEqual((rec["missing_before"], rec["missing_after"]), (["S2"], []))
+        self.assertEqual(steps[1]["mathlib"], "Nat.exists_prime_lt_and_le_two_mul")
+        self.assertIn("ADOPTED", (self.pdir / "REROUTE.md").read_text())
+
+    def test_an_unrefereed_variant_keeps_the_original(self):
+        def script(purpose, prompt, n):
+            if purpose == "blueprint-reroute":
+                return '```json\n{"mathlib": {"S2": null}, "variant": true}\n```\n=== VARIANT PROOF\n' + "x " * 400
+            return referee(False, "step 2 is wrong")
+        self.h._discovery_caller = lambda: FakeCall(script)
+        with patch.object(H, "find_decl", lambda n: None):
+            steps, rec = self.h._blueprint_reroute(self.pdir, H.parse_blueprint(self.STEPS), "proof", "a proof", "medium", 0.6)
+        self.assertFalse(rec["variant_refereed"])
+        self.assertEqual(steps[1]["title"], "a prime in a short window")
+        self.assertTrue(steps[1]["missing"])
+
+
+class Rediscover(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        p = patch.object(H, "ROOT", self.root)
+        p.start()
+        self.addCleanup(p.stop)
+        self.h = _stub(self.tmp.name)
+        self.h.args.rediscover = 1
+        self.pdir = self.root / "programs" / "erdos_99"
+        self.pdir.mkdir(parents=True)
+        self.parsed = H.parse_residual(SPLICED, 99)
+
+    def test_a_refereed_proof_becomes_the_steps_blueprint(self):
+        self.h._queue_rediscover("erdos_99_hyp_b")
+        H.record_failure(self.pdir, {"name": "erdos_99_hyp_b", "cycle": 1, "stop_reason": "unsolved goals",
+                                     "diagnosis": "needs the zero case"})
+        call = FakeCall(lambda p, q, n: referee(True) if p == "discover-critic" else answer(body="Induct on n."))
+        self.h._discovery_caller = lambda: call
+        self.h._maybe_rediscover(self.pdir, 2, self.parsed, SPLICED)
+        prompt = call.prompts("discover")[0]
+        self.assertIn("[Lean] erdos_99_hyp_a", prompt)             # the machine-checked facts reach the step's discovery
+        self.assertIn("needs the zero case", prompt)               # and what broke in Lean
+        self.assertIn("theorem erdos_99_hyp_b", prompt)
+        text, ids = self.h._blueprint_for_name("erdos_99_hyp_b")
+        self.assertEqual(ids, ["R"])
+        self.assertIn("Induct on n.", text)
+        n = len(call.calls)
+        self.h._queue_rediscover("erdos_99_hyp_b")
+        self.h._maybe_rediscover(self.pdir, 3, self.parsed, SPLICED)
+        self.assertEqual(len(call.calls), n)                       # at most --rediscover N per run
+
+    def test_a_refereed_disproof_is_a_failure_the_plan_must_answer(self):
+        self.h._queue_rediscover("erdos_99_hyp_b")
+        call = FakeCall(lambda p, q, n: referee(True) if p == "discover-critic" else answer(ans="false", body="n = 3 breaks it"))
+        self.h._discovery_caller = lambda: call
+        self.h._maybe_rediscover(self.pdir, 2, self.parsed, SPLICED)
+        fails = [f for f in H.load_failures(self.pdir) if f.get("kind") == "rediscover"]
+        self.assertEqual(len(fails), 1)
+        self.assertIn("FALSE", fails[0]["diagnosis"])
+        self.assertNotIn("erdos_99_hyp_b", self.h.state.get("step_proofs") or {})
+
+    def test_off_by_default_and_the_hooks_exist(self):
+        self.h.args.rediscover = 0
+        self.h._queue_rediscover("erdos_99_hyp_b")
+        self.assertNotIn("rediscover_queue", self.h.state)
+        import inspect
+        src = inspect.getsource(H.Harness._run_program_deductive)
+        self.assertIn("self._maybe_rediscover(pdir, cycle, parsed, skeleton)", src)
+        self.assertIn('h["name"] in (self.state.get("step_proofs") or {})', src)
+        self.assertIn("self._blackboard_program(pdir, parsed, load_refutations(pid))", src)
+
+
+class DiscoverModel(unittest.TestCase):
+    def test_route_choosing_calls_may_use_another_model(self):
+        h = _stub(tempfile.mkdtemp())
+        h.llm = H.ClaudeCliBackend("claude-opus-5-5", 60)
+        h.args.discover_model = "claude-other-model"
+        self.assertEqual(h._fresh_backend().model, "claude-other-model")
+        h.args.discover_model = None
+        self.assertEqual(h._fresh_backend().model, "claude-opus-5-5")

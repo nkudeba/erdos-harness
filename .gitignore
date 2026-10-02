@@ -44,3 +44,4 @@ pin_*_harness.py
 # timesplit literature libraries: raw third-party paper texts stay local (manifest.json records id, date and sha256,
 # so `timesplit.py library` can rebuild them); manifests, digests and statements are committed
 benchmarks/timesplit/library/*/papers/
+experiments/*/library/*/papers/

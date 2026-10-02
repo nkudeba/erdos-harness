@@ -51,6 +51,18 @@ class RunSummaryLine(unittest.TestCase):
   self.assertIn("lemmas=1", line)          # the child's certified lemma still counts
   self.assertIn("spend=$3.00", line)       # and so does its spend
 
+ def test_finished_open_run_reads_its_outcome_from_DONE(self):
+  """run_open's DONE records only an exit code. A finished --open run (#455: exit 3, pos:partial) used to
+  print outcome=running; the run's OWN DONE maps it, as collect_run_facts already did."""
+  self._write([ev(stage="run", event="start")], state={"mode": "research"},
+              done={"open": {"pos": 3}, "exit": 3})
+  sub = self.d / "pos"; sub.mkdir()
+  (sub / "state.json").write_text(json.dumps({"outcome": "partial"}))
+  line = H.run_summary_line(self.d, None)
+  self.assertIn("outcome=partial", line)
+  self.assertIn("directions=pos:partial", line)
+  self.assertEqual(H.collect_run_facts(self.d, "99677")["outcome"], "partial")
+
  def test_unknown_cost_is_reported_as_unavailable_not_zero(self):
   self._write([ev(stage="run", event="start"), ev(event="response")], state={"outcome": "partial"})
   self.assertIn("spend=unavailable", H.run_summary_line(self.d, 3))

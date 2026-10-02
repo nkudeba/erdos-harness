@@ -1302,6 +1302,8 @@ class DischargeNotSplit(unittest.TestCase):
         self.assertEqual(stalled[0][2]["cycle"], 3)          # cycle 1 adopted the first skeleton; 2 and 3 only split
         self.assertFalse(any(e[2].get("cycle") == 4 for e in h.log.events if isinstance(e[2], dict)))
         self.assertIn("descent stalled", h.state["stop_reason"])
+        # the cycles RUN, not the cap: #455's brief said "six cycles" for a run that stopped at 3 of 6
+        self.assertIn("ran 3 of 4 cycle(s)", h.state["stop_reason"])
 
     def test_first_skeleton_counts_as_progress(self):
         h, rc = self._run(1)

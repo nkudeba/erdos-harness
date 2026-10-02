@@ -3031,11 +3031,15 @@ class DiscoverySettings:
     synthesis_budget: float = 0.5
     proof_room: int = 14000          # characters of the best proof the guidance keeps (head and tail beyond that)
     library: str = ""                # a literature digest (library.py) added to every discovery prompt
+    draws: int = 1                   # independent draws (ladder shared), further ones only while no refereed proof exists
+    blackboard: str = ""             # what earlier runs on this problem learned (--blackboard on)
+    context: str = ""                # extra context, e.g. the Lean facts around one step (--rediscover)
     extra: dict = dataclasses.field(default_factory=dict)
 
     def as_dict(self) -> dict:
         d = dataclasses.asdict(self)
-        d["library"] = bool(self.library)
+        for k in ("library", "blackboard", "context"):
+            d[k] = bool(getattr(self, k))
         return d
 
 
@@ -3296,39 +3300,65 @@ def discovery_run(call, statement: str, lean: str, s: DiscoverySettings | None =
     """The discovery stage. Returns everything it learned; `guidance` is the text later stages see."""
     s = s or DiscoverySettings()
     spend = _DiscoverySpend(s.total_budget)
-    base_context = ("LITERATURE LIBRARY (papers dated before the problem's resolution; summaries are unverified):\n"
-                    + s.library.strip()) if s.library.strip() else ""
+    parts = []
+    if s.blackboard.strip():
+        parts.append("CAMPAIGN BLACKBOARD: what earlier runs on this problem learned. Items marked [Lean] were machine-checked; "
+                     "everything else is unverified, and a listed dead end should not be repeated unchanged:\n"
+                     + s.blackboard.strip())
+    if s.library.strip():
+        parts.append("LITERATURE LIBRARY (papers dated before its cutoff, summarised; the summaries are unverified):\n"
+                     + s.library.strip())
+    if s.context.strip():
+        parts.append(s.context.strip())
+    base_context = "\n\n".join(parts)
     rungs = discovery_ladder(call, s, statement, lean, spend, base_context) if s.ladder else []
     warmup = discovery_ladder_block(rungs)
     context = "\n\n".join(x for x in (base_context, warmup) if x)
     frames = [(k, DISCOVER_FRAMES[k % len(DISCOVER_FRAMES)]) for k in range(max(1, s.attempts))]
-    attempts = _discovery_round(call, s, statement, lean, frames, 1, context, workers)
-    for a in attempts:
-        spend.add(a.get("cost"))
+    attempts: list[dict] = []
     syntheses: list[dict] = []
-    last = sum(float(a.get("cost") or 0) for a in attempts)
-    rounds = 1
-    while rounds < max(1, s.rounds) and not has_refereed_complete(attempts):
-        nxt_context, nxt_frames = context, frames
-        if s.mode == "crossfed":
-            if not spend.room(s.synthesis_budget + last):
-                break
-            syn = discovery_synthesize(call, s, statement, lean, attempts, context, len(frames))
-            spend.add(syn.get("cost"))
-            syn["after_round"] = rounds
-            syntheses.append(syn)
-            if syn.get("text"):
-                nxt_context = "\n\n".join(x for x in (context, discovery_synthesis_block(syn)) if x)
-                given = syn.get("assignments") or []
-                nxt_frames = [(f"r{rounds + 1}a{i + 1}", (given[i] if i < len(given) else DISCOVER_FRAMES[i % len(DISCOVER_FRAMES)]))
-                              for i in range(len(frames))]
-        elif not spend.room(last):
+    rounds_total, draws_run, last_draw = 0, 0, 0.0
+    # --discover-draws (2026-10-01): one draw's refereed-proof rate on the hard train items is about 0.29 (Screens A, B
+    # and D pooled), so a single draw is not an item's rate. Draws are independent apart from the shared ladder and
+    # blackboard; within a draw the rounds are cross-fed (crossfed mode) or repeated (independent mode, discover-v4).
+    for draw in range(1, max(1, s.draws) + 1):
+        if draw > 1 and (has_refereed_complete(attempts) or not spend.room(last_draw)):
             break
-        more = _discovery_round(call, s, statement, lean, nxt_frames, rounds + 1, nxt_context, workers)
-        last = sum(float(a.get("cost") or 0) for a in more)
-        spend.add(last)
-        attempts += more
-        rounds += 1
+        before = spend.total
+        mine = _discovery_round(call, s, statement, lean, frames, 1, context, workers)
+        for a in mine:
+            a["draw"] = draw
+            spend.add(a.get("cost"))
+        last = sum(float(a.get("cost") or 0) for a in mine)
+        rounds = 1
+        while rounds < max(1, s.rounds) and not has_refereed_complete(mine):
+            nxt_context, nxt_frames = context, frames
+            if s.mode == "crossfed":
+                if not spend.room(s.synthesis_budget + last):
+                    break
+                syn = discovery_synthesize(call, s, statement, lean, mine, context, len(frames))
+                spend.add(syn.get("cost"))
+                syn["after_round"], syn["draw"] = rounds, draw
+                syntheses.append(syn)
+                if syn.get("text"):
+                    nxt_context = "\n\n".join(x for x in (context, discovery_synthesis_block(syn)) if x)
+                    given = syn.get("assignments") or []
+                    nxt_frames = [(f"r{rounds + 1}a{i + 1}", (given[i] if i < len(given) else DISCOVER_FRAMES[i % len(DISCOVER_FRAMES)]))
+                                  for i in range(len(frames))]
+            elif not spend.room(last):
+                break
+            more = _discovery_round(call, s, statement, lean, nxt_frames, rounds + 1, nxt_context, workers)
+            for a in more:
+                a["draw"] = draw
+            last = sum(float(a.get("cost") or 0) for a in more)
+            spend.add(last)
+            mine += more
+            rounds += 1
+        attempts += mine
+        rounds_total += rounds
+        draws_run = draw
+        last_draw = spend.total - before
+    rounds = rounds_total
     d = decide_direction(attempts, single_confident=s.single_confident, floor=s.commit_floor)
     best = d.get("best") or {}
     gap = None
@@ -3337,7 +3367,7 @@ def discovery_run(call, statement: str, lean: str, s: DiscoverySettings | None =
         gap = discovery_attack_gap(call, s, statement, lean, d, best)
         spend.add(gap.get("cost"))
     result = {"settings": s.as_dict(), "decision": {k: v for k, v in d.items() if k != "best"},
-              "best_frame": best.get("frame"), "best_round": best.get("round"), "rounds": rounds,
+              "best_frame": best.get("frame"), "best_round": best.get("round"), "rounds": rounds, "draws": draws_run,
               "attempts": attempts, "ladder": rungs, "syntheses": syntheses, "gap_attempt": gap,
               "spend": round(spend.total, 4)}
     proof = discovery_best_proof(attempts, d)
@@ -3441,8 +3471,12 @@ def blueprint_text(steps: list[dict], ids: list[str] | None = None, proofs: bool
                 used.append(by[u])
     lines = []
     for s in chosen:
+        lean_note = (f"\nMATHLIB HAS IT: `{s['mathlib']}`. Use that theorem by name; it is certified, not a premise."
+                     if s.get("mathlib") else
+                     "\nNOT IN MATHLIB: as a premise this stays unproved and the formal proof stops here; prefer a route "
+                     "that avoids it, or prove it." if s.get("missing") else "")
         lines.append(f"[{s['id']}] {s['title']} ({s['kind']})\nSTATEMENT: {s['statement']}"
-                     + (f"\nUSES: {', '.join(s['uses'])}" if s.get("uses") else "")
+                     + (f"\nUSES: {', '.join(s['uses'])}" if s.get("uses") else "") + lean_note
                      + (f"\nPROOF: {s['proof']}" if proofs and s.get("proof") else ""))
     if used:
         lines.append("Statements it may use (from other steps of the same blueprint):")
@@ -3471,6 +3505,60 @@ restate it.
 
 BLUEPRINT_CHILD_HEADER = ("BLUEPRINT FOR THIS STATEMENT: the informal proof of exactly this step, taken from a complete proof of "
                           "the whole problem that a referee accepted (unverified in Lean). Formalize THIS argument:\n")
+STEP_PROOF_CHILD_HEADER = ("BLUEPRINT FOR THIS STATEMENT: an informal proof of exactly this step that a referee accepted, found by "
+                           "a discovery round after the step failed in Lean, with the machine-checked facts around it in view "
+                           "(unverified in Lean). Formalize THIS argument:\n")
+
+# --blueprint-reroute on (2026-10-01). Runs C and D ended every closure attempt at a published premise Mathlib lacks
+# (#678: Nagura 1952; #1141: an analytic premise), although an earlier #678 run had found a route that needs only
+# Bertrand, which Mathlib has. The wall was the ROUTE discovery chose. So before planning, each cited step is checked
+# against Mathlib (a claimed name must exist in the local declaration index), and when one is missing a variant proof
+# avoiding it is requested, refereed, and adopted only if it leaves fewer missing premises.
+REROUTE_PROMPT = """A complete informal proof, accepted by a referee, is about to be formalized in Lean 4 + Mathlib. Some of its
+steps cite published theorems. A cited theorem that Mathlib lacks becomes an unproved premise, and the formal proof
+stops there.
+
+THE STATEMENT (Lean 4):
+```lean
+{lean}
+```
+
+THE PROOF:
+{proof}
+
+ITS CITED STEPS:
+{steps}
+
+1. For each cited step, give the exact name of a Mathlib theorem that states it or something directly stronger, only
+   if you are sure the name exists; otherwise null. For instance, Mathlib has Bertrand's postulate as
+   Nat.exists_prime_lt_and_le_two_mul.
+2. If any cited step has no Mathlib theorem, write a VARIANT of the whole proof that avoids every such step. Use
+   elementary arguments, or results Mathlib has, and name them. Change as little of the proof as you can. If you see
+   no such variant, say so; do not force one.
+
+Reply with exactly one ```json block, then the complete variant proof (if any) after a line `=== VARIANT PROOF`:
+{{"mathlib": {{"<step id>": "<exact name or null>", ...}}, "variant": true | false, "avoids": ["<step id>", ...]}}"""
+
+
+def blueprint_cited(steps: list[dict]) -> str:
+    return "\n".join(f"[{s['id']}] {s['statement'][:600]}\n  cited as: {str(s.get('proof') or '')[:300]}"
+                     for s in steps if s.get("kind") == "published")
+
+
+def blueprint_mark_mathlib(steps: list[dict], names: dict) -> list[str]:
+    """Mark each published step with a VERIFIED Mathlib name (the declaration must exist in the local index), or as
+    missing. Returns the ids of the missing ones. A name the model is unsure of, or invents, counts as missing."""
+    missing = []
+    for s in steps:
+        if s.get("kind") != "published":
+            continue
+        name = str((names or {}).get(s["id"]) or "").strip().strip("`")
+        if name and name.lower() not in ("null", "none") and find_decl(name):
+            s["mathlib"], s["missing"] = name, False
+        else:
+            s["mathlib"], s["missing"] = None, True
+            missing.append(s["id"])
+    return missing
 
 
 
@@ -3864,7 +3952,9 @@ class Harness:
         inner = getattr(self.llm, "_inner", self.llm)
         if not isinstance(inner, ClaudeCliBackend):
             return None
-        b = ClaudeCliBackend(inner.model, inner.timeout, inner.call_budget_usd, aux_effort=inner.aux_effort,
+        # --discover-model: the few calls that choose a route (discovery, synthesis, blueprint) may use a stronger model
+        model = getattr(getattr(self, "args", None), "discover_model", None) or inner.model
+        b = ClaudeCliBackend(model, inner.timeout, inner.call_budget_usd, aux_effort=inner.aux_effort,
                              formal_effort=inner.formal_effort, prove_effort=inner.prove_effort,
                              aux_budget_usd=inner.aux_budget_usd, formal_budget_usd=inner.formal_budget_usd)
         return MaskedBackend(b) if isinstance(self.llm, MaskedBackend) else b
@@ -3940,8 +4030,10 @@ class Harness:
                               rounds=int(g("discover_rounds", 1)), total_budget=float(g("discover_total_budget", 3.0)),
                               commit_floor=floor if floor > 0 else None,
                               gap_round=str(g("discover_gap_round", "on")) == "on",
-                              mode=str(g("discover_mode", "independent")), ladder=int(g("discover_ladder", 0)))
+                              mode=str(g("discover_mode", "independent")), ladder=int(g("discover_ladder", 0)),
+                              draws=int(g("discover_draws", 1)))
         s.library = self._library_text(10000)
+        s.blackboard = self._read_blackboard(8000)
         return s
 
     def stage_discover(self) -> dict | None:
@@ -3956,7 +4048,7 @@ class Harness:
         s = self._discovery_settings()
         self.log.event("discover", "start", **{k: v for k, v in s.as_dict().items() if k != "extra"})
         if s.library:
-            self.log.event("library", "used", stage="discover", chars=len(s.library),
+            self.log.event("library", "used", where="discover", chars=len(s.library),
                            sha256=hashlib.sha256(s.library.encode()).hexdigest()[:16], path=str(getattr(self.args, "library", "")))
         res = discovery_run(self._discovery_caller(), self.problem["statement"], self.state["statement"], s,
                             workers=max(1, s.attempts))
@@ -3968,6 +4060,12 @@ class Harness:
         keep["settings"] = s.as_dict()
         self.state["discovery"] = keep
         self.save()
+        if s.blackboard:
+            self.log.event("blackboard", "read", where="discover", chars=len(s.blackboard))
+        try:
+            self._blackboard_discovery(res)
+        except Exception as e:                             # noqa: BLE001 - a memory write must not cost the stage
+            self.log.event("blackboard", "write_failed", error=repr(e)[:200])
         dec = res.get("decision") or {}
         self.log.event("discover", "done", commit=dec.get("commit"), answer=dec.get("answer"), share=dec.get("share"),
                        refereed_complete=res.get("refereed_complete"), rounds=res.get("rounds"),
@@ -6158,7 +6256,12 @@ for the SAT solver instead of enumerating it.
 
     def _blueprint_for_name(self, name: str) -> tuple[str, list[str]]:
         """The informal proof of the blueprint step(s) hypothesis `name` formalizes, from the plan's ledger
-        (`blueprint_steps`), with the statements of the steps they use. ("", []) without a blueprint or a mapping."""
+        (`blueprint_steps`), with the statements of the steps they use. ("", []) without a blueprint or a mapping.
+        A refereed informal proof of exactly this step, found by --rediscover after it failed in Lean, comes first and
+        is returned with the id "R", whatever --blueprint says."""
+        sp = (self.state.get("step_proofs") or {}).get(name) if isinstance(getattr(self, "state", None), dict) else None
+        if isinstance(sp, dict) and sp.get("text"):
+            return clip_middle(sp["text"], 8000), ["R"]
         bp = self.state.get("blueprint") if isinstance(getattr(self, "state", None), dict) else None
         if getattr(getattr(self, "args", None), "blueprint", "off") != "on" or not isinstance(bp, dict) or not bp.get("steps"):
             return "", []
@@ -6175,6 +6278,18 @@ for the SAT solver instead of enumerating it.
             return "", []
         return blueprint_text(bp["steps"], ids, proofs=True, room=8000), ids
 
+    BLUEPRINT_MERGED_STEPS = 3
+
+    def _blueprint_merged(self, name: str) -> bool:
+        """--blueprint on: a hypothesis the plan mapped to 3 or more blueprint steps is decomposed at once, along those
+        steps (its child expands them and plans on the pieces), instead of being attacked whole.
+
+        Run C (2026-10-01): #678's `hyp_nside` covered seven steps and #435's `hyp_digits_exist` five, against the plan's
+        instruction to merge only short steps. The five hypotheses #435 left open averaged 2.6 steps each. A
+        cheap-fallback miss is not counted as a failure, so a merged step's first recursion, and with it the step
+        expansion, came a cycle late."""
+        return len(self._blueprint_for_name(name)[1]) >= self.BLUEPRINT_MERGED_STEPS
+
     def _maybe_blueprint(self, pdir: Path) -> None:
         """--blueprint on: once per program, turn its informal proof into numbered steps the plan builds on.
         At the top, the proof is discovery's refereed complete proof for THIS direction (pos needs a proof that the
@@ -6186,7 +6301,8 @@ for the SAT solver instead of enumerating it.
         budget = float(getattr(self.args, "blueprint_budget", None) or 0.6)
         step = self.state.get("blueprint_step") if isinstance(self.state.get("blueprint_step"), dict) else None
         if step and step.get("text"):
-            sid = (step.get("ids") or ["S"])[0]
+            sid = (step.get("ids") or ["S1"])[0]
+            sid = sid if re.match(r"S[0-9]", sid) else "S1"        # a rediscovered step proof ("R") expands as S1.k
             res = blueprint_expand(self._discovery_caller(), step["text"], sid, step.get("why") or "", effort, budget)
             source = "step"
         else:
@@ -6204,13 +6320,250 @@ for the SAT solver instead of enumerating it.
                                     effort, budget)
             source = "proof"
         steps = res.get("steps") or []
-        self.state["blueprint"] = {"steps": steps, "source": source if steps else None, "cost": res.get("cost"),
-                                   **({"error": res["error"]} if res.get("error") else {})}
-        self.save()
         if res.get("text"):
             (pdir / "BLUEPRINT.md").write_text(f"# Blueprint ({source})\n\n" + res["text"] + "\n")
+        reroute = None
+        if steps and source == "proof" and getattr(self.args, "blueprint_reroute", "off") == "on":
+            steps, reroute = self._blueprint_reroute(pdir, steps, proof["text"], direction, effort, budget)
+        self.state["blueprint"] = {"steps": steps, "source": source if steps else None, "cost": res.get("cost"),
+                                   **({"reroute": reroute} if reroute else {}),
+                                   **({"error": res["error"]} if res.get("error") else {})}
+        self.save()
         self.log.event("blueprint", "extracted" if steps else "empty", source=source, steps=len(steps),
                        ids=[s["id"] for s in steps][:30], cost_usd=res.get("cost"))
+
+    def _blueprint_reroute(self, pdir: Path, steps: list[dict], proof_text: str, direction: str, effort: str,
+                           budget: float) -> tuple[list[dict], dict | None]:
+        """--blueprint-reroute on: mark each cited step with a VERIFIED Mathlib name or as missing, and when one is
+        missing ask for a variant proof that avoids it. The variant must pass the referee and leave strictly fewer
+        missing premises, or the original blueprint stays (annotated either way, so the plan uses Mathlib names
+        instead of restating them as premises)."""
+        cited = blueprint_cited(steps)
+        if not cited:
+            return steps, None
+        call = self._discovery_caller()
+        lean = self.state["statement"]
+        text, cost, err = _discovery_call(call, "blueprint-reroute", REROUTE_PROMPT.format(
+            lean=lean, proof=clip_middle(proof_text, 20000), steps=cited), effort, max(budget, 1.0))
+        rec: dict = {"cost": round(cost, 4)}
+        if text is None:
+            rec["error"] = err
+            self.log.event("blueprint", "reroute_failed", error=str(err)[:200])
+            return steps, rec
+        meta = json_tail_any(text)
+        missing = blueprint_mark_mathlib(steps, meta.get("mathlib") or {})
+        rec.update({"missing_before": missing,
+                    "mathlib": {s["id"]: s.get("mathlib") for s in steps if s.get("kind") == "published"}})
+        variant = text.split("=== VARIANT PROOF", 1)[1].strip() if "=== VARIANT PROOF" in text else ""
+        if not missing or not meta.get("variant") or len(variant) < 400:
+            rec["variant"] = False
+            self.log.event("blueprint", "reroute", missing=missing, variant=False, cost_usd=rec["cost"])
+            return steps, rec
+        verdict, c2, _ = _discovery_call(call, "discover-critic", DISCOVER_CRITIC_PROMPT.format(
+            lean=lean, answer="TRUE", proof=clip_middle(variant, 24000)), "medium", 0.3)
+        cost += c2
+        rec["variant_refereed"] = bool(verdict and json_tail_any(verdict).get("valid"))
+        if not rec["variant_refereed"]:
+            rec["cost"] = round(cost, 4)
+            self.log.event("blueprint", "reroute", missing=missing, variant=True, refereed=False, cost_usd=rec["cost"])
+            return steps, rec
+        new = blueprint_extract(call, lean, variant, direction, effort, budget)
+        cost += float(new.get("cost") or 0)
+        nsteps = new.get("steps") or []
+        nmissing: list[str] = []
+        if nsteps and blueprint_cited(nsteps):
+            t2, c3, _ = _discovery_call(call, "blueprint-reroute", REROUTE_PROMPT.format(
+                lean=lean, proof=clip_middle(variant, 20000), steps=blueprint_cited(nsteps)), effort, max(budget, 1.0))
+            cost += c3
+            nmissing = blueprint_mark_mathlib(nsteps, json_tail_any(t2 or "").get("mathlib") or {})
+        rec.update({"missing_after": nmissing if nsteps else None, "cost": round(cost, 4)})
+        adopted = bool(nsteps) and len(nmissing) < len(missing)
+        rec["adopted"] = adopted
+        (pdir / "REROUTE.md").write_text(f"# Premise-aware reroute ({'ADOPTED' if adopted else 'not adopted'})\n\n"
+                                         f"Missing from Mathlib before: {missing}; after: {nmissing}\n\n## Variant proof\n\n"
+                                         + variant + ("\n\n## Its blueprint\n\n" + new.get("text", "") if nsteps else "") + "\n")
+        self.log.event("blueprint", "reroute", missing=missing, variant=True, refereed=True, adopted=adopted,
+                       missing_after=nmissing, cost_usd=rec["cost"])
+        return (nsteps, rec) if adopted else (steps, rec)
+
+    # -- campaign blackboard (--blackboard on) and Lean-in-the-loop rediscovery (--rediscover N), 2026-10-01 ----------
+
+    def _blackboard_path(self) -> Path:
+        return ROOT / "programs" / f"erdos_{self.problem['id']}" / "BLACKBOARD.md"
+
+    def _read_blackboard(self, room: int = 8000) -> str:
+        """The newest whole entries that fit in `room` characters; the header always. Empty unless --blackboard on."""
+        if getattr(getattr(self, "args", None), "blackboard", "off") != "on":
+            return ""
+        try:
+            text = self._blackboard_path().read_text()
+        except OSError:
+            return ""
+        secs = re.split(r"(?m)^(?=## )", text)
+        head = secs[0] if secs and not secs[0].startswith("## ") else ""
+        body = [x for x in secs if x.startswith("## ")]
+        out, used = [], len(head)
+        for x in reversed(body):
+            if used + len(x) > room:
+                break
+            out.insert(0, x)
+            used += len(x)
+        omitted = len(body) - len(out)
+        return (head + (f"(... {omitted} earlier entr{'y' if omitted == 1 else 'ies'} omitted ...)\n\n" if omitted else "")
+                + "".join(out)).strip()
+
+    def _blackboard_append(self, title: str, lines: list[str]) -> None:
+        """One dated entry, appended under a lock: both --open directions of a run share the problem's blackboard."""
+        if getattr(getattr(self, "args", None), "blackboard", "off") != "on" or not lines:
+            return
+        import fcntl
+        p = self._blackboard_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        run = self.run_dir.name                          # a direction child's dir is just "pos"/"neg"
+        run = f"{self.run_dir.parent.name}/{run}" if run in ("pos", "neg") else run
+        entry = f"## {now()} · {title} · run {run}\n" + "\n".join(lines) + "\n\n"
+        with open(p.with_name(".BLACKBOARD.lock"), "w") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX)
+            if not p.exists():
+                p.write_text(f"# Campaign blackboard: problem {self.problem['id']}\n\nWritten by harness runs with "
+                             "--blackboard on, read by the next run's discovery. [Lean] marks a machine-checked fact; "
+                             "everything else is unverified.\n\n")
+            with open(p, "a") as f:
+                f.write(entry)
+        self.log.event("blackboard", "appended", title=title, lines=len(lines))
+
+    def _blackboard_discovery(self, res: dict) -> None:
+        dec = res.get("decision") or {}
+        lines = [f"- discovery decided {str(dec.get('answer')).upper()} (weight share {dec.get('share')}, commit "
+                 f"{dec.get('commit')}); refereed complete proof: {'yes' if res.get('refereed_complete') else 'no'}; "
+                 f"{res.get('draws') or 1} draw(s), ${res.get('spend')}"]
+        best = res.get("best_proof") or {}
+        steps = best.get("key_steps") or []
+        if not steps:
+            cands = [a for a in (res.get("attempts") or []) if a.get("key_steps")]
+            steps = (max(cands, key=lambda a: float(a.get("confidence") or 0)) if cands else {}).get("key_steps") or []
+        if steps:
+            lines.append("- key steps of the best attempt (unverified): " + " | ".join(str(x)[:240] for x in steps[:8]))
+        syn = next((x for x in reversed(res.get("syntheses") or []) if x.get("text")), None)
+        for sec in ("ESTABLISHED", "ROUTE", "GAPS", "DEAD ENDS"):
+            body = ((syn or {}).get("sections") or {}).get(sec)
+            if body:
+                lines.append(f"- {sec.lower()} (synthesis, unverified): " + " ".join(clip_middle(body, 900).split()))
+        for r in (res.get("ladder") or []):
+            if r.get("rung") and r.get("method"):
+                lines.append(f"- warm-up variant {r['rung']} ({'complete' if r.get('complete') else 'incomplete'}): "
+                             f"{str(r['statement'])[:200]} -- method: {str(r['method'])[:300]}")
+        self._blackboard_append("discovery", lines)
+
+    def _blackboard_program(self, pdir: Path, parsed: dict | None, refutations: list[dict]) -> None:
+        hyps = (parsed or {}).get("hypotheses") or []
+        lines = []
+        if parsed and parsed.get("main_present") and parsed.get("glue_sorry_free"):
+            lines.append("- [Lean] the frozen target follows from the hypotheses below (a certified conditional theorem)")
+        lines += [f"- [Lean] {h['name']}: {h['statement'][:300]}" for h in hyps if not h["open"]]
+        lines += self._blackboard_sub_facts(pdir)
+        lines += [f"- open {h['kind']} ({h.get('difficulty', 'unrated')}): {h['name']}: {h['statement'][:300]}"
+                  for h in hyps if h["open"]]
+        lines += [f"- refuted by a numerical witness: {str(r.get('statement') or r.get('name') or '')[:240]}"
+                  for r in (refutations or [])[-5:]]
+        last = {}
+        for f in load_failures(pdir):
+            if f.get("name"):
+                last[f["name"]] = f
+        lines += [f"- failed in Lean: {n}: {str(f.get('diagnosis') or f.get('stop_reason') or '')[:300]}"
+                  for n, f in list(last.items())[-6:]]
+        lines += [f"- refereed informal proof of a step after it failed in Lean: {n}"
+                  for n in (self.state.get("step_proofs") or {})]
+        self._blackboard_append(f"Lean residual, direction {open_direction_of(self) or 'pos'}", lines)
+
+    def _blackboard_sub_facts(self, pdir: Path) -> list[str]:
+        """[Lean] facts certified inside sub-residuals, with the definitions they mention. They are certified even
+        when the parent refused the refinement that held them: #455's gap bound (i <= 6 gap_i) sat under a refinement
+        judged not easier, and the residual entry alone left the run's strongest machine-checked fact off the board."""
+        out: list[str] = []
+        for res in sorted((pdir / "sub").rglob("Residual.lean")) if (pdir / "sub").is_dir() else []:
+            try:
+                text = res.read_text()
+                sp = parse_residual(text, self.problem["id"], main=res.parent.name)
+            except Exception:                            # noqa: BLE001 - a memory write must not mask the outcome
+                continue
+            defs = {m.group(1): " ".join(d.split())[:300] for d in split_decls(text)
+                    for m in [re.match(r"\s*(?:noncomputable\s+)?def\s+([A-Za-z0-9_'.]+)", d)] if m}
+            for h in sp.get("hypotheses") or []:
+                if h["open"]:
+                    continue
+                used = [d for n, d in defs.items() if re.search(rf"\b{re.escape(n)}\b", h["statement"])]
+                out.append(f"- [Lean] {h['name']} (proved while attacking {res.parent.name}): {h['statement'][:300]}"
+                           + ("".join(f"\n  - where {d}" for d in used)))
+        return out
+
+    def _queue_rediscover(self, name: str) -> None:
+        if int(getattr(self.args, "rediscover", 0) or 0) > 0:
+            q = self.state.setdefault("rediscover_queue", [])
+            if name not in q:
+                q.append(name)
+
+    def _maybe_rediscover(self, pdir: Path, cycle: int, parsed: dict | None, skeleton: str) -> None:
+        """--rediscover N: Lean inside the discovery loop. A conjecture that failed a Lean attack gets ONE cross-fed
+        discovery of its own, told what is already machine-checked and what broke. A refereed proof becomes that
+        step's blueprint (`_blueprint_for_name` -> "R"), and its next attack is recursive, so the proof is expanded
+        and followed. A refereed DISPROOF is recorded as a failure the next plan must answer. At most N per run."""
+        limit = int(getattr(self.args, "rediscover", 0) or 0)
+        done = self.state.setdefault("rediscovered", [])
+        queue = self.state.get("rediscover_queue") or []
+        if limit <= 0 or len(done) >= limit or not queue or not parsed:
+            return
+        open_c = {h["name"]: h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "conjecture"}
+        fails = failure_counts(pdir)
+        cands = [n for n in queue if n in open_c and n not in done]
+        if not cands:
+            return
+        name = max(cands, key=lambda n: (fails.get(n, 0), DIFFICULTY_RANK.get(open_c[n].get("difficulty", "unrated"), 2)))
+        h = open_c[name]
+        sub = hypothesis_substatement(skeleton, name)
+        if not sub:
+            return
+        done.append(name)
+        self.save()
+        facts = "\n".join(f"- [Lean] {x['name']}: {x['statement'][:400]}" for x in parsed["hypotheses"] if not x["open"])
+        why = "\n".join(f"- cycle {f.get('cycle')}: {str(f.get('stop_reason') or '')[:200]}; {str(f.get('diagnosis') or '')[:400]}"
+                        for f in [f for f in load_failures(pdir) if f.get("name") == name][-2:])
+        bp, _ = self._blueprint_for_name(name)
+        statement = ("This is ONE STEP of an argument for the problem below; the rest of the argument is in place, and "
+                     "much of it is already proved in Lean.\n\nTHE WHOLE PROBLEM:\n" + self.problem["statement"]
+                     + "\n\nTHE STEP: prove or refute exactly the Lean statement shown below.\n" + h["statement"][:2000]
+                     + (f"\n\nITS INFORMAL PROOF SO FAR (from the blueprint; it did not formalize):\n{bp}" if bp else ""))
+        context = ("MACHINE-CHECKED IN LEAN for this argument (true; use them freely):\n" + (facts or "(none yet)")
+                   + "\n\nWHAT FAILED WHEN THIS STEP WAS ATTACKED IN LEAN:\n" + (why or "(no digest recorded)"))
+        s = self._discovery_settings()
+        s.mode, s.draws, s.rounds, s.ladder = "crossfed", 1, 2, 0
+        s.total_budget = float(getattr(self.args, "rediscover_budget", 2.5) or 2.5)
+        s.context, s.blackboard = context, ""
+        self.log.event("discover", "rediscover_start", cycle=cycle, name=name, fails=fails.get(name, 0))
+        res = discovery_run(self._discovery_caller(), statement, sub, s, workers=max(1, s.attempts))
+        out = pdir / "rediscover"
+        out.mkdir(exist_ok=True)
+        (out / f"{name}-c{cycle}.json").write_text(json.dumps({k: v for k, v in res.items() if k != "guidance"},
+                                                              indent=1, ensure_ascii=False))
+        best = res.get("best_proof") or {}
+        verdict = "none"
+        if best.get("text") and best.get("answer") == "true":
+            self.state.setdefault("step_proofs", {})[name] = {"text": best["text"], "key_steps": best.get("key_steps") or [],
+                                                              "cycle": cycle}
+            verdict = "proved"
+        elif best.get("text") and best.get("answer") == "false":
+            record_failure(pdir, {"name": name, "statement": h["statement"], "cycle": cycle, "kind": "rediscover",
+                                  "stop_reason": "a refereed informal DISPROOF of this step",
+                                  "diagnosis": "Rediscovery found this hypothesis FALSE: "
+                                               + " | ".join(str(x)[:240] for x in (best.get("key_steps") or [])[:6])})
+            verdict = "refuted"
+        self.save()
+        self.log.event("discover", "rediscover_done", cycle=cycle, name=name, verdict=verdict,
+                       refereed=res.get("refereed_complete"), spend=res.get("spend"))
+        self._blackboard_append(f"rediscovery of {name}", [
+            f"- after {fails.get(name, 0)} failed Lean attack(s): {verdict}"
+            + (" (refereed, unverified in Lean)" if verdict != "none" else " (no refereed proof)"),
+            *([("- key steps: " + " | ".join(str(x)[:200] for x in (best.get("key_steps") or [])[:6]))] if best else [])])
 
     def _residual_view(self, text: str, room: int = 6000) -> str:
         """The residual skeleton as a plan reads it. `--residual-view tail` (default) is the old last-`room` characters.
@@ -6559,8 +6912,10 @@ for the SAT solver instead of enumerating it.
             bp, ids = self._blueprint_for_name(name)
             if bp:
                 # --blueprint on: the step's own informal proof goes first in the prover's context (prove_prompt and
-                # agentic_prompt print the literature whole), and a sub-residual plans on it, expanded
-                st["literature"] = (BLUEPRINT_CHILD_HEADER + bp + "\n\n" + st["literature"]).strip()
+                # agentic_prompt print the literature whole), and a sub-residual plans on it, expanded. A proof that
+                # --rediscover found for this step after it failed in Lean ("R") is labelled as such.
+                header = STEP_PROOF_CHILD_HEADER if ids == ["R"] else BLUEPRINT_CHILD_HEADER
+                st["literature"] = (header + bp + "\n\n" + st["literature"]).strip()
                 st["blueprint_step"] = {"name": name, "ids": ids, "text": bp,
                                         "why": ("it failed a direct attack" if failure_counts(self._program_dir()).get(name)
                                                 else "the plan rated it hard") if recursive else ""}
@@ -6804,7 +7159,9 @@ for the SAT solver instead of enumerating it.
             self._maybe_blueprint(pdir)
         except Harness.BudgetExhausted as e:
             self.log.event("program", "stopped_on_budget", cycle=0, detail=str(e))
+        ran = 0                          # cycles actually run; `cycles` is only the cap (#455 stopped at 3 of 6)
         for cycle in range(1, cycles + 1):
+            ran = cycle
             progress = False             # Step 2: did this cycle DISCHARGE anything (not merely split)?
             try:
                 cdir = pdir / "cycles" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-c{cycle}"
@@ -6812,6 +7169,7 @@ for the SAT solver instead of enumerating it.
                 if (getattr(self.args, "explore_core", "off") == "on" and parsed
                         and int(self.state.get("stall_cycles") or 0) >= 1):
                     self._explore_core(pdir, parsed, skeleton)
+                self._maybe_rediscover(pdir, cycle, parsed, skeleton)   # --rediscover N: Lean inside the discovery loop
                 refutations = load_refutations(pid)
                 # Premise endgame (2026-10-01): with every conjecture certified and only published premises open,
                 # there is nothing to refute or re-plan, and the premises are the only path to a proof. Train #678's
@@ -7078,7 +7436,9 @@ for the SAT solver instead of enumerating it.
                         # First attempt: a direct proof. A hypothesis that already failed, or one the plan rates
                         # hard, gets the deductive treatment itself (its own skeleton, one level down) while depth
                         # allows: the failure is analysed by decomposition, not retried verbatim.
-                        recursive = depth < max_depth and (fails.get(h["name"], 0) >= 1 or h.get("difficulty") == "hard")
+                        recursive = depth < max_depth and (fails.get(h["name"], 0) >= 1 or h.get("difficulty") == "hard"
+                                                           or self._blueprint_merged(h["name"])
+                                                           or h["name"] in (self.state.get("step_proofs") or {}))
                         share = (float(getattr(self.args, "core_share", 0.5) or 0.5)
                                  if core is not None and h is core and len(todo) > 1 else None)
                         if share:
@@ -7114,6 +7474,7 @@ for the SAT solver instead of enumerating it.
                                                       "diagnosis": f"split only: the child certified {h['name']} <= "
                                                                    f"{', '.join(opened)} but discharged none of them, so the "
                                                                    f"frontier was kept. Its decomposition:\n{sub_skel[-1500:]}"})
+                                self._queue_rediscover(h["name"])
                                 continue
                             not_easier = (self._refinement_not_easier(h, sub_parsed, sub_skel, cycle)
                                           if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"] else None)
@@ -7126,6 +7487,7 @@ for the SAT solver instead of enumerating it.
                                                                    f"certified {', '.join(discharged_subs)} but its open pieces "
                                                                    f"({', '.join(opened)}) are not strictly easier than "
                                                                    f"{h['name']}. Its decomposition:\n{sub_skel[-1500:]}"})
+                                self._queue_rediscover(h["name"])
                                 continue
                             refined = (splice_hypothesis(skeleton, h["name"], sub_skel)
                                        if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"]
@@ -7146,12 +7508,15 @@ for the SAT solver instead of enumerating it.
                                 self.log.event("program", "refine_failed", cycle=cycle, name=h["name"],
                                                error=(res["errors"][:1] or [""])[0][:200])
                                 record_failure(pdir, failure_digest(child.state, h["name"], h["statement"], cycle, rc))
+                                self._queue_rediscover(h["name"])
                         elif not (rc == 0 and child.state.get("proof")):
                             digest = failure_digest(child.state, h["name"], h["statement"], cycle, rc)
                             digest["missing_subgoals"] = self._missing_subgoals(child, digest, f"extract-c{cycle}-{i}")
                             record_failure(pdir, digest)
                             self.log.event("program", "hypothesis_failed", cycle=cycle, name=h["name"], exit=rc,
                                            attempts=digest["attempts"], goals=len(digest["unsolved_goals"]))
+                            if h["kind"] == "conjecture":
+                                self._queue_rediscover(h["name"])
                         if rc == 0 and child.state.get("proof"):
                             body = strip_imports(child.state["proof"])
                             certified_any = True
@@ -7230,6 +7595,11 @@ for the SAT solver instead of enumerating it.
                 self._write_residual(pdir, parsed, skeleton, cycle, meta, load_refutations(pid))
             except Exception as e:                       # noqa: BLE001 - reporting must not mask the outcome
                 self.log.event("program", "residual_report_failed", error=repr(e)[:200])
+        if depth <= 1:
+            try:                                         # --blackboard on: what the next run starts from
+                self._blackboard_program(pdir, parsed, load_refutations(pid))
+            except Exception as e:                       # noqa: BLE001 - a memory write must not mask the outcome
+                self.log.event("blackboard", "write_failed", error=repr(e)[:200])
         metric = (parsed or {}).get("metric") or {}
         self.state["program"] = {"dir": str(pdir), "loop": "deductive", "certified_any": certified_any,
                                  "residual": metric or None,
@@ -7243,7 +7613,7 @@ for the SAT solver instead of enumerating it.
                                          "the residual skeleton closed: no hypothesis left, final verification cleared")
         else:
             outcome = "partial" if (certified_any or parsed) else "not_proved"
-            self.state["stop_reason"] = (f"deductive research program finished {cycles} cycle(s); residual: "
+            self.state["stop_reason"] = (f"deductive research program ran {ran} of {cycles} cycle(s); residual: "
                                          + (f"{metric.get('open_conjectures')} open conjecture(s), "
                                             f"{metric.get('published')} published premise(s)" if metric else "no skeleton in force")
                                          + f" (see {pdir.relative_to(ROOT)}/RESIDUAL.md)"
@@ -9094,8 +9464,11 @@ def run_summary_line(run_dir: Path, exit_code: int | None = None) -> str:
         pass
     if exit_code is None:
         exit_code = done.get("exit")
+    # As in collect_run_facts: run_open's DONE records only an exit code, so a finished --open run read as
+    # "running" (#455: exit=3, pos:partial). Only the run's own DONE counts, never the caller's exit code.
     outcome = (st.get("outcome") or done.get("outcome")
                or (ends[-1].get("outcome") if ends else None)
+               or {0: "proved", 1: "infrastructure_error", 2: "not_proved", 3: "partial"}.get(done.get("exit"))
                or ("fatal" if done.get("fatal") else "running"))
     per_dir = []
     for sub in ("pos", "neg"):
@@ -9286,6 +9659,23 @@ def build_parser() -> argparse.ArgumentParser:
                       help="v2's second round on the best attempt's named missing step")
     runp.add_argument("--discover-commit", choices=["on", "off"], default="on",
                       help="under --open, attack only the committed direction (off: both, guidance only)")
+    runp.add_argument("--discover-draws", type=int, default=1,
+                      help="independent discovery draws (the ladder is shared), further ones only while no refereed complete "
+                           "proof exists; one draw finds one on a hard train item about 0.29 of the time")
+    runp.add_argument("--discover-model", default=None,
+                      help="model for the calls that choose a route (discovery, synthesis, blueprint); default: --model")
+    runp.add_argument("--blackboard", choices=["off", "on"], default="off",
+                      help="campaign memory: each run appends what it learned to programs/erdos_<n>/BLACKBOARD.md "
+                           "(discovery's synthesis, the Lean-certified facts marked [Lean], failures), and the next run's "
+                           "discovery starts from it")
+    runp.add_argument("--rediscover", type=int, default=0,
+                      help="Lean inside the discovery loop: up to N conjectures that FAILED a Lean attack each get one "
+                           "cross-fed discovery of their own, told what is machine-checked; a refereed proof becomes the "
+                           "step's blueprint and its next attack is recursive")
+    runp.add_argument("--rediscover-budget", type=float, default=2.5, help="USD cap per rediscovery")
+    runp.add_argument("--blueprint-reroute", choices=["off", "on"], default="off",
+                      help="premise-aware routing: mark each cited blueprint step with a verified Mathlib name or as missing; "
+                           "when one is missing, ask for a refereed variant proof that avoids it")
     runp.add_argument("--blueprint", choices=["off", "on"], default="off",
                       help="deductive loop: turn discovery's refereed complete proof into numbered steps; the plan maps "
                            "hypotheses onto them; each child gets its step's informal proof; a sub-residual first expands "
