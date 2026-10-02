@@ -11743,8 +11743,8 @@
       "prize": "no",
       "evidence": {
         "best": "closed apart from published premises",
-        "runs": 7,
-        "benchmarkRuns": 7,
+        "runs": 8,
+        "benchmarkRuns": 8,
         "certifiedMax": 2
       },
       "rank": 213,
@@ -42028,13 +42028,14 @@
         "number theory"
       ],
       "score": 8,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
@@ -42105,8 +42106,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
