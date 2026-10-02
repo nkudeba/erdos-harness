@@ -140,6 +140,12 @@ Each result line in `results/<tag>.jsonl` records the protocol: git commit and d
 Solves are the verdict. At $8 per item they are too rare to steer by: three arms and 20 dev runs produced none.
 So each iteration is gated on the dense key, and solves remain the final check.
 
+**One baseline draw is not a baseline (2026-10-02).** On the 5-item dev screen, two draws of the same baseline harness
+scored 10 and 4 pieces. The second draw lost to the first 0-3-2, the same score a candidate got against it.
+- Screen against at least two baseline draws per item.
+- Read a candidate against the range of those draws, never against one of them.
+- Treat a 5-item screen as a check for breakage, not a verdict. RESULTS.md, "Baseline replicate", has the numbers.
+
 A candidate change is kept when, paired item by item against the baseline on `dev` under the same protocol:
 
 1. the saved-proof regression still passes;

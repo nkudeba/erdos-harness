@@ -1359,3 +1359,40 @@ run. $21.43, against $20.56 for `baseline-v2-84f21c5` on the same 5 items.**
 - Main against the replicate: P(W ≥ L) = 0.4.
 - No solve: P(at least one) = 0.05.
 - About $20; the original spent $20.56 on these 5.
+
+### Outcome of the baseline replicate (2026-10-02): `baseline-v2-84f21c5-rep1`
+
+**The same harness, re-run, loses to itself 0-3-2, exactly main's score against it.** The original baseline was a
+lucky draw, so main's screen loss is not evidence against main. By the pre-registered rule, no ablation runs.
+
+| item | original (pieces / size) | replicate | main |
+|---|---|---|---|
+| #150 | 0 / 0 | 0 / 0 | 0 / 0 |
+| #202 | 2 / 1305 | 0 / 0 | 1 / 621 |
+| #204 | 3 / 3073 | 2 / 4329 | 2 / 1500 |
+| #392 | 3 / 4384 | 2 / 2498 | 1 / 1100 |
+| #401 | 2 / 855 | 0 / 0 | 1 / 2492 |
+| **total** | **10** | **4** | **5** |
+| spend | $20.56 | $34.52 | $21.43 |
+
+- **The comparisons:**
+  - replicate against the original: 0 wins, 3 losses (#202, #392, #401), 2 ties;
+  - main against the replicate: 2 wins (#202, #401), 1 loss (#392), 2 ties; one-sided p = 0.5.
+- **No measurement drift.** Re-measured with today's `progress` code, the original and main gave exactly their earlier
+  values on all 10 runs.
+- **Against the predictions:**
+  - replicate pieces: 4, at the bottom of the predicted range (about 7, range 4–11);
+  - replicate against the original: L − W = 3 (P(L − W ≥ 2) was 0.35);
+  - main against the replicate: W ≥ L held (P was 0.4);
+  - no solve (P of at least one was 0.05);
+  - spend $34.52, against a predicted $20. The same harness's spend on the same items varied by two thirds.
+- **What it means for the gate.**
+  - On these 5 items, one draw of the baseline harness scored 10 pieces and the next scored 4. Main's 5 sits between
+    them.
+  - So a 5-item screen against a single baseline draw cannot separate harness versions: a re-run of the baseline
+    itself loses that screen, by the same margin main did.
+  - Both earlier screen losses (`dev-fixes-ea6d987` 0-2-3, `dev-main-a88fab5` 0-3-2) are within this noise. The
+    README's gate now says a screen needs at least two baseline draws per item.
+- **Next, not run:** a verdict on main needs power, not another screen. That means all 17 pairable dev items, with
+  two baseline draws per item: about $70 for main on the other 12, plus about $70 for a second baseline draw on them.
+  This is a budget decision for the operator.
