@@ -828,6 +828,26 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   - Facts certified inside a sub-residual now reach the blackboard (`_blackboard_sub_facts`), even under a refused
     refinement. The automatic brief still misses them.
 
+**The research engine, `--discover-mode engine`** (2026-10-02, OFF by default; harness.py "research engine",
+`tests/test_engine.py`, `experiments/idea-engine-2026-10-02/REPORT.md`):
+- **Why.** The old discovery attempts were one-shot essays: on #455 a median of 4,300 output tokens and 49 s each. One
+  of them found a beyond-frontier constant and the synthesis filed it under dead ends.
+- **What a run does:**
+  - a frontier map (KNOWN, BARRIERS, CORE), plus typed TARGETs beyond the frontier and ANGLEs on the core;
+  - parallel tool-using research sessions with a Python sandbox (`--engine-session-budget`, default $3), half on core
+    angles and half on targets of distinct types;
+  - for every proved or refuted claim, a step referee and an adversary; a novelty judge only if both pass;
+  - outside benchmarks, an OpenAlex literature check before a claim keeps `validated-new`;
+  - a meta-review that writes the next round's assignments.
+- **Outputs:** `engine/engine.json`, `engine/IDEAS.md` and a blackboard entry. Only `validated-new` counts, and it is
+  informal: never Lean-checked or human-reviewed by itself.
+- **Operator guidance** reaches the frontier, session and meta calls, never the judges.
+- **v1 on #455** ($15.42):
+  - liminf q_n/n² ≥ 0.80024, against Richter's 0.352. It came from a max-plus certificate mod 15015; the certificate
+    was re-run independently and the literature search found nothing better.
+  - A barrier: the Lean run's finite core implies class-number-one finiteness.
+  - The engine rated both significance 1; the bar for the loop is significance ≥ 2.
+
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses
   to start items while it is live. Pass `--allow-concurrent` deliberately.

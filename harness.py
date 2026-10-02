@@ -46,7 +46,7 @@ import time
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -339,13 +339,13 @@ class ClaudeCliBackend:
     )
 
     def complete_explore(self, purpose: str, prompt: str, sandbox: Path, max_turns: int,
-                         budget: float | None = None, effort: str | None = None) -> str:
+                         budget: float | None = None, effort: str | None = None, system_prompt: str | None = None) -> str:
         """Tool-using exploration confined to `sandbox`: files may be written there, the only command is `./run.sh`
         (the screened `python -I` runner), and nothing reaches Lean or the web."""
         extra = ["--tools", "Bash", "Read", "Edit", "Write", "Grep", "Glob",
                  "--allowedTools", "Bash(./run.sh:*)", "Edit(./**)", "Write(./**)", *scoped_read_rules([]),
                  "--max-turns", str(max_turns), "--permission-mode", "acceptEdits",
-                 "--system-prompt", self.EXPLORE_SYSTEM_PROMPT]
+                 "--system-prompt", system_prompt or self.EXPLORE_SYSTEM_PROMPT]
         return self._run(purpose, prompt, extra, sandbox, effort_override=effort, budget_override=budget)
 
     def complete_agentic(self, purpose: str, prompt: str, sandbox: Path, max_turns: int,
@@ -3561,6 +3561,651 @@ def blueprint_mark_mathlib(steps: list[dict], names: dict) -> list[str]:
     return missing
 
 
+# ---------------------------------------------------------------- research engine (idea generation), 2026-10-02 -------
+# `--discover-mode engine`. On every open problem the old discovery reconstructed the published frontier and stopped:
+# 0 refereed proofs in 10 draws over 7 problems. Its attempts were one-shot essays: on #455 a median 4,300 output
+# tokens and 49 s each, $3.70 for the whole stage. One of them noticed that a sharper lemma gives liminf q_n/n^2 >= 0.543,
+# beyond Richter's published 0.352, and the synthesis filed it under "dead ends" because it did not finish the problem.
+# The engine changes four things:
+# - the objective: NEW results beyond the frontier count, not only a resolution;
+# - the depth: compute-enabled research sessions with real budgets;
+# - the diversity: every session gets a different target or a different angle on the core;
+# - the validation: a step referee, an adversary and a novelty judge before a claim counts.
+
+ENGINE_TYPES = ("QUANT", "SPECIAL", "CONDITIONAL", "STRUCTURE", "ANALOGUE", "NEGATIVE", "REDUCTION")
+
+FRONTIER_PROMPT = """You are the lead of a research team about to attack an OPEN problem. Before anyone starts, map the frontier:
+what is known, what blocks the known methods, exactly what remains, and where a NEW result is within reach. The team
+will spend its whole budget on what you write, so be precise, and be bold.
+
+PROBLEM:
+{statement}
+
+THE PRECISE STATEMENT (Lean 4):
+```lean
+{lean}
+```
+{context}
+Write exactly these sections, each starting with its === line.
+
+=== DIRECTION
+TRUE or FALSE for the precise statement, a confidence between 0 and 1, and the strongest evidence.
+
+=== KNOWN
+Every established result that bears on the problem, one per line: the precise statement | its source (a paper, a
+forum comment, or "standard") | the method, in a phrase. Include the strongest partial results, special cases and
+conditional results, with their exact constants.
+
+=== BARRIERS
+Each known obstruction, one per line: what it is | which family of methods it defeats, and why | what it does NOT
+rule out.
+
+=== CORE
+The precise statement that remains: what, given KNOWN, would finish the problem. Then say why it is hard.
+
+Then exactly {targets} blocks of this form:
+=== TARGET T1
+TYPE: QUANT | SPECIAL | CONDITIONAL | STRUCTURE | ANALOGUE | NEGATIVE | REDUCTION
+STATEMENT: <a precise, self-contained statement>
+BEYOND: <the item of KNOWN it strictly improves, and why it is not already known>
+VALUE: <how proving it moves toward CORE>
+TEST: <how to test it by computation, or "none">
+
+A target is a statement strictly beyond KNOWN that a strong mathematician might prove in weeks. It is never a
+restatement of CORE. Use every type at least once where it makes sense:
+- QUANT: a better constant, exponent or bound than any in KNOWN. Check whether a sharper version of a KNOWN argument
+  already beats the published constant; this is often missed.
+- SPECIAL: the full conclusion for a natural restricted class that KNOWN does not cover.
+- CONDITIONAL: the full conclusion under a hypothesis WEAKER than in any known conditional result, or of a new kind.
+- STRUCTURE: a structural property that every counterexample, or every extremal object, must have.
+- ANALOGUE: an unresolved analogue in a model setting: random sets, function fields, finite fields, a continuous version.
+- NEGATIVE: a counterexample to a natural strengthening, or a proof that a named method cannot work.
+- REDUCTION: CORE follows from a statement X that is NOT equivalent to CORE and looks easier, with the implication proved.
+
+Then exactly {angles} blocks of this form:
+=== ANGLE A1
+TECHNIQUE: <a named technique or combination>
+IDEA: <the mechanism, concretely: which object you would build or bound, and how>
+BARRIERS: <why none of the BARRIERS stops it, or which one it must beat, and how>
+FIRST STEP: <a precise lemma that tests the angle quickly>
+
+An angle is a genuinely different way to attack CORE itself. At least half of the angles must use a technique that no
+item of KNOWN uses. Prefer a bold angle with a sharp first step to a safe one that repeats the literature."""
+
+SESSION_PROMPT = """You are a member of a research team working on an OPEN problem. You have a Python sandbox and a large budget:
+work like a research mathematician for as long as it takes. Compute, look at the data, conjecture, test, prove, and
+repeat.
+
+PROBLEM:
+{statement}
+
+THE PRECISE STATEMENT (Lean 4):
+```lean
+{lean}
+```
+
+THE TEAM'S FRONTIER MAP (what is known, what blocks the known methods, what remains):
+{frontier}
+{context}
+YOUR ASSIGNMENT:
+{assignment}
+
+WHAT COUNTS is a result that is NEW: strictly beyond everything under KNOWN. In order of value:
+1. a complete, checked proof of your assignment;
+2. a complete proof of a weaker statement that is still new;
+3. a precise new obstruction: a counterexample to a natural lemma, or a proof that a route cannot work;
+4. a sharp conjecture with strong computational evidence and a mechanism.
+Re-proving KNOWN, restating CORE, or a sketch whose unproved step is labelled proved counts for nothing. A referee will
+attack every claimed proof, and a false claim costs the team more than no claim.
+
+YOUR TOOLS. Write Python scripts in the sandbox with the Write tool and run each one with `./run.sh <script.py>`.
+Scripts may import only: {modules}. A run is capped at {seconds} s and its output at 20,000 characters, so print
+compact tables.
+
+HOW TO WORK.
+- Start by computing: the smallest cases, the extremal examples, and the families that come closest to breaking the
+  statement.
+- Push your assignment's mechanism on the data before you trust it. If it fails, find out exactly why: that is often
+  the new result.
+- Prove what the data supports. Check every inequality and every case by hand and, where you can, by computation.
+- When you are stuck, change the statement: a sharper or a weaker version, a restricted class, a model setting.
+
+Keep NOTEBOOK.md current after every script, because only the notebook survives. Its sections, in this order:
+## Result
+The single strongest new claim you have, its status, and why it is new, in a few lines.
+## Claims
+One block per claim, strongest first:
+### C1
+STATEMENT: <precise and self-contained>
+STATUS: PROVED | CONJECTURED | REFUTED
+TYPE: QUANT | SPECIAL | CONDITIONAL | STRUCTURE | ANALOGUE | NEGATIVE | REDUCTION | OTHER
+BEYOND: <the item of KNOWN it improves, and why it is new>
+PROOF: <for PROVED, the complete proof; for REFUTED, the explicit counterexample and how you checked it; for
+CONJECTURED, the evidence and the mechanism>
+## Data
+## Dead ends
+What failed, and exactly why.
+
+When you are done, reply with the Result section."""
+
+ENGINE_SYSTEM_PROMPT = (
+    "You are a research mathematician on a team attacking an open problem, working inside a sandbox directory. Create "
+    "Python scripts with the Write tool and run them ONLY as `./run.sh <script.py>`; no other shell command is "
+    "available. Keep NOTEBOOK.md in the sandbox current after EVERY script, not at the end: it is the only thing kept if "
+    "the session is cut off. Never mark a claim PROVED unless every step is checked."
+)
+
+CLAIM_REFEREE_PROMPT = """Referee a claimed theorem from a research team working on an open problem. Check every step, recompute every
+calculation, and test the key lemmas on small cases. Do not repair the proof: find the first real error or gap, if
+there is one. Be strict: a step that is plausible but not proved is a gap.
+
+THE PROBLEM (context):
+{statement}
+
+THE CLAIM:
+{claim}
+
+ITS PROOF:
+{proof}
+
+End with exactly one ```json block: {{"valid": true | false, "first_error": "<where and why, or null>", "fixable": true | false}}"""
+
+CLAIM_ADVERSARY_PROMPT = """You are trying to BREAK a claimed theorem. A research team says it proved the claim below. Assume it is false until
+you fail to break it. Look for:
+- a counterexample: work out small cases explicitly, and test the extreme ones;
+- a hidden assumption, a quantifier in the wrong order, or a case the proof skips;
+- an inequality that fails for small parameters, or a constant computed wrongly;
+- a cited result used beyond what it says.
+
+THE PROBLEM (context):
+{statement}
+
+THE CLAIM:
+{claim}
+
+ITS PROOF:
+{proof}
+
+End with exactly one ```json block:
+{{"broken": true | false, "how": "<the counterexample or the error, precisely, or null>", "severity": "fatal" | "fixable" | "none"}}"""
+
+NOVELTY_PROMPT = """Decide whether a result is NEW. A research team working on an open problem believes it has proved the claim
+below, and two referees found no error. Your only questions are whether it is new and whether it matters.
+
+THE PROBLEM:
+{statement}
+
+WHAT IS KNOWN (the team's frontier map, and the literature it read):
+{known}
+
+THE CLAIM:
+{claim}
+
+Answer from everything you know about the literature, not only from the list above.
+- KNOWN: the claim, or something stronger, is published or well known. Cite it.
+- ROUTINE: it follows from known results by a short standard argument, so no expert would call it new.
+- RESTATEMENT: it is equivalent to the problem or to its remaining core, so proving it would solve the problem. Say so
+  plainly: such a proof needs the most scrutiny of all.
+- NEW: none of the above, as far as you know.
+Then rate SIGNIFICANCE: 0 trivial, 1 a minor improvement, 2 a solid partial result an expert would note, 3 major
+progress on the problem.
+
+End with exactly one ```json block:
+{{"verdict": "new" | "known" | "routine" | "restatement", "cite": "<source or null>", "significance": 0 | 1 | 2 | 3, "why": "<one or two sentences>"}}"""
+
+METAREVIEW_PROMPT = """You lead a research team on an OPEN problem. One round of work has finished. Decide what the next round does.
+
+PROBLEM:
+{statement}
+
+THE FRONTIER MAP:
+{frontier}
+
+THIS ROUND'S RESULTS (each claim with its referee, adversary and novelty verdicts):
+{results}
+
+Write exactly these sections, each starting with its === line:
+=== STATE
+What the team now knows beyond the frontier map: each validated new result, one per line. Then the best unvalidated
+ideas.
+=== LESSONS
+What failed, and exactly why; which barriers bit; which angle looks most alive, and why.
+=== NEXT
+Exactly {k} numbered lines, one per next-round session, each a DIFFERENT concrete assignment:
+- push a validated result further: a sharper constant, a larger class, a weaker hypothesis;
+- repair a claim the referee broke, if the error looked fixable, or salvage the part that survives;
+- combine two results or ideas into a new one;
+- attack CORE by an angle that this round's results make newly plausible.
+At least half must aim at CORE, or at a result an expert would call significant. Each line names its technique and
+its first step."""
+
+
+LIT_QUERY_PROMPT = """Write search queries that would find a published paper proving the claim below, or something stronger.
+
+THE PROBLEM (context):
+{statement}
+
+THE CLAIM:
+{claim}
+
+Write exactly {k} queries, one per line, each 3 to 8 plain keywords (no LaTeX, no quotes, no Boolean operators), from the
+most specific to the broadest. Name the objects and the method; include the classical names a paper would use."""
+
+LIT_NOVELTY_PROMPT = """A literature search ran for the claim below. Decide whether any paper it found already contains the claim.
+
+THE CLAIM:
+{claim}
+
+THE PAPERS FOUND (title, year, abstract):
+{papers}
+
+For each paper that is relevant, say what it proves. Then decide:
+- KNOWN: a paper proves the claim, or something stronger. Cite it.
+- ROUTINE: a paper's result makes the claim a short standard consequence. Cite it.
+- NEW: no paper above proves it or makes it routine. Absence here is weak evidence, so say how close the nearest paper came.
+
+End with exactly one ```json block:
+{{"verdict": "new" | "known" | "routine", "cite": "<title and year, or null>", "nearest": "<the closest paper and why it falls short, or null>"}}"""
+
+
+def engine_literature_check(call, search, s: "EngineSettings", statement: str, c: dict) -> dict:
+    """For a claim the judges called new: search the literature for it, then ask whether a paper found contains it.
+    `search(query) -> [{"title", "year", "abstract"}]` (OpenAlex in the Harness). A search that fails leaves the claim
+    unchecked, never "new"."""
+    claim = _claim_text(c)
+    qt, qc, qerr = _discovery_call(call, "engine-litq", LIT_QUERY_PROMPT.format(statement=statement, claim=claim, k=4),
+                                   "medium", 0.3)
+    rec: dict = {"cost": round(qc, 4)}
+    queries = [re.sub(r"^\s*(?:\d+[.)]|[-*])\s*", "", l).strip().strip('"') for l in (qt or "").splitlines()]
+    queries = [q for q in queries if 2 <= len(q.split()) <= 12][:4]
+    rec["queries"] = queries
+    seen, papers = set(), []
+    for q in queries:
+        try:
+            hits = search(q) or []
+        except Exception as e:                    # noqa: BLE001 - network: the check is skipped, not passed
+            rec.setdefault("search_errors", []).append(f"{q}: {repr(e)[:160]}")
+            continue
+        for w in hits[:6]:
+            key = (w.get("title") or "").strip().lower()
+            if key and key not in seen:
+                seen.add(key)
+                papers.append(w)
+    rec["papers"] = [{"title": w.get("title"), "year": w.get("year")} for w in papers][:24]
+    if not papers:
+        rec["verdict"] = "unchecked"
+        return rec
+    body = "\n\n".join(f"[{i}] {w.get('title')} ({w.get('year')})\n{clip_middle(w.get('abstract') or '(no abstract)', 1500)}"
+                       for i, w in enumerate(papers[:24], 1))
+    jt, jc, jerr = _discovery_call(call, "engine-novelty-lit", LIT_NOVELTY_PROMPT.format(claim=claim, papers=body),
+                                   s.judge_effort, s.novelty_budget)
+    rec["cost"] = round(rec["cost"] + jc, 4)
+    j = json_tail_any(jt) if jt else {"error": jerr}
+    rec.update({k: j.get(k) for k in ("verdict", "cite", "nearest", "error") if j.get(k) is not None})
+    rec.setdefault("verdict", "unchecked")
+    return rec
+
+
+@dataclasses.dataclass
+class EngineSettings:
+    """What one run of the research engine does. A session is a tool-using agent with a Python sandbox; everything
+    else is a one-shot call. Nothing starts that would take the engine past `total_budget`."""
+    targets: int = 10
+    angles: int = 6
+    sessions: int = 4                # per round
+    rounds: int = 2
+    core_share: float = 0.5          # share of round-1 sessions that attack CORE through an ANGLE (the rest take TARGETs)
+    session_budget: float = 3.0
+    session_turns: int = 80
+    session_effort: str = "high"
+    frontier_budget: float = 2.0
+    frontier_effort: str = "high"
+    judge_budget: float = 0.8        # each referee and adversary call
+    judge_effort: str = "high"
+    novelty_budget: float = 0.6
+    meta_budget: float = 1.0
+    validate_max: int = 8            # claims validated per round, strongest first
+    total_budget: float = 30.0
+    library: str = ""
+    blackboard: str = ""
+    context: str = ""
+
+    def as_dict(self) -> dict:
+        d = dataclasses.asdict(self)
+        for k in ("library", "blackboard", "context"):
+            d[k] = bool(getattr(self, k))
+        return d
+
+
+def _first_word(text: str) -> str:
+    m = re.search(r"[A-Za-z]+", text or "")
+    return m.group(0).upper() if m else ""
+
+
+def parse_frontier(text: str) -> dict:
+    """The frontier map's sections, targets and angles. `=== X` delimited, so LaTeX cannot break it."""
+    out: dict = {"direction": "", "known": "", "barriers": "", "core": "", "targets": [], "angles": []}
+    for title, body in delimited_sections(text):
+        t = title.upper()
+        if t.startswith("TARGET"):
+            st = section_field(body, "STATEMENT")
+            if st:
+                ty = _first_word(section_field(body, "TYPE"))
+                out["targets"].append({"id": (title.split() + ["T"])[1][:8], "type": ty if ty in ENGINE_TYPES else "OTHER",
+                                       "statement": st[:2500], "beyond": section_field(body, "BEYOND")[:1200],
+                                       "value": section_field(body, "VALUE")[:800], "test": section_field(body, "TEST")[:800]})
+        elif t.startswith("ANGLE"):
+            idea = section_field(body, "IDEA")
+            if idea:
+                out["angles"].append({"id": (title.split() + ["A"])[1][:8], "technique": section_field(body, "TECHNIQUE")[:400],
+                                      "idea": idea[:2500], "barriers": section_field(body, "BARRIERS")[:1200],
+                                      "first_step": section_field(body, "FIRST STEP")[:1200]})
+        elif t in ("DIRECTION", "KNOWN", "BARRIERS", "CORE"):
+            out[t.lower()] = body.strip()
+    d = out["direction"]
+    ans = re.search(r"\b(TRUE|FALSE)\b", d, re.I)
+    conf = re.search(r"\b(0?\.\d+|1\.0|0|1)\b", d)
+    out["answer"] = ans.group(1).lower() if ans else None
+    out["confidence"] = float(conf.group(1)) if conf else None
+    return out
+
+
+def frontier_block(f: dict, room: int = 9000) -> str:
+    """KNOWN, BARRIERS and CORE for a session or a judge; the targets and angles go out one at a time."""
+    parts = [("KNOWN", f.get("known")), ("BARRIERS", f.get("barriers")), ("CORE", f.get("core"))]
+    body = "\n\n".join(f"{t}:\n{b}" for t, b in parts if b)
+    return clip_middle(body, room) or "(no frontier map)"
+
+
+def engine_assignments(f: dict, n: int, core_share: float) -> list[dict]:
+    """Round 1's sessions: `core_share` of them attack CORE through distinct ANGLEs (bold), the rest take TARGETs
+    of distinct TYPEs first (broad). Either list tops up the other when it runs short."""
+    angles, targets = list(f.get("angles") or []), list(f.get("targets") or [])
+    by_type: dict = {}
+    for t in targets:
+        by_type.setdefault(t["type"], []).append(t)
+    spread = []
+    while any(by_type.values()):                 # one of each type before a second of any
+        for ty in list(by_type):
+            if by_type[ty]:
+                spread.append(by_type[ty].pop(0))
+    n_core = min(len(angles), max(1 if angles else 0, round(n * core_share)))
+    picks = [{"kind": "angle", **a} for a in angles[:n_core]]
+    picks += [{"kind": "target", **t} for t in spread[: n - len(picks)]]
+    picks += [{"kind": "angle", **a} for a in angles[n_core: n_core + n - len(picks)]]
+    return picks[:n]
+
+
+def assignment_text(a: dict) -> str:
+    if a.get("kind") == "angle":
+        return (f"ATTACK THE CORE by this angle ({a.get('id')}).\nTECHNIQUE: {a.get('technique')}\nIDEA: {a.get('idea')}\n"
+                f"BARRIERS: {a.get('barriers')}\nFIRST STEP: {a.get('first_step')}\n"
+                "Take the angle seriously and push it as far as it goes. If it fails, find out exactly where and why, and "
+                "prove the strongest NEW statement it does give.")
+    if a.get("kind") == "target":
+        return (f"PROVE THIS TARGET ({a.get('id')}, type {a.get('type')}).\nSTATEMENT: {a.get('statement')}\n"
+                f"BEYOND: {a.get('beyond')}\nVALUE: {a.get('value')}\nTEST: {a.get('test')}\n"
+                "Test it by computation first. If it is false, refute it explicitly. If it is too hard, prove the strongest "
+                "NEW special case, and then try to push past the target.")
+    return str(a.get("text") or "")
+
+
+CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF)[*_]*[ \t]*[:.][*_]*[ \t]*")
+
+
+def _claim_fields(block: str) -> dict:
+    """A claim block's fields, each running to the next FIELD header of the five, so a proof keeps every line.
+    `section_field` stops at any ALL-CAPS line and needs a colon: on #455 a session wrote `PROOF.` and the whole proof
+    landed in BEYOND, was clipped at 1,500 characters, and the referee failed the claim for a proof that "breaks off"."""
+    marks = list(CLAIM_FIELD_RE.finditer(block))
+    out: dict = {}
+    for i, m in enumerate(marks):
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(block)
+        out.setdefault(m.group(1), block[m.end():end].strip())
+    return out
+
+
+def parse_claims(notebook: str) -> list[dict]:
+    """`### C<k>` blocks under `## Claims`. Status is normalised to PROVED / CONJECTURED / REFUTED / OTHER."""
+    m = re.search(r"(?ms)^##\s*Claims\s*$(.*?)(?=^##\s|\Z)", notebook or "")
+    body = m.group(1) if m else (notebook or "")
+    parts = re.split(r"(?m)^###\s*(C\d+)\b.*$", body)
+    claims = []
+    for i in range(1, len(parts) - 1, 2):
+        f = _claim_fields(parts[i + 1])
+        st = f.get("STATEMENT")
+        if not st:
+            continue
+        status, ty = _first_word(f.get("STATUS", "")), _first_word(f.get("TYPE", ""))
+        claims.append({"id": parts[i], "statement": st[:3000],
+                       "status": status if status in ("PROVED", "CONJECTURED", "REFUTED") else "OTHER",
+                       "type": ty if ty in ENGINE_TYPES else "OTHER", "beyond": f.get("BEYOND", "")[:1500],
+                       "proof": f.get("PROOF", "")})
+    return claims
+
+
+def engine_status(v: dict) -> str:
+    """broken < unjudged < valid-* < validated-new. Only `validated-new` counts as a new result."""
+    ref, adv, nov = v.get("referee") or {}, v.get("adversary") or {}, v.get("novelty") or {}
+    if ref.get("valid") is False or adv.get("broken") is True:
+        return "broken"
+    if ref.get("valid") is not True or adv.get("broken") is not False:
+        return "unjudged"
+    verdict = str(nov.get("verdict") or "").lower()
+    if verdict == "new":
+        return "validated-new"
+    return f"valid-{verdict}" if verdict in ("known", "routine", "restatement") else "valid-unrated"
+
+
+def _claim_text(c: dict) -> str:
+    lead = "The following statement is FALSE:\n" if c.get("status") == "REFUTED" else ""
+    return f"{lead}{c['statement']}\n(type {c.get('type')}; the team says it goes beyond the known results as follows: {c.get('beyond') or 'not stated'})"
+
+
+def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict, spend: _DiscoverySpend) -> dict:
+    """A step referee and an adversary, in parallel; a novelty judge only when both pass."""
+    claim, proof = _claim_text(c), clip_middle(c.get("proof") or "(no proof given)", 24000)
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        fr = ex.submit(_discovery_call, call, "engine-referee",
+                       CLAIM_REFEREE_PROMPT.format(statement=statement, claim=claim, proof=proof), s.judge_effort, s.judge_budget)
+        fa = ex.submit(_discovery_call, call, "engine-adversary",
+                       CLAIM_ADVERSARY_PROMPT.format(statement=statement, claim=claim, proof=proof), s.judge_effort, s.judge_budget)
+        (rt, rc, rerr), (at, ac, aerr) = fr.result(), fa.result()
+    spend.add(rc + ac)
+    v: dict = {"referee": json_tail_any(rt) if rt else {"error": rerr},
+               "adversary": json_tail_any(at) if at else {"error": aerr}, "cost": round(rc + ac, 4)}
+    if (v["referee"].get("valid") is True and v["adversary"].get("broken") is False and spend.room(s.novelty_budget)):
+        nt, nc, nerr = _discovery_call(call, "engine-novelty", NOVELTY_PROMPT.format(statement=statement, known=known, claim=claim),
+                                       s.judge_effort, s.novelty_budget)
+        spend.add(nc)
+        v["novelty"] = json_tail_any(nt) if nt else {"error": nerr}
+        v["cost"] = round(v["cost"] + nc, 4)
+    v["status"] = engine_status(v)
+    return v
+
+
+def _claim_rank(c: dict) -> tuple:
+    """Validate first what would matter most if it held: proofs and refutations, the core's angles, bold types."""
+    bold = {"REDUCTION": 3, "CONDITIONAL": 2, "STRUCTURE": 2, "SPECIAL": 2, "QUANT": 1, "NEGATIVE": 1, "ANALOGUE": 1}
+    return ({"PROVED": 2, "REFUTED": 1}.get(c.get("status"), 0), c.get("_kind") == "angle", bold.get(c.get("type"), 0))
+
+
+def engine_results_digest(claims: list[dict], room_each: int = 2500) -> str:
+    out = []
+    for c in claims:
+        v = c.get("validation") or {}
+        ref, adv, nov = v.get("referee") or {}, v.get("adversary") or {}, v.get("novelty") or {}
+        line = (f"[{c.get('session')}/{c.get('id')}] {c.get('status')} {c.get('type')}: {clip_middle(c.get('statement') or '', 900)}\n"
+                f"  status after validation: {v.get('status', 'not validated')}")
+        if ref:
+            line += f"; referee valid={ref.get('valid')} ({str(ref.get('first_error') or '')[:300]})"
+        if adv:
+            line += f"; adversary broken={adv.get('broken')} ({str(adv.get('how') or '')[:300]})"
+        if nov:
+            line += f"; novelty {nov.get('verdict')}, significance {nov.get('significance')} ({str(nov.get('why') or '')[:300]})"
+        if c.get("status") == "CONJECTURED":
+            line += "\n  evidence: " + clip_middle(c.get("proof") or "", room_each // 3)
+        out.append(line)
+    return "\n".join(out) or "(no claims)"
+
+
+def engine_guidance(f: dict, ledger: list[dict], meta: dict | None, room: int = 9000) -> str:
+    """What later stages see: the validated new results with their proofs, the core, and the lessons."""
+    good = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
+    lines = ["RESEARCH ENGINE FINDINGS (informal; each result below passed a step referee, an adversary and a novelty "
+             "judge, but none is Lean-checked):"]
+    for c in good:
+        lines.append(f"- NEW ({c.get('type')}): {c['statement'][:900]}\n  proof: {clip_middle(c.get('proof') or '', 2500)}")
+    if not good:
+        lines.append("- no claim passed validation")
+    if f.get("core"):
+        lines.append("THE CORE, as the frontier map states it:\n" + clip_middle(f["core"], 1500))
+    secs = (meta or {}).get("sections") or {}
+    for key in ("STATE", "LESSONS"):
+        if secs.get(key):
+            lines.append(f"{key}:\n" + clip_middle(secs[key], 2000))
+    return clip_middle("\n".join(lines), room)
+
+
+def engine_run(call, session, statement: str, lean: str, s: EngineSettings | None = None, workers: int = 4,
+               search=None) -> dict:
+    """Frontier map, then `rounds` x (parallel research sessions, validation, meta-review). `call(purpose, prompt,
+    effort, budget) -> (text, cost)` as in discovery; `session(purpose, prompt, label, turns, budget, effort) ->
+    (reply, notebook, cost)` runs one tool-using session and may raise DiscoveryCallFailed. With `search`, a claim the
+    judges call new is also checked against a literature search, and loses `validated-new` if a paper has it."""
+    s = s or EngineSettings()
+    spend = _DiscoverySpend(s.total_budget)
+    parts = []
+    if s.blackboard.strip():
+        parts.append("CAMPAIGN BLACKBOARD: what earlier runs on this problem learned. Items marked [Lean] were machine-checked; "
+                     "everything else is unverified.\n" + s.blackboard.strip())
+    if s.library.strip():
+        parts.append("LITERATURE LIBRARY (papers and discussion dated before the cutoff, summarised; unverified):\n"
+                     + s.library.strip())
+    if s.context.strip():
+        parts.append(s.context.strip())
+    context = ("\n" + "\n\n".join(parts) + "\n") if parts else ""
+    ft, fc, ferr = _discovery_call(call, "engine-frontier", FRONTIER_PROMPT.format(
+        statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles), s.frontier_effort, s.frontier_budget)
+    spend.add(fc)
+    if ft is None:
+        return {"error": ferr, "spend": round(spend.total, 4), "rounds": [], "ledger": [], "validated": [],
+                "decision": {"commit": None, "answer": None, "share": 0.0}, "guidance": "", "settings": s.as_dict()}
+    f = {**parse_frontier(ft), "text": ft, "cost": round(fc, 4)}
+    fblock = frontier_block(f)
+    known = clip_middle(fblock + ("\n\nLITERATURE:\n" + s.library if s.library.strip() else ""), 16000)
+    sess_context = ("\n" + clip_middle(context, 12000) + "\n") if context else ""
+    assignments = engine_assignments(f, s.sessions, s.core_share)
+    rounds, ledger, meta = [], [], None
+    seen_sessions, seen_judging, seen_judged = [], 0.0, 0
+    for rnd in range(1, max(1, s.rounds) + 1):
+        if not assignments:
+            break
+        # Round 1 sizes itself from the caps. Later rounds use what round 1 actually cost: on #455 a session cost $1.2-2.0
+        # against its $3 cap and judging a claim $0.31 against the $1.10 the caps implied, so the cap-based reserve ran
+        # only 2 of round 2's 4 sessions and dropped the two boldest assignments.
+        per_claim = (seen_judging / seen_judged) if seen_judged else (2 * s.judge_budget + s.novelty_budget) * 0.5
+        per_session = (sum(seen_sessions) / len(seen_sessions)) if seen_sessions else s.session_budget
+        reserve = min(s.validate_max, 2 * len(assignments)) * per_claim + s.meta_budget
+        fit = int(max(0.0, s.total_budget - spend.total - reserve) // max(min(per_session * 1.25, s.session_budget), 0.01))
+        todo = assignments[: max(fit, 1 if rnd == 1 and spend.room(s.session_budget) else 0)]
+        if not todo:
+            break
+
+        def one(ia):
+            i, a = ia
+            label = f"r{rnd}s{i}"
+            prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                           assignment=assignment_text(a), modules=", ".join(sorted(EXPLORE_MODULES)),
+                                           seconds=EXPLORE_SECONDS)
+            try:
+                reply, notebook, cost = session("engine-session", prompt, label, s.session_turns, s.session_budget, s.session_effort)
+            except DiscoveryCallFailed as e:
+                return {"label": label, "assignment": a, "error": str(e)[:300], "cost": round(e.cost, 4), "claims": []}
+            claims = parse_claims(notebook)
+            for c in claims:
+                c["session"], c["_kind"] = label, a.get("kind")
+            return {"label": label, "assignment": a, "reply": (reply or "")[-3000:], "notebook": notebook,
+                    "claims": claims, "cost": round(float(cost or 0.0), 4)}
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(todo)))) as ex:
+            sessions = list(ex.map(one, list(enumerate(todo, 1))))
+        for x in sessions:
+            spend.add(x.get("cost"))
+            if not x.get("error"):
+                seen_sessions.append(float(x.get("cost") or 0.0))
+        claims = [c for x in sessions for c in x["claims"]]
+        checkable = sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)
+        for c in checkable[: s.validate_max]:
+            if not spend.room(2 * s.judge_budget):
+                c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
+                continue
+            c["validation"] = engine_validate(call, s, statement, known, c, spend)
+            seen_judging, seen_judged = seen_judging + float(c["validation"].get("cost") or 0.0), seen_judged + 1
+            if search is not None and c["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
+                lit = engine_literature_check(call, search, s, statement, c)
+                spend.add(lit.get("cost"))
+                c["validation"]["literature"] = lit
+                if lit.get("verdict") in ("known", "routine"):
+                    c["validation"]["status"] = f"valid-{lit['verdict']}"
+        ledger += claims
+        rec = {"round": rnd, "sessions": [{k: v for k, v in x.items() if k != "notebook"} for x in sessions],
+               "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
+        assignments = []
+        if rnd < s.rounds and spend.room(s.meta_budget + s.session_budget):
+            mt, mc, merr = _discovery_call(call, "engine-meta", METAREVIEW_PROMPT.format(
+                statement=statement, frontier=fblock, results=engine_results_digest(ledger), k=s.sessions),
+                s.frontier_effort, s.meta_budget)
+            spend.add(mc)
+            if mt:
+                secs = dict((t.upper(), b) for t, b in delimited_sections(mt))
+                nxt = [re.sub(r"^\s*\d+[.)]\s*", "", l).strip() for l in (secs.get("NEXT") or "").splitlines()
+                       if re.match(r"^\s*\d+[.)]", l)]
+                meta = {"text": mt, "sections": {t: b[:5000] for t, b in secs.items()}, "next": nxt[: s.sessions],
+                        "cost": round(mc, 4)}
+                assignments = [{"kind": "next", "text": "NEXT-ROUND ASSIGNMENT from the team lead, who has read every "
+                                "result of the first round:\n" + line + "\n\nWHAT THE TEAM ESTABLISHED IN ROUND "
+                                f"{rnd} (validated results first):\n" + clip_middle(secs.get("STATE") or "", 3000)
+                                + "\n\nLESSONS:\n" + clip_middle(secs.get("LESSONS") or "", 2000)} for line in nxt[: s.sessions]]
+            else:
+                meta = {"error": merr, "cost": round(mc, 4)}
+            rec["meta"] = {k: v for k, v in (meta or {}).items() if k != "text"}
+        rounds.append(rec)
+    validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
+    ans, conf = f.get("answer"), f.get("confidence")
+    decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
+                "commit": ("pos" if ans == "true" else "neg") if ans and (conf or 0) >= 0.8 else None}
+    return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
+            "meta": meta, "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(),
+            "guidance": engine_guidance(f, ledger, meta)}
+
+
+def engine_report(res: dict, title: str) -> str:
+    """IDEAS.md: every claim with its verdicts, validated ones first; then the frontier map's targets and angles."""
+    led = res.get("ledger") or []
+    order = {"validated-new": 0, "valid-restatement": 1, "valid-unrated": 2, "valid-routine": 3, "valid-known": 4,
+             "unjudged": 5, "broken": 6}
+    led = sorted(led, key=lambda c: (order.get((c.get("validation") or {}).get("status"), 7), c.get("session") or ""))
+    lines = [f"# Research engine: {title}", "",
+             f"Spend ${res.get('spend')}; {len(led)} claim(s); {len(res.get('validated') or [])} validated as new. "
+             "Validated means a step referee and an adversary found no error and a novelty judge called it new. It is "
+             "informal: nothing here is Lean-checked or human-reviewed.", ""]
+    for c in led:
+        v = c.get("validation") or {}
+        lines.append(f"## [{v.get('status', 'not validated')}] {c.get('session')}/{c.get('id')} {c.get('status')} {c.get('type')}")
+        lines.append(f"**Statement.** {c.get('statement')}")
+        if c.get("beyond"):
+            lines.append(f"**Beyond.** {c['beyond']}")
+        for key in ("referee", "adversary", "novelty"):
+            if v.get(key):
+                lines.append(f"**{key.capitalize()}.** `{json.dumps(v[key], ensure_ascii=False)[:800]}`")
+        lines.append("**Proof or evidence.**\n\n" + (c.get("proof") or "(none)"))
+        lines.append("")
+    f = res.get("frontier") or {}
+    lines.append("## Frontier map\n\n" + (f.get("text") or "(none)"))
+    if (res.get("meta") or {}).get("text"):
+        lines.append("\n## Meta-review\n\n" + res["meta"]["text"])
+    return "\n".join(lines) + "\n"
+
 
 class MaskedBackend:
     """Wraps a backend so EVERY outbound prompt is masked -- `ask`, the agentic prover and any direct
@@ -3834,7 +4479,8 @@ class Harness:
 
     # the in-run discovery stage's own calls: they see operator guidance (a human's route hint is worth most here)
     # but never discovery's guidance, which they are producing
-    DISCOVERY_PURPOSES = {"discover", "discover-ladder", "discover-rung", "discover-synthesis", "discover-gap"}
+    DISCOVERY_PURPOSES = {"discover", "discover-ladder", "discover-rung", "discover-synthesis", "discover-gap",
+                          "engine-frontier", "engine-session", "engine-meta"}    # never the referee, adversary or novelty judge
 
     def _with_research_guidance(self, purpose: str, prompt: str) -> str:
         """Load current operator guidance even for old checkpoints and research children, and the in-run discovery
@@ -4045,6 +4691,8 @@ class Harness:
             return None
         if isinstance(self.state.get("discovery"), dict):
             return self.state["discovery"]
+        if getattr(self.args, "discover_mode", None) == "engine":
+            return self._stage_engine()
         s = self._discovery_settings()
         self.log.event("discover", "start", **{k: v for k, v in s.as_dict().items() if k != "extra"})
         if s.library:
@@ -4073,6 +4721,138 @@ class Harness:
                        rungs=sum(1 for r in (res.get("ladder") or []) if r.get("rung")),
                        syntheses=len(res.get("syntheses") or []), spend=res.get("spend"))
         return keep
+
+    def _engine_settings(self) -> EngineSettings:
+        a = self.args
+
+        def g(key, default):
+            v = getattr(a, key, None)
+            return default if v is None else v
+        s = EngineSettings(sessions=int(g("engine_sessions", 4)), rounds=int(g("engine_rounds", 2)),
+                           session_budget=float(g("engine_session_budget", 3.0)), session_turns=int(g("engine_session_turns", 80)),
+                           session_effort=str(g("engine_session_effort", "high")), judge_effort=str(g("engine_judge_effort", "high")),
+                           targets=int(g("engine_targets", 10)), angles=int(g("engine_angles", 6)),
+                           core_share=float(g("engine_core_share", 0.5)), total_budget=float(g("engine_total_budget", 30.0)))
+        s.library = self._library_text(10000)
+        s.blackboard = self._read_blackboard(8000)
+        return s
+
+    def _engine_session_caller(self):
+        """`session(purpose, prompt, label, turns, budget, effort) -> (reply, notebook, cost)`: one tool-using research
+        session in its own sandbox under run_dir/engine/sessions/<label>, on its own backend so parallel sessions keep
+        their own costs. Budget-checked and logged like every call; a cut-off session still yields its notebook."""
+        lock = threading.Lock()
+
+        def session(purpose, prompt, label, turns, budget, effort):
+            self._check_run_budget(purpose)
+            prompt = self._outbound(self._with_research_guidance(purpose, prompt))
+            run_budget = getattr(self.args, "run_budget", None)
+            if run_budget and budget is not None:
+                budget = round(max(0.5, min(float(budget), float(run_budget) - self.spent_usd())), 2)
+            backend = self._fresh_backend() or self.llm
+            if not hasattr(backend, "complete_explore"):
+                raise DiscoveryCallFailed(f"backend {type(backend).__name__} has no tool-using sessions")
+            sb = self.run_dir / "engine" / "sessions" / label
+            sb.mkdir(parents=True, exist_ok=True)
+            (sb / "runner.py").write_text(explore_runner_source())
+            run_sh = sb / "run.sh"
+            run_sh.write_text(f'#!/bin/sh\nexec "{sys.executable}" "$(dirname "$0")/runner.py" "$@"\n')
+            run_sh.chmod(0o755)
+            (sb / "NOTEBOOK.md").write_text("## Result\n(not yet)\n")
+            (sb / "TASK.md").write_text(prompt)
+            self.log.event("llm", "request", purpose=purpose, chars=len(prompt), effort=effort, budget=budget, label=label)
+            t0, text = time.time(), ""
+            try:
+                text = backend.complete_explore(purpose, prompt, sb, turns, budget=budget, effort=effort,
+                                                system_prompt=ENGINE_SYSTEM_PROMPT)
+            except (RuntimeError, subprocess.TimeoutExpired) as e:
+                if ClaudeCliBackend.HARD_RE.search(str(e)):
+                    raise                   # usage limit, auth: infrastructure, stop the run (it is resumable)
+                self.log.event("engine", "session_ended", label=label, error=repr(e)[:300])
+            meta = dict(getattr(backend, "last_meta", {}) or {})
+            self.log.event("llm", "response", purpose=purpose, chars=len(text), secs=round(time.time() - t0, 1),
+                           cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"), label=label)
+            notebook = (sb / "NOTEBOOK.md").read_text() if (sb / "NOTEBOOK.md").exists() else ""
+            if notebook.strip() in ("", "## Result\n(not yet)"):
+                runs = (sb / "runs.log").read_text() if (sb / "runs.log").exists() else ""
+                notebook = "## Result\n(no notebook written)\n\n## Reply\n" + text[-4000:] + "\n\n## Data\n" + runs[-6000:]
+                self.log.event("engine", "notebook_missing", label=label)
+            with lock:
+                (self.run_dir / "transcripts").mkdir(exist_ok=True)
+                n = len(list((self.run_dir / "transcripts").glob("*.md"))) + 1
+                (self.run_dir / "transcripts" / f"{n:03d}-{purpose}-{label}.md").write_text(
+                    f"# {purpose} {label}\n\n## prompt\n\n{prompt}\n\n## reply\n\n{text}\n\n## NOTEBOOK.md\n\n{notebook}\n")
+            return text, notebook, float(meta.get("cost_usd") or 0.0)
+        return session
+
+    def _engine_search(self):
+        """OpenAlex search for the engine's literature check, or None on a benchmark run: a dated item must never see
+        papers from after its cutoff, and this search has no cutoff."""
+        if getattr(self.args, "benchmark", False):
+            return None
+        import library as L
+
+        def search(query):
+            hits = L.search(query, datetime.now(timezone.utc).date() + timedelta(days=1), per_page=8)
+            return [{"title": w.get("title"), "year": (w.get("publication_date") or "")[:4], "abstract": L.abstract_of(w)}
+                    for w in hits]
+        return search
+
+    def _stage_engine(self) -> dict:
+        """--discover-mode engine: the research engine in place of the discovery rounds. It writes engine.json and
+        IDEAS.md, gives later stages its validated results as guidance, and leaves the blackboard an entry."""
+        s = self._engine_settings()
+        self.log.event("discover", "start", mode="engine", **{k: v for k, v in s.as_dict().items()})
+        if s.library:
+            self.log.event("library", "used", where="engine", chars=len(s.library),
+                           sha256=hashlib.sha256(s.library.encode()).hexdigest()[:16], path=str(getattr(self.args, "library", "")))
+        if s.blackboard:
+            self.log.event("blackboard", "read", where="engine", chars=len(s.blackboard))
+        res = engine_run(self._discovery_caller(), self._engine_session_caller(), self.problem["statement"],
+                         self.state["statement"], s, workers=max(1, s.sessions), search=self._engine_search())
+        out = self.run_dir / "engine"
+        out.mkdir(exist_ok=True)
+        (out / "engine.json").write_text(json.dumps({k: v for k, v in res.items() if k != "guidance"}, indent=1, ensure_ascii=False))
+        (out / "IDEAS.md").write_text(engine_report(res, f"problem {self.problem['id']}, run {self.run_dir.name}"))
+        keep = {"decision": res.get("decision"), "guidance": res.get("guidance"), "spend": res.get("spend"),
+                "refereed_complete": False, "best_proof": None, "mode": "engine", "settings": s.as_dict(),
+                "validated": [{k: c.get(k) for k in ("session", "id", "type", "statement")} for c in res.get("validated") or []]}
+        self.state["discovery"] = keep
+        self.save()
+        try:
+            self._blackboard_engine(res)
+        except Exception as e:                             # noqa: BLE001 - a memory write must not cost the stage
+            self.log.event("blackboard", "write_failed", error=repr(e)[:200])
+        counts: dict = {}
+        for c in res.get("ledger") or []:
+            st = (c.get("validation") or {}).get("status") or f"unvalidated-{c.get('status', '').lower()}"
+            counts[st] = counts.get(st, 0) + 1
+        dec = res.get("decision") or {}
+        self.log.event("discover", "done", mode="engine", commit=dec.get("commit"), answer=dec.get("answer"),
+                       share=dec.get("share"), validated=len(res.get("validated") or []), claims=counts,
+                       sessions=sum(len(r.get("sessions") or []) for r in res.get("rounds") or []),
+                       rounds=len(res.get("rounds") or []), spend=res.get("spend"), error=res.get("error"))
+        return keep
+
+    def _blackboard_engine(self, res: dict) -> None:
+        lines = [f"- research engine: {len(res.get('validated') or [])} validated new result(s) of "
+                 f"{len(res.get('ledger') or [])} claim(s), ${res.get('spend')}"]
+        for c in res.get("ledger") or []:
+            v = c.get("validation") or {}
+            st = v.get("status")
+            if st == "validated-new":
+                lines.append(f"- NEW, refereed informally, not Lean-checked ({c.get('type')}): {c['statement'][:400]}")
+            elif st == "broken":
+                why = (v.get("referee") or {}).get("first_error") or (v.get("adversary") or {}).get("how") or ""
+                lines.append(f"- broken claim: {c['statement'][:240]} -- {str(why)[:240]}")
+            elif st and st.startswith("valid-"):
+                lines.append(f"- correct but {st[6:]}: {c['statement'][:240]}")
+            elif c.get("status") == "CONJECTURED":
+                lines.append(f"- conjectured (evidence only): {c['statement'][:240]}")
+        secs = (res.get("meta") or {}).get("sections") or {}
+        if secs.get("LESSONS"):
+            lines.append("- lessons: " + " ".join(clip_middle(secs["LESSONS"], 900).split()))
+        self._blackboard_append("research engine", lines)
 
     def _discovery_for_child(self) -> dict | None:
         """What a direction or hypothesis child inherits from the discovery stage: the decision and the guidance,
@@ -9641,9 +10421,22 @@ def build_parser() -> argparse.ArgumentParser:
                       help="informal attempts + a referee + a direction decision before any Lean (once per run); under "
                            "--open a confident decision commits the run to one direction. The guidance (with the best "
                            "proof WHOLE) reaches every research stage and every child")
-    runp.add_argument("--discover-mode", choices=["independent", "crossfed"], default="independent",
+    runp.add_argument("--discover-mode", choices=["independent", "crossfed", "engine"], default="independent",
                       help="independent = discover-v3/v4's rounds; crossfed = a synthesis of each round's attempts and "
-                           "referee verdicts seeds the next round with assignments (OpenAI's Navier-Stokes consolidator)")
+                           "referee verdicts seeds the next round with assignments (OpenAI's Navier-Stokes consolidator); "
+                           "engine = the research engine: a frontier map, compute-enabled research sessions on targets "
+                           "beyond the frontier and angles on the core, adversarial validation and a meta-review round")
+    runp.add_argument("--engine-sessions", type=int, default=4, help="research sessions per engine round")
+    runp.add_argument("--engine-rounds", type=int, default=2, help="engine rounds (sessions, validation, meta-review)")
+    runp.add_argument("--engine-session-budget", type=float, default=3.0, help="USD cap per research session")
+    runp.add_argument("--engine-session-turns", type=int, default=80, help="turn cap per research session")
+    runp.add_argument("--engine-session-effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
+    runp.add_argument("--engine-judge-effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
+    runp.add_argument("--engine-targets", type=int, default=10, help="targets beyond the frontier in the map")
+    runp.add_argument("--engine-angles", type=int, default=6, help="angles on the core in the map")
+    runp.add_argument("--engine-core-share", type=float, default=0.5,
+                      help="share of round-1 sessions that attack the core through an angle; the rest take targets")
+    runp.add_argument("--engine-total-budget", type=float, default=30.0, help="USD cap for the whole engine")
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")
