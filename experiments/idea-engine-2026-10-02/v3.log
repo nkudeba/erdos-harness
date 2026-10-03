@@ -12,3 +12,6 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory: '/Users/nicolas.kudeba/workspace/erdos-harness/1203/lane.log'
 #455 [v3]: 4 validated new of 25 claims; {'valid-routine': 6, 'broken': 9, 'validated-new': 4, 'unvalidated-conjectured': 2, 'unvalidated-proved': 4}; significance [1, 1, 1, 1]; $36.105516000000016
 #1203 [v3]: 1 validated new of 22 claims; {'valid-routine': 8, 'unvalidated-conjectured': 5, 'unvalidated-other': 1, 'broken': 7, 'validated-new': 1}; significance [1]; $32.287354599999986
+#156 [v3]: 2 validated new of 35 claims; {'valid-routine': 16, 'broken': 4, 'unvalidated-conjectured': 10, 'unvalidated-proved': 1, 'validated-new': 2, 'unvalidated-other': 1, 'valid-known': 1}; significance [1, 1]; $28.394815400000002
+#1203 [v3-repair]: 2 validated new of 25 claims; {'valid-routine': 8, 'unvalidated-conjectured': 5, 'unvalidated-other': 1, 'broken': 8, 'validated-new': 2, 'valid-restatement': 1}; significance [1, 1]; $34.30817059999998
+#455 [v3-repair]: 5 validated new of 28 claims; {'valid-routine': 8, 'broken': 9, 'validated-new': 5, 'unvalidated-conjectured': 2, 'unvalidated-proved': 4}; significance [1, 1, 1, 1, 1]; $37.970500000000015

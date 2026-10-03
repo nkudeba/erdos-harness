@@ -250,3 +250,26 @@ characters with every section. It aimed past v1.1: a power-saving exceptional se
   - I checked the proof's structure and elementary lemmas (`evidence/1203/v3-deep-NOTEBOOK.md`), not every constant.
   - **This is the closest any claim has come to the bar.**
 - **C2, broken (fatal):** it overstated what the construction certifies.
+
+### v3 on #156: $28.39 (`runs/20261002-214504-015603-erdos156`), and the first repair passes
+
+**#156** asks for a maximal Sidon set in [1, N] of size O(N^{1/3}). The known bounds are (2N)^{1/3} below and
+O((N log N)^{1/3}) above.
+- **Validated new, significance 1:** every maximal Sidon set has |A| ≥ (1.2679 − o(1))·N^{1/3}, up from the known
+  2^{1/3} = 1.2599.
+- **The deep dive proved the cyclic analogue:** ℤ_n with n = m(q²+q+1) has a maximal Sidon set of size exactly q+m, so
+  O(n^{1/3}), for m ≤ q/2 with q ≥ 160, and for m ≤ 3q/10 in general.
+  - It is a Singer difference set in a subgroup plus a Sidon transversal of its cosets. Maximality comes from an exact
+    coset tiling, so there is no log loss.
+  - Validated new, significance 1, literature new. The first screen had flagged this analogue as possibly new.
+- **Not proved:** the case n = q³−1 is only conjectured. Random greedy succeeded for every q ≤ 67.
+- **The repair pass's first live use:** all 3 fixable broken claims came back valid, though routine.
+
+**Repair passes on #1203 and #455**, resumed from their checkpoints for $2.02 and $1.86.
+- **#1203:** the conditional proof that F → ∞ (U(c), repaired to integer x) now passes the referee and the adversary.
+  - The novelty panel calls it a restatement or routine: the hypothesis carries the difficulty.
+  - The thin-set constant 6w(2312) was repaired and validated new.
+- **#455:** the dichotomy behind the θ < 2/3 glitch theorem was repaired and validated new.
+
+**Tally after four problems: 18 validated-new claims, all significance 1.** One got a 2 from one of its two judges: #1203's
+liminf F/L₃ ≤ 80.
