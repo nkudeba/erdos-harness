@@ -41,6 +41,12 @@ def main() -> int:
     # (?!\d), not \b: every identifier continues with "_" (erdos_27285_hyp_top, erdos_27285_Rep), and \b after the
     # digits never matched, so the first #435 Lean run kept the old ids and no plan could parse against the new one.
     lean = re.sub(rf"\berdos_{old_id}(?!\d)", f"erdos_{sid}", st["statement"]) if old_id else st["statement"]
+    # The step's theorem becomes the run's main theorem `erdos_<sid>`. A run started from the CLI looks for exactly
+    # that name (only in-process research children get another `thm_name`), so with `erdos_<sid>_hyp_top` kept, the
+    # second #435 Lean run matched no plan at all and logged "no skeleton block in the plan" for a complete skeleton.
+    thms = re.findall(rf"(?m)^\s*theorem\s+(erdos_{sid}\w*)", lean)
+    if thms and thms[-1] != f"erdos_{sid}":
+        lean = re.sub(rf"\b{re.escape(thms[-1])}(?![\w'!?])", f"erdos_{sid}", lean)
     answer = "true" if c["status"] == "PROVED" else "false"
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-hardlean-erdos{sid}"
     run_dir.mkdir(parents=True)

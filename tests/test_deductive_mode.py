@@ -431,6 +431,15 @@ class DeductiveLoopEndToEnd(unittest.TestCase):
         kinds = [json.loads(l)["kind"] for l in (pdir / "ledger.jsonl").read_text().splitlines()]
         self.assertEqual(kinds, ["skeleton", "hypothesis"])
 
+    def test_a_statement_without_the_main_theorem_stops_before_any_call(self):
+        """Two #435 hard-step runs froze `erdos_<id>_hyp_top` and spent every cycle on plans no matcher could see."""
+        h = _stub(self.root / "run", statement=FROZEN.replace("theorem erdos_99 ", "theorem erdos_99_hyp_top "))
+        asked = []
+        h.ask = lambda purpose, prompt, **kw: asked.append(purpose) or ""
+        with self.assertRaisesRegex(ValueError, "no theorem named `erdos_99`"):
+            h.run_program()
+        self.assertEqual(asked, [])
+
     def test_a_published_premise_keeps_the_target_open(self):
         """The honesty trap: with the published RS premise still `sorry`, the loop must NOT declare a proof even
         after every conjecture is discharged. The residual reports 0 open conjectures and 1 premise."""

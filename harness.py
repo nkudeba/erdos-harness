@@ -8261,6 +8261,11 @@ for the SAT solver instead of enumerating it.
         refute_pol = getattr(self.args, "refute", "auto")
         frozen = statement_prefix(self.state["statement"])
         main = getattr(self, "thm_name", None) or f"erdos_{pid}"
+        # A plan is matched by `theorem <main>`, so a frozen statement without that theorem can never adopt one. Two
+        # hard-step Lean runs (#435's `erdos_727285_hyp_top`, started from the CLI, where `main` is `erdos_<id>`) spent
+        # their cycles on complete skeletons logged as "no skeleton block in the plan". Stop before any call instead.
+        if not re.search(rf"(?m)^\s*theorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])", strip_comment_lines(self.state["statement"])):
+            raise ValueError(f"the frozen statement has no theorem named `{main}`: no plan could ever be adopted")
         hyp_prefix = f"{main}_hyp_"          # erdos_<n>_hyp_ at the top; <hypothesis>_hyp_ inside a sub-residual
         depth = int(getattr(self.args, "residual_depth_current", 1) or 1)
         max_depth = int(getattr(self.args, "residual_depth", 1) or 1)

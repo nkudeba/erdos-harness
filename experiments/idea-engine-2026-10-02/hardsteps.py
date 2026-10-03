@@ -68,6 +68,29 @@ def bank() -> list[dict]:
     return out
 
 
+def record(out: Path, tag: str, i: int, s: dict, run_dir: Path, rc) -> None:
+    """Append the bank row for a finished engine run. Shared by a launch and by `--record`, which files a run
+    whose launcher was killed after the engine finished (#435's first run lost its row that way)."""
+    try:
+        ej = json.loads((run_dir / "engine" / "engine.json").read_text())
+    except (OSError, ValueError):
+        print(f"[{i}] #{s['problem']} {s['name']}: no engine record (exit {rc})", flush=True)
+        return
+    led = ej.get("ledger") or []
+    counts: dict = {}
+    for c in led:
+        st = (c.get("validation") or {}).get("status") or f"unvalidated-{str(c.get('status')).lower()}"
+        counts[st] = counts.get(st, 0) + 1
+    sound = [c for c in led if (c.get("validation") or {}).get("status", "").startswith(("valid", "validated"))]
+    rec = {"tag": tag, "index": i, **{k: s[k] for k in ("problem", "alias", "name", "tag", "run_dir")},
+           "engine_run": str(run_dir.relative_to(ROOT)), "exit": rc, "spend": ej.get("spend"), "claims": counts,
+           "sound": [{k: c.get(k) for k in ("session", "id", "status", "type", "statement")} for c in sound],
+           "at": datetime.now().isoformat(timespec="seconds")}
+    with out.open("a") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    print(f"[{i}] #{s['problem']} {s['name']}: {counts}; ${ej.get('spend')}", flush=True)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--list", action="store_true")
@@ -75,6 +98,7 @@ def main() -> int:
     ap.add_argument("--pick", type=int, nargs="*", default=[])
     ap.add_argument("--total", type=float, default=15.0, help="engine budget per step, USD")
     ap.add_argument("--flags", default="--engine-sessions 3 --engine-rounds 2")
+    ap.add_argument("--record", help="file the row for this finished engine run of the single --pick, launch nothing")
     args = ap.parse_args()
     b = bank()
     if args.list:
@@ -82,6 +106,14 @@ def main() -> int:
             print(f"[{i}] #{s['problem']} {s['name']} ({s['tag']}, {s['direction']}): {' '.join(s['lean'].split())[:160]}")
         return 0
     out = HERE / "hardsteps.jsonl"
+    if args.record:
+        if len(args.pick) != 1:
+            print("--record needs exactly one --pick")
+            return 2
+        rd = (ROOT / args.record).resolve()
+        done = (rd / "DONE").read_text().strip() if (rd / "DONE").exists() else None
+        record(out, args.tag, args.pick[0], b[args.pick[0]], rd, f"recorded after the launcher died; DONE={done}")
+        return 0
     for i in args.pick:
         s = b[i]
         mask = json.loads((ROOT / s["mask"]).read_text())
@@ -103,24 +135,7 @@ def main() -> int:
         with (run_dir / "lane.log").open("w") as log:
             rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                                 timeout=6 * 3600).returncode
-        try:
-            ej = json.loads((run_dir / "engine" / "engine.json").read_text())
-        except (OSError, ValueError):
-            print(f"[{i}] #{s['problem']} {s['name']}: no engine record (exit {rc})", flush=True)
-            continue
-        led = ej.get("ledger") or []
-        counts: dict = {}
-        for c in led:
-            st = (c.get("validation") or {}).get("status") or f"unvalidated-{str(c.get('status')).lower()}"
-            counts[st] = counts.get(st, 0) + 1
-        sound = [c for c in led if (c.get("validation") or {}).get("status", "").startswith(("valid", "validated"))]
-        rec = {"tag": args.tag, "index": i, **{k: s[k] for k in ("problem", "alias", "name", "tag", "run_dir")},
-               "engine_run": str(run_dir.relative_to(ROOT)), "exit": rc, "spend": ej.get("spend"), "claims": counts,
-               "sound": [{k: c.get(k) for k in ("session", "id", "status", "type", "statement")} for c in sound],
-               "at": datetime.now().isoformat(timespec="seconds")}
-        with out.open("a") as f:
-            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-        print(f"[{i}] #{s['problem']} {s['name']}: {counts}; ${ej.get('spend')}", flush=True)
+        record(out, args.tag, i, s, run_dir, rc)
     return 0
 
 
