@@ -677,7 +677,10 @@ class Stage(unittest.TestCase):
         self.assertIn("NEW, refereed informally, not Lean-checked (QUANT): liminf >= 0.54", board)
         done = [e for e in self.h.log.events if e[1] == "done"]
         self.assertEqual(done[-1][2]["validated"], 2)
-        self.assertEqual(self.h.stage_discover(), keep)      # once per run
+        n_calls, n_sessions = len(call.calls), len(sess.calls)
+        again = self.h.stage_discover()                     # a resume re-enters the engine from its checkpoint...
+        self.assertEqual(again["validated"], keep["validated"])
+        self.assertEqual((len(call.calls), len(sess.calls)), (n_calls, n_sessions))   # ...and buys nothing twice
 
     def test_a_benchmark_run_never_searches(self):
         self.h.args.benchmark = True

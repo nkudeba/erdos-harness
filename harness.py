@@ -5127,9 +5127,15 @@ class Harness:
         it. See the section "informal discovery (in-run)" for what each mode does and why."""
         if getattr(self.args, "discover", "off") != "on" or not self.state.get("statement"):
             return None
+        engine = getattr(self.args, "discover_mode", None) == "engine"
         if isinstance(self.state.get("discovery"), dict):
-            return self.state["discovery"]
-        if getattr(self.args, "discover_mode", None) == "engine":
+            # The engine checkpoints everything it buys, so re-entering it from its checkpoint costs nothing unless a
+            # resume added budget. That is the point: #152's hard step had to be resumed to run a deep dive whose plan
+            # had been cut off, and the stored record used to end that resume before any call.
+            if not (engine and self.state["discovery"].get("mode") == "engine"
+                    and (self.run_dir / "engine" / "checkpoint.json").exists()):
+                return self.state["discovery"]
+        if engine:
             return self._stage_engine()
         s = self._discovery_settings()
         self.log.event("discover", "start", **{k: v for k, v in s.as_dict().items() if k != "extra"})
