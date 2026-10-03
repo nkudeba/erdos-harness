@@ -73,3 +73,16 @@ binomials.
   `HardStep_SUMMARY.line`.
 - `BLUEPRINT.md`: the engine's proof, cut into steps. `RESIDUAL_final.md` is the Lean run's final residual.
 - `engine_IDEAS.md`: the engine run's claims and verdicts.
+
+## Where the $66.28 went
+
+- About $11 at the top level: plans $6.60 (eight calls, including re-plans the adoption rule refused) and refutation
+  experiments $2.91.
+- The rest went to children:
+  - cheap one-shot attempts proved roughly 8 of about 20;
+  - depth and recursive children proved 16 of 18 (S12 and S21 failed at depth, then closed by restructuring);
+  - the core steps took most of it: S11 in five pieces, S21a, S12 and S7.
+- Two kinds of waste were avoidable:
+  - the S19b proof lost to the splice bug, together with its re-attack;
+  - two re-plans that only split statements. The adoption rule refused them, because more explicit statements score
+    higher on syntactic complexity.
