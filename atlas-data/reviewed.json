@@ -108,27 +108,37 @@
   },
   "153": {
     "rationale": [
-      "Discovery screen 2026-10-02: believed TRUE; reproved the forum's asymptotically-maximum case and a bound above the Cauchy–Schwarz value 4; the open regime matches the forum's (diameter in [(1+δ)n², Cn²])."
+      "Discovery screen 2026-10-02: believed TRUE; reproved the forum's asymptotically-maximum case and a bound above the Cauchy–Schwarz value 4; the open regime matches the forum's (diameter in [(1+δ)n², Cn²]).",
+      "Research engine v2 (2026-10-02, $23.36, informal; referee, adversary, two-judge novelty panel and literature check; not Lean-checked, not human-reviewed): a Sidon set made of at most K affine images of Singer difference sets plus n^{1-eps} exceptional elements has Q(A) -> infinity. Validated new, significance 1.",
+      "Barrier (engine v2, model result): in the continuum pairwise-profile model at D/n^2 = 1+delta, the known c log(1/delta) bound is sharp up to its constant for every argument using only the macroscopic profile plus pair constraints. The extremal profiles load an endpoint spike, and every counting constraint of additive order <= 4 reduces to the pair difference-density bound."
     ],
     "requirements": [
-      "A multiscale edge/bulk sparsity lemma for Sidon sets with diameter between (1+δ)n² and Cn²."
+      "A multiscale edge/bulk sparsity lemma for Sidon sets with diameter between (1+δ)n² and Cn².",
+      "Beating the known bound needs exact coincidences among the edge elements, not densities. Any proof of C* > 1 must rule out the endpoint-spike loading."
     ],
     "sources": [
-      "experiments/open-discovery-2026-10-02/REPORT.md"
+      "experiments/open-discovery-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/evidence/153/v2-IDEAS.md"
     ],
-    "assessed": "2026-10-01"
+    "assessed": "2026-10-03"
   },
   "156": {
     "rationale": [
-      "Discovery screen 2026-10-02: believed TRUE; reproved the greedy N^{1/3} lower bound; informally found maximal Sidon sets of size O(n^{1/3}) in ℤ_n for n = p², p²−1, p³ (unchecked, possibly new)."
+      "Discovery screen 2026-10-02: believed TRUE; reproved the greedy N^{1/3} lower bound; informally found maximal Sidon sets of size O(n^{1/3}) in ℤ_n for n = p², p²−1, p³ (unchecked, possibly new).",
+      "Research engine v3 (2026-10-03, $28.39, informal; referee, adversary, two-judge novelty panel and literature check; not Lean-checked, not human-reviewed): every maximal Sidon set in [N] has size >= (1.2679 - o(1)) N^{1/3}, up from the known (2N)^{1/3} = 1.2599 N^{1/3}. Validated new, significance 1.",
+      "Cyclic analogue PROVED (engine v3 deep dive, validated new, significance 1, literature new): Z_n with n = m(q^2+q+1) contains a maximal Sidon set of size q+m = O(n^{1/3}), for any prime power q >= 160 and m <= q/2, and for m <= 3q/10 in general. It is a Singer difference set in the subgroup of index m plus a Sidon transversal of its cosets. Maximality comes from an exact coset tiling, so there is no log loss. Z_{q^3-1} is conjectured (random greedy succeeded for every q <= 67)."
     ],
     "requirements": [
-      "Construct a Sidon set Y of size O(√L) with [1, L] ⊆ Y − Y, or otherwise emulate the Singer wrap-around in the integers."
+      "Construct a Sidon set Y of size O(√L) with [1, L] ⊆ Y − Y, or otherwise emulate the Singer wrap-around in the integers.",
+      "For [1,N], remove the (log N)^{1/3} factor of Ruzsa's O((N log N)^{1/3}). Either transfer the exact coset tiling from Z_n without the coupon-collector log loss, or construct Sidon rulers Y_L of size sqrt(sigma L) with [1,L] in Y-Y; that route gives <= ~2.54 N^{1/3} and is capped there by Leech's bound."
     ],
     "sources": [
-      "experiments/open-discovery-2026-10-02/REPORT.md"
+      "experiments/open-discovery-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/evidence/156/v3-deep-NOTEBOOK.md"
     ],
-    "assessed": "2026-10-01"
+    "assessed": "2026-10-03"
   },
   "164": {
     "rationale": [
