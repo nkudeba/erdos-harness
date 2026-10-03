@@ -4526,6 +4526,10 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         ck.pop("partial", None)
         keep()
     deep = ck.get("deep")
+    if isinstance(deep, dict) and deep.get("error") and "plan_cost" in deep and "goal" not in deep and not ck.get("deep_partial"):
+        # The plan call failed (a cut-off cap on #152's hard step) and the session never started. That was an
+        # infrastructure failure, not a verdict, so a resume tries the deep dive again instead of keeping the error.
+        deep = None
     if deep is None and s.deep_budget > 0 and ledger and (ck.get("deep_partial") or spend.room(s.meta_budget + s.deep_budget)):
         deep = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend,
                                 search, ck=ck, keep=keep)

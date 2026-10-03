@@ -387,6 +387,23 @@ class DeepDive(unittest.TestCase):
         self.assertIn("deep", [label for label, p in sess.calls])
         self.assertNotIn("error", res["deep"])
 
+    def test_a_deep_dive_that_failed_at_its_plan_is_retried_on_resume(self):
+        """#152's hard step: the checkpoint kept the plan's cut-off error as the deep dive's result, so a resume skipped it."""
+        def script(purpose, prompt, n):
+            return FRONTIER if purpose == "engine-frontier" else DEEP_PLAN if purpose == "engine-deep-plan" else judge(purpose)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim from {label}")))
+        s = H.EngineSettings(sessions=1, rounds=1, total_budget=50, deep_budget=8.0)
+        first = H.engine_run(FakeCall(script, cost=0.1), sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50))
+        ck = {"frontier": first["frontier"], "rounds": [{**r, "_sessions": []} for r in first["rounds"]], "meta": None, "next": [],
+              "deep": {"plan_cost": 2.62, "error": "claude -p returned an error result (engine-deep-plan): error_max_budget_usd:"}}
+        res = H.engine_run(FakeCall(script, cost=0.1), sess, "PROBLEM", LEAN, s, checkpoint=ck)
+        self.assertIn("deep", [label for label, p in sess.calls])
+        self.assertNotIn("error", res["deep"])
+        done = {"plan_cost": 1.0, "goal": "g", "error": "the session failed", "cost": 3.0}
+        sess2 = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
+        H.engine_run(FakeCall(script, cost=0.1), sess2, "PROBLEM", LEAN, s, checkpoint={**ck, "deep": done})
+        self.assertNotIn("deep", [label for label, p in sess2.calls])        # a session that ran and failed is final
+
     def test_the_meta_review_gets_the_same_retry(self):
         budgets = []
 
