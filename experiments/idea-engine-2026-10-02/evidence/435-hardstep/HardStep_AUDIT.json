@@ -1,0 +1,47 @@
+{
+ "run": "runs/20261003-004608-866727-hardlean-erdos727285",
+ "at": "2026-10-03T11:19:34Z",
+ "direction": null,
+ "proof": {
+  "file": "runs/20261003-004608-866727-hardlean-erdos727285/final/Erdos727285.lean",
+  "sha256": "bdac6d6803f22362d9f170f32935db3dd96caad9fa160871619c08b3dd1a8683"
+ },
+ "benchmark": {
+  "tag": null
+ },
+ "checks": {
+  "source_scan": {
+   "ok": true,
+   "detail": "no sorry, kernel bypass or elaboration-time code"
+  },
+  "imports": {
+   "ok": true,
+   "detail": "5 import(s), all Mathlib, Formal.Library or the statement's own"
+  },
+  "compiles": {
+   "ok": true,
+   "detail": "no errors"
+  },
+  "no_sorry_warning": {
+   "ok": true,
+   "detail": "0 sorry warning(s)"
+  },
+  "axioms": {
+   "ok": true,
+   "detail": "[Classical.choice, Quot.sound, propext]"
+  },
+  "statement_identity": {
+   "ok": true,
+   "detail": "the proved `erdos_727285` and 2 frozen definition(s) are structurally identical to a clean elaboration of the frozen statement (3 constant(s) compared)"
+  },
+  "kernel_replay": {
+   "ok": true,
+   "detail": "all declarations replayed"
+  },
+  "benchmark_record": {
+   "ok": false,
+   "detail": "no time-split record points at this run"
+  }
+ },
+ "verdict": "FAIL"
+}

@@ -866,6 +866,12 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     refuses a statement without it.
   - The frame tells the model that the problem was resolved, so a hard-step result is not evidence about open
     problems.
+  - **First result, #435 `hyp_top`:** the train run's only open step. The engine proved it informally for $8. The
+    deductive loop certified it with that proof as its blueprint, for $66 over three operator-funded resumes. The full
+    #435 statement then assembles and passes the audit
+    (`experiments/idea-engine-2026-10-02/evidence/435-hardstep/`).
+    - It is a reconstruction by the published route, not an autonomous solve.
+    - On the way it exposed the splice bug fixed in `8641308`: an `open ... in` left behind by a dropped duplicate def.
 
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses

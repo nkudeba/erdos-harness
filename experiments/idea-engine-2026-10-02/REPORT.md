@@ -317,3 +317,18 @@ launcher, not mathematics:
   Everything certified is supporting arithmetic.
 - **Resumed by the operator** with `--run-budget` raised from 15 to 35. This is budget only, recorded in the run's
   `assistance`.
+
+**Result: the hard step is proved in Lean, and the full #435 statement assembles**
+(`evidence/435-hardstep/README.md`).
+- **The run.** After three funded resumes (budget 15 → 35 → 50 → 70, recorded in its `assistance`), the Lean run
+  closed at $66.28 with verification cleared. Its audit passes all 7 Lean checks.
+  - Recursive children did the decisive work: S19b, S12, S21a, and S11 as five pieces. The plan's own re-cuts did the
+    rest.
+  - One resume was stopped to load the splice fix `8641308`. Without it, a certified proof was being thrown away.
+- **The assembly.** The step's proof was spliced into the train run's final residual, where it was the only open step.
+  The result passes all 7 audit checks against #435's frozen statement.
+- **What it is.** A reconstruction of a published result by the published route: the Apéry set, and the C(n,p^j) as
+  mixed-radix digits. Assembled by the operator, so not an autonomous solve.
+- **For the hard-step failure mode** ("steps rated hard succeed 1 time in 20"): an informal, refereed proof from the
+  engine, used as the blueprint, took a stalled hard step to a certified one. The cost was about 5× the original run
+  ($74 for engine and Lean, against $12.84), and it needed operator budget decisions to get there.
