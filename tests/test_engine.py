@@ -364,6 +364,48 @@ class DeepDive(unittest.TestCase):
         self.assertIn("deep", {c["session"] for c in res["validated"]})
         self.assertTrue(all("_sessions" not in r for r in res["rounds"]))      # notebooks are not copied into engine.json
 
+    def test_a_plan_cut_off_by_its_cap_is_retried_once(self):
+        """#152's hard step: the deep dive's plan spent $2.62 against its $2 cap, wrote nothing, and the deep dive never
+        ran. The plan, like the map, now gets one retry at 1.5x its cap."""
+        budgets = []
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-deep-plan":
+                return H.DiscoveryCallFailed("error_max_budget_usd: over cap", cost=2.62) if n == 0 else DEEP_PLAN
+            return judge(purpose)
+
+        class Rec(FakeCall):
+            def __call__(self, purpose, prompt, effort, budget):
+                budgets.append((purpose, budget))
+                return super().__call__(purpose, prompt, effort, budget)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim from {label}")))
+        res = H.engine_run(Rec(script), sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50,
+                                                                              deep_budget=8.0))
+        self.assertEqual([b for p, b in budgets if p == "engine-deep-plan"], [2.0, 3.0])
+        self.assertIn("deep", [label for label, p in sess.calls])
+        self.assertNotIn("error", res["deep"])
+
+    def test_the_meta_review_gets_the_same_retry(self):
+        budgets = []
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-meta":
+                return H.DiscoveryCallFailed("error_max_budget_usd: over cap", cost=2.1) if n == 0 else META
+            return judge(purpose)
+
+        class Rec(FakeCall):
+            def __call__(self, purpose, prompt, effort, budget):
+                budgets.append((purpose, budget))
+                return super().__call__(purpose, prompt, effort, budget)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim {label}")))
+        res = H.engine_run(Rec(script), sess, "PROBLEM", LEAN, H.EngineSettings(sessions=2, rounds=2, total_budget=60), workers=2)
+        self.assertEqual([b for p, b in budgets if p == "engine-meta"], [2.0, 3.0])
+        self.assertEqual(len(res["rounds"]), 2)
+
     def test_off_by_default(self):
         call = FakeCall(lambda purpose, prompt, n: FRONTIER if purpose == "engine-frontier" else judge(purpose))
         sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))

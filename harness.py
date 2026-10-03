@@ -3158,6 +3158,20 @@ def _discovery_call(call, purpose: str, prompt: str, effort, budget) -> tuple[st
         return None, e.cost, str(e)[:200]
 
 
+def _discovery_call_capped(call, purpose: str, prompt: str, effort, budget, spend) -> tuple[str | None, float, str | None]:
+    """`_discovery_call`, retried once at 1.5x its cap when the cap cut the call off before it wrote anything. A cut-off
+    call's text is lost whatever it cost. The engine's map has had this retry since #1203. On 2026-10-03 the deep
+    dive's plan hit the same wall on #152's hard step: $2.62 of thinking against a $2 cap, no text, and the deep dive,
+    the engine's most valuable stage, never ran. Spend is added here, for both calls."""
+    text, cost, err = _discovery_call(call, purpose, prompt, effort, budget)
+    spend.add(cost)
+    if text is None and "budget" in str(err) and budget and spend.room(1.5 * budget):
+        text, cost2, err = _discovery_call(call, purpose, prompt, effort, round(1.5 * budget, 2))
+        spend.add(cost2)
+        cost += cost2
+    return text, cost, err
+
+
 def _discovery_attempt(call, s: DiscoverySettings, statement: str, lean: str, frame: str, label, rnd: int, context: str) -> dict:
     prompt = _discovery_with_context(DISCOVER_PROMPT.format(statement=statement, lean=lean, frame=frame), context)
     text, cost, err = _discovery_call(call, "discover", prompt, s.effort, s.budget)
@@ -4489,12 +4503,11 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
         assignments = []
         if rnd < s.rounds and spend.room(s.meta_budget + s.session_budget):
-            mt, mc, merr = _discovery_call(call, "engine-meta", METAREVIEW_PROMPT.format(
+            mt, mc, merr = _discovery_call_capped(call, "engine-meta", METAREVIEW_PROMPT.format(
                 statement=statement, results=engine_results_digest(ledger), k=s.sessions,
                 frontier=fblock + (f"\n\nTARGETS AS THE JUDGES RATED THEM BEFORE ANY WORK (the bar is a new result at significance "
                                    f">= {s.min_target_sig}):\n" + engine_ratings_block(f, ratings) if ratings else "")),
-                s.frontier_effort, s.meta_budget)
-            spend.add(mc)
+                s.frontier_effort, s.meta_budget, spend)
             if mt:
                 secs = dict((t.upper(), b) for t, b in delimited_sections(mt))
                 nxt = [re.sub(r"^\s*\d+[.)]\s*", "", l).strip() for l in (secs.get("NEXT") or "").splitlines()
@@ -4552,9 +4565,9 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
     keep = keep or (lambda: None)
     dp = ck.get("deep_partial") if isinstance(ck.get("deep_partial"), dict) else None
     if dp is None:
-        pt, pc, perr = _discovery_call(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
-            statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort, s.meta_budget)
-        spend.add(pc)
+        pt, pc, perr = _discovery_call_capped(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
+            statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort, s.meta_budget,
+            spend)
         if not pt:
             return {"plan_cost": round(pc, 4), "error": perr}
         secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
