@@ -360,3 +360,10 @@ launcher, not mathematics:
 
 **Hard-step tally:** 2 of 3 steps proved informally (#435, #1179), against 1 in 20 for hard steps in the Lean loop
 alone. Lean has certified 1 of them so far (#435).
+- **Can a prompt fix the false verdict?** No, on this evidence.
+  - The replay (`novelty_replay.py`, about $1.60) put #1179's r1s3/C1 through the masked novelty prompt again: 2 judges
+    on the current prompt, and 2 on a variant that first asks for the strongest known result on the same question.
+  - All 4 still said "new, significance 2". Both variant judges named Erdős–Rényi's 2·log₂N as the strongest bound they
+    knew. Their text mentions "Hall", but neither cited the Erdős–Hall (1 + o(1))·log₂N bound.
+  - The gap is recall of older literature, not prompting, so the prompt is unchanged. What closes it is the problem's
+    own bibliography. Open-problem runs get it through their library; hard-step runs do not.
