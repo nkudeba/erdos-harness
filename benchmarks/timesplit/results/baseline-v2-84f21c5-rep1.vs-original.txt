@@ -1,0 +1,63 @@
+## baseline-v2-84f21c5-rep1
+#  150 answer=yes solved=False pos=partial/0 neg=partial/0 pieces=0 size=0 closed=0 trivial=0 open=2 $5.98
+#  202 answer=yes solved=False pos=partial/0 neg=not_proved/0 pieces=0 size=0 closed=0 trivial=0 open=1 $8.42
+#  204 answer=no  solved=False pos=partial/0 neg=partial/2 pieces=2 size=4329 closed=2 trivial=0 open=3 $5.56
+#  392 answer=yes solved=False pos=partial/2 neg=partial/0 pieces=2 size=2498 closed=2 trivial=0 open=1 $6.08
+#  401 answer=yes solved=False pos=partial/0 neg=partial/0 pieces=0 size=0 closed=0 trivial=0 open=1 $8.48
+{
+ "items": 5,
+ "solved": 0,
+ "rate": 0.083,
+ "rate_90": [
+  0.001,
+  0.307
+ ],
+ "contradictions": [],
+ "false_direction_stopped": 3,
+ "true_direction_abandoned": 0,
+ "true_direction_certified": 4,
+ "true_closed_modulo_published": [],
+ "true_direction_open_left": 8,
+ "true_pieces": 4,
+ "items_with_pieces": [
+  "204",
+  "392"
+ ],
+ "progress_unmeasured": [],
+ "spend": 34.52,
+ "usd_per_solve": null,
+ "infrastructure_failures": []
+}
+{
+ "paired_items": 5,
+ "solved_only_by_baseline-v2-84f21c5-rep1": [],
+ "solved_only_by_baseline-v2-84f21c5": [],
+ "mcnemar_p": 1.0,
+ "true_certified_delta": -6,
+ "spend_delta": 13.96,
+ "dense": {
+  "pairs": 5,
+  "unmeasured": [],
+  "lost_a_direction": [],
+  "wins": [],
+  "losses": [
+   "202",
+   "392",
+   "401"
+  ],
+  "ties": 2,
+  "p_one_sided": 1.0,
+  "pieces_only": {
+   "wins": [],
+   "losses": [
+    "202",
+    "204",
+    "392",
+    "401"
+   ]
+  },
+  "pieces_mean_delta": -1.2,
+  "certified_size_delta": -2790,
+  "closed_lemmas_delta": -6
+ }
+}

@@ -1,0 +1,68 @@
+## dev-main-a88fab5
+#  150 answer=yes solved=False pos=partial/0 neg=partial/0 pieces=0 size=0 closed=0 trivial=0 open=1 $5.54
+#  202 answer=yes solved=False pos=partial/1 neg=partial/0 pieces=1 size=621 closed=1 trivial=0 open=0 $4.16
+#  204 answer=no  solved=False pos=partial/0 neg=partial/2 pieces=2 size=1500 closed=2 trivial=0 open=1 $2.81
+#  392 answer=yes solved=False pos=partial/1 neg=partial/3 pieces=1 size=1100 closed=1 trivial=0 open=1 $3.81
+#  401 answer=yes solved=False pos=partial/1 neg=partial/5 pieces=1 size=2492 closed=1 trivial=0 open=1 $5.11
+{
+ "items": 5,
+ "solved": 0,
+ "rate": 0.083,
+ "rate_90": [
+  0.001,
+  0.307
+ ],
+ "contradictions": [],
+ "false_direction_stopped": 3,
+ "true_direction_abandoned": 0,
+ "true_direction_certified": 5,
+ "true_closed_modulo_published": [
+  "202"
+ ],
+ "true_direction_open_left": 4,
+ "true_pieces": 5,
+ "items_with_pieces": [
+  "202",
+  "204",
+  "392",
+  "401"
+ ],
+ "progress_unmeasured": [],
+ "spend": 21.43,
+ "usd_per_solve": null,
+ "infrastructure_failures": []
+}
+{
+ "paired_items": 5,
+ "solved_only_by_dev-main-a88fab5": [],
+ "solved_only_by_baseline-v2-84f21c5-rep1": [],
+ "mcnemar_p": 1.0,
+ "true_certified_delta": 1,
+ "spend_delta": -13.09,
+ "dense": {
+  "pairs": 5,
+  "unmeasured": [],
+  "lost_a_direction": [],
+  "wins": [
+   "202",
+   "401"
+  ],
+  "losses": [
+   "392"
+  ],
+  "ties": 2,
+  "p_one_sided": 0.5,
+  "pieces_only": {
+   "wins": [
+    "202",
+    "401"
+   ],
+   "losses": [
+    "392"
+   ]
+  },
+  "pieces_mean_delta": 0.2,
+  "certified_size_delta": -1114,
+  "closed_lemmas_delta": 1
+ }
+}
