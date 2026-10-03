@@ -305,3 +305,13 @@ launcher, not mathematics:
 - **Found on the way, a harness bug that predates this work:** `stage_reduce` compiled each reduction's Lean statement
   without the problem's own `def`s. On statements with `def`s, 95 of 141 reductions died as `Unknown identifier` after
   their numerical check had passed. Fixed in `31d3f6e`. Launch 3's two reductions now type-check as `stated`.
+
+**Lean stage, launch 3** (`runs/20261003-004608-866727-hardlean-erdos727285`, $15.25, 104 min). It ended partial:
+**17 of 25 steps certified** (the second plan split S19 in two), 8 open. The blueprint had 22 steps.
+- The plan rated 9 steps elementary, 13 moderate and 1 hard. Cheap one-shot attempts certified 10 of 14 tried, and
+  depth children 5 of 6.
+- **Open:** S6 (digit surjectivity), S7_digits_spec, S7_phi_basic, S11 (the tower carry step, rated hard), S12 (closure
+  induction), S18, S19b and S21 (every binomial lies in T). These are the proof's core: the Apéry-potential argument.
+  Everything certified is supporting arithmetic.
+- **Resumed by the operator** with `--run-budget` raised from 15 to 35. This is budget only, recorded in the run's
+  `assistance`.
