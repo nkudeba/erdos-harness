@@ -224,3 +224,29 @@ contact with the core, not a new mechanism.
 **After four engine runs (#455 twice, #1203, #153): 14 validated-new claims, all significance 1.** I checked three
 independently: 0.80024, 0.86429 and 1.584. The deep dive did what it was built for, a longer push down the most
 promising line, and moved the glitch threshold from 2/3 to 3/4. That still did not reach significance 2.
+
+### v3 on #1203, a continuation: $32.29 (`runs/20261002-190542-547817-erdos1203`)
+
+**The map.** It ran 370,259 tokens in three turns, 69 minutes and $7.56. The multi-message fix kept it whole: 21,895
+characters with every section. It aimed past v1.1: a power-saving exceptional set (significance 2), liminf F ≥
+1.587 + δ (significance 3), and a sieve barrier theorem (significance 2).
+
+**Rounds 1–2: 8 sessions, mostly judged routine** (8 routine, 7 broken).
+- **The map's own sieve barrier was refuted for r = 0.** A Selberg majorant gives a power saving. Round 2 then proved
+  the saving is special to r = 0 and fails for r ≥ 1.
+- **F has normal order w(15)·log log n**, via a uniform multi-shift Rankin–Brun lemma.
+- **Off a polylog-thin explicit set** (n near 61-smooth plants), F(n) ≥ 6·w(2312) = 1.585743. That is exactly the
+  bounded-window ceiling under Dickson's conjecture. The significance-3 target itself runs into the parity barrier.
+- **A conditional proof that F → ∞** under a near-independence hypothesis U(c), giving F ≥ (1/log 2 − ε)·log log log n.
+  The adversary broke it: U(c) was written for real x and fails for non-integer x. The fix it named, integer x, is the
+  only case the proof uses. This motivated the repair pass (`d3a22f9`).
+- **Heuristic and moment theorem:** liminf F/log log log n = 1/log 2 in the random model.
+
+**The deep dive:** $0.60 to plan, $3.65 for the session.
+- **C1, validated-new: liminf F(n)/log log log n ≤ 80**, with N^{1−o(1)} such n in (N, 2N].
+  - The two novelty judges split, 1 and 2. One wrote that "no published upper bound on liminf F … is known". The
+    conservative panel records 1.
+  - It matches the conjectured order: round 2's heuristic gives 1/log 2 ≈ 1.44.
+  - I checked the proof's structure and elementary lemmas (`evidence/1203/v3-deep-NOTEBOOK.md`), not every constant.
+  - **This is the closest any claim has come to the bar.**
+- **C2, broken (fatal):** it overstated what the construction certifies.
