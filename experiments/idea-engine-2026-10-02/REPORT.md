@@ -332,3 +332,31 @@ launcher, not mathematics:
 - **For the hard-step failure mode** ("steps rated hard succeed 1 time in 20"): an informal, refereed proof from the
   engine, used as the blueprint, took a stalled hard step to a certified one. The cost was about 5× the original run
   ($74 for engine and Lean, against $12.84), and it needed operator budget decisions to get there.
+
+**Two more hard steps from the bank** (`--engine-sessions 3 --engine-rounds 1 --engine-deep-budget 6`, $20 caps):
+- **#1179 `hyp_fixed_delta`** ($15.11, `runs/20261003-083314-684014-hardstep-erdos799065`): the uniform ε-balance of
+  random k-subsets of every abelian group of order N, with k = ⌈(1+δ)·log₂N⌉. **The deep dive proved the step
+  itself** (deep/C1). Both the referee and the adversary passed it, and the panel rated it a restatement at
+  significance 3.
+  - The proof is a moment method: a Fourier "Good" event, then a split of G into small and large cyclic factors, rank
+    bounds, an Odlyzko-type count of 0/1 relations, and Cramer minor bounds.
+  - It is informal. A Lean stage would need finite abelian duality and moment estimates, far more than #435 did, and is
+    not funded.
+- **A false significance-2 verdict, recorded as a calibration failure.** In the same #1179 run, r1s3/C1 proves the
+  statement with (3/2 + δ)·log₂N. Both novelty judges called it new at significance 2: the first claim ever to clear
+  the conservative panel's bar.
+  - It is weaker than the (1 + o(1))·log₂N bound the problem's page attributes to Erdős–Hall (1976).
+  - The judges did not know that paper, and hard-step runs skip the literature check and get no library.
+  - The pre-registered bar's own literature-search requirement exists for exactly this case. A panel "new" is not
+    evidence of novelty for older literature.
+- **#152 `hyp_runs`** ($13.02, `runs/20261003-072447-715298-hardstep-erdos792759`): **not proved.** The step needs
+  diffRuns(A) ≥ 3|A| + M for every large Sidon set.
+  - The best results were R ≥ n − 3 (validated new, significance 1) and a conditional R ≥ c·n^{3/2}.
+  - Its deep dive never ran: the plan call spent $2.62 against its $2 cap and wrote nothing. That is now fixed:
+    - `cdb0a17`: a capped call is retried at 1.5× its cap;
+    - `d2a06bf`: a deep dive that failed at its plan is retried on resume;
+    - `7e4a8f4`: a finished engine run can be resumed.
+  - Resumed with a $23 cap to run it.
+
+**Hard-step tally:** 2 of 3 steps proved informally (#435, #1179), against 1 in 20 for hard steps in the Lean loop
+alone. Lean has certified 1 of them so far (#435).
