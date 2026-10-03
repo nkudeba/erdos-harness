@@ -311,6 +311,15 @@ class TargetRating(unittest.TestCase):
         self.assertEqual(call.prompts("engine-target-rate"), [])               # a resume reuses the checkpointed ratings
         self.assertTrue(any("(T1, type QUANT, significance 3 of 3)" in p for label, p in sess.calls))
 
+    def test_a_map_and_rate_screen_runs_no_session(self):
+        """`--engine-sessions 0`: the frontier map and the judges' ratings only, to choose where a full run is worth buying."""
+        res, call, sess = self._run(H.EngineSettings(sessions=0, rounds=2, total_budget=30, min_target_sig=2))
+        self.assertEqual(sess.calls, [])
+        self.assertEqual(len(call.prompts("engine-target-rate")), 6)
+        self.assertEqual(res["rounds"], [])
+        self.assertEqual(call.prompts("engine-meta"), [])
+        self.assertEqual(res["ratings"]["T2"]["significance"], 2)
+
     def test_the_conservative_reading_and_an_empty_gate(self):
         def split(prompt, n):                                                  # one judge says new 3, the other routine 1
             v = {"verdict": "new", "significance": 3} if n % 2 else {"verdict": "routine", "significance": 1}
