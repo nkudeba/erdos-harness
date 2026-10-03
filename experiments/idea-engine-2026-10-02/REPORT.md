@@ -280,6 +280,10 @@ The first failure on the list is that steps rated hard succeed 1 time in 20. `ha
 left by train runs (`--list`). Each runs masked under `--benchmark`, with a fresh synthetic id, as the engine's whole
 target. `hardsteps_lean.py` then hands a refereed proof to the deductive loop as its blueprint, and Lean decides.
 
+Protocol note: the step's frame tells the model that the whole problem "was resolved recently, and you are not told
+how". That is a cue that a proof exists, which an open problem never gives, and #435's novelty judges repeated it. A
+hard-step result therefore measures the engine on a step known to be provable. It is not evidence about open problems.
+
 **#435 `hyp_top`** (bank index 5, from train-conv): X(n) − n is not a sum of the binomials C(n,i), 0 < i < n, for n not
 a prime power. With the Brauer upper bound, this is the whole lower-bound half of the problem. The Lean loop had failed
 on it. Engine run: $8.00, 11 claims (`runs/20261002-235647-826042-hardstep-erdos727285`).

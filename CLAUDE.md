@@ -514,7 +514,9 @@ the whole run's remainder (a `budget_handover` event), so a direction that stops
 
 `stage_reduce` now asks for a Lean statement beside each check; a checked reduction the cascade closes is
 `certified` and so labelled in prompts, one that only type-checks is `stated` and carried "as a hypothesis,
-not a fact". Nothing about the honesty gates changed: a closed skeleton is *mechanically verified*, never a
+not a fact". The statement is compiled under the frozen statement's own `def`s and `open`s (`reduction_source`). Until
+2026-10-03 it was compiled alone, and 95 of 141 reductions on statements with `def`s died as `Unknown identifier`.
+Nothing about the honesty gates changed: a closed skeleton is *mechanically verified*, never a
 resolution; `claimEligible=false` until human review. Design and acceptance test:
 `docs/deductive-research-mode.md`. Covered by `tests/test_deductive_mode.py`.
 
@@ -847,6 +849,23 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     was re-run independently and the literature search found nothing better.
   - A barrier: the Lean run's finite core implies class-number-one finiteness.
   - The engine rated both significance 1; the bar for the loop is significance ≥ 2.
+- **Later additions**, each off unless flagged:
+  - `engine/checkpoint.json` resumes a cut-off run without buying anything twice: the map, each session and each
+    verdict.
+  - `--engine-deep-budget` buys one long session on the most promising line after the rounds.
+  - Broken claims a judge calls fixable are repaired once and re-judged (`--engine-repair-max`, default 3).
+- **Tally after v1–v3** on #455, #1203, #153 and #156: 18 validated-new claims, every one significance 1. The best are
+  #455's liminf q_n/n² ≥ 0.86429 (certificate re-run independently) and #156's cyclic analogue.
+- **`--engine-min-target-sig N`** (v4): the two novelty judges rate every frontier target as if proved, on the same
+  scale, and round 1 attacks only targets they rate new at ≥ N.
+  - Why: the maps labelled 1–6 targets per problem at significance 2–3, but sessions settled for what they could prove.
+  - The final verdict is still the post-hoc panel on the actual proof.
+- **Hard steps:** `experiments/idea-engine-2026-10-02/hardsteps.py` points the engine at steps train runs left open as
+  hard. `hardsteps_lean.py` hands a refereed proof to the deductive loop as its blueprint.
+  - The frozen theorem must be named `erdos_<id>`: a CLI run matches plans only against that name, and the loop now
+    refuses a statement without it.
+  - The frame tells the model that the problem was resolved, so a hard-step result is not evidence about open
+    problems.
 
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses
