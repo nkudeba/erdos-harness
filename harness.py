@@ -1340,8 +1340,9 @@ Return ONE ```json block:
                    Say it as something to assert, not as background. Omit if the reduction implies no
                    directly assertable constraint.",
     "lean": "OPTIONAL but valuable: the claim as a CLOSED Lean 4 theorem statement,
-             `theorem reduction_<k> : <Prop> := by\n  sorry` (no free variables; only Mathlib and the library
-             names above). A reduction that is also PROVED in Lean may replace the working target; one that is
+             `theorem reduction_<k> : <Prop> := by\n  sorry` (no free variables; only Mathlib, the library
+             names above, and the frozen statement's own definitions, which are in scope: use them by name and do
+             not restate them). A reduction that is also PROVED in Lean may replace the working target; one that is
              only checked numerically is carried as a hypothesis, never as fact.",
     "check": "python source that prints REDUCTION-OK or REDUCTION-FAIL <why>"}}
 ]}}"""
@@ -6423,6 +6424,8 @@ echo "exit=${{PIPESTATUS[0]}}"
         if has_banned(code, allow_sorry=True) or not re.search(r"\btheorem\s+\w+", code):
             entry["lean_status"] = "ill-typed"
             return
+        name = reduction_theorem_name(code)
+        code = reduction_source(code, self.state.get("statement") or "")
         try:
             chk = self.check(code, f"reduction-{i}")
         except Exception as e:                                  # noqa: BLE001 - never fail the stage on this
@@ -6433,7 +6436,7 @@ echo "exit=${{PIPESTATUS[0]}}"
             entry["lean_error"] = (chk["errors"][:1] or [""])[0][:200]
             return
         code = chk.get("body", code)
-        entry["lean"], entry["lean_status"], entry["lean_name"] = code, "stated", decl_name(code)
+        entry["lean"], entry["lean_status"], entry["lean_name"] = code, "stated", name
         if not chk["sorries"]:
             entry["lean_status"] = "certified"
             return
@@ -9964,6 +9967,34 @@ def skeleton_context(skeleton: str, pos: int = -1) -> list[str]:
             else:
                 out.append(d)
     return out
+
+
+def reduction_source(code: str, frozen: str) -> str:
+    """A reduction's Lean statement, compiled where it was written: under the frozen statement's own `def`s and
+    `open`s. It used to be compiled alone, so a reduction about the problem's own objects failed with `Unknown
+    identifier` and was dropped as ill-typed: 95 of the 141 reductions on statements with `def`s, every one of them
+    after its numerical check had passed (the first #435 hard-step Lean run lost its Apéry-set reduction this way).
+    A definition the reduction restates itself, or an `open` it already has, is not added twice."""
+    src = strip_comment_lines(code)
+    ctx = []
+    for d in skeleton_context(frozen):
+        head = strip_comment_lines(d).strip()
+        m = _DECL_NAME_RE.match(head)
+        if m:
+            if re.search(rf"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
+                         rf"(?:def|abbrev|structure|inductive|class|instance|theorem|lemma)\s+{re.escape(m.group(1))}(?![\w'.])", src):
+                continue
+        elif norm_ws(head) in norm_ws(src):
+            continue
+        ctx.append(d.strip("\n"))
+    return "\n\n".join(ctx + [code.strip()]) if ctx else code
+
+
+def reduction_theorem_name(code: str) -> str:
+    """The reduction's own theorem: `decl_name` would name the first `def` once the frozen context is prefixed."""
+    m = re.search(r"(?m)^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+)*(?:theorem|lemma)\s+([^\s:({\[]+)",
+                  strip_comment_lines(code))
+    return m.group(1) if m else decl_name(code)
 
 
 def hypothesis_substatement(skeleton: str, name: str) -> str | None:

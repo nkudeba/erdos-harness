@@ -307,6 +307,26 @@ class ReductionCertification(unittest.TestCase):
         self.assertEqual(e["lean_status"], "certified")
         self.assertEqual(e["lean_name"], "reduction_1")
 
+    def test_compiled_under_the_frozen_defs(self):
+        """95 of 141 reductions on statements with `def`s died as `Unknown identifier`: compiled without the defs."""
+        frozen = ("open Finset\n\ndef erdos_7_Rep (n : ℕ) : Prop := n = n\n\n"
+                  "theorem erdos_7_hyp_top : ∀ n : ℕ, erdos_7_Rep n := by\n  sorry")
+        h = _stub(self.tmp.name, statement=frozen)
+        seen = []
+        inner = h.check
+        h.check = lambda body, name: seen.append(body) or inner(body, name)
+        e = {"id": "R1"}
+        h._certify_reduction_statement(e, "theorem reduction_1 : ∀ n, erdos_7_Rep n := by\n  sorry", 0)
+        self.assertEqual(e["lean_status"], "stated")
+        self.assertEqual(e["lean_name"], "reduction_1")
+        self.assertIn("def erdos_7_Rep", seen[0])
+        self.assertIn("open Finset", seen[0])
+        self.assertNotIn("erdos_7_hyp_top", seen[0])          # the target is not a premise
+        own = "def erdos_7_Rep (n : ℕ) : Prop := True\n\ntheorem reduction_2 : erdos_7_Rep 0 := by\n  sorry"
+        self.assertEqual(H.reduction_source(own, frozen).count("def erdos_7_Rep"), 1)
+        self.assertEqual(H.reduction_theorem_name(own), "reduction_2")
+        self.assertEqual(H.reduction_source(own, "theorem t : True := by\n  sorry"), own)
+
     def test_ill_typed_or_banned_is_dropped(self):
         h = _stub(self.tmp.name)
         e = {"id": "R1"}

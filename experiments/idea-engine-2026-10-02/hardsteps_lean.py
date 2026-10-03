@@ -38,7 +38,9 @@ def main() -> int:
     m = re.search(r"\berdos_(\d+)", st["statement"])
     old_id = m.group(1) if m else None
     sid = str(prob["id"])
-    lean = re.sub(rf"\berdos_{old_id}\b", f"erdos_{sid}", st["statement"]) if old_id else st["statement"]
+    # (?!\d), not \b: every identifier continues with "_" (erdos_27285_hyp_top, erdos_27285_Rep), and \b after the
+    # digits never matched, so the first #435 Lean run kept the old ids and no plan could parse against the new one.
+    lean = re.sub(rf"\berdos_{old_id}(?!\d)", f"erdos_{sid}", st["statement"]) if old_id else st["statement"]
     answer = "true" if c["status"] == "PROVED" else "false"
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-hardlean-erdos{sid}"
     run_dir.mkdir(parents=True)
