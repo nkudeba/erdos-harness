@@ -389,6 +389,71 @@ class Resume(unittest.TestCase):
         self.assertEqual(res["deep"]["validated"], 1)
 
 
+REPAIRED = """=== VERDICT
+REPAIRED: the hypothesis is restricted to integer x, the only case the proof uses.
+=== STATEMENT
+Assume U(c) for integer x. Then F(n) tends to infinity.
+=== PROOF
+As before, with x = n - 1 an integer throughout.
+=== CHANGES
+U(c) now quantifies over integers, so the adversary's non-integer x no longer applies.
+"""
+
+
+class Repair(unittest.TestCase):
+    """#1203: the adversary broke a conditional proof of the whole statement over a technicality it called fixable
+    (the hypothesis was stated for real x, the proof uses integer x). A fixable break used to be final."""
+
+    def _call(self, fatal=False, severity="fixable"):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-repair":
+                return "=== VERDICT\nFATAL: the counterexample stands.\n" if fatal else REPAIRED
+            broken = "U(c) for real x" in prompt
+            if purpose == "engine-adversary":
+                return "```json\n" + json.dumps({"broken": broken, "how": "non-integer x" if broken else None,
+                                                 "severity": severity if broken else "none"}) + "\n```"
+            return judge(purpose)
+        return FakeCall(script, cost=0.1)
+
+    def _run(self, call, repair_max=3, checkpoint=None, save=None):
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "CONDITIONAL", "Assume U(c) for real x. Then F -> infinity.")))
+        return H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50,
+                                                                          repair_max=repair_max),
+                            checkpoint=checkpoint, save=save)
+
+    def test_a_fixable_break_is_repaired_and_judged_again(self):
+        call = self._call()
+        res = self._run(call)
+        by = {c["id"]: c for c in res["ledger"]}
+        self.assertEqual(by["C1"]["validation"]["status"], "broken")          # the original stays as it was judged
+        self.assertEqual(by["C1r"]["validation"]["status"], "validated-new")
+        self.assertEqual(by["C1r"]["repaired_from"], "r1s1/C1")
+        self.assertIn("integer x", by["C1r"]["statement"])
+        self.assertEqual(len(call.prompts("engine-repair")), 1)
+        self.assertEqual([c["id"] for c in res["validated"]], ["C1r"])
+
+    def test_fatal_repairs_and_fatal_breaks_add_nothing(self):
+        res = self._run(self._call(fatal=True))
+        self.assertEqual([c["id"] for c in res["ledger"]], ["C1"])
+        call = self._call(severity="fatal")                                   # the referee passes, the adversary: fatal
+        res = self._run(call)
+        self.assertEqual(res["ledger"][0]["validation"]["status"], "broken")
+        self.assertEqual(call.prompts("engine-repair"), [])                   # a fatal break is never "repaired"
+
+    def test_repairs_are_checkpointed(self):
+        box = {}
+
+        def save(ck):
+            box["ck"] = json.loads(json.dumps(ck))
+        self._run(self._call(), save=save)
+        again = self._call()
+        res = self._run(again, checkpoint=box["ck"], save=save)
+        self.assertEqual(again.prompts("engine-repair"), [])
+        self.assertIn("C1r", [c["id"] for c in res["ledger"]])
+
+
 class Panel(unittest.TestCase):
     def test_the_conservative_verdict_wins(self):
         P = H.engine_novelty_panel

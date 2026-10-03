@@ -3790,6 +3790,33 @@ At least half must aim at CORE, or at a result an expert would call significant.
 its first step."""
 
 
+REPAIR_PROMPT = """A referee or an adversary found a problem in a claimed theorem from a research team working on an open problem.
+Repair it if you can. Fix the statement (narrow its range, add a missing hypothesis, correct a constant) and the proof,
+so that the objection no longer applies. Weaken the claim only as far as the objection forces. If the objection is
+fatal, say so: a false repair costs more than none.
+
+THE PROBLEM (context):
+{statement}
+
+THE CLAIM:
+{claim}
+
+ITS PROOF:
+{proof}
+
+THE OBJECTIONS:
+{objections}
+
+Write exactly these sections, each starting with its === line:
+=== VERDICT
+REPAIRED or FATAL, and one sentence why.
+=== STATEMENT
+The corrected claim, precise and self-contained (omit if FATAL).
+=== PROOF
+The complete corrected proof, every step (omit if FATAL).
+=== CHANGES
+What changed, and why each objection no longer applies."""
+
 LIT_QUERY_PROMPT = """Write search queries that would find a published paper proving the claim below, or something stronger.
 
 THE PROBLEM (context):
@@ -3910,6 +3937,8 @@ class EngineSettings:
     meta_budget: float = 2.0
     validate_max: int = 8            # claims validated per round, strongest first
     total_budget: float = 30.0
+    repair_max: int = 3              # broken claims the judges call fixable, repaired once and re-judged (v4)
+    repair_budget: float = 1.5
     deep_budget: float = 0.0         # > 0: after the rounds, ONE long session on the line most likely to matter (v3)
     deep_turns: int = 200
     deep_effort: str = "high"
@@ -4073,6 +4102,52 @@ def engine_status(v: dict) -> str:
     if verdict == "new":
         return "validated-new"
     return f"valid-{verdict}" if verdict in ("known", "routine", "restatement") else "valid-unrated"
+
+
+def engine_claim_key(c: dict) -> str:
+    return f"{c.get('session')}/{c.get('id')}"
+
+
+def engine_fixable(c: dict) -> bool:
+    """Broken, and a judge said the error can be fixed. On #1203 the adversary broke a conditional proof of the whole
+    statement because its hypothesis, written "for all real x", is false for non-integer x; the fix it named, integer x,
+    is the only case the proof uses."""
+    v = c.get("validation") or {}
+    if v.get("status") != "broken" or c.get("repaired_from"):
+        return False
+    ref, adv = v.get("referee") or {}, v.get("adversary") or {}
+    return bool((ref.get("valid") is False and ref.get("fixable") is True) or
+                (adv.get("broken") is True and str(adv.get("severity") or "").lower() == "fixable"))
+
+
+def engine_repair(call, s: "EngineSettings", statement: str, known: str, c: dict, spend: _DiscoverySpend, search=None) -> dict:
+    """One repair of a fixable claim, then the full validation again. Returns the repaired claim (validated), or a
+    record of why there is none. A repaired claim keeps its session and gets id `<id>r`."""
+    v = c.get("validation") or {}
+    objections = "\n".join(x for x in (
+        f"REFEREE: {(v.get('referee') or {}).get('first_error')}" if (v.get("referee") or {}).get("valid") is False else "",
+        f"ADVERSARY: {(v.get('adversary') or {}).get('how')}" if (v.get("adversary") or {}).get("broken") is True else "") if x)
+    rt, rc, rerr = _discovery_call(call, "engine-repair", REPAIR_PROMPT.format(
+        statement=statement, claim=_claim_text(c), proof=clip_middle(c.get("proof") or "", 20000), objections=objections),
+        s.judge_effort, s.repair_budget)
+    spend.add(rc)
+    if not rt:
+        return {"error": rerr, "cost": round(rc, 4)}
+    secs = dict((t.upper(), b) for t, b in delimited_sections(rt))
+    if _first_word(secs.get("VERDICT", "")) != "REPAIRED" or not secs.get("STATEMENT"):
+        return {"verdict": "fatal", "why": (secs.get("VERDICT") or rt)[:600], "cost": round(rc, 4)}
+    new = {"id": f"{c.get('id')}r", "session": c.get("session"), "_kind": c.get("_kind"), "status": c.get("status"),
+           "type": c.get("type"), "statement": secs["STATEMENT"][:3000], "beyond": c.get("beyond", ""),
+           "proof": secs.get("PROOF", ""), "repaired_from": engine_claim_key(c), "changes": secs.get("CHANGES", "")[:3000],
+           "repair_cost": round(rc, 4)}
+    new["validation"] = engine_validate(call, s, statement, known, new, spend)
+    if search is not None and new["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
+        lit = engine_literature_check(call, search, s, statement, new)
+        spend.add(lit.get("cost"))
+        new["validation"]["literature"] = lit
+        if lit.get("verdict") in ("known", "routine"):
+            new["validation"]["status"] = f"valid-{lit['verdict']}"
+    return new
 
 
 def _claim_text(c: dict) -> str:
@@ -4336,6 +4411,14 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         ck.pop("deep_partial", None)
         keep()
     ledger = ledger + list((deep or {}).get("claims_list") or [])
+    repairs = ck.setdefault("repairs", {})
+    fixable = [c for c in ledger if engine_fixable(c) and engine_claim_key(c) not in repairs]
+    for c in sorted(fixable, key=_claim_rank, reverse=True)[: max(0, s.repair_max - len(repairs))]:
+        if not spend.room(s.repair_budget + 2 * s.judge_budget + 2 * s.novelty_budget):
+            break
+        repairs[engine_claim_key(c)] = engine_repair(call, s, statement, known, c, spend, search)
+        keep()
+    ledger = ledger + [r for r in repairs.values() if isinstance(r, dict) and r.get("statement")]
     validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
     ans, conf = f.get("answer"), f.get("confidence")
     decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
@@ -4962,7 +5045,7 @@ class Harness:
                            core_share=float(g("engine_core_share", 0.5)), total_budget=float(g("engine_total_budget", 30.0)),
                            frontier_budget=float(g("engine_frontier_budget", 8.0)),
                            deep_budget=float(g("engine_deep_budget", 0.0)), deep_turns=int(g("engine_deep_turns", 200)),
-                           deep_effort=str(g("engine_deep_effort", "high")))
+                           deep_effort=str(g("engine_deep_effort", "high")), repair_max=int(g("engine_repair_max", 3)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         return s
@@ -10691,6 +10774,8 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-frontier-budget", type=float, default=8.0, help="USD cap for the frontier map")
     runp.add_argument("--engine-deep-budget", type=float, default=0.0,
                       help="> 0: after the rounds, one long session (this USD cap) on the line most likely to matter")
+    runp.add_argument("--engine-repair-max", type=int, default=3,
+                      help="broken claims a judge calls fixable, repaired once and re-judged, per run")
     runp.add_argument("--engine-deep-turns", type=int, default=200)
     runp.add_argument("--engine-deep-effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
