@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "04519f07e3a4ba65ce71976c1516990fb856c4272ae8229ddd97757e56b6245e",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "dfc9012f90b815a7eebc3605a587dd9b3affe6b781780b0b61af306a96978e8c"
+    "manual_reviews_sha256": "2ea3d7347ecd0230f0b63302ad892b2606e51f7b635ec0bad8761febbba8f122"
   },
   "problems": [
     {
@@ -43315,6 +43315,7 @@
         "Discovery screen 2026-10-02 (crossfed + ladder, no Lean): believed TRUE; the ladder proved informally limsup F = ∞, liminf F ≥ 1 and F → ∞ on a density-one set, but every attempt stops at the same core.",
         "Research engine v1.1 + v3 (2026-10-02, $22.10 + $32.29, informal): liminf F >= 7w(30033) = 1.58407 unconditionally (the 1.584 proof was checked by hand here). Off a polylog-thin explicit set of smooth plants, F(n) >= 6w(2312) = 1.585743, which is exactly the bounded-window ceiling under Dickson's conjecture.",
         "Research engine v3 deep dive (validated new; the two novelty judges rated it significance 1 and 2; literature check new; not Lean-checked, not human-reviewed): for at least N^{1-o(1)} integers n in (N,2N], F(n) <= 80 logloglog n, so liminf F(n)/logloglog n <= 80. This matches the conjectured true order (liminf F/L3 = 1/log 2, heuristic). A conditional proof that F -> infinity under a near-independence hypothesis U(c) was broken over a fixable technicality: the hypothesis was stated for real x, the proof uses integer x.",
+        "Repair pass (2026-10-03, informal): the conditional proof that F -> infinity under the near-independence hypothesis U(c), repaired to integer x, now passes the referee and the adversary, but the novelty judges call it a restatement or routine. U(c) carries essentially the whole difficulty, so it is not conditional progress.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
