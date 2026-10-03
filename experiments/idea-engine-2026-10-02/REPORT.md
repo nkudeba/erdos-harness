@@ -273,3 +273,31 @@ O((N log N)^{1/3}) above.
 
 **Tally after four problems: 18 validated-new claims, all significance 1.** One got a 2 from one of its two judges: #1203's
 liminf F/L₃ ≤ 80.
+
+### Hard steps: the engine on a step the Lean loop failed (hs1, 2026-10-03)
+
+The first failure on the list is that steps rated hard succeed 1 time in 20. `hardsteps.py` banks the 18 open hard steps
+left by train runs (`--list`). Each runs masked under `--benchmark`, with a fresh synthetic id, as the engine's whole
+target. `hardsteps_lean.py` then hands a refereed proof to the deductive loop as its blueprint, and Lean decides.
+
+**#435 `hyp_top`** (bank index 5, from train-conv): X(n) − n is not a sum of the binomials C(n,i), 0 < i < n, for n not
+a prime power. With the Brauer upper bound, this is the whole lower-bound half of the problem. The Lean loop had failed
+on it. Engine run: $8.00, 11 claims (`runs/20261002-235647-826042-hardstep-erdos727285`).
+- **The step itself was proved twice** (r1s1/C1, then the deep dive's C1r). Each proof passed both the step referee and
+  the adversary. The panel rated each a *restatement* at significance 3, which here means it is the step, proved whole.
+- **The core inequality (E)** was proved three times (r1s2/C1, r1s3/C3, deep/C2). It says every non-tower binomial
+  C(n,i) is at least its residue's potential.
+- **Validated new** (significance 1 and 2 from the two judges): the dual-certificate reduction r1s3/C1. A digit
+  potential on ℤ/n is a lower bound for the Apéry set once (E) and a carry lemma hold.
+- 3 claims broke, among them the finite check to n = 160 that one session reported as proved.
+
+This is informal and refereed only. The Lean stage took three launches, and both failures were bugs in this experiment's
+launcher, not mathematics:
+- **Launch 1:** the rename `erdos_<old>\b` never matches before `_`, so the frozen statement kept its old ids. Killed.
+- **Launch 2** ($1.09): a CLI run matches plans only against `theorem erdos_<id>`, and the step's theorem was
+  `erdos_<id>_hyp_top`. A complete four-hypothesis skeleton was logged as "no skeleton block in the plan". Replayed
+  offline with the theorem renamed, the same plan parses and compiles. Killed. The loop now refuses such a statement
+  before any call (`60d3130`).
+- **Found on the way, a harness bug that predates this work:** `stage_reduce` compiled each reduction's Lean statement
+  without the problem's own `def`s. On statements with `def`s, 95 of 141 reductions died as `Unknown identifier` after
+  their numerical check had passed. Fixed in `31d3f6e`. Launch 3's two reductions now type-check as `stated`.
