@@ -1394,15 +1394,20 @@
   },
   "1203": {
     "rationale": [
-      "Discovery screen 2026-10-02 (crossfed + ladder, no Lean): believed TRUE; the ladder proved informally limsup F = ∞, liminf F ≥ 1 and F → ∞ on a density-one set, but every attempt stops at the same core."
+      "Discovery screen 2026-10-02 (crossfed + ladder, no Lean): believed TRUE; the ladder proved informally limsup F = ∞, liminf F ≥ 1 and F → ∞ on a density-one set, but every attempt stops at the same core.",
+      "Research engine v1.1 + v3 (2026-10-02, $22.10 + $32.29, informal): liminf F >= 7w(30033) = 1.58407 unconditionally (the 1.584 proof was checked by hand here). Off a polylog-thin explicit set of smooth plants, F(n) >= 6w(2312) = 1.585743, which is exactly the bounded-window ceiling under Dickson's conjecture.",
+      "Research engine v3 deep dive (validated new; the two novelty judges rated it significance 1 and 2; literature check new; not Lean-checked, not human-reviewed): for at least N^{1-o(1)} integers n in (N,2N], F(n) <= 80 logloglog n, so liminf F(n)/logloglog n <= 80. This matches the conjectured true order (liminf F/L3 = 1/log 2, heuristic). A conditional proof that F -> infinity under a near-independence hypothesis U(c) was broken over a fixable technicality: the hypothesis was stated for real x, the proof uses integer x."
     ],
     "requirements": [
-      "Show that EVERY short interval (n, n+K], K = n^{o(1)}, contains an integer with ≥ C·log K/log log K distinct prime factors: control of large prime divisors in arbitrary short intervals, beyond current sieve methods."
+      "Show that EVERY short interval (n, n+K], K = n^{o(1)}, contains an integer with ≥ C·log K/log log K distinct prime factors: control of large prime divisors in arbitrary short intervals, beyond current sieve methods.",
+      "F -> infinity needs every n, not almost every n. Counting methods give at best N exp(-(log N)^{1-o(1)}) exceptions and cannot certify fewer than one; bounded windows cap at 6w(2312); the growth from windows of length (log n)^A needs >= 2 large primes in some term, which is the parity barrier."
     ],
     "sources": [
-      "experiments/open-discovery-2026-10-02/REPORT.md"
+      "experiments/open-discovery-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/REPORT.md",
+      "experiments/idea-engine-2026-10-02/evidence/1203/v3-deep-NOTEBOOK.md"
     ],
-    "assessed": "2026-10-01"
+    "assessed": "2026-10-02"
   },
   "1213": {
     "score": 90,
