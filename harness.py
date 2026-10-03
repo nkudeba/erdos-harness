@@ -10137,8 +10137,17 @@ def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:
     if not span:
         return None
     have = {decl_name(d) for d in skeleton_defs(skeleton)}
-    parts = [d for d in split_decls(strip_imports(proof_block))
-             if not (DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n")) and decl_name(d) in have)]
+    blocks = split_decls(strip_imports(proof_block))
+    keep = [not (DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n")) and decl_name(d) in have) for d in blocks]
+    # `open X in` scopes the NEXT command only, and `split_decls` makes it a block of its own. When that command is a
+    # dropped duplicate def, the `open ... in` goes with it. Left behind, it scoped whatever came next: in #435's
+    # hard-step run it met a recursive child's `namespace <sub>_ns`, Lean closed its implicit section on the
+    # namespace, and a certified proof of S19b was thrown away as `splice_failed`.
+    for k in range(len(blocks) - 1, -1, -1):
+        s = strip_comment_lines(blocks[k]).strip()
+        if re.match(r"open\s", s) and re.search(r"\bin$", s) and (k + 1 >= len(blocks) or not keep[k + 1]):
+            keep[k] = False
+    parts = [d for d, kp in zip(blocks, keep) if kp]
     if not any(decl_name(d) == name for d in parts):
         return None
     blk = skeleton[span[0]:span[1]]

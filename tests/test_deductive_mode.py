@@ -1,6 +1,6 @@
 """The deductive research loop (docs/deductive-research-mode.md): the unit of progress is a certified
 CONDITIONAL THEOREM whose open hypotheses are the residual. No provider calls; Lean is mocked."""
-import argparse, json, sys, tempfile, unittest
+import argparse, os, json, sys, tempfile, unittest
 from pathlib import Path
 from unittest.mock import patch
 
@@ -1118,6 +1118,40 @@ class SplicedNamespaceDefs(unittest.TestCase):
         sub = H.hypothesis_substatement(skel, "erdos_99_hyp_b")
         self.assertNotIn("MetaM", sub)
         self.assertIn("theorem erdos_99_hyp_b : search 1 = false := by\n  sorry", sub)
+
+
+class SpliceDropsAnOrphanedOpenIn(unittest.TestCase):
+    """#435 hard step: a recursive child's proof repeats the skeleton's `open Classical in` + `noncomputable def`. The
+    duplicate def was dropped, its `open ... in` was not, and it scoped the child's own `namespace <sub>_ns`. Lean then
+    closed the implicit section on that namespace, and a certified proof of S19b was lost as `splice_failed`."""
+    SKEL = ("open Classical in\nnoncomputable def phi (n : ℕ) : ℕ := if n = 0 then 0 else n\n\n"
+            "theorem erdos_99_hyp_a : phi 0 = 0 := by\n  sorry\n\n"
+            "theorem erdos_99 : phi 0 = 0 := by\n  exact erdos_99_hyp_a")
+    PROOF = ("open Classical in\nnoncomputable def phi (n : ℕ) : ℕ := if n = 0 then 0 else n\n\n"
+             "namespace erdos_99_hyp_a_hyp_b_ns\ntheorem erdos_99_hyp_a_hyp_b : True := trivial\nend erdos_99_hyp_a_hyp_b_ns\n\n"
+             "theorem erdos_99_hyp_a_hyp_b : True := by\n  exact erdos_99_hyp_a_hyp_b_ns.erdos_99_hyp_a_hyp_b\n\n"
+             "theorem erdos_99_hyp_a : phi 0 = 0 := by\n  simp [phi]")
+
+    def test_the_open_in_goes_with_its_dropped_def(self):
+        sp = H.splice_hypothesis(self.SKEL, "erdos_99_hyp_a", self.PROOF)
+        block = sp[sp.index("namespace erdos_99_hyp_a_ns"):sp.index("end erdos_99_hyp_a_ns")]
+        self.assertNotIn("def phi", block)                       # the skeleton's constant is reused
+        self.assertNotIn("open Classical in", block)             # and its scoping line went with it
+        self.assertEqual(sp.count("open Classical in"), 1)
+        self.assertIn("exact erdos_99_hyp_a_ns.erdos_99_hyp_a", sp)
+
+    def test_an_open_in_before_a_kept_declaration_stays(self):
+        proof = self.PROOF.replace("theorem erdos_99_hyp_a : phi 0", "open Classical in\ntheorem erdos_99_hyp_a : phi 0")
+        sp = H.splice_hypothesis(self.SKEL, "erdos_99_hyp_a", proof)
+        block = sp[sp.index("namespace erdos_99_hyp_a_ns"):sp.index("end erdos_99_hyp_a_ns")]
+        self.assertRegex(block, r"open Classical in\s*\ntheorem erdos_99_hyp_a : phi 0")
+
+    @unittest.skipUnless(os.environ.get("DEDUCTIVE_LEAN_TESTS") == "1", "needs Lean (DEDUCTIVE_LEAN_TESTS=1)")
+    def test_the_spliced_skeleton_compiles(self):
+        sp = H.splice_hypothesis(self.SKEL, "erdos_99_hyp_a", self.PROOF)
+        with tempfile.TemporaryDirectory() as d:
+            r = H.LeanChecker(H.FORMAL, 600).check(H.compose(sp, list(H.DEFAULT_IMPORTS)), Path(d) / "splice.lean")
+        self.assertTrue(r["ok"] and not r["sorries"], r["errors"][:2])
 
 
 PREMISE_ONLY = """def foo (n : ℕ) : Prop := n = n
