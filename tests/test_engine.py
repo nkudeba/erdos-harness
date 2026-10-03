@@ -259,6 +259,68 @@ class EngineRun(unittest.TestCase):
         self.assertEqual((res["error"], res["ledger"]), ("down", []))
 
 
+def rating(prompt, n):
+    """T1 is a minor improvement, T2 a solid partial result, T3 the core restated; judge 2 doubts T2's novelty."""
+    target = prompt.split("THE TARGET:")[1]
+    if "0.54" in target:
+        v = {"verdict": "new", "significance": 1, "reach": "high"}
+    elif "0.6" in target:
+        v = {"verdict": "new", "significance": 2, "reach": "medium"}
+    else:
+        v = {"verdict": "restatement", "significance": 3, "reach": "low"}
+    return "```json\n" + json.dumps({**v, "cite": None, "why": "w"}) + "\n```"
+
+
+class TargetRating(unittest.TestCase):
+    """v4: the novelty judges rate every target BEFORE any work, and round 1 attacks only those rated new at the bar.
+    v1-v3's 18 validated-new claims were all significance 1 while the maps had labelled 1-6 targets per problem at 2-3."""
+
+    def _run(self, s, ck=None, rate=rating):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-target-rate":
+                return rate(prompt, n)
+            if purpose == "engine-meta":
+                return META
+            return judge(purpose)
+        call = FakeCall(script, cost=0.1)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim {label}")))
+        return H.engine_run(call, sess, "PROBLEM", LEAN, s, workers=2, checkpoint=ck), call, sess
+
+    def test_round_one_attacks_only_targets_rated_at_the_bar(self):
+        res, call, sess = self._run(H.EngineSettings(sessions=3, rounds=2, total_budget=60, min_target_sig=2))
+        self.assertEqual(len(call.prompts("engine-target-rate")), 6)          # 3 targets x 2 judges
+        r1 = [p for label, p in sess.calls if label.startswith("r1")]
+        targets = [p for p in r1 if "PROVE THIS TARGET" in p.split("YOUR TEAMMATES")[0]]
+        self.assertEqual(len(targets), 1)
+        self.assertIn("(T2, type QUANT, significance 2 of 3)", targets[0])
+        self.assertEqual(sum("ATTACK THE CORE" in p.split("YOUR TEAMMATES")[0] for p in r1), 2)   # angles fill the rest
+        self.assertEqual(res["ratings"]["T1"]["significance"], 1)
+        self.assertEqual(res["ratings"]["T3"]["verdict"], "restatement")
+        self.assertIn("TARGETS AS THE JUDGES RATED THEM", call.prompts("engine-meta")[0])
+        self.assertIn("rated new, significance 2 if proved, reach medium", H.engine_report(res, "t"))
+
+    def test_off_by_default_and_never_rated_twice(self):
+        res, call, sess = self._run(H.EngineSettings(sessions=2, rounds=1, total_budget=30))
+        self.assertEqual(call.prompts("engine-target-rate"), [])
+        self.assertIsNone(res["ratings"])
+        ck = {"frontier": {**H.parse_frontier(FRONTIER), "text": FRONTIER},
+              "ratings": {"T1": {"verdict": "new", "significance": 3, "reach": "high"}}}
+        res, call, sess = self._run(H.EngineSettings(sessions=2, rounds=1, total_budget=30, min_target_sig=2), ck)
+        self.assertEqual(call.prompts("engine-target-rate"), [])               # a resume reuses the checkpointed ratings
+        self.assertTrue(any("(T1, type QUANT, significance 3 of 3)" in p for label, p in sess.calls))
+
+    def test_the_conservative_reading_and_an_empty_gate(self):
+        def split(prompt, n):                                                  # one judge says new 3, the other routine 1
+            v = {"verdict": "new", "significance": 3} if n % 2 else {"verdict": "routine", "significance": 1}
+            return "```json\n" + json.dumps({**v, "reach": "high", "cite": None, "why": "w"}) + "\n```"
+        res, call, sess = self._run(H.EngineSettings(sessions=2, rounds=1, total_budget=30, min_target_sig=2), rate=split)
+        self.assertTrue(all(r["verdict"] == "routine" for r in res["ratings"].values()))
+        self.assertTrue(all("ATTACK THE CORE" in p.split("YOUR TEAMMATES")[0] for label, p in sess.calls))
+
+
+
 DEEP_PLAN = """=== GOAL
 Prove liminf q_n/n^2 >= 1 + delta (beyond the profinite cap), significance 2.
 === WHY THIS LINE

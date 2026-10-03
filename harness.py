@@ -3764,6 +3764,34 @@ progress on the problem.
 End with exactly one ```json block:
 {{"verdict": "new" | "known" | "routine" | "restatement", "cite": "<source or null>", "significance": 0 | 1 | 2 | 3, "why": "<one or two sentences>"}}"""
 
+# The novelty scale, word for word, applied BEFORE any work: what would a correct proof of this target be worth? Round 1
+# then attacks only what the same judges would rate at the bar. v1-v3 produced 18 validated-new claims, every one rated
+# significance 1, while the frontier maps had labelled 1-6 targets per problem at 2 or 3: the sessions settled for what
+# they could prove, and the map's own labels ran ahead of the judges.
+TARGET_RATING_PROMPT = """Rate a research TARGET before anyone works on it. A team working on an open problem proposes to prove the
+claim below. Nobody has proved it yet. Judge what it would be worth IF a correct proof were found.
+
+THE PROBLEM:
+{statement}
+
+WHAT IS KNOWN (the team's frontier map, and the literature it read):
+{known}
+
+THE TARGET:
+{claim}
+
+Answer from everything you know about the literature, not only from the list above.
+- KNOWN: the claim, or something stronger, is published or well known. Cite it.
+- ROUTINE: it follows from known results by a short standard argument, so no expert would call it new.
+- RESTATEMENT: it is equivalent to the problem or to its remaining core, so proving it would solve the problem.
+- NEW: none of the above, as far as you know.
+Then rate SIGNIFICANCE, as it would be if proved: 0 trivial, 1 a minor improvement, 2 a solid partial result an expert
+would note, 3 major progress on the problem. And REACH: how likely a strong researcher with a computer is to prove it in
+a day of focused work: low, medium or high.
+
+End with exactly one ```json block:
+{{"verdict": "new" | "known" | "routine" | "restatement", "cite": "<source or null>", "significance": 0 | 1 | 2 | 3, "reach": "low" | "medium" | "high", "why": "<one or two sentences>"}}"""
+
 METAREVIEW_PROMPT = """You lead a research team on an OPEN problem. One round of work has finished. Decide what the next round does.
 
 PROBLEM:
@@ -3943,6 +3971,10 @@ class EngineSettings:
     deep_budget: float = 0.0         # > 0: after the rounds, ONE long session on the line most likely to matter (v3)
     deep_turns: int = 200
     deep_effort: str = "high"
+    min_target_sig: int = 0          # > 0: judges pre-rate every target and round 1 attacks only those rated new at >= this (v4)
+    rate_judges: int = 2
+    rate_budget: float = 0.3
+    rate_effort: str = "medium"
     library: str = ""
     blackboard: str = ""
     context: str = ""
@@ -4200,6 +4232,75 @@ def engine_novelty_panel(judges: list[dict]) -> dict:
             "why": worst.get("why"), "panel": judges}
 
 
+REACH_RANK = {"low": 0, "medium": 1, "high": 2}
+
+
+def engine_rate_targets(call, statement: str, known: str, targets: list[dict], s: "EngineSettings", spend,
+                        workers: int = 4) -> dict:
+    """{target id: panel} for every frontier target, `s.rate_judges` judges each, read conservatively as the novelty
+    panel is (`engine_novelty_panel`), plus the lowest REACH. A target that would not fit the budget is left unrated."""
+    jobs = [(t, j) for t in targets for j in range(max(1, s.rate_judges)) if t.get("id")]
+    lock = threading.Lock()
+
+    def one(job):
+        t, _ = job
+        with lock:
+            if not spend.room(s.rate_budget):
+                return t["id"], None, 0.0
+        claim = f"[{t.get('type')}] {t.get('statement')}" + (f"\nBEYOND: {t['beyond']}" if t.get("beyond") else "")
+        text, cost, err = _discovery_call(call, "engine-target-rate",
+                                          TARGET_RATING_PROMPT.format(statement=statement, known=known, claim=claim),
+                                          s.rate_effort, s.rate_budget)
+        with lock:
+            spend.add(cost)
+        return t["id"], (json_tail_any(text) if text else {"error": err}), cost
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
+        outs = list(ex.map(one, jobs))
+    by: dict = {}
+    for tid, j, cost in outs:
+        rec = by.setdefault(tid, {"judges": [], "cost": 0.0})
+        rec["cost"] = round(rec["cost"] + cost, 4)
+        if j is not None:
+            rec["judges"].append(j)
+    out = {}
+    for tid, rec in by.items():
+        if not rec["judges"]:
+            out[tid] = {"error": "not rated (budget)", "cost": rec["cost"]}
+            continue
+        panel = engine_novelty_panel(rec["judges"])
+        reaches = [str(j.get("reach") or "").lower() for j in rec["judges"] if str(j.get("reach") or "").lower() in REACH_RANK]
+        panel["reach"] = min(reaches, key=REACH_RANK.get) if reaches else None
+        panel["cost"] = rec["cost"]
+        out[tid] = panel
+    return out
+
+
+def engine_gate_targets(f: dict, ratings: dict, min_sig: int) -> dict:
+    """The frontier map with only the targets the judges rated `new` at significance >= `min_sig` if proved, carrying
+    the RATED significance, most significant then most reachable first. With none left, every round-1 session goes to
+    the core's angles (`engine_assignments` tops up from them), which is the bold choice, not a fallback to the easy."""
+    keep = []
+    for t in f.get("targets") or []:
+        r = ratings.get(t.get("id")) or {}
+        sig = r.get("significance")
+        if r.get("verdict") == "new" and isinstance(sig, (int, float)) and sig >= min_sig:
+            keep.append({**t, "significance": int(sig), "frontier_significance": t.get("significance"),
+                         "reach": r.get("reach")})
+    keep.sort(key=lambda t: (-t["significance"], -REACH_RANK.get(t.get("reach") or "", -1)))
+    return {**f, "targets": keep}
+
+
+def engine_ratings_block(f: dict, ratings: dict) -> str:
+    """The judges' pre-ratings, one line per target, for the meta-review and the report."""
+    lines = []
+    for t in f.get("targets") or []:
+        r = ratings.get(t.get("id")) or {}
+        lines.append(f"- {t.get('id')} [{t.get('type')}] rated {r.get('verdict', 'unrated')}, significance "
+                     f"{r.get('significance', '?')} if proved, reach {r.get('reach') or '?'}: "
+                     + " ".join(str(t.get("statement") or "").split())[:300])
+    return "\n".join(lines)
+
+
 def _claim_rank(c: dict) -> tuple:
     """Validate first what would matter most if it held: proofs and refutations, the core's angles, bold types."""
     bold = {"REDUCTION": 3, "CONDITIONAL": 2, "STRUCTURE": 2, "SPECIAL": 2, "QUANT": 1, "NEGATIVE": 1, "ANALOGUE": 1}
@@ -4307,7 +4408,12 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     seen_sessions = [float(x.get("cost") or 0.0) for r in rounds for x in r.get("sessions") or [] if not x.get("error")]
     judged = [c["validation"] for c in ledger if isinstance(c.get("validation"), dict) and "cost" in c["validation"]]
     seen_judging, seen_judged = sum(float(v.get("cost") or 0.0) for v in judged), len(judged)
-    assignments = ck["next"] if "next" in ck else engine_assignments(f, s.sessions, s.core_share)
+    ratings = ck.get("ratings") if isinstance(ck.get("ratings"), dict) else None
+    if s.min_target_sig > 0 and ratings is None and f.get("targets"):
+        ratings = ck["ratings"] = engine_rate_targets(call, statement, known, f["targets"], s, spend, workers)
+        keep()
+    gated = engine_gate_targets(f, ratings, s.min_target_sig) if (s.min_target_sig > 0 and ratings) else f
+    assignments = ck["next"] if "next" in ck else engine_assignments(gated, s.sessions, s.core_share)
     for rnd in range(len(rounds) + 1, max(1, s.rounds) + 1):
         if not assignments:
             break
@@ -4384,7 +4490,9 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         assignments = []
         if rnd < s.rounds and spend.room(s.meta_budget + s.session_budget):
             mt, mc, merr = _discovery_call(call, "engine-meta", METAREVIEW_PROMPT.format(
-                statement=statement, frontier=fblock, results=engine_results_digest(ledger), k=s.sessions),
+                statement=statement, results=engine_results_digest(ledger), k=s.sessions,
+                frontier=fblock + (f"\n\nTARGETS AS THE JUDGES RATED THEM BEFORE ANY WORK (the bar is a new result at significance "
+                                   f">= {s.min_target_sig}):\n" + engine_ratings_block(f, ratings) if ratings else "")),
                 s.frontier_effort, s.meta_budget)
             spend.add(mc)
             if mt:
@@ -4427,7 +4535,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     rounds = [{k: v for k, v in r.items() if k != "_sessions"} for r in rounds]   # the notebooks live in the sandboxes
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
             "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k != "claims_list"} if deep else None,
-            "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(),
+            "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings,
             "guidance": engine_guidance(f, ledger, meta)}
 
 
@@ -4510,6 +4618,8 @@ def engine_report(res: dict, title: str) -> str:
         lines.append("**Proof or evidence.**\n\n" + (c.get("proof") or "(none)"))
         lines.append("")
     f = res.get("frontier") or {}
+    if res.get("ratings"):
+        lines.append("## Targets as the judges rated them before any work\n\n" + engine_ratings_block(f, res["ratings"]) + "\n")
     lines.append("## Frontier map\n\n" + (f.get("text") or "(none)"))
     if (res.get("meta") or {}).get("text"):
         lines.append("\n## Meta-review\n\n" + res["meta"]["text"])
@@ -5046,7 +5156,9 @@ class Harness:
                            core_share=float(g("engine_core_share", 0.5)), total_budget=float(g("engine_total_budget", 30.0)),
                            frontier_budget=float(g("engine_frontier_budget", 8.0)),
                            deep_budget=float(g("engine_deep_budget", 0.0)), deep_turns=int(g("engine_deep_turns", 200)),
-                           deep_effort=str(g("engine_deep_effort", "high")), repair_max=int(g("engine_repair_max", 3)))
+                           deep_effort=str(g("engine_deep_effort", "high")), repair_max=int(g("engine_repair_max", 3)),
+                           min_target_sig=int(g("engine_min_target_sig", 0)), rate_judges=int(g("engine_rate_judges", 2)),
+                           rate_effort=str(g("engine_rate_effort", "medium")))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         return s
@@ -10814,6 +10926,11 @@ def build_parser() -> argparse.ArgumentParser:
                       help="broken claims a judge calls fixable, repaired once and re-judged, per run")
     runp.add_argument("--engine-deep-turns", type=int, default=200)
     runp.add_argument("--engine-deep-effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
+    runp.add_argument("--engine-min-target-sig", type=int, default=0,
+                      help="> 0: the novelty judges pre-rate every frontier target, and round 1 attacks only the targets "
+                           "they rate new at this significance or more, if proved (0 = off)")
+    runp.add_argument("--engine-rate-judges", type=int, default=2)
+    runp.add_argument("--engine-rate-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")
