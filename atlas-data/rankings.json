@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "f2b8f2a14f6948b472b7a0d21ae708c725c0d1867980b3638c1d7290807c8195",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "52a7956d2bcaa2cab3baae3d6c9f103ead5789964748037600b836831797a652"
+    "manual_reviews_sha256": "6d9f05c75e7003444343605c23df6b9b9a68edeeeceeff4c4aabf9efd888f78d"
   },
   "problems": [
     {
@@ -17259,16 +17259,18 @@
       "harness": "Partial result",
       "rationale": [
         "An elementary double count of Sidon quadruples. The harness certified every step the discovery route supplied and stopped at the one step both discovery attempts named as missing (train diagnostic, 2026-09-24). The 2026-09-25 smoke run was lost to the since-fixed skeleton_context bug.",
+        "2026-10-06: the research engine's whole-problem chain was formalized in Lean to all but three counting bounds: 27 steps certified, 3 open, $70 at the cap. The open bounds are the extreme-pair counts noconsec_rhs and interior_rhs and one edge count. It was a hard-step run with the 'resolved' cue, so it is a reconstruction, not a blind solve.",
         "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
         "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Re-run on the fixed harness; the missing step is the local inequality 4N1 + N3 <= 3|X| + 2N2 on 0/1 patterns.",
+        "To finish: certify the extreme-pair counting bounds (noconsec_rhs, interior_rhs, edge_rhs countP). Their sub-runs certified the scaffolding but left each count as an estimate that the refinement judge does not accept as easier.",
         "Identify the reusable prerequisites without treating an external proof as an autonomous solve."
       ],
       "formal": "External Lean-verified resolution reported.",
-      "review": "Reviewed on 2026-09-30 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: known resolution",
@@ -17298,9 +17300,10 @@
         "certifiedMax": 8
       },
       "assessed": {
-        "on": "2026-09-30",
+        "on": "2026-10-06",
         "sources": [
-          "benchmarks/timesplit/RESULTS.md#candidate-discover-v2-2026-09-24-discover-v2-84f21c5"
+          "benchmarks/timesplit/RESULTS.md#candidate-discover-v2-2026-09-24-discover-v2-84f21c5",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": null
       },

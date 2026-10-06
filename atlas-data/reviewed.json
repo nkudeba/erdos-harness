@@ -111,15 +111,18 @@
   "152": {
     "score": 40,
     "rationale": [
-      "An elementary double count of Sidon quadruples. The harness certified every step the discovery route supplied and stopped at the one step both discovery attempts named as missing (train diagnostic, 2026-09-24). The 2026-09-25 smoke run was lost to the since-fixed skeleton_context bug."
+      "An elementary double count of Sidon quadruples. The harness certified every step the discovery route supplied and stopped at the one step both discovery attempts named as missing (train diagnostic, 2026-09-24). The 2026-09-25 smoke run was lost to the since-fixed skeleton_context bug.",
+      "2026-10-06: the research engine's whole-problem chain was formalized in Lean to all but three counting bounds: 27 steps certified, 3 open, $70 at the cap. The open bounds are the extreme-pair counts noconsec_rhs and interior_rhs and one edge count. It was a hard-step run with the 'resolved' cue, so it is a reconstruction, not a blind solve."
     ],
     "requirements": [
-      "Re-run on the fixed harness; the missing step is the local inequality 4N1 + N3 <= 3|X| + 2N2 on 0/1 patterns."
+      "Re-run on the fixed harness; the missing step is the local inequality 4N1 + N3 <= 3|X| + 2N2 on 0/1 patterns.",
+      "To finish: certify the extreme-pair counting bounds (noconsec_rhs, interior_rhs, edge_rhs countP). Their sub-runs certified the scaffolding but left each count as an estimate that the refinement judge does not accept as easier."
     ],
     "sources": [
-      "benchmarks/timesplit/RESULTS.md#candidate-discover-v2-2026-09-24-discover-v2-84f21c5"
+      "benchmarks/timesplit/RESULTS.md#candidate-discover-v2-2026-09-24-discover-v2-84f21c5",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
-    "assessed": "2026-09-30"
+    "assessed": "2026-10-06"
   },
   "153": {
     "rationale": [
