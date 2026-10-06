@@ -462,3 +462,29 @@ Solving one is significance 3 by definition. This is the benchmark the next engi
   2. Items whose engine names the true problem number (`recognized_true`) are reported apart. A recognized item's
      proof is no evidence of unaided research.
 - **#204:** pre-registered rule: not complete. Settles rule: complete, correct (false). Recognized: yes.
+
+**Step 2, first five items** (the account's weekly usage limit stopped three others at their first call; they are
+being re-run):
+
+| item | truth | recognized | pre-registered rule | settles rule | notes |
+|---|---|---|---|---|---|
+| #204 | false | **yes** | no | **complete, correct** | the map named the problem and recalled a 2025 resolution |
+| #392 | true | **yes** | complete, correct | complete, correct | recognized, so not evidence of unaided research |
+| #570 | true | no | no | no | |
+| #865 | true | no | no | no | 5 validated-new, 3 with both judges at significance ≥ 2: partial results |
+| **#1125** | true | **no** | **complete, correct** | **complete, correct** | **clean: an unaided, refereed proof of a problem resolved in April 2026** |
+
+**#1125, read by me.** The claim: if f: ℝ→ℝ satisfies 2f(x) ≤ f(x+h)+f(x+2h) for all x and all h > 0, then f is
+nondecreasing. That is exactly the frozen statement (`Monotone f`). The proof (3,883 characters, `deep/C1`) is
+elementary:
+1. **Reflection.** L_ρ = {f < ρ} is closed under p, q′ ↦ 2p−q′, so it propagates down arithmetic progressions.
+2. **Halving.** A drop f(x) > f(y) forces f(x_k) − f(y) ≥ 2^k·δ along points approaching y from the left.
+3. **Chain lemma.** Each consecutive pair in L_ρ quadruples f − ρ at a fixed endpoint.
+4. **Conclusion.** Some {f < N} ∩ [y, y+1] is infinite, so it accumulates and its progressions make it dense. That
+   gives chains of every length K, so the value at a fixed point exceeds ρ + 4^K·(f(a) − ρ) for every K, which is a
+   contradiction.
+
+I checked every use of the hypothesis (h > 0 each time) and every inequality. The one gap is trivial: in Step 5, n must
+also make z − p_n < v − u. It is clean by the recognition check: the map named no problem number. Memory of the April
+2026 resolution cannot be excluded, only cued less, and the published route has not been compared. Lean verification
+launched (`runs/20261006-100843-326327-hardlean-erdos877933`).
