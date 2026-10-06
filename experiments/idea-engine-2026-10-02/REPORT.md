@@ -531,15 +531,32 @@ both-judge significance ≥ 2).
   I believe it is correct. It is probabilistic, so a Lean version must be derandomized over a finite space, which will
   cost more than #1125 or #401.
 
-## Status at the session handoff (2026-10-06, about 15:40 UTC)
+## Status at the session handoff (2026-10-06, updated 16:00 UTC)
 
-**Still running when this was written.** Each finishes on its own; each launcher writes its ledger row.
+**Finished since the handoff.** #888's step-2 row is in, and the step-2 table below is final.
+
+**#152 whole problem in Lean: partial at $30.34 (certified 9 steps, 5 open), then resumed after two harness fixes.**
+- **Budget starvation.** The run had a $70 self-funding cap, and the extension fired once ($20 to $30.48). In cycles 4
+  and 5 it deferred every open step for `--min-child-budget`, with $1.21 and then $0.14 left. The extension fired only
+  on a hard budget stop, so those two starved cycles counted as a stall and ended the run.
+- **Lemma blocks.** A re-plan reused the name `hyp_interior` for a new statement. `Lemmas.lean` then held two
+  `namespace` blocks declaring the same constants, so the module stopped building and later attempts could not import
+  certified lemmas.
+- **Fix.** Both are fixed in `c9ec386`: the extension now fires before steps are deferred for money, and one block is
+  kept per name.
+- **Resume, recorded in the run's `assistance`.** The resume reset the stall count and set the budget to $40.48, the
+  value the fixed rule would have granted. The cap is still $70, and there was no mathematical input.
+- **Open steps.** The five open steps are the argument's real core:
+  - `split_ne`, the nonempty split identity;
+  - `c6`;
+  - the three extreme-pair counting bounds `noconsec_rhs`, `interior_rhs` and `edge_rhs`.
+
+**Still running.**
 
 | what | run | how to finish |
 |---|---|---|
-| step 2, last item #888 | `runs/20261006-100457-390170-discover-erdos66664` | its results row lands in `benchmarks/timesplit/results/engine-v5-dev.jsonl`, settles check included; check `recognized_true`, then add it to the step-2 table |
-| #401 in Lean (clean solve 2) | `runs/20261006-105451-996165-hardlean-erdos893177` | if `SUMMARY.line` says `outcome=proved`, run `python3 audit.py --run <dir>`, then copy `Proof.lean`, `AUDIT.md` and the engine proof to `benchmarks/timesplit/evidence/401/`, as for 1125 |
-| #152 whole problem in Lean (engine chain) | `runs/20261006-013445-204681-hardlean-erdos892759` | the same, with the evidence in `experiments/idea-engine-2026-10-02/evidence/152-chain/`; this is a train item with the "resolved" cue |
+| #401 in Lean (clean solve 2) | `runs/20261006-105451-996165-hardlean-erdos893177` | 5 of 9 steps certified in its first cycle. If `SUMMARY.line` says `outcome=proved`, run `python3 audit.py --run <dir>`, then copy `Proof.lean`, `AUDIT.md` and the engine proof to `benchmarks/timesplit/evidence/401/`, as for 1125. It started before `c9ec386`; if it ends starved, resume it as #152 was |
+| #152 whole problem in Lean (engine chain), resumed | `runs/20261006-013445-204681-hardlean-erdos892759` | the same, with the evidence in `experiments/idea-engine-2026-10-02/evidence/152-chain/`; this is a train item with the "resolved" cue |
 
 **Not started.** #618 in Lean. Its proof is probabilistic and needs derandomizing over a finite space first, so it will
 cost more than #1125 or #401. Decide before launching:
