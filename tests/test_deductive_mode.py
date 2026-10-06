@@ -591,6 +591,68 @@ class BudgetExtension(unittest.TestCase):
         self.assertNotIn("budget_extensions", h.state)
         self.assertEqual(h.args.run_budget, 5.0)
 
+    def _starved(self, extend):
+        """$1 left against a $2.50 minimum child: the open step would be deferred. #152's cycles 4 and 5."""
+        h = self._harness(extend=extend, cap=70.0)
+        h.args.min_child_budget, h.args.research_cycles = 2.5, 1
+        h.spent_usd = lambda: 4.0
+        attacked = []
+        h._attack_substatement = lambda sub, name, *a, **k: attacked.append(name) or (2, argparse.Namespace(state={}))
+        h.run_program()
+        return h, attacked
+
+    def test_a_step_deferred_for_money_is_funded_by_the_extension(self):
+        h, attacked = self._starved(extend=10.0)
+        self.assertEqual([(e["from"], e["to"]) for e in h.state["budget_extensions"]], [(5.0, 15.0)])
+        self.assertEqual(attacked, ["erdos_99_hyp_a"])
+        self.assertFalse(any(e[1] == "hypotheses_deferred" for e in h.log.events))
+
+    def test_without_an_extension_the_step_is_still_deferred(self):
+        h, attacked = self._starved(extend=0.0)
+        self.assertNotIn("budget_extensions", h.state)
+        self.assertEqual(attacked, [])
+        self.assertTrue(any(e[1] == "hypotheses_deferred" for e in h.log.events))
+
+
+class LemmaBlocksDeduped(unittest.TestCase):
+    """#152's whole-problem run certified `hyp_interior` twice (a re-plan reused the name for a new statement). Two
+    `namespace erdos_N_hyp_interior_ns` blocks declared the same constants twice, the lemmas module stopped building, and
+    no later attempt could import a certified lemma. The newest block per name is kept."""
+
+    def _block(self, name, body, at):
+        return f"\n-- certified in cycle-{at} ({at})\nnamespace {name}_ns\n{body}\nend {name}_ns\n"
+
+    def test_the_newest_block_per_name_is_kept(self):
+        text = (self._block("erdos_9_hyp_a", "theorem erdos_9_hyp_a : 1 = 1 := rfl", 1)
+                + self._block("erdos_9_hyp_b", "theorem erdos_9_hyp_b : 2 = 2 := rfl", 2)
+                + self._block("erdos_9_hyp_a", "theorem erdos_9_hyp_a : 3 = 3 := rfl", 3))
+        out = H.lemma_blocks_deduped(text)
+        self.assertEqual(out.count("namespace erdos_9_hyp_a_ns"), 1)
+        self.assertIn("3 = 3", out)
+        self.assertNotIn("1 = 1", out)
+        self.assertIn("namespace erdos_9_hyp_b_ns", out)
+        self.assertEqual(H.lemma_blocks_deduped(out), out)              # idempotent
+
+    def test_a_name_ending_in_ns_and_nested_namespaces_survive(self):
+        text = (self._block("erdos_9_hyp_ns_x", "namespace Inner\ntheorem t : True := trivial\nend Inner", 1)
+                + self._block("erdos_9_hyp_ns_x", "theorem t2 : True := trivial", 2))
+        out = H.lemma_blocks_deduped(text)
+        self.assertEqual(out.count("namespace erdos_9_hyp_ns_x_ns"), 1)
+        self.assertIn("t2", out)
+        self.assertNotIn("Inner", out)
+
+    def test_banking_the_same_name_twice_leaves_one_block(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            h = _stub(tmp)
+            lemmas, residual = Path(tmp) / "Lemmas.lean", Path(tmp) / "Residual.lean"
+            for i in (1, 2):
+                h._bank_certified(lemmas, residual, SKELETON, H.parse_residual(SKELETON, "99", {}), {}, "99", "erdos_99",
+                                  "erdos_99_hyp_a", f"theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := fun n => rfl -- v{i}",
+                                  f"cycle-{i}", i, f"splice-{i}")
+            text = lemmas.read_text()
+            self.assertEqual(text.count("namespace erdos_99_hyp_a_ns"), 1)
+            self.assertIn("-- v2", text)
+
 
 class FalseInForce(unittest.TestCase):
     """#152's whole-problem run: the plan saw that a hypothesis IN FORCE was false (SidSplitIdentity at A = ∅) and the

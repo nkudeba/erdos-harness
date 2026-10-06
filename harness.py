@@ -8798,8 +8798,9 @@ for the SAT solver instead of enumerating it.
         update skeleton/parsed in lockstep. Shared by the depth loop (one full child per hypothesis) and the
         breadth-first sweep (Change A, 2026-09-26), so a hypothesis proved either way is banked identically --
         `via` records which one found it (None for the depth loop, "sweep" for the sweep), for the log only."""
-        with open(lemmas_path, "a") as f:
-            f.write(f"\n-- certified in {origin} ({now()})\nnamespace {name}_ns\n{body}\nend {name}_ns\n")
+        text = lemmas_path.read_text() if lemmas_path.exists() else ""
+        lemmas_path.write_text(lemma_blocks_deduped(
+            text + f"\n-- certified in {origin} ({now()})\nnamespace {name}_ns\n{body}\nend {name}_ns\n"))
         self.log.event("program", "lemma_certified", cycle=cycle, name=name, **({"via": via} if via else {}))
         spliced = splice_hypothesis(skeleton, name, body)
         res = self.check(spliced, check_tag) if spliced else {"ok": False, "errors": ["splice failed"], "sorries": []}
@@ -8926,6 +8927,11 @@ for the SAT solver instead of enumerating it.
         plan_path, lemmas_path, ledger = pdir / "PLAN.md", pdir / "Lemmas.lean", pdir / "ledger.jsonl"
         residual_path, premises_path = pdir / "Residual.lean", pdir / "premises.jsonl"
         lemmas_path.touch()
+        old_lemmas = lemmas_path.read_text()
+        if lemma_blocks_deduped(old_lemmas) != old_lemmas:     # a file written before the dedupe, repaired on resume
+            lemmas_path.write_text(lemma_blocks_deduped(old_lemmas))
+            self.log.event("program", "lemmas_deduped", blocks_before=len(LEMMA_BLOCK_RE.findall(old_lemmas)),
+                           blocks_after=len(LEMMA_BLOCK_RE.findall(lemmas_path.read_text())))
         cycles = int(getattr(self.args, "research_cycles", 2))
         review_every = int(getattr(self.args, "review_every", 2))
         per_cycle = max(0, int(getattr(self.args, "hyps_per_cycle", 4)))
@@ -9221,6 +9227,16 @@ for the SAT solver instead of enumerating it.
                     if self.args.run_budget and min_child > 0:
                         left = self.args.run_budget - self.spent_usd()
                         affordable = int(left // min_child)
+                        # --budget-extend: steps deferred for want of money while the descent is still discharging
+                        # get the extension HERE. It used to fire only on a BudgetExhausted stop, which a run that is
+                        # merely too poor to fund a child never raises. #152's whole-problem run discharged four steps
+                        # in cycle 3, then deferred all four open steps with $1.21 left in cycle 4 and $0.14 in cycle
+                        # 5; the two starved cycles counted as a stall and stopped it at $30.34 under a $70 cap.
+                        if affordable < len(todo) and (progress or prev_progress) \
+                                and int(self.state.get("stall_cycles") or 0) < STALL_LIMIT \
+                                and self._extend_run_budget(cycle):
+                            left = self.args.run_budget - self.spent_usd()
+                            affordable = int(left // min_child)
                         if premise_phase and affordable == 0 and left >= 1.0:
                             # the premises are the last thing between this run and a proof: one attack with all
                             # that is left beats deferring every one of them (#678's third run, $1.33 unspent)
@@ -10712,6 +10728,19 @@ def hypothesis_substatement(skeleton: str, name: str) -> str | None:
     if idx == -1:
         return None
     return "\n\n".join(skeleton_context(skeleton, span[0]) + [blk[:idx].rstrip() + " := by\n  sorry"]).strip()
+
+
+LEMMA_BLOCK_RE = re.compile(r"(?ms)^-- certified in [^\n]*\nnamespace (\S+)_ns\n.*?^end \1_ns\n")
+
+
+def lemma_blocks_deduped(text: str) -> str:
+    """Lemmas.lean keeps ONE certified block per hypothesis name: the newest. A re-plan may reuse a name for a new
+    statement, and two `namespace <name>_ns` blocks declare the same constants twice. #152's whole-problem run
+    certified `hyp_interior` under a premise later refuted and again under its replacement; from then on the module
+    failed with "has already been declared", `_install_lemmas_module` returned None, and no later attempt could import
+    any certified lemma. The newest block is the one the skeleton in force uses."""
+    last = {m.group(1): m.start() for m in LEMMA_BLOCK_RE.finditer(text)}
+    return LEMMA_BLOCK_RE.sub(lambda m: m.group(0) if last.get(m.group(1)) == m.start() else "", text)
 
 
 def splice_hypothesis(skeleton: str, name: str, proof_block: str) -> str | None:

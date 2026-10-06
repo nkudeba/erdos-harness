@@ -201,6 +201,10 @@ program. Budget the whole thing, not one lane, and check `harness.py summary --p
 by default):
 - When a cycle runs out of money and it, or the cycle before, discharged a step, the budget grows by STEP from the
   spend, never past CAP.
+- That includes a cycle too poor to fund a child, not only one that hits the cap. When steps would be deferred for
+  `--min-child-budget`, the extension fires before they are. Until 2026-10-06 it fired only on a hard budget stop:
+  #152's whole-problem run deferred all four open steps two cycles running ($1.21, then $0.14 left). Those starved
+  cycles counted as a stall and ended it at $30.34 under a $70 cap.
 - A cycle that ran dry without a discharge counts toward the stall limit.
 - Each extension is logged (`program/budget_extended`) and named in the stop reason.
 - #435's hard step needed three hand-raised budgets; this rule replaces them.
@@ -468,7 +472,10 @@ proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE
    call with nothing compiled. Budget a deductive run at roughly $4 for reduce, refute and plan plus $2.50
    per hypothesis you expect to attack. A certified one is spliced back
    (`splice_hypothesis`: proof in `<name>_ns`, hypothesis becomes `exact <name>_ns.<name>`) and the residual
-   shrinks. `Lemmas.lean` still accumulates the certified proofs as an importable module.
+   shrinks. `Lemmas.lean` still accumulates the certified proofs as an importable module, keeping ONE block per
+   hypothesis name, the newest (`lemma_blocks_deduped`). A re-plan that reused a name used to leave two
+   `namespace <name>_ns` blocks. After that the module never built again, and no attempt could import a certified lemma
+   (#152, 2026-10-06).
 5. **Learn from failures, grow in depth.** A child that fails leaves a *failure digest* (unsolved goals,
    best attempts' errors, the prover's own diagnosis) in `failures.jsonl`; the next plan sees it under
    PROOF FAILURES and must answer with one of four moves — `lemma` (state the missing fact as a new
