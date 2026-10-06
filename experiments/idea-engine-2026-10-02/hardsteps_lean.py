@@ -27,10 +27,14 @@ def main() -> int:
     ap.add_argument("--cycles", type=int, default=4)
     ap.add_argument("--extend", type=float, default=0.0, help="--budget-extend: USD added while the residual still shrinks")
     ap.add_argument("--extend-max", type=float, default=0.0, help="--budget-extend-max: the hard cap, USD")
+    ap.add_argument("--full-run", help="target the WHOLE problem: this original run's frozen statement, not the step")
+    ap.add_argument("--chain", action="store_true", help="the blueprint is the claim with every lemma under it")
+    ap.add_argument("--id", help="the fresh synthetic id (default: the engine run's)")
     args = ap.parse_args()
     er = (ROOT / args.engine_run).resolve()
-    st = json.loads((er / "state.json").read_text())
-    prob = json.loads((er / "problem.json").read_text())
+    src = (ROOT / args.full_run).resolve() if args.full_run else er
+    st = json.loads((src / "state.json").read_text())
+    prob = json.loads((src / "problem.json").read_text())
     ej = json.loads((er / "engine" / "engine.json").read_text())
     sess, cid = args.claim.split("/")
     c = next(x for x in ej["ledger"] if x.get("session") == sess and x.get("id") == cid)
@@ -39,7 +43,8 @@ def main() -> int:
         return 2
     m = re.search(r"\berdos_(\d+)", st["statement"])
     old_id = m.group(1) if m else None
-    sid = str(prob["id"])
+    sid = str(args.id or (json.loads((er / "problem.json").read_text())["id"] if not args.full_run else prob["id"]))
+    prob = {**prob, "id": sid}
     # (?!\d), not \b: every identifier continues with "_" (erdos_27285_hyp_top, erdos_27285_Rep), and \b after the
     # digits never matched, so the first #435 Lean run kept the old ids and no plan could parse against the new one.
     lean = re.sub(rf"\berdos_{old_id}(?!\d)", f"erdos_{sid}", st["statement"]) if old_id else st["statement"]
@@ -53,15 +58,21 @@ def main() -> int:
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-hardlean-erdos{sid}"
     run_dir.mkdir(parents=True)
     (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
-    proof = f"CLAIM: {c['statement']}\n\nPROOF:\n{c.get('proof') or ''}"
+    if args.chain:
+        sys.path.insert(0, str(ROOT))
+        import harness as H
+        proof = H.engine_chain_text(c, ej["ledger"])     # the claim with every lemma under it, gap-closed versions in place
+    else:
+        proof = f"CLAIM: {c['statement']}\n\nPROOF:\n{c.get('proof') or ''}"
     disc = {"decision": {"commit": "pos" if answer == "true" else "neg", "answer": answer, "share": 1.0},
             "best_proof": {"text": proof, "answer": answer, "complete": True},
-            "guidance": f"An informal proof of this step, refereed but unverified, from a research-engine run "
-                        f"({er.name}, {args.claim}):\n{proof[:12000]}",
+            "guidance": f"An informal proof{' of the whole problem' if args.full_run else ' of this step'}, refereed but "
+                        f"unverified, from a research-engine run ({er.name}, {args.claim}"
+                        f"{', with every lemma under it' if args.chain else ''}):\n{proof[:24000]}",
             "refereed_complete": True, "mode": "engine-hardstep"}
     (run_dir / "state.json").write_text(json.dumps({
         "statement": lean, "problem_input": prob, "mode": "research", "invocations": [], "benchmark": True,
-        "discovery": disc, "statement_source": f"hard step from {st.get('statement_source')}, ids renamed erdos_{old_id} -> erdos_{sid}",
+        "discovery": disc, "statement_source": f"{'the whole problem' if args.full_run else 'hard step'} from {st.get('statement_source')}, ids renamed erdos_{old_id} -> erdos_{sid}",
         "assistance": [f"the informal proof came from the research engine run {er.name} ({args.claim}); no operator proof"]},
         indent=2, ensure_ascii=False))
     if answer == "false":
@@ -75,7 +86,7 @@ def main() -> int:
            *(["--budget-extend", str(args.extend), "--budget-extend-max", str(args.extend_max)] if args.extend > 0 else [])]
     with (run_dir / "lane.log").open("w") as log:
         rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                            timeout=8 * 3600).returncode
+                            timeout=16 * 3600).returncode       # a self-funding run may outlast the old 8 hours
     line = (run_dir / "SUMMARY.line").read_text().strip() if (run_dir / "SUMMARY.line").exists() else ""
     with (HERE / "hardsteps_lean.jsonl").open("a") as f:
         f.write(json.dumps({"engine_run": str(er.relative_to(ROOT)), "claim": args.claim, "lean_run": str(run_dir.relative_to(ROOT)),
