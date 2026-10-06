@@ -2367,8 +2367,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 6,
-        "benchmarkRuns": 6,
+        "runs": 7,
+        "benchmarkRuns": 7,
         "certifiedMax": 3
       },
       "rank": 45,
@@ -10588,8 +10588,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 2,
-        "benchmarkRuns": 2,
+        "runs": 3,
+        "benchmarkRuns": 3,
         "certifiedMax": 3
       },
       "rank": 192,
@@ -18772,8 +18772,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 2,
-        "benchmarkRuns": 2,
+        "runs": 3,
+        "benchmarkRuns": 3,
         "certifiedMax": 2
       },
       "rank": 342,
@@ -20137,8 +20137,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 3,
-        "benchmarkRuns": 3,
+        "runs": 4,
+        "benchmarkRuns": 4,
         "certifiedMax": 1
       },
       "rank": 366,
