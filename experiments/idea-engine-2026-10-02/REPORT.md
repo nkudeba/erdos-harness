@@ -504,12 +504,20 @@ Every inequality checks, including (2^{1/5}·5/6) < 0.958 and T ≤ L/5 for larg
 verification is queued behind #1125's.
 
 **#1125 is proved in Lean, end to end.** The engine's complete claim, used as the blueprint, became a Lean proof in one
-run of the deductive loop: $2.79, 46 minutes, all 10 hypotheses certified, no re-plan, no recursion. The audit passes
-all 7 Lean checks (`benchmarks/timesplit/evidence/1125/`).
+run of the deductive loop: $2.79, 46 minutes, all 10 hypotheses certified, no re-plan, no recursion.
+- **The audit passes all 13 checks** (`benchmarks/timesplit/evidence/1125/`): the 7 Lean checks plus the 6 blindness
+  checks. The prompt scan covers the engine run as well as the Lean run.
+- **Correction.** The first audit's verdict was FAIL: the Lean stage wrote no time-split record, so the blindness checks
+  never ran. `hardsteps_lean.py` now writes one (`results/engine-v5-dev-lean.jsonl`), and the re-run passes.
+- **A recall signal.** The engine's novelty judges, not the session that wrote the proof, placed the statement as
+  Kemperman's inequality on the Erdős list. They believed it still open and could not recall its number.
 - **The whole path:** the engine on the whole problem ($13.04), with no cue and no recognition, then the Lean loop
   ($2.79). That is $15.83 for a machine-checked proof of a problem posed in 1984 and resolved in April 2026.
-- **What it is not:** new mathematics; a time-split solve by that benchmark's bookkeeping (the Lean stage ran outside
-  its runner); or proof that memory played no part, since the model's cutoff is after the resolution.
+- **What it is not:**
+  - new mathematics;
+  - proof that memory played no part, since the model's cutoff is after the resolution.
+- The Lean stage still ran outside the time-split runner, which is why its record was written by
+  `hardsteps_lean.py`.
 
 **#618: a third clean, refereed, complete proof** (`r1s1/C1`, $19.40, with 5 more validated-new claims, 4 of them
 both-judge significance ≥ 2).

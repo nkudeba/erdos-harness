@@ -398,6 +398,12 @@ def benchmark_checks(run_dir: Path, state: dict, frozen: str, direction: str | N
                                       "detail": f"masked={proto.get('masked')}, --benchmark={bool(state.get('benchmark'))}, "
                                                 f"knowledge={proto.get('knowledge')}"}
     calls = prompts_of(run_dir, str(rec.get("alias") or ""))
+    if rec.get("engine_run"):
+        # a Lean stage whose blueprint is a research-engine proof (experiments/idea-engine-2026-10-02/hardsteps_lean.py)
+        # is blind only if the engine run that wrote the proof was: its prompts are scanned too, and its responses
+        # count toward `responses_naming_the_problem`
+        info["engine_run"] = rec["engine_run"]
+        calls += prompts_of(ROOT / rec["engine_run"], str(rec.get("engine_alias") or ""))
     hits, recall = {}, {}
     for label, pat in identity_patterns(item or {"problem": rec["problem"]}):
         hits[label] = sum(1 for _, p, _ in calls if re.search(pat, p))

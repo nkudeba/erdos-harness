@@ -1,13 +1,22 @@
 {
  "run": "runs/20261006-100843-326327-hardlean-erdos877933",
- "at": "2026-10-06T14:55:10Z",
+ "at": "2026-10-06T16:01:58Z",
  "direction": null,
  "proof": {
   "file": "runs/20261006-100843-326327-hardlean-erdos877933/final/Erdos877933.lean",
   "sha256": "7e426d1afa91beaf3e5cdb8c07edf07ef8279e5dddb8809160de40f711e61a35"
  },
  "benchmark": {
-  "tag": null
+  "tag": "engine-v5-dev-lean",
+  "problem": "1125",
+  "split": "dev",
+  "alias": 877933,
+  "engine_run": "runs/20261006-021530-371610-discover-erdos77933",
+  "responses_naming_the_problem": {
+   "problem number with context": 0,
+   "Erdős by name": 5
+  },
+  "other_verified_runs": []
  },
  "checks": {
   "source_scan": {
@@ -38,10 +47,30 @@
    "ok": true,
    "detail": "all declarations replayed"
   },
-  "benchmark_record": {
-   "ok": false,
-   "detail": "no time-split record points at this run"
+  "provenance": {
+   "ok": true,
+   "detail": "the pos direction of the benchmark's statement (google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/1125.lean (main theorem; answer stripped; comments removed; identity renamed))"
+  },
+  "direction_matches_answer": {
+   "ok": true,
+   "detail": "proved pos, recorded answer True (formal-conjectures answer(...))"
+  },
+  "faithfulness_judges": {
+   "ok": true,
+   "detail": "at build: True; at verification: True"
+  },
+  "probe": {
+   "ok": true,
+   "detail": "probe verdict: unaware"
+  },
+  "masked_benchmark_run": {
+   "ok": true,
+   "detail": "masked=True, --benchmark=True, knowledge=lemma store excluded (--benchmark)"
+  },
+  "no_identity_in_prompts": {
+   "ok": true,
+   "detail": "70 prompt(s) scanned; matches: {'problem number with context': 0, 'Erdős by name': 0}"
   }
  },
- "verdict": "FAIL"
+ "verdict": "PASS"
 }

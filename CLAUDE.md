@@ -901,8 +901,11 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   tag `engine-v5-dev`, $8–20 an item):
   - clean, refereed, complete proofs of the true answer on 3 of the 6 items the engine did not recognize: #1125, #401
     and #618. The pre-registered prediction was 1 of 8.
-  - **#1125 is proved in Lean end to end**: the engine's proof as the blueprint, Lean for $2.79, the audit passing
-    all 7 checks (`benchmarks/timesplit/evidence/1125/`).
+  - **#1125 is proved in Lean end to end** (`benchmarks/timesplit/evidence/1125/`):
+    - the engine's proof is the blueprint, and Lean cost $2.79;
+    - the audit passes all 13 checks, the blindness checks included;
+    - those checks need the Lean stage's own time-split record, which `hardsteps_lean.py` now writes. Without it the
+      verdict was FAIL.
   - #204 and #392 were solved but recognized, so they are not evidence. #570 and #865 were not solved.
 - **Contamination is real.** A masked high-effort engine can name the problem and recall its resolution. Grade on
   `recognized_true` (`engine_recognized`), and judge completeness with the settles check (`engine_settles`, both judges

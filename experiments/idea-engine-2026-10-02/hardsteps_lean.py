@@ -17,6 +17,68 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
+RESULTS = ROOT / "benchmarks" / "timesplit" / "results"
+
+
+def engine_record(engine_run: Path) -> tuple[str | None, dict | None]:
+    """The time-split results row of the engine run whose proof this Lean stage formalizes, if it was a time-split
+    evaluation (a hard-step run on a train item is not: its frame says the problem was resolved)."""
+    rel = str(engine_run.resolve().relative_to(ROOT))
+    for f in sorted(RESULTS.glob("*.jsonl")):
+        if any(x in f.name for x in (".infra.", ".ideas.", ".progress.", ".aliases.", ".grades.")):
+            continue
+        for line in f.read_text().splitlines():
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            if r.get("run_dir") == rel and r.get("alias") is not None:
+                return f.name[: -len(".jsonl")], r
+    return None, None
+
+
+def record_alias(engine_run: Path, lean_run: Path, sid: str) -> None:
+    """At launch: the fresh id resolves to its catalogue number (atlas_ids.py), so the Atlas attributes the run while
+    it is still going."""
+    tag, er = engine_record(engine_run)
+    if er:
+        af = RESULTS / f"{tag}-lean.aliases.jsonl"
+        if af.exists() and any(json.loads(l).get("alias") == int(sid) for l in af.read_text().splitlines() if l.strip()):
+            return
+        with af.open("a") as f:
+            f.write(json.dumps({"alias": int(sid), "problem": er["problem"],
+                                "run_dir": str(lean_run.resolve().relative_to(ROOT))}) + "\n")
+
+
+def record_result(engine_run: Path, lean_run: Path, claim: str, sid: str, rc: int | None) -> dict | None:
+    """At the end: a results row pointing at the Lean run, in `<engine tag>-lean.jsonl`.
+
+    Without it the audit's blindness checks (provenance, probe, masking, no identity in any prompt) never run. #1125's
+    Lean proof passed all seven Lean checks and still got the verdict FAIL on `benchmark_record` ("no time-split record
+    points at this run"), so the Atlas could not count it. `solved` follows the runner's meaning: the TRUE direction
+    verified. The row names the engine run, whose prompts the audit scans as well."""
+    tag, er = engine_record(engine_run)
+    if not er:
+        return None
+    st = json.loads((lean_run / "state.json").read_text()) if (lean_run / "state.json").exists() else {}
+    done = json.loads((lean_run / "DONE").read_text()) if (lean_run / "DONE").exists() else {}
+    verified = done.get("exit") == 0 and bool((st.get("verify") or {}).get("all_clear"))
+    line = (lean_run / "SUMMARY.line").read_text() if (lean_run / "SUMMARY.line").exists() else ""
+    m = re.search(r"spend=\$([0-9.]+)", line)
+    row = {"problem": er["problem"], "tag": f"{tag}-lean", "alias": int(sid),
+           "run_dir": str(lean_run.resolve().relative_to(ROOT)), "answer": er.get("answer"), "truth": er.get("truth"),
+           "split": er.get("split"), "returncode": done.get("exit", rc),
+           "solved": verified and er.get("truth") == "true", "contradiction": verified and er.get("truth") != "true",
+           "spend": float(m.group(1)) if m else None, "stage": "lean",
+           "engine_run": er["run_dir"], "engine_alias": er.get("alias"), "engine_claim": claim,
+           "engine_spend": er.get("spend"),
+           "protocol": {"masked": True, "benchmark": bool(st.get("benchmark")), "stage": "lean",
+                        "knowledge": "lemma store excluded (--benchmark)", "blueprint": f"{er['run_dir']} {claim}",
+                        "engine_tag": tag},
+           "at": datetime.now().isoformat(timespec="seconds")}
+    with (RESULTS / f"{tag}-lean.jsonl").open("a") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return row
 
 
 def main() -> int:
@@ -30,8 +92,21 @@ def main() -> int:
     ap.add_argument("--full-run", help="target the WHOLE problem: this original run's frozen statement, not the step")
     ap.add_argument("--chain", action="store_true", help="the blueprint is the claim with every lemma under it")
     ap.add_argument("--id", help="the fresh synthetic id (default: the engine run's)")
+    ap.add_argument("--record-only", metavar="LEAN_RUN",
+                    help="write the time-split alias and results rows for an existing Lean run, then stop")
     args = ap.parse_args()
     er = (ROOT / args.engine_run).resolve()
+    # Only a WHOLE-problem Lean stage on the engine run's own statement is a time-split evaluation; a single step is not.
+    timesplit = bool(args.full_run) and (ROOT / args.full_run).resolve() == er
+    if args.record_only:
+        lr = (ROOT / args.record_only).resolve()
+        sid = args.id or re.search(r"erdos(\d+)$", lr.name).group(1)
+        row = None
+        if timesplit:
+            record_alias(er, lr, sid)
+            row = record_result(er, lr, args.claim, sid, None)
+        print(json.dumps(row)[:300] if row else "not a whole-problem stage of a time-split engine run; nothing written")
+        return 0
     src = (ROOT / args.full_run).resolve() if args.full_run else er
     st = json.loads((src / "state.json").read_text())
     prob = json.loads((src / "problem.json").read_text())
@@ -57,6 +132,8 @@ def main() -> int:
     answer = "true" if c["status"] == "PROVED" else "false"
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-hardlean-erdos{sid}"
     run_dir.mkdir(parents=True)
+    if timesplit:
+        record_alias(er, run_dir, sid)
     (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
     if args.chain:
         sys.path.insert(0, str(ROOT))
@@ -88,6 +165,8 @@ def main() -> int:
         rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                             timeout=16 * 3600).returncode       # a self-funding run may outlast the old 8 hours
     line = (run_dir / "SUMMARY.line").read_text().strip() if (run_dir / "SUMMARY.line").exists() else ""
+    if timesplit:
+        record_result(er, run_dir, args.claim, sid, rc)
     with (HERE / "hardsteps_lean.jsonl").open("a") as f:
         f.write(json.dumps({"engine_run": str(er.relative_to(ROOT)), "claim": args.claim, "lean_run": str(run_dir.relative_to(ROOT)),
                             "exit": rc, "summary": line, "at": datetime.now().isoformat(timespec="seconds")}) + "\n")
