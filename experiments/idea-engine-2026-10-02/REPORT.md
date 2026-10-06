@@ -488,3 +488,17 @@ I checked every use of the hypothesis (h > 0 each time) and every inequality. Th
 also make z − p_n < v − u. It is clean by the recognition check: the map named no problem number. Memory of the April
 2026 resolution cannot be excluded, only cued less, and the published route has not been compared. Lean verification
 launched (`runs/20261006-100843-326327-hardlean-erdos877933`).
+
+**#401: a second clean, refereed, complete proof** (`r1s2/C1`, $8.16, graded by the new settles check at run time).
+Not recognized; both settles judges agree; the answer is correct (true). The claim: with q = p_{r+1}, P = p_1⋯p_r and
+K = (q−1)/(20 log q), for all large N there are N ≤ m < 2N and 1 ≤ a < N with a!(m−a)! | n!Pⁿ for n = m − ⌈K log N⌉.
+So f(r) = (p_{r+1}−1)/(40 log p_{r+1}) witnesses the statement. I read the proof (4,636 characters):
+- **The reduction.** The primes below q are absorbed by Pⁿ, because D·log₂ 2N ≤ n. For the primes p ≥ q it suffices
+  that v_p(∏_{j<D}(m−j)) ≤ v_p(C(m,a)).
+- **Kummer's carry count** bounds v_p(C(m,a)) from below by the digit comparisons a_i > m_i. A deterministic bound caps
+  v_p of the product at D/(p−1) + t + Z.
+- **Two ranges of primes.** For q ≤ p ≤ D³, digit statistics transferred from (ℤ/p^L)² bound the failures by
+  8·0.958^L. For D³ < p ≤ 2N a direct count bounds them by D⁻² + 2/D + o(1).
+
+Every inequality checks, including (2^{1/5}·5/6) < 0.958 and T ≤ L/5 for large N. I believe it is correct. Its Lean
+verification is queued behind #1125's.
