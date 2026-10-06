@@ -2273,6 +2273,21 @@ def discover_screen(args) -> int:
                  "--discover-rounds", str(args.discover_rounds), "--discover-total-budget", str(args.discover_total_budget),
                  "--discover-ladder", str(args.discover_ladder), "--discover-commit-floor", str(args.commit_floor),
                  "--discover-gap-round", args.gap_round]
+    if getattr(args, "record", None):
+        # Only write the row for one finished engine run: a screen split across parallel lanes, or a lane stopped
+        # while its harness run went on, records that run without starting another.
+        import harness as H
+        rd = (ROOT / args.record).resolve()
+        al = next(json.loads(l) for l in (RESULTS / f"{args.tag}.aliases.jsonl").read_text().splitlines()
+                  if l.strip() and json.loads(l)["run_dir"] == str(rd.relative_to(ROOT)))
+        item = next(i for i in load_pool()["items"] if i["problem"] == al["problem"])
+        dn = json.loads((rd / "DONE").read_text()) if (rd / "DONE").exists() else {}
+        rec = engine_screen_record(rd, item, al["alias"], dn.get("exit"), H.collect_run_facts(rd, str(al["alias"])), args, flags)
+        with out.open("a") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        print(f"#{item['problem']}: truth={rec['truth']} complete={rec['complete']} answer={rec['complete_answer']} "
+              f"validated_new={rec['validated_new']} sig2={rec['sig2']} ${rec['spend']} (recorded)", flush=True)
+        return 0
     print(f"discover-screen {args.tag}: {len([i for i in items if i['problem'] not in done])} item(s); {' '.join(flags)}",
           flush=True)
     for item in items:
@@ -2764,6 +2779,7 @@ def main() -> int:
     ds.add_argument("--model", default=DEFAULT_MODEL)
     ds.add_argument("--discover-mode", default="independent", choices=["independent", "crossfed", "engine"])
     ds.add_argument("--engine-flags", default="", help="with --discover-mode engine: extra harness flags, one string")
+    ds.add_argument("--record", help="with --discover-mode engine: only write the results row for this finished run dir")
     ds.add_argument("--discover-attempts", type=int, default=2)
     ds.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     ds.add_argument("--discover-budget", type=float, default=0.8)
