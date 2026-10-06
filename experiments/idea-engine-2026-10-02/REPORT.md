@@ -568,10 +568,25 @@ both-judge significance ≥ 2).
 - A further push would need an operator decision, such as a deeper `--residual-depth`. That is assistance, so it was
   not taken automatically.
 
-**#152 whole problem in Lean: still running, resumed twice after harness fixes.**
-- Its `split_ne` core is now certified (9 + 1 steps).
-- The second fix is `12e1f5f`. A child's certified pieces now count as progress when the budget stops the parent
-  first. Before that, `split_ne`'s 7 certified pieces were stranded at the refinement judge's budget check.
+**#152 whole problem in Lean: partial at the $70 cap.**
+- **Result.** 27 steps certified, 3 open, $70.37 over 1,076 minutes. The open steps are the extreme-pair counting
+  bounds `noconsec_rhs` and `interior_rhs`, and `edge_rhs_hyp_countP`.
+- **What was certified.**
+  - The combinatorial core `split_ne`: its sub-run certified the nonempty split identity.
+  - `c6`.
+  - `edge_rhs`, refined into two counts, of which `countQ` was certified.
+  - Every glue step of the argument.
+- **Harness fixes it exposed, all with regression tests:**
+  - `c9ec386`: budget starvation, and duplicate lemma blocks.
+  - `12e1f5f`: a child's unbanked pieces now count as progress.
+  - `ae0e24a`: the last extension step is clamped to the cap.
+  - `0106e1f`: a stale sub-residual is set aside. `c6`'s re-stated version kept loading its old closed skeleton, and
+    a cheap direct attempt proved it anyway.
+- **Assistance.** Each resume after a fix is recorded in the run's `assistance`. Every one used the budget value the
+  fixed rule would have granted, under the same $70 cap, with no mathematical input.
+- **What remains.** Going further needs the cap raised, which is an operator decision. The two extreme-pair bounds
+  were refused twice as refinements: each time the sub-run certified the scaffolding and left the count as an
+  estimate.
 
 **A design observation, from #152 (a train item).**
 - A sub-run often certifies the scaffolding of a counting step, then leaves the count as quantitative estimates that
@@ -581,9 +596,7 @@ both-judge significance ≥ 2).
 - That is the natural shape of an analytic proof: estimate each range, then take a union bound. Whether such splits
   should count as easier is an open design question for the refinement rule, and it is not changed here.
 
-| what | run | how to finish |
-|---|---|---|
-| #152 whole problem in Lean (engine chain), resumed | `runs/20261006-013445-204681-hardlean-erdos892759` | if `SUMMARY.line` says `outcome=proved`, run `python3 audit.py --run <dir>` and keep the evidence in `experiments/idea-engine-2026-10-02/evidence/152-chain/`. It is a train item with the "resolved" cue, so it has no time-split record, and `benchmark_record` fails by design |
+**Nothing is running.**
 
 **Not started.** #618 in Lean. Its proof is probabilistic and needs derandomizing over a finite space first, so it will
 cost more than #1125 or #401. Decide before launching:
