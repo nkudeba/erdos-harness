@@ -510,3 +510,23 @@ all 7 Lean checks (`benchmarks/timesplit/evidence/1125/`).
   ($2.79). That is $15.83 for a machine-checked proof of a problem posed in 1984 and resolved in April 2026.
 - **What it is not:** new mathematics; a time-split solve by that benchmark's bookkeeping (the Lean stage ran outside
   its runner); or proof that memory played no part, since the model's cutoff is after the resolution.
+
+**#618: a third clean, refereed, complete proof** (`r1s1/C1`, $19.40, with 5 more validated-new claims, 4 of them
+both-judge significance ≥ 2).
+- **The claim:** h₂(G) ≤ 12(d+1)n^{3/2} + 2n for every triangle-free G with maximum degree d, so Δ = o(√n) gives
+  h₂ = o(n²). That is exactly the frozen statement.
+- **Recognition.** The engine named #134, the sibling problem with Δ < n^{1/2−ε} that Alon solved before 2026, and
+  treated #618's o(√n) version as the open follow-up. Its judges know no published result for that version. That is
+  pre-2026 background knowledge, not a recalled answer, so `recognized_true` is false.
+- **My reading of the proof** (3,125 characters). I checked each step:
+  - **Repair lemma:** adding a bad pair's edge never makes a triangle.
+  - **Construction:** hub v joins to a random independent set L_v. L_v is the set of vertices whose coin, at rate
+    q(deg+1), is 1 and whose priority is a local minimum. So P(x ∈ L_v) = q exactly, with independence for pairs at
+    distance ≥ 3. The neighbourhood of v's neighbourhood and the neighbouring hubs' sets are excluded.
+  - **No triangles:** every triangle case is ruled out.
+  - **Coverage:** P(C_v) ≥ q²/e. The covariance is ≤ 0 for adjacent hubs, ≤ q⁴ for hubs at distance 2, and 0 otherwise.
+    Chebyshev gives P(X = 0) ≤ (4e+e²)(d+1)²/|T|.
+  - **Arithmetic:** with s = 2d² + ⌈3(d+1)√n⌉ the total is ≤ 10.6(d+1)n^{3/2} + 1.5n.
+
+  I believe it is correct. It is probabilistic, so a Lean version must be derandomized over a finite space, which will
+  cost more than #1125 or #401.
