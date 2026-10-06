@@ -376,3 +376,52 @@ alone. Lean has certified 1 of them so far (#435).
   - Only C6 (R ≤ 2·iso_off + 1 + 2(n−1)[1 ∈ A−A]) and C1 survived, as routine.
   - The repair pass did not rescue them. A notebook's "Result" section is not a result until the referee has read the
     proof.
+
+## v5: dependency-aware validation and gap closing (2026-10-06)
+
+**What changed** (`07898b3`, `de2db38`, all in `harness.py`, research engine):
+- **Citations.** A claim's proof may cite other claims of its notebook. The referee and the adversary now see those
+  lemmas' statements, taken as given.
+- **Chain statuses.** `engine_resolve` keeps each claim's own verdict in `own_status`. Its `status` stays
+  `conditional`, with a `pending` list, until everything under it is valid. A gap-closing or repaired version of a
+  lemma stands in for it; a refutation never does. A proof ends at its last end mark (∎, □, QED), so citations after
+  it are commentary.
+- **Gap closing** (`--engine-gap-rounds N`, off by default):
+  - broken claims are rated "if proved", the most dependent first;
+  - each claim that would be the core, or new at significance 2 or more, is re-judged with its lemmas in view;
+  - if it is still broken, it gets a tool-using gap-closing session that sees the objections, the lemmas and the
+    notebook, for up to N rounds;
+  - every lemma under it is settled the same way.
+- **The Lean loop can fund itself** (`1176f75`): `--budget-extend STEP --budget-extend-max CAP`.
+
+**Test on #152's hard-step run** ($5.49 more, $26.93 in all; `--engine-gap-rounds 2 --engine-gap-max 2`). The
+deep dive's would-be proof of the whole problem (C9) had been thrown away as broken.
+- **Ratings.** The judges rated C9 a restatement at significance 3 ("implies the whole problem") and C7 new at
+  significance 2.
+- **C9, re-judged with its lemmas in view:** both the referee and the adversary passed it. It was then conditional on
+  C7, because the one-shot repair of the same resume had already fixed C5 as C5r.
+- **C7, re-judged:** still broken. It had used C5r's strong form, which holds only under a hypothesis (H_κ) that
+  nothing proves.
+- **One gap session on C7** ($1.12) produced C7g1. C7g1 proves C7's full statement with an 8,300-character proof
+  citing only C6:
+  - iso ≥ (3n−4−[n odd])/4 when 1 ∉ A−A;
+  - iso ≥ (n−10)/4 for an interior consecutive pair.
+
+  Both judges passed it, and the novelty panel called it new at significance 2 (2, 2).
+- **C9, re-judged against C7g1:** passed. **Every Sidon set with n ≥ 4 has at least (n−18)/4 isolated sums, so the
+  whole of #152 now stands as a refereed chain:** C9 ← C7g1, C5r, C1, C6, all valid.
+- **My own checks:**
+  - I read C9's proof. It plays the a₃+a_j family of sums against a_i+a_n through C1's run identity and C6, and
+    every step reads as sound.
+  - The C9 and C7g1 inequalities held on 14,042 Sidon sets: Erdős–Turán sets and their reflections for p ≤ 37,
+    every Sidon set in [0, 26] containing 0, and random dense sets, half of them forced to contain an end pair. No
+    violation; the smallest slack was 3. The bounds are loose, so this only rules out a false statement.
+- **Caveats:**
+  - Informal. Nothing here is Lean-checked or read by a mathematician.
+  - The step's frame said the problem was resolved.
+  - #152 was resolved in 2026: the DeepMind prover agent's Lean proof gives I ≥ n²/16 − O(n). The engine's bound is
+    linear, so weaker, but it answers the question.
+  - C1's quadruple count a−b+1 = c−d is the k = 1 piece of the published double count, so the route partly overlaps
+    the published one.
+- **What it shows:** before v5 the engine dropped exactly this chain. A referee without the lemmas, plus a lemma error
+  that never got a session, cost a complete argument for a research problem.
