@@ -3960,6 +3960,33 @@ Do not stop at the first result. Once you have one, push it further, toward the 
 refuted, or when your budget runs out. A smaller result that is new and fully proved is still worth recording."""
 
 
+GAP_ASSIGNMENT = """CLOSE THE GAP in one claim. The judges rate a correct proof of the claim below as {value}. Its proof did
+not survive review. Make it survive, or find out exactly why it cannot.
+
+THE CLAIM ({key}):
+{claim}
+
+ITS PROOF, as written:
+{proof}
+
+THE OBJECTIONS:
+{objections}
+
+THE LEMMAS ITS PROOF CITES, from the same notebook. prior/notebook.md has every claim of that notebook with its proof.
+{lemmas}
+
+Do this, in order:
+1. Decide whether each objection is right. Test the disputed step by computation in the sandbox: small cases, extreme
+   cases, and the exact identity or inequality at issue.
+2. If the claim is true as stated, write a COMPLETE proof that a strict referee can check line by line. Define every
+   symbol. State and prove inside the proof every lemma you use, except the cited lemmas above, which you may use
+   exactly as stated.
+3. If it is true only in a narrower form, prove the strongest form you can and state it precisely.
+4. If it is false, give an explicit counterexample.
+Record the outcome in NOTEBOOK.md as claim ### C1 (STATEMENT, STATUS, TYPE, BEYOND, PROOF). A referee and an adversary
+will attack it again, with the same lemmas in view."""
+
+
 @dataclasses.dataclass
 class EngineSettings:
     """What one run of the research engine does. A session is a tool-using agent with a Python sandbox; everything
@@ -3985,6 +4012,12 @@ class EngineSettings:
     deep_budget: float = 0.0         # > 0: after the rounds, ONE long session on the line most likely to matter (v3)
     deep_turns: int = 200
     deep_effort: str = "high"
+    gap_rounds: int = 0              # > 0: high-value broken claims get gap-closing sessions, this many rounds each (v5)
+    gap_max: int = 2                 # claims gap-closed per run
+    gap_min_sig: int = 2             # high value: a restatement of the core, or new at this significance, if proved
+    gap_rate_max: int = 6            # broken claims rated "if proved", the most dependent first
+    gap_budget: float = 4.0
+    gap_turns: int = 120
     min_target_sig: int = 0          # > 0: judges pre-rate every target and round 1 attacks only those rated new at >= this (v4)
     rate_judges: int = 2
     rate_budget: float = 0.3
@@ -4197,14 +4230,125 @@ def engine_repair(call, s: "EngineSettings", statement: str, known: str, c: dict
     return new
 
 
+CITE_RE = re.compile(r"\bC(\d+)\b")
+
+
+def _claim_supersedes(c: dict) -> str | None:
+    """The id of the claim this one replaces: a gap-closing version (`supersedes`) or a one-shot repair (`<id>r`)."""
+    return c.get("supersedes") or ((c.get("repaired_from") or "").split("/")[-1] or None)
+
+
+def claim_citations(c: dict, ids: set) -> list[str]:
+    """The ids of the claims in the same notebook that a claim's proof cites (`C5`, `C5(b)`, `by C6`), in order, never
+    its own or the one it supersedes."""
+    own, base = str(c.get("id") or ""), _claim_supersedes(c)
+    out: list[str] = []
+    for m in CITE_RE.finditer(f"{c.get('proof') or ''}\n{c.get('statement') or ''}"):
+        cid = f"C{m.group(1)}"
+        if cid in ids and cid not in (own, base) and cid not in out:
+            out.append(cid)
+    return out
+
+
+def _valid_status(st) -> bool:
+    return st == "validated-new" or str(st or "").startswith("valid-")
+
+
+def _session_index(ledger: list[dict]) -> dict:
+    by: dict = {}
+    for c in ledger:
+        by.setdefault(c.get("session"), []).append(c)
+    return by
+
+
+def _versions(by: dict, session, cid: str) -> list[dict]:
+    """Every version of claim `cid` in one notebook: the original first, then what superseded it, newest last."""
+    cs = by.get(session) or []
+    return [c for c in cs if c.get("id") == cid] + [c for c in cs if _claim_supersedes(c) == cid]
+
+
+def engine_resolve(ledger: list[dict]) -> None:
+    """Dependency-aware statuses, in place. A claim's proof may cite other claims of its notebook. Each claim keeps its
+    own verdict in `own_status`, and `status` becomes `conditional` (with `pending`) while anything it cites, directly or
+    through a lemma, is not valid. Only an unconditional chain counts.
+    Why: on #152's hard step a would-be proof of the whole problem (C9) cited C1, C5, C6 and C7. The referee saw C9's
+    text alone and broke it for lemmas "never stated", and nothing tracked that C5, under it, was broken for a real
+    error. A cited lemma resolves to its best version, so a gap-closing repair of C5 lifts every claim above it."""
+    by = _session_index(ledger)
+    for cs in by.values():
+        ids = {c.get("id") for c in cs} | {_claim_supersedes(c) for c in cs}
+        ids.discard(None)
+        for c in cs:
+            c["cites"] = claim_citations(c, ids)
+    memo: dict = {}
+
+    def final(c: dict, stack: frozenset) -> tuple:
+        if id(c) in memo:
+            return memo[id(c)]
+        v = c.get("validation") or {}
+        if not v:
+            return ("unvalidated", [])
+        v.setdefault("own_status", v.get("status"))
+        own = v["own_status"]
+        if not _valid_status(own):
+            res = (own, [])
+        else:
+            pending = []
+            for cid in c.get("cites") or []:
+                vs = _versions(by, c.get("session"), cid)
+                if vs and not any(id(d) not in stack and _valid_status(final(d, stack | {id(c)})[0]) for d in vs):
+                    pending.append(f"{c.get('session')}/{cid}")
+            res = (own if not pending else "conditional", pending)
+        memo[id(c)] = res
+        return res
+
+    for c in ledger:
+        v = c.get("validation")
+        if not v:
+            continue
+        st, pending = final(c, frozenset())
+        v["status"] = st
+        if pending:
+            v["pending"] = pending
+        else:
+            v.pop("pending", None)
+
+
+def engine_lemmas(c: dict, ledger: list[dict]) -> list[dict]:
+    """The lemmas a claim's proof cites, each as its best version (a valid supersedor's statement when there is one)."""
+    by = _session_index(ledger)
+    ids = {x.get("id") for x in by.get(c.get("session")) or []} | {_claim_supersedes(x) for x in by.get(c.get("session")) or []}
+    ids.discard(None)
+    out = []
+    for cid in claim_citations(c, ids):
+        vs = _versions(by, c.get("session"), cid)
+        if not vs:
+            continue
+        best = next((d for d in reversed(vs) if _valid_status((d.get("validation") or {}).get("status"))), vs[-1])
+        out.append({"id": cid, "statement": best.get("statement") or ""})
+    return out
+
+
+def lemma_context(lemmas: list[dict] | None) -> str:
+    if not lemmas:
+        return ""
+    return ("\n\nLEMMAS THIS PROOF CITES, from the same notebook. Each is judged separately: take each exactly as stated, "
+            "and check that the proof uses it only within what it states.\n"
+            + "\n".join(f"[{l['id']}] {clip_middle(l['statement'], 2500)}" for l in lemmas))
+
+
 def _claim_text(c: dict) -> str:
     lead = "The following statement is FALSE:\n" if c.get("status") == "REFUTED" else ""
     return f"{lead}{c['statement']}\n(type {c.get('type')}; the team says it goes beyond the known results as follows: {c.get('beyond') or 'not stated'})"
 
 
-def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict, spend: _DiscoverySpend) -> dict:
-    """A step referee and an adversary, in parallel; a novelty judge only when both pass."""
-    claim, proof = _claim_text(c), clip_middle(c.get("proof") or "(no proof given)", 24000)
+def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict, spend: _DiscoverySpend,
+                    lemmas: list[dict] | None = None) -> dict:
+    """A step referee and an adversary, in parallel; a novelty judge only when both pass. `lemmas`: the claims of the
+    same notebook that the proof cites, shown to both judges as given (each is judged on its own; `engine_resolve`
+    joins the verdicts)."""
+    claim = _claim_text(c)
+    proof = clip_middle(c.get("proof") or "(no proof given)", 24000) + lemma_context(lemmas)
     with ThreadPoolExecutor(max_workers=2) as ex:
         fr = ex.submit(_discovery_call, call, "engine-referee",
                        CLAIM_REFEREE_PROMPT.format(statement=statement, claim=claim, proof=proof), s.judge_effort, s.judge_budget)
@@ -4227,6 +4371,8 @@ def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict
         v["novelty"] = engine_novelty_panel(judges)
         v["cost"] = round(v["cost"] + cost, 4)
     v["status"] = engine_status(v)
+    if lemmas:
+        v["lemmas"] = [l["id"] for l in lemmas]
     return v
 
 
@@ -4481,14 +4627,17 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 list(ex.map(one, pending))
         sessions = [done[f"r{rnd}s{i}"] for i in range(1, len(todo) + 1)]
         claims = [c for x in sessions for c in x["claims"]]
+        engine_resolve(claims)                           # citations first: the lemmas a chosen claim rests on are judged too
         checkable = sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)
-        for c in checkable[: s.validate_max]:
+        for c in engine_with_lemmas(checkable[: s.validate_max], claims, s.validate_max):
             if c.get("validation"):                      # judged before a resume
                 continue
             if not spend.room(2 * s.judge_budget):
                 c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
                 continue
-            c["validation"] = engine_validate(call, s, statement, known, c, spend)
+            lem = engine_lemmas(c, claims)
+            c["validation"] = engine_validate(call, s, statement, known, c, spend, lemmas=lem)
+            c["validation"]["lemma_hash"] = _lemma_hash(lem)
             seen_judging, seen_judged = seen_judging + float(c["validation"].get("cost") or 0.0), seen_judged + 1
             if search is not None and c["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
                 lit = engine_literature_check(call, search, s, statement, c)
@@ -4497,6 +4646,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 if lit.get("verdict") in ("known", "routine"):
                     c["validation"]["status"] = f"valid-{lit['verdict']}"
             keep()
+        engine_resolve(claims)
         ledger += claims
         rec = {"round": rnd, "sessions": [{k: v for k, v in x.items() if k != "notebook"} for x in sessions],
                "_sessions": [{"label": x["label"], "notebook": x.get("notebook") or ""} for x in sessions],
@@ -4545,6 +4695,12 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         repairs[engine_claim_key(c)] = engine_repair(call, s, statement, known, c, spend, search)
         keep()
     ledger = ledger + [r for r in repairs.values() if isinstance(r, dict) and r.get("statement")]
+    ledger = ledger + [g for g in (ck.get("gaps") or {}).get("claims") or [] if not any(g is x for x in ledger)]
+    gaps = None
+    if s.gap_rounds > 0 and ledger:
+        gaps = engine_gap_phase(call, session, s, statement, lean, fblock, sess_context, known, ledger, spend, search,
+                                ck=ck, keep=keep, workers=workers)
+    engine_resolve(ledger)
     validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
     ans, conf = f.get("answer"), f.get("confidence")
     decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
@@ -4552,7 +4708,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     rounds = [{k: v for k, v in r.items() if k != "_sessions"} for r in rounds]   # the notebooks live in the sandboxes
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
             "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k != "claims_list"} if deep else None,
-            "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings,
+            "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings, "gaps": gaps,
             "guidance": engine_guidance(f, ledger, meta)}
 
 
@@ -4595,13 +4751,17 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
         ck["deep_partial"] = dp
         keep()
     claims = dp.get("claims_list") or []
-    for c in sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)[: s.validate_max]:
+    engine_resolve(claims)
+    chosen = sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)[: s.validate_max]
+    for c in engine_with_lemmas(chosen, claims, s.validate_max):
         if c.get("validation"):
             continue
         if not spend.room(2 * s.judge_budget):
             c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
             continue
-        c["validation"] = engine_validate(call, s, statement, known, c, spend)
+        lem = engine_lemmas(c, claims)
+        c["validation"] = engine_validate(call, s, statement, known, c, spend, lemmas=lem)
+        c["validation"]["lemma_hash"] = _lemma_hash(lem)
         if search is not None and c["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
             lit = engine_literature_check(call, search, s, statement, c)
             spend.add(lit.get("cost"))
@@ -4609,15 +4769,215 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
             if lit.get("verdict") in ("known", "routine"):
                 c["validation"]["status"] = f"valid-{lit['verdict']}"
         keep()
+    engine_resolve(claims)
     return {**dp, "claims": len(claims),
             "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
+
+
+def engine_with_lemmas(chosen: list[dict], claims: list[dict], cap: int) -> list[dict]:
+    """The chosen claims plus every PROVED/REFUTED claim they cite, transitively, at most `cap` more. A claim whose lemma
+    was never judged can only ever be conditional."""
+    by = _session_index(claims)
+    out, seen, i = list(chosen), {id(c) for c in chosen}, 0
+    while i < len(out):
+        c, i = out[i], i + 1
+        for cid in c.get("cites") or []:
+            for d in _versions(by, c.get("session"), cid):
+                if id(d) not in seen and d.get("status") in ("PROVED", "REFUTED") and len(out) - len(chosen) < cap:
+                    seen.add(id(d))
+                    out.append(d)
+    return out
+
+
+def _lemma_hash(lemmas: list[dict]) -> str:
+    return hashlib.sha256(json.dumps(lemmas, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
+
+
+def _objection(c: dict) -> str:
+    v = c.get("validation") or {}
+    return "\n".join(x for x in (
+        f"REFEREE: {(v.get('referee') or {}).get('first_error')}" if (v.get("referee") or {}).get("valid") is False else "",
+        f"ADVERSARY: {(v.get('adversary') or {}).get('how')}" if (v.get("adversary") or {}).get("broken") is True else "") if x)
+
+
+def _value_text(val: dict) -> str:
+    if str(val.get("verdict")) == "restatement":
+        return f"a restatement of the problem's remaining core (significance {val.get('significance', '?')}): proving it settles the problem"
+    return f"{val.get('verdict', 'unrated')}, significance {val.get('significance', '?')} of 3"
+
+
+def engine_gap_phase(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
+                     known: str, ledger: list, spend: _DiscoverySpend, search=None, ck: dict | None = None, keep=None,
+                     workers: int = 4) -> dict:
+    """v5: the claims that would matter most get their proofs finished instead of dropped. This is the informal
+    analogue of the deductive loop that took #435's hard step through Lean.
+    1. Rate the broken and conditional claims, most dependent first. A broken claim is rated "if proved" by the target
+       judges; a conditional one already has its novelty panel.
+    2. High value means a restatement of the core, or new at significance >= `gap_min_sig`. For each such claim:
+       - re-judge it with the lemmas it cites in view, if it was judged without them;
+       - if its own proof is broken, run a gap-closing session (`GAP_ASSIGNMENT`) for up to `gap_rounds` rounds, each
+         re-judged, stopping early when an objection repeats;
+       - settle every lemma under it the same way, then re-judge it if a lemma's statement changed.
+    `engine_resolve` lifts every claim above a repaired lemma.
+    Why: #152's deep dive wrote a would-be proof of the whole problem, and the engine dropped it after one text-only
+    repair attempt. Its referee had never seen the lemmas it cited, and the lemma with the real error never got a
+    session."""
+    ck = ck if ck is not None else {}
+    keep = keep or (lambda: None)
+    rec = ck.setdefault("gaps", {})
+    for k, dflt in (("rated", {}), ("rejudged", []), ("claims", []), ("targets", [])):
+        rec.setdefault(k, dflt)
+    for g in rec["claims"]:
+        if not any(g is x for x in ledger):
+            ledger.append(g)
+    engine_resolve(ledger)
+
+    def lit(c: dict) -> None:
+        if search is not None and (c.get("validation") or {}).get("status") == "validated-new" and spend.room(s.novelty_budget + 0.3):
+            r = engine_literature_check(call, search, s, statement, c)
+            spend.add(r.get("cost"))
+            c["validation"]["literature"] = r
+            if r.get("verdict") in ("known", "routine"):
+                c["validation"]["status"] = f"valid-{r['verdict']}"
+
+    def judge(c: dict, lem: list[dict]) -> None:
+        c["validation"] = engine_validate(call, s, statement, known, c, spend, lemmas=lem)
+        c["validation"]["lemma_hash"] = _lemma_hash(lem)
+        lit(c)
+        engine_resolve(ledger)
+        keep()
+
+    def closure(c: dict, seen: set) -> set:
+        by = _session_index(ledger)
+        for cid in c.get("cites") or []:
+            for d in _versions(by, c.get("session"), cid):
+                if id(d) not in seen:
+                    seen.add(id(d))
+                    closure(d, seen)
+        return seen
+
+    cands = [c for c in ledger if c.get("status") == "PROVED" and not _claim_supersedes(c)
+             and (c.get("validation") or {}).get("status") in ("broken", "conditional")]
+    cands.sort(key=lambda c: (len(closure(c, set())), _claim_rank(c)), reverse=True)
+    cands = cands[: s.gap_rate_max]
+    to_rate = [c for c in cands if engine_claim_key(c) not in rec["rated"]
+               and not _valid_status((c.get("validation") or {}).get("own_status"))]
+    if to_rate and spend.room(len(to_rate) * max(1, s.rate_judges) * s.rate_budget):
+        rec["rated"].update(engine_rate_targets(call, statement, known, [
+            {"id": engine_claim_key(c), "type": c.get("type"), "statement": c.get("statement"), "beyond": c.get("beyond")}
+            for c in to_rate], s, spend, workers))
+        keep()
+
+    def value(c: dict) -> dict:
+        v = c.get("validation") or {}
+        return (v.get("novelty") if _valid_status(v.get("own_status")) else None) or rec["rated"].get(engine_claim_key(c)) or {}
+
+    def high(val: dict) -> bool:
+        return str(val.get("verdict")) == "restatement" or (
+            str(val.get("verdict")) == "new" and (val.get("significance") or 0) >= s.gap_min_sig)
+
+    def gap_close(c: dict) -> dict | None:
+        cur, base = c, c
+        for r in range(1, max(0, s.gap_rounds) + 1):
+            if not spend.room(s.gap_budget + 2 * s.judge_budget + 2 * s.novelty_budget):
+                break
+            lem = engine_lemmas(cur, ledger)
+            book = "\n\n".join(f"### {x.get('id')}\nSTATEMENT: {x.get('statement')}\nSTATUS: {x.get('status')}\n"
+                               f"VERDICT: {(x.get('validation') or {}).get('status', 'not judged')}\nPROOF: {x.get('proof') or ''}"
+                               for x in _session_index(ledger).get(base.get("session")) or [])
+            label = f"gap-{base.get('session')}-{base.get('id')}-{r}"
+            prompt = SESSION_PROMPT.format(
+                statement=statement, lean=lean, frontier=fblock, context=sess_context, teammates="",
+                assignment=GAP_ASSIGNMENT.format(value=_value_text(value(base)), key=engine_claim_key(cur),
+                                                 claim=_claim_text(cur), proof=clip_middle(cur.get("proof") or "(none)", 16000),
+                                                 objections=_objection(cur) or "(none recorded)",
+                                                 lemmas="\n".join(f"[{l['id']}] {l['statement']}" for l in lem) or "(none)"),
+                modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+            try:
+                reply, notebook, cost = session("engine-session", prompt, label, s.gap_turns, s.gap_budget, s.session_effort,
+                                                files={"prior/notebook.md": book})
+            except DiscoveryCallFailed as e:
+                spend.add(e.cost)
+                rec.setdefault("errors", []).append({"label": label, "error": str(e)[:300]})
+                keep()
+                break
+            spend.add(cost)
+            got = [x for x in parse_claims(notebook) if x["status"] in ("PROVED", "REFUTED")]
+            if not got:
+                rec.setdefault("empty", []).append(label)
+                keep()
+                break
+            pick = next((x for x in got if x["id"] == "C1"), got[0])
+            new = {**pick, "id": f"{base.get('id')}g{r}", "session": base.get("session"), "_kind": "gap",
+                   "repaired_from": engine_claim_key(cur), "gap_cost": round(float(cost or 0.0), 4)}
+            if pick["status"] == "PROVED":
+                new["supersedes"] = base.get("id")       # a refutation never stands in for the lemma it refutes
+            else:
+                new["refutes"] = base.get("id")
+            ledger.append(new)
+            rec["claims"].append(new)
+            engine_resolve(ledger)
+            judge(new, engine_lemmas(new, ledger))
+            if pick["status"] == "PROVED" and _valid_status(new["validation"].get("own_status")):
+                return new
+            if pick["status"] != "PROVED" or _objection(new) == _objection(cur):
+                break
+            cur = new
+        return None
+
+    def settle(c: dict, depth: int, visited: set) -> None:
+        if id(c) in visited or depth > 4:
+            return
+        visited.add(id(c))
+        v = c.get("validation") or {}
+        if (not v or v.get("skipped")) and c.get("status") in ("PROVED", "REFUTED"):
+            if not spend.room(2 * s.judge_budget + 2 * s.novelty_budget):
+                return
+            judge(c, engine_lemmas(c, ledger))
+            v = c["validation"]
+        lem = engine_lemmas(c, ledger)
+        if lem and not _valid_status(v.get("own_status")) and not v.get("lemmas"):
+            key = f"{engine_claim_key(c)}@{_lemma_hash(lem)}"
+            if key not in rec["rejudged"] and spend.room(2 * s.judge_budget + 2 * s.novelty_budget):
+                rec["rejudged"].append(key)
+                judge(c, lem)                        # judged before without the lemmas it cites
+                v = c["validation"]
+        if v.get("own_status") == "broken":
+            if engine_claim_key(c) in rec["targets"] or len(rec["targets"]) >= s.gap_max:
+                return
+            rec["targets"].append(engine_claim_key(c))
+            keep()
+            new = gap_close(c)
+            if new is None:
+                return
+            c, v = new, new["validation"]
+        by = _session_index(ledger)
+        for cid in c.get("cites") or []:
+            vs = _versions(by, c.get("session"), cid)
+            if vs and not any(_valid_status((d.get("validation") or {}).get("status")) for d in vs):
+                settle(vs[0], depth + 1, visited)
+        lem = engine_lemmas(c, ledger)
+        if lem and _valid_status(v.get("own_status")) and v.get("lemma_hash") and v.get("lemma_hash") != _lemma_hash(lem):
+            key = f"{engine_claim_key(c)}@{_lemma_hash(lem)}"
+            if key not in rec["rejudged"] and spend.room(2 * s.judge_budget + 2 * s.novelty_budget):
+                rec["rejudged"].append(key)
+                judge(c, lem)                        # a lemma under it changed its statement
+
+    tops = sorted((c for c in cands if high(value(c))), key=lambda c: (
+        str(value(c).get("verdict")) != "restatement", -(value(c).get("significance") or 0)))
+    for c in tops:
+        settle(c, 0, set())
+    engine_resolve(ledger)
+    keep()
+    return {"rated": len(rec["rated"]), "high": [engine_claim_key(c) for c in tops], "targets": list(rec["targets"]),
+            "claims": len(rec["claims"]), "rejudged": len(rec["rejudged"])}
 
 
 def engine_report(res: dict, title: str) -> str:
     """IDEAS.md: every claim with its verdicts, validated ones first; then the frontier map's targets and angles."""
     led = res.get("ledger") or []
     order = {"validated-new": 0, "valid-restatement": 1, "valid-unrated": 2, "valid-routine": 3, "valid-known": 4,
-             "unjudged": 5, "broken": 6}
+             "conditional": 4.5, "unjudged": 5, "broken": 6}
     led = sorted(led, key=lambda c: (order.get((c.get("validation") or {}).get("status"), 7), c.get("session") or ""))
     lines = [f"# Research engine: {title}", "",
              f"Spend ${res.get('spend')}; {len(led)} claim(s); {len(res.get('validated') or [])} validated as new. "
@@ -4627,6 +4987,11 @@ def engine_report(res: dict, title: str) -> str:
         v = c.get("validation") or {}
         lines.append(f"## [{v.get('status', 'not validated')}] {c.get('session')}/{c.get('id')} {c.get('status')} {c.get('type')}")
         lines.append(f"**Statement.** {c.get('statement')}")
+        if v.get("pending"):
+            lines.append(f"**Conditional on** {', '.join(v['pending'])} (its own proof passed as {v.get('own_status')}).")
+        if c.get("supersedes") or c.get("refutes"):
+            lines.append(f"**Gap-closing version** of {c.get('session')}/{c.get('supersedes') or c.get('refutes')}"
+                         + (" (a refutation)" if c.get("refutes") else "") + ".")
         if c.get("beyond"):
             lines.append(f"**Beyond.** {c['beyond']}")
         for key in ("referee", "adversary", "novelty"):
@@ -5180,6 +5545,8 @@ class Harness:
                            frontier_budget=float(g("engine_frontier_budget", 8.0)),
                            deep_budget=float(g("engine_deep_budget", 0.0)), deep_turns=int(g("engine_deep_turns", 200)),
                            deep_effort=str(g("engine_deep_effort", "high")), repair_max=int(g("engine_repair_max", 3)),
+                           gap_rounds=int(g("engine_gap_rounds", 0)), gap_max=int(g("engine_gap_max", 2)),
+                           gap_min_sig=int(g("engine_gap_min_sig", 2)), gap_budget=float(g("engine_gap_budget", 4.0)),
                            min_target_sig=int(g("engine_min_target_sig", 0)), rate_judges=int(g("engine_rate_judges", 2)),
                            rate_effort=str(g("engine_rate_effort", "medium")))
         s.library = self._library_text(10000)
@@ -10962,6 +11329,12 @@ def build_parser() -> argparse.ArgumentParser:
                       help="> 0: the novelty judges pre-rate every frontier target, and round 1 attacks only the targets "
                            "they rate new at this significance or more, if proved (0 = off)")
     runp.add_argument("--engine-rate-judges", type=int, default=2)
+    runp.add_argument("--engine-gap-rounds", type=int, default=0,
+                      help="> 0: a broken claim the judges rate as the core or significance >= --engine-gap-min-sig if "
+                           "proved gets gap-closing sessions, this many rounds, and so does every lemma under it (0 = off)")
+    runp.add_argument("--engine-gap-max", type=int, default=2, help="claims gap-closed per run")
+    runp.add_argument("--engine-gap-min-sig", type=int, default=2)
+    runp.add_argument("--engine-gap-budget", type=float, default=4.0, help="USD per gap-closing session")
     runp.add_argument("--engine-rate-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])

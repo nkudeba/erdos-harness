@@ -341,6 +341,131 @@ The r1s2 exponent swap.
 """
 
 
+def claim(cid, st, proof, status="PROVED", vstat=None, session="deep", **kw):
+    c = {"id": cid, "session": session, "status": status, "type": "QUANT", "statement": st, "proof": proof, "beyond": ""}
+    if vstat:
+        c["validation"] = {"status": vstat}
+    c.update(kw)
+    return c
+
+
+def verdict(purpose, ok=True, nov=("routine", 0)):
+    if purpose == "engine-referee":
+        return "```json\n" + json.dumps({"valid": ok, "first_error": None if ok else "the lemmas C1 and C5 are never stated", "fixable": True}) + "\n```"
+    if purpose == "engine-adversary":
+        return "```json\n" + json.dumps({"broken": not ok, "how": None if ok else "C1(i) is used with two incompatible signs",
+                                         "severity": "none" if ok else "fixable"}) + "\n```"
+    return "```json\n" + json.dumps({"verdict": nov[0], "cite": None, "significance": nov[1], "why": "w"}) + "\n```"
+
+
+class Dependencies(unittest.TestCase):
+    """v5: a claim counts only when every lemma it cites is valid. A gap-closing version of a lemma lifts what rests on it.
+    #152's deep dive wrote a proof of the whole problem (C9) from C1, C5, C6 and C7. Its referee never saw them, and the
+    one real error, in C5, never got a session."""
+
+    def test_citations(self):
+        c = claim("C9", "main", "By C5(b) and C7, then C5 again; C12 is not a claim; C9 is itself.")
+        self.assertEqual(H.claim_citations(c, {"C5", "C7", "C9"}), ["C5", "C7"])
+        g = claim("C5g1", "x", "fixes C5 with C1", supersedes="C5")
+        self.assertEqual(H.claim_citations(g, {"C1", "C5"}), ["C1"])
+
+    def test_a_claim_waits_for_its_lemmas_and_a_fixed_lemma_lifts_it(self):
+        c5 = claim("C5", "lemma", "a sign identity", vstat="broken")
+        c7 = claim("C7", "middle", "by C5", vstat="valid-routine")
+        c9 = claim("C9", "main", "from C7 and C5", vstat="validated-new")
+        other = claim("C5", "unrelated", "x", vstat="broken", session="r1s1")      # same id, another notebook
+        led = [c5, c7, c9, other]
+        H.engine_resolve(led)
+        self.assertEqual((c9["validation"]["status"], c9["validation"]["own_status"]), ("conditional", "validated-new"))
+        self.assertEqual(c9["validation"]["pending"], ["deep/C7", "deep/C5"])
+        self.assertEqual(c7["validation"]["status"], "conditional")
+        led.append(claim("C5g1", "lemma", "fixed", vstat="valid-routine", supersedes="C5"))
+        H.engine_resolve(led)
+        self.assertEqual((c7["validation"]["status"], c9["validation"]["status"]), ("valid-routine", "validated-new"))
+        self.assertNotIn("pending", c9["validation"])
+        led[-1] = claim("C5g1", "C5 is false", "a counterexample", status="REFUTED", vstat="valid-routine", refutes="C5")
+        H.engine_resolve(led)
+        self.assertEqual(c9["validation"]["status"], "conditional")             # a refutation never stands in for the lemma
+
+    def test_circular_citations_are_conditional(self):
+        a = claim("C1", "a", "by C2", vstat="valid-routine")
+        b = claim("C2", "b", "by C1", vstat="valid-routine")
+        H.engine_resolve([a, b])
+        self.assertEqual((a["validation"]["status"], b["validation"]["status"]), ("conditional", "conditional"))
+
+    def test_the_judges_see_the_cited_lemmas(self):
+        call = FakeCall(lambda purpose, prompt, n: judge(purpose))
+        v = H.engine_validate(call, H.EngineSettings(), "P", "K", claim("C9", "main", "from C5"), H._DiscoverySpend(10),
+                              lemmas=[{"id": "C5", "statement": "the sign identity"}])
+        for purpose in ("engine-referee", "engine-adversary"):
+            self.assertIn("[C5] the sign identity", call.prompts(purpose)[0])
+        self.assertEqual(v["lemmas"], ["C5"])
+
+    def test_a_chosen_claims_lemma_is_judged_too(self):
+        call = FakeCall(lambda purpose, prompt, n: FRONTIER if purpose == "engine-frontier" else judge(purpose))
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "REDUCTION", "the main claim, via C3"),
+                                                          ("PROVED", "QUANT", "a side claim"), ("PROVED", "OTHER", "the lemma")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50, validate_max=1))
+        judged = {c["id"] for c in res["ledger"] if c.get("validation")}
+        self.assertEqual(judged, {"C1", "C3"})                                 # C3 ranks last, but C1 rests on it
+        self.assertIsNone(res["gaps"])                                         # the gap phase is off by default
+        self.assertFalse(any(label.startswith("gap-") for label, p in sess.calls))
+
+    def _gap_ledger(self):
+        c1 = claim("C1", "the split identity", "algebra", vstat="valid-routine")
+        c5 = claim("C5", "the sign lemma", "uses C1 twice")
+        c5["validation"] = {"referee": {"valid": True}, "adversary": {"broken": True, "how": "C1(i) is used with two incompatible signs"},
+                            "status": "broken"}
+        c9 = claim("C9", "the whole problem", "from C1 and C5")
+        c9["validation"] = {"referee": {"valid": False, "first_error": "the lemmas C1 and C5 are never stated"},
+                            "adversary": {"broken": False}, "status": "broken"}
+        return c1, c5, c9
+
+    def _gap_call(self):
+        def script(purpose, prompt, n):
+            if purpose == "engine-target-rate":
+                big = "the whole problem" in prompt.split("THE TARGET:")[1]
+                return "```json\n" + json.dumps({"verdict": "restatement" if big else "new", "significance": 3 if big else 1,
+                                                 "reach": "medium", "cite": None, "why": "w"}) + "\n```"
+            text = prompt.split("THE CLAIM:")[1]
+            if "the whole problem" in text:
+                return verdict(purpose, ok="LEMMAS THIS PROOF CITES" in prompt, nov=("restatement", 3))
+            if "the sign lemma" in text and "repaired" not in text:
+                return verdict(purpose, ok=purpose != "engine-adversary")
+            return verdict(purpose)
+        return FakeCall(script, cost=0.05)
+
+    def test_the_gap_phase_closes_the_lemma_under_a_high_value_claim(self):
+        c1, c5, c9 = self._gap_ledger()
+        ledger = [c1, c5, c9]
+        sess = FakeSession(lambda label, prompt: "## Claims\n### C1\nSTATEMENT: the sign lemma, repaired\nSTATUS: PROVED\n"
+                                                 "TYPE: QUANT\nBEYOND: x\nPROOF: complete, from C1 with one sign throughout.\n")
+        res = H.engine_gap_phase(self._gap_call(), sess, H.EngineSettings(gap_rounds=2, total_budget=50), "P", LEAN, "FB", "",
+                                 "K", ledger, H._DiscoverySpend(50))
+        self.assertEqual([label for label, p in sess.calls], ["gap-deep-C5-1"])
+        prompt = sess.calls[0][1]
+        self.assertIn("two incompatible signs", prompt)
+        self.assertIn("[C1] the split identity", prompt)
+        self.assertIn("the sign lemma", sess.files["gap-deep-C5-1"]["prior/notebook.md"])
+        g = next(c for c in ledger if c["id"] == "C5g1")
+        self.assertEqual((g["supersedes"], g["validation"]["status"]), ("C5", "valid-routine"))
+        self.assertEqual(c9["validation"]["own_status"], "valid-restatement")   # re-judged with its lemmas in view
+        self.assertEqual(c9["validation"]["status"], "valid-restatement")       # and no longer waiting on C5
+        self.assertEqual(res["high"], ["deep/C9"])
+        self.assertEqual(res["targets"], ["deep/C5"])
+
+    def test_a_refuting_gap_session_leaves_the_claim_conditional(self):
+        c1, c5, c9 = self._gap_ledger()
+        ledger = [c1, c5, c9]
+        sess = FakeSession(lambda label, prompt: "### C1\nSTATEMENT: the sign lemma fails at n = 5\nSTATUS: REFUTED\n"
+                                                 "TYPE: NEGATIVE\nBEYOND: x\nPROOF: n = 5 breaks it.\n")
+        H.engine_gap_phase(self._gap_call(), sess, H.EngineSettings(gap_rounds=3, total_budget=50), "P", LEAN, "FB", "",
+                           "K", ledger, H._DiscoverySpend(50))
+        self.assertEqual(len(sess.calls), 1)                                   # a refutation ends the rounds
+        self.assertEqual(c9["validation"]["status"], "conditional")
+        self.assertEqual(next(c for c in ledger if c["id"] == "C5g1").get("refutes"), "C5")
+
+
 class DeepDive(unittest.TestCase):
     def test_one_long_session_on_the_chosen_line_with_the_notebooks(self):
         def script(purpose, prompt, n):
