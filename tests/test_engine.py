@@ -368,6 +368,8 @@ class Dependencies(unittest.TestCase):
         self.assertEqual(H.claim_citations(c, {"C5", "C7", "C9"}), ["C5", "C7"])
         g = claim("C5g1", "x", "fixes C5 with C1", supersedes="C5")
         self.assertEqual(H.claim_citations(g, {"C1", "C5"}), ["C1"])
+        c7 = claim("C7", "the interior case", "C6 and C5(b) give it. ∎\nREMAINING CASE (now CLOSED by C9): the end pair.")
+        self.assertEqual(H.claim_citations(c7, {"C5", "C6", "C7", "C9"}), ["C6", "C5"])   # commentary after the end mark
 
     def test_a_claim_waits_for_its_lemmas_and_a_fixed_lemma_lifts_it(self):
         c5 = claim("C5", "lemma", "a sign identity", vstat="broken")

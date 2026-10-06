@@ -4238,12 +4238,21 @@ def _claim_supersedes(c: dict) -> str | None:
     return c.get("supersedes") or ((c.get("repaired_from") or "").split("/")[-1] or None)
 
 
+PROOF_END_RE = re.compile(r"∎|□|■|\bQ\.?E\.?D\b\.?")
+
+
 def claim_citations(c: dict, ids: set) -> list[str]:
     """The ids of the claims in the same notebook that a claim's proof cites (`C5`, `C5(b)`, `by C6`), in order, never
-    its own or the one it supersedes."""
+    its own or the one it supersedes. Text after the proof's last end mark (∎, □, QED) is commentary, not proof: #152's
+    C7 ended "∎ REMAINING CASE (now CLOSED by C9)", and reading that as a citation made C7 and C9, which really cites
+    C7, depend on each other, so neither could ever count."""
     own, base = str(c.get("id") or ""), _claim_supersedes(c)
+    proof = c.get("proof") or ""
+    ends = list(PROOF_END_RE.finditer(proof))
+    if ends:
+        proof = proof[: ends[-1].start()]
     out: list[str] = []
-    for m in CITE_RE.finditer(f"{c.get('proof') or ''}\n{c.get('statement') or ''}"):
+    for m in CITE_RE.finditer(f"{proof}\n{c.get('statement') or ''}"):
         cid = f"C{m.group(1)}"
         if cid in ids and cid not in (own, base) and cid not in out:
             out.append(cid)
