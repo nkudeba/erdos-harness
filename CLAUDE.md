@@ -479,7 +479,10 @@ proved from them by glue with **no `sorry` of its own**. The open hypotheses ARE
    shrinks. `Lemmas.lean` still accumulates the certified proofs as an importable module, keeping ONE block per
    hypothesis name, the newest (`lemma_blocks_deduped`). A re-plan that reused a name used to leave two
    `namespace <name>_ns` blocks. After that the module never built again, and no attempt could import a certified lemma
-   (#152, 2026-10-06).
+   (#152, 2026-10-06). For the same reason, the residual in force must contain the frozen statement, as an adopted
+   skeleton must. Otherwise it is archived as `Residual.stale-*.lean`. A sub-residual lives in
+   `sub/<hypothesis name>/`, and #152's re-stated `hyp_c6` kept loading its OLD closed skeleton. That skeleton had
+   0 open steps, so it refused every new plan and never reported a proof.
 5. **Learn from failures, grow in depth.** A child that fails leaves a *failure digest* (unsolved goals,
    best attempts' errors, the prover's own diagnosis) in `failures.jsonl`; the next plan sees it under
    PROOF FAILURES and must answer with one of four moves — `lemma` (state the missing fact as a new

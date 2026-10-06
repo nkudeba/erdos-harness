@@ -8952,6 +8952,17 @@ for the SAT solver instead of enumerating it.
         certified_any = proved = False
         skeleton = residual_path.read_text() if residual_path.exists() else ""
         meta = ((self.state.get("residual") or {}) if isinstance(self.state.get("residual"), dict) else {}).get("meta") or {}
+        if skeleton.strip() and not contains_frozen(skeleton, frozen):
+            # A sub-residual lives in sub/<hypothesis name>/, so a re-plan that reuses a name for a new statement left
+            # the OLD statement's skeleton in force for the new one. #152's `hyp_c6` was re-stated as SkKnownNE -> SkC6
+            # after its first version had closed: every later attack loaded the closed old skeleton (0 open), refused
+            # each new plan as "no improvement", never reported a proof, and the parent logged "no refinable
+            # sub-residual" twice. The adoption check already demands the frozen statement; the residual in force now
+            # meets it too.
+            stale = residual_path.with_name(f"Residual.stale-{datetime.now().strftime('%Y%m%d-%H%M%S')}.lean")
+            residual_path.rename(stale)
+            self.log.event("program", "residual_stale", path=str(stale))
+            skeleton, meta = "", {}
         parsed = parse_residual(skeleton, pid, meta, main=main) if skeleton.strip() else None
         if parsed and not (parsed["main_present"] and parsed["glue_sorry_free"]):
             parsed, skeleton = None, ""          # a stale or hand-edited skeleton is not in force

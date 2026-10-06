@@ -667,6 +667,48 @@ class BudgetExtension(unittest.TestCase):
         self.assertEqual(int(h.state.get("stall_cycles") or 0), 0)
 
 
+class StaleResidual(unittest.TestCase):
+    """#152: `hyp_c6` was re-stated by a re-plan after its first version had closed in sub/erdos_892759_hyp_c6/. Every
+    later attack loaded that closed skeleton for the OLD statement as the residual in force: 0 open, so every new plan
+    was "no improvement", no proof was ever reported, and the parent logged "no refinable sub-residual"."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _run(self, residual_text):
+        h = _stub(self.root / "run")
+        h.args.min_child_budget = 0
+        plan = "```lean\n" + SKELETON + "\n```\n```json\n" + json.dumps({"hypotheses": []}) + "\n```\n"
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
+        h._install_lemmas_module = lambda pdir: None
+        h._attack_substatement = lambda *a, **k: (2, argparse.Namespace(state={}))
+        pdir = self.root / "programs" / "erdos_99"
+        pdir.mkdir(parents=True)
+        (pdir / "Residual.lean").write_text(residual_text)
+        h.run_program()
+        return h, pdir
+
+    def test_a_skeleton_for_an_earlier_statement_is_set_aside(self):
+        old = "def foo (n : ℕ) : Prop := n = n\n\ntheorem erdos_99 : ∀ n : ℕ, n = n := by\n  intro n\n  rfl"
+        h, pdir = self._run(old)
+        self.assertTrue(any(e[1] == "residual_stale" for e in h.log.events))
+        self.assertEqual(len(list(pdir.glob("Residual.stale-*.lean"))), 1)
+        sk = [e for e in h.log.events if e[1] == "skeleton"]
+        self.assertTrue(sk and sk[0][2]["adopted"] and sk[0][2]["reason"] == "first skeleton")
+
+    def test_the_skeleton_in_force_for_the_same_statement_is_kept(self):
+        h, pdir = self._run(SKELETON)
+        self.assertFalse(any(e[1] == "residual_stale" for e in h.log.events))
+        self.assertEqual(list(pdir.glob("Residual.stale-*.lean")), [])
+
+
 class LemmaBlocksDeduped(unittest.TestCase):
     """#152's whole-problem run certified `hyp_interior` twice (a re-plan reused the name for a new statement). Two
     `namespace erdos_N_hyp_interior_ns` blocks declared the same constants twice, the lemmas module stopped building, and
