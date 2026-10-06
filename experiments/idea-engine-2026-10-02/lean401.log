@@ -1,0 +1,2 @@
+RUN-SUMMARY problem=893177 exit=1 outcome=infrastructure_error verified=None spend=$7.08 llm_calls=17 lean_checks=108 lemmas=5 residual=open:4,published:0,certified:5 fatals=2 wall=74m mode=research dir=runs/20261006-105451-996165-hardlean-erdos893177
+LEAN401-DONE 2026-10-06T16:08:59Z
