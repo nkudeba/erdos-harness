@@ -1601,8 +1601,11 @@ Write ONE ```python script (standard library only: math, itertools, functools, c
 bisect, json, re; NO sys/os/files/network — do not import `sys` even for the recursion limit; use iteration) that
 runs in ≤ 60 s and does two things:
 
-1. REFUTE FIRST. For every hypothesis above, search for a counterexample: smallest parameters first, then every
-   structured near-miss family the problem is known for (name each family in a comment). For each hypothesis
+1. REFUTE FIRST. For every hypothesis above, search for a counterexample. Start with the DEGENERATE instances the
+   Lean statement allows: the empty set, 0, 1, a single element, an empty sum. An informal argument assumes them
+   away, and the formal statement does not (a "split identity" proved for every Sidon set was false at A = ∅ and stalled
+   a whole run). Then the smallest parameters, then every structured near-miss family the problem is known for (name
+   each family in a comment). A hypothesis marked CLAIMED FALSE is tested with that witness first. For each hypothesis
    print exactly one line, either
      REFUTED: {{"hypothesis": "<name>", "witness": {{"<bound variable>": <value>, ...}}}}
    with the SMALLEST witness found — re-verify it with exact integer arithmetic before printing — or
@@ -1717,7 +1720,11 @@ Produce, in this order:
      "definitions": ["<name>: <one-line meaning>", ...],
      "failure_responses": [{{"hypothesis": "<name>", "move": "lemma" | "split" | "define" | "defer",
                             "detail": "what you changed and why the failure implied it"}}, ...],
-     "route": "two or three sentences: how the glue works and what would finish the job"}}
+     "route": "two or three sentences: how the glue works and what would finish the job",
+     "false_in_force": [{{"name": "<an open hypothesis of the skeleton IN FORCE>", "witness": "<the smallest counterexample, exactly>"}}, ...]}}
+    `false_in_force` names a hypothesis of the skeleton already in force that is false AS STATED, an edge case the
+    informal argument assumed away included. It is not attacked again; the next refutation stage tests your witness
+    first, and a confirmed witness retires that skeleton so a corrected one can be adopted.
     Statuses are exactly proved / refuted / conditional / open. Never a percentage. `difficulty` is your honest
     estimate of the Lean effort to discharge the hypothesis (elementary = a page of undergraduate mathematics;
     hard = the genuinely open core); the harness attacks elementary hypotheses first and leaves hard ones for
@@ -8972,9 +8979,12 @@ for the SAT solver instead of enumerating it.
                 exp_out, rf = "", {"refuted": [], "clear": [], "invariants": []}
                 if refute_pol != "off" and not endgame:
                     open_h = [h for h in (parsed or {}).get("hypotheses", []) if h["open"] and h["kind"] == "conjecture"]
-                    hyp_txt = ("\n".join(f"- {h['name']} : {h['statement']}" for h in open_h)
+                    claims = self.state.get("false_claims") or {}
+                    hyp_txt = ("\n".join(f"- {h['name']} : {h['statement']}"
+                                         + (f"\n  CLAIMED FALSE by the last plan, witness: {claims[h['name']]}" if h["name"] in claims else "")
+                                         for h in open_h)
                                or "(none yet -- this cycle, only extract necessary conditions on a counterexample to the target)")
-                    hyp_sig = open_hypotheses_signature(open_h)
+                    hyp_sig = open_hypotheses_signature(open_h) + ("|claims:" + ",".join(sorted(claims)) if claims else "")
                     if refute_pol == "changed" and cycle > 1 and hyp_sig == self.state.get("last_refute_sig"):
                         # On train #283 the refutation script cost 39% of the run ($2.28 of $5.89), rerun every
                         # cycle in both directions against a set of open hypotheses the plan had not touched.
@@ -9035,6 +9045,15 @@ for the SAT solver instead of enumerating it.
                 options, verdict, cand = [], None, None
                 for ri, resp in enumerate(responses):
                     rmeta = json_block(resp) or {}
+                    open_now = {h["name"] for h in (parsed or {}).get("hypotheses", []) if h["open"]}
+                    for fc in rmeta.get("false_in_force") or []:
+                        if isinstance(fc, dict) and str(fc.get("name") or "") in open_now:
+                            # #152's whole-problem run: its plan saw that SidSplitIdentity is false at A = ∅, proposed
+                            # the corrected skeleton, and the metric refused it, so the loop kept attacking a false
+                            # hypothesis. The claim now goes to the refutation stage, whose witness retires the skeleton.
+                            self.state.setdefault("false_claims", {})[str(fc["name"])] = str(fc.get("witness") or "")[:400]
+                            self.log.event("program", "hypothesis_claimed_false", cycle=cycle, name=fc["name"],
+                                           witness=str(fc.get("witness") or "")[:200])
                     for mv in (rmeta.get("failure_responses") or []):
                         if isinstance(mv, dict) and mv.get("hypothesis"):
                             with open(pdir / "moves.jsonl", "a") as f:
@@ -9117,7 +9136,7 @@ for the SAT solver instead of enumerating it.
                     module = self._install_lemmas_module(pdir)
                     fails = failure_counts(pdir)
                     false_names = {h.get("name") for h in (meta.get("hypotheses") or [])
-                                   if isinstance(h, dict) and h.get("believed_false") is True}
+                                   if isinstance(h, dict) and h.get("believed_false") is True} | set(self.state.get("false_claims") or {})
                     # Change A, "breadth before depth" (2026-09-26): sweep every open conjecture cheaply BEFORE
                     # core-first/per-cycle/min-child-budget narrow the field. `todo` below is recomputed from
                     # the sweep's own (possibly updated) `parsed`, so the depth phase only ever sees hypotheses

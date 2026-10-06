@@ -592,6 +592,47 @@ class BudgetExtension(unittest.TestCase):
         self.assertEqual(h.args.run_budget, 5.0)
 
 
+class FalseInForce(unittest.TestCase):
+    """#152's whole-problem run: the plan saw that a hypothesis IN FORCE was false (SidSplitIdentity at A = ∅) and the
+    metric refused its corrected skeleton. The claim now stops attacks on that hypothesis and goes, with its witness,
+    to the next refutation stage."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def test_a_claimed_false_hypothesis_is_tested_not_attacked(self):
+        h = _stub(self.root / "run")
+        h.args.research_cycles, h.args.refute, h.args.min_child_budget = 3, "changed", 0
+        plans = {"n": 0}
+        def ask(purpose, prompt, **kw):
+            plans["n"] += 1
+            meta = {"hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture", "derivation": "d"}]}
+            if plans["n"] >= 2:                    # cycle 2 on: the plan says hyp_a is false as stated
+                meta["false_in_force"] = [{"name": "erdos_99_hyp_a", "witness": "n = 0"}]
+            return "```lean\n" + SKELETON + "\n```\n```json\n" + json.dumps(meta) + "\n```\n"
+        h.ask = _judged(ask)
+        h._install_lemmas_module = lambda pdir: None
+        attacked, seen = [], []
+        h._attack_substatement = lambda sub, name, *a, **k: attacked.append(name) or (2, argparse.Namespace(state={}))
+        h._deductive_experiments = lambda cdir, cycle, hyp_txt: seen.append(hyp_txt) or ("", {"refuted": [], "clear": [], "invariants": []})
+        h.run_program()
+        self.assertEqual(h.state["false_claims"], {"erdos_99_hyp_a": "n = 0"})
+        self.assertEqual(attacked.count("erdos_99_hyp_a"), 1)                 # attacked in cycle 1 only
+        self.assertTrue(any("CLAIMED FALSE by the last plan, witness: n = 0" in t for t in seen[1:]))
+        self.assertTrue(any(e[1] == "hypothesis_claimed_false" for e in h.log.events))
+
+    def test_the_refutation_prompt_asks_for_degenerate_cases_first(self):
+        self.assertIn("DEGENERATE instances", H.EXPERIMENTS_PROMPT)
+        self.assertIn("false_in_force", H.PLAN_PROMPT)
+
+
 class Refinement(unittest.TestCase):
     """A child that does not close its target but certifies `target <= sub-hypotheses` refines the parent."""
 
