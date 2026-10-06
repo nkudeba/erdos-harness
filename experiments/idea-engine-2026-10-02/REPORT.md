@@ -571,6 +571,10 @@ cost more than #1125 or #401. Decide before launching:
 `hardsteps_lean.py --engine-run runs/20261006-100457-390025-discover-erdos33868 --claim r1s1/C1 --full-run <same> --chain --id 833868`.
 
 **Next: step 3, open problems.**
+- **Candidates.** The top 30 unsolved problems by `partial`, tie-broken by `score`, from the 2026-10-06 rankings: 7, 264,
+  488, 20, 306, 872, 273, 120, 686, 835, 978, 366, 617, 364, 1041, 647, 396, 536, 677, 176, 307, 951, 12, 367, 409, 886,
+  885, 97, 138, 873.
+- **Forum threads.** Their threads were refreshed with `fetch_forum.py --refresh` on 2026-10-06.
 1. **Screen.** Map and rate 20–30 high-`partial` open problems with the engine (`--engine-sessions 0
    --engine-min-target-sig 2`), after fetching each problem's forum thread.
 2. **Attack.** Pick the 2–3 where both judges rate a reachable target at significance ≥ 2, and run the full engine with
