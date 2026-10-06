@@ -728,3 +728,31 @@ class DiscoverV4(unittest.TestCase):
         T.apply_candidate_settings(a)
         self.assertEqual((a.discover_rounds, a.discover_total_budget, a.commit_floor, a.discover_effort),
                          (3, 3.0, 0.6, "medium"))
+
+
+class EngineScreenRecord(unittest.TestCase):
+    """discover-screen --discover-mode engine: the row says whether the engine's refereed complete chain lands on the
+    TRUE side, and counts validated-new claims and those both judges rate significance 2 or more."""
+
+    def test_record(self):
+        import types
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            run = Path(d) / "runs" / "x-discover-erdos7"
+            (run / "engine").mkdir(parents=True)
+            (run / "state.json").write_text(json.dumps({"discovery": {"refereed_complete": True,
+                "best_proof": {"answer": "true", "claim": "deep/C9", "text": "..."}}}))
+            led = [{"session": "deep", "id": "C9", "validation": {"status": "valid-restatement"}},
+                   {"session": "r1s1", "id": "C1", "validation": {"status": "validated-new", "novelty": {"significance": 2}}},
+                   {"session": "r1s1", "id": "C2", "validation": {"status": "validated-new", "novelty": {"significance": 1}}},
+                   {"session": "r1s1", "id": "C3", "status": "CONJECTURED"}]
+            (run / "engine" / "engine.json").write_text(json.dumps({"ledger": led, "frontier": {"answer": "true"}}))
+            args = types.SimpleNamespace(tag="t")
+            with patch.object(T, "ROOT", Path(d)), patch.object(T, "protocol", lambda a: {}):
+                rec = T.engine_screen_record(run, {"problem": "152", "answer": True, "split": "dev"}, 7, 2, {"spend": 21.4},
+                                             args, ["--discover-mode", "engine"])
+        self.assertEqual((rec["complete"], rec["refereed_true"], rec["refereed_false"]), (True, 1, 0))
+        self.assertEqual((rec["validated_new"], rec["sig2"]), (2, 1))
+        self.assertTrue(rec["direction_correct"])
+        self.assertFalse(rec["solved"])                     # only Lean makes it a solve
+        self.assertEqual(rec["claims"]["unvalidated-conjectured"], 1)

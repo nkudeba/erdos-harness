@@ -2223,6 +2223,34 @@ def library_cmd(args) -> int:
     return 0
 
 
+def engine_screen_record(run_dir: Path, item: dict, alias, rc, facts: dict, args, flags: list) -> dict:
+    """One results row for a research-engine screen of a whole problem. `complete` is the engine's own claim: an
+    unconditional refereed chain that its novelty judges call the problem itself (`engine_complete`), and
+    `refereed_true` means it lands on the TRUE side. Only Lean makes it a solve, so `solved` stays False here."""
+    st = json.loads((run_dir / "state.json").read_text())
+    d = st.get("discovery") or {}
+    ej = json.loads((run_dir / "engine" / "engine.json").read_text())
+    truth = "true" if item["answer"] else "false"
+    counts: dict = {}
+    for c in ej.get("ledger") or []:
+        s = (c.get("validation") or {}).get("status") or f"unvalidated-{str(c.get('status')).lower()}"
+        counts[s] = counts.get(s, 0) + 1
+    new = [c for c in ej.get("ledger") or [] if (c.get("validation") or {}).get("status") == "validated-new"]
+    sig = lambda c: (((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0)
+    bp = d.get("best_proof") or {}
+    complete = bool(d.get("refereed_complete"))
+    return {"problem": item["problem"], "tag": args.tag, "alias": alias, "run_dir": str(run_dir.relative_to(ROOT)),
+            "answer": item["answer"], "truth": truth, "split": item["split"], "returncode": rc, "solved": False,
+            "contradiction": False, "spend": round(facts.get("spend") or 0.0, 2), "screen": "engine",
+            "complete": complete, "complete_answer": bp.get("answer"), "complete_claim": bp.get("claim"),
+            "refereed_true": int(complete and bp.get("answer") == truth),
+            "refereed_false": int(complete and bp.get("answer") != truth),
+            "frontier_answer": (ej.get("frontier") or {}).get("answer"),
+            "direction_correct": ((ej.get("frontier") or {}).get("answer") == truth) if (ej.get("frontier") or {}).get("answer") else None,
+            "claims": counts, "validated_new": len(new), "sig2": sum(1 for c in new if sig(c) >= 2),
+            "gaps": ej.get("gaps"), "protocol": {**protocol(args), "screen": "engine", "discovery_flags": flags}}
+
+
 def discover_screen(args) -> int:
     """The no-Lean screen for changes to discovery: the in-run stage alone (`harness.py --stop-after discover`) on
     each item, recorded in the result-record shape so `ideas --tag <tag>` grades it, plus what decides conversion
@@ -2233,11 +2261,18 @@ def discover_screen(args) -> int:
     done = set(load_results(args.tag))
     taken = taken_aliases()
     out = RESULTS / f"{args.tag}.jsonl"
-    flags = ["--discover-mode", args.discover_mode, "--discover-attempts", str(args.discover_attempts),
-             "--discover-effort", args.discover_effort, "--discover-budget", str(args.discover_budget),
-             "--discover-rounds", str(args.discover_rounds), "--discover-total-budget", str(args.discover_total_budget),
-             "--discover-ladder", str(args.discover_ladder), "--discover-commit-floor", str(args.commit_floor),
-             "--discover-gap-round", args.gap_round]
+    engine = args.discover_mode == "engine"
+    if engine:
+        # The research engine on the WHOLE problem, framed as open (no "resolved" cue): its own budget is
+        # --discover-total-budget, the rest comes from --engine-flags (e.g. "--engine-sessions 3 --engine-deep-budget 6").
+        flags = ["--discover-mode", "engine", "--engine-total-budget", str(args.discover_total_budget),
+                 *(args.engine_flags or "").split()]
+    else:
+        flags = ["--discover-mode", args.discover_mode, "--discover-attempts", str(args.discover_attempts),
+                 "--discover-effort", args.discover_effort, "--discover-budget", str(args.discover_budget),
+                 "--discover-rounds", str(args.discover_rounds), "--discover-total-budget", str(args.discover_total_budget),
+                 "--discover-ladder", str(args.discover_ladder), "--discover-commit-floor", str(args.commit_floor),
+                 "--discover-gap-round", args.gap_round]
     print(f"discover-screen {args.tag}: {len([i for i in items if i['problem'] not in done])} item(s); {' '.join(flags)}",
           flush=True)
     for item in items:
@@ -2281,7 +2316,7 @@ def discover_screen(args) -> int:
         else:
             print(f"#{item['problem']}: still limited after 4 waits; not recorded (rerun the command)", flush=True)
             continue
-        if rc == 1 or not (run_dir / "discovery.json").exists():
+        if rc == 1 or not (run_dir / ("engine/engine.json" if engine else "discovery.json")).exists():
             # an infrastructure failure is never a result (the runner's rule): on 2026-10-01 a logging bug crashed
             # every --library run before its first call, and five $0 non-results were recorded as screened items
             with (RESULTS / f"{args.tag}.infra.jsonl").open("a") as f:
@@ -2292,6 +2327,13 @@ def discover_screen(args) -> int:
             continue
         import harness as H
         facts = H.collect_run_facts(run_dir, str(alias))
+        if engine:
+            rec = engine_screen_record(run_dir, item, alias, rc, facts, args, flags)
+            with out.open("a") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            print(f"#{item['problem']}: truth={rec['truth']} complete={rec['complete']} answer={rec['complete_answer']} "
+                  f"validated_new={rec['validated_new']} sig2={rec['sig2']} ${rec['spend']}", flush=True)
+            continue
         try:
             dj = json.loads((run_dir / "discovery.json").read_text())
         except (OSError, ValueError):
@@ -2720,7 +2762,8 @@ def main() -> int:
     ds.add_argument("--harness", help="a pinned copy from `pin` (default: the live harness.py)")
     ds.add_argument("--knowledge")
     ds.add_argument("--model", default=DEFAULT_MODEL)
-    ds.add_argument("--discover-mode", default="independent", choices=["independent", "crossfed"])
+    ds.add_argument("--discover-mode", default="independent", choices=["independent", "crossfed", "engine"])
+    ds.add_argument("--engine-flags", default="", help="with --discover-mode engine: extra harness flags, one string")
     ds.add_argument("--discover-attempts", type=int, default=2)
     ds.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     ds.add_argument("--discover-budget", type=float, default=0.8)

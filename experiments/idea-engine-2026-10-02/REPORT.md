@@ -425,3 +425,27 @@ deep dive's would-be proof of the whole problem (C9) had been thrown away as bro
     the published one.
 - **What it shows:** before v5 the engine dropped exactly this chain. A referee without the lemmas, plus a lemma error
   that never got a session, cost a complete argument for a research problem.
+
+## Step 2: the engine on whole problems, with no cue (pre-registered 2026-10-06, before launch)
+
+**Question.** Can the engine produce a complete, correct proof of a research problem that was open until 2026, unaided?
+Solving one is significance 3 by definition. This is the benchmark the next engine changes will be judged on.
+
+**Protocol.**
+- Items: 8 dev items, drawn with `random.Random(20261006).sample` from the 18 masked dev items: #204, #392, #401,
+  #570, #618, #865, #888 and #1125. One answer is FALSE (#204); the rest are TRUE.
+- Each runs through `timesplit.py discover-screen --discover-mode engine`, tag `engine-v5-dev`, on the live harness at
+  `675cb22`. A fresh synthetic alias per item, masked prompts.
+- Framing: the whole problem, as the engine frames any open problem. No "resolved" cue, no library (dev items have
+  none), and the literature check is skipped on benchmark runs.
+- Engine: `--engine-total-budget 28`, 3 sessions, 1 round, a $6 deep dive, gap closing with 2 rounds on at most 2
+  targets.
+- Success: an unconditional refereed chain that the judges call the problem itself (`engine_complete`), on the TRUE
+  side. Each one then goes to Lean, which alone makes it a solve.
+
+**Predictions:**
+- complete refereed chains on the TRUE side: 1 of 8 (range 0–2);
+- complete chains on the FALSE side: 0 (at most 1);
+- validated-new claims both judges rate significance ≥ 2: 2 in all;
+- the frontier map's direction right on 6 of 8 (the model's prior guess was right 26 times in 31);
+- spend: $25 ± 5 an item, about $200 in all.
