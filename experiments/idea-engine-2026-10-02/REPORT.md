@@ -502,3 +502,11 @@ So f(r) = (p_{r+1}−1)/(40 log p_{r+1}) witnesses the statement. I read the pro
 
 Every inequality checks, including (2^{1/5}·5/6) < 0.958 and T ≤ L/5 for large N. I believe it is correct. Its Lean
 verification is queued behind #1125's.
+
+**#1125 is proved in Lean, end to end.** The engine's complete claim, used as the blueprint, became a Lean proof in one
+run of the deductive loop: $2.79, 46 minutes, all 10 hypotheses certified, no re-plan, no recursion. The audit passes
+all 7 Lean checks (`benchmarks/timesplit/evidence/1125/`).
+- **The whole path:** the engine on the whole problem ($13.04), with no cue and no recognition, then the Lean loop
+  ($2.79). That is $15.83 for a machine-checked proof of a problem posed in 1984 and resolved in April 2026.
+- **What it is not:** new mathematics; a time-split solve by that benchmark's bookkeeping (the Lean stage ran outside
+  its runner); or proof that memory played no part, since the model's cutoff is after the resolution.
