@@ -3324,8 +3324,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 2,
-        "benchmarkRuns": 2,
+        "runs": 3,
+        "benchmarkRuns": 3,
         "certifiedMax": 2
       },
       "rank": 62,
