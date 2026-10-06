@@ -559,12 +559,31 @@ both-judge significance ≥ 2).
   - `c6`;
   - the three extreme-pair counting bounds `noconsec_rhs`, `interior_rhs` and `edge_rhs`.
 
-**Still running.**
+**#401 in Lean: partial, $20.10.**
+- 8 of 9 steps were certified, with the blueprint followed and both session-limit stops resumed.
+- The last step was attacked three times, one level down. The descent then stalled under the rules (2 cycles without a
+  discharge).
+- Its sub-run certified 9 supporting pieces and left two counting estimates open.
+- Its record is `results/engine-v5-dev-lean.jsonl` (`solved: false`).
+- A further push would need an operator decision, such as a deeper `--residual-depth`. That is assistance, so it was
+  not taken automatically.
+
+**#152 whole problem in Lean: still running, resumed twice after harness fixes.**
+- Its `split_ne` core is now certified (9 + 1 steps).
+- The second fix is `12e1f5f`. A child's certified pieces now count as progress when the budget stops the parent
+  first. Before that, `split_ne`'s 7 certified pieces were stranded at the refinement judge's budget check.
+
+**A design observation, from #152 (a train item).**
+- A sub-run often certifies the scaffolding of a counting step, then leaves the count as quantitative estimates that
+  imply the step.
+- The refinement judge refuses those as "a quantitative strengthening, not easier". #152's `noconsec_rhs`
+  certified 4 pieces and was refused that way.
+- That is the natural shape of an analytic proof: estimate each range, then take a union bound. Whether such splits
+  should count as easier is an open design question for the refinement rule, and it is not changed here.
 
 | what | run | how to finish |
 |---|---|---|
-| #401 in Lean (clean solve 2) | `runs/20261006-105451-996165-hardlean-erdos893177` | 5 of 9 steps certified in its first cycle. If `SUMMARY.line` says `outcome=proved`, run `python3 audit.py --run <dir>`, then copy `Proof.lean`, `AUDIT.md` and the engine proof to `benchmarks/timesplit/evidence/401/`, as for 1125. It started before `c9ec386`; if it ends starved, resume it as #152 was |
-| #152 whole problem in Lean (engine chain), resumed | `runs/20261006-013445-204681-hardlean-erdos892759` | the same, with the evidence in `experiments/idea-engine-2026-10-02/evidence/152-chain/`; this is a train item with the "resolved" cue |
+| #152 whole problem in Lean (engine chain), resumed | `runs/20261006-013445-204681-hardlean-erdos892759` | if `SUMMARY.line` says `outcome=proved`, run `python3 audit.py --run <dir>` and keep the evidence in `experiments/idea-engine-2026-10-02/evidence/152-chain/`. It is a train item with the "resolved" cue, so it has no time-split record, and `benchmark_record` fails by design |
 
 **Not started.** #618 in Lean. Its proof is probabilistic and needs derandomizing over a finite space first, so it will
 cost more than #1125 or #401. Decide before launching:
