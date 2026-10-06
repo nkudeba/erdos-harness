@@ -552,3 +552,26 @@ cost more than #1125 or #401. Decide before launching:
    gap closing. Grade every complete chain by settles and recognition.
 3. **Verify.** Send any complete chain to Lean. An open-problem resolution needs human review even after the audit, and
    `claimEligible` stays false until then.
+
+**Step 2, final (all 8 items, $111.45 of engine spend):**
+
+| item | truth | recognized | complete (settles) | correct | validated-new (significance ≥ 2) | spend |
+|---|---|---|---|---|---|---|
+| #204 | false | yes | yes | yes | 0 | $13.18 |
+| #392 | true | yes | yes | yes | 0 | $11.68 |
+| **#401** | true | no | **yes** | **yes** | 1 (0) | $8.16 |
+| #570 | true | no | no | — | 0 | $9.98 |
+| **#618** | true | no | **yes** | **yes** | 5 (4) | $19.40 |
+| #865 | true | no | no | — | 5 (3) | $13.35 |
+| #888 | true | no | no | — | 4 (1) | $22.66 |
+| **#1125** | true | no | **yes** | **yes**, Lean-verified | 1 (0) | $13.04 |
+
+**Against the predictions written before launch:**
+- Clean complete proofs on the true side: predicted 1 of 8 (range 0–2), observed **3 of the 6 unrecognized items**,
+  with #1125 verified in Lean.
+- Complete proofs on the wrong side: predicted 0, observed 0.
+- Both-judge significance-2 claims: predicted 2, observed 8.
+- Spend: predicted about $200, observed $111.
+- The two recognized items were also solved correctly. They are reported apart and count for nothing.
+
+The result exceeds the pre-registered expectation on every axis. It rests on 8 items: one sample, not a rate.

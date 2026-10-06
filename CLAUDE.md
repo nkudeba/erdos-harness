@@ -892,7 +892,7 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
 **Where the engine stands (2026-10-06), and step 3.** Details: `experiments/idea-engine-2026-10-02/REPORT.md`.
 - **Step 2: whole time-split dev problems, open framing, no cue** (`timesplit.py discover-screen --discover-mode engine`,
   tag `engine-v5-dev`, $8–20 an item):
-  - clean, refereed, complete proofs of the true answer on 3 of the 5 items the engine did not recognize: #1125, #401
+  - clean, refereed, complete proofs of the true answer on 3 of the 6 items the engine did not recognize: #1125, #401
     and #618. The pre-registered prediction was 1 of 8.
   - **#1125 is proved in Lean end to end**: the engine's proof as the blueprint, Lean for $2.79, the audit passing
     all 7 checks (`benchmarks/timesplit/evidence/1125/`).

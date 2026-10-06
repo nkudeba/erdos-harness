@@ -16,3 +16,4 @@ discover-screen engine-v5-dev: 1 item(s); --discover-mode engine --engine-total-
 discover-screen engine-v5-dev: 1 item(s); --discover-mode engine --engine-total-budget 28.0 --engine-sessions 3 --engine-rounds 1 --engine-deep-budget 6 --engine-gap-rounds 2 --engine-gap-max 2
 #401: truth=true complete=True answer=true validated_new=1 sig2=0 $8.16
 #618: truth=true complete=True answer=true validated_new=5 sig2=4 $19.4
+#888: truth=true complete=False answer=None validated_new=4 sig2=1 $22.66
