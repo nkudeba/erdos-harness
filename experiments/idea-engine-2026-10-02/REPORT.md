@@ -449,3 +449,16 @@ Solving one is significance 3 by definition. This is the benchmark the next engi
 - validated-new claims both judges rate significance ≥ 2: 2 in all;
 - the frontier map's direction right on 6 of 8 (the model's prior guess was right 26 times in 31);
 - spend: $25 ± 5 an item, about $200 in all.
+
+**Deviation, recorded after item 1 of 8 (#204) and before any other result.**
+- **What #204 showed.** The masked engine recognized the problem: its map wrote "I believe this is Erdős Problem
+  #204" and recalled a 2025 arXiv resolution. It then proved the full (correct, negative) answer twice, refereed and
+  unconditional. The novelty judges, remembering the paper, rated both proofs "known", so the pre-registered rule
+  (`valid-restatement`) missed them.
+- **What changes:**
+  1. Every item is graded under BOTH rules: the pre-registered one, and "settles". Under "settles", both settles
+     judges agree that an unconditional valid claim answers the formal statement; `step2_grade.py` applies it to runs
+     made before the check existed.
+  2. Items whose engine names the true problem number (`recognized_true`) are reported apart. A recognized item's
+     proof is no evidence of unaided research.
+- **#204:** pre-registered rule: not complete. Settles rule: complete, correct (false). Recognized: yes.
