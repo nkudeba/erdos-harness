@@ -1,0 +1,2 @@
+RUN-SUMMARY problem=877933 exit=0 outcome=proved verified=True spend=$2.79 llm_calls=16 lean_checks=77 lemmas=10 residual=open:0,published:0,certified:10 fatals=0 wall=46m mode=research dir=runs/20261006-100843-326327-hardlean-erdos877933 stop="the residual skeleton closed: no hypothesis left, final verification cleared"
+LEAN1125-DONE 2026-10-06T14:54:42Z

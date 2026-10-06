@@ -889,6 +889,27 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     - It is a reconstruction by the published route, not an autonomous solve.
     - On the way it exposed the splice bug fixed in `8641308`: an `open ... in` left behind by a dropped duplicate def.
 
+**Where the engine stands (2026-10-06), and step 3.** Details: `experiments/idea-engine-2026-10-02/REPORT.md`.
+- **Step 2: whole time-split dev problems, open framing, no cue** (`timesplit.py discover-screen --discover-mode engine`,
+  tag `engine-v5-dev`, $8–20 an item):
+  - clean, refereed, complete proofs of the true answer on 3 of the 5 items the engine did not recognize: #1125, #401
+    and #618. The pre-registered prediction was 1 of 8.
+  - **#1125 is proved in Lean end to end**: the engine's proof as the blueprint, Lean for $2.79, the audit passing
+    all 7 checks (`benchmarks/timesplit/evidence/1125/`).
+  - #204 and #392 were solved but recognized, so they are not evidence. #570 and #865 were not solved.
+- **Contamination is real.** A masked high-effort engine can name the problem and recall its resolution. Grade on
+  `recognized_true` (`engine_recognized`), and judge completeness with the settles check (`engine_settles`, both judges
+  agree), never with the novelty verdict: judges who remember a result say "known".
+- **Step 3, next.** Open problems:
+  1. a broad map-and-rate screen (`--engine-sessions 0 --engine-min-target-sig 2`) over 20–30 high-`partial` open
+     problems;
+  2. full engine runs, with gap closing on, on the 2–3 where the judges see a reachable significance-2/3 target;
+  3. Lean on any complete chain (`hardsteps_lean.py --full-run --chain`).
+
+  On an open problem the audit is necessary but not sufficient: a resolution also needs human review.
+- **The account has a weekly usage limit** (it resets Monday 09:00 Toronto). It stopped every lane on 2026-10-06, and
+  the lanes resumed after the reset. Budget a week, not a day.
+
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses
   to start items while it is live. Pass `--allow-concurrent` deliberately.

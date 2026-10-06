@@ -530,3 +530,25 @@ both-judge significance ≥ 2).
 
   I believe it is correct. It is probabilistic, so a Lean version must be derandomized over a finite space, which will
   cost more than #1125 or #401.
+
+## Status at the session handoff (2026-10-06, about 15:40 UTC)
+
+**Still running when this was written.** Each finishes on its own; each launcher writes its ledger row.
+
+| what | run | how to finish |
+|---|---|---|
+| step 2, last item #888 | `runs/20261006-100457-390170-discover-erdos66664` | its results row lands in `benchmarks/timesplit/results/engine-v5-dev.jsonl`, settles check included; check `recognized_true`, then add it to the step-2 table |
+| #401 in Lean (clean solve 2) | `runs/20261006-105451-996165-hardlean-erdos893177` | if `SUMMARY.line` says `outcome=proved`, run `python3 audit.py --run <dir>`, then copy `Proof.lean`, `AUDIT.md` and the engine proof to `benchmarks/timesplit/evidence/401/`, as for 1125 |
+| #152 whole problem in Lean (engine chain) | `runs/20261006-013445-204681-hardlean-erdos892759` | the same, with the evidence in `experiments/idea-engine-2026-10-02/evidence/152-chain/`; this is a train item with the "resolved" cue |
+
+**Not started.** #618 in Lean. Its proof is probabilistic and needs derandomizing over a finite space first, so it will
+cost more than #1125 or #401. Decide before launching:
+`hardsteps_lean.py --engine-run runs/20261006-100457-390025-discover-erdos33868 --claim r1s1/C1 --full-run <same> --chain --id 833868`.
+
+**Next: step 3, open problems.**
+1. **Screen.** Map and rate 20–30 high-`partial` open problems with the engine (`--engine-sessions 0
+   --engine-min-target-sig 2`), after fetching each problem's forum thread.
+2. **Attack.** Pick the 2–3 where both judges rate a reachable target at significance ≥ 2, and run the full engine with
+   gap closing. Grade every complete chain by settles and recognition.
+3. **Verify.** Send any complete chain to Lean. An open-problem resolution needs human review even after the audit, and
+   `claimEligible` stays false until then.

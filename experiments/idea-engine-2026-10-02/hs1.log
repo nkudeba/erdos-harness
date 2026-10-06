@@ -1,0 +1,8 @@
+[9] #152 erdos_92759_hyp_runs: {'valid-routine': 5, 'broken': 3, 'unvalidated-conjectured': 1, 'unvalidated-other': 2, 'validated-new': 1}; $13.0241
+[11] #1179 erdos_99065_hyp_fixed_delta: {'broken': 5, 'validated-new': 3, 'valid-routine': 4, 'unvalidated-conjectured': 1, 'valid-restatement': 1}; $15.109
+exit 2
+[9] #152 erdos_92759_hyp_runs: {'valid-routine': 5, 'broken': 3, 'unvalidated-conjectured': 1, 'unvalidated-other': 2, 'validated-new': 1}; $13.0241
+exit 2
+[9] #152 erdos_92759_hyp_runs: {'valid-routine': 7, 'broken': 8, 'unvalidated-conjectured': 1, 'unvalidated-other': 2, 'validated-new': 1, 'unjudged': 1}; $21.4411
+gap152 exit 2
+[9] #152 erdos_92759_hyp_runs: {'valid-routine': 9, 'broken': 7, 'unvalidated-conjectured': 1, 'unvalidated-other': 2, 'validated-new': 2, 'valid-restatement': 1, 'unjudged': 1}; $26.9297
