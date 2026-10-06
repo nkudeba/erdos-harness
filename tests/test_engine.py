@@ -405,6 +405,30 @@ class Dependencies(unittest.TestCase):
         c9["validation"]["status"] = "conditional"
         self.assertIsNone(H.engine_complete(res))
 
+    def test_a_settled_claim_is_complete_whatever_its_novelty_verdict(self):
+        """#204: the engine proved the full answer twice and its judges, recalling the 2025 resolution, said "known"."""
+        def script(purpose, prompt, n):
+            if purpose == "engine-settles":
+                full = "cannot both hold" in prompt.split("THE CLAIM:")[1]
+                return "```json\n" + json.dumps({"settles": full, "answer": "false" if full else None, "why": "w"}) + "\n```"
+            return judge(purpose)
+        call = FakeCall(script)
+        c = claim("C1", "For every n the covering and the disjointness rule cannot both hold.", "pigeonhole", vstat="valid-known")
+        v = H.engine_settles(call, H.EngineSettings(), "P", LEAN, c, H._DiscoverySpend(10))
+        self.assertEqual((v["settles"], v["answer"]), (True, "false"))
+        c["validation"]["settles"] = v
+        side = claim("C2", "the case of three primes", "x", vstat="valid-restatement")
+        self.assertIs(H.engine_complete({"ledger": [side, c]}), c)                # settled beats an unchecked restatement
+        split = H.engine_settles(FakeCall(lambda p, pr, n: "```json\n" + json.dumps(
+            {"settles": True, "answer": "true" if n == 0 else "false"}) + "\n```"), H.EngineSettings(), "P", LEAN, c,
+            H._DiscoverySpend(10))
+        self.assertFalse(split["settles"])                                       # the two judges must agree on the answer
+
+    def test_recognition_of_the_real_problem_is_recorded(self):
+        res = {"frontier": {"text": "FALSE. I believe this is Erdős Problem #204 (Erdős–Graham 1980); see erdosproblems.com/204."},
+               "ledger": [{"validation": {"novelty": {"cite": "resolves Erdos #204", "why": "x"}}}]}
+        self.assertEqual(H.engine_recognized(res), ["204"])
+
     def test_circular_citations_are_conditional(self):
         a = claim("C1", "a", "by C2", vstat="valid-routine")
         b = claim("C2", "b", "by C1", vstat="valid-routine")

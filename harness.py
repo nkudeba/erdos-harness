@@ -3778,6 +3778,30 @@ progress on the problem.
 End with exactly one ```json block:
 {{"verdict": "new" | "known" | "routine" | "restatement", "cite": "<source or null>", "significance": 0 | 1 | 2 | 3, "why": "<one or two sentences>"}}"""
 
+SETTLES_PROMPT = """Decide whether a claimed theorem ANSWERS a problem completely. Its proof has passed a referee and an
+adversary; do not re-check the proof. Judge only what the claim, if true, says about the problem.
+
+THE PROBLEM:
+{statement}
+
+THE FORMAL STATEMENT (Lean):
+```lean
+{lean}
+```
+
+THE CLAIM:
+{claim}
+
+If the claim is true, does it settle the problem as the formal statement poses it: does it prove the statement, or
+prove its negation? A special case, a weaker bound, a conditional result, or a claim that needs more than routine
+bookkeeping to give the answer does NOT settle it. Small mismatches (n >= 4 against all n, Z against N) settle it only
+if the cases left over are trivial.
+
+End with exactly one ```json block:
+{{"settles": true | false, "answer": "true" | "false" | null, "why": "<one sentence>"}}
+"answer" is "true" if the claim implies the formal statement, "false" if it implies its negation."""
+
+
 # The novelty scale, word for word, applied BEFORE any work: what would a correct proof of this target be worth? Round 1
 # then attacks only what the same judges would rate at the bar. v1-v3 produced 18 validated-new claims, every one rated
 # significance 1, while the frontier maps had labelled 1-6 targets per problem at 2 or 3: the sessions settled for what
@@ -4018,6 +4042,7 @@ class EngineSettings:
     gap_rate_max: int = 6            # broken claims rated "if proved", the most dependent first
     gap_budget: float = 4.0
     gap_turns: int = 120
+    settles_max: int = 3             # the strongest unconditional valid claims checked for answering the problem outright
     min_target_sig: int = 0          # > 0: judges pre-rate every target and round 1 attacks only those rated new at >= this (v4)
     rate_judges: int = 2
     rate_budget: float = 0.3
@@ -4710,6 +4735,16 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         gaps = engine_gap_phase(call, session, s, statement, lean, fblock, sess_context, known, ledger, spend, search,
                                 ck=ck, keep=keep, workers=workers)
     engine_resolve(ledger)
+    by_rank = sorted((c for c in ledger if c.get("status") in ("PROVED", "REFUTED") and _valid_status((c.get("validation") or {}).get("status"))
+                      and "settles" not in (c.get("validation") or {})),
+                     key=lambda c: (str(((c.get("validation") or {}).get("novelty") or {}).get("verdict")) in ("restatement", "known"),
+                                    ((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0, _claim_rank(c)),
+                     reverse=True)
+    for c in by_rank[: s.settles_max]:
+        if not spend.room(2 * s.rate_budget):
+            break
+        c["validation"]["settles"] = engine_settles(call, s, statement, lean, c, spend)
+        keep()
     validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
     ans, conf = f.get("answer"), f.get("confidence")
     decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
@@ -4718,6 +4753,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
             "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k != "claims_list"} if deep else None,
             "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings, "gaps": gaps,
+            "recognized": engine_recognized({"frontier": f, "ledger": ledger}),
             "guidance": engine_guidance(f, ledger, meta)}
 
 
@@ -5008,16 +5044,48 @@ def engine_chain_text(c: dict, ledger: list[dict]) -> str:
 
 
 def engine_complete(res: dict) -> dict | None:
-    """The engine's complete proof, if it has one: a claim the novelty panel calls a restatement of the problem or its
-    core, whose own proof AND every lemma under it passed the referee and the adversary (status `valid-restatement`,
-    so not conditional). PROVED claims first, then the most significant."""
+    """The engine's complete proof, if it has one: an unconditional valid claim (its own proof AND every lemma under it
+    passed the referee and the adversary) that the settles judges agree answers the problem, whatever its novelty
+    verdict. A run without settles verdicts falls back to a `valid-restatement`. PROVED claims first, then the most
+    significant."""
     led = res.get("ledger") or []
-    done = [c for c in led if (c.get("validation") or {}).get("status") == "valid-restatement"
-            and c.get("status") in ("PROVED", "REFUTED")]
+    settled = [c for c in led if ((c.get("validation") or {}).get("settles") or {}).get("settles")
+               and _valid_status((c.get("validation") or {}).get("status"))]
+    done = settled or [c for c in led if (c.get("validation") or {}).get("status") == "valid-restatement"
+                       and c.get("status") in ("PROVED", "REFUTED")]
     if not done:
         return None
     done.sort(key=lambda c: (c.get("status") != "PROVED", -(((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0)))
     return done[0]
+
+
+PROBLEM_NUMBER_RE = re.compile(r"(?i)(?:erd(?:ő|o)s\s+problem\s*#?|erd(?:ő|o)s\s*#|erdosproblems\.com/(?:forum/thread/)?)(\d{1,4})\b")
+
+
+def engine_recognized(res: dict) -> list[str]:
+    """Catalogue numbers the engine named, from its frontier map and its judges' citations. A masked run that names the
+    true number recognised the problem. On #204 the map wrote "I believe this is Erdős Problem #204" and recalled the
+    2025 resolution, so its proof of the answer is no evidence of unaided research."""
+    texts = [str((res.get("frontier") or {}).get("text") or "")]
+    for c in res.get("ledger") or []:
+        nov = (c.get("validation") or {}).get("novelty") or {}
+        texts += [str(nov.get("cite") or ""), str(nov.get("why") or "")]
+    return sorted({m.group(1) for t in texts for m in PROBLEM_NUMBER_RE.finditer(t)}, key=int)
+
+
+def engine_settles(call, s: "EngineSettings", statement: str, lean: str, c: dict, spend) -> dict:
+    """Two judges decide whether a claim, if true, answers the problem completely, and which way; both must agree. This
+    is independent of novelty. #204's engine proved the full answer twice, refereed and unconditional, and its novelty
+    judges, recalling the 2025 resolution, called it "known", not "restatement", so a novelty-based rule missed it."""
+    prompt = SETTLES_PROMPT.format(statement=statement, lean=lean, claim=_claim_text(c))
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        outs = list(ex.map(lambda _: _discovery_call(call, "engine-settles", prompt, s.rate_effort, s.rate_budget), range(2)))
+    spend.add(sum(cost for _, cost, _ in outs))
+    js = [json_tail_any(tx) if tx else {"error": err} for tx, _, err in outs]
+    answers = {str(j.get("answer")).lower() for j in js}
+    agree = all(j.get("settles") is True for j in js) and len(answers) == 1 and answers <= {"true", "false"}
+    return {"settles": agree, "answer": answers.pop() if agree else None, "judges": js,
+            "cost": round(sum(cost for _, cost, _ in outs), 4)}
 
 
 def engine_report(res: dict, title: str) -> str:
@@ -5727,7 +5795,8 @@ class Harness:
             # A refereed chain that the judges call the problem itself is the engine's answer. It feeds the blueprint
             # and the deductive loop like discovery's best proof. It commits an --open run only when the frontier map's
             # direction agrees with it.
-            answer = "true" if complete.get("status") == "PROVED" else "false"
+            answer = (((complete.get("validation") or {}).get("settles") or {}).get("answer")
+                      or ("true" if complete.get("status") == "PROVED" else "false"))
             best = {"text": engine_chain_text(complete, res.get("ledger") or []), "answer": answer, "complete": True,
                     "claim": engine_claim_key(complete)}
             dec = dict(res.get("decision") or {})

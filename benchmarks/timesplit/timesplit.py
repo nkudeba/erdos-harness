@@ -2239,6 +2239,8 @@ def engine_screen_record(run_dir: Path, item: dict, alias, rc, facts: dict, args
     sig = lambda c: (((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0)
     bp = d.get("best_proof") or {}
     complete = bool(d.get("refereed_complete"))
+    import harness as H
+    recognized = ej.get("recognized") if "recognized" in ej else H.engine_recognized(ej)
     return {"problem": item["problem"], "tag": args.tag, "alias": alias, "run_dir": str(run_dir.relative_to(ROOT)),
             "answer": item["answer"], "truth": truth, "split": item["split"], "returncode": rc, "solved": False,
             "contradiction": False, "spend": round(facts.get("spend") or 0.0, 2), "screen": "engine",
@@ -2247,6 +2249,7 @@ def engine_screen_record(run_dir: Path, item: dict, alias, rc, facts: dict, args
             "refereed_false": int(complete and bp.get("answer") != truth),
             "frontier_answer": (ej.get("frontier") or {}).get("answer"),
             "direction_correct": ((ej.get("frontier") or {}).get("answer") == truth) if (ej.get("frontier") or {}).get("answer") else None,
+            "recognized": recognized, "recognized_true": str(item["problem"]) in [str(x) for x in recognized or []],
             "claims": counts, "validated_new": len(new), "sig2": sum(1 for c in new if sig(c) >= 2),
             "gaps": ej.get("gaps"), "protocol": {**protocol(args), "screen": "engine", "discovery_flags": flags}}
 

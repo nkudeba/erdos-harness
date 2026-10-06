@@ -756,3 +756,4 @@ class EngineScreenRecord(unittest.TestCase):
         self.assertTrue(rec["direction_correct"])
         self.assertFalse(rec["solved"])                     # only Lean makes it a solve
         self.assertEqual(rec["claims"]["unvalidated-conjectured"], 1)
+        self.assertFalse(rec["recognized_true"])
