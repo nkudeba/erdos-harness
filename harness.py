@@ -5166,6 +5166,30 @@ class Harness:
         except Exception:                                   # noqa: BLE001
             return
 
+    def _extend_run_budget(self, cycle: int) -> bool:
+        """`--budget-extend STEP --budget-extend-max CAP`: a deductive run that ran out of money while it was still
+        discharging steps gets STEP more, measured from what it has spent, never past CAP. The rule is set before the
+        run, so an extension is the harness's own decision, not operator assistance, and each one is logged and kept in
+        `state["budget_extensions"]`.
+        Why: #435's hard step closed only after the operator raised its budget by hand three times, 15 -> 35 -> 50 -> 70,
+        each time because the residual was still shrinking when the money ran out."""
+        step = float(getattr(self.args, "budget_extend", 0) or 0)
+        cap = float(getattr(self.args, "budget_extend_max", 0) or 0)
+        cur = getattr(self.args, "run_budget", None)
+        if step <= 0 or not cur:
+            return False
+        spent = self.spent_usd()
+        new = round(max(float(cur), spent) + step, 2)
+        if new > cap + 1e-9:
+            self.log.event("program", "budget_extension_refused", cycle=cycle, spent=round(spent, 2), cap=cap)
+            return False
+        self.args.run_budget = new
+        self.state.setdefault("budget_extensions", []).append(
+            {"cycle": cycle, "from": cur, "to": new, "spent": round(spent, 2), "at": now()})
+        self.save()
+        self.log.event("program", "budget_extended", cycle=cycle, from_usd=cur, to_usd=new, cap=cap, spent=round(spent, 2))
+        return True
+
     def _check_run_budget(self, purpose: str):
         budget = getattr(self.args, "run_budget", None)
         if budget and self.spent_usd() >= budget:
@@ -8793,7 +8817,9 @@ for the SAT solver instead of enumerating it.
         except Harness.BudgetExhausted as e:
             self.log.event("program", "stopped_on_budget", cycle=0, detail=str(e))
         ran = 0                          # cycles actually run; `cycles` is only the cap (#455 stopped at 3 of 6)
-        for cycle in range(1, cycles + 1):
+        cycle, prev_progress = 0, False
+        while cycle < cycles:
+            cycle += 1
             ran = cycle
             progress = False             # Step 2: did this cycle DISCHARGE anything (not merely split)?
             try:
@@ -9217,8 +9243,17 @@ for the SAT solver instead of enumerating it.
                     self.log.event("program", "descent_stalled", cycle=cycle, stall_cycles=self.state["stall_cycles"],
                                    open=open_now)
                     break
+                prev_progress = progress
             except Harness.BudgetExhausted as e:
                 self.log.event("program", "stopped_on_budget", cycle=cycle, detail=str(e))
+                if not progress:                 # a cycle that ran dry without a discharge still counts as a stall
+                    self.state["stall_cycles"] = int(self.state.get("stall_cycles") or 0) + 1
+                    self.save()
+                if (progress or prev_progress) and self.state.get("stall_cycles", 0) < STALL_LIMIT \
+                        and self._extend_run_budget(cycle):
+                    cycles = max(cycles, cycle + 1)    # the money buys at least the cycle it was cut from
+                    prev_progress = progress
+                    continue
                 break
         # Render the state of the argument however the loop ended. A budget stop inside a cycle used to skip
         # this step, so a run that had adopted a skeleton finished with no RESIDUAL.md and no `residual=` on
@@ -9253,7 +9288,10 @@ for the SAT solver instead of enumerating it.
                                          + ("; stopped: the plan believes the target FALSE"
                                             if self.state.get("target_believed_false") else "")
                                          + (f"; stopped: the descent stalled ({STALL_LIMIT} cycles without a discharge)"
-                                            if self.state.get("descent_stalled") else ""))
+                                            if self.state.get("descent_stalled") else "")
+                                         + (f"; budget extended {len(self.state['budget_extensions'])} time(s), to "
+                                            f"${self.state['budget_extensions'][-1]['to']}"
+                                            if self.state.get("budget_extensions") else ""))
         self.state["outcome"] = outcome
         self.save()
         self.report(proved)
@@ -11228,6 +11266,10 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--agentic-samples", type=int, default=3, help="parallel agentic attempts per round")
     runp.add_argument("--agentic-turns", type=int, default=80, help="max tool calls per agentic attempt")
     runp.add_argument("--run-budget", type=float, default=None, help="stop cleanly (exit 2) once this run's logged spend reaches N USD")
+    runp.add_argument("--budget-extend", type=float, default=0.0,
+                      help="deductive loop: when the run budget runs out in a cycle that (or whose predecessor) discharged a "
+                           "step, add this many USD, measured from the spend, up to --budget-extend-max (0 = off)")
+    runp.add_argument("--budget-extend-max", type=float, default=0.0, help="hard cap on an extended run budget, USD")
     runp.add_argument("--skip-assess", action="store_true", help="skip the triage stage (route = fast)")
     runp.add_argument("--mode", choices=["fast", "search-first", "construct", "research"], default=None,
                       help="override the triage routing decision")

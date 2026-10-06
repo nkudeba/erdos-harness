@@ -25,6 +25,8 @@ def main() -> int:
     ap.add_argument("--claim", required=True, help="session/claim id of the proof to use, e.g. r1s2/C1")
     ap.add_argument("--budget", type=float, default=15.0)
     ap.add_argument("--cycles", type=int, default=4)
+    ap.add_argument("--extend", type=float, default=0.0, help="--budget-extend: USD added while the residual still shrinks")
+    ap.add_argument("--extend-max", type=float, default=0.0, help="--budget-extend-max: the hard cap, USD")
     args = ap.parse_args()
     er = (ROOT / args.engine_run).resolve()
     st = json.loads((er / "state.json").read_text())
@@ -69,7 +71,8 @@ def main() -> int:
            str(run_dir), "--mode", "research", "--allow-research", "--benchmark", "--masked", "--no-brief",
            "--skip-literature", "--blueprint", "on", "--residual-view", "outline", "--research-cycles", str(args.cycles),
            "--run-budget", str(args.budget), "--lean-timeout", "1800", "--llm-timeout", "5400",
-           "--backend", "claude-cli", "--model", "claude-opus-5-5"]
+           "--backend", "claude-cli", "--model", "claude-opus-5-5",
+           *(["--budget-extend", str(args.extend), "--budget-extend-max", str(args.extend_max)] if args.extend > 0 else [])]
     with (run_dir / "lane.log").open("w") as log:
         rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                             timeout=8 * 3600).returncode

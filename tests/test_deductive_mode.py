@@ -543,6 +543,55 @@ class BudgetStopStillReports(unittest.TestCase):
         self.assertEqual(seen, ["prove"])
 
 
+class BudgetExtension(unittest.TestCase):
+    """--budget-extend: a run that is still discharging steps funds itself up to a cap. #435's hard step closed only after
+    three hand-raised budgets (15 -> 35 -> 50 -> 70). A run that has stopped progressing gets nothing."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _harness(self, extend=10.0, cap=25.0):
+        h = _stub(self.root / "run")
+        h.args.min_child_budget, h.args.research_cycles, h.args.run_budget = 0, 2, 5.0
+        h.args.budget_extend, h.args.budget_extend_max = extend, cap
+        plan = "```lean\n" + SKELETON + "\n```\n```json\n" + json.dumps({"hypotheses": []}) + "\n```\n"
+        h.ask = _judged(lambda purpose, prompt, **kw: plan)
+        h._install_lemmas_module = lambda pdir: None
+        h.spent_usd = lambda: 5.1
+        return h
+
+    def test_a_run_still_discharging_funds_itself_up_to_the_cap(self):
+        h = self._harness()
+        attacks = []
+        def attack(*a, **k):
+            attacks.append(1)
+            raise H.Harness.BudgetExhausted("run budget exhausted")
+        h._attack_substatement = attack
+        h.run_program()
+        ext = h.state["budget_extensions"]
+        self.assertEqual([(e["from"], e["to"]) for e in ext], [(5.0, 15.1)])   # measured from the spend, not the old cap
+        self.assertEqual(h.args.run_budget, 15.1)
+        self.assertEqual(len(attacks), 2)                  # the extension bought the next cycle
+        self.assertTrue(any(e[1] == "budget_extension_refused" for e in h.log.events))   # 25.1 > the $25 cap
+        self.assertIn("budget extended 1 time(s), to $15.1", h.state["stop_reason"])
+
+    def test_a_run_that_has_not_progressed_gets_nothing(self):
+        h = self._harness()
+        def ask(purpose, prompt, **kw):
+            raise H.Harness.BudgetExhausted("run budget exhausted")
+        h.ask = ask
+        h.run_program()
+        self.assertNotIn("budget_extensions", h.state)
+        self.assertEqual(h.args.run_budget, 5.0)
+
+
 class Refinement(unittest.TestCase):
     """A child that does not close its target but certifies `target <= sub-hypotheses` refines the parent."""
 
