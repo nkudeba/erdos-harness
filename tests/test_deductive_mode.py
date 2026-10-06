@@ -576,11 +576,23 @@ class BudgetExtension(unittest.TestCase):
         h._attack_substatement = attack
         h.run_program()
         ext = h.state["budget_extensions"]
-        self.assertEqual([(e["from"], e["to"]) for e in ext], [(5.0, 15.1)])   # measured from the spend, not the old cap
-        self.assertEqual(h.args.run_budget, 15.1)
-        self.assertEqual(len(attacks), 2)                  # the extension bought the next cycle
-        self.assertTrue(any(e[1] == "budget_extension_refused" for e in h.log.events))   # 25.1 > the $25 cap
-        self.assertIn("budget extended 1 time(s), to $15.1", h.state["stop_reason"])
+        # measured from the spend, not the old cap; the second step is clamped to the $25 cap instead of refused
+        self.assertEqual([(e["from"], e["to"]) for e in ext], [(5.0, 15.1), (15.1, 25.0)])
+        self.assertEqual(h.args.run_budget, 25.0)
+        self.assertEqual(len(attacks), 3)                  # each extension bought the next cycle; the stall rule ends it
+        self.assertIn("budget extended 2 time(s), to $25.0", h.state["stop_reason"])
+
+    def test_the_last_step_is_clamped_to_the_cap_and_a_spent_cap_is_refused(self):
+        h = self._harness(extend=10.0, cap=70.0)
+        h.state["budget_extensions"] = []
+        h.args.run_budget = 62.43
+        h.spent_usd = lambda: 63.0                         # #152's numbers: a full step would be $73
+        self.assertTrue(h._extend_run_budget(2))
+        self.assertEqual(h.args.run_budget, 70.0)
+        h.spent_usd = lambda: 69.6
+        self.assertFalse(h._extend_run_budget(3))          # under $1 of room left
+        self.assertEqual(h.args.run_budget, 70.0)
+        self.assertTrue(any(e[1] == "budget_extension_refused" for e in h.log.events))
 
     def test_a_run_that_has_not_progressed_gets_nothing(self):
         h = self._harness()

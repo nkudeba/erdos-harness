@@ -5292,8 +5292,11 @@ class Harness:
         if step <= 0 or not cur:
             return False
         spent = self.spent_usd()
-        new = round(max(float(cur), spent) + step, 2)
-        if new > cap + 1e-9:
+        base = max(float(cur), spent)
+        # up to the cap, not "a full step or nothing": #152's whole-problem run would have been refused $73 against a
+        # $70 cap and left the last $7 unspent while it was still discharging steps
+        new = round(min(base + step, cap), 2)
+        if new - base < 1.0:                  # under $1 of room: not even a cheap attempt's worth
             self.log.event("program", "budget_extension_refused", cycle=cycle, spent=round(spent, 2), cap=cap)
             return False
         self.args.run_budget = new

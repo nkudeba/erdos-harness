@@ -200,7 +200,8 @@ program. Budget the whole thing, not one lane, and check `harness.py summary --p
 **A deductive run may fund itself, by a rule set before it starts** (`--budget-extend STEP --budget-extend-max CAP`, off
 by default):
 - When a cycle runs out of money and it, or the cycle before, discharged a step, the budget grows by STEP from the
-  spend, never past CAP.
+  spend, never past CAP. The last step is clamped to CAP, not refused: a full step would have taken #152's run from
+  $63 to $73 against a $70 cap and left the last $7 unspent. Under $1 of room is refused.
 - That includes a cycle too poor to fund a child, not only one that hits the cap. When steps would be deferred for
   `--min-child-budget`, the extension fires before they are. Until 2026-10-06 it fired only on a hard budget stop:
   #152's whole-problem run deferred all four open steps two cycles running ($1.21, then $0.14 left). Those starved
