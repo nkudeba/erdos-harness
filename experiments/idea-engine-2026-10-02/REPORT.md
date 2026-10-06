@@ -367,3 +367,12 @@ alone. Lean has certified 1 of them so far (#435).
     knew. Their text mentions "Hall", but neither cited the Erdős–Hall (1 + o(1))·log₂N bound.
   - The gap is recall of older literature, not prompting, so the prompt is unchanged. What closes it is the problem's
     own bibliography. Open-problem runs get it through their library; hard-step runs do not.
+- **#152's deep dive, resumed** ($21.44 for the run in all): **nothing validated new, and the step is still unproved.**
+  - The notebook's headline claims did not survive validation:
+    - C9: iso(A) ≥ (n−18)/4 for every Sidon set, which is the whole of #152;
+    - C7: a linear bound except in the end-pair case.
+  - The referee broke both because their proofs only add up inequalities from lemmas that are never stated or proved
+    inside the claim. The adversary broke C5, the lemma under C7, for using one identity with two incompatible signs.
+  - Only C6 (R ≤ 2·iso_off + 1 + 2(n−1)[1 ∈ A−A]) and C1 survived, as routine.
+  - The repair pass did not rescue them. A notebook's "Result" section is not a result until the referee has read the
+    proof.
