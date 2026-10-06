@@ -185,7 +185,7 @@ class EngineRun(unittest.TestCase):
         call = self._call(broken_for="0.6")
         sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "liminf >= 0.54" if label.startswith("r1") else "liminf >= 0.6"),
                                                           ("CONJECTURED", "OTHER", "U(x) = o(x)")))
-        s = H.EngineSettings(sessions=2, rounds=2, total_budget=50)
+        s = H.EngineSettings(sessions=2, rounds=2, total_budget=50, gap_rounds=0)   # rounds alone; the gap phase is tested in Dependencies
         res = H.engine_run(call, sess, "PROBLEM", LEAN, s, workers=2)
         self.assertEqual(len(res["rounds"]), 2)
         self.assertEqual(len(sess.calls), 4)
@@ -389,6 +389,22 @@ class Dependencies(unittest.TestCase):
         H.engine_resolve(led)
         self.assertEqual(c9["validation"]["status"], "conditional")             # a refutation never stands in for the lemma
 
+    def test_a_complete_chain_is_reported_with_every_lemma(self):
+        """engine_complete: an unconditional valid restatement is the engine's answer; its text is the whole chain."""
+        c1 = claim("C1", "the identity", "algebra", vstat="valid-routine")
+        c7 = claim("C7", "the interior case", "from C1", vstat="broken")
+        g = claim("C7g1", "the interior case, for all n", "fixed, from C1", vstat="valid-routine", supersedes="C7")
+        c9 = claim("C9", "the whole problem", "from C7 and C1", vstat="valid-restatement")
+        res = {"ledger": [c1, c7, g, c9]}
+        H.engine_resolve(res["ledger"])
+        self.assertIs(H.engine_complete(res), c9)
+        text = H.engine_chain_text(c9, res["ledger"])
+        self.assertLess(text.index("LEMMA C1"), text.index("LEMMA C7 (its corrected version C7g1)"))
+        self.assertLess(text.index("C7g1"), text.index("THEOREM C9"))
+        self.assertNotIn("STATEMENT: the interior case\n", text)          # the broken original gives way to its fix
+        c9["validation"]["status"] = "conditional"
+        self.assertIsNone(H.engine_complete(res))
+
     def test_circular_citations_are_conditional(self):
         a = claim("C1", "a", "by C2", vstat="valid-routine")
         b = claim("C2", "b", "by C1", vstat="valid-routine")
@@ -410,7 +426,7 @@ class Dependencies(unittest.TestCase):
         res = H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50, validate_max=1))
         judged = {c["id"] for c in res["ledger"] if c.get("validation")}
         self.assertEqual(judged, {"C1", "C3"})                                 # C3 ranks last, but C1 rests on it
-        self.assertIsNone(res["gaps"])                                         # the gap phase is off by default
+        self.assertEqual(res["gaps"]["targets"], [])                           # on by default, with nothing broken to close
         self.assertFalse(any(label.startswith("gap-") for label, p in sess.calls))
 
     def _gap_ledger(self):
@@ -677,8 +693,8 @@ class Repair(unittest.TestCase):
     def _run(self, call, repair_max=3, checkpoint=None, save=None):
         sess = FakeSession(lambda label, prompt: notebook(("PROVED", "CONDITIONAL", "Assume U(c) for real x. Then F -> infinity.")))
         return H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50,
-                                                                          repair_max=repair_max),
-                            checkpoint=checkpoint, save=save)
+                                                                          repair_max=repair_max, gap_rounds=0),
+                            checkpoint=checkpoint, save=save)          # the one-shot repair alone; gap closing is tested apart
 
     def test_a_fixable_break_is_repaired_and_judged_again(self):
         call = self._call()

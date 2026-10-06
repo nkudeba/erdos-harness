@@ -4012,7 +4012,7 @@ class EngineSettings:
     deep_budget: float = 0.0         # > 0: after the rounds, ONE long session on the line most likely to matter (v3)
     deep_turns: int = 200
     deep_effort: str = "high"
-    gap_rounds: int = 0              # > 0: high-value broken claims get gap-closing sessions, this many rounds each (v5)
+    gap_rounds: int = 2              # high-value broken claims get gap-closing sessions, this many rounds each (v5; 0 = off)
     gap_max: int = 2                 # claims gap-closed per run
     gap_min_sig: int = 2             # high value: a restatement of the core, or new at this significance, if proved
     gap_rate_max: int = 6            # broken claims rated "if proved", the most dependent first
@@ -4982,6 +4982,44 @@ def engine_gap_phase(call, session, s: "EngineSettings", statement: str, lean: s
             "claims": len(rec["claims"]), "rejudged": len(rec["rejudged"])}
 
 
+def engine_chain_text(c: dict, ledger: list[dict]) -> str:
+    """A claim with every lemma under it, deepest first, each in its best version with statement and proof: the
+    complete informal argument, for a blueprint or a reader. A gap-closed lemma is labelled with the id the proofs cite."""
+    engine_resolve(ledger)
+    by, order, seen = _session_index(ledger), [], set()
+
+    def visit(x: dict) -> None:
+        if id(x) in seen:
+            return
+        seen.add(id(x))
+        for cid in x.get("cites") or []:
+            vs = _versions(by, x.get("session"), cid)
+            if vs:
+                visit(next((d for d in reversed(vs) if _valid_status((d.get("validation") or {}).get("status"))), vs[-1]))
+        order.append(x)
+    visit(c)
+    parts = []
+    for x in order:
+        base = _claim_supersedes(x)
+        label = f"{base} (its corrected version {x.get('id')})" if base else str(x.get("id"))
+        head = "THEOREM" if x is c else "LEMMA"
+        parts.append(f"=== {head} {label}\nSTATEMENT: {x.get('statement')}\nPROOF:\n{x.get('proof') or ''}")
+    return "\n\n".join(parts)
+
+
+def engine_complete(res: dict) -> dict | None:
+    """The engine's complete proof, if it has one: a claim the novelty panel calls a restatement of the problem or its
+    core, whose own proof AND every lemma under it passed the referee and the adversary (status `valid-restatement`,
+    so not conditional). PROVED claims first, then the most significant."""
+    led = res.get("ledger") or []
+    done = [c for c in led if (c.get("validation") or {}).get("status") == "valid-restatement"
+            and c.get("status") in ("PROVED", "REFUTED")]
+    if not done:
+        return None
+    done.sort(key=lambda c: (c.get("status") != "PROVED", -(((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0)))
+    return done[0]
+
+
 def engine_report(res: dict, title: str) -> str:
     """IDEAS.md: every claim with its verdicts, validated ones first; then the frontier map's targets and angles."""
     led = res.get("ledger") or []
@@ -5578,7 +5616,7 @@ class Harness:
                            frontier_budget=float(g("engine_frontier_budget", 8.0)),
                            deep_budget=float(g("engine_deep_budget", 0.0)), deep_turns=int(g("engine_deep_turns", 200)),
                            deep_effort=str(g("engine_deep_effort", "high")), repair_max=int(g("engine_repair_max", 3)),
-                           gap_rounds=int(g("engine_gap_rounds", 0)), gap_max=int(g("engine_gap_max", 2)),
+                           gap_rounds=int(g("engine_gap_rounds", 2)), gap_max=int(g("engine_gap_max", 2)),
                            gap_min_sig=int(g("engine_gap_min_sig", 2)), gap_budget=float(g("engine_gap_budget", 4.0)),
                            min_target_sig=int(g("engine_min_target_sig", 0)), rate_judges=int(g("engine_rate_judges", 2)),
                            rate_effort=str(g("engine_rate_effort", "medium")))
@@ -5684,8 +5722,23 @@ class Harness:
                          checkpoint=checkpoint, save=save)
         (out / "engine.json").write_text(json.dumps({k: v for k, v in res.items() if k != "guidance"}, indent=1, ensure_ascii=False))
         (out / "IDEAS.md").write_text(engine_report(res, f"problem {self.problem['id']}, run {self.run_dir.name}"))
+        best, complete = None, engine_complete(res)
+        if complete is not None:
+            # A refereed chain that the judges call the problem itself is the engine's answer. It feeds the blueprint
+            # and the deductive loop like discovery's best proof. It commits an --open run only when the frontier map's
+            # direction agrees with it.
+            answer = "true" if complete.get("status") == "PROVED" else "false"
+            best = {"text": engine_chain_text(complete, res.get("ledger") or []), "answer": answer, "complete": True,
+                    "claim": engine_claim_key(complete)}
+            dec = dict(res.get("decision") or {})
+            if dec.get("answer") in (None, answer):
+                dec.update({"answer": answer, "commit": "pos" if answer == "true" else "neg", "share": 1.0,
+                            "best": engine_claim_key(complete)})
+                res["decision"] = dec
+            self.log.event("engine", "complete", claim=engine_claim_key(complete), answer=answer,
+                           frontier_answer=(res.get("frontier") or {}).get("answer"))
         keep = {"decision": res.get("decision"), "guidance": res.get("guidance"), "spend": res.get("spend"),
-                "refereed_complete": False, "best_proof": None, "mode": "engine", "settings": s.as_dict(),
+                "refereed_complete": complete is not None, "best_proof": best, "mode": "engine", "settings": s.as_dict(),
                 "validated": [{k: c.get(k) for k in ("session", "id", "type", "statement")} for c in res.get("validated") or []]}
         self.state["discovery"] = keep
         self.save()
@@ -5700,6 +5753,7 @@ class Harness:
         dec = res.get("decision") or {}
         self.log.event("discover", "done", mode="engine", commit=dec.get("commit"), answer=dec.get("answer"),
                        share=dec.get("share"), validated=len(res.get("validated") or []), claims=counts,
+                       refereed_complete=complete is not None,
                        sessions=sum(len(r.get("sessions") or []) for r in res.get("rounds") or []),
                        rounds=len(res.get("rounds") or []), spend=res.get("spend"), error=res.get("error"))
         return keep
@@ -11380,9 +11434,9 @@ def build_parser() -> argparse.ArgumentParser:
                       help="> 0: the novelty judges pre-rate every frontier target, and round 1 attacks only the targets "
                            "they rate new at this significance or more, if proved (0 = off)")
     runp.add_argument("--engine-rate-judges", type=int, default=2)
-    runp.add_argument("--engine-gap-rounds", type=int, default=0,
-                      help="> 0: a broken claim the judges rate as the core or significance >= --engine-gap-min-sig if "
-                           "proved gets gap-closing sessions, this many rounds, and so does every lemma under it (0 = off)")
+    runp.add_argument("--engine-gap-rounds", type=int, default=2,
+                      help="a broken claim the judges rate as the core or significance >= --engine-gap-min-sig if proved "
+                           "gets gap-closing sessions, this many rounds, and so does every lemma under it (0 = off)")
     runp.add_argument("--engine-gap-max", type=int, default=2, help="claims gap-closed per run")
     runp.add_argument("--engine-gap-min-sig", type=int, default=2)
     runp.add_argument("--engine-gap-budget", type=float, default=4.0, help="USD per gap-closing session")
