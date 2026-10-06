@@ -197,6 +197,14 @@ Covered by `tests/test_budget_accounting.py`.
 Practical: `--open` halves the budget per direction, and each direction then runs its own research
 program. Budget the whole thing, not one lane, and check `harness.py summary --problem N` mid-run.
 
+**A deductive run may fund itself, by a rule set before it starts** (`--budget-extend STEP --budget-extend-max CAP`, off
+by default):
+- When a cycle runs out of money and it, or the cycle before, discharged a step, the budget grows by STEP from the
+  spend, never past CAP.
+- A cycle that ran dry without a discharge counts toward the stall limit.
+- Each extension is logged (`program/budget_extended`) and named in the stop reason.
+- #435's hard step needed three hand-raised budgets; this rule replaces them.
+
 The cap is enforced BEFORE every model call, never right after one (a paid response was being thrown away
 uncompiled), and **each call is capped at what the run has left**: the per-call cap (`--call-budget`, $8) used to
 apply unchanged with $4 remaining, so one prove call overshot a $15 run to $16.11. A call is never capped below
@@ -860,6 +868,14 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   scale, and round 1 attacks only targets they rate new at ≥ N.
   - Why: the maps labelled 1–6 targets per problem at significance 2–3, but sessions settled for what they could prove.
   - The final verdict is still the post-hoc panel on the actual proof.
+- **v5: chain-aware validation (always on) and gap closing (`--engine-gap-rounds N`, off by default).**
+  - A proof may cite other claims of its notebook. The judges see the cited lemmas, and a claim's `status` stays
+    `conditional` (with `pending`) until every lemma under it is valid. `own_status` keeps its own verdict.
+  - Gap closing: broken claims are rated "if proved", the most dependent first. Each one worth significance ≥ 2 or the
+    core is re-judged with its lemmas, then gets tool-using gap-closing sessions, and so does every lemma under it.
+  - First test, #152's hard-step run ($5.49): it turned the deep dive's dropped would-be proof of the whole problem
+    into a refereed chain, iso ≥ (n−18)/4 for every Sidon set. That is informal and has the "resolved" cue; see the
+    idea-engine REPORT.
 - **Hard steps:** `experiments/idea-engine-2026-10-02/hardsteps.py` points the engine at steps train runs left open as
   hard. `hardsteps_lean.py` hands a refereed proof to the deductive loop as its blueprint.
   - The frozen theorem must be named `erdos_<id>`: a CLI run matches plans only against that name, and the loop now
