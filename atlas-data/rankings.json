@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 102,
+    "manually_reviewed": 106,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "d53826d718125e932386f6f8319ec0cfa796a4483b956d6edf23facadf666b52",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "0d34e578a0529078c88e973d588f68e733d75b8b52752afda73283c2598c83e5"
+    "manual_reviews_sha256": "52a7956d2bcaa2cab3baae3d6c9f103ead5789964748037600b836831797a652"
   },
   "problems": [
     {
@@ -30538,17 +30538,19 @@
       "score": 19,
       "harness": "Untried",
       "rationale": [
+        "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Divisor and prime-factor APIs are represented in previous successful runs.",
         "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
       ],
       "requirements": [
+        "The open frontier is k = 5. A witness for it would be a certifiable partial result; the full problem needs a construction for every k.",
         "Resolve natural/integer coercions and retrieve factorization lemmas early.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -30605,13 +30607,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/885",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-06",
+        "sources": [
+          "atlas-data/forum/885.json",
+          "https://www.erdosproblems.com/forum/thread/885"
+        ],
+        "searchFloor": null
       },
       "rank": 558,
       "tier": "Research"
@@ -31259,6 +31269,7 @@
       "rationale": [
         "A witness would certify finitely many divisor inequalities, but the source ties the existence problem to much harder prime-pattern questions.",
         "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground.",
+        "Forum, 2026-10-06: an uncertified GPU search (veljjanoski) reports no solution with 24 < n <= 1e22. That raises the recorded 9.17e18 floor; the count is of n, the enumerable object. A kernel-checked Lean exclusion reaches 1e13 (standard axioms, no native_decide), and its writeup argues that no finite table of modular sieve stages can prove the statement.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -31268,11 +31279,12 @@
       "requirements": [
         "Use a sieve-backed search beyond the known example 24, retaining a compact certificate for every m below the witness.",
         "Enumeration is futile below ~9e18. The live routes are the modular/prime-chain reductions or formalising the density-zero bounds, not search.",
+        "Enumeration is futile below 1e22 (published, not rerun). A resolution needs a structural argument, and the sieve-table writeup suggests finitely many modular stages cannot supply one.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -31355,9 +31367,12 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
-        "sources": [],
-        "searchFloor": 9.17e+18
+        "on": "2026-10-06",
+        "sources": [
+          "atlas-data/forum/647.json",
+          "https://github.com/veljjanoski/erdos647"
+        ],
+        "searchFloor": 1e+22
       },
       "rank": 567,
       "tier": "Research"
@@ -32904,6 +32919,7 @@
         "The main theorem is already formalized sorry-free in Lean 4 / Mathlib and archived with the arXiv source (anc/lean/), leaving a stated axiom boundary of two explicit analytic inputs.",
         "Live check 2026-09-16: still OPEN on the site (10 comments, 0 proof claims, 'Working on formalising: Yuren_Tang'). Two distinct Lean developments exist and the earlier Atlas note conflated them. (1) Yuren Tang, Zenodo 10.5281/zenodo.20767390 v0.0.3 (19 Jun 2026; github.com/Yuren-Tang/erdos-306): claims a COMPLETE sorry-free proof of the formal-conjectures statement erdos_306 (every q > 0 with squarefree denominator), with #print axioms = propext, Classical.choice, Quot.sound plus two named axioms transcribing Rosser-Schoenfeld 1962 - Corollary 3 (3x/(5 log x) < pi(2x) - pi(x) for x >= 20.5) and Theorem 5 (Mertens' prime-reciprocal sum within 1/(2 log^2 x) of log log x + B). Toolchain v4.28.0, CI rebuilds and audits the axiom set. Nat Sothanaphan ran a screening check and reports it 'could be correct'; no informal manuscript yet; NOT verified here and not accepted by Bloom. (2) Shisheng Li, arXiv:2606.15159 (18 Jun 2026): PARTIAL - all rationals for omega >= 3, and for omega = 2 only a/b above a threshold T(r) <= 1/5; uses native_decide plus Olson's theorem and a Rosser-type bound as inputs.",
         "Mathlib v4.32.0-rc1 (local checkout) has theta(x) <= log 4 * x, Bertrand, and asymptotic Chebyshev/PNT-adjacent statements (eventually_primeCounting_le, primeCounting_sub_theta_div_log_isBigO) but no explicit Rosser-Schoenfeld bounds and no explicit Mertens error term, so Tang's two axioms are a genuine formalisation gap, not a lookup.",
+        "Forum proof-claims page, 2026-10-06: a FULL-proof claim by Shisheng Li (with GPT-5.6-sol, GPT-6-astra and Claude Opus 5.5). Every a/b > 0 with b squarefree is a finite sum of distinct 1/(pq), by one two-scale bipartite-graph circle-method construction that needs only Chebyshev bounds. Its Lean development is reported sorry-free on the standard axioms and to prove the formal-conjectures statement. Unverified by us.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -32912,11 +32928,12 @@
       "requirements": [
         "Discharge one of the two boundary axioms against Mathlib rather than reproving the main theorem.",
         "Not a harness solve target: the mathematics is Tang's. The harness-shaped contribution is independent verification (clean rebuild, #print axioms, statement-faithfulness audit against formal-conjectures) and, if the proof has slack, discharging the two analytic axioms against Mathlib with weaker explicit Chebyshev-type bounds. Record any such result as verification of a third-party proof, never as a resolution.",
+        "Not a step-3 target: claimed resolved with Lean. Before treating it as resolved, replay the cited Lean repository with the audit's checks against the formal-conjectures statement.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -32977,7 +32994,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-16",
+        "on": "2026-10-06",
         "sources": [
           "atlas-data/forum/306.json",
           "experiments/open-viability-2026-09-16/ASSESSMENT.md",
@@ -38320,6 +38337,7 @@
       "score": 11,
       "harness": "Untried",
       "rationale": [
+        "Proof-claims page, 2026-10-06: Kruer, Kohlmeyer and Price (using GPT 6 Astra) claim a disproof of #96 and #97, including the general version of #97: for every k, a convex polygon in which every vertex has at least k other vertices at distance 1. They report the Lean formalisation was completed by the AI. Separately, exhaustive computations with published certificates exclude counterexamples to the 4-vertex version with at most 10 vertices. Unverified by us.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
@@ -38328,12 +38346,13 @@
         "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
       ],
       "requirements": [
+        "Not a step-3 target while the disproof claim stands. Check the claimed Lean formalisation against the problem's statement first.",
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -38402,13 +38421,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/97",
-      "manual": false,
+      "manual": true,
       "prize": "$100",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-06",
+        "sources": [
+          "atlas-data/forum/97.json",
+          "https://www.erdosproblems.com/forum/thread/97"
+        ],
+        "searchFloor": null
       },
       "rank": 650,
       "tier": "Frontier"
@@ -38836,6 +38863,7 @@
       "score": 11,
       "harness": "Untried",
       "rationale": [
+        "Forum, 2026-10-06: ani's degree-seven counterexample claim (7 September) was checked independently by another user, who formalised one instance (s = 1e-6) in Lean on the standard axioms; nobody independent has reviewed it yet. Partial claims also appear: a positive cubic case (proof-claims page, Zenodo preprint), coefficient-restricted families, and a critical-value estimate. Unverified by us.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Limits, function spaces and analytic estimates create a larger formalization burden.",
@@ -38843,12 +38871,13 @@
         "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
       ],
       "requirements": [
+        "Not a step-3 target while the counterexample claim stands. A check would replay the cited Lean formalisation and confirm that its statement matches the problem's.",
         "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -38919,13 +38948,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1041",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-06",
+        "sources": [
+          "atlas-data/forum/1041.json",
+          "https://www.erdosproblems.com/forum/thread/1041"
+        ],
+        "searchFloor": null
       },
       "rank": 655,
       "tier": "Frontier"
@@ -42817,6 +42854,7 @@
         "This makes proximity-to-threshold ranking actively misleading here: a search walks up a closed provably-safe family reporting 1.997, 1.9999, 1.999999 while proving nothing. In the genuinely open regime (primitive, |A|>=3) the margin GROWS with |A|: 0.08 at |A|=3, 0.19 at 4, 0.37 at 5.",
         "Expert signal against tractability: Tao states the problem stays hard after four simultaneous weakenings; a contributor reports 13 natural approaches killed by explicit counterexamples; one clean inclusion-exclusion reduction was refuted.",
         "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled.",
+        "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -42837,7 +42875,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-10 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -42929,9 +42967,11 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-10",
+        "on": "2026-10-06",
         "sources": [
-          "experiments/open-top3/488-assessment.md"
+          "experiments/open-top3/488-assessment.md",
+          "atlas-data/forum/488.json",
+          "https://github.com/shoal-rat/erdos-488-lean"
         ],
         "searchFloor": null
       },
@@ -43990,6 +44030,7 @@
         "PUBLISHED SEARCH FLOOR (recorded 2026-09-11, NOT rerun by us): a preprint linked from the #7 forum thread (egeozturk, 18 Aug 2026, 'Closed-form nonexistence certificates for odd covering systems') claims no covering system with distinct odd moduli > 1 has lcm below 11,486,475, by a search-free hierarchy of closed-form certificates in exact rational arithmetic - extending an earlier search-based 2e6 computation. UNREFEREED preprint, self-described as undergraduate work, not verified by us. Its own stated stopping point is the strongly abundant smooth moduli, first uncertified case 11486475 = 3^3*5^2*7*11*13*17.",
         "Our fibre/Fourier test (see #273, knowledge/reductions/273/) transfers to #7 verbatim - every divisor m>1 of odd L is admissible, the reciprocal screen becomes 'L is ODD ABUNDANT' (smallest 945), and the condition collapses to: max over n|L, n<L of (2n - sigma(n)) <= sigma(L) - 2L. It eliminates 191 of the 391 candidates below 200,000 (including 945: 58 > 30 at n=189) and gives a floor of 3,465. That is roughly 3,300x WEAKER than the floor already on the forum, so the transfer is superseded on arrival and banks nothing for #7.",
         "A full resolution claim on the thread (jinooklee, 02 May 2026: Erdos-Selfridge via sieve monotonicity, Lean 4 + three BBMST axioms) was REFUTED in-thread - a commenter gives decisive evidence that the assumed axiom bbmst_sf_lt_1 is false, and Thomas Bloom states he assumes the proof is flawed absent expert vouching or an axiom-free formalisation. #7 is open. Related published theorems: BBMST22 settles the odd SQUAREFREE case negatively; Hough-Nielsen prove some modulus is divisible by 2 or 3; BBMST prove the lcm must be divisible by 9 or 15. Prizes: Erdos $25 for nonexistence, Selfridge $2000 for an explicit example.",
+        "Forum, 2026-10-06: three papers show that a distinct covering system with odd moduli greater than 1 needs omega(lcm) >= 7, then 8, then 9. A fourth proves noncoverage whenever every modulus has at most three prime divisors. Lean formalisations are reported with them, and the unrestricted conjecture stays open. Unverified by us.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -44004,7 +44045,7 @@
         "Set an explicit search bound and prove that any found certificate resolves the exact target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -44083,10 +44124,11 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-10-06",
         "sources": [
           "atlas-data/forum/7.json",
-          "knowledge/reductions/273/fourier_transfer_erdos7.py"
+          "knowledge/reductions/273/fourier_transfer_erdos7.py",
+          "https://www.erdosproblems.com/forum/thread/7"
         ],
         "searchFloor": 11486475.0
       },
@@ -48404,6 +48446,7 @@
       "rationale": [
         "The source records searches beyond 10^28 without a triple of consecutive powerful numbers. Generic bounded search is an especially poor full-solution bet.",
         "Two self-contained formalizable facts sit in the thread: no four consecutive powerful integers (one is 2 mod 4), and the pair-doubling construction (n,n+1) -> (4n(n+1),(2n+1)^2).",
+        "Forum and proof-claims page, 2026-10-06: a partial claim (Fable 5 in Claude Code) excludes the two remaining mixed shapes for the neighbours of a cube. It reduces to t^6+t^3+1 = 3w^2, solved through a rank-0 elliptic curve (computer-assisted, SageMath). It is explicitly not a solution. Unverified by us.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -48418,7 +48461,7 @@
         "Set an explicit search bound and prove that any found certificate resolves the exact target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -48495,9 +48538,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-10-06",
         "sources": [
-          "atlas-data/forum/364.json"
+          "atlas-data/forum/364.json",
+          "https://www.erdosproblems.com/forum/thread/364"
         ],
         "searchFloor": null
       },
@@ -48913,6 +48957,117 @@
       "tier": "Frontier"
     },
     {
+      "id": 1054,
+      "statement": "Let $f(n)$ be the minimal integer $m$ such that $n$ is the sum of the $k$ smallest divisors of $m$ for some $k\\geq 1$. Is it true that $f(n)=o(n)$? Or is this true only for almost all $n$, and $\\limsup f(n)/n=\\infty$?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "number theory",
+        "divisors"
+      ],
+      "score": 5,
+      "harness": "Untried",
+      "rationale": [
+        "A Lean formalization of the claim exists and isolates its Mathlib gap precisely: a quantitative Mertens product estimate not yet available.",
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Divisor and prime-factor APIs are represented in previous successful runs.",
+        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
+        "An optimal bound or classification is requested; a single construction may cover only one direction.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Formalize quantitative Mertens as a reusable Mathlib-style lemma; it unblocks this and other analytic problems.",
+        "Resolve natural/integer coercions and retrieve factorization lemmas early.",
+        "Prove the asymptotic statement with its full quantifiers and error control.",
+        "Separate upper and lower bounds and check that they meet the requested precision.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: divisors",
+          "points": 4
+        },
+        {
+          "label": "Asymptotic or density target",
+          "points": -9
+        },
+        {
+          "label": "Optimality or full classification",
+          "points": -5
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        }
+      ],
+      "partial": {
+        "score": 56,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Public formalization with an identified gap (2 kinds)",
+            "points": 12
+          },
+          {
+            "label": "Library fit",
+            "points": 4
+          },
+          {
+            "label": "Asymptotic core",
+            "points": -6
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "A public formal artifact exists and its remaining gap is named (an open sorry, or a stated missing Mathlib input). The encoding cost is already paid and the next step is explicit.",
+          "Reachable partial results still need the relevant Mathlib development.",
+          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/1054",
+      "manual": true,
+      "prize": "no",
+      "evidence": {
+        "best": "untried",
+        "runs": 0,
+        "benchmarkRuns": 0,
+        "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-09-11",
+        "sources": [
+          "atlas-data/forum/1054.json"
+        ],
+        "searchFloor": null
+      },
+      "rank": 760,
+      "tier": "Frontier"
+    },
+    {
       "id": 1139,
       "statement": "Let $1\\leq u_1<u_2<\\cdots$ be the sequence of integers with at most $2$ prime factors. Is it true that\\[\\limsup \\frac{u_{k+1}-u_k}{\\log k}=\\infty?\\]",
       "status": "Unsolved",
@@ -49010,7 +49165,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 760,
+      "rank": 761,
       "tier": "Frontier"
     },
     {
@@ -49095,7 +49250,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 761,
+      "rank": 762,
       "tier": "Frontier"
     },
     {
@@ -49201,7 +49356,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 762,
+      "rank": 763,
       "tier": "Frontier"
     },
     {
@@ -49301,7 +49456,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 763,
+      "rank": 764,
       "tier": "Frontier"
     },
     {
@@ -49401,7 +49556,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 764,
+      "rank": 765,
       "tier": "Frontier"
     },
     {
@@ -49507,7 +49662,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 765,
+      "rank": 766,
       "tier": "Frontier"
     },
     {
@@ -49594,7 +49749,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 766,
+      "rank": 767,
       "tier": "Frontier"
     },
     {
@@ -49700,7 +49855,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 767,
+      "rank": 768,
       "tier": "Frontier"
     },
     {
@@ -49799,7 +49954,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 768,
+      "rank": 769,
       "tier": "Frontier"
     },
     {
@@ -49890,7 +50045,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 769,
+      "rank": 770,
       "tier": "Frontier"
     },
     {
@@ -49975,7 +50130,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 770,
+      "rank": 771,
       "tier": "Frontier"
     },
     {
@@ -50069,7 +50224,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 771,
+      "rank": 772,
       "tier": "Frontier"
     },
     {
@@ -50161,7 +50316,108 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 772,
+      "rank": 773,
+      "tier": "Frontier"
+    },
+    {
+      "id": 1082,
+      "statement": "Let $A\\subset \\mathbb{R}^2$ be a set of $n$ points with no three on a line. Does $A$ determine at least $\\lfloor n/2\\rfloor$ distinct distances? In fact, must there exist a single point from which there are at least $\\lfloor n/2\\rfloor$ distinct distances?",
+      "status": "Unsolved",
+      "state": "falsifiable",
+      "tags": [
+        "geometry",
+        "distances"
+      ],
+      "score": 4,
+      "harness": "Untried",
+      "rationale": [
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Geometric incidence and configuration reasoning needs substantial formal setup.",
+        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
+        "An optimal bound or classification is requested; a single construction may cover only one direction.",
+        "The statement or its discussion mentions deep additive or extremal machinery; that is a possible dependency to audit, not an assumed theorem requirement."
+      ],
+      "requirements": [
+        "Choose exact coordinates or a reusable geometric model before proof search.",
+        "Set an explicit search bound and prove that any found certificate resolves the exact target.",
+        "Separate upper and lower bounds and check that they meet the requested precision."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: geometry",
+          "points": -11
+        },
+        {
+          "label": "Catalogue finite-certificate class",
+          "points": 9
+        },
+        {
+          "label": "Optimality or full classification",
+          "points": -5
+        },
+        {
+          "label": "Deep additive or extremal machinery",
+          "points": -7
+        }
+      ],
+      "partial": {
+        "score": 56,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Public formalization artifact (4 kinds)",
+            "points": 10
+          },
+          {
+            "label": "Reachable finite direction",
+            "points": 8
+          },
+          {
+            "label": "Library fit",
+            "points": -8
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
+          "A finite certificate direction with no published check beyond our search range.",
+          "Reachable partial results still need the relevant Mathlib development."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/1082",
+      "manual": false,
+      "prize": "no",
+      "evidence": {
+        "best": "untried",
+        "runs": 0,
+        "benchmarkRuns": 0,
+        "certifiedMax": 0
+      },
+      "rank": 774,
       "tier": "Frontier"
     },
     {
@@ -50240,7 +50496,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 773,
+      "rank": 775,
       "tier": "Frontier"
     },
     {
@@ -50323,7 +50579,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 774,
+      "rank": 776,
       "tier": "Frontier"
     },
     {
@@ -50419,7 +50675,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 775,
+      "rank": 777,
       "tier": "Frontier"
     },
     {
@@ -50516,7 +50772,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 776,
+      "rank": 778,
       "tier": "Frontier"
     },
     {
@@ -50605,7 +50861,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 777,
+      "rank": 779,
       "tier": "Frontier"
     },
     {
@@ -50694,7 +50950,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 778,
+      "rank": 780,
       "tier": "Frontier"
     },
     {
@@ -50780,7 +51036,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 779,
+      "rank": 781,
       "tier": "Frontier"
     },
     {
@@ -50871,7 +51127,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 780,
+      "rank": 782,
       "tier": "Frontier"
     },
     {
@@ -50974,7 +51230,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 781,
+      "rank": 783,
       "tier": "Frontier"
     },
     {
@@ -51077,7 +51333,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 782,
+      "rank": 784,
       "tier": "Frontier"
     },
     {
@@ -51176,7 +51432,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 783,
+      "rank": 785,
       "tier": "Frontier"
     },
     {
@@ -51265,7 +51521,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 784,
+      "rank": 786,
       "tier": "Frontier"
     },
     {
@@ -51412,7 +51668,7 @@
         "searchFloor": 1e+18
       },
       "brief": "---\nproblem: 242\nupdated: 2026-09-24\nrun: 20260923-113735-833279-erdos242\noutcome: partial\nsolved: false\ncertified: 8\nsearch_floor: 1e+18\ncost_usd: 15.94\n---\n\n## What the problem asks\n\nTake any whole number n larger than 2. The question is whether 4/n can always be written as a sum of three fractions of the form 1/x, where x is a whole number and the three x's are all different. Such a fraction, with 1 on top, is called a unit fraction. For example, 4/3 = 1/1 + 1/4 + 1/12. The catalogue lists the problem as open and \"falsifiable\". That means a single number n with no such sum would disprove it. The claim must hold for every n, and nobody has shown that it does.\n\n## What we tried\n\nWe ran an automated research program in two directions. One direction tried to prove the claim. The other tried to find a number n where it fails. Each direction splits the goal into smaller statements. It tries to settle each one and passes the rest to the next cycle. Both directions stopped after 2 cycles because no further piece could be settled. The small results were checked in Lean. Lean is a computer system that verifies proofs line by line. The formal version reads n as a whole number and treats the equation as exact arithmetic with fractions. These are the standard readings. No outside help was recorded. The run cost $15.94.\n\n## What we found\n\nThis work is partial. The problem is not solved. The most useful reduction is this: if 4/p has a sum for a prime p, then so does 4/n for every multiple n of p. A prime is a number whose only divisors are 1 and itself. Explicit formulas then handle every prime except those leaving remainder 1 when divided by 24. Eight lemmas were certified, meaning checked in Lean. They cover several of these formula families. An earlier note on the same day also records extra families based on remainders when divided by 840 and by 11. One open statement remains. It is the hard core of the problem. The summary reduction statements were written in Lean but not proved there. No counterexample was found.\n\n## What would move it\n\nThe run searched for no new numbers. A published check, which we did not rerun, reports that the claim holds for all n up to 10^18. So a counterexample search within reach is not useful. Notes on the problem suggest certifying more of the known published formula families. That would shrink the remaining open case further. It would still not solve the problem. A full answer needs one of two things. The first is one formula that covers all remaining primes. The second is an actual counterexample beyond the checked range. The counterexample stage failed in every cycle of an earlier run on this problem. It has since been fixed, so later runs should use the working version.\n\n*Written automatically at the end of run `20260923-113735-833279-erdos242`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 785,
+      "rank": 787,
       "tier": "Frontier"
     },
     {
@@ -51505,7 +51761,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 786,
+      "rank": 788,
       "tier": "Frontier"
     },
     {
@@ -51591,7 +51847,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 787,
+      "rank": 789,
       "tier": "Frontier"
     },
     {
@@ -51692,7 +51948,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 788,
+      "rank": 790,
       "tier": "Frontier"
     },
     {
@@ -51787,7 +52043,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 789,
+      "rank": 791,
       "tier": "Frontier"
     },
     {
@@ -51868,7 +52124,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 790,
+      "rank": 792,
       "tier": "Frontier"
     },
     {
@@ -51968,7 +52224,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 791,
+      "rank": 793,
       "tier": "Frontier"
     },
     {
@@ -52048,7 +52304,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 792,
+      "rank": 794,
       "tier": "Frontier"
     },
     {
@@ -52164,7 +52420,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 793,
+      "rank": 795,
       "tier": "Frontier"
     },
     {
@@ -52260,7 +52516,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 794,
+      "rank": 796,
       "tier": "Frontier"
     },
     {
@@ -52340,7 +52596,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 795,
+      "rank": 797,
       "tier": "Frontier"
     },
     {
@@ -52437,7 +52693,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 796,
+      "rank": 798,
       "tier": "Frontier"
     },
     {
@@ -52517,7 +52773,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 797,
+      "rank": 799,
       "tier": "Frontier"
     },
     {
@@ -52599,7 +52855,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 798,
+      "rank": 800,
       "tier": "Frontier"
     },
     {
@@ -52694,7 +52950,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 799,
+      "rank": 801,
       "tier": "Frontier"
     },
     {
@@ -52779,7 +53035,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 800,
+      "rank": 802,
       "tier": "Frontier"
     },
     {
@@ -52859,7 +53115,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 801,
+      "rank": 803,
       "tier": "Frontier"
     },
     {
@@ -52973,7 +53229,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 802,
+      "rank": 804,
       "tier": "Frontier"
     },
     {
@@ -53058,7 +53314,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 803,
+      "rank": 805,
       "tier": "Frontier"
     },
     {
@@ -53160,7 +53416,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 804,
+      "rank": 806,
       "tier": "Frontier"
     },
     {
@@ -53256,7 +53512,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 805,
+      "rank": 807,
       "tier": "Frontier"
     },
     {
@@ -53351,7 +53607,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 806,
+      "rank": 808,
       "tier": "Frontier"
     },
     {
@@ -53441,7 +53697,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 807,
+      "rank": 809,
       "tier": "Frontier"
     },
     {
@@ -53536,7 +53792,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 808,
+      "rank": 810,
       "tier": "Frontier"
     },
     {
@@ -53619,7 +53875,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 809,
+      "rank": 811,
       "tier": "Frontier"
     },
     {
@@ -53714,7 +53970,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 810,
+      "rank": 812,
       "tier": "Frontier"
     },
     {
@@ -53810,7 +54066,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 811,
+      "rank": 813,
       "tier": "Frontier"
     },
     {
@@ -53896,7 +54152,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 812,
+      "rank": 814,
       "tier": "Frontier"
     },
     {
@@ -53997,7 +54253,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 813,
+      "rank": 815,
       "tier": "Frontier"
     },
     {
@@ -54092,7 +54348,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 814,
+      "rank": 816,
       "tier": "Frontier"
     },
     {
@@ -54188,7 +54444,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 815,
+      "rank": 817,
       "tier": "Frontier"
     },
     {
@@ -54289,7 +54545,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 816,
+      "rank": 818,
       "tier": "Frontier"
     },
     {
@@ -54395,7 +54651,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 817,
+      "rank": 819,
       "tier": "Frontier"
     },
     {
@@ -54481,7 +54737,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 818,
+      "rank": 820,
       "tier": "Frontier"
     },
     {
@@ -54582,7 +54838,7 @@
         "benchmarkRuns": 3,
         "certifiedMax": 0
       },
-      "rank": 819,
+      "rank": 821,
       "tier": "Frontier"
     },
     {
@@ -54667,7 +54923,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 820,
+      "rank": 822,
       "tier": "Frontier"
     },
     {
@@ -54753,7 +55009,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 821,
+      "rank": 823,
       "tier": "Frontier"
     },
     {
@@ -54838,7 +55094,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 822,
+      "rank": 824,
       "tier": "Frontier"
     },
     {
@@ -54937,7 +55193,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 823,
+      "rank": 825,
       "tier": "Frontier"
     },
     {
@@ -55037,7 +55293,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 824,
+      "rank": 826,
       "tier": "Frontier"
     },
     {
@@ -55124,7 +55380,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 825,
+      "rank": 827,
       "tier": "Frontier"
     },
     {
@@ -55230,7 +55486,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 826,
+      "rank": 828,
       "tier": "Frontier"
     },
     {
@@ -55340,7 +55596,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 827,
+      "rank": 829,
       "tier": "Frontier"
     },
     {
@@ -55461,7 +55717,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 828,
+      "rank": 830,
       "tier": "Frontier"
     },
     {
@@ -55567,7 +55823,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 829,
+      "rank": 831,
       "tier": "Frontier"
     },
     {
@@ -55678,7 +55934,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 830,
+      "rank": 832,
       "tier": "Frontier"
     },
     {
@@ -55791,7 +56047,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 831,
+      "rank": 833,
       "tier": "Frontier"
     },
     {
@@ -55913,7 +56169,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 832,
+      "rank": 834,
       "tier": "Frontier"
     },
     {
@@ -56019,7 +56275,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 833,
+      "rank": 835,
       "tier": "Frontier"
     },
     {
@@ -56135,7 +56391,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 834,
+      "rank": 836,
       "tier": "Frontier"
     },
     {
@@ -56232,7 +56488,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 835,
+      "rank": 837,
       "tier": "Frontier"
     },
     {
@@ -56332,7 +56588,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 836,
+      "rank": 838,
       "tier": "Frontier"
     },
     {
@@ -56448,7 +56704,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 837,
+      "rank": 839,
       "tier": "Frontier"
     },
     {
@@ -56555,7 +56811,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 838,
+      "rank": 840,
       "tier": "Frontier"
     },
     {
@@ -56661,7 +56917,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 839,
+      "rank": 841,
       "tier": "Frontier"
     },
     {
@@ -56782,7 +57038,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 840,
+      "rank": 842,
       "tier": "Frontier"
     },
     {
@@ -56876,7 +57132,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 841,
+      "rank": 843,
       "tier": "Frontier"
     },
     {
@@ -56954,7 +57210,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 842,
+      "rank": 844,
       "tier": "Frontier"
     },
     {
@@ -57044,7 +57300,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 843,
+      "rank": 845,
       "tier": "Frontier"
     },
     {
@@ -57139,7 +57395,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 844,
+      "rank": 846,
       "tier": "Frontier"
     },
     {
@@ -57239,7 +57495,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 845,
+      "rank": 847,
       "tier": "Frontier"
     },
     {
@@ -57340,7 +57596,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 846,
+      "rank": 848,
       "tier": "Frontier"
     },
     {
@@ -57429,7 +57685,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 847,
+      "rank": 849,
       "tier": "Frontier"
     },
     {
@@ -57535,7 +57791,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 848,
+      "rank": 850,
       "tier": "Frontier"
     },
     {
@@ -57633,7 +57889,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 849,
+      "rank": 851,
       "tier": "Frontier"
     },
     {
@@ -57752,7 +58008,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 850,
+      "rank": 852,
       "tier": "Frontier"
     },
     {
@@ -57837,7 +58093,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 851,
+      "rank": 853,
       "tier": "Frontier"
     },
     {
@@ -57936,7 +58192,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 852,
+      "rank": 854,
       "tier": "Frontier"
     },
     {
@@ -58020,7 +58276,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 853,
+      "rank": 855,
       "tier": "Frontier"
     },
     {
@@ -58125,7 +58381,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 854,
+      "rank": 856,
       "tier": "Frontier"
     },
     {
@@ -58220,7 +58476,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 855,
+      "rank": 857,
       "tier": "Frontier"
     },
     {
@@ -58326,7 +58582,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 856,
+      "rank": 858,
       "tier": "Frontier"
     },
     {
@@ -58431,7 +58687,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 857,
+      "rank": 859,
       "tier": "Frontier"
     },
     {
@@ -58537,7 +58793,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 858,
+      "rank": 860,
       "tier": "Frontier"
     },
     {
@@ -58637,7 +58893,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 859,
+      "rank": 861,
       "tier": "Frontier"
     },
     {
@@ -58740,7 +58996,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 860,
+      "rank": 862,
       "tier": "Frontier"
     },
     {
@@ -58825,7 +59081,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 861,
+      "rank": 863,
       "tier": "Frontier"
     },
     {
@@ -58905,7 +59161,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 862,
+      "rank": 864,
       "tier": "Frontier"
     },
     {
@@ -59008,7 +59264,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 863,
+      "rank": 865,
       "tier": "Frontier"
     },
     {
@@ -59094,7 +59350,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 864,
+      "rank": 866,
       "tier": "Frontier"
     },
     {
@@ -59174,7 +59430,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 865,
+      "rank": 867,
       "tier": "Frontier"
     },
     {
@@ -59284,7 +59540,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 866,
+      "rank": 868,
       "tier": "Frontier"
     },
     {
@@ -59368,7 +59624,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 867,
+      "rank": 869,
       "tier": "Frontier"
     },
     {
@@ -59464,7 +59720,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 868,
+      "rank": 870,
       "tier": "Frontier"
     },
     {
@@ -59560,7 +59816,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 869,
+      "rank": 871,
       "tier": "Frontier"
     },
     {
@@ -59668,7 +59924,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 870,
+      "rank": 872,
       "tier": "Frontier"
     },
     {
@@ -59758,7 +60014,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 871,
+      "rank": 873,
       "tier": "Frontier"
     },
     {
@@ -59852,7 +60108,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 872,
+      "rank": 874,
       "tier": "Frontier"
     },
     {
@@ -59961,7 +60217,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 873,
+      "rank": 875,
       "tier": "Frontier"
     },
     {
@@ -60071,7 +60327,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 874,
+      "rank": 876,
       "tier": "Frontier"
     },
     {
@@ -60177,7 +60433,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 875,
+      "rank": 877,
       "tier": "Frontier"
     },
     {
@@ -60287,7 +60543,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 876,
+      "rank": 878,
       "tier": "Frontier"
     },
     {
@@ -60395,7 +60651,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 877,
+      "rank": 879,
       "tier": "Frontier"
     },
     {
@@ -60479,7 +60735,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 878,
+      "rank": 880,
       "tier": "Frontier"
     },
     {
@@ -60552,7 +60808,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 879,
+      "rank": 881,
       "tier": "Frontier"
     },
     {
@@ -60657,7 +60913,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 880,
+      "rank": 882,
       "tier": "Frontier"
     },
     {
@@ -60751,7 +61007,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 881,
+      "rank": 883,
       "tier": "Frontier"
     },
     {
@@ -60840,7 +61096,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 882,
+      "rank": 884,
       "tier": "Frontier"
     },
     {
@@ -60933,7 +61189,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 883,
+      "rank": 885,
       "tier": "Frontier"
     },
     {
@@ -61036,7 +61292,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 884,
+      "rank": 886,
       "tier": "Frontier"
     },
     {
@@ -61135,7 +61391,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 885,
+      "rank": 887,
       "tier": "Frontier"
     },
     {
@@ -61241,7 +61497,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 886,
+      "rank": 888,
       "tier": "Frontier"
     },
     {
@@ -61338,7 +61594,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 887,
+      "rank": 889,
       "tier": "Frontier"
     },
     {
@@ -61442,7 +61698,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 888,
+      "rank": 890,
       "tier": "Frontier"
     },
     {
@@ -61525,7 +61781,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 889,
+      "rank": 891,
       "tier": "Frontier"
     },
     {
@@ -61604,7 +61860,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 890,
+      "rank": 892,
       "tier": "Frontier"
     },
     {
@@ -61684,7 +61940,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 891,
+      "rank": 893,
       "tier": "Frontier"
     },
     {
@@ -61784,7 +62040,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 892,
+      "rank": 894,
       "tier": "Frontier"
     },
     {
@@ -61883,7 +62139,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 893,
+      "rank": 895,
       "tier": "Frontier"
     },
     {
@@ -61979,7 +62235,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 894,
+      "rank": 896,
       "tier": "Frontier"
     },
     {
@@ -62079,7 +62335,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 895,
+      "rank": 897,
       "tier": "Frontier"
     },
     {
@@ -62178,7 +62434,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 896,
+      "rank": 898,
       "tier": "Frontier"
     },
     {
@@ -62262,7 +62518,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 897,
+      "rank": 899,
       "tier": "Frontier"
     },
     {
@@ -62361,7 +62617,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 898,
+      "rank": 900,
       "tier": "Frontier"
     },
     {
@@ -62446,7 +62702,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 899,
+      "rank": 901,
       "tier": "Frontier"
     },
     {
@@ -62557,7 +62813,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 900,
+      "rank": 902,
       "tier": "Frontier"
     },
     {
@@ -62667,7 +62923,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 901,
+      "rank": 903,
       "tier": "Frontier"
     },
     {
@@ -62771,7 +63027,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 902,
+      "rank": 904,
       "tier": "Frontier"
     },
     {
@@ -62877,7 +63133,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 903,
+      "rank": 905,
       "tier": "Frontier"
     },
     {
@@ -62984,7 +63240,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 904,
+      "rank": 906,
       "tier": "Frontier"
     },
     {
@@ -63074,7 +63330,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 905,
+      "rank": 907,
       "tier": "Frontier"
     },
     {
@@ -63172,7 +63428,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 906,
+      "rank": 908,
       "tier": "Frontier"
     },
     {
@@ -63273,7 +63529,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 907,
+      "rank": 909,
       "tier": "Frontier"
     },
     {
@@ -63362,7 +63618,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 908,
+      "rank": 910,
       "tier": "Frontier"
     },
     {
@@ -63451,7 +63707,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 909,
+      "rank": 911,
       "tier": "Frontier"
     },
     {
@@ -63535,7 +63791,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 910,
+      "rank": 912,
       "tier": "Frontier"
     },
     {
@@ -63620,7 +63876,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 911,
+      "rank": 913,
       "tier": "Frontier"
     },
     {
@@ -63721,7 +63977,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 912,
+      "rank": 914,
       "tier": "Frontier"
     },
     {
@@ -63818,7 +64074,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 913,
+      "rank": 915,
       "tier": "Frontier"
     },
     {
@@ -63915,7 +64171,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 914,
+      "rank": 916,
       "tier": "Frontier"
     },
     {
@@ -64006,7 +64262,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 915,
+      "rank": 917,
       "tier": "Frontier"
     },
     {
@@ -64108,7 +64364,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 916,
+      "rank": 918,
       "tier": "Frontier"
     },
     {
@@ -64205,7 +64461,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 917,
+      "rank": 919,
       "tier": "Frontier"
     },
     {
@@ -64307,7 +64563,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 918,
+      "rank": 920,
       "tier": "Frontier"
     },
     {
@@ -64419,7 +64675,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 919,
+      "rank": 921,
       "tier": "Frontier"
     },
     {
@@ -64515,7 +64771,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 920,
+      "rank": 922,
       "tier": "Frontier"
     },
     {
@@ -64604,7 +64860,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 921,
+      "rank": 923,
       "tier": "Frontier"
     },
     {
@@ -64695,7 +64951,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 922,
+      "rank": 924,
       "tier": "Frontier"
     },
     {
@@ -64797,7 +65053,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 923,
+      "rank": 925,
       "tier": "Frontier"
     },
     {
@@ -64907,7 +65163,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 924,
+      "rank": 926,
       "tier": "Frontier"
     },
     {
@@ -65004,7 +65260,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 925,
+      "rank": 927,
       "tier": "Frontier"
     },
     {
@@ -65109,7 +65365,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 926,
+      "rank": 928,
       "tier": "Frontier"
     },
     {
@@ -65205,7 +65461,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 927,
+      "rank": 929,
       "tier": "Frontier"
     },
     {
@@ -65300,7 +65556,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 928,
+      "rank": 930,
       "tier": "Frontier"
     },
     {
@@ -65400,7 +65656,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 929,
+      "rank": 931,
       "tier": "Frontier"
     },
     {
@@ -65500,7 +65756,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 930,
+      "rank": 932,
       "tier": "Frontier"
     },
     {
@@ -65621,7 +65877,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 931,
+      "rank": 933,
       "tier": "Frontier"
     },
     {
@@ -65703,7 +65959,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 932,
+      "rank": 934,
       "tier": "Frontier"
     },
     {
@@ -65787,7 +66043,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 933,
+      "rank": 935,
       "tier": "Frontier"
     },
     {
@@ -65802,6 +66058,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "Forum, 2026-10-06: an exhaustive search extends OEIS A375077, the least n with prod_{0<=i<=k}(n-i) dividing C(2n,n), through k = 13. It comes with validation certificates, independent verifiers, and a Lean-verified small-prime barrier lemma that justifies the search's completeness. The problem stays open.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -65810,11 +66067,12 @@
         "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate."
       ],
       "requirements": [
+        "Partial value: the witnesses for k <= 13 are explicit and checkable by Kummer's theorem, so they can be certified. A resolution needs a construction for every k.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Do not expect a short route; scope the attempt to a partial result."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -65892,7 +66150,7 @@
         ]
       },
       "url": "https://www.erdosproblems.com/396",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
@@ -65900,7 +66158,15 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 934,
+      "assessed": {
+        "on": "2026-10-06",
+        "sources": [
+          "atlas-data/forum/396.json",
+          "https://www.erdosproblems.com/forum/thread/396"
+        ],
+        "searchFloor": null
+      },
+      "rank": 936,
       "tier": "Frontier"
     },
     {
@@ -66007,7 +66273,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 935,
+      "rank": 937,
       "tier": "Frontier"
     },
     {
@@ -66109,7 +66375,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 936,
+      "rank": 938,
       "tier": "Frontier"
     },
     {
@@ -66222,7 +66488,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 937,
+      "rank": 939,
       "tier": "Frontier"
     },
     {
@@ -66318,7 +66584,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 938,
+      "rank": 940,
       "tier": "Frontier"
     },
     {
@@ -66414,7 +66680,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 939,
+      "rank": 941,
       "tier": "Frontier"
     },
     {
@@ -66510,7 +66776,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 940,
+      "rank": 942,
       "tier": "Frontier"
     },
     {
@@ -66607,7 +66873,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 941,
+      "rank": 943,
       "tier": "Frontier"
     },
     {
@@ -66697,7 +66963,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 942,
+      "rank": 944,
       "tier": "Frontier"
     },
     {
@@ -66809,7 +67075,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 943,
+      "rank": 945,
       "tier": "Frontier"
     },
     {
@@ -66904,7 +67170,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 944,
+      "rank": 946,
       "tier": "Frontier"
     },
     {
@@ -66994,7 +67260,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 945,
+      "rank": 947,
       "tier": "Frontier"
     },
     {
@@ -67091,7 +67357,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 946,
+      "rank": 948,
       "tier": "Frontier"
     },
     {
@@ -67197,7 +67463,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 947,
+      "rank": 949,
       "tier": "Frontier"
     },
     {
@@ -67260,7 +67526,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 948,
+      "rank": 950,
       "tier": "Frontier"
     },
     {
@@ -67346,7 +67612,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 949,
+      "rank": 951,
       "tier": "Frontier"
     },
     {
@@ -67447,7 +67713,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 950,
+      "rank": 952,
       "tier": "Frontier"
     },
     {
@@ -67549,7 +67815,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 951,
+      "rank": 953,
       "tier": "Frontier"
     },
     {
@@ -67635,7 +67901,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 952,
+      "rank": 954,
       "tier": "Frontier"
     },
     {
@@ -67730,7 +67996,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 953,
+      "rank": 955,
       "tier": "Frontier"
     },
     {
@@ -67833,7 +68099,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 954,
+      "rank": 956,
       "tier": "Frontier"
     },
     {
@@ -67928,7 +68194,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 955,
+      "rank": 957,
       "tier": "Frontier"
     },
     {
@@ -68018,7 +68284,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 956,
+      "rank": 958,
       "tier": "Frontier"
     },
     {
@@ -68110,7 +68376,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 957,
+      "rank": 959,
       "tier": "Frontier"
     },
     {
@@ -68204,7 +68470,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 958,
+      "rank": 960,
       "tier": "Frontier"
     },
     {
@@ -68299,7 +68565,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 959,
+      "rank": 961,
       "tier": "Frontier"
     },
     {
@@ -68399,7 +68665,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 960,
+      "rank": 962,
       "tier": "Frontier"
     },
     {
@@ -68494,7 +68760,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 961,
+      "rank": 963,
       "tier": "Frontier"
     },
     {
@@ -68596,7 +68862,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 962,
+      "rank": 964,
       "tier": "Frontier"
     },
     {
@@ -68698,7 +68964,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 963,
+      "rank": 965,
       "tier": "Frontier"
     },
     {
@@ -68806,7 +69072,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 964,
+      "rank": 966,
       "tier": "Frontier"
     },
     {
@@ -68896,7 +69162,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 965,
+      "rank": 967,
       "tier": "Frontier"
     },
     {
@@ -68981,7 +69247,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 966,
+      "rank": 968,
       "tier": "Frontier"
     },
     {
@@ -69077,7 +69343,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 967,
+      "rank": 969,
       "tier": "Frontier"
     },
     {
@@ -69157,7 +69423,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 968,
+      "rank": 970,
       "tier": "Frontier"
     },
     {
@@ -69266,7 +69532,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 969,
+      "rank": 971,
       "tier": "Frontier"
     },
     {
@@ -69355,7 +69621,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 970,
+      "rank": 972,
       "tier": "Frontier"
     },
     {
@@ -69445,7 +69711,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 971,
+      "rank": 973,
       "tier": "Frontier"
     },
     {
@@ -69529,7 +69795,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 972,
+      "rank": 974,
       "tier": "Frontier"
     },
     {
@@ -69620,7 +69886,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 973,
+      "rank": 975,
       "tier": "Frontier"
     },
     {
@@ -69711,7 +69977,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 974,
+      "rank": 976,
       "tier": "Frontier"
     },
     {
@@ -69795,7 +70061,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 975,
+      "rank": 977,
       "tier": "Frontier"
     },
     {
@@ -69880,7 +70146,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 976,
+      "rank": 978,
       "tier": "Frontier"
     },
     {
@@ -69965,7 +70231,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 977,
+      "rank": 979,
       "tier": "Frontier"
     },
     {
@@ -70044,7 +70310,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 978,
+      "rank": 980,
       "tier": "Frontier"
     },
     {
@@ -70125,7 +70391,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 979,
+      "rank": 981,
       "tier": "Frontier"
     },
     {
@@ -70223,7 +70489,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 980,
+      "rank": 982,
       "tier": "Frontier"
     },
     {
@@ -70313,7 +70579,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 981,
+      "rank": 983,
       "tier": "Frontier"
     },
     {
@@ -70407,7 +70673,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 982,
+      "rank": 984,
       "tier": "Frontier"
     },
     {
@@ -70502,7 +70768,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 983,
+      "rank": 985,
       "tier": "Frontier"
     },
     {
@@ -70582,7 +70848,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 984,
+      "rank": 986,
       "tier": "Frontier"
     },
     {
@@ -70671,7 +70937,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 985,
+      "rank": 987,
       "tier": "Frontier"
     },
     {
@@ -70761,7 +71027,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 986,
+      "rank": 988,
       "tier": "Frontier"
     },
     {
@@ -70850,7 +71116,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 987,
+      "rank": 989,
       "tier": "Frontier"
     },
     {
@@ -70939,7 +71205,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 988,
+      "rank": 990,
       "tier": "Frontier"
     },
     {
@@ -71039,7 +71305,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 989,
+      "rank": 991,
       "tier": "Frontier"
     },
     {
@@ -71124,7 +71390,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 990,
+      "rank": 992,
       "tier": "Frontier"
     },
     {
@@ -71218,7 +71484,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 991,
+      "rank": 993,
       "tier": "Frontier"
     },
     {
@@ -71307,7 +71573,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 992,
+      "rank": 994,
       "tier": "Frontier"
     },
     {
@@ -71397,7 +71663,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 993,
+      "rank": 995,
       "tier": "Frontier"
     },
     {
@@ -71503,7 +71769,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 994,
+      "rank": 996,
       "tier": "Frontier"
     },
     {
@@ -71598,7 +71864,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 995,
+      "rank": 997,
       "tier": "Frontier"
     },
     {
@@ -71697,7 +71963,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 996,
+      "rank": 998,
       "tier": "Frontier"
     },
     {
@@ -71787,7 +72053,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 997,
+      "rank": 999,
       "tier": "Frontier"
     },
     {
@@ -71868,7 +72134,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 998,
+      "rank": 1000,
       "tier": "Frontier"
     },
     {
@@ -71973,7 +72239,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 999,
+      "rank": 1001,
       "tier": "Frontier"
     },
     {
@@ -72072,7 +72338,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1000,
+      "rank": 1002,
       "tier": "Frontier"
     },
     {
@@ -72157,7 +72423,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1001,
+      "rank": 1003,
       "tier": "Frontier"
     },
     {
@@ -72246,7 +72512,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1002,
+      "rank": 1004,
       "tier": "Frontier"
     },
     {
@@ -72346,7 +72612,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1003,
+      "rank": 1005,
       "tier": "Frontier"
     },
     {
@@ -72431,7 +72697,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1004,
+      "rank": 1006,
       "tier": "Frontier"
     },
     {
@@ -72510,7 +72776,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1005,
+      "rank": 1007,
       "tier": "Frontier"
     },
     {
@@ -72605,7 +72871,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1006,
+      "rank": 1008,
       "tier": "Frontier"
     },
     {
@@ -72684,7 +72950,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1007,
+      "rank": 1009,
       "tier": "Frontier"
     },
     {
@@ -72763,7 +73029,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1008,
+      "rank": 1010,
       "tier": "Frontier"
     },
     {
@@ -72851,7 +73117,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1009,
+      "rank": 1011,
       "tier": "Frontier"
     },
     {
@@ -72945,7 +73211,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1010,
+      "rank": 1012,
       "tier": "Frontier"
     },
     {
@@ -73035,7 +73301,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1011,
+      "rank": 1013,
       "tier": "Frontier"
     },
     {
@@ -73127,7 +73393,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1012,
+      "rank": 1014,
       "tier": "Frontier"
     },
     {
@@ -73218,7 +73484,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1013,
+      "rank": 1015,
       "tier": "Frontier"
     },
     {
@@ -73308,7 +73574,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1014,
+      "rank": 1016,
       "tier": "Frontier"
     },
     {
@@ -73390,7 +73656,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1015,
+      "rank": 1017,
       "tier": "Frontier"
     },
     {
@@ -73481,7 +73747,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1016,
+      "rank": 1018,
       "tier": "Frontier"
     },
     {
@@ -73555,7 +73821,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1017,
+      "rank": 1019,
       "tier": "Frontier"
     },
     {
@@ -73644,7 +73910,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1018,
+      "rank": 1020,
       "tier": "Frontier"
     },
     {
@@ -73735,7 +74001,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1019,
+      "rank": 1021,
       "tier": "Frontier"
     },
     {
@@ -73819,7 +74085,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1020,
+      "rank": 1022,
       "tier": "Frontier"
     },
     {
@@ -73920,7 +74186,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1021,
+      "rank": 1023,
       "tier": "Frontier"
     },
     {
@@ -74011,7 +74277,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1022,
+      "rank": 1024,
       "tier": "Frontier"
     },
     {
@@ -74112,7 +74378,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1023,
+      "rank": 1025,
       "tier": "Frontier"
     },
     {
@@ -74203,7 +74469,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1024,
+      "rank": 1026,
       "tier": "Frontier"
     },
     {
@@ -74309,7 +74575,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1025,
+      "rank": 1027,
       "tier": "Frontier"
     },
     {
@@ -74393,7 +74659,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1026,
+      "rank": 1028,
       "tier": "Frontier"
     },
     {
@@ -74478,7 +74744,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1027,
+      "rank": 1029,
       "tier": "Frontier"
     },
     {
@@ -74569,7 +74835,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1028,
+      "rank": 1030,
       "tier": "Frontier"
     },
     {
@@ -74655,7 +74921,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1029,
+      "rank": 1031,
       "tier": "Frontier"
     },
     {
@@ -74745,7 +75011,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1030,
+      "rank": 1032,
       "tier": "Frontier"
     },
     {
@@ -74840,7 +75106,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1031,
+      "rank": 1033,
       "tier": "Frontier"
     },
     {
@@ -74941,7 +75207,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1032,
+      "rank": 1034,
       "tier": "Frontier"
     },
     {
@@ -75030,7 +75296,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1033,
+      "rank": 1035,
       "tier": "Frontier"
     },
     {
@@ -75127,7 +75393,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1034,
+      "rank": 1036,
       "tier": "Frontier"
     },
     {
@@ -75222,7 +75488,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1035,
+      "rank": 1037,
       "tier": "Frontier"
     },
     {
@@ -75334,7 +75600,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1036,
+      "rank": 1038,
       "tier": "Frontier"
     },
     {
@@ -75435,7 +75701,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1037,
+      "rank": 1039,
       "tier": "Frontier"
     },
     {
@@ -75531,7 +75797,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1038,
+      "rank": 1040,
       "tier": "Frontier"
     },
     {
@@ -75622,7 +75888,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1039,
+      "rank": 1041,
       "tier": "Frontier"
     },
     {
@@ -75735,7 +76001,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1040,
+      "rank": 1042,
       "tier": "Frontier"
     },
     {
@@ -75832,7 +76098,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1041,
+      "rank": 1043,
       "tier": "Frontier"
     },
     {
@@ -75928,7 +76194,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1042,
+      "rank": 1044,
       "tier": "Frontier"
     },
     {
@@ -76023,7 +76289,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1043,
+      "rank": 1045,
       "tier": "Frontier"
     },
     {
@@ -76117,7 +76383,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1044,
+      "rank": 1046,
       "tier": "Frontier"
     },
     {
@@ -76206,7 +76472,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1045,
+      "rank": 1047,
       "tier": "Frontier"
     },
     {
@@ -76292,7 +76558,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1046,
+      "rank": 1048,
       "tier": "Frontier"
     },
     {
@@ -76401,7 +76667,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1047,
+      "rank": 1049,
       "tier": "Frontier"
     },
     {
@@ -76500,7 +76766,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1048,
+      "rank": 1050,
       "tier": "Frontier"
     },
     {
@@ -76580,7 +76846,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1049,
+      "rank": 1051,
       "tier": "Frontier"
     },
     {
@@ -76669,7 +76935,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1050,
+      "rank": 1052,
       "tier": "Frontier"
     },
     {
@@ -76757,7 +77023,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1051,
+      "rank": 1053,
       "tier": "Frontier"
     },
     {
@@ -76860,7 +77126,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1052,
+      "rank": 1054,
       "tier": "Frontier"
     },
     {
@@ -76960,7 +77226,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1053,
+      "rank": 1055,
       "tier": "Frontier"
     },
     {
@@ -77050,7 +77316,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1054,
+      "rank": 1056,
       "tier": "Frontier"
     },
     {
@@ -77103,7 +77369,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1055,
+      "rank": 1057,
       "tier": "Frontier"
     },
     {
@@ -77187,7 +77453,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1056,
+      "rank": 1058,
       "tier": "Frontier"
     },
     {
@@ -77251,7 +77517,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1057,
+      "rank": 1059,
       "tier": "Frontier"
     },
     {
@@ -77351,7 +77617,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1058,
+      "rank": 1060,
       "tier": "Frontier"
     },
     {
@@ -77455,7 +77721,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1059,
+      "rank": 1061,
       "tier": "Frontier"
     },
     {
@@ -77540,7 +77806,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1060,
+      "rank": 1062,
       "tier": "Frontier"
     },
     {
@@ -77625,7 +77891,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1061,
+      "rank": 1063,
       "tier": "Frontier"
     },
     {
@@ -77705,7 +77971,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1062,
+      "rank": 1064,
       "tier": "Frontier"
     },
     {
@@ -77795,7 +78061,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1063,
+      "rank": 1065,
       "tier": "Frontier"
     },
     {
@@ -77886,7 +78152,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1064,
+      "rank": 1066,
       "tier": "Frontier"
     },
     {
@@ -77986,7 +78252,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1065,
+      "rank": 1067,
       "tier": "Frontier"
     },
     {
@@ -78081,7 +78347,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1066,
+      "rank": 1068,
       "tier": "Frontier"
     },
     {
@@ -78176,7 +78442,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1067,
+      "rank": 1069,
       "tier": "Frontier"
     },
     {
@@ -78277,7 +78543,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1068,
+      "rank": 1070,
       "tier": "Frontier"
     },
     {
@@ -78378,7 +78644,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1069,
+      "rank": 1071,
       "tier": "Frontier"
     },
     {
@@ -78468,7 +78734,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1070,
+      "rank": 1072,
       "tier": "Frontier"
     },
     {
@@ -78552,7 +78818,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1071,
+      "rank": 1073,
       "tier": "Frontier"
     },
     {
@@ -78663,7 +78929,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1072,
+      "rank": 1074,
       "tier": "Frontier"
     },
     {
@@ -78751,7 +79017,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1073,
+      "rank": 1075,
       "tier": "Frontier"
     },
     {
@@ -78829,7 +79095,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1074,
+      "rank": 1076,
       "tier": "Frontier"
     },
     {
@@ -78920,7 +79186,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1075,
+      "rank": 1077,
       "tier": "Frontier"
     },
     {
@@ -79021,7 +79287,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1076,
+      "rank": 1078,
       "tier": "Frontier"
     },
     {
@@ -79105,7 +79371,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1077,
+      "rank": 1079,
       "tier": "Frontier"
     },
     {
@@ -79204,7 +79470,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1078,
+      "rank": 1080,
       "tier": "Frontier"
     },
     {
@@ -79294,7 +79560,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1079,
+      "rank": 1081,
       "tier": "Frontier"
     },
     {
@@ -79399,7 +79665,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1080,
+      "rank": 1082,
       "tier": "Frontier"
     },
     {
@@ -79483,7 +79749,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1081,
+      "rank": 1083,
       "tier": "Frontier"
     },
     {
@@ -79572,7 +79838,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1082,
+      "rank": 1084,
       "tier": "Frontier"
     },
     {
@@ -79668,7 +79934,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1083,
+      "rank": 1085,
       "tier": "Frontier"
     },
     {
@@ -79752,7 +80018,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1084,
+      "rank": 1086,
       "tier": "Frontier"
     },
     {
@@ -79843,7 +80109,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1085,
+      "rank": 1087,
       "tier": "Frontier"
     },
     {
@@ -79928,7 +80194,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1086,
+      "rank": 1088,
       "tier": "Frontier"
     },
     {
@@ -80019,7 +80285,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1087,
+      "rank": 1089,
       "tier": "Frontier"
     },
     {
@@ -80118,7 +80384,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1088,
+      "rank": 1090,
       "tier": "Frontier"
     },
     {
@@ -80209,7 +80475,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1089,
+      "rank": 1091,
       "tier": "Frontier"
     },
     {
@@ -80300,7 +80566,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1090,
+      "rank": 1092,
       "tier": "Frontier"
     },
     {
@@ -80397,7 +80663,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1091,
+      "rank": 1093,
       "tier": "Frontier"
     },
     {
@@ -80487,7 +80753,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1092,
+      "rank": 1094,
       "tier": "Frontier"
     },
     {
@@ -80581,7 +80847,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1093,
+      "rank": 1095,
       "tier": "Frontier"
     },
     {
@@ -80686,7 +80952,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1094,
+      "rank": 1096,
       "tier": "Frontier"
     },
     {
@@ -80778,7 +81044,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1095,
+      "rank": 1097,
       "tier": "Frontier"
     },
     {
@@ -80873,7 +81139,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1096,
+      "rank": 1098,
       "tier": "Frontier"
     },
     {
@@ -80965,7 +81231,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1097,
+      "rank": 1099,
       "tier": "Frontier"
     },
     {
@@ -81060,7 +81326,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1098,
+      "rank": 1100,
       "tier": "Frontier"
     },
     {
@@ -81149,7 +81415,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1099,
+      "rank": 1101,
       "tier": "Frontier"
     },
     {
@@ -81250,7 +81516,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1100,
+      "rank": 1102,
       "tier": "Frontier"
     },
     {
@@ -81329,7 +81595,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1101,
+      "rank": 1103,
       "tier": "Frontier"
     },
     {
@@ -81420,7 +81686,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1102,
+      "rank": 1104,
       "tier": "Frontier"
     },
     {
@@ -81504,7 +81770,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1103,
+      "rank": 1105,
       "tier": "Frontier"
     },
     {
@@ -81616,7 +81882,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1104,
+      "rank": 1106,
       "tier": "Frontier"
     },
     {
@@ -81696,7 +81962,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1105,
+      "rank": 1107,
       "tier": "Frontier"
     },
     {
@@ -81787,7 +82053,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1106,
+      "rank": 1108,
       "tier": "Frontier"
     },
     {
@@ -81887,7 +82153,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1107,
+      "rank": 1109,
       "tier": "Frontier"
     },
     {
@@ -81961,7 +82227,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1108,
+      "rank": 1110,
       "tier": "Frontier"
     },
     {
@@ -82055,7 +82321,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1109,
+      "rank": 1111,
       "tier": "Frontier"
     },
     {
@@ -82144,7 +82410,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1110,
+      "rank": 1112,
       "tier": "Frontier"
     },
     {
@@ -82252,7 +82518,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1111,
+      "rank": 1113,
       "tier": "Frontier"
     },
     {
@@ -82357,7 +82623,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1112,
+      "rank": 1114,
       "tier": "Frontier"
     },
     {
@@ -82464,7 +82730,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1113,
+      "rank": 1115,
       "tier": "Frontier"
     },
     {
@@ -82606,7 +82872,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1114,
+      "rank": 1116,
       "tier": "Frontier"
     },
     {
@@ -82713,7 +82979,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1115,
+      "rank": 1117,
       "tier": "Frontier"
     },
     {
@@ -82797,7 +83063,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1116,
+      "rank": 1118,
       "tier": "Frontier"
     },
     {
@@ -82901,7 +83167,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1117,
+      "rank": 1119,
       "tier": "Frontier"
     },
     {
@@ -83016,7 +83282,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1118,
+      "rank": 1120,
       "tier": "Frontier"
     },
     {
@@ -83111,7 +83377,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1119,
+      "rank": 1121,
       "tier": "Frontier"
     },
     {
@@ -83201,7 +83467,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1120,
+      "rank": 1122,
       "tier": "Frontier"
     },
     {
@@ -83292,7 +83558,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1121,
+      "rank": 1123,
       "tier": "Frontier"
     },
     {
@@ -83382,7 +83648,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1122,
+      "rank": 1124,
       "tier": "Frontier"
     },
     {
@@ -83488,7 +83754,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1123,
+      "rank": 1125,
       "tier": "Frontier"
     },
     {
@@ -83583,7 +83849,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1124,
+      "rank": 1126,
       "tier": "Frontier"
     },
     {
@@ -83686,7 +83952,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1125,
+      "rank": 1127,
       "tier": "Frontier"
     },
     {
@@ -83785,7 +84051,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1126,
+      "rank": 1128,
       "tier": "Frontier"
     },
     {
@@ -83876,7 +84142,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1127,
+      "rank": 1129,
       "tier": "Frontier"
     },
     {
@@ -83976,7 +84242,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1128,
+      "rank": 1130,
       "tier": "Frontier"
     },
     {
@@ -84070,7 +84336,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1129,
+      "rank": 1131,
       "tier": "Frontier"
     },
     {
@@ -84160,7 +84426,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1130,
+      "rank": 1132,
       "tier": "Frontier"
     },
     {
@@ -84274,7 +84540,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1131,
+      "rank": 1133,
       "tier": "Frontier"
     },
     {
@@ -84370,7 +84636,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1132,
+      "rank": 1134,
       "tier": "Frontier"
     },
     {
@@ -84472,7 +84738,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1133,
+      "rank": 1135,
       "tier": "Frontier"
     },
     {
@@ -84569,7 +84835,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1134,
+      "rank": 1136,
       "tier": "Frontier"
     },
     {
@@ -84663,7 +84929,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1135,
+      "rank": 1137,
       "tier": "Frontier"
     },
     {
@@ -84764,7 +85030,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1136,
+      "rank": 1138,
       "tier": "Frontier"
     },
     {
@@ -84863,7 +85129,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1137,
+      "rank": 1139,
       "tier": "Frontier"
     },
     {
@@ -84959,7 +85225,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1138,
+      "rank": 1140,
       "tier": "Frontier"
     },
     {
@@ -85050,7 +85316,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1139,
+      "rank": 1141,
       "tier": "Frontier"
     },
     {
@@ -85133,7 +85399,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1140,
+      "rank": 1142,
       "tier": "Frontier"
     },
     {
@@ -85228,7 +85494,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1141,
+      "rank": 1143,
       "tier": "Frontier"
     },
     {
@@ -85324,7 +85590,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1142,
+      "rank": 1144,
       "tier": "Frontier"
     },
     {
@@ -85421,7 +85687,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1143,
+      "rank": 1145,
       "tier": "Frontier"
     },
     {
@@ -85516,7 +85782,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1144,
+      "rank": 1146,
       "tier": "Frontier"
     },
     {
@@ -85614,7 +85880,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1145,
+      "rank": 1147,
       "tier": "Frontier"
     },
     {
@@ -85740,7 +86006,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1146,
+      "rank": 1148,
       "tier": "Frontier"
     },
     {
@@ -85850,7 +86116,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1147,
+      "rank": 1149,
       "tier": "Frontier"
     },
     {
@@ -85945,7 +86211,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1148,
+      "rank": 1150,
       "tier": "Frontier"
     },
     {
@@ -86046,128 +86312,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1149,
-      "tier": "Frontier"
-    },
-    {
-      "id": 1054,
-      "statement": "Let $f(n)$ be the minimal integer $m$ such that $n$ is the sum of the $k$ smallest divisors of $m$ for some $k\\geq 1$. Is it true that $f(n)=o(n)$? Or is this true only for almost all $n$, and $\\limsup f(n)/n=\\infty$?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "number theory",
-        "divisors"
-      ],
-      "score": 1,
-      "harness": "Untried",
-      "rationale": [
-        "A Lean formalization of the claim exists and isolates its Mathlib gap precisely: a quantitative Mertens product estimate not yet available.",
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Divisor and prime-factor APIs are represented in previous successful runs.",
-        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
-        "An optimal bound or classification is requested; a single construction may cover only one direction.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
-      ],
-      "requirements": [
-        "Formalize quantitative Mertens as a reusable Mathlib-style lemma; it unblocks this and other analytic problems.",
-        "Resolve natural/integer coercions and retrieve factorization lemmas early.",
-        "Prove the asymptotic statement with its full quantifiers and error control.",
-        "Separate upper and lower bounds and check that they meet the requested precision.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
-        "Freeze the corrected statement and record the scope choice."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: divisors",
-          "points": 4
-        },
-        {
-          "label": "Asymptotic or density target",
-          "points": -9
-        },
-        {
-          "label": "Optimality or full classification",
-          "points": -5
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
-          "label": "Statement-interpretation risk",
-          "points": -3
-        },
-        {
-          "label": "Score floor / ceiling",
-          "points": 4
-        }
-      ],
-      "partial": {
-        "score": 56,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Public formalization with an identified gap (2 kinds)",
-            "points": 12
-          },
-          {
-            "label": "Library fit",
-            "points": 4
-          },
-          {
-            "label": "Asymptotic core",
-            "points": -6
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "A public formal artifact exists and its remaining gap is named (an open sorry, or a stated missing Mathlib input). The encoding cost is already paid and the next step is explicit.",
-          "Reachable partial results still need the relevant Mathlib development.",
-          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/1054",
-      "manual": true,
-      "prize": "no",
-      "evidence": {
-        "best": "untried",
-        "runs": 0,
-        "benchmarkRuns": 0,
-        "certifiedMax": 0
-      },
-      "assessed": {
-        "on": "2026-09-11",
-        "sources": [
-          "atlas-data/forum/1054.json"
-        ],
-        "searchFloor": null
-      },
-      "rank": 1150,
+      "rank": 1151,
       "tier": "Frontier"
     },
     {
@@ -86273,7 +86418,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1151,
+      "rank": 1152,
       "tier": "Frontier"
     },
     {
@@ -86369,7 +86514,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1152,
+      "rank": 1153,
       "tier": "Frontier"
     },
     {
@@ -86470,7 +86615,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1153,
+      "rank": 1154,
       "tier": "Frontier"
     },
     {
@@ -86554,7 +86699,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1154,
+      "rank": 1155,
       "tier": "Frontier"
     },
     {
@@ -86660,7 +86805,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1155,
+      "rank": 1156,
       "tier": "Frontier"
     },
     {
@@ -86766,7 +86911,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1156,
+      "rank": 1157,
       "tier": "Frontier"
     },
     {
@@ -86842,117 +86987,6 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1075",
-      "manual": false,
-      "prize": "no",
-      "evidence": {
-        "best": "untried",
-        "runs": 0,
-        "benchmarkRuns": 0,
-        "certifiedMax": 0
-      },
-      "rank": 1157,
-      "tier": "Frontier"
-    },
-    {
-      "id": 1082,
-      "statement": "Let $A\\subset \\mathbb{R}^2$ be a set of $n$ points with no three on a line. Does $A$ determine at least $\\lfloor n/2\\rfloor$ distinct distances? In fact, must there exist a single point from which there are at least $\\lfloor n/2\\rfloor$ distinct distances?",
-      "status": "Unsolved",
-      "state": "falsifiable",
-      "tags": [
-        "geometry",
-        "distances"
-      ],
-      "score": 1,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Geometric incidence and configuration reasoning needs substantial formal setup.",
-        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
-        "An optimal bound or classification is requested; a single construction may cover only one direction.",
-        "The statement or its discussion mentions deep additive or extremal machinery; that is a possible dependency to audit, not an assumed theorem requirement.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
-      ],
-      "requirements": [
-        "Choose exact coordinates or a reusable geometric model before proof search.",
-        "Set an explicit search bound and prove that any found certificate resolves the exact target.",
-        "Separate upper and lower bounds and check that they meet the requested precision.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: geometry",
-          "points": -11
-        },
-        {
-          "label": "Catalogue finite-certificate class",
-          "points": 9
-        },
-        {
-          "label": "Optimality or full classification",
-          "points": -5
-        },
-        {
-          "label": "Deep additive or extremal machinery",
-          "points": -7
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
-          "label": "Score floor / ceiling",
-          "points": 5
-        }
-      ],
-      "partial": {
-        "score": 56,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Public formalization artifact (4 kinds)",
-            "points": 10
-          },
-          {
-            "label": "Reachable finite direction",
-            "points": 8
-          },
-          {
-            "label": "Library fit",
-            "points": -8
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
-          "A finite certificate direction with no published check beyond our search range.",
-          "Reachable partial results still need the relevant Mathlib development."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/1082",
       "manual": false,
       "prize": "no",
       "evidence": {

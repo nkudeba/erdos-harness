@@ -13,7 +13,8 @@
       "The odd-covering-system question remains hard despite its finite-certificate label and known restrictions on moduli.",
       "PUBLISHED SEARCH FLOOR (recorded 2026-09-11, NOT rerun by us): a preprint linked from the #7 forum thread (egeozturk, 18 Aug 2026, 'Closed-form nonexistence certificates for odd covering systems') claims no covering system with distinct odd moduli > 1 has lcm below 11,486,475, by a search-free hierarchy of closed-form certificates in exact rational arithmetic - extending an earlier search-based 2e6 computation. UNREFEREED preprint, self-described as undergraduate work, not verified by us. Its own stated stopping point is the strongly abundant smooth moduli, first uncertified case 11486475 = 3^3*5^2*7*11*13*17.",
       "Our fibre/Fourier test (see #273, knowledge/reductions/273/) transfers to #7 verbatim - every divisor m>1 of odd L is admissible, the reciprocal screen becomes 'L is ODD ABUNDANT' (smallest 945), and the condition collapses to: max over n|L, n<L of (2n - sigma(n)) <= sigma(L) - 2L. It eliminates 191 of the 391 candidates below 200,000 (including 945: 58 > 30 at n=189) and gives a floor of 3,465. That is roughly 3,300x WEAKER than the floor already on the forum, so the transfer is superseded on arrival and banks nothing for #7.",
-      "A full resolution claim on the thread (jinooklee, 02 May 2026: Erdos-Selfridge via sieve monotonicity, Lean 4 + three BBMST axioms) was REFUTED in-thread - a commenter gives decisive evidence that the assumed axiom bbmst_sf_lt_1 is false, and Thomas Bloom states he assumes the proof is flawed absent expert vouching or an axiom-free formalisation. #7 is open. Related published theorems: BBMST22 settles the odd SQUAREFREE case negatively; Hough-Nielsen prove some modulus is divisible by 2 or 3; BBMST prove the lcm must be divisible by 9 or 15. Prizes: Erdos $25 for nonexistence, Selfridge $2000 for an explicit example."
+      "A full resolution claim on the thread (jinooklee, 02 May 2026: Erdos-Selfridge via sieve monotonicity, Lean 4 + three BBMST axioms) was REFUTED in-thread - a commenter gives decisive evidence that the assumed axiom bbmst_sf_lt_1 is false, and Thomas Bloom states he assumes the proof is flawed absent expert vouching or an axiom-free formalisation. #7 is open. Related published theorems: BBMST22 settles the odd SQUAREFREE case negatively; Hough-Nielsen prove some modulus is divisible by 2 or 3; BBMST prove the lcm must be divisible by 9 or 15. Prizes: Erdos $25 for nonexistence, Selfridge $2000 for an explicit example.",
+      "Forum, 2026-10-06: three papers show that a distinct covering system with odd moduli greater than 1 needs omega(lcm) >= 7, then 8, then 9. A fourth proves noncoverage whenever every modulus has at most three prime divisors. Lean formalisations are reported with them, and the unrestricted conjecture stays open. Unverified by us."
     ],
     "requirements": [
       "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it.",
@@ -23,11 +24,12 @@
     "score": 7,
     "sources": [
       "atlas-data/forum/7.json",
-      "knowledge/reductions/273/fourier_transfer_erdos7.py"
+      "knowledge/reductions/273/fourier_transfer_erdos7.py",
+      "https://www.erdosproblems.com/forum/thread/7"
     ],
     "search_floor": 11486475.0,
     "search_floor_kind": "published",
-    "assessed": "2026-09-11"
+    "assessed": "2026-10-06"
   },
   "8": {
     "rationale": [
@@ -83,6 +85,19 @@
       "Formalize the incidence theorem and its distance-energy reduction."
     ],
     "score": 21
+  },
+  "97": {
+    "rationale": [
+      "Proof-claims page, 2026-10-06: Kruer, Kohlmeyer and Price (using GPT 6 Astra) claim a disproof of #96 and #97, including the general version of #97: for every k, a convex polygon in which every vertex has at least k other vertices at distance 1. They report the Lean formalisation was completed by the AI. Separately, exhaustive computations with published certificates exclude counterexamples to the 4-vertex version with at most 10 vertices. Unverified by us."
+    ],
+    "requirements": [
+      "Not a step-3 target while the disproof claim stands. Check the claimed Lean formalisation against the problem's statement first."
+    ],
+    "sources": [
+      "atlas-data/forum/97.json",
+      "https://www.erdosproblems.com/forum/thread/97"
+    ],
+    "assessed": "2026-10-06"
   },
   "105": {
     "rationale": [
@@ -459,15 +474,17 @@
     "score": 62
   },
   "306": {
-    "assessed": "2026-09-16",
+    "assessed": "2026-10-06",
     "rationale": [
       "The main theorem is already formalized sorry-free in Lean 4 / Mathlib and archived with the arXiv source (anc/lean/), leaving a stated axiom boundary of two explicit analytic inputs.",
       "Live check 2026-09-16: still OPEN on the site (10 comments, 0 proof claims, 'Working on formalising: Yuren_Tang'). Two distinct Lean developments exist and the earlier Atlas note conflated them. (1) Yuren Tang, Zenodo 10.5281/zenodo.20767390 v0.0.3 (19 Jun 2026; github.com/Yuren-Tang/erdos-306): claims a COMPLETE sorry-free proof of the formal-conjectures statement erdos_306 (every q > 0 with squarefree denominator), with #print axioms = propext, Classical.choice, Quot.sound plus two named axioms transcribing Rosser-Schoenfeld 1962 - Corollary 3 (3x/(5 log x) < pi(2x) - pi(x) for x >= 20.5) and Theorem 5 (Mertens' prime-reciprocal sum within 1/(2 log^2 x) of log log x + B). Toolchain v4.28.0, CI rebuilds and audits the axiom set. Nat Sothanaphan ran a screening check and reports it 'could be correct'; no informal manuscript yet; NOT verified here and not accepted by Bloom. (2) Shisheng Li, arXiv:2606.15159 (18 Jun 2026): PARTIAL - all rationals for omega >= 3, and for omega = 2 only a/b above a threshold T(r) <= 1/5; uses native_decide plus Olson's theorem and a Rosser-type bound as inputs.",
-      "Mathlib v4.32.0-rc1 (local checkout) has theta(x) <= log 4 * x, Bertrand, and asymptotic Chebyshev/PNT-adjacent statements (eventually_primeCounting_le, primeCounting_sub_theta_div_log_isBigO) but no explicit Rosser-Schoenfeld bounds and no explicit Mertens error term, so Tang's two axioms are a genuine formalisation gap, not a lookup."
+      "Mathlib v4.32.0-rc1 (local checkout) has theta(x) <= log 4 * x, Bertrand, and asymptotic Chebyshev/PNT-adjacent statements (eventually_primeCounting_le, primeCounting_sub_theta_div_log_isBigO) but no explicit Rosser-Schoenfeld bounds and no explicit Mertens error term, so Tang's two axioms are a genuine formalisation gap, not a lookup.",
+      "Forum proof-claims page, 2026-10-06: a FULL-proof claim by Shisheng Li (with GPT-5.6-sol, GPT-6-astra and Claude Opus 5.5). Every a/b > 0 with b squarefree is a finite sum of distinct 1/(pq), by one two-scale bipartite-graph circle-method construction that needs only Chebyshev bounds. Its Lean development is reported sorry-free on the standard axioms and to prove the formal-conjectures statement. Unverified by us."
     ],
     "requirements": [
       "Discharge one of the two boundary axioms against Mathlib rather than reproving the main theorem.",
-      "Not a harness solve target: the mathematics is Tang's. The harness-shaped contribution is independent verification (clean rebuild, #print axioms, statement-faithfulness audit against formal-conjectures) and, if the proof has slack, discharging the two analytic axioms against Mathlib with weaker explicit Chebyshev-type bounds. Record any such result as verification of a third-party proof, never as a resolution."
+      "Not a harness solve target: the mathematics is Tang's. The harness-shaped contribution is independent verification (clean rebuild, #print axioms, statement-faithfulness audit against formal-conjectures) and, if the proof has slack, discharging the two analytic axioms against Mathlib with weaker explicit Chebyshev-type bounds. Record any such result as verification of a third-party proof, never as a resolution.",
+      "Not a step-3 target: claimed resolved with Lean. Before treating it as resolved, replay the cited Lean repository with the audit's checks against the formal-conjectures statement."
     ],
     "sources": [
       "atlas-data/forum/306.json",
@@ -522,11 +539,12 @@
     "score": 99
   },
   "364": {
-    "assessed": "2026-09-11",
+    "assessed": "2026-10-06",
     "partial": 62,
     "rationale": [
       "The source records searches beyond 10^28 without a triple of consecutive powerful numbers. Generic bounded search is an especially poor full-solution bet.",
-      "Two self-contained formalizable facts sit in the thread: no four consecutive powerful integers (one is 2 mod 4), and the pair-doubling construction (n,n+1) -> (4n(n+1),(2n+1)^2)."
+      "Two self-contained formalizable facts sit in the thread: no four consecutive powerful integers (one is 2 mod 4), and the pair-doubling construction (n,n+1) -> (4n(n+1),(2n+1)^2).",
+      "Forum and proof-claims page, 2026-10-06: a partial claim (Fable 5 in Claude Code) excludes the two remaining mixed shapes for the neighbours of a cube. It reduces to t^6+t^3+1 = 3w^2, solved through a rank-0 elliptic curve (computer-assisted, SageMath). It is explicitly not a solution. Unverified by us."
     ],
     "requirements": [
       "Find a structural impossibility theorem or a genuinely new construction; the Pell-equation result for pairs is insufficient.",
@@ -534,7 +552,8 @@
     ],
     "score": 5,
     "sources": [
-      "atlas-data/forum/364.json"
+      "atlas-data/forum/364.json",
+      "https://www.erdosproblems.com/forum/thread/364"
     ]
   },
   "366": {
@@ -613,6 +632,19 @@
       "Prove both eventual positivity and the claimed divergence rather than extrapolating computed values."
     ],
     "score": 7
+  },
+  "396": {
+    "rationale": [
+      "Forum, 2026-10-06: an exhaustive search extends OEIS A375077, the least n with prod_{0<=i<=k}(n-i) dividing C(2n,n), through k = 13. It comes with validation certificates, independent verifiers, and a Lean-verified small-prime barrier lemma that justifies the search's completeness. The problem stays open."
+    ],
+    "requirements": [
+      "Partial value: the witnesses for k <= 13 are explicit and checkable by Kummer's theorem, so they can be certified. A resolution needs a construction for every k."
+    ],
+    "sources": [
+      "atlas-data/forum/396.json",
+      "https://www.erdosproblems.com/forum/thread/396"
+    ],
+    "assessed": "2026-10-06"
   },
   "397": {
     "rationale": [
@@ -827,13 +859,14 @@
     "score": 53
   },
   "488": {
-    "assessed": "2026-09-10",
+    "assessed": "2026-10-06",
     "rationale": [
       "There is a plausible finite counting/counterexample workflow, but the easy counterexamples in the discussion concern the alternate non-divisibility typo.",
       "Assessed 2026-09-10: a bounded search over ~1.2e13 (A,n,m) triples across 13,870 sets found zero violations, and every near-miss comes from families already PROVED safe (singletons give exactly 2 - 1/a, pairs and min(A)=2 likewise).",
       "This makes proximity-to-threshold ranking actively misleading here: a search walks up a closed provably-safe family reporting 1.997, 1.9999, 1.999999 while proving nothing. In the genuinely open regime (primitive, |A|>=3) the margin GROWS with |A|: 0.08 at |A|=3, 0.19 at 4, 0.37 at 5.",
       "Expert signal against tractability: Tao states the problem stays hard after four simultaneous weakenings; a contributor reports 13 natural approaches killed by explicit counterexamples; one clean inclusion-exclusion reduction was refuted.",
-      "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled."
+      "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled.",
+      "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us."
     ],
     "requirements": [
       "Use the divisibility definition as printed; certify the full finite counts for A, n and m with n at least max(A).",
@@ -843,7 +876,9 @@
     ],
     "score": 8,
     "sources": [
-      "experiments/open-top3/488-assessment.md"
+      "experiments/open-top3/488-assessment.md",
+      "atlas-data/forum/488.json",
+      "https://github.com/shoal-rat/erdos-488-lean"
     ]
   },
   "493": {
@@ -916,16 +951,22 @@
   "647": {
     "rationale": [
       "A witness would certify finitely many divisor inequalities, but the source ties the existence problem to much harder prime-pattern questions.",
-      "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground."
+      "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground.",
+      "Forum, 2026-10-06: an uncertified GPU search (veljjanoski) reports no solution with 24 < n <= 1e22. That raises the recorded 9.17e18 floor; the count is of n, the enumerable object. A kernel-checked Lean exclusion reaches 1e13 (standard axioms, no native_decide), and its writeup argues that no finite table of modular sieve stages can prove the statement."
     ],
     "requirements": [
       "Use a sieve-backed search beyond the known example 24, retaining a compact certificate for every m below the witness.",
-      "Enumeration is futile below ~9e18. The live routes are the modular/prime-chain reductions or formalising the density-zero bounds, not search."
+      "Enumeration is futile below ~9e18. The live routes are the modular/prime-chain reductions or formalising the density-zero bounds, not search.",
+      "Enumeration is futile below 1e22 (published, not rerun). A resolution needs a structural argument, and the sieve-table writeup suggests finitely many modular stages cannot supply one."
     ],
     "score": 18,
-    "search_floor": 9.17e+18,
+    "search_floor": 1e+22,
     "search_floor_kind": "published",
-    "assessed": "2026-09-11"
+    "assessed": "2026-10-06",
+    "sources": [
+      "atlas-data/forum/647.json",
+      "https://github.com/veljjanoski/erdos647"
+    ]
   },
   "649": {
     "rationale": [
@@ -1212,6 +1253,19 @@
     ],
     "score": 43
   },
+  "885": {
+    "rationale": [
+      "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5."
+    ],
+    "requirements": [
+      "The open frontier is k = 5. A witness for it would be a certifiable partial result; the full problem needs a construction for every k."
+    ],
+    "sources": [
+      "atlas-data/forum/885.json",
+      "https://www.erdosproblems.com/forum/thread/885"
+    ],
+    "assessed": "2026-10-06"
+  },
   "929": {
     "rationale": [
       "The source’s square-root lower bound is far below the requested near-linear one; this is a sieve/prime-gap frontier."
@@ -1314,6 +1368,19 @@
       "atlas-data/forum/1039.json"
     ],
     "partial": 50
+  },
+  "1041": {
+    "rationale": [
+      "Forum, 2026-10-06: ani's degree-seven counterexample claim (7 September) was checked independently by another user, who formalised one instance (s = 1e-6) in Lean on the standard axioms; nobody independent has reviewed it yet. Partial claims also appear: a positive cubic case (proof-claims page, Zenodo preprint), coefficient-restricted families, and a critical-value estimate. Unverified by us."
+    ],
+    "requirements": [
+      "Not a step-3 target while the counterexample claim stands. A check would replay the cited Lean formalisation and confirm that its statement matches the problem's."
+    ],
+    "sources": [
+      "atlas-data/forum/1041.json",
+      "https://www.erdosproblems.com/forum/thread/1041"
+    ],
+    "assessed": "2026-10-06"
   },
   "1054": {
     "assessed": "2026-09-11",
