@@ -205,7 +205,10 @@ by default):
   `--min-child-budget`, the extension fires before they are. Until 2026-10-06 it fired only on a hard budget stop:
   #152's whole-problem run deferred all four open steps two cycles running ($1.21, then $0.14 left). Those starved
   cycles counted as a stall and ended it at $30.34 under a $70 cap.
-- A cycle that ran dry without a discharge counts toward the stall limit.
+- A cycle that ran dry without a discharge counts toward the stall limit. A child that came back with certified
+  pieces the parent had not yet banked counts as a discharge, for both the stall count and the extension.
+  #152's resumed run stopped at the refinement judge's budget check, right after its `split_ne` child proved 7 of
+  8 pieces. A resumed run starts with no record of earlier progress, so it was refused the extension (2026-10-06).
 - Each extension is logged (`program/budget_extended`) and named in the stop reason.
 - #435's hard step needed three hand-raised budgets; this rule replaces them.
 

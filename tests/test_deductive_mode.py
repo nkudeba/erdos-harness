@@ -613,6 +613,47 @@ class BudgetExtension(unittest.TestCase):
         self.assertEqual(attacked, [])
         self.assertTrue(any(e[1] == "hypotheses_deferred" for e in h.log.events))
 
+    def _child_certified_then_dry(self, extend):
+        """#152's resumed run: the `split_ne` child proved 7 of 8 pieces, then the parent's budget ran out at the
+        refinement judge, before the refinement was banked. A resumed run starts with no `prev_progress`."""
+        h = self._harness(extend=extend, cap=70.0)
+        h.args.research_cycles = 1
+        skel = SKELETON.replace("-- PUBLISHED: Rosser–Schoenfeld 1962, Corollary 3\n"
+                                "theorem erdos_99_hyp_rs : ∀ x : ℕ, 1 ≤ x → x ≤ x := by\n  sorry\n\n", "")
+        plan = "```lean\n" + skel + "\n```\n```json\n" + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "difficulty": "hard"}]}) + "\n```\n"
+        def ask(purpose, prompt, **kw):
+            if purpose == "refinement":
+                raise H.Harness.BudgetExhausted("run budget exhausted")
+            return JUDGE_OK if purpose == "circularity" else plan
+        h.ask = ask
+        # the residual in force exists before the run (a resume), so the cycle's skeleton is not "first skeleton" progress
+        pdir = self.root / "programs" / "erdos_99"
+        pdir.mkdir(parents=True)
+        (pdir / "Residual.lean").write_text(skel)
+        sub_path = self.root / "sub_residual.lean"
+        sub_path.write_text("def foo (n : ℕ) : Prop := n = n\n\n"
+                            "theorem erdos_99_hyp_a_hyp_base : foo 0 := by\n  rfl\n\n"
+                            "theorem erdos_99_hyp_a_hyp_step : ∀ n : ℕ, foo n := by\n  sorry\n\n"
+                            "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  exact erdos_99_hyp_a_hyp_step n")
+        attacks = []
+        def attack(sub, name, sdir, cycle, module, remaining, recursive=False):
+            attacks.append(cycle)
+            return 3, argparse.Namespace(state={"residual": {"skeleton": str(sub_path), "meta": {}}})
+        h._attack_substatement = attack
+        h.run_program()
+        return h, attacks
+
+    def test_a_child_s_unbanked_work_earns_the_extension(self):
+        h, attacks = self._child_certified_then_dry(extend=10.0)
+        self.assertEqual([(e["from"], e["to"]) for e in h.state["budget_extensions"]][:1], [(5.0, 15.1)])
+        self.assertGreaterEqual(len(attacks), 2)            # the extension bought another attack on the same step
+        self.assertNotIn("descent_stalled", h.state)
+
+    def test_without_an_extension_unbanked_work_is_not_a_stall(self):
+        h, attacks = self._child_certified_then_dry(extend=0.0)
+        self.assertEqual(attacks, [1])
+        self.assertEqual(int(h.state.get("stall_cycles") or 0), 0)
+
 
 class LemmaBlocksDeduped(unittest.TestCase):
     """#152's whole-problem run certified `hyp_interior` twice (a re-plan reused the name for a new statement). Two

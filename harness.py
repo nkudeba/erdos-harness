@@ -8964,6 +8964,7 @@ for the SAT solver instead of enumerating it.
             cycle += 1
             ran = cycle
             progress = False             # Step 2: did this cycle DISCHARGE anything (not merely split)?
+            pending = False              # a child came back with certified work the parent has not banked yet
             try:
                 cdir = pdir / "cycles" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-c{cycle}"
                 cdir.mkdir(parents=True, exist_ok=True)
@@ -9285,6 +9286,7 @@ for the SAT solver instead of enumerating it.
                                 sub_skel = ""
                             sub_parsed = parse_residual(sub_skel, pid, sub_res.get("meta") or {}, main=h["name"]) if sub_skel.strip() else None
                             discharged_subs = [x["name"] for x in (sub_parsed or {}).get("hypotheses", []) if not x["open"]]
+                            pending = pending or bool(discharged_subs)
                             if sub_parsed and sub_parsed["main_present"] and sub_parsed["glue_sorry_free"] and not discharged_subs:
                                 # Step 2: a split that discharges nothing is not progress, and splicing it could make the
                                 # frontier HARDER (#242's negation turned "a counterexample exists" into the stronger
@@ -9341,6 +9343,7 @@ for the SAT solver instead of enumerating it.
                             if h["kind"] == "conjecture":
                                 self._queue_rediscover(h["name"])
                         if rc == 0 and child.state.get("proof"):
+                            pending = True
                             body = strip_imports(child.state["proof"])
                             certified_any = True
                             r = self._bank_certified(lemmas_path, residual_path, skeleton, parsed, meta, pid, main,
@@ -9410,13 +9413,18 @@ for the SAT solver instead of enumerating it.
                 prev_progress = progress
             except Harness.BudgetExhausted as e:
                 self.log.event("program", "stopped_on_budget", cycle=cycle, detail=str(e))
-                if not progress:                 # a cycle that ran dry without a discharge still counts as a stall
+                # Work a child certified counts even when the money ran out before the parent could bank it. #152's
+                # resumed run stopped at the refinement judge's budget check, just after its `split_ne` child had
+                # proved 7 of 8 pieces: the cycle counted as a stall and was refused the extension, because a
+                # resumed run starts with no `prev_progress`. The child's residual stays on disk and resumes on the
+                # next attack of the same step.
+                if not (progress or pending):    # a cycle that ran dry without a discharge still counts as a stall
                     self.state["stall_cycles"] = int(self.state.get("stall_cycles") or 0) + 1
                     self.save()
-                if (progress or prev_progress) and self.state.get("stall_cycles", 0) < STALL_LIMIT \
+                if (progress or pending or prev_progress) and self.state.get("stall_cycles", 0) < STALL_LIMIT \
                         and self._extend_run_budget(cycle):
                     cycles = max(cycles, cycle + 1)    # the money buys at least the cycle it was cut from
-                    prev_progress = progress
+                    prev_progress = progress or pending
                     continue
                 break
         # Render the state of the argument however the loop ended. A budget stop inside a cycle used to skip
