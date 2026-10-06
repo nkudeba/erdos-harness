@@ -849,6 +849,17 @@ class Stage(unittest.TestCase):
         self.assertEqual(again["validated"], keep["validated"])
         self.assertEqual((len(call.calls), len(sess.calls)), (n_calls, n_sessions))   # ...and buys nothing twice
 
+    def test_no_frontier_map_is_an_infrastructure_error(self):
+        """A usage limit at the first call is never a result: three step-2 items were recorded as $0 problems."""
+        def boom(purpose, prompt, n):
+            return H.DiscoveryCallFailed("claude -p returned an error result: You've hit your weekly limit", cost=0.0)
+        self.h._discovery_caller = lambda: FakeCall(boom)
+        self.h._engine_session_caller = lambda: FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
+        self.h._engine_search = lambda: None
+        with self.assertRaisesRegex(RuntimeError, "no frontier map"):
+            self.h.stage_discover()
+        self.assertNotIn("discovery", self.h.state)
+
     def test_a_benchmark_run_never_searches(self):
         self.h.args.benchmark = True
         self.assertIsNone(self.h._engine_search())

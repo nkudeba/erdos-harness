@@ -5788,6 +5788,12 @@ class Harness:
         res = engine_run(self._discovery_caller(), self._engine_session_caller(), self.problem["statement"],
                          self.state["statement"], s, workers=max(1, s.sessions), search=self._engine_search(),
                          checkpoint=checkpoint, save=save)
+        if res.get("error") and not (res.get("frontier") or {}).get("text"):
+            # No frontier map means the engine did no work at all: a usage limit or an outage, never a result. Raising
+            # makes it an infrastructure error (exit 1), so a lane waits and resumes it. On 2026-10-06 three step-2
+            # items hit the weekly limit at their first call; the engine returned the error, the run exited 2, and the
+            # screen recorded three $0 non-results as finished problems.
+            raise RuntimeError(f"engine produced no frontier map: {res['error']}")
         (out / "engine.json").write_text(json.dumps({k: v for k, v in res.items() if k != "guidance"}, indent=1, ensure_ascii=False))
         (out / "IDEAS.md").write_text(engine_report(res, f"problem {self.problem['id']}, run {self.run_dir.name}"))
         best, complete = None, engine_complete(res)
