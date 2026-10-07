@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 127,
+    "manually_reviewed": 129,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "63f36c4637bae2952b8e17647f68831bbc8ecd9d7bcd443d9da674eee4733cd9",
+    "harness_sha256": "0ef6b3ea908e30d0049315528dda296ca0b51bceded89f4facc812fdf79a6a71",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "34a8a99563db0cc3e75400765ec967e22dbde4830a04a4e9a27d678c4214f749"
+    "manual_reviews_sha256": "58ca27c2658a0a2e554289db0c251e68b7e64e0a66177b08dd0f070deb838230"
   },
   "problems": [
     {
@@ -41303,6 +41303,7 @@
       "score": 9,
       "harness": "Attempted",
       "rationale": [
+        "Step-3 engine run 2026-10-07 ($20.24, informal): nothing new. The judges passed a conditional reduction as valid but a restatement (deep/C2): if suitable (eta,eps)-good prime bands exist (hypothesis H), DHJ(3) gives f(N)=o(N), and H alone gives f(N) <= (2/3+o(1))N. The run's own barrier analysis puts H against the comparable-composite-divisor barrier.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -41311,12 +41312,13 @@
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
+        "Prove hypothesis H (near-uniform cube covers by prime bands) or show it fails; the cube transference itself is routine (deep/C1r).",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Separate upper and lower bounds and check that they meet the requested precision."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -41382,13 +41384,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/536",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "experiments/idea-engine-2026-10-02/REPORT.md"
+        ],
+        "searchFloor": null
       },
       "rank": 681,
       "tier": "Frontier"
@@ -56188,6 +56197,7 @@
       "harness": "Attempted",
       "rationale": [
         "A public Lean 4 repo (SamMausberg/lean-formalizations, FormalConjectures/Problems/Erdos/E20) formalizes the conjecture statement and certifies base cases f(1,3)=2 through f(6,3)=19.",
+        "Step-3 engine run 2026-10-07 ($15.90, informal): nothing new. Two routes provably fail: kappa-spread does not force k pairwise disjoint members for any constant kappa (an intersecting n-uniform family can be (1-o(1)) log n/log log n spread; judged valid but routine), and Meshulam-type domination bounds via topological Hall stop at the trivial (k-1)n threshold.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite combinatorics fits decomposition, but set/cardinality bookkeeping is substantial.",
@@ -56199,11 +56209,12 @@
       ],
       "requirements": [
         "Extend the certified base cases beyond f(6,3) using a SAT encoding; do not attempt the full exponential sunflower conjecture, which carries a $1000 prize and is polymath-hard.",
+        "A spread-based proof must use sunflower-freeness inside the spread case; disjointness alone needs kappa = Omega(log n/log log n).",
         "Separate the combinatorial invariant from the final counting argument.",
         "Do not expect a short route; scope the attempt to a partial result."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -56290,9 +56301,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-10-07",
         "sources": [
-          "atlas-data/forum/20.json"
+          "atlas-data/forum/20.json",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": null
       },
@@ -81385,6 +81397,7 @@
       "score": 1,
       "harness": "Attempted",
       "rationale": [
+        "Step-3 engine run 2026-10-07 ($21.10, informal): a model referee, an adversary and two novelty judges passed r1s1/C1 as new at significance 2: F(A,X,4) << X^(1/3-1/700) for every strictly increasing A, below the Erdos-Szemeredi X^(1/3) log X for k=4 and 5. Not Lean-checked and not human-reviewed.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -81393,10 +81406,11 @@
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
+        "Before it counts: a human check or a Lean proof of the k=4 bound against formal-conjectures' F. Next rung: an exponent below 1/3 for every k >= 4 by the same 2x2 archimedean/p-adic determinant.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -81456,13 +81470,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/873",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "experiments/idea-engine-2026-10-02/REPORT.md"
+        ],
+        "searchFloor": null
       },
       "rank": 1099,
       "tier": "Frontier"
