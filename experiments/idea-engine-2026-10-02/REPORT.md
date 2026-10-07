@@ -722,6 +722,42 @@ causes: three in targeting and one in execution.
 
   Their predictions are written before launch.
 
+**3.5, progress (2026-10-07, 19:46 UTC).** The account's session limit stopped the lane after 4 of 8 problems: #7, #488,
+#885 and #273. #686, #835, #647 and #366 failed at their first call at no cost, and were relaunched after the reset with
+the same protocol. The results are held until all 8 are in.
+
+**A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
+- **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
+  pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
+  weekly limit". So a limit inside the research engine read as an ordinary failed call:
+  - judges recorded "unjudged" or "valid-unrated" verdicts;
+  - gap-phase ratings recorded errors;
+  - sessions ended with empty notebooks;
+  - the run went on as if those were results, and a resume kept them.
+- **Affected runs.** A scan of every engine run on disk found four:
+  - #273 in this screen: 5 probe claims. One would raise #273's search floor if valid: "L ≥ 6,652,800, and every
+    candidate L < 10^8 is in a 115-element list".
+  - Three step-2 dev runs, stopped by the weekly limit on 2026-10-06. Every gap rating failed, so gap closing, which is
+    part of the step-2 protocol, never ran on any of them.
+    - #570: 4 deep-dive claims.
+    - #865: 1 claim.
+    - #1125: 1 claim.
+  - **Step 2's "not solved" for #570 and #865 is therefore an incomplete evaluation.**
+- **The fix** (`018f7c4`, `1c6aa44`):
+  - The pattern now matches the CLI's wording, so a limit stops the run.
+  - When a resume loads a checkpoint, it drops every verdict and rating the judges never gave, and judges those claims
+    again exactly as the round would have. Nothing else is bought twice.
+  - `step2_grade.py` and `rerate.py` had the same broad `except`, and now stop on a limit too.
+- **The repair**, queued behind the screen (`step3/rejudge.log`):
+  - #273 is resumed under its screen protocol.
+  - The three step-2 runs are resumed with their original command and caps ($28 engine, $29.50 run), then re-recorded
+    (`discover-screen --record`) and re-graded (`step2_grade.py`).
+- **A deviation, recorded now.** The repair runs on the live harness. The re-judged claims meet the v6 referee prompt,
+  which adds the check of each cited theorem's hypotheses, and any gap-closing session uses the v6 session prompt. Every
+  other step-2 verdict stays as the v5 judges gave it.
+- **Not assistance.** The repair gives the problem-solving no new input. It completes judging the protocol paid for and
+  never received.
+
 ## Status at the session handoff (2026-10-06, updated 16:00 UTC)
 
 **Finished since the handoff.** #888's step-2 row is in, and the step-2 table below is final.
