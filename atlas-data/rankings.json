@@ -38542,7 +38542,7 @@
         "graph theory"
       ],
       "score": 11,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "Each fixed r is a finite, SAT-encodable decision problem; r=3 and r=4 are published (Erdos-Gyarfas) and the claims page carries verification programs for r=5,7,8,9.",
         "EVERY REACHABLE FIXED CASE IS ALREADY CLAIMED (recorded 2026-09-11 from the proof-claims page, claims NOT verified by us). Seven proof claims filed in July 2026, all AI-assisted and all partial: r=5 independently four times (Winter, Rose, Silverstein, Sneiderman - with 458 DRAT-verified SAT leaves, twelve UNSAT formulas, and Kang-Pikhurko equality routes), plus r=6 (K_37), r=7 (K_50), r=8 (K_65, 862 LRAT-checked instances) and r=9 (K_82, 50 LRAT certificates). Erdos-Gyarfas published r=3 and r=4. So the first UNCLAIMED fixed case is r=10 (K_101, 5050 edges), and the universal statement over all r is what remains genuinely open.",
@@ -38553,7 +38553,8 @@
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Formalize the published r=3 or r=4 case, or decide a fixed r by SAT; graph-theory library fit in Mathlib is weak, so budget encoding work.",
@@ -38640,8 +38641,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
