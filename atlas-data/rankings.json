@@ -40709,13 +40709,14 @@
         "combinatorics"
       ],
       "score": 9,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite combinatorics fits decomposition, but set/cardinality bookkeeping is substantial.",
         "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
-        "An unresolved prize problem receives a conservative difficulty prior."
+        "An unresolved prize problem receives a conservative difficulty prior.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Separate the combinatorial invariant from the final counting argument.",
@@ -40786,8 +40787,8 @@
       "manual": false,
       "prize": "$100",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
