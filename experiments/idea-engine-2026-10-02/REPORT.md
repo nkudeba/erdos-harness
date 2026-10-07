@@ -586,9 +586,11 @@ sufficient: a resolution also needs human review.
   - At least one claim, across the 3 problems, that the judges validate as new at significance ≥ 2: probability 0.5.
   - A complete resolution of an open problem: 0.03 each.
 
-**3.2, alongside the screen.**
-- Design the counting-estimate fix for the refinement rule on #152, a train item.
-- Gate it once on #401 (dev), with a fresh Lean run.
+**3.2, alongside the screen: done, no change.**
+- The premise was wrong; see "A design observation, corrected" below.
+- The train evidence shows no wrongly refused split, so there is no fix to gate on #401.
+- For 3.4's Lean runs: a refused refinement is the case `--rediscover 1` exists for. It gives the stuck step its own
+  informal discovery, told what Lean certified around it.
 
 ## Status at the session handoff (2026-10-06, updated 16:00 UTC)
 
@@ -639,13 +641,21 @@ sufficient: a resolution also needs human review.
   were refused twice as refinements: each time the sub-run certified the scaffolding and left the count as an
   estimate.
 
-**A design observation, from #152 (a train item).**
-- A sub-run often certifies the scaffolding of a counting step, then leaves the count as quantitative estimates that
-  imply the step.
-- The refinement judge refuses those as "a quantitative strengthening, not easier". #152's `noconsec_rhs`
-  certified 4 pieces and was refused that way.
-- That is the natural shape of an analytic proof: estimate each range, then take a union bound. Whether such splits
-  should count as easier is an open design question for the refinement rule, and it is not changed here.
+**A design observation, corrected on 2026-10-07.**
+- **What was wrong.** The first version of this paragraph said #152's refused refinements were range splits, that is,
+  quantitative estimates per range that imply the step. They were not.
+- **What #152's refusals actually were.** Each left ONE open piece: the step's own inequality with a slack term dropped
+  or an existential fixed, which is a strictly stronger statement. The judge was right to refuse both.
+- **Across every refinement verdict on disk, the train refusals are:**
+  - #152 `core` and #678 `core`: one piece still carries all of H. Correct.
+  - #435 `apery`: the pieces generalise H to every residue class. This is a different question, a strengthening made
+    for induction.
+- **The only refused range split** (each piece bounding one range of primes, with certified glue) was #401's last step.
+  #401 is a dev item.
+- **So the rule is unchanged.** Changing it on a dev observation and then gating it on that same item would be
+  circular, and it would break the time-split rule. A candidate prompt was written and reverted, never committed.
+- **What actually stalled #152** is the planner, not the judge. Its sub-runs certified small local facts and never
+  decomposed the core counting inequality. `--rediscover` targets exactly that and was not on.
 
 **Nothing is running.**
 
