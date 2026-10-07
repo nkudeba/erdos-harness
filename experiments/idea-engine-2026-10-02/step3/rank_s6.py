@@ -39,7 +39,7 @@ def main() -> int:
             r = json.loads(line)
             rows[str(r["problem"])] = r                      # a re-run problem keeps its latest row
     ranks = json.loads((ROOT / "atlas-data" / "rankings.json").read_text())["problems"]
-    partial = {str(p["id"]): p.get("partial") for p in ranks}
+    partial = {str(p["id"]): (p.get("partial") or {}).get("score") for p in ranks}   # {"score": .., "signals": ..}
     order = sorted(rows.values(), key=lambda r: key(r, partial), reverse=True)
     out = [{"problem": r["problem"], "best_validated_sig": key(r, partial)[0], "validated_new": key(r, partial)[1],
             "open_targets": key(r, partial)[2], "partial": key(r, partial)[3], "spend": r.get("spend_run"),
