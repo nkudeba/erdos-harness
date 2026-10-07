@@ -22,6 +22,31 @@ sys.path.insert(0, str(ROOT))
 import timesplit as T
 
 
+def target_summary(ej: dict) -> dict:
+    """The map-and-rate screen's result: every frontier target with the judges' pre-rating (step 3, 2026-10-07).
+    The panel is conservative (`engine_novelty_panel`): `new` only if both judges say new, the lower significance and
+    the lower reach. `open_targets` counts targets rated new at significance >= 2 with reach medium or high."""
+    f = ej.get("frontier") or {}
+    ratings = ej.get("ratings") or {}
+    reach = {"low": 0, "medium": 1, "high": 2}
+    rows = []
+    for t in f.get("targets") or []:
+        r = ratings.get(t.get("id")) or {}
+        rows.append({"id": t.get("id"), "type": t.get("type"), "map_significance": t.get("significance"),
+                     "verdict": r.get("verdict"), "significance": r.get("significance"), "reach": r.get("reach"),
+                     "judges": [{k: j.get(k) for k in ("verdict", "significance", "reach")} for j in r.get("panel") or []
+                                if isinstance(j, dict)],
+                     "statement": " ".join(str(t.get("statement") or "").split())[:400]})
+    new = [x for x in rows if x["verdict"] == "new" and isinstance(x["significance"], (int, float))]
+    sig2 = [x for x in new if x["significance"] >= 2]
+    open_ = [x for x in sig2 if reach.get(str(x["reach"] or ""), -1) >= 1]
+    best = max(open_, key=lambda x: (x["significance"], reach.get(str(x["reach"]), -1)), default=None)
+    return {"frontier_cost": f.get("cost"), "targets": rows, "n_targets": len(rows),
+            "n_rated": sum(1 for x in rows if x["verdict"]), "n_new": len(new), "n_new_sig2": len(sig2),
+            "open_targets": len(open_), "best_open": ({k: best[k] for k in ("id", "significance", "reach", "statement")}
+                                                      if best else None)}
+
+
 def record(run_dir: Path, n: str, tag: str, rc) -> dict | None:
     """One results.jsonl row for a finished engine run (also usable on a run started outside this script)."""
     try:
@@ -40,6 +65,7 @@ def record(run_dir: Path, n: str, tag: str, rc) -> dict | None:
                                            for c in ej.get("validated") or []],
            "significance": [((c.get("validation") or {}).get("novelty") or {}).get("significance")
                             for c in ej.get("validated") or []],
+           **target_summary(ej),
            "at": datetime.now().isoformat(timespec="seconds")}
     with (HERE / "results.jsonl").open("a") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
@@ -53,6 +79,8 @@ def main() -> int:
     ap.add_argument("--total", type=float, default=30.0, help="engine budget per problem, USD")
     ap.add_argument("--flags", default="", help="extra harness flags, one string")
     ap.add_argument("--record", default=None, help="only write the results row for this finished run dir")
+    ap.add_argument("--src", default=str(PREV), help="the directory holding fc/<n>.lean and library/<n>/ (default: the "
+                    "open-discovery experiment; step 3 uses step3/)")
     ap.add_argument("--resume", action="append", default=[], help="a cut-off run dir to resume first, repeatable (the "
                     "engine picks up from engine/checkpoint.json); one value per flag, so it never swallows the problems")
     args = ap.parse_args()
@@ -65,9 +93,10 @@ def main() -> int:
     jobs = [((ROOT / r).resolve().name.split("erdos")[-1], (ROOT / r).resolve()) for r in args.resume]
     jobs += [(n, None) for n in args.problems]
     for n, run_dir in jobs:
-        lib = PREV / "library" / (f"{n}-full" if (PREV / "library" / f"{n}-full").exists() else n)
+        src = Path(args.src).resolve()
+        lib = src / "library" / (f"{n}-full" if (src / "library" / f"{n}-full").exists() else n)
         if run_dir is None:
-            fc = T.parse_fc((PREV / "fc" / f"{n}.lean").read_text(), int(n))
+            fc = T.parse_fc((src / "fc" / f"{n}.lean").read_text(), int(n))
             if fc.get("error"):
                 print(f"#{n}: formal-conjectures parse failed: {fc['error']}", flush=True)
                 continue
@@ -99,7 +128,8 @@ def main() -> int:
                 f.write(json.dumps({"problem": n, "run_dir": str(run_dir.relative_to(ROOT)), "exit": rc}) + "\n")
             continue
         print(f"#{n} [{args.tag}]: {len(rec['validated'])} validated new of {sum(rec['claims'].values())} claims; "
-              f"{rec['claims']}; significance {rec['significance']}; ${rec['spend_run']}", flush=True)
+              f"targets {rec['n_targets']} (new {rec['n_new']}, sig>=2 {rec['n_new_sig2']}, open {rec['open_targets']}); "
+              f"best {rec['best_open']['significance'] if rec['best_open'] else None}; ${rec['spend_run']}", flush=True)
     return 0
 
 

@@ -4109,7 +4109,11 @@ def frontier_block(f: dict, room: int = 9000) -> str:
 
 def engine_assignments(f: dict, n: int, core_share: float) -> list[dict]:
     """Round 1's sessions: `core_share` of them attack CORE through distinct ANGLEs (bold), the rest take TARGETs
-    of distinct TYPEs first (broad). Either list tops up the other when it runs short."""
+    of distinct TYPEs first (broad). Either list tops up the other when it runs short. `n <= 0` (a map-and-rate
+    screen, `--engine-sessions 0`) assigns nothing: the slices below go negative there and handed out one angle plus
+    every target but the last."""
+    if n <= 0:
+        return []
     angles, targets = list(f.get("angles") or []), list(f.get("targets") or [])
     by_type: dict = {}
     for t in sorted(targets, key=lambda t: -(t.get("significance") or 0)):   # stable: map order breaks ties

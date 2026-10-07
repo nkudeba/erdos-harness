@@ -539,6 +539,57 @@ both-judge significance ≥ 2).
   I believe it is correct. It is probabilistic, so a Lean version must be derandomized over a finite space, which will
   cost more than #1125 or #401.
 
+## Step 3: the engine on open problems (pre-registered 2026-10-07, before launch)
+
+**Goal.** Find where the engine sees a reachable, significant target on genuinely open problems. Then attack the best
+2–3 with the full engine, and send any complete chain to Lean. On an open problem the audit is necessary but not
+sufficient: a resolution also needs human review.
+
+**3.1, the screen. This part was written before any screen result.**
+- **Candidates.** The top 30 unsolved problems by `partial`, after the forum screen above.
+  - 20 have a single formal-conjectures main theorem at commit `9d259649abe0`, and they are the ones screened: 7, 488, 20,
+    273, 120, 686, 835, 366, 617, 364, 647, 396, 536, 677, 307, 951, 886, 885, 138, 873.
+  - 10 are left out because there is no single formal statement to freeze:
+    - 264, 872, 978, 12, 367, 409, 1054 and 1082 are split into parts with no main theorem;
+    - 176 has no file;
+    - 506 asks for a value.
+
+    Choosing one part would be a reading of the statement, and none is chosen here.
+- **Protocol.** `screen.py --tag s3-map --src step3 --total 7 --flags "--engine-sessions 0 --engine-min-target-sig 2
+  --engine-deep-budget 0 --engine-gap-rounds 0 --engine-rounds 1"`.
+  - Each problem gets the frontier map at high effort, and two judges rate every target as if it were proved.
+  - There are no research sessions and no Lean.
+  - Each problem's library is its page, forum thread and proof-claims page (refreshed 2026-10-06), with
+    `--blackboard on`.
+  - `prep.py` builds the statements and the libraries.
+  - A zero-session bug was fixed before launch: `engine_assignments(n=0)` handed out sessions.
+- **OPEN target.** A target is OPEN when the conservative panel (both judges) rates it new, at significance ≥ 2, with
+  reach medium or high.
+- **Predictions:**
+  1. Cost $60–100 for the 20, a median of $4 a problem. This replaces the $45–90 for 30 given before past map costs
+     were measured: open-problem maps cost $1.39–9.06.
+  2. Problems with at least one target rated new at significance ≥ 2: 13 of 20 (range 7–18).
+  3. Problems with at least one OPEN target: 6 of 20 (range 2–11).
+  4. Problems with an OPEN target at significance 3: 1 (range 0–3).
+- **Selection for 3.3, fixed now.**
+  - Rank the problems by:
+    1. the best OPEN target's significance;
+    2. then the number of OPEN targets;
+    3. then `partial`.
+  - Take the top 3.
+  - Drop any whose map reports a fresh claimed resolution.
+
+**3.3, full engine runs, with predictions written now.**
+- **Settings.** Step 2's engine settings (3 sessions, 1 round, a $6 deep dive, gap closing on) plus
+  `--engine-min-target-sig 2`, $28 a problem.
+- **Predictions:**
+  - At least one claim, across the 3 problems, that the judges validate as new at significance ≥ 2: probability 0.5.
+  - A complete resolution of an open problem: 0.03 each.
+
+**3.2, alongside the screen.**
+- Design the counting-estimate fix for the refinement rule on #152, a train item.
+- Gate it once on #401 (dev), with a fresh Lean run.
+
 ## Status at the session handoff (2026-10-06, updated 16:00 UTC)
 
 **Finished since the handoff.** #888's step-2 row is in, and the step-2 table below is final.

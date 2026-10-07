@@ -122,6 +122,12 @@ class Frontier(unittest.TestCase):
         many = H.engine_assignments(f, 7, 0.5)                      # more sessions than targets + angles: no repeats
         self.assertEqual(len(many), 5)
 
+    def test_zero_sessions_assign_nothing(self):
+        """A map-and-rate screen (`--engine-sessions 0`, step 3) must buy no session. The slices went negative and
+        assigned one angle plus every target but the last."""
+        f = H.parse_frontier(FRONTIER)
+        self.assertEqual(H.engine_assignments(f, 0, 0.5), [])
+
 
 class Claims(unittest.TestCase):
     def test_claim_blocks_parse_with_multiline_proofs(self):

@@ -1,0 +1,195 @@
+{
+  "fc_sha": "9d259649abe0b02d7a25f7589b872db679b35e21",
+  "rows": [
+    {
+      "problem": "7",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 135,
+      "digest_chars": 9173
+    },
+    {
+      "problem": "264",
+      "fc": "no main theorem (parts: parts.i, parts.ii, variants.example, variants.ko_tao_neg, variants.ko_tao_pos)",
+      "form": null
+    },
+    {
+      "problem": "488",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 275,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "20",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 252,
+      "digest_chars": 9174
+    },
+    {
+      "problem": "872",
+      "fc": "no main theorem (parts: parts.i, parts.ii, trivial_upper_bound, variants.prime_question)",
+      "form": null
+    },
+    {
+      "problem": "273",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 140,
+      "digest_chars": 4365
+    },
+    {
+      "problem": "120",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 231,
+      "digest_chars": 2268
+    },
+    {
+      "problem": "686",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 166,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "835",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 341,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "978",
+      "fc": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.allow_fixed_divisors, variants.sub_one, variants.sub_two)",
+      "form": null
+    },
+    {
+      "problem": "366",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 76,
+      "digest_chars": 2594
+    },
+    {
+      "problem": "617",
+      "fc": "ok",
+      "form": "assertion",
+      "statement_chars": 267,
+      "digest_chars": 2300
+    },
+    {
+      "problem": "364",
+      "fc": "ok",
+      "form": "assertion",
+      "statement_chars": 109,
+      "digest_chars": 2835
+    },
+    {
+      "problem": "647",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 116,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "396",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 106,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "536",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 253,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "677",
+      "fc": "ok",
+      "form": "assertion",
+      "statement_chars": 119,
+      "digest_chars": 2834
+    },
+    {
+      "problem": "176",
+      "fc": "no formal-conjectures file",
+      "form": null
+    },
+    {
+      "problem": "307",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 169,
+      "digest_chars": 2612
+    },
+    {
+      "problem": "951",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 315,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "12",
+      "fc": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.baier, variants.erdos_sarkozy, variants.erdos_sarkozy_density_0)",
+      "form": null
+    },
+    {
+      "problem": "367",
+      "fc": "no main theorem (parts: parts.i, parts.ii, variants.higher_full_parts, variants.k_ge_three_lower, variants.k_le_two)",
+      "form": null
+    },
+    {
+      "problem": "409",
+      "fc": "no main theorem (parts: parts.i, parts.i.isBigO, parts.i.isLittleO, parts.i.isTheta, parts.ii, parts.iii)",
+      "form": null
+    },
+    {
+      "problem": "886",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 302,
+      "digest_chars": 3593
+    },
+    {
+      "problem": "885",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 283,
+      "digest_chars": 9175
+    },
+    {
+      "problem": "138",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 365,
+      "digest_chars": 4791
+    },
+    {
+      "problem": "873",
+      "fc": "ok",
+      "form": "answer-iff",
+      "statement_chars": 259,
+      "digest_chars": 4998
+    },
+    {
+      "problem": "506",
+      "fc": "non-boolean answer (the question asks for a value)",
+      "form": null
+    },
+    {
+      "problem": "1054",
+      "fc": "no main theorem (parts: parts.i, parts.ii, parts.iii)",
+      "form": null
+    },
+    {
+      "problem": "1082",
+      "fc": "no main theorem (parts: parts.i, parts.ii)",
+      "form": null
+    }
+  ]
+}
