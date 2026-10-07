@@ -17,7 +17,13 @@ ROOT = HERE.parents[2]
 
 
 def probe_claims(row: dict) -> list[dict]:
-    return [c for x in row.get("probes") or [] for c in x.get("claims") or []]
+    """Every judged claim of the row's probes, from the run's ledger: a probe claim that was repaired and then validated
+    (#686's p4/C1r) is a probe claim too. The row's own probe list holds only the claims as first written."""
+    ej = json.loads((ROOT / row["run_dir"] / "engine" / "engine.json").read_text())
+    labels = {x.get("label") for x in ej.get("probes") or []}
+    return [{"validation": (c.get("validation") or {}).get("status"),
+             "significance": ((c.get("validation") or {}).get("novelty") or {}).get("significance")}
+            for c in ej.get("ledger") or [] if c.get("session") in labels]
 
 
 def key(row: dict, partial: dict) -> tuple:
