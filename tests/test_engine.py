@@ -297,6 +297,101 @@ def rating(prompt, n):
     return "```json\n" + json.dumps({**v, "cite": None, "why": "w"}) + "\n```"
 
 
+class ProbesAndMarathon(unittest.TestCase):
+    """v6 (2026-10-07). Probes MEASURE reach: step 3's predicted reach rated 69 of 70 significant targets low, and the one
+    significance-2 result came from an unrated angle. A marathon continues the deep dive's line over several legs, as
+    openai/math gave each result hours of thinking."""
+
+    PROBE_NB = ("## Claims\n### C1\nSTATEMENT: the k = 4 case\nSTATUS: PROVED\nTYPE: SPECIAL\nBEYOND: new.\nPROOF: Step one.\n"
+                "## Routes\nROUTE: pigeonhole on residues | OUTCOME: partial | BARRIER: the large-prime range\n"
+                "## Probe verdict\nPROGRESS: strong\nP_SUCCESS: 0.7\nNEXT: extend to k = 5\n")
+    EMPTY_NB = "## Claims\n## Probe verdict\nPROGRESS: none\nP_SUCCESS: 0.05\nNEXT: nothing obvious\n"
+
+    def test_the_parsers(self):
+        v = H.parse_probe_verdict(self.PROBE_NB)
+        self.assertEqual((v["progress"], v["p_success"]), ("strong", 0.7))
+        self.assertIn("k = 5", v["next"])
+        self.assertEqual(H.parse_routes(self.PROBE_NB), ["ROUTE: pigeonhole on residues | OUTCOME: partial | BARRIER: the large-prime range"])
+        self.assertEqual(H.parse_probe_verdict("no verdict")["progress"], None)
+
+    def test_measured_progress_orders_the_score(self):
+        new2 = {"claims": [{"validation": {"status": "validated-new", "novelty": {"significance": 2}}}], "verdict": {}}
+        routine = {"claims": [{"validation": {"status": "valid-routine"}}], "verdict": {}}
+        strong = {"claims": [], "verdict": {"progress": "strong", "p_success": 0.6}}
+        none = {"claims": [], "verdict": {"progress": "none", "p_success": 0.0}}
+        scores = [H.probe_score(x) for x in (new2, routine, strong, none)]
+        self.assertEqual(scores, sorted(scores, reverse=True))
+
+    def _script(self):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-deep-plan":
+                return DEEP_PLAN
+            if purpose == "engine-meta":
+                return META
+            return judge(purpose)
+        return script
+
+    def test_probes_run_first_and_their_traction_decides_round_one(self):
+        f = H.parse_frontier(FRONTIER)
+        last = f["angles"][-1]["id"]                     # the probes find traction on the LAST angle in map order
+        def nb(label, prompt):
+            if label.startswith("p"):
+                return self.PROBE_NB if f"({last})" in prompt else self.EMPTY_NB
+            return notebook(("PROVED", "QUANT", f"claim {label}"))
+        sess = FakeSession(nb)
+        res = H.engine_run(FakeCall(self._script(), cost=0.1), sess, "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=2, rounds=1, total_budget=80, probe_items=4), workers=2)
+        labels = [l for l, _ in sess.calls]
+        self.assertEqual(sorted(l for l in labels if l.startswith("p")), ["p1", "p2", "p3", "p4"])
+        self.assertTrue(all("PROBE. A short first attempt" in pr for l, pr in sess.calls if l.startswith("p")))
+        r1 = [pr for l, pr in sess.calls if l.startswith("r1")]
+        angle_session = next(pr for pr in r1 if "ATTACK THE CORE" in pr.split("YOUR TEAMMATES")[0])
+        self.assertIn(f"({last})", angle_session.split("YOUR TEAMMATES")[0])   # measured, not map order
+        self.assertTrue(any(x["score"] > 2 for x in res["probes"]))
+        self.assertTrue(any(c.get("session") == next(x["label"] for x in res["probes"] if x["score"] > 2) for c in res["ledger"]))
+
+    def test_with_no_sessions_it_is_a_map_and_probe_screen(self):
+        sess = FakeSession(lambda label, prompt: self.EMPTY_NB)
+        res = H.engine_run(FakeCall(self._script(), cost=0.1), sess, "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=0, rounds=1, total_budget=40, probe_items=3))
+        self.assertEqual(sorted(l for l, _ in sess.calls), ["p1", "p2", "p3"])
+        self.assertEqual(res["rounds"], [])
+
+    def test_a_marathon_continues_the_deep_dive_with_its_routes_and_notebooks(self):
+        deep_nb = notebook(("PROVED", "QUANT", "deep claim")) + "## Routes\nROUTE: max-plus | OUTCOME: failed | BARRIER: rank growth\n"
+        def nb(label, prompt):
+            if label == "deep":
+                return deep_nb
+            if label.startswith("marathon"):
+                return notebook(("PROVED", "QUANT", f"leg claim {label}")) + f"## Routes\nROUTE: route of {label} | OUTCOME: partial | BARRIER: b\n"
+            return notebook(("PROVED", "QUANT", f"claim {label}"))
+        sess = FakeSession(nb)
+        res = H.engine_run(FakeCall(self._script(), cost=0.1), sess, "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=1, rounds=1, total_budget=120, deep_budget=8.0, marathon_legs=2))
+        labels = [l for l, _ in sess.calls]
+        self.assertEqual([l for l in labels if l.startswith("marathon")], ["marathon-1", "marathon-2"])
+        leg2 = dict(sess.calls)["marathon-2"]
+        self.assertIn("leg 2 of 2", leg2)
+        self.assertIn("max-plus", leg2)                  # the deep dive's routes
+        self.assertIn("route of marathon-1", leg2)        # and leg 1's
+        self.assertEqual(set(sess.files["marathon-2"]), {"prior/deep.md", "prior/leg-1.md"})
+        self.assertEqual(len(res["marathon"]["legs"]), 2)
+        self.assertTrue(any(c.get("session") == "marathon-2" for c in res["ledger"]))
+
+    def test_an_empty_leg_ends_the_marathon(self):
+        def nb(label, prompt):
+            if label.startswith("marathon"):
+                return "## Claims\n"
+            return notebook(("PROVED", "QUANT", f"claim {label}"))
+        sess = FakeSession(nb)
+        res = H.engine_run(FakeCall(self._script(), cost=0.1), sess, "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=1, rounds=1, total_budget=120, deep_budget=8.0, marathon_legs=3))
+        self.assertEqual([l for l, _ in sess.calls if l.startswith("marathon")], ["marathon-1"])
+        self.assertIn("no route and no claim", res["marathon"]["stopped"])
+
+
 class SelfAudit(unittest.TestCase):
     """openai/math's #3 trace ends in seven audit passes: the dependency chain, the hypotheses of every cited theorem,
     small examples, parameter order and circularity, repair and re-audit, and concerns it could not resolve stated

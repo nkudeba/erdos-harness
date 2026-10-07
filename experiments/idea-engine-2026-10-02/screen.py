@@ -41,7 +41,15 @@ def target_summary(ej: dict) -> dict:
     sig2 = [x for x in new if x["significance"] >= 2]
     open_ = [x for x in sig2 if reach.get(str(x["reach"] or ""), -1) >= 1]
     best = max(open_, key=lambda x: (x["significance"], reach.get(str(x["reach"]), -1)), default=None)
-    return {"frontier_cost": f.get("cost"), "targets": rows, "n_targets": len(rows),
+    probes = ej.get("probes") or []
+    measured = [x for x in probes if any(c.get("validation") == "validated-new" and (c.get("significance") or 0) >= 2
+                                         for c in x.get("claims") or [])]
+    traction = [x for x in probes if (x.get("score") or 0) >= 2 or (x.get("verdict") or {}).get("progress") == "strong"]
+    return {"probes": [{"label": x.get("label"), "item": x.get("item"), "score": x.get("score"), "verdict": x.get("verdict"),
+                        "claims": x.get("claims")} for x in probes],
+            "measured_open": len(measured), "traction": len(traction),
+            "probe_best": max((x.get("score") or 0 for x in probes), default=None),
+            "frontier_cost": f.get("cost"), "targets": rows, "n_targets": len(rows),
             "n_rated": sum(1 for x in rows if x["verdict"]), "n_new": len(new), "n_new_sig2": len(sig2),
             "open_targets": len(open_), "best_open": ({k: best[k] for k in ("id", "significance", "reach", "statement")}
                                                       if best else None)}
@@ -129,7 +137,8 @@ def main() -> int:
             continue
         print(f"#{n} [{args.tag}]: {len(rec['validated'])} validated new of {sum(rec['claims'].values())} claims; "
               f"targets {rec['n_targets']} (new {rec['n_new']}, sig>=2 {rec['n_new_sig2']}, open {rec['open_targets']}); "
-              f"best {rec['best_open']['significance'] if rec['best_open'] else None}; ${rec['spend_run']}", flush=True)
+              f"best {rec['best_open']['significance'] if rec['best_open'] else None}; probes: measured {rec['measured_open']}, "
+              f"traction {rec['traction']}, best {rec['probe_best']}; ${rec['spend_run']}", flush=True)
     return 0
 
 

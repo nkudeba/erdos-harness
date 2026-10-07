@@ -4056,6 +4056,36 @@ Do not stop at the first result. Once you have one, push it further, toward the 
 refuted, or when your budget runs out. A smaller result that is new and fully proved is still worth recording."""
 
 
+PROBE_ASSIGNMENT = """PROBE. A short first attempt at the line below, so the team can MEASURE what is reachable before it spends a full
+session. Do not try to finish it. Within your budget:
+1. compute the smallest cases and try the first step;
+2. prove whatever NEW piece you can, however small, and record it as a claim;
+3. find the exact obstacle, if there is one.
+Then add this section to NOTEBOOK.md and stop:
+## Probe verdict
+PROGRESS: none | partial | strong
+P_SUCCESS: <your probability, 0 to 1, that one full session proves the line's goal>
+NEXT: <the most promising next step, precisely>
+
+THE LINE:
+{line}"""
+
+MARATHON_ASSIGNMENT = """MARATHON, leg {leg} of {legs}. The team gives ONE line of attack a far longer effort than any session, in legs. Each
+leg starts from everything the earlier legs found. The files in prior/ are the deep dive's notebook and every earlier
+leg's notebook: read them first.
+
+THE GOAL AND THE PLAN, from the team lead:
+{plan}
+
+ROUTES ALREADY TRIED. Do not retry one unchanged; when a route stalls, pivot to a genuinely different one:
+{routes}
+
+RESULTS SO FAR, with the judges' verdicts:
+{results}
+
+Work toward the GOAL. Reuse every validated result instead of re-deriving it. Keep ## Routes current. Run the full AUDIT
+before you mark anything PROVED. A smaller result that is new and fully proved is still worth recording."""
+
 GAP_ASSIGNMENT = """CLOSE THE GAP in one claim. The judges rate a correct proof of the claim below as {value}. Its proof did
 not survive review. Make it survive, or find out exactly why it cannot.
 
@@ -4115,6 +4145,13 @@ class EngineSettings:
     gap_budget: float = 4.0
     gap_turns: int = 120
     settles_max: int = 3             # the strongest unconditional valid claims checked for answering the problem outright
+    probe_items: int = 0             # > 0: short probe sessions on this many targets and angles before round 1 (v6, 2026-10-07)
+    probe_budget: float = 1.0
+    probe_turns: int = 40
+    probe_validate: int = 2          # claims judged per probe, strongest first
+    marathon_legs: int = 0           # > 0: the deep dive continues for this many more legs, each from all earlier legs (v6)
+    marathon_leg_budget: float = 8.0
+    marathon_leg_turns: int = 300
     min_target_sig: int = 0          # > 0: judges pre-rate every target and round 1 attacks only those rated new at >= this (v4)
     rate_judges: int = 2
     rate_budget: float = 0.3
@@ -4181,10 +4218,15 @@ def engine_assignments(f: dict, n: int, core_share: float) -> list[dict]:
     if n <= 0:
         return []
     angles, targets = list(f.get("angles") or []), list(f.get("targets") or [])
+    # Measured value first (a probe's score), else expected value (significance x chance). Sorting by significance
+    # alone undid the gate's order and sent #873's one target slot to an unreachable significance-3 target.
+    key = lambda t: -(t["probe_score"] if isinstance(t.get("probe_score"), (int, float)) else target_value(t))
+    if any(isinstance(a.get("probe_score"), (int, float)) for a in angles):
+        angles = sorted(angles, key=key)
     by_type: dict = {}
-    for t in sorted(targets, key=lambda t: -(t.get("significance") or 0)):   # stable: map order breaks ties
+    for t in sorted(targets, key=key):           # stable: map order breaks ties
         by_type.setdefault(t["type"], []).append(t)
-    order = sorted(by_type, key=lambda ty: -(by_type[ty][0].get("significance") or 0))
+    order = sorted(by_type, key=lambda ty: key(by_type[ty][0]))
     spread = []
     while any(by_type.values()):                 # one of each type before a second of any; the most significant first
         for ty in order:
@@ -4708,6 +4750,17 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         ratings = ck["ratings"] = engine_rate_targets(call, statement, known, f["targets"], s, spend, workers)
         keep()
     gated = engine_gate_targets(f, ratings, s.min_target_sig) if (s.min_target_sig > 0 and ratings) else f
+    probes = ck.get("probes") if isinstance(ck.get("probes"), list) else None
+    if probes is None and s.probe_items > 0:
+        items = probe_candidates(gated, s.probe_items)
+        if items:
+            probes = ck["probes"] = engine_probe(call, session, s, statement, lean, fblock, sess_context, known, items, spend,
+                                                 search, ck=ck, keep=keep, workers=workers)
+            ck.pop("probe_partial", None)
+            keep()
+    if probes:
+        gated = rank_by_probes(gated, probes)
+        ledger = [c for x in probes for c in x.get("claims") or []] + ledger
     assignments = ck["next"] if "next" in ck else engine_assignments(gated, s.sessions, s.core_share)
     for rnd in range(len(rounds) + 1, max(1, s.rounds) + 1):
         if not assignments:
@@ -4822,6 +4875,11 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         ck.pop("deep_partial", None)
         keep()
     ledger = ledger + list((deep or {}).get("claims_list") or [])
+    marathon = None
+    if s.marathon_legs > 0 and isinstance(deep, dict) and deep.get("goal") and not deep.get("error"):
+        marathon = engine_marathon(call, session, s, statement, lean, fblock, sess_context, known, ledger, deep, spend,
+                                   search, ck=ck, keep=keep)
+        ledger = ledger + [c for leg in marathon.get("legs") or [] for c in leg.get("claims_list") or []]
     repairs = ck.setdefault("repairs", {})
     fixable = [c for c in ledger if engine_fixable(c) and engine_claim_key(c) not in repairs]
     for c in sorted(fixable, key=_claim_rank, reverse=True)[: max(0, s.repair_max - len(repairs))]:
@@ -4852,10 +4910,199 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 "commit": ("pos" if ans == "true" else "neg") if ans and (conf or 0) >= 0.8 else None}
     rounds = [{k: v for k, v in r.items() if k != "_sessions"} for r in rounds]   # the notebooks live in the sandboxes
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
-            "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k != "claims_list"} if deep else None,
+            "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k not in ("claims_list", "notebook")} if deep else None,
+            "probes": [{"label": x.get("label"), "item": {k: (x.get("item") or {}).get(k) for k in ("kind", "id", "type", "significance")},
+                        "score": x.get("score"), "verdict": x.get("verdict"), "cost": x.get("cost"), "error": x.get("error"),
+                        "claims": [{"id": c.get("id"), "status": c.get("status"),
+                                    "validation": (c.get("validation") or {}).get("status"),
+                                    "significance": (((c.get("validation") or {}).get("novelty") or {}).get("significance"))}
+                                   for c in x.get("claims") or []]} for x in probes or []] or None,
+            "marathon": {"legs": [{k: v for k, v in leg.items() if k not in ("notebook", "claims_list")}
+                                  for leg in (marathon or {}).get("legs") or []],
+                         "stopped": (marathon or {}).get("stopped")} if marathon else None,
             "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings, "gaps": gaps,
             "recognized": engine_recognized({"frontier": f, "ledger": ledger}),
             "guidance": engine_guidance(f, ledger, meta)}
+
+
+
+def parse_probe_verdict(notebook: str) -> dict:
+    m = re.search(r"(?ims)^#{2,3}[ \t]*Probe verdict[ \t]*$(.*?)(?=^#{1,3}[ \t]|\Z)", notebook or "")
+    body = m.group(1) if m else ""
+    prog = re.search(r"(?i)PROGRESS\s*:\s*\**\s*(none|partial|strong)", body)
+    ps = re.search(r"(?i)P_SUCCESS\s*:\s*\**\s*([01](?:\.\d+)?|\.\d+)", body)
+    nxt = re.search(r"(?is)NEXT\s*:\s*(.+)", body)
+    return {"progress": prog.group(1).lower() if prog else None,
+            "p_success": max(0.0, min(1.0, float(ps.group(1)))) if ps else None,
+            "next": " ".join(nxt.group(1).split())[:600] if nxt else ""}
+
+
+def parse_routes(notebook: str) -> list[str]:
+    """The `## Routes` log: one `ROUTE: ... | OUTCOME: ... | BARRIER: ...` line per line of attack."""
+    m = re.search(r"(?ims)^#{2,3}[ \t]*Routes[ \t]*$(.*?)(?=^#{1,3}[ \t]|\Z)", notebook or "")
+    body = m.group(1) if m else ""
+    return [" ".join(l.strip().lstrip("-*0123456789. ").split())[:400] for l in body.splitlines()
+            if re.search(r"(?i)\bROUTE\s*:", l)]
+
+
+PROGRESS_POINTS = {"none": 0.0, "partial": 0.5, "strong": 1.0}
+
+
+def probe_score(x: dict) -> float:
+    """What a probe MEASURED, for ordering round 1. What the judges validated outranks what the probe says about itself:
+    a validated new result scores 3 plus its significance, any other valid claim 2, and the probe's own report (progress
+    and probability of success) adds at most 1.5."""
+    best = 0.0
+    for c in x.get("claims") or []:
+        v = c.get("validation") or {}
+        st = v.get("status")
+        if st == "validated-new":
+            best = max(best, 3.0 + float(((v.get("novelty") or {}).get("significance") or 0)))
+        elif _valid_status(st):
+            best = max(best, 2.0)
+    vd = x.get("verdict") or {}
+    return best + 0.75 * (PROGRESS_POINTS.get(vd.get("progress") or "", 0.0) + float(vd.get("p_success") or 0.0))
+
+
+def probe_candidates(f: dict, n: int) -> list[dict]:
+    """What to probe: half targets, by expected value, half angles, in map order, each list topping up the other.
+    Angles stay in: step 3's one validated significance-2 result on an open problem (#873) came from a core angle."""
+    ts = sorted(f.get("targets") or [], key=lambda t: -target_value(t))
+    an = list(f.get("angles") or [])
+    k = min(len(ts), (n + 1) // 2)
+    picks = [{"kind": "target", **x} for x in ts[:k]]
+    picks += [{"kind": "angle", **a} for a in an[: max(0, n - len(picks))]]
+    picks += [{"kind": "target", **x} for x in ts[k: k + max(0, n - len(picks))]]
+    return picks[:n]
+
+
+def rank_by_probes(f: dict, probes: list[dict]) -> dict:
+    """The frontier with each probed target and angle carrying its measured `probe_score`, so round 1 goes where the
+    probes found traction. Unprobed lines keep their expected-value order behind them."""
+    sc = {(x["item"].get("kind"), x["item"].get("id")): probe_score(x) for x in probes or [] if x.get("item")}
+    mark = lambda items, kind: [{**y, "probe_score": round(sc[(kind, y.get("id"))], 3)} if (kind, y.get("id")) in sc else y
+                                for y in items]
+    return {**f, "targets": mark(f.get("targets") or [], "target"), "angles": mark(f.get("angles") or [], "angle")}
+
+
+def _validate_some(call, s, statement, known, claims, cap, spend, search=None, keep=None) -> None:
+    """Judge the strongest `cap` PROVED/REFUTED claims (and the lemmas they cite), as the rounds do."""
+    keep = keep or (lambda: None)
+    engine_resolve(claims)
+    chosen = sorted((c for c in claims if c["status"] in ("PROVED", "REFUTED")), key=_claim_rank, reverse=True)[:cap]
+    for c in engine_with_lemmas(chosen, claims, cap):
+        if c.get("validation"):
+            continue
+        if not spend.room(2 * s.judge_budget):
+            c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
+            continue
+        lem = engine_lemmas(c, claims)
+        c["validation"] = engine_validate(call, s, statement, known, c, spend, lemmas=lem)
+        c["validation"]["lemma_hash"] = _lemma_hash(lem)
+        if search is not None and c["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
+            lit = engine_literature_check(call, search, s, statement, c)
+            spend.add(lit.get("cost"))
+            c["validation"]["literature"] = lit
+            if lit.get("verdict") in ("known", "routine"):
+                c["validation"]["status"] = f"valid-{lit['verdict']}"
+        keep()
+    engine_resolve(claims)
+
+
+def engine_probe(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
+                 known: str, items: list[dict], spend: _DiscoverySpend, search=None, ck: dict | None = None, keep=None,
+                 workers: int = 4) -> list[dict]:
+    """v6: MEASURE reach instead of predicting it. Short parallel probe sessions, one per item, each trying the first
+    step and ending with a verdict (PROGRESS, P_SUCCESS, NEXT); their strongest claims are judged. Step 3's screen showed
+    the judges' predicted reach does not discriminate on open problems (69 of 70 significant targets rated low), while
+    the one significance-2 result came from a line nobody had rated. Checkpointed per probe (`ck["probe_partial"]`)."""
+    ck = ck if ck is not None else {}
+    keep = keep or (lambda: None)
+    done = ck.setdefault("probe_partial", {})
+    lock = threading.Lock()
+
+    def one(ia):
+        i, a = ia
+        label = f"p{i}"
+        if label in done:
+            return done[label]
+        prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                       assignment=PROBE_ASSIGNMENT.format(line=assignment_text(a)), teammates="",
+                                       modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+        try:
+            reply, notebook, cost = session("engine-probe", prompt, label, s.probe_turns, s.probe_budget, s.session_effort)
+            claims = parse_claims(notebook)
+            for c in claims:
+                c["session"], c["_kind"] = label, "probe"
+            x = {"label": label, "item": a, "cost": round(float(cost or 0.0), 4), "verdict": parse_probe_verdict(notebook),
+                 "routes": parse_routes(notebook), "claims": claims}
+        except DiscoveryCallFailed as e:
+            x = {"label": label, "item": a, "error": str(e)[:300], "cost": round(e.cost, 4), "claims": [], "verdict": {}}
+        with lock:
+            spend.add(x["cost"])
+            done[label] = x
+        keep()
+        return x
+    todo = [(i, a) for i, a in enumerate(items, 1) if f"p{i}" in done or spend.room(s.probe_budget)]
+    if todo:
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, len(todo)))) as ex:
+            out = list(ex.map(one, todo))
+    else:
+        out = []
+    for x in out:
+        _validate_some(call, s, statement, known, x.get("claims") or [], s.probe_validate, spend, search, keep)
+        x["score"] = round(probe_score(x), 3)
+    return out
+
+
+def engine_marathon(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
+                    known: str, ledger: list, deep: dict, spend: _DiscoverySpend, search=None, ck: dict | None = None,
+                    keep=None) -> dict:
+    """v6: the deep dive's line, continued for `marathon_legs` more legs. Each leg reads the deep dive's and every earlier
+    leg's notebook (prior/), the accumulated routes log (never retry a route unchanged) and the judged results so far,
+    and its own strongest claims are judged before the next leg starts. openai/math gave each result about three hours
+    of thinking and its #3 trace pivots about twenty times; a deep dive here was one ~17-minute session. Checkpointed
+    per leg (`ck["marathon"]`)."""
+    ck = ck if ck is not None else {}
+    keep = keep or (lambda: None)
+    mar = ck.setdefault("marathon", {"legs": []})
+    legs = mar["legs"]
+    plan = deep.get("plan_text") or deep.get("goal") or ""
+    for k in range(len(legs) + 1, s.marathon_legs + 1):
+        if not spend.room(s.marathon_leg_budget + 2 * s.judge_budget):
+            mar["stopped"] = "engine budget"
+            break
+        routes = list(deep.get("routes") or []) + [r for leg in legs for r in leg.get("routes") or []]
+        so_far = ledger + [c for leg in legs for c in leg.get("claims_list") or []]
+        files = {"prior/deep.md": deep.get("notebook") or ""}
+        files.update({f"prior/leg-{j}.md": leg.get("notebook") or "" for j, leg in enumerate(legs, 1)})
+        prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                       assignment=MARATHON_ASSIGNMENT.format(
+                                           leg=k, legs=s.marathon_legs, plan=clip_middle(plan, 9000),
+                                           routes="\n".join(f"- {r}" for r in routes[-40:]) or "(none logged yet)",
+                                           results=engine_results_digest(so_far)),
+                                       teammates="", modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+        try:
+            reply, notebook, cost = session("engine-session", prompt, f"marathon-{k}", s.marathon_leg_turns,
+                                            s.marathon_leg_budget, s.deep_effort, files=files)
+        except DiscoveryCallFailed as e:
+            spend.add(e.cost)
+            legs.append({"leg": k, "error": str(e)[:300], "cost": round(e.cost, 4), "claims_list": []})
+            keep()
+            break
+        spend.add(cost)
+        claims = parse_claims(notebook)
+        for c in claims:
+            c["session"], c["_kind"] = f"marathon-{k}", "marathon"
+        leg = {"leg": k, "cost": round(float(cost or 0.0), 4), "notebook": (notebook or "")[-60000:],
+               "routes": parse_routes(notebook), "claims_list": claims}
+        legs.append(leg)
+        keep()
+        _validate_some(call, s, statement, known, claims, s.validate_max, spend, search, keep)
+        if not claims and not leg["routes"]:
+            mar["stopped"] = f"leg {k} logged no route and no claim"
+            break
+    return mar
 
 
 def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
@@ -4882,7 +5129,7 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
         prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
                                        assignment=DEEP_ASSIGNMENT.format(plan=clip_middle(plan, 9000)), teammates="",
                                        modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
-        dp = {"plan_cost": round(pc, 4), "goal": (secs.get("GOAL") or "")[:2000]}
+        dp = {"plan_cost": round(pc, 4), "goal": (secs.get("GOAL") or "")[:2000], "plan_text": plan[:9000]}
         try:
             reply, notebook, cost = session("engine-session", prompt, "deep", s.deep_turns, s.deep_budget, s.deep_effort,
                                             files=files)
@@ -4893,7 +5140,8 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
         claims = parse_claims(notebook)
         for c in claims:
             c["session"], c["_kind"] = "deep", "deep"
-        dp.update({"cost": round(float(cost or 0.0), 4), "reply": (reply or "")[-3000:], "claims_list": claims})
+        dp.update({"cost": round(float(cost or 0.0), 4), "reply": (reply or "")[-3000:], "claims_list": claims,
+                   "notebook": (notebook or "")[-60000:], "routes": parse_routes(notebook)})
         ck["deep_partial"] = dp
         keep()
     claims = dp.get("claims_list") or []
@@ -5794,7 +6042,12 @@ class Harness:
                            gap_rounds=int(g("engine_gap_rounds", 2)), gap_max=int(g("engine_gap_max", 2)),
                            gap_min_sig=int(g("engine_gap_min_sig", 2)), gap_budget=float(g("engine_gap_budget", 4.0)),
                            min_target_sig=int(g("engine_min_target_sig", 0)), rate_judges=int(g("engine_rate_judges", 2)),
-                           rate_effort=str(g("engine_rate_effort", "medium")))
+                           rate_effort=str(g("engine_rate_effort", "medium")),
+                           probe_items=int(g("engine_probe_items", 0)), probe_budget=float(g("engine_probe_budget", 1.0)),
+                           probe_turns=int(g("engine_probe_turns", 40)),
+                           marathon_legs=int(g("engine_marathon_legs", 0)),
+                           marathon_leg_budget=float(g("engine_marathon_leg_budget", 8.0)),
+                           marathon_leg_turns=int(g("engine_marathon_leg_turns", 300)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         return s
@@ -11685,6 +11938,15 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-gap-min-sig", type=int, default=2)
     runp.add_argument("--engine-gap-budget", type=float, default=4.0, help="USD per gap-closing session")
     runp.add_argument("--engine-rate-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
+    runp.add_argument("--engine-probe-items", type=int, default=0,
+                      help="v6: short probe sessions on this many targets and angles before round 1; their measured "
+                           "progress orders round 1 (0 = off). With --engine-sessions 0 it is a map-and-probe screen")
+    runp.add_argument("--engine-probe-budget", type=float, default=1.0, help="USD cap per probe session")
+    runp.add_argument("--engine-probe-turns", type=int, default=40, help="turn cap per probe session")
+    runp.add_argument("--engine-marathon-legs", type=int, default=0,
+                      help="v6: continue the deep dive's line for this many more legs, each reading every earlier leg (0 = off)")
+    runp.add_argument("--engine-marathon-leg-budget", type=float, default=8.0, help="USD cap per marathon leg")
+    runp.add_argument("--engine-marathon-leg-turns", type=int, default=300, help="turn cap per marathon leg")
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")
