@@ -1,0 +1,414 @@
+{
+  "pre_registered": [
+    {
+      "problem": "873",
+      "open_best": 2,
+      "open": 1,
+      "sig3": 1,
+      "sig2": 5,
+      "partial": 57,
+      "spend": 6.8,
+      "best3": "There exist an explicit K (say K ≤ 1000) and δ > 0 such that every strictly increasing A satisfies F(A,X,K) ≪ X^{1/4−δ}. At the critical scale this needs the fo"
+    },
+    {
+      "problem": "7",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 6,
+      "partial": 80,
+      "spend": 1.66,
+      "best3": ""
+    },
+    {
+      "problem": "488",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 5,
+      "partial": 69,
+      "spend": 3.81,
+      "best3": ""
+    },
+    {
+      "problem": "885",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 5,
+      "partial": 68,
+      "spend": 3.68,
+      "best3": ""
+    },
+    {
+      "problem": "20",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 2,
+      "sig2": 6,
+      "partial": 66,
+      "spend": 2.63,
+      "best3": "There is an absolute C such that every 3-sunflower-free n-partite family with all blocks of size ≤ (log n)^{10} has size ≤ C^n."
+    },
+    {
+      "problem": "273",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 3,
+      "partial": 64,
+      "spend": 2.81,
+      "best3": ""
+    },
+    {
+      "problem": "120",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 3,
+      "sig2": 4,
+      "partial": 64,
+      "spend": 4.79,
+      "best3": "There is λ_0 < 1 such that for every λ ∈ (λ_0, 1), A_λ = {λ^n} is not universal."
+    },
+    {
+      "problem": "686",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 63,
+      "spend": 3.97,
+      "best3": ""
+    },
+    {
+      "problem": "835",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 3,
+      "partial": 63,
+      "spend": 3.67,
+      "best3": ""
+    },
+    {
+      "problem": "647",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 0,
+      "partial": 63,
+      "spend": 6.37,
+      "best3": ""
+    },
+    {
+      "problem": "366",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 0,
+      "partial": 62,
+      "spend": 5.35,
+      "best3": ""
+    },
+    {
+      "problem": "617",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 62,
+      "spend": 3.66,
+      "best3": ""
+    },
+    {
+      "problem": "364",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 3,
+      "partial": 62,
+      "spend": 5.21,
+      "best3": ""
+    },
+    {
+      "problem": "396",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 61,
+      "spend": 5.83,
+      "best3": ""
+    },
+    {
+      "problem": "536",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 2,
+      "sig2": 4,
+      "partial": 61,
+      "spend": 6.03,
+      "best3": "f(N) ≪ N/(log log N)^c for some absolute c>0."
+    },
+    {
+      "problem": "677",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 4,
+      "partial": 60,
+      "spend": 3.37,
+      "best3": ""
+    },
+    {
+      "problem": "307",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 59,
+      "spend": 3.13,
+      "best3": ""
+    },
+    {
+      "problem": "951",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 4,
+      "partial": 59,
+      "spend": 5.49,
+      "best3": ""
+    },
+    {
+      "problem": "886",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 5,
+      "partial": 58,
+      "spend": 5.78,
+      "best3": ""
+    },
+    {
+      "problem": "138",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 2,
+      "sig2": 6,
+      "partial": 57,
+      "spend": 3.93,
+      "best3": "limsup_{k→∞} W(k)^{1/k} > 2. Equivalently, there is δ>0 with W(k) ≥ (2+δ)^k for infinitely many k."
+    }
+  ],
+  "significance_only": [
+    {
+      "problem": "120",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 3,
+      "sig2": 4,
+      "partial": 64,
+      "spend": 4.79,
+      "best3": "There is λ_0 < 1 such that for every λ ∈ (λ_0, 1), A_λ = {λ^n} is not universal."
+    },
+    {
+      "problem": "20",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 2,
+      "sig2": 6,
+      "partial": 66,
+      "spend": 2.63,
+      "best3": "There is an absolute C such that every 3-sunflower-free n-partite family with all blocks of size ≤ (log n)^{10} has size ≤ C^n."
+    },
+    {
+      "problem": "138",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 2,
+      "sig2": 6,
+      "partial": 57,
+      "spend": 3.93,
+      "best3": "limsup_{k→∞} W(k)^{1/k} > 2. Equivalently, there is δ>0 with W(k) ≥ (2+δ)^k for infinitely many k."
+    },
+    {
+      "problem": "536",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 2,
+      "sig2": 4,
+      "partial": 61,
+      "spend": 6.03,
+      "best3": "f(N) ≪ N/(log log N)^c for some absolute c>0."
+    },
+    {
+      "problem": "873",
+      "open_best": 2,
+      "open": 1,
+      "sig3": 1,
+      "sig2": 5,
+      "partial": 57,
+      "spend": 6.8,
+      "best3": "There exist an explicit K (say K ≤ 1000) and δ > 0 such that every strictly increasing A satisfies F(A,X,K) ≪ X^{1/4−δ}. At the critical scale this needs the fo"
+    },
+    {
+      "problem": "7",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 6,
+      "partial": 80,
+      "spend": 1.66,
+      "best3": ""
+    },
+    {
+      "problem": "488",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 5,
+      "partial": 69,
+      "spend": 3.81,
+      "best3": ""
+    },
+    {
+      "problem": "885",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 5,
+      "partial": 68,
+      "spend": 3.68,
+      "best3": ""
+    },
+    {
+      "problem": "886",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 5,
+      "partial": 58,
+      "spend": 5.78,
+      "best3": ""
+    },
+    {
+      "problem": "677",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 4,
+      "partial": 60,
+      "spend": 3.37,
+      "best3": ""
+    },
+    {
+      "problem": "951",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 4,
+      "partial": 59,
+      "spend": 5.49,
+      "best3": ""
+    },
+    {
+      "problem": "273",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 3,
+      "partial": 64,
+      "spend": 2.81,
+      "best3": ""
+    },
+    {
+      "problem": "835",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 3,
+      "partial": 63,
+      "spend": 3.67,
+      "best3": ""
+    },
+    {
+      "problem": "364",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 3,
+      "partial": 62,
+      "spend": 5.21,
+      "best3": ""
+    },
+    {
+      "problem": "686",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 63,
+      "spend": 3.97,
+      "best3": ""
+    },
+    {
+      "problem": "617",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 62,
+      "spend": 3.66,
+      "best3": ""
+    },
+    {
+      "problem": "396",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 61,
+      "spend": 5.83,
+      "best3": ""
+    },
+    {
+      "problem": "307",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 2,
+      "partial": 59,
+      "spend": 3.13,
+      "best3": ""
+    },
+    {
+      "problem": "647",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 0,
+      "partial": 63,
+      "spend": 6.37,
+      "best3": ""
+    },
+    {
+      "problem": "366",
+      "open_best": 0,
+      "open": 0,
+      "sig3": 0,
+      "sig2": 0,
+      "partial": 62,
+      "spend": 5.35,
+      "best3": ""
+    }
+  ],
+  "reach_by_significance": {
+    "(2, 'low')": 60,
+    "(1, 'low')": 41,
+    "(1, 'medium')": 24,
+    "(3, 'low')": 10,
+    "(1, 'high')": 2,
+    "(2, 'medium')": 1
+  }
+}

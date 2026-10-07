@@ -579,6 +579,37 @@ sufficient: a resolution also needs human review.
   - Take the top 3.
   - Drop any whose map reports a fresh claimed resolution.
 
+**3.1 results, recorded after the screen (2026-10-07, 14:42 UTC).**
+- 20 problems, $87.97, about 8.5 hours in one lane. `results.jsonl` holds the rows tagged `s3-map`, and
+  `step3/selection.json` holds the rankings.
+- **Against the predictions:**
+
+  | prediction | predicted | observed |
+  |---|---|---|
+  | cost | $60–100 | $87.97, hit |
+  | problems with a target rated new at significance ≥ 2 | 13 (7–18) | 18, at the top of the range |
+  | problems with an OPEN target | 6 (2–11) | **1, a miss** |
+  | OPEN at significance 3 | 1 (0–3) | 0, inside the range |
+
+- **Reach did not discriminate.** Of 70 targets both judges rated new at significance 2 or 3, all but one were rated low
+  reach. Medium or high reach went almost only to targets rated 1.
+  - The two judges also agreed nearly everywhere, so the second judge adds little.
+  - Read the judges' reach as a pessimistic prior on open problems, not as a measured rate.
+- **The one OPEN target.** #873 T2: "for every k ≥ 3, F(A,X,k) ≪ X^{1/4 + 1/(8⌊(k−1)/2⌋+4) + o(1)}", significance 2,
+  reach medium.
+- **Most significance-3 targets.** #120 (universal sets) has 3. #20 (sunflowers), #138 (van der Waerden) and #536 have
+  2 each.
+- **No selected map reports a fresh claimed resolution.**
+
+**Selection, a recorded deviation.**
+- **The pre-registered rule gives #873, #7 and #488.** Only #873 is chosen on substance. #7 and #488 come from the
+  `partial` tie-break, because no other problem has an OPEN target.
+- **Run instead:**
+  - #873, the rule's real pick;
+  - #120 and #20, the top two by significance-3 targets.
+- **Why:** this fills the slots where the rule degenerated with the problems the judges see the most significant
+  targets in. It was chosen after the screen and is labelled a deviation. The predictions above stand as written.
+
 **3.3, full engine runs, with predictions written now.**
 - **Settings.** Step 2's engine settings (3 sessions, 1 round, a $6 deep dive, gap closing on) plus
   `--engine-min-target-sig 2`, $28 a problem.
