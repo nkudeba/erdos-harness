@@ -3750,6 +3750,16 @@ HOW TO WORK.
   the new result.
 - Prove what the data supports. Check every inequality and every case by hand and, where you can, by computation.
 - When you are stuck, change the statement: a sharper or a weaker version, a restricted class, a model setting.
+- Log every line of attack under ## Routes as you go: the idea, how far it got, and the exact barrier that stopped it.
+  Never retry a logged route unchanged. When a route stalls, pivot to a genuinely different one and log that too.
+- AUDIT before you mark any claim PROVED, and record it under AUDIT:
+  1. write the dependency chain: every step, and what it relies on;
+  2. for every cited result, state its hypotheses and check that each one holds where you apply it;
+  3. test every lemma on small and extreme cases in the sandbox;
+  4. check that the parameters are fixed in a valid order, with no circular choice;
+  5. repair what fails, then audit again.
+  Put every concern you could not resolve under CONCERNS. A claim with an unresolved concern that could break it is
+  CONJECTURED, not PROVED.
 
 Keep NOTEBOOK.md current after every script, because only the notebook survives. Its sections, in this order:
 ## Result
@@ -3763,9 +3773,12 @@ TYPE: QUANT | SPECIAL | CONDITIONAL | STRUCTURE | ANALOGUE | NEGATIVE | REDUCTIO
 BEYOND: <the item of KNOWN it improves, and why it is new>
 PROOF: <for PROVED, the complete proof; for REFUTED, the explicit counterexample and how you checked it; for
 CONJECTURED, the evidence and the mechanism>
+AUDIT: <the dependency chain and the checks above, briefly>
+CONCERNS: <every unresolved concern, or none>
+## Routes
+One line per line of attack, in the order tried: ROUTE: <the idea> | OUTCOME: <proved / partial / failed> | BARRIER:
+<exactly what stopped it>.
 ## Data
-## Dead ends
-What failed, and exactly why.
 
 When you are done, reply with the Result section."""
 
@@ -3777,8 +3790,10 @@ ENGINE_SYSTEM_PROMPT = (
 )
 
 CLAIM_REFEREE_PROMPT = """Referee a claimed theorem from a research team working on an open problem. Check every step, recompute every
-calculation, and test the key lemmas on small cases. Do not repair the proof: find the first real error or gap, if
-there is one. Be strict: a step that is plausible but not proved is a gap.
+calculation, and test the key lemmas on small cases. For every cited result, state its hypotheses and check that each
+one holds where it is applied. Check that the parameters are fixed in a valid order, with no circular choice. Decide
+every concern the authors list. Do not repair the proof: find the first real error or gap, if there is one. Be strict:
+a step that is plausible but not proved is a gap.
 
 THE PROBLEM (context):
 {statement}
@@ -4064,7 +4079,7 @@ Do this, in order:
    exactly as stated.
 3. If it is true only in a narrower form, prove the strongest form you can and state it precisely.
 4. If it is false, give an explicit counterexample.
-Record the outcome in NOTEBOOK.md as claim ### C1 (STATEMENT, STATUS, TYPE, BEYOND, PROOF). A referee and an adversary
+Record the outcome in NOTEBOOK.md as claim ### C1 (STATEMENT, STATUS, TYPE, BEYOND, PROOF, AUDIT, CONCERNS). A referee and an adversary
 will attack it again, with the same lemmas in view."""
 
 
@@ -4199,7 +4214,7 @@ def assignment_text(a: dict) -> str:
 
 # `STATEMENT (method barrier):` and `EVIDENCE/MECHANISM:` occur in practice (the #455 deep dive); EVIDENCE stands in for a
 # conjecture's PROOF.
-CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF|EVIDENCE)(?:/[A-Z]+)?[*_]*"
+CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF|EVIDENCE|AUDIT|CONCERNS)(?:/[A-Z]+)?[*_]*"
                             r"(?:[ \t]*\([^)\n]*\))?[ \t]*[:.][*_]*[ \t]*")
 
 
@@ -4244,7 +4259,8 @@ def parse_claims(notebook: str) -> list[dict]:
         claims.append({"id": cm.group(1), "statement": st[:3000],
                        "status": status if status in ("PROVED", "CONJECTURED", "REFUTED") else "OTHER",
                        "type": ty if ty in ENGINE_TYPES else "OTHER", "beyond": f.get("BEYOND", "")[:1500],
-                       "proof": f.get("PROOF") or f.get("EVIDENCE", "")})
+                       "proof": f.get("PROOF") or f.get("EVIDENCE", ""), "audit": f.get("AUDIT", "")[:3000],
+                       "concerns": f.get("CONCERNS", "")[:2000]})
     seen = set()
     out = []
     for c in claims:                                     # the same claim restated later keeps its first block
@@ -4433,6 +4449,14 @@ def lemma_context(lemmas: list[dict] | None) -> str:
             + "\n".join(f"[{l['id']}] {clip_middle(l['statement'], 2500)}" for l in lemmas))
 
 
+def concerns_context(c: dict) -> str:
+    """The authors' own unresolved concerns, which the judges must decide. Empty for none."""
+    cc = " ".join(str(c.get("concerns") or "").split())
+    if not cc or re.fullmatch(r"(?i)(none|n/?a|no(ne)? (known|remaining|unresolved)( concerns?)?)\.?", cc):
+        return ""
+    return "\n\nTHE AUTHORS' OWN UNRESOLVED CONCERNS (decide each one):\n" + clip_middle(str(c.get("concerns")), 2000)
+
+
 def _claim_text(c: dict) -> str:
     lead = "The following statement is FALSE:\n" if c.get("status") == "REFUTED" else ""
     return f"{lead}{c['statement']}\n(type {c.get('type')}; the team says it goes beyond the known results as follows: {c.get('beyond') or 'not stated'})"
@@ -4444,7 +4468,7 @@ def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict
     same notebook that the proof cites, shown to both judges as given (each is judged on its own; `engine_resolve`
     joins the verdicts)."""
     claim = _claim_text(c)
-    proof = clip_middle(c.get("proof") or "(no proof given)", 24000) + lemma_context(lemmas)
+    proof = clip_middle(c.get("proof") or "(no proof given)", 24000) + lemma_context(lemmas) + concerns_context(c)
     with ThreadPoolExecutor(max_workers=2) as ex:
         fr = ex.submit(_discovery_call, call, "engine-referee",
                        CLAIM_REFEREE_PROMPT.format(statement=statement, claim=claim, proof=proof), s.judge_effort, s.judge_budget)

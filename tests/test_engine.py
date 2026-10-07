@@ -297,6 +297,32 @@ def rating(prompt, n):
     return "```json\n" + json.dumps({**v, "cite": None, "why": "w"}) + "\n```"
 
 
+class SelfAudit(unittest.TestCase):
+    """openai/math's #3 trace ends in seven audit passes: the dependency chain, the hypotheses of every cited theorem,
+    small examples, parameter order and circularity, repair and re-audit, and concerns it could not resolve stated
+    plainly. Sessions now audit before they claim PROVED, and the judges decide the authors' concerns."""
+
+    def test_audit_and_concerns_are_parsed(self):
+        nb = ("## Claims\n### C1\nSTATEMENT: F(A,X,4) << X^(1/3-c)\nSTATUS: PROVED\nTYPE: QUANT\nPROOF: step 1. step 2.\n"
+              "AUDIT: chain: L0 -> Key lemma -> count; cited Bloom-Sisask Thm 17, hypotheses checked\n"
+              "CONCERNS: the truncation parameter may depend on the mesh\n## Routes\nROUTE: x | OUTCOME: failed | BARRIER: y\n")
+        c = H.parse_claims(nb)[0]
+        self.assertEqual(c["proof"], "step 1. step 2.")
+        self.assertIn("Bloom-Sisask", c["audit"])
+        self.assertIn("truncation", c["concerns"])
+
+    def test_the_judges_see_unresolved_concerns_and_not_a_none(self):
+        self.assertIn("decide each one", H.concerns_context({"concerns": "the mesh may be circular"}))
+        for none in ("none", "None.", "n/a", "No unresolved concerns", ""):
+            self.assertEqual(H.concerns_context({"concerns": none}), "", none)
+
+    def test_the_prompts_carry_the_protocol(self):
+        sp = " ".join(H.SESSION_PROMPT.split())
+        for phrase in ("## Routes", "AUDIT before you mark any claim PROVED", "state its hypotheses", "CONCERNS:"):
+            self.assertIn(phrase, sp)
+        self.assertIn("state its hypotheses and check that each one holds", " ".join(H.CLAIM_REFEREE_PROMPT.split()))
+
+
 class ReachFix(unittest.TestCase):
     """Step 3's screen found 1 OPEN target in 20 problems against 6 predicted. The map asked for targets a strong
     mathematician proves "in weeks" while the judges rated reach as the chance of a proof "in a day", so 69 of 70
