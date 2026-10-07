@@ -60245,7 +60245,7 @@
         "additive combinatorics"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
@@ -60253,7 +60253,8 @@
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
         "An unresolved prize problem receives a conservative difficulty prior.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Identify whether an explicit finite construction settles the full quantifiers.",
@@ -60338,8 +60339,8 @@
       "manual": false,
       "prize": "$500",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
