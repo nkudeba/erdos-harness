@@ -28381,11 +28381,12 @@
         "divisors"
       ],
       "score": 24,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
-        "Divisor and prime-factor APIs are represented in previous successful runs."
+        "Divisor and prime-factor APIs are represented in previous successful runs.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Resolve natural/integer coercions and retrieve factorization lemmas early."
@@ -28446,8 +28447,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
