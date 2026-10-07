@@ -56063,7 +56063,7 @@
         "combinatorics"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "A public Lean 4 repo (SamMausberg/lean-formalizations, FormalConjectures/Problems/Erdos/E20) formalizes the conjecture statement and certifies base cases f(1,3)=2 through f(6,3)=19.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
@@ -56072,7 +56072,8 @@
         "The statement or its discussion mentions analytic-number-theory machinery; that is a possible dependency to audit, not an assumed theorem requirement.",
         "The statement or its discussion mentions foundational obstruction or dependence; that is a possible dependency to audit, not an assumed theorem requirement.",
         "An unresolved prize problem receives a conservative difficulty prior.",
-        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate."
+        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Extend the certified base cases beyond f(6,3) using a SAT encoding; do not attempt the full exponential sunflower conjecture, which carries a $1000 prize and is polymath-hard.",
@@ -56161,8 +56162,8 @@
       "manual": true,
       "prize": "$1000",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
