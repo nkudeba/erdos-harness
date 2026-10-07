@@ -47399,14 +47399,15 @@
         "hypergraphs"
       ],
       "score": 6,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "AlphaProof proved J(18,9) != 10 and that proof is in a PR to formal-conjectures; the problem reduces to Johnson-graph chromatic numbers, with k=4 known via chi(J(6,3))=6.",
         "Equivalent to asking whether chi(J(2k,k)) = k+1 for some k>2 (Johnson graph). Published chromatic-number tables already settle 3<=k<=8 NEGATIVELY, and Ma-Tang proved chi > k+1 for every k>2 not of the form p-1 with p prime. So the open frontier is k in {10,12,16,18,22,...}, and the smallest, k=10, is a chromatic-number question on J(20,10) with 184,756 vertices and 167,960 rainbow constraints - not a small SAT instance. The 'finite example' label is real but the reachable cases are all decided.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
-        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget."
+        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Reuse the existing formal-conjectures material on Johnson graphs; the k+1 prime cases are the documented obstruction.",
@@ -47484,8 +47485,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
