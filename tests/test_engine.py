@@ -287,7 +287,7 @@ class EngineRun(unittest.TestCase):
 
 def rating(prompt, n):
     """T1 is a minor improvement, T2 a solid partial result, T3 the core restated; judge 2 doubts T2's novelty."""
-    target = prompt.split("THE TARGET:")[1]
+    target = prompt.split("THE TARGET:")[1].split("Answer from everything")[0]   # the target only, not the rubric
     if "0.54" in target:
         v = {"verdict": "new", "significance": 1, "reach": "high"}
     elif "0.6" in target:
@@ -295,6 +295,34 @@ def rating(prompt, n):
     else:
         v = {"verdict": "restatement", "significance": 3, "reach": "low"}
     return "```json\n" + json.dumps({**v, "cite": None, "why": "w"}) + "\n```"
+
+
+class ReachFix(unittest.TestCase):
+    """Step 3's screen found 1 OPEN target in 20 problems against 6 predicted. The map asked for targets a strong
+    mathematician proves "in weeks" while the judges rated reach as the chance of a proof "in a day", so 69 of 70
+    significant targets came out low; and the gate sorted by significance first, so #873's one target slot went to an
+    unreachable significance-3 target over the reachable significance-2 one."""
+
+    def test_a_reachable_significance_two_target_outranks_an_unreachable_three(self):
+        f = {"targets": [{"id": "T1", "significance": 3}, {"id": "T2", "significance": 2}], "angles": []}
+        ratings = {"T1": {"verdict": "new", "significance": 3, "reach": "low", "p_week": 0.05},
+                   "T2": {"verdict": "new", "significance": 2, "reach": "medium", "p_week": 0.4}}
+        self.assertEqual([x["id"] for x in H.engine_gate_targets(f, ratings, 2)["targets"]], ["T2", "T1"])
+
+    def test_without_probabilities_the_reach_level_decides(self):
+        self.assertGreater(H.target_value({"significance": 2, "reach": "medium"}), H.target_value({"significance": 3, "reach": "low"}))
+        self.assertGreater(H.target_value({"significance": 2, "map_reach": "high"}), H.target_value({"significance": 2}))
+
+    def test_the_rubric_uses_one_horizon(self):
+        rubric = " ".join(H.TARGET_RATING_PROMPT.split())
+        self.assertIn("ONE focused week", rubric)
+        self.assertNotIn("a day of focused work", rubric)
+        self.assertIn("STEPPING STONES", H.FRONTIER_PROMPT)
+        self.assertIn("REACH:", H.FRONTIER_PROMPT)
+
+    def test_the_map_s_reach_is_parsed(self):
+        f = H.parse_frontier("=== TARGET T1\nTYPE: SPECIAL\nSTATEMENT: the k = 4 case\nSIGNIFICANCE: 2\nREACH: medium\n")
+        self.assertEqual(f["targets"][0]["map_reach"], "medium")
 
 
 class TargetRating(unittest.TestCase):

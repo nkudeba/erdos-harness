@@ -3681,10 +3681,17 @@ VALUE: <how proving it moves toward CORE>
 SIGNIFICANCE: <0-3: how an expert in the field would rate a proof of it; 0 trivial, 1 a minor improvement, 2 a solid
 partial result an expert would note, 3 major progress>
 TEST: <how to test it by computation, or "none">
+REACH: <low | medium | high: how likely a strong team with computers is to prove it in ONE focused week; low under 20%,
+medium 20-60%, high over 60%>
 
-A target is a statement strictly beyond KNOWN that a strong mathematician might prove in weeks. It is never a
-restatement of CORE. Rate SIGNIFICANCE honestly: a better constant inside a method's known ceiling is usually 1. At
-least three targets should be rated 2 or more. If no conditional proof of the whole statement is known, one CONDITIONAL
+A target is a statement strictly beyond KNOWN. It is never a restatement of CORE. Rate SIGNIFICANCE honestly: a better
+constant inside a method's known ceiling is usually 1. Build a LADDER, not a wish list:
+- at least three STEPPING STONES: significance 2 with reach medium or high. Each is NARROW: the smallest open case, a
+  single parameter value, the first k for which the problem is open, a natural special family, the full statement for
+  almost all inputs, or a conditional version. Each must have a first step a researcher could start today. A solid
+  partial result on the smallest open case is worth more to the team than a third major target nobody can start;
+- at least two targets of significance 2 or more at any reach, aimed straight at CORE.
+If no conditional proof of the whole statement is known, one CONDITIONAL
 target must be exactly that: the full statement under a standard, named conjecture (GRH, Hardy-Littlewood, Elliott-
 Halberstam, abc, Schinzel's Hypothesis H, ...). Use every type at least once where it makes sense:
 - QUANT: a better constant, exponent or bound than any in KNOWN. Check whether a sharper version of a KNOWN argument
@@ -3873,11 +3880,12 @@ Answer from everything you know about the literature, not only from the list abo
 - RESTATEMENT: it is equivalent to the problem or to its remaining core, so proving it would solve the problem.
 - NEW: none of the above, as far as you know.
 Then rate SIGNIFICANCE, as it would be if proved: 0 trivial, 1 a minor improvement, 2 a solid partial result an expert
-would note, 3 major progress on the problem. And REACH: how likely a strong researcher with a computer is to prove it in
-a day of focused work: low, medium or high.
+would note, 3 major progress on the problem. And REACH: how likely a strong team with computers is to prove it in ONE
+focused week. Give the probability P_WEEK, and the level: low under 0.2, medium 0.2 to 0.6, high over 0.6. Judge the
+target's own difficulty, not the problem's: a narrow case of a hard problem can be reachable.
 
 End with exactly one ```json block:
-{{"verdict": "new" | "known" | "routine" | "restatement", "cite": "<source or null>", "significance": 0 | 1 | 2 | 3, "reach": "low" | "medium" | "high", "why": "<one or two sentences>"}}"""
+{{"verdict": "new" | "known" | "routine" | "restatement", "cite": "<source or null>", "significance": 0 | 1 | 2 | 3, "reach": "low" | "medium" | "high", "p_week": <0.0-1.0>, "why": "<one or two sentences>"}}"""
 
 METAREVIEW_PROMPT = """You lead a research team on an OPEN problem. One round of work has finished. Decide what the next round does.
 
@@ -4125,7 +4133,8 @@ def parse_frontier(text: str) -> dict:
                 out["targets"].append({"id": (title.split() + ["T"])[1][:8], "type": ty if ty in ENGINE_TYPES else "OTHER",
                                        "statement": st[:2500], "beyond": section_field(body, "BEYOND")[:1200],
                                        "value": section_field(body, "VALUE")[:800], "test": section_field(body, "TEST")[:800],
-                                       "significance": int(sig.group(0)) if sig else None})
+                                       "significance": int(sig.group(0)) if sig else None,
+                                       "map_reach": _first_word(section_field(body, "REACH")).lower() or None})
         elif t.startswith("ANGLE"):
             idea = section_field(body, "IDEA")
             if idea:
@@ -4517,6 +4526,8 @@ def engine_rate_targets(call, statement: str, known: str, targets: list[dict], s
         panel = engine_novelty_panel(rec["judges"])
         reaches = [str(j.get("reach") or "").lower() for j in rec["judges"] if str(j.get("reach") or "").lower() in REACH_RANK]
         panel["reach"] = min(reaches, key=REACH_RANK.get) if reaches else None
+        ps = [float(j["p_week"]) for j in rec["judges"] if isinstance(j.get("p_week"), (int, float)) and 0 <= j["p_week"] <= 1]
+        panel["p_week"] = round(sum(ps) / len(ps), 3) if ps else None
         panel["cost"] = rec["cost"]
         out[tid] = panel
     return out
@@ -4532,9 +4543,22 @@ def engine_gate_targets(f: dict, ratings: dict, min_sig: int) -> dict:
         sig = r.get("significance")
         if r.get("verdict") == "new" and isinstance(sig, (int, float)) and sig >= min_sig:
             keep.append({**t, "significance": int(sig), "frontier_significance": t.get("significance"),
-                         "reach": r.get("reach")})
-    keep.sort(key=lambda t: (-t["significance"], -REACH_RANK.get(t.get("reach") or "", -1)))
+                         "reach": r.get("reach"), "p_week": r.get("p_week")})
+    keep.sort(key=lambda t: (-target_value(t), -t["significance"]))
     return {**f, "targets": keep}
+
+
+REACH_P = {"low": 0.1, "medium": 0.4, "high": 0.7}
+
+
+def target_value(t: dict) -> float:
+    """Expected value of attacking a target: significance times the chance of proving it (the judges' P_WEEK, else the
+    midpoint of their reach level). Sorting by significance first sent #873's one session on a target to T1 (rated 3,
+    reach low) and never attacked T2 (rated 2, reach medium), the only target the judges thought reachable."""
+    p = t.get("p_week")
+    if not isinstance(p, (int, float)):
+        p = REACH_P.get(str(t.get("reach") or t.get("map_reach") or "").lower(), 0.1)
+    return float(t.get("significance") or 0) * float(p)
 
 
 def engine_ratings_block(f: dict, ratings: dict) -> str:
