@@ -958,9 +958,10 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   and the accumulated `## Routes` log.
 - **`--engine-session-legs N`.** A round session or deep dive that stops with budget left goes back into its own sandbox
   to take the route it named under `## Next`, up to N legs within its own budget (`engine_session_legs`).
-  - Why: 74 of 90 round sessions on disk stopped under 60% of their cap (median $1.45 of $3, 10 turns, 9 minutes), and
-    14 of 18 deep dives did too, although the deep dive's prompt already said not to stop. A session ends when its first
-    route ends: #20's sessions refuted their assigned route, named the corrected statement, and stopped with $2 left.
+  - Why: outside the time-split dev and test sets, 52 of 63 round sessions on disk stopped under 60% of their cap
+    (median $1.44 of $3, 10 turns), and 8 of 9 deep dives did too, although the deep dive's prompt already said not to
+    stop. A session ends when its first route ends: #20's sessions refuted their assigned route, named the corrected
+    statement, and stopped with $2 left.
   - Prompting alone does not fix this, so the harness does. Every session now writes `## Next`, and `NEXT: NONE` ends it.
   - Each finished leg is checkpointed, and so is the deep dive's plan, so a resume buys neither again.
 - **Self-audit (always on).** Sessions keep a routes log and audit before PROVED: the dependency chain, every cited

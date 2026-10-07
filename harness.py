@@ -4994,8 +4994,9 @@ def engine_session_legs(session, s: "EngineSettings", spend: _DiscoverySpend, pu
                         slot: dict | None = None, keep=None, lock=None) -> tuple[str, str, float, int]:
     """One research session that keeps going (v6, `s.session_legs`). Returns (reply, notebook, cost, legs).
 
-    82% of 90 round sessions on disk stopped under 60% of their cap (median $1.45 of $3, 10 turns, 9 minutes), and 14 of
-    18 deep dives did too, although the deep dive's prompt already said not to stop at the first result. A session ends
+    Outside the time-split dev and test sets, 52 of 63 round sessions on disk stopped under 60% of their cap (median $1.44
+    of $3, 10 turns), and 8 of 9 deep dives did too, although the deep dive's prompt already said not to stop at the first
+    result. A session ends
     when its first route ends: #20's sessions refuted their assigned route, named the corrected statement, and stopped
     with $2 and 74 turns left. So when a session stops with budget left and a route under `## Next`, it goes back into
     the same sandbox to take that route, within its own budget, up to `s.session_legs` legs. `cont_prompt(leg, route)`

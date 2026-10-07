@@ -676,8 +676,10 @@ causes: three in targeting and one in execution.
 3. **Assignment by significance.** #873's one reachable target was never attacked, and its significance-2 result came
    from an angle nobody had rated.
 4. **Effort.** Sessions stop when their first route ends.
-   - 74 of 90 round sessions on disk spent under 60% of their cap: a median of $1.45 of $3, 10 turns, 9.3 minutes.
-   - 14 of 18 deep dives did the same, a median of $3.43 of $6, although the deep dive's prompt already said not to stop.
+   - Outside the time-split dev and test sets, 52 of 63 round sessions on disk spent under 60% of their cap: a median of
+     $1.44 of $3 and 10 turns. Dev runs are left out so that a later dev gate is not judged on the data that shaped the
+     fix; with them the share is the same, 74 of 90.
+   - 8 of 9 deep dives did the same, a median of $3.50 of $6, although the deep dive's prompt already said not to stop.
    - #20's sessions refuted their assigned route, named the corrected statement, and stopped with $2 and 74 turns left.
    - openai/math's trace shows about 20 pivots per problem.
 
