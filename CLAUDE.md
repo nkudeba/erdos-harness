@@ -956,13 +956,20 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   judged claims and verdicts order round 1. With `--engine-sessions 0` this is a map-and-probe screen.
 - **`--engine-marathon-legs N`.** The deep dive's line continues for N legs, each reading every earlier leg's notebook
   and the accumulated `## Routes` log.
+- **`--engine-session-legs N`.** A round session or deep dive that stops with budget left goes back into its own sandbox
+  to take the route it named under `## Next`, up to N legs within its own budget (`engine_session_legs`).
+  - Why: 74 of 90 round sessions on disk stopped under 60% of their cap (median $1.45 of $3, 10 turns, 9 minutes), and
+    14 of 18 deep dives did too, although the deep dive's prompt already said not to stop. A session ends when its first
+    route ends: #20's sessions refuted their assigned route, named the corrected statement, and stopped with $2 left.
+  - Prompting alone does not fix this, so the harness does. Every session now writes `## Next`, and `NEXT: NONE` ends it.
+  - Each finished leg is checkpointed, and so is the deep dive's plan, so a resume buys neither again.
 - **Self-audit (always on).** Sessions keep a routes log and audit before PROVED: the dependency chain, every cited
   theorem's hypotheses, small cases, parameter order. Claims carry AUDIT and CONCERNS, and the judges decide the
   concerns.
 - **`--results-library on`.** Other runs' validated results plus the openai/math families relevant to the problem
   (`results_library.py`). Never in benchmark or masked runs, and no dev or test item ever enters it.
 - **The audit** adds Comparator and nanoda when `tools/install.sh` has been run (see the honesty rules).
-- **Off by default** until a dev screen against v5: probes, marathon and the library.
+- **Off by default** until a dev screen against v5: probes, marathon, session legs and the library.
 
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses

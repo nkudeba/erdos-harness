@@ -3778,9 +3778,14 @@ CONCERNS: <every unresolved concern, or none>
 ## Routes
 One line per line of attack, in the order tried: ROUTE: <the idea> | OUTCOME: <proved / partial / failed> | BARRIER:
 <exactly what stopped it>.
+## Next
+NEXT: <the most promising route you have not tried: what to prove, and the first step> | NONE
 ## Data
 
-When you are done, reply with the Result section."""
+Unless your assignment says otherwise, do not stop when a route ends, whether it worked or failed: log it and take the
+next one. A failed route usually names the next (a corrected statement, a weaker case, a different tool), and a proved
+claim invites a stronger one. Write NEXT: NONE only when your assignment is PROVED and audited with nothing stronger in
+reach, or when every route you can think of is logged as failed. Then reply with the Result section."""
 
 ENGINE_SYSTEM_PROMPT = (
     "You are a research mathematician on a team attacking an open problem, working inside a sandbox directory. Create "
@@ -4086,6 +4091,16 @@ RESULTS SO FAR, with the judges' verdicts:
 Work toward the GOAL. Reuse every validated result instead of re-deriving it. Keep ## Routes current. Run the full AUDIT
 before you mark anything PROVED. A smaller result that is new and fully proved is still worth recording."""
 
+CONTINUE_ASSIGNMENT = """CONTINUATION, leg {leg} of at most {legs}. You are resuming your OWN earlier work on the assignment
+below, in the same sandbox. NOTEBOOK.md holds everything you found so far, with ## Routes and ## Next, and your scripts
+are still here: read NOTEBOOK.md first. Do not redo a logged route. Take this route first, unless you now see a better
+one:
+{next}
+Keep pivoting whenever a route ends. Edit claims in place, and number new claims after the existing ones.
+
+YOUR ASSIGNMENT:
+{assignment}"""
+
 GAP_ASSIGNMENT = """CLOSE THE GAP in one claim. The judges rate a correct proof of the claim below as {value}. Its proof did
 not survive review. Make it survive, or find out exactly why it cannot.
 
@@ -4125,6 +4140,8 @@ class EngineSettings:
     session_budget: float = 3.0
     session_turns: int = 80
     session_effort: str = "high"
+    session_legs: int = 1            # > 1: a session that stops with budget left and a route to try is sent back (v6)
+    leg_min_budget: float = 0.75     # a continuation needs at least this much of the session's own budget left
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4782,6 +4799,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
             ck["partial"] = partial = {"round": rnd, "todo": todo, "done": {}}
             keep()
         done = partial["done"]
+        legs_ck = partial.setdefault("legs", {})         # sessions part way through their continuation legs
 
         def one(ia):
             i, a = ia
@@ -4793,13 +4811,24 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
             prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
                                            assignment=assignment_text(a), teammates=teammates,
                                            modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+
+            def cont(leg, route):
+                return SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                             assignment=CONTINUE_ASSIGNMENT.format(leg=leg, legs=s.session_legs, next=route,
+                                                                                   assignment=assignment_text(a)),
+                                             teammates=teammates, modules=", ".join(sorted(EXPLORE_MODULES)),
+                                             seconds=EXPLORE_SECONDS)
+            with lock:
+                slot = legs_ck.setdefault(label, {})
             try:
-                reply, notebook, cost = session("engine-session", prompt, label, s.session_turns, s.session_budget, s.session_effort)
+                reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", label, prompt, cont,
+                                                                  s.session_turns, s.session_budget, s.session_effort,
+                                                                  slot=slot, keep=keep, lock=lock)
                 claims = parse_claims(notebook)
                 for c in claims:
                     c["session"], c["_kind"] = label, a.get("kind")
                 x = {"label": label, "assignment": a, "reply": (reply or "")[-3000:], "notebook": notebook,
-                     "claims": claims, "cost": round(float(cost or 0.0), 4)}
+                     "claims": claims, "cost": round(float(cost or 0.0), 4), "legs": legs}
             except DiscoveryCallFailed as e:
                 x = {"label": label, "assignment": a, "error": str(e)[:300], "cost": round(e.cost, 4), "claims": []}
             with lock:
@@ -4807,6 +4836,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 if not x.get("error"):
                     seen_sessions.append(float(x["cost"]))
                 done[label] = x
+                legs_ck.pop(label, None)
             keep()
             return x
         pending = [(i, a) for i, a in enumerate(todo, 1) if f"r{rnd}s{i}" not in done]
@@ -4943,6 +4973,65 @@ def parse_routes(notebook: str) -> list[str]:
     body = m.group(1) if m else ""
     return [" ".join(l.strip().lstrip("-*0123456789. ").split())[:400] for l in body.splitlines()
             if re.search(r"(?i)\bROUTE\s*:", l)]
+
+
+def parse_next_route(notebook: str) -> str | None:
+    """The route a session would take next, from its `## Next` section; None when it wrote NONE. A notebook without the
+    section gets a generic pivot: the early stop is what continuation exists to fix, so silence does not end a session."""
+    m = re.search(r"(?ims)^#{2,3}[ \t]*Next\b[^\n]*$(.*?)(?=^#{1,3}[ \t]|\Z)", notebook or "")
+    if not m:
+        return "(no ## Next section was written) Choose the most promising route you have not tried."
+    body = " ".join(m.group(1).split())
+    n = re.search(r"(?i)NEXT\s*:\s*(.*)", body)
+    route = (n.group(1) if n else body).strip(" *_")
+    if not route or re.match(r"(?i)none\b\s*(?:$|[(\-\u2013\u2014:.;,])", route):
+        return None
+    return route[:2000]
+
+
+def engine_session_legs(session, s: "EngineSettings", spend: _DiscoverySpend, purpose: str, label: str, prompt: str,
+                        cont_prompt, turns: int, budget: float, effort, files: dict | None = None,
+                        slot: dict | None = None, keep=None, lock=None) -> tuple[str, str, float, int]:
+    """One research session that keeps going (v6, `s.session_legs`). Returns (reply, notebook, cost, legs).
+
+    82% of 90 round sessions on disk stopped under 60% of their cap (median $1.45 of $3, 10 turns, 9 minutes), and 14 of
+    18 deep dives did too, although the deep dive's prompt already said not to stop at the first result. A session ends
+    when its first route ends: #20's sessions refuted their assigned route, named the corrected statement, and stopped
+    with $2 and 74 turns left. So when a session stops with budget left and a route under `## Next`, it goes back into
+    the same sandbox to take that route, within its own budget, up to `s.session_legs` legs. `cont_prompt(leg, route)`
+    builds a continuation's prompt. `slot` checkpoints every finished leg, so a resume continues instead of re-buying."""
+    slot = slot if slot is not None else {}
+    keep = keep or (lambda: None)
+    lock = lock or threading.Lock()
+    if slot.get("legs"):
+        reply, notebook = slot.get("reply") or "", slot.get("notebook") or ""
+        cost, legs = float(slot.get("cost") or 0.0), int(slot["legs"])
+    else:
+        reply, notebook, cost = session(purpose, prompt, label, turns, budget, effort, **({"files": files} if files else {}))
+        cost, legs = float(cost or 0.0), 1
+        with lock:
+            slot.update({"legs": 1, "reply": (reply or "")[-3000:], "notebook": notebook, "cost": round(cost, 4)})
+        keep()
+    while legs < max(1, int(s.session_legs)):
+        left = round(float(budget) - cost, 2)
+        route = parse_next_route(notebook)
+        if route is None or left < s.leg_min_budget or not spend.room(cost + left):
+            break
+        legs += 1
+        try:
+            r2, nb2, c2 = session(purpose, cont_prompt(legs, route), label, turns, left, effort, keep_notebook=True)
+        except DiscoveryCallFailed as e:
+            cost += float(e.cost or 0.0)
+            with lock:
+                slot.update({"legs": legs, "cost": round(cost, 4), "stopped": str(e)[:200]})
+            keep()
+            break
+        cost += float(c2 or 0.0)
+        reply, notebook = (r2 or reply), (nb2 or notebook)
+        with lock:
+            slot.update({"legs": legs, "reply": (reply or "")[-3000:], "notebook": notebook, "cost": round(cost, 4)})
+        keep()
+    return reply, notebook, cost, legs
 
 
 PROGRESS_POINTS = {"none": 0.0, "partial": 0.5, "strong": 1.0}
@@ -5118,21 +5207,36 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
     keep = keep or (lambda: None)
     dp = ck.get("deep_partial") if isinstance(ck.get("deep_partial"), dict) else None
     if dp is None:
-        pt, pc, perr = _discovery_call_capped(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
-            statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort, s.meta_budget,
-            spend)
-        if not pt:
-            return {"plan_cost": round(pc, 4), "error": perr}
-        secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
-        plan = "\n\n".join(f"{k}:\n{secs[k]}" for k in ("GOAL", "WHY THIS LINE", "PLAN", "PITFALLS") if secs.get(k)) or pt
+        slot = ck.setdefault("deep_legs", {})            # the plan and any finished legs: a resume buys neither again
+        if slot.get("plan_text"):
+            plan, pc, goal = slot["plan_text"], float(slot.get("plan_cost") or 0.0), slot.get("goal") or ""
+        else:
+            pt, pc, perr = _discovery_call_capped(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
+                statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort,
+                s.meta_budget, spend)
+            if not pt:
+                return {"plan_cost": round(pc, 4), "error": perr}
+            secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
+            plan = "\n\n".join(f"{k}:\n{secs[k]}" for k in ("GOAL", "WHY THIS LINE", "PLAN", "PITFALLS") if secs.get(k)) or pt
+            goal = (secs.get("GOAL") or "")[:2000]
+            slot.update({"plan_text": plan[:9000], "plan_cost": round(pc, 4), "goal": goal})
+            keep()
         files = {f"prior/{x['label']}.md": x.get("notebook") or "" for r in rounds for x in (r.get("_sessions") or [])}
+        assignment = DEEP_ASSIGNMENT.format(plan=clip_middle(plan, 9000))
         prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
-                                       assignment=DEEP_ASSIGNMENT.format(plan=clip_middle(plan, 9000)), teammates="",
+                                       assignment=assignment, teammates="",
                                        modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
-        dp = {"plan_cost": round(pc, 4), "goal": (secs.get("GOAL") or "")[:2000], "plan_text": plan[:9000]}
+
+        def cont(leg, route):
+            return SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                         assignment=CONTINUE_ASSIGNMENT.format(leg=leg, legs=s.session_legs, next=route,
+                                                                               assignment=assignment),
+                                         teammates="", modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+        dp = {"plan_cost": round(pc, 4), "goal": goal, "plan_text": plan[:9000]}
         try:
-            reply, notebook, cost = session("engine-session", prompt, "deep", s.deep_turns, s.deep_budget, s.deep_effort,
-                                            files=files)
+            reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", "deep", prompt, cont,
+                                                              s.deep_turns, s.deep_budget, s.deep_effort, files=files,
+                                                              slot=slot, keep=keep)
         except DiscoveryCallFailed as e:
             spend.add(e.cost)
             return {**dp, "error": str(e)[:300], "cost": round(e.cost, 4)}
@@ -5141,8 +5245,9 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
         for c in claims:
             c["session"], c["_kind"] = "deep", "deep"
         dp.update({"cost": round(float(cost or 0.0), 4), "reply": (reply or "")[-3000:], "claims_list": claims,
-                   "notebook": (notebook or "")[-60000:], "routes": parse_routes(notebook)})
+                   "notebook": (notebook or "")[-60000:], "routes": parse_routes(notebook), "legs": legs})
         ck["deep_partial"] = dp
+        ck.pop("deep_legs", None)
         keep()
     claims = dp.get("claims_list") or []
     engine_resolve(claims)
@@ -6072,7 +6177,9 @@ class Harness:
                            probe_turns=int(g("engine_probe_turns", 40)),
                            marathon_legs=int(g("engine_marathon_legs", 0)),
                            marathon_leg_budget=float(g("engine_marathon_leg_budget", 8.0)),
-                           marathon_leg_turns=int(g("engine_marathon_leg_turns", 300)))
+                           marathon_leg_turns=int(g("engine_marathon_leg_turns", 300)),
+                           session_legs=int(g("engine_session_legs", 1)),
+                           leg_min_budget=float(g("engine_leg_min_budget", 0.75)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -6108,7 +6215,7 @@ class Harness:
         their own costs. Budget-checked and logged like every call; a cut-off session still yields its notebook."""
         lock = threading.Lock()
 
-        def session(purpose, prompt, label, turns, budget, effort, files=None):
+        def session(purpose, prompt, label, turns, budget, effort, files=None, keep_notebook=False):
             self._check_run_budget(purpose)
             prompt = self._outbound(self._with_research_guidance(purpose, prompt))
             run_budget = getattr(self.args, "run_budget", None)
@@ -6123,14 +6230,16 @@ class Harness:
             run_sh = sb / "run.sh"
             run_sh.write_text(f'#!/bin/sh\nexec "{sys.executable}" "$(dirname "$0")/runner.py" "$@"\n')
             run_sh.chmod(0o755)
-            (sb / "NOTEBOOK.md").write_text("## Result\n(not yet)\n")
+            if not (keep_notebook and (sb / "NOTEBOOK.md").exists()):     # a continuation leg keeps its own notebook
+                (sb / "NOTEBOOK.md").write_text("## Result\n(not yet)\n")
             (sb / "TASK.md").write_text(prompt)
             for rel, body in (files or {}).items():          # e.g. prior/<label>.md for the deep dive; never outside sb
                 dest = (sb / rel).resolve()
                 if sb.resolve() in dest.parents:
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     dest.write_text(body)
-            self.log.event("llm", "request", purpose=purpose, chars=len(prompt), effort=effort, budget=budget, label=label)
+            self.log.event("llm", "request", purpose=purpose, chars=len(prompt), effort=effort, budget=budget, label=label,
+                           **({"continuation": True} if keep_notebook else {}))
             t0, text = time.time(), ""
             try:
                 text = backend.complete_explore(purpose, prompt, sb, turns, budget=budget, effort=effort,
@@ -12000,6 +12109,11 @@ def build_parser() -> argparse.ArgumentParser:
                       help="v6: continue the deep dive's line for this many more legs, each reading every earlier leg (0 = off)")
     runp.add_argument("--engine-marathon-leg-budget", type=float, default=8.0, help="USD cap per marathon leg")
     runp.add_argument("--engine-marathon-leg-turns", type=int, default=300, help="turn cap per marathon leg")
+    runp.add_argument("--engine-session-legs", type=int, default=1,
+                      help="v6: a round session or deep dive that stops with budget left and a route under ## Next goes "
+                           "back into its sandbox to take it, up to this many legs within its own budget (1 = off)")
+    runp.add_argument("--engine-leg-min-budget", type=float, default=0.75,
+                      help="USD of the session's own budget a continuation leg needs")
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")

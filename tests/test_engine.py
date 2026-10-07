@@ -773,6 +773,134 @@ class DeepDive(unittest.TestCase):
         self.assertNotIn("deep", [label for label, p in sess.calls])
 
 
+class SessionLegs(unittest.TestCase):
+    """v6 (2026-10-07): a session that stops with budget left and a route under ## Next goes back into its own sandbox.
+    82% of 90 round sessions on disk stopped under 60% of their $3 cap, and 14 of 18 deep dives did too, although the
+    deep dive's prompt already said not to stop at the first result: a session ends when its first route ends."""
+
+    @staticmethod
+    def nb(route, claim="liminf >= 0.54"):
+        return notebook(("PROVED", "QUANT", claim)) + f"## Next\nNEXT: {route}\n"
+
+    class Legs:
+        """A fake session that knows which leg it is on, and records each leg's budget and notebook handling."""
+        def __init__(self, script, cost=1.0):
+            self.script, self.cost, self.calls, self.lock = script, cost, [], threading.Lock()
+
+        def __call__(self, purpose, prompt, label, turns, budget, effort, files=None, keep_notebook=False):
+            with self.lock:
+                self.calls.append({"label": label, "prompt": prompt, "budget": budget, "keep": keep_notebook})
+                k = sum(1 for c in self.calls if c["label"] == label)
+            return f"reply {k}", self.script(label, k), self.cost
+
+    def run_legs(self, sess, s, budget=3.0, spend=None, slot=None):
+        return H.engine_session_legs(sess, s, spend or H._DiscoverySpend(50), "engine-session", "r1s1", "FIRST",
+                                     lambda leg, route: f"CONT {leg}: {route}", 80, budget, "high", slot=slot)
+
+    def test_the_next_route_is_read_from_the_notebook(self):
+        self.assertEqual(H.parse_next_route(self.nb("prove the k=3 case first")), "prove the k=3 case first")
+        for none in ("NONE", "**NONE**", "NONE (the assignment is proved)", "NONE - nothing left"):
+            self.assertIsNone(H.parse_next_route(self.nb(none)), none)
+        self.assertEqual(H.parse_next_route(self.nb("none of the logged routes; try the dual")),
+                         "none of the logged routes; try the dual")
+        self.assertIn("Choose the most promising route", H.parse_next_route(notebook(("PROVED", "QUANT", "x"))))
+        self.assertIn("## Next\nNEXT:", H.SESSION_PROMPT)
+        self.assertIn("Write NEXT: NONE only when", H.SESSION_PROMPT)
+
+    def test_a_session_goes_back_until_it_writes_none(self):
+        sess = self.Legs(lambda label, k: self.nb("the k=3 case" if k == 1 else "NONE"))
+        reply, nb, cost, legs = self.run_legs(sess, H.EngineSettings(session_legs=4))
+        self.assertEqual((legs, cost, reply), (2, 2.0, "reply 2"))
+        self.assertEqual([c["keep"] for c in sess.calls], [False, True])       # leg 2 keeps leg 1's notebook
+        self.assertEqual(sess.calls[1]["budget"], 2.0)                          # the rest of its OWN budget, no more
+        self.assertEqual(sess.calls[1]["prompt"], "CONT 2: the k=3 case")
+
+    def test_the_leg_cap_the_budget_and_the_engine_total_each_stop_it(self):
+        always = lambda label, k: self.nb(f"route {k + 1}")
+        self.assertEqual(self.run_legs(self.Legs(always), H.EngineSettings(session_legs=2))[3], 2)
+        # $3 budget, $1 a leg: after leg 3 nothing is left, so a fourth never starts
+        self.assertEqual(self.run_legs(self.Legs(always), H.EngineSettings(session_legs=9))[3], 3)
+        # $0.50 left after leg 1 is under leg_min_budget
+        self.assertEqual(self.run_legs(self.Legs(always, cost=2.5), H.EngineSettings(session_legs=9))[3], 1)
+        # the engine's total: $1 spent of a $2.5 cap, and a $2 continuation would pass it
+        self.assertEqual(self.run_legs(self.Legs(always), H.EngineSettings(session_legs=9), spend=H._DiscoverySpend(2.5))[3], 1)
+
+    def test_one_leg_by_default(self):
+        sess = self.Legs(lambda label, k: self.nb("another route"))
+        self.assertEqual(self.run_legs(sess, H.EngineSettings())[3], 1)
+        self.assertEqual(len(sess.calls), 1)
+
+    def test_a_resume_continues_from_the_last_finished_leg(self):
+        slot = {"legs": 1, "reply": "r", "notebook": self.nb("route X"), "cost": 1.0}
+        sess = self.Legs(lambda label, k: self.nb("NONE"))
+        _, nb, cost, legs = self.run_legs(sess, H.EngineSettings(session_legs=3), slot=slot)
+        self.assertEqual((legs, cost), (2, 2.0))
+        self.assertEqual([(c["keep"], c["prompt"]) for c in sess.calls], [(True, "CONT 2: route X")])  # leg 1 not re-bought
+        self.assertEqual(slot["legs"], 2)
+
+    def test_round_sessions_and_the_deep_dive_continue_in_engine_run(self):
+        def script(purpose, prompt, n):
+            return FRONTIER if purpose == "engine-frontier" else DEEP_PLAN if purpose == "engine-deep-plan" else judge(purpose)
+        sess = self.Legs(lambda label, k: self.nb("NONE" if k == 2 else "push to 0.6", claim=f"claim {label} {k}"))
+        res = H.engine_run(FakeCall(script, cost=0.1), sess, "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=2, rounds=1, total_budget=60, deep_budget=6.0, session_legs=3), workers=2)
+        self.assertEqual([x["legs"] for x in res["rounds"][0]["sessions"]], [2, 2])
+        self.assertEqual([x["cost"] for x in res["rounds"][0]["sessions"]], [2.0, 2.0])
+        self.assertEqual((res["deep"]["legs"], res["deep"]["cost"]), (2, 2.0))
+        cont = [c for c in sess.calls if c["keep"]]
+        self.assertEqual(sorted(c["label"] for c in cont), ["deep", "r1s1", "r1s2"])
+        r1 = next(c["prompt"] for c in cont if c["label"] == "r1s1")
+        self.assertIn("CONTINUATION, leg 2 of at most 3", r1)
+        self.assertIn("push to 0.6", r1)
+        self.assertIn("YOUR ASSIGNMENT:", r1)
+        deep = next(c["prompt"] for c in cont if c["label"] == "deep")
+        self.assertIn("DEEP DIVE", deep.split("YOUR ASSIGNMENT:")[-1])           # the deep dive keeps its plan
+        self.assertIn("claim r1s1 2", {c["statement"] for c in res["ledger"]})   # the last leg's notebook is judged
+
+    def test_the_deep_dive_plan_is_not_bought_twice(self):
+        def script(purpose, prompt, n):
+            return FRONTIER if purpose == "engine-frontier" else DEEP_PLAN if purpose == "engine-deep-plan" else judge(purpose)
+        sess = self.Legs(lambda label, k: self.nb("NONE"))
+        first = H.engine_run(FakeCall(script, cost=0.1), sess, "PROBLEM", LEAN,
+                             H.EngineSettings(sessions=1, rounds=1, total_budget=50))
+        ck = {"frontier": first["frontier"], "rounds": [{**r, "_sessions": []} for r in first["rounds"]], "meta": None,
+              "next": [], "deep_legs": {"plan_text": "GOAL:\nthe kept plan", "plan_cost": 1.0, "goal": "the kept plan",
+                                        "legs": 1, "notebook": self.nb("route Y"), "cost": 1.0, "reply": "r"}}
+        call = FakeCall(script, cost=0.1)
+        sess2 = self.Legs(lambda label, k: self.nb("NONE"))
+        res = H.engine_run(call, sess2, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50,
+                                                                          deep_budget=6.0, session_legs=2), checkpoint=ck)
+        self.assertEqual(call.prompts("engine-deep-plan"), [])
+        self.assertEqual([(c["label"], c["keep"]) for c in sess2.calls], [("deep", True)])
+        self.assertEqual((res["deep"]["legs"], res["deep"]["goal"]), (2, "the kept plan"))
+        self.assertNotIn("deep_legs", ck)
+
+    def test_the_session_caller_keeps_a_continuation_notebook(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        p = patch.object(H, "ROOT", Path(tmp.name))
+        p.start()
+        self.addCleanup(p.stop)
+        h = _stub(tmp.name)
+        seen = []
+
+        class Backend:
+            last_meta = {"cost_usd": 0.5, "turns": 3}
+
+            def complete_explore(self, purpose, prompt, sb, turns, budget=None, effort=None, system_prompt=None):
+                seen.append((sb / "NOTEBOOK.md").read_text())
+                (sb / "NOTEBOOK.md").write_text(seen[-1] + "leg\n")
+                return "done"
+        h.llm = Backend()
+        session = h._engine_session_caller()
+        session("engine-session", "P1", "r1s1", 10, 3.0, "high")
+        _, nb, _ = session("engine-session", "P2", "r1s1", 10, 2.0, "high", keep_notebook=True)
+        self.assertEqual(seen, ["## Result\n(not yet)\n", "## Result\n(not yet)\nleg\n"])
+        self.assertEqual(nb, "## Result\n(not yet)\nleg\nleg\n")
+        reqs = [e for e in h.log.events if e[0] == "llm" and e[1] == "request"]
+        self.assertEqual([bool(e[2].get("continuation")) for e in reqs], [False, True])
+
+
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
 
