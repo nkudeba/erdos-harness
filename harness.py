@@ -167,6 +167,49 @@ class RunLog:
 
 # --------------------------------------------------------------------------- LLM backends
 
+# Model sessions (`claude -p`) started by this process, so a SIGTERM or SIGHUP can take them down too. Killing a harness
+# run used to leave its in-flight sessions running as orphans, still billing: step 3's #120 engine run was stopped on
+# 2026-10-07 and three of its sessions kept going until they were killed by hand. A process-group kill is not the answer,
+# because a harness run shares its group with whatever launched it (screen.py, which must carry on to the next problem).
+_LIVE_CHILDREN: set = set()
+_LIVE_LOCK = threading.Lock()
+
+
+def run_tracked(cmd: list[str], input: str | None = None, timeout: float | None = None, env=None,
+                cwd: str | None = None) -> subprocess.CompletedProcess:
+    """`subprocess.run(..., capture_output=True, text=True)` whose child is terminated with this process. Raises
+    `subprocess.TimeoutExpired` on a timeout after killing the child, as `subprocess.run` does."""
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE if input is not None else None, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True, env=env, cwd=cwd)
+    with _LIVE_LOCK:
+        _LIVE_CHILDREN.add(proc)
+    try:
+        try:
+            out, err = proc.communicate(input=input, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.communicate()
+            raise
+        return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
+    finally:
+        with _LIVE_LOCK:
+            _LIVE_CHILDREN.discard(proc)
+
+
+def terminate_children(signum=None, frame=None) -> None:
+    """Terminate every tracked model session; as a signal handler, then die of the same signal."""
+    with _LIVE_LOCK:
+        procs = list(_LIVE_CHILDREN)
+    for proc in procs:
+        try:
+            proc.terminate()
+        except Exception:                                  # noqa: BLE001 - already gone
+            pass
+    if signum is not None:
+        signal.signal(signum, signal.SIG_DFL)
+        os.kill(os.getpid(), signum)
+
+
 class ClaudeCliBackend:
     """Production backend: `claude -p` in print mode with a scrubbed environment.
 
@@ -252,8 +295,7 @@ class ClaudeCliBackend:
         last_err = ""
         for attempt in range(self.RETRIES + 1):
             try:
-                r = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
-                                   timeout=self.timeout, env=clean_env(), cwd=str(cwd) if cwd else None)
+                r = run_tracked(cmd, input=prompt, timeout=self.timeout, env=clean_env(), cwd=str(cwd) if cwd else None)
             except subprocess.TimeoutExpired:
                 # a hung/slow provider call: retry once more if budget allows, else surface as RuntimeError
                 last_err = f"timeout after {self.timeout}s"
@@ -11760,6 +11802,8 @@ def main():
         return campaign_main(sys.argv[2:])
     ap = build_parser()
     args = ap.parse_args()
+    for sig in (signal.SIGTERM, signal.SIGHUP):      # a killed run takes its model sessions with it
+        signal.signal(sig, terminate_children)
     if args.cmd == "check":
         checker = LeanChecker(FORMAL, args.lean_timeout)
         res = checker.check(Path(args.file).read_text(), RUNS / "adhoc" / Path(args.file).name)

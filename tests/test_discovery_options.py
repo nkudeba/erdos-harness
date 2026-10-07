@@ -388,7 +388,7 @@ class ToolBoundaries(unittest.TestCase):
             return type("R", (), {"returncode": 0, "stderr": "",
                                   "stdout": json.dumps({"type": "result", "subtype": "success", "is_error": False,
                                                         "result": "ok", "total_cost_usd": 0.01, "num_turns": 1})})()
-        with patch.object(H.subprocess, "run", side_effect=run):
+        with patch.object(H, "run_tracked", side_effect=run):
             call(H.ClaudeCliBackend(None, 10))
         return seen["cmd"]
 

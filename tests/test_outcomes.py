@@ -83,7 +83,7 @@ class Outcomes(unittest.TestCase):
 
     def test_provider_error_with_text_is_not_completion(self):
         response = type('Response', (), {'returncode': 0, 'stdout': json.dumps({'is_error': True, 'result': 'Spend limit reached'}), 'stderr': ''})()
-        with patch.object(H.subprocess, 'run', return_value=response):
+        with patch.object(H, 'run_tracked', return_value=response):
             with self.assertRaisesRegex(RuntimeError, 'Spend limit'):
                 H.ClaudeCliBackend(None, 1).complete('prove', 'test')
 

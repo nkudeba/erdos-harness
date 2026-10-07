@@ -15,7 +15,7 @@ class Retry(unittest.TestCase):
         seq = [_resp(1, {"is_error": True, "subtype": "success", "result": "API Error: Can't reach the API server (ENOTFOUND)"}),
                _resp(0, {"is_error": False, "result": "PONG", "total_cost_usd": 0.1, "num_turns": 1})]
         sleeps = []
-        with patch.object(H.subprocess, "run", side_effect=seq), patch.object(H.time, "sleep", sleeps.append):
+        with patch.object(H, "run_tracked", side_effect=seq), patch.object(H.time, "sleep", sleeps.append):
             b = H.ClaudeCliBackend(None, 10)
             self.assertEqual(b.complete("t", "x"), "PONG")
         self.assertEqual(sleeps, [45])
@@ -23,14 +23,14 @@ class Retry(unittest.TestCase):
 
     def test_hard_error_not_retried(self):
         seq = [_resp(1, {"is_error": True, "subtype": "error", "result": "Spend limit reached for this month"})]
-        with patch.object(H.subprocess, "run", side_effect=seq), patch.object(H.time, "sleep", lambda s: None):
+        with patch.object(H, "run_tracked", side_effect=seq), patch.object(H.time, "sleep", lambda s: None):
             with self.assertRaisesRegex(RuntimeError, "Spend limit"):
                 H.ClaudeCliBackend(None, 10).complete("t", "x")
 
     def test_empty_failure_retried_then_gives_up(self):
         seq = [_resp(1, stdout="", stderr="")] * 4
         sleeps = []
-        with patch.object(H.subprocess, "run", side_effect=seq), patch.object(H.time, "sleep", sleeps.append):
+        with patch.object(H, "run_tracked", side_effect=seq), patch.object(H.time, "sleep", sleeps.append):
             with self.assertRaises(RuntimeError):
                 H.ClaudeCliBackend(None, 10).complete("t", "x")
         self.assertEqual(sleeps, [45, 90, 180])
@@ -70,7 +70,7 @@ class EffortTuning(unittest.TestCase):
         def fake_run(cmd, **kw):
             calls.append(cmd)
             return _resp(0, {"is_error": False, "result": "ok", "total_cost_usd": 0.01, "num_turns": 1})
-        with patch.object(H.subprocess, "run", side_effect=fake_run):
+        with patch.object(H, "run_tracked", side_effect=fake_run):
             b = H.ClaudeCliBackend(None, 10, 8.0)
             b.complete("literature", "x"); b.complete("formalize", "x"); b.complete("prove", "x")
         lit, form, prove = calls
@@ -84,7 +84,7 @@ class ModelDefault(unittest.TestCase):
     def _model(self, b):
         calls = []
         ok = _resp(0, {"is_error": False, "result": "ok", "total_cost_usd": 0.0, "num_turns": 1})
-        with patch.object(H.subprocess, "run", side_effect=lambda cmd, **k: calls.append(cmd) or ok):
+        with patch.object(H, "run_tracked", side_effect=lambda cmd, **k: calls.append(cmd) or ok):
             b.complete("prove", "x")
         return calls[0][calls[0].index("--model") + 1]
 
@@ -101,7 +101,7 @@ class NoAmbientContext(unittest.TestCase):
     def test_every_call_kind_passes_empty_setting_sources(self):
         calls = []
         ok = _resp(0, {"is_error": False, "result": "ok", "total_cost_usd": 0.0, "num_turns": 1})
-        with patch.object(H.subprocess, "run", side_effect=lambda cmd, **k: calls.append(cmd) or ok):
+        with patch.object(H, "run_tracked", side_effect=lambda cmd, **k: calls.append(cmd) or ok):
             b = H.ClaudeCliBackend(None, 10)
             b.complete("prove", "x")
             b.complete_web("literature", "x")
@@ -182,7 +182,7 @@ class OverBudgetRecovery(unittest.TestCase):
             "num_turns": 1, "errors": ["Reached maximum budget ($0.03)"]}
 
     def test_text_call_keeps_the_paid_answer(self):
-        with patch.object(H.subprocess, "run", return_value=_resp(1, stdout=_stream(self.OVER, ["", "THE ANSWER"]))):
+        with patch.object(H, "run_tracked", return_value=_resp(1, stdout=_stream(self.OVER, ["", "THE ANSWER"]))):
             b = H.ClaudeCliBackend(None, 10)
             self.assertEqual(b.complete("plan", "x"), "THE ANSWER")
         self.assertTrue(b.last_meta["recovered_over_budget"])
@@ -190,13 +190,13 @@ class OverBudgetRecovery(unittest.TestCase):
 
     def test_an_unfinished_turn_is_not_recovered(self):
         cut = {**self.OVER, "stop_reason": "max_tokens"}
-        with patch.object(H.subprocess, "run", return_value=_resp(1, stdout=_stream(cut, ["half an answer"]))), \
+        with patch.object(H, "run_tracked", return_value=_resp(1, stdout=_stream(cut, ["half an answer"]))), \
              patch.object(H.time, "sleep", lambda s: None):
             with self.assertRaisesRegex(RuntimeError, "error_max_budget_usd"):
                 H.ClaudeCliBackend(None, 10).complete("plan", "x")
 
     def test_tool_sessions_still_fail_over_budget(self):
-        with patch.object(H.subprocess, "run", return_value=_resp(1, stdout=_stream(self.OVER, ["step 3 of 9"]))), \
+        with patch.object(H, "run_tracked", return_value=_resp(1, stdout=_stream(self.OVER, ["step 3 of 9"]))), \
              patch.object(H.time, "sleep", lambda s: None):
             with self.assertRaisesRegex(RuntimeError, "error_max_budget_usd"):
                 H.ClaudeCliBackend(None, 10).complete_agentic("prove-agentic", "x", Path("/tmp"), 5)
@@ -205,17 +205,17 @@ class OverBudgetRecovery(unittest.TestCase):
         """A text answer past the per-message cap continues in a second message, and `result` holds only that one."""
         ok = {"subtype": "success", "is_error": False, "result": "=== TARGET T9\nthe rest", "total_cost_usd": 3.6,
               "num_turns": 2}
-        with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["=== DIRECTION\nTRUE\n",
+        with patch.object(H, "run_tracked", return_value=_resp(0, stdout=_stream(ok, ["=== DIRECTION\nTRUE\n",
                                                                                        "=== TARGET T9\nthe rest"]))):
             self.assertEqual(H.ClaudeCliBackend(None, 10).complete("engine-frontier", "x"),
                              "=== DIRECTION\nTRUE\n=== TARGET T9\nthe rest")
 
     def test_a_tool_session_still_returns_its_final_reply(self):
         ok = {"subtype": "success", "is_error": False, "result": "FINAL", "total_cost_usd": 0.5, "num_turns": 4}
-        with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["I will run a script", "FINAL"]))):
+        with patch.object(H, "run_tracked", return_value=_resp(0, stdout=_stream(ok, ["I will run a script", "FINAL"]))):
             self.assertEqual(H.ClaudeCliBackend(None, 10).complete_agentic("prove-agentic", "x", Path("/tmp"), 5), "FINAL")
 
     def test_a_normal_stream_returns_the_result(self):
         ok = {"subtype": "success", "is_error": False, "result": "PONG", "total_cost_usd": 0.01, "num_turns": 1}
-        with patch.object(H.subprocess, "run", return_value=_resp(0, stdout=_stream(ok, ["PONG"]))):
+        with patch.object(H, "run_tracked", return_value=_resp(0, stdout=_stream(ok, ["PONG"]))):
             self.assertEqual(H.ClaudeCliBackend(None, 10).complete("t", "x"), "PONG")

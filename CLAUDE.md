@@ -408,6 +408,10 @@ Covered by `tests/test_cluster_library.py`.
 - `native_decide` is banned in proofs. Kernel `decide` has timed out at 420 s on a 3,003-case check, so
   finite certificates must be small or Bool-reflected.
 - macOS has no `timeout` binary; use a perl alarm.
+- **A killed run takes its model sessions with it.** Every `claude -p` call goes through `run_tracked`. SIGTERM and
+  SIGHUP terminate the tracked sessions, then the run (`terminate_children`). Killing a run used to leave its in-flight
+  sessions running and billing as orphans (step 3's #120, 2026-10-07). Kill a run with plain `kill <pid>`, never
+  `kill -9`, which skips the handler. A process-group kill would also take down the launcher, such as `screen.py`.
 - Pace model runs in ONE lane. This is a **spend-pacing** rule, not a correctness one: the account's usage
   limit is the shared resource, and hitting it is a hard failure that stops a lane with exit 1 (runs are
   resumable with `--resume`). Concurrent runs do not corrupt each other — audited 2026-09-11: each run's
