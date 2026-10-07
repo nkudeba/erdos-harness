@@ -129,6 +129,26 @@ class Frontier(unittest.TestCase):
         self.assertEqual(H.engine_assignments(f, 0, 0.5), [])
 
 
+class EngineCompleteFallback(unittest.TestCase):
+    """Step 3's #20: an equivalence with an unproven statement, graded valid-restatement and REJECTED by both settles
+    judges, was reported as the engine's complete proof of an open problem."""
+
+    def _claim(self, settles=None):
+        v = {"status": "valid-restatement", "novelty": {"verdict": "restatement", "significance": 0}}
+        if settles is not None:
+            v["settles"] = {"settles": settles, "answer": "true" if settles else None}
+        return {"session": "r1s1", "id": "C2", "status": "PROVED", "statement": "f < c^n iff spread matching", "validation": v}
+
+    def test_a_restatement_the_settles_judges_rejected_is_not_complete(self):
+        self.assertIsNone(H.engine_complete({"ledger": [self._claim(settles=False)]}))
+
+    def test_an_unchecked_restatement_still_falls_back(self):
+        self.assertEqual(H.engine_complete({"ledger": [self._claim()]})["id"], "C2")
+
+    def test_a_settled_claim_is_complete(self):
+        self.assertEqual(H.engine_complete({"ledger": [self._claim(settles=True)]})["id"], "C2")
+
+
 class Claims(unittest.TestCase):
     def test_claim_blocks_parse_with_multiline_proofs(self):
         cs = H.parse_claims(notebook(("PROVED", "QUANT", "liminf >= 0.54"), ("CONJECTURED", "core", "U(x) = o(x)")))

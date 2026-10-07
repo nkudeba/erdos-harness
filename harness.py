@@ -5104,8 +5104,11 @@ def engine_complete(res: dict) -> dict | None:
     led = res.get("ledger") or []
     settled = [c for c in led if ((c.get("validation") or {}).get("settles") or {}).get("settles")
                and _valid_status((c.get("validation") or {}).get("status"))]
+    # The fallback is for claims nobody asked the settles judges about, never for ones they rejected: step 3's #20 run
+    # was marked refereed-complete on an open problem by a valid restatement (an equivalence with an unproven
+    # statement) that both settles judges had said does not settle it.
     done = settled or [c for c in led if (c.get("validation") or {}).get("status") == "valid-restatement"
-                       and c.get("status") in ("PROVED", "REFUTED")]
+                       and c.get("status") in ("PROVED", "REFUTED") and "settles" not in (c.get("validation") or {})]
     if not done:
         return None
     done.sort(key=lambda c: (c.get("status") != "PROVED", -(((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0)))
