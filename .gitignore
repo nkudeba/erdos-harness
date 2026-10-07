@@ -47,3 +47,4 @@ benchmarks/timesplit/library/*/papers/
 experiments/*/library/*/papers/
 tools/*
 !tools/install.sh
+knowledge/results-library.jsonl

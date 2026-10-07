@@ -5977,7 +5977,32 @@ class Harness:
                               draws=int(g("discover_draws", 1)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
+        block = self._results_library_block()
+        if block:
+            s.context = (s.context + "\n\n" + block).strip() if s.context else block
         return s
+
+    def _results_library_block(self) -> str:
+        """--results-library on: other runs' validated results and the openai/math families most relevant to this problem
+        (results_library.py), labelled with how far each can be trusted. Never in a benchmark or masked run: the library
+        holds the release that resolves several catalogue problems, and benchmark aliases are never read into it."""
+        if getattr(self.args, "results_library", "off") != "on":
+            return ""
+        if self.state.get("benchmark") or getattr(self.args, "benchmark", False) or getattr(self.args, "masked", False):
+            self.log.event("engine", "results_library", skipped="benchmark or masked run")
+            return ""
+        try:
+            import results_library as RL
+            pid = int(str(self.problem.get("id")))
+            entries = RL.select(str(self.problem.get("statement") or ""), self.problem.get("tags") or [], RL.load(), 8,
+                                pid if 1 <= pid <= 1217 else None)
+        except Exception as e:                           # noqa: BLE001 - a missing library must not cost the run
+            self.log.event("engine", "results_library", error=repr(e)[:200])
+            return ""
+        self.log.event("engine", "results_library", entries=len(entries),
+                       harness=sum(1 for e in entries if e.get("source") == "harness"),
+                       openai=sum(1 for e in entries if e.get("source") == "openai/math"))
+        return RL.render(entries)
 
     def stage_discover(self) -> dict | None:
         """--discover on: informal attempts, a referee and a direction decision before any Lean is spent, run ONCE
@@ -6050,7 +6075,32 @@ class Harness:
                            marathon_leg_turns=int(g("engine_marathon_leg_turns", 300)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
+        block = self._results_library_block()
+        if block:
+            s.context = (s.context + "\n\n" + block).strip() if s.context else block
         return s
+
+    def _results_library_block(self) -> str:
+        """--results-library on: other runs' validated results and the openai/math families most relevant to this problem
+        (results_library.py), labelled with how far each can be trusted. Never in a benchmark or masked run: the library
+        holds the release that resolves several catalogue problems, and benchmark aliases are never read into it."""
+        if getattr(self.args, "results_library", "off") != "on":
+            return ""
+        if self.state.get("benchmark") or getattr(self.args, "benchmark", False) or getattr(self.args, "masked", False):
+            self.log.event("engine", "results_library", skipped="benchmark or masked run")
+            return ""
+        try:
+            import results_library as RL
+            pid = int(str(self.problem.get("id")))
+            entries = RL.select(str(self.problem.get("statement") or ""), self.problem.get("tags") or [], RL.load(), 8,
+                                pid if 1 <= pid <= 1217 else None)
+        except Exception as e:                           # noqa: BLE001 - a missing library must not cost the run
+            self.log.event("engine", "results_library", error=repr(e)[:200])
+            return ""
+        self.log.event("engine", "results_library", entries=len(entries),
+                       harness=sum(1 for e in entries if e.get("source") == "harness"),
+                       openai=sum(1 for e in entries if e.get("source") == "openai/math"))
+        return RL.render(entries)
 
     def _engine_session_caller(self):
         """`session(purpose, prompt, label, turns, budget, effort) -> (reply, notebook, cost)`: one tool-using research
@@ -11938,6 +11988,9 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-gap-min-sig", type=int, default=2)
     runp.add_argument("--engine-gap-budget", type=float, default=4.0, help="USD per gap-closing session")
     runp.add_argument("--engine-rate-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
+    runp.add_argument("--results-library", choices=["on", "off"], default="off",
+                      help="v6: give the engine other runs' validated results and the openai/math families relevant to "
+                           "this problem (results_library.py). Always off in benchmark and masked runs")
     runp.add_argument("--engine-probe-items", type=int, default=0,
                       help="v6: short probe sessions on this many targets and angles before round 1; their measured "
                            "progress orders round 1 (0 = off). With --engine-sessions 0 it is a map-and-probe screen")
