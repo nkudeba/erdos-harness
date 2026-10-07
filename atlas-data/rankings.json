@@ -31269,7 +31269,7 @@
         "number theory"
       ],
       "score": 18,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "A witness would certify finitely many divisor inequalities, but the source ties the existence problem to much harder prime-pattern questions.",
         "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground.",
@@ -31278,7 +31278,8 @@
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
-        "An unresolved prize problem receives a conservative difficulty prior."
+        "An unresolved prize problem receives a conservative difficulty prior.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use a sieve-backed search beyond the known example 24, retaining a compact certificate for every m below the witness.",
@@ -31365,8 +31366,8 @@
       "manual": true,
       "prize": "£25",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
