@@ -1,0 +1,9 @@
+#7 [s6-probe]: 0 validated new of 8 claims; targets 10 (new 6, sig>=2 3, open 0); best None; probes: measured 0, traction 3, best 2.413; $7.662986999999999
+#488 [s6-probe]: 1 validated new of 12 claims; targets 10 (new 10, sig>=2 7, open 1); best 2; probes: measured 0, traction 3, best 4.825; $12.229464199999999
+#885 [s6-probe]: 1 validated new of 10 claims; targets 10 (new 7, sig>=2 3, open 0); best None; probes: measured 0, traction 3, best 4.405; $9.749969399999998
+#273 [s6-probe]: 0 validated new of 7 claims; targets 10 (new 9, sig>=2 3, open 0); best None; probes: measured 0, traction 1, best 2.397; $6.523759600000001
+#686: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261007-154629-933373-erdos686/lane.log
+#835: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261007-154633-091420-erdos835/lane.log
+#647: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261007-154636-132610-erdos647/lane.log
+#366: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261007-154638-856596-erdos366/lane.log
+S6PROBE-DONE 2026-10-07T19:46:41Z
