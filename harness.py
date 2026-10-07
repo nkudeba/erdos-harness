@@ -252,7 +252,12 @@ class ClaudeCliBackend:
     RETRIES = 3
     BACKOFF_S = (45, 90, 180)
     # Hard failures: never retried, never treated as a failed proof attempt — the run stops (resumable).
+    # "You've hit your session limit · resets 4:50pm" and "You've hit your weekly limit" are the CLI's own wording. Until
+    # 2026-10-07 neither matched, so a limit inside the research engine read as an ordinary failed call: judges recorded
+    # "unjudged" verdicts and sessions ended empty, and the run carried on as if those were results (#273, and three
+    # step-2 dev items stopped by the weekly limit on 2026-10-06).
     HARD_RE = re.compile(r"spend limit|usage limit|hit your (?:org's )?(?:monthly|weekly|daily)?\s*(?:spend|usage)|"
+                         r"hit your (?:session |weekly |daily |monthly |5-hour )?limit|"
                          r"out of credits|insufficient credits|usage-credits|not logged in|unauthori[sz]ed|invalid api key|authentication", re.I)
 
     def _tuning(self, purpose: str) -> tuple[str | None, float]:
@@ -4756,6 +4761,14 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     fblock = frontier_block(f)
     known = clip_middle(fblock + ("\n\nLITERATURE:\n" + s.library if s.library.strip() else ""), 16000)
     sess_context = ("\n" + clip_middle(context, 12000) + "\n") if context else ""
+    dropped = engine_drop_infra(ck)
+    if dropped:
+        everything = list(_ck_claims(ck))
+        ck["rejudged"] = int(ck.get("rejudged") or 0) + engine_rejudge(call, s, statement, known, dropped, everything,
+                                                                        spend, search, keep)
+        for x in ck.get("probes") or []:
+            x["score"] = round(probe_score(x), 3)
+        keep()
     rounds = list(ck.get("rounds") or [])
     ledger = [c for r in rounds for x in r.get("sessions") or [] for c in x.get("claims") or []]
     meta = ck.get("meta")
@@ -4954,6 +4967,77 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
             "recognized": engine_recognized({"frontier": f, "ledger": ledger}),
             "guidance": engine_guidance(f, ledger, meta)}
 
+
+
+def _ck_claims(ck: dict):
+    """Every claim dict an engine checkpoint holds: rounds, probes, the deep dive, marathon legs, repairs and gaps."""
+    for r in ck.get("rounds") or []:
+        for x in r.get("sessions") or []:
+            yield from x.get("claims") or []
+    for x in (ck.get("partial") or {}).get("done", {}).values() if isinstance((ck.get("partial") or {}).get("done"), dict) else []:
+        yield from x.get("claims") or []
+    for x in ck.get("probes") or []:
+        yield from x.get("claims") or []
+    for key in ("deep", "deep_partial"):
+        yield from (ck.get(key) or {}).get("claims_list") or [] if isinstance(ck.get(key), dict) else []
+    for leg in (ck.get("marathon") or {}).get("legs") or [] if isinstance(ck.get("marathon"), dict) else []:
+        yield from leg.get("claims_list") or []
+    for r in (ck.get("repairs") or {}).values() if isinstance(ck.get("repairs"), dict) else []:
+        if isinstance(r, dict) and r.get("statement"):
+            yield r
+    yield from (ck.get("gaps") or {}).get("claims") or [] if isinstance(ck.get("gaps"), dict) else []
+
+
+def _infra_failed(x) -> bool:
+    return bool(ClaudeCliBackend.HARD_RE.search(json.dumps(x, default=str)))
+
+
+def engine_drop_infra(ck: dict) -> list[dict]:
+    """The claims whose judges failed for an infrastructure reason (a usage limit, an auth failure), with that verdict
+    removed so a resume judges them again. A failed settles panel loses only its settles check, which the run redoes.
+    A verdict the judges never gave is not a verdict: #273's probe claims were left "unjudged" by a session limit, and
+    #570's deep dive in step 2 by the weekly limit, and a resume used to keep those as final."""
+    out, seen = [], set()
+    for c in _ck_claims(ck or {}):
+        v = c.get("validation")
+        if id(c) in seen or not isinstance(v, dict):
+            continue
+        seen.add(id(c))
+        if _infra_failed({k: v.get(k) for k in ("referee", "adversary", "novelty", "literature", "panel", "error")}):
+            c.pop("validation")
+            out.append(c)
+        elif isinstance(v.get("settles"), dict) and _infra_failed(v["settles"]):
+            v.pop("settles")
+            out.append(c)
+    return out
+
+
+def engine_rejudge(call, s: "EngineSettings", statement: str, known: str, dropped: list[dict], claims: list[dict],
+                   spend: _DiscoverySpend, search=None, keep=None) -> int:
+    """Judge again every claim `engine_drop_infra` stripped of its verdict, exactly as the round would have, with the
+    whole checkpoint as the lemma context. Returns how many were judged."""
+    keep = keep or (lambda: None)
+    n = 0
+    for c in dropped:
+        if c.get("validation"):                          # only its settles check was dropped; the settles step redoes it
+            continue
+        if not spend.room(2 * s.judge_budget):
+            c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
+            continue
+        lem = engine_lemmas(c, claims)
+        c["validation"] = engine_validate(call, s, statement, known, c, spend, lemmas=lem)
+        c["validation"]["lemma_hash"] = _lemma_hash(lem)
+        c["validation"]["rejudged"] = True
+        if search is not None and c["validation"]["status"] == "validated-new" and spend.room(s.novelty_budget + 0.3):
+            lit = engine_literature_check(call, search, s, statement, c)
+            spend.add(lit.get("cost"))
+            c["validation"]["literature"] = lit
+            if lit.get("verdict") in ("known", "routine"):
+                c["validation"]["status"] = f"valid-{lit['verdict']}"
+        n += 1
+        keep()
+    engine_resolve(claims)
+    return n
 
 
 def parse_probe_verdict(notebook: str) -> dict:

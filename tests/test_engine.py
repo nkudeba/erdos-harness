@@ -901,6 +901,67 @@ class SessionLegs(unittest.TestCase):
         self.assertEqual([bool(e[2].get("continuation")) for e in reqs], [False, True])
 
 
+class InfraVerdicts(unittest.TestCase):
+    """2026-10-07: the CLI's own limit wording ("You've hit your session limit · resets 4:50pm", "You've hit your weekly
+    limit") did not match HARD_RE, so a limit inside the engine read as an ordinary failed call. Judges recorded
+    "unjudged" verdicts, a resume kept them, and #273's probe claims and #570's step-2 deep dive were never judged."""
+
+    LIMIT = "claude -p returned an error result (engine-referee): success: You've hit your session limit · resets 4:50pm (America/Toronto)"
+    NB = ("## Claims\n### C1\nSTATEMENT: the k = 4 case\nSTATUS: PROVED\nTYPE: SPECIAL\nBEYOND: new.\nPROOF: Step one.\n"
+          "## Probe verdict\nPROGRESS: partial\nP_SUCCESS: 0.2\nNEXT: k = 5\n")
+
+    def _script(self, fail_referee=False):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if fail_referee and purpose == "engine-referee":
+                return RuntimeError(self.LIMIT)
+            return judge(purpose)
+        return script
+
+    def test_the_cli_limit_wording_is_hard(self):
+        for msg in (self.LIMIT, "You've hit your weekly limit", "You've hit your usage limit"):
+            self.assertIsNotNone(H.ClaudeCliBackend.HARD_RE.search(msg), msg)
+        self.assertIsNone(H.ClaudeCliBackend.HARD_RE.search("rate limit exceeded, retry"))   # transient: retried
+
+    def test_a_limit_at_a_judge_stops_the_run_instead_of_becoming_a_verdict(self):
+        sess = FakeSession(lambda label, prompt: self.NB)
+        ck = {}
+        with self.assertRaisesRegex(RuntimeError, "session limit"):
+            H.engine_run(FakeCall(self._script(fail_referee=True)), sess, "PROBLEM", LEAN,
+                         H.EngineSettings(sessions=0, rounds=1, total_budget=40, probe_items=2), checkpoint=ck,
+                         save=lambda c: None)
+        self.assertFalse(any((c.get("validation") or {}).get("status") == "unjudged" for c in H._ck_claims(ck)))
+
+    def test_a_resume_rejudges_exactly_the_failed_verdicts(self):
+        sess = FakeSession(lambda label, prompt: self.NB)
+        ck = {}
+        s = H.EngineSettings(sessions=0, rounds=1, total_budget=40, probe_items=2)
+        H.engine_run(FakeCall(self._script()), sess, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        probe_claims = [c for x in ck["probes"] for c in x["claims"]]
+        self.assertTrue(all(c["validation"]["status"] == "validated-new" for c in probe_claims))
+        # what the old pattern let through: one claim's judges failed on the limit, another's settles check did
+        bad, settled = probe_claims[0], probe_claims[1]
+        bad["validation"] = {"status": "unjudged", "referee": {"error": self.LIMIT}, "adversary": {"error": self.LIMIT}}
+        settled["validation"]["settles"] = {"settles": False, "judges": [{"error": self.LIMIT}]}
+        ck["probes"][0]["score"] = 0.0
+        call, sess2 = FakeCall(self._script()), FakeSession(lambda label, prompt: self.NB)
+        res = H.engine_run(call, sess2, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        self.assertEqual(len(call.prompts("engine-referee")), 1)                 # the one failed verdict, nothing else
+        self.assertTrue(bad["validation"].get("rejudged"))
+        self.assertEqual(bad["validation"]["status"], "validated-new")
+        self.assertNotIn("error", json.dumps(settled["validation"].get("settles")))   # settles redone, not kept as False
+        self.assertEqual(ck["rejudged"], 1)
+        self.assertGreater(res["probes"][0]["score"], 3.0)                       # the probe's score follows its new verdict
+        self.assertEqual(sess2.calls, [])                                        # no probe was bought again
+
+    def test_budget_skips_and_real_verdicts_are_kept(self):
+        ck = {"probes": [{"claims": [
+            {"id": "C1", "session": "p1", "status": "PROVED", "validation": {"status": "unjudged", "skipped": "engine budget"}},
+            {"id": "C2", "session": "p1", "status": "PROVED", "validation": {"status": "broken", "referee": {"valid": False}}}]}]}
+        self.assertEqual(H.engine_drop_infra(ck), [])
+
+
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
 
