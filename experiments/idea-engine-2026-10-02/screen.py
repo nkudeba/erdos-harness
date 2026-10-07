@@ -10,7 +10,7 @@ problems are open, so a claim needs human review, and ideally Lean, before it me
 
     python3 experiments/idea-engine-2026-10-02/screen.py --tag v1 455 1203 153
 """
-import argparse, json, subprocess, sys
+import argparse, json, subprocess, sys, time
 from datetime import datetime
 from pathlib import Path
 
@@ -126,9 +126,18 @@ def main() -> int:
                "--engine-total-budget", str(args.total), "--blackboard", "on", "--library", str(lib),
                "--run-budget", str(args.total + 5), "--backend", "claude-cli", "--model", "claude-opus-5-5", "--llm-timeout", "5400",
                *args.flags.split()]
-        with (run_dir / "lane.log").open("a") as log:
-            rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                                timeout=6 * 3600).returncode
+        for attempt in range(4):
+            with (run_dir / "lane.log").open("a") as log:
+                rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                    timeout=6 * 3600).returncode
+            tail = (run_dir / "lane.log").read_text(errors="replace")[-6000:]
+            if rc != 1 or not T.LIMIT_RE.search(tail):
+                break
+            # A usage limit stops the run (exit 1), and the run is resumable: wait for the stated reset, then resume the
+            # same run dir. On 2026-10-07 the session limit failed four problems in a row at their first call.
+            wait = T.seconds_until_reset(tail)
+            print(f"#{n}: usage limit; waiting {wait / 60:.0f} min, then resuming", flush=True)
+            time.sleep(wait)
         rec = record(run_dir, n, args.tag, rc)
         if rec is None:
             print(f"#{n}: no engine record (exit {rc}); see {run_dir}/lane.log", flush=True)
