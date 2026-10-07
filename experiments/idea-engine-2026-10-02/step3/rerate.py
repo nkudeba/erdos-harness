@@ -23,6 +23,8 @@ def call(purpose, prompt, effort, budget):
     try:
         text = be.complete(purpose, prompt, effort_override=effort, budget_override=budget)
     except Exception as e:                                   # noqa: BLE001 - a failed judge is a missing verdict
+        if H.ClaudeCliBackend.HARD_RE.search(str(e)):
+            raise                                            # a usage limit is no verdict: stop, rerun later
         raise H.DiscoveryCallFailed(str(e)[:300], cost=float((getattr(be, "last_meta", None) or {}).get("cost_usd") or 0))
     return text, float((getattr(be, "last_meta", None) or {}).get("cost_usd") or 0)
 

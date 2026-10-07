@@ -480,8 +480,11 @@ class TargetRating(unittest.TestCase):
         res, call, sess = self._run(H.EngineSettings(sessions=2, rounds=1, total_budget=30))
         self.assertEqual(call.prompts("engine-target-rate"), [])
         self.assertIsNone(res["ratings"])
+        # a real checkpoint holds an entry for every target: a rating, or "not rated (budget)"
         ck = {"frontier": {**H.parse_frontier(FRONTIER), "text": FRONTIER},
-              "ratings": {"T1": {"verdict": "new", "significance": 3, "reach": "high"}}}
+              "ratings": {"T1": {"verdict": "new", "significance": 3, "reach": "high"},
+                          "T2": {"verdict": "routine", "significance": 1, "reach": "high"},
+                          "T3": {"error": "not rated (budget)", "cost": 0.0}}}
         res, call, sess = self._run(H.EngineSettings(sessions=2, rounds=1, total_budget=30, min_target_sig=2), ck)
         self.assertEqual(call.prompts("engine-target-rate"), [])               # a resume reuses the checkpointed ratings
         self.assertTrue(any("(T1, type QUANT, significance 3 of 3)" in p for label, p in sess.calls))
@@ -954,6 +957,28 @@ class InfraVerdicts(unittest.TestCase):
         self.assertEqual(ck["rejudged"], 1)
         self.assertGreater(res["probes"][0]["score"], 3.0)                       # the probe's score follows its new verdict
         self.assertEqual(sess2.calls, [])                                        # no probe was bought again
+
+    def test_failed_ratings_are_rated_again(self):
+        f = H.parse_frontier(FRONTIER)
+        ck = {"gaps": {"rated": {"r1s1/C1": {"error": "no novelty verdict", "panel": [{"error": self.LIMIT}]},
+                                 "r1s2/C1": {"verdict": "new", "significance": 2}}},
+              "ratings": {f["targets"][0]["id"]: {"error": "no novelty verdict", "panel": [{"error": self.LIMIT}]}}}
+        H.engine_drop_infra(ck)
+        self.assertEqual(sorted(ck["gaps"]["rated"]), ["r1s2/C1"])
+        self.assertEqual((ck["ratings"], ck["ratings_dropped"]), ({}, 2))
+        # a resume rates exactly the targets that have no rating, and buys no map
+        sess = FakeSession(lambda label, prompt: self.NB)
+        ck = {}
+        s = H.EngineSettings(sessions=0, rounds=1, total_budget=40, min_target_sig=2)
+        H.engine_run(FakeCall(lambda purpose, prompt, n: FRONTIER if purpose == "engine-frontier" else rating(prompt, n)),
+                     sess, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        lost = sorted(ck["ratings"])[0]
+        ck["ratings"][lost] = {"error": "no novelty verdict", "panel": [{"error": self.LIMIT}]}
+        call = FakeCall(lambda purpose, prompt, n: FRONTIER if purpose == "engine-frontier" else rating(prompt, n))
+        H.engine_run(call, sess, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        self.assertEqual(call.prompts("engine-frontier"), [])
+        self.assertEqual(len(call.prompts("engine-target-rate")), s.rate_judges)
+        self.assertNotIn("error", ck["ratings"][lost])
 
     def test_budget_skips_and_real_verdicts_are_kept(self):
         ck = {"probes": [{"claims": [

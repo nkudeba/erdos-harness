@@ -4776,8 +4776,9 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     judged = [c["validation"] for c in ledger if isinstance(c.get("validation"), dict) and "cost" in c["validation"]]
     seen_judging, seen_judged = sum(float(v.get("cost") or 0.0) for v in judged), len(judged)
     ratings = ck.get("ratings") if isinstance(ck.get("ratings"), dict) else None
-    if s.min_target_sig > 0 and ratings is None and f.get("targets"):
-        ratings = ck["ratings"] = engine_rate_targets(call, statement, known, f["targets"], s, spend, workers)
+    missing = [t for t in f.get("targets") or [] if t.get("id") not in (ratings or {})]
+    if s.min_target_sig > 0 and missing:                 # all of them on a fresh run; on a resume, any whose rating failed
+        ratings = ck["ratings"] = {**(ratings or {}), **engine_rate_targets(call, statement, known, missing, s, spend, workers)}
         keep()
     gated = engine_gate_targets(f, ratings, s.min_target_sig) if (s.min_target_sig > 0 and ratings) else f
     probes = ck.get("probes") if isinstance(ck.get("probes"), list) else None
@@ -5009,6 +5010,13 @@ def engine_drop_infra(ck: dict) -> list[dict]:
         elif isinstance(v.get("settles"), dict) and _infra_failed(v["settles"]):
             v.pop("settles")
             out.append(c)
+    # Ratings too: the gap phase never re-rates a claim already in its table, and the gate never re-rates a target, so a
+    # failed rating used to be final. #570's gap ratings all failed on the weekly limit, and its gap phase never ran.
+    for table in ((ck.get("gaps") or {}).get("rated") if isinstance(ck.get("gaps"), dict) else None, ck.get("ratings")):
+        if isinstance(table, dict):
+            for k in [k for k, v in table.items() if _infra_failed(v)]:
+                table.pop(k)
+                ck["ratings_dropped"] = int(ck.get("ratings_dropped") or 0) + 1
     return out
 
 
