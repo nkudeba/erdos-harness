@@ -5800,7 +5800,9 @@ class Harness:
             tmp.write_text(json.dumps(ck, ensure_ascii=False))
             os.replace(tmp, ckpath)
         res = engine_run(self._discovery_caller(), self._engine_session_caller(), self.problem["statement"],
-                         self.state["statement"], s, workers=max(1, s.sessions), search=self._engine_search(),
+                         # at least 4: target ratings and judges are independent calls, and a map-and-rate screen
+                         # (--engine-sessions 0) otherwise rated its 20 targets one at a time
+                         self.state["statement"], s, workers=max(4, s.sessions), search=self._engine_search(),
                          checkpoint=checkpoint, save=save)
         if res.get("error") and not (res.get("frontier") or {}).get("text"):
             # No frontier map means the engine did no work at all: a usage limit or an outage, never a result. Raising
