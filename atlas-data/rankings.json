@@ -30923,7 +30923,7 @@
         "powerful"
       ],
       "score": 18,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The thread carries a complete conditional argument that abc implies finitely many solutions, with an explicit bound n <= K_eps^{6/(1-5eps)}.",
         "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing.",
@@ -30932,7 +30932,8 @@
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
         "The statement or its discussion mentions abc-related dependency; that is a possible dependency to audit, not an assumed theorem requirement.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Formalize the implication with abc as an explicit hypothesis; do not assert the unconditional finiteness.",
@@ -31013,8 +31014,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
