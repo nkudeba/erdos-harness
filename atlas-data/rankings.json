@@ -15,7 +15,7 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "d6913fa5f4ef1445bfce2c26c3b37c06a9aa7402a334520dd40a1e7545548e3d",
+    "harness_sha256": "18241aca883a1c0c27ee8da18a5ea908709e8f0cc011ce7fb10afc89405ce098",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
     "manual_reviews_sha256": "6d9f05c75e7003444343605c23df6b9b9a68edeeeceeff4c4aabf9efd888f78d"
   },
@@ -42850,7 +42850,7 @@
         "number theory"
       ],
       "score": 8,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "There is a plausible finite counting/counterexample workflow, but the easy counterexamples in the discussion concern the alternate non-divisibility typo.",
         "Assessed 2026-09-10: a bounded search over ~1.2e13 (A,n,m) triples across 13,870 sets found zero violations, and every near-miss comes from families already PROVED safe (singletons give exactly 2 - 1/a, pairs and min(A)=2 likewise).",
@@ -42864,7 +42864,8 @@
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
         "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use the divisibility definition as printed; certify the full finite counts for A, n and m with n at least max(A).",
@@ -42964,8 +42965,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -44122,7 +44123,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 1,
+        "runs": 2,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
