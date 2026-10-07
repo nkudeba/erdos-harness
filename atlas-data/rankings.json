@@ -30540,13 +30540,14 @@
         "divisors"
       ],
       "score": 19,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Divisor and prime-factor APIs are represented in previous successful runs.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "The open frontier is k = 5. A witness for it would be a certifiable partial result; the full problem needs a construction for every k.",
@@ -30614,8 +30615,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
