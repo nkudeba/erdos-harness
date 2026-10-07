@@ -43181,13 +43181,14 @@
         "number theory"
       ],
       "score": 8,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary.",
@@ -43268,8 +43269,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
