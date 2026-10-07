@@ -35575,13 +35575,14 @@
         "unit fractions"
       ],
       "score": 12,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "Any prime-set witness needs at least sixty primes in its union, according to the source. Small subset searches and examples using 1 solve only a weakened variant.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget."
+        "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use structured exact subset-sum search with the disjointness/size obstruction and certify primality of every denominator.",
@@ -35652,8 +35653,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
