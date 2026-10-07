@@ -77,6 +77,28 @@ class Parsing(unittest.TestCase):
         self.assertFalse(re.search(num, "the sum is 1213"))                 # arithmetic is not an identity
 
 
+class ComparatorWiring(unittest.TestCase):
+    """The Comparator/nanoda checks (2026-10-07) need no Lean to test their wiring."""
+
+    def test_the_challenge_is_the_frozen_statement_under_the_proof_s_header(self):
+        proof = "import Mathlib.Tactic\nset_option maxHeartbeats 400000\n\ndef f (n : ℕ) : ℕ := n\n\ntheorem erdos_T : f 1 = 1 := by\n  rfl\n"
+        frozen = "def f (n : ℕ) : ℕ := n\n\ntheorem erdos_T : f 1 = 1 := by\n  sorry\n"
+        ch, sol, cfg = A.comparator_files(proof, frozen, "erdos_T", ["f"], "Formal.Audit.AX")
+        self.assertTrue(ch.startswith("import Mathlib.Tactic\nset_option maxHeartbeats 400000"))
+        self.assertIn("theorem erdos_T : f 1 = 1 := by\n  sorry", ch)
+        self.assertEqual(sol, proof)
+        self.assertEqual((cfg["challenge_module"], cfg["solution_module"]), ("Formal.Audit.AX.Challenge", "Formal.Audit.AX.Solution"))
+        self.assertEqual((cfg["theorem_names"], cfg["definition_names"]), (["erdos_T"], ["f"]))
+        self.assertEqual(set(cfg["permitted_axioms"]), A.STD_AXIOMS)
+
+    def test_no_tools_means_no_checks(self):
+        import os
+        from unittest.mock import patch
+        with patch.dict(os.environ, {"COMPARATOR_BIN": "/nonexistent/comparator"}):
+            self.assertIsNone(A.comparator_tools())
+            self.assertEqual(A.comparator_checks("theorem erdos_T : True := trivial", "theorem erdos_T : True := by\n  sorry", "t"), {})
+
+
 @unittest.skipUnless(os.environ.get("DEDUCTIVE_LEAN_TESTS") == "1", "Lean-backed; set DEDUCTIVE_LEAN_TESTS=1")
 class LeanChecks(unittest.TestCase):
     FROZEN = "theorem erdos_T : (3 : ℕ) < 2 := by\n  sorry\n"
@@ -89,6 +111,8 @@ class LeanChecks(unittest.TestCase):
         for k in ("source_scan", "imports", "compiles", "no_sorry_warning", "axioms"):
             self.assertTrue(r[k]["ok"], k)
         self.assertFalse(r["statement_identity"]["ok"])
+        if "comparator" in r:                        # installed (tools/install.sh): its challenge uses the real `<`
+            self.assertFalse(r["comparator"]["ok"])
 
     def test_an_honest_proof_passes(self):
         frozen = "theorem erdos_T : (2 : ℕ) < 3 := by\n  sorry\n"

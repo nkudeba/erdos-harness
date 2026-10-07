@@ -130,6 +130,15 @@ reads whatever is cached and derives its own penalties from it.
   - that the proved constant's **elaborated type** is structurally identical to a clean elaboration of the frozen
     statement.
 
+  When `tools/install.sh` has been run, the audit adds two independent checks, the way openai/math verifies its 405 Lean
+  results:
+  - `comparator` (leanprover/comparator): the proof must match a separately written challenge statement, definitions
+    included, on the permitted axioms, through the Lean kernel;
+  - `nanoda`: the same proof through an independent kernel.
+
+  macOS has no Landlock, so Comparator runs without its sandbox (the repo's fake-landrun shim), and each audit says so.
+  #1125 passes both, and the redefined-`<` attack fails Comparator (`tests/test_audit.py`).
+
   The last check is new, and it is not optional. The harness's own final check compares TEXT, and a redefined `<`
   lets a file prove `(3 : ℕ) < 2` with the frozen text verbatim, no `sorry` and no axioms. `tests/test_audit.py`
   shows that attack passing every text check and failing the audit.

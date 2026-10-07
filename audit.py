@@ -284,6 +284,99 @@ def lean_checks(candidate: str, frozen: str, frozen_imports: list[str], tag: str
                     f"differs at: {', '.join(diff[:6]) or '(no fingerprints)'}") + ("" if kind_ok else f"; `{main}` is not a theorem"))}
     # 3. kernel replay of the proof as written
     checks["kernel_replay"] = kernel_replay(candidate, tag)
+    # 4. Comparator (and nanoda), when installed: an independent statement match and an independent kernel
+    checks.update(comparator_checks(candidate, frozen, tag))
+    return checks
+
+
+# ---------------------------------------------------------------- independent checkers (2026-10-07) -------------
+# leanprover/comparator checks that a proof proves exactly a separately written challenge statement, using no axiom
+# beyond the permitted ones, through the Lean kernel; with nanoda (ammkrn/nanoda_lib) also through an independent kernel.
+# openai/math verifies its 405 Lean results this way. tools/install.sh builds all of it. On macOS there is no Landlock,
+# so Comparator runs under its own fake-landrun shim, without its sandbox. The source scan already bans the
+# elaboration-time code the sandbox guards against, and the detail says the sandbox was absent.
+TOOLS = ROOT / "tools"
+
+
+def comparator_tools() -> dict | None:
+    """Paths to comparator, lean4export, landrun (real or the macOS shim) and nanoda, or None if comparator is missing."""
+    env = os.environ
+    comp = Path(env.get("COMPARATOR_BIN") or TOOLS / "comparator" / ".lake" / "build" / "bin" / "comparator")
+    export = Path(env.get("COMPARATOR_LEAN4EXPORT") or TOOLS / "lean4export" / ".lake" / "build" / "bin" / "lean4export")
+    if not (comp.exists() and export.exists()):
+        return None
+    landrun = env.get("COMPARATOR_LANDRUN") or (shutil_which("landrun") or str(TOOLS / "landrun"))
+    nanoda = Path(env.get("COMPARATOR_NANODA") or TOOLS / "nanoda_lib" / "target" / "release" / "nanoda_bin")
+    return {"comparator": str(comp), "lean4export": str(export), "landrun": landrun,
+            "nanoda": str(nanoda) if nanoda.exists() else None,
+            "sandbox": "landrun" if Path(landrun).name == "landrun" and Path(landrun).parent != TOOLS else "none (fake-landrun shim)"}
+
+
+def shutil_which(name: str) -> str | None:
+    import shutil
+    return shutil.which(name)
+
+
+def header_lines(src: str) -> list[str]:
+    """The leading `import` / `set_option` / `open` lines (and blanks) of a Lean file."""
+    out = []
+    for line in src.splitlines():
+        if line.startswith(("import ", "set_option ", "open ")) or not line.strip():
+            out.append(line)
+        else:
+            break
+    return out
+
+
+def comparator_files(candidate: str, frozen: str, main: str, defs: list[str], base: str) -> tuple[str, str, dict]:
+    """The challenge module (the frozen statement under the proof's own header), the solution module (the proof) and
+    Comparator's config, for module prefix `base`."""
+    challenge = "\n".join(header_lines(candidate)).rstrip() + "\n\n" + strip_imports(frozen).strip() + "\n"
+    cfg = {"challenge_module": f"{base}.Challenge", "solution_module": f"{base}.Solution", "theorem_names": [main],
+           "definition_names": list(defs), "permitted_axioms": sorted(STD_AXIOMS)}
+    return challenge, candidate, cfg
+
+
+def comparator_checks(candidate: str, frozen: str, tag: str) -> dict:
+    """`comparator` and, when nanoda is built, `nanoda`. Empty when Comparator is not installed, so a machine without
+    the tools keeps the audit it had."""
+    tools = comparator_tools()
+    main, defs = frozen_names(frozen)
+    if tools is None or not main:
+        return {}
+    base = "Formal.Audit.A" + hashlib.sha1(tag.encode()).hexdigest()[:12]
+    d = FORMAL / Path(*base.split("."))
+    d.mkdir(parents=True, exist_ok=True)
+    challenge, solution, cfg = comparator_files(candidate, frozen, main, defs, base)
+    if tools["nanoda"]:
+        cfg["enable_nanoda"] = True
+    (d / "Challenge.lean").write_text(challenge)
+    (d / "Solution.lean").write_text(solution)
+    (d / "config.json").write_text(json.dumps(cfg, indent=1))
+    env = {**os.environ, "COMPARATOR_LANDRUN": tools["landrun"], "COMPARATOR_LEAN4EXPORT": tools["lean4export"],
+           **({"COMPARATOR_NANODA": tools["nanoda"]} if tools["nanoda"] else {})}
+    try:
+        r = subprocess.run(["lake", "env", tools["comparator"], str(d / "config.json")], cwd=FORMAL, capture_output=True,
+                           text=True, timeout=LEAN_TIMEOUT, env=env)
+        out = ((r.stdout or "") + "\n" + (r.stderr or "")).replace("WARNING: THIS IS NOT REAL LANDRUN! UNSAFELY RUNNING", "")
+        rc = r.returncode
+    except subprocess.TimeoutExpired:
+        out, rc = "timed out", -1
+    finally:
+        for f in ("Challenge.lean", "Solution.lean", "config.json"):
+            try:
+                (d / f).unlink()
+            except OSError:
+                pass
+    ok = rc == 0 and "Your solution is okay!" in out
+    tail = " ".join(l.strip() for l in out.splitlines() if l.strip() and not l.startswith(("warning:", "Note:", "✔", "⚠")))[-400:]
+    checks = {"comparator": {"ok": ok, "detail": (f"the proof matches the challenge statement ({len(defs)} definition(s) "
+                                                  f"compared), on the permitted axioms, through the Lean kernel; sandbox: "
+                                                  f"{tools['sandbox']}") if ok else f"rejected: {tail}"}}
+    if tools["nanoda"]:
+        acc = "nanoda kernel accepts the solution" in out
+        checks["nanoda"] = {"ok": acc, "detail": "the independent nanoda kernel accepts the proof" if acc
+                            else ("not reached: Comparator stopped earlier" if not ok and "nanoda" not in out else f"rejected: {tail}")}
     return checks
 
 

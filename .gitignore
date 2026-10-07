@@ -45,3 +45,5 @@ pin_*_harness.py
 # so `timesplit.py library` can rebuild them); manifests, digests and statements are committed
 benchmarks/timesplit/library/*/papers/
 experiments/*/library/*/papers/
+tools/*
+!tools/install.sh
