@@ -66067,7 +66067,7 @@
         "binomial coefficients"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "Forum, 2026-10-06: an exhaustive search extends OEIS A375077, the least n with prod_{0<=i<=k}(n-i) dividing C(2n,n), through k = 13. It comes with validation certificates, independent verifiers, and a Lean-verified small-prime barrier lemma that justifies the search's completeness. The problem stays open.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
@@ -66075,7 +66075,8 @@
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The statement or its discussion mentions analytic-number-theory machinery; that is a possible dependency to audit, not an assumed theorem requirement.",
         "The statement or its discussion mentions foundational obstruction or dependence; that is a possible dependency to audit, not an assumed theorem requirement.",
-        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate."
+        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Partial value: the witnesses for k <= 13 are explicit and checkable by Kummer's theorem, so they can be certified. A resolution needs a construction for every k.",
@@ -66164,8 +66165,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
