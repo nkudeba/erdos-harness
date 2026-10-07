@@ -1,0 +1,141 @@
+{
+ "release": "https://github.com/openai/math",
+ "released": "2026-10-06",
+ "mapped": "2026-10-07",
+ "claimed_resolved": [
+  {
+   "problem": "3",
+   "family": "159",
+   "claim": "every set of positive integers with divergent reciprocal sum contains arithmetic progressions of every finite length (the Erdős–Turán conjecture), with quasipolynomial Szemerédi bounds",
+   "lean": true
+  },
+  {
+   "problem": "138",
+   "family": "160",
+   "claim": "W_r(k) > k^{ck⌊log₂ r⌋} for large k, so W(k)^{1/k} → ∞",
+   "lean": true
+  },
+  {
+   "problem": "181",
+   "family": "171",
+   "claim": "R(Q_n) = Θ(2^n), the Burr–Erdős hypercube conjecture",
+   "lean": false
+  },
+  {
+   "problem": "371",
+   "family": "012",
+   "claim": "P(n) < P(n+1) on a set of density 1/2 (the Erdős–Pomerance joint Dickman conjecture)",
+   "lean": true
+  },
+  {
+   "problem": "416",
+   "family": "024",
+   "claim": "an asymptotic equivalent for V(x), and V(cx)/V(x) → c for every fixed c > 0",
+   "lean": true
+  },
+  {
+   "problem": "968",
+   "family": "026",
+   "claim": "the indices where p_n/n increases have positive lower density",
+   "lean": true
+  },
+  {
+   "problem": "952",
+   "family": "028",
+   "claim": "the Gaussian moat conjecture: no infinite walk through distinct Gaussian primes has bounded steps, so the answer is no",
+   "lean": true
+  },
+  {
+   "problem": "970",
+   "family": "021",
+   "claim": "h(k) ≪ k², Jacobsthal's quadratic bound",
+   "lean": true
+  },
+  {
+   "problem": "551",
+   "family": "189",
+   "claim": "R(C_m,K_n) = (m−1)(n−1)+1 for m ≥ n ≥ 3, except R(C_3,K_3) = 6",
+   "lean": true
+  },
+  {
+   "problem": "802",
+   "family": "184",
+   "claim": "the Ajtai–Erdős–Komlós–Szemerédi conjecture: a K_r-free graph of average degree d has an independent set of size Ω_r(n log d / d)",
+   "lean": true
+  },
+  {
+   "problem": "172",
+   "family": "164",
+   "claim": "Hindman's finite sums and products conjecture",
+   "lean": false
+  },
+  {
+   "problem": "431",
+   "family": "013",
+   "claim": "Ostmann's inverse Goldbach conjecture: no finite modification of the primes is A+B with |A|,|B| ≥ 2, so the answer is no",
+   "lean": true
+  },
+  {
+   "problem": "304",
+   "family": "025",
+   "claim": "N(b) ≪ log log b, which is the right order",
+   "lean": true
+  },
+  {
+   "problem": "1150",
+   "family": "076",
+   "claim": "±1 polynomials with modulus (1+o(1))√N on the whole unit circle for every large N, so the answer is no",
+   "lean": true
+  },
+  {
+   "problem": "821",
+   "family": "011",
+   "claim": "infinitely many n have more than n^{1−ε} totient preimages, for every ε > 0",
+   "lean": false
+  },
+  {
+   "problem": "184",
+   "family": "181",
+   "claim": "every graph's edges partition into O(n) cycles and edges, the Erdős–Gallai cycle-decomposition conjecture",
+   "lean": true
+  },
+  {
+   "problem": "174",
+   "family": "172",
+   "claim": "a classification of the finite Euclidean Ramsey configurations by an algebraic condition over the coordinate field; it also disproves the Leader–Russell–Walters conjecture",
+   "lean": true
+  },
+  {
+   "problem": "1083",
+   "family": "166",
+   "claim": "f_d(n) ≥ c_d n^{2/d} for every fixed d ≥ 3, the grid order",
+   "lean": false
+  }
+ ],
+ "claimed_partial": [
+  {
+   "problem": "120",
+   "family": "084",
+   "claim": "the geometric case of the similarity conjecture: for every q ∈ (0,1), compact sets of measure close to 1 with no affine copy of {q^n}. The general case stays open. Step 3's #120 engine run was stopped on 2026-10-07 because its top target was this case",
+   "lean": true
+  },
+  {
+   "problem": "507",
+   "family": "191",
+   "claim": "n points in the unit square with every triangle of area at least n^{−2+c}, a power improvement of the lower bound that disproves the conjectured almost-n^{−2} upper bound",
+   "lean": true
+  },
+  {
+   "problem": "508",
+   "family": "158",
+   "claim": "every 5-colouring of the plane has a monochromatic unit pair, so χ(ℝ²) ∈ {6, 7}",
+   "lean": true
+  },
+  {
+   "problem": "978",
+   "family": "020",
+   "claim": "squarefree values of irreducible quartics with the predicted density, and (d−2)-power-free density for degrees 4–8 under the local condition",
+   "lean": true
+  }
+ ]
+}

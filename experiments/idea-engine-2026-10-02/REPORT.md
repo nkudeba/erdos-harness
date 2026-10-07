@@ -610,6 +610,24 @@ sufficient: a resolution also needs human review.
 - **Why:** this fills the slots where the rule degenerated with the problems the judges see the most significant
   targets in. It was chosen after the screen and is labelled a deviation. The predictions above stand as written.
 
+**The openai/math release (2026-10-06), checked on 2026-10-07 during 3.3.**
+- **What it is.** OpenAI released 722 manuscripts in 372 families from an internal model, with Lean for 235 families.
+- **What it covers.** Mapping its families to erdosproblems.com statements gives 22 Erdős problems:
+  - **claimed resolved (18):** #3, #138, #181, #371, #416, #968, #952, #970, #551, #802, #172, #431, #304, #1150, #821,
+    #184, #174 and #1083;
+  - **claimed partial (4):** #120, #507, #508 and #978.
+- **In the Atlas.** All 22 are recorded as unverified claims, and the claimed-resolved ones have `partial` set to 10.
+  `atlas-data/openai-math-2026-10-06.json` holds the mapping.
+- **Effect on step 3:**
+  - **#120 was stopped mid-run.** Family 084 claims the geometric case of the similarity conjecture, which was the
+    #120 run's top significance-3 target. The run's novelty judges and literature search cannot see a release from the
+    day before, so anything it proved there would have come out "validated-new" falsely. It had spent about $5 of its
+    run before the stop.
+  - **#138, from the screen, is claimed resolved** (family 160).
+  - **#873 and #20 are untouched by the release.** No family concerns lcm of consecutive terms or sunflowers.
+- **A harness flaw this exposed.** Killing a harness run left its in-flight `claude -p` sessions running as orphans, which
+  were stopped by hand.
+
 **3.3, full engine runs, with predictions written now.**
 - **Settings.** Step 2's engine settings (3 sessions, 1 round, a $6 deep dive, gap closing on) plus
   `--engine-min-target-sig 2`, $28 a problem.
