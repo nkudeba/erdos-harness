@@ -8,6 +8,20 @@
     ],
     "score": 31
   },
+  "3": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 159 ('Erdős’s reciprocal-sum conjecture and quasipolynomial Szemerédi bounds'), claims to resolve this problem: every set of positive integers with divergent reciprocal sum contains arithmetic progressions of every finite length (the Erdős–Turán conjecture), with quasipolynomial Szemerédi bounds. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/159.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "7": {
     "rationale": [
       "The odd-covering-system question remains hard despite its finite-certificate label and known restrictions on moduli.",
@@ -108,6 +122,33 @@
     ],
     "score": 73
   },
+  "120": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 084 ('The geometric case of the Erdős similarity conjecture'), claims partial progress on this problem: the geometric case of the similarity conjecture: for every q ∈ (0,1), compact sets of measure close to 1 with no affine copy of {q^n}. The general case stays open. Step 3's #120 engine run was stopped on 2026-10-07 because its top target was this case. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/084.md"
+    ],
+    "assessed": "2026-10-07"
+  },
+  "138": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 160 ('Superexponential van der Waerden numbers'), claims to resolve this problem: W_r(k) > k^{ck⌊log₂ r⌋} for large k, so W(k)^{1/k} → ∞. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/160.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "152": {
     "score": 40,
     "rationale": [
@@ -178,12 +219,33 @@
   },
   "172": {
     "rationale": [
-      "The latest program run certified several basic sublemmas, including degenerate cases. None resolves arbitrary large monochromatic sum-product sets over the naturals."
+      "The latest program run certified several basic sublemmas, including degenerate cases. None resolves arbitrary large monochromatic sum-product sets over the naturals.",
+      "openai/math, released 2026-10-06, family 164 ('Hindman’s finite sums and products conjecture'), claims to resolve this problem: Hindman's finite sums and products conjecture. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
     ],
     "requirements": [
-      "Bridge additive and multiplicative structure for arbitrary size; rational-number results and k≤1 cases are insufficient."
+      "Bridge additive and multiplicative structure for arbitrary size; rational-number results and k≤1 cases are insufficient.",
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
     ],
-    "score": 9
+    "score": 9,
+    "sources": [
+      "https://github.com/openai/math"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
+  "174": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 172 ('Classification of finite Euclidean Ramsey configurations'), claims to resolve this problem: a classification of the finite Euclidean Ramsey configurations by an algebraic condition over the coordinate field; it also disproves the Leader–Russell–Walters conjecture. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/172.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
   },
   "175": {
     "rationale": [
@@ -206,6 +268,33 @@
     "sources": [
       "atlas-data/forum/176.json"
     ]
+  },
+  "181": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 171 ('The hypercube Ramsey conjecture'), claims to resolve this problem: R(Q_n) = Θ(2^n), the Burr–Erdős hypercube conjecture. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
+  "184": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 181 ('The Erdős–Gallai cycle-decomposition conjecture'), claims to resolve this problem: every graph's edges partition into O(n) cycles and edges, the Erdős–Gallai cycle-decomposition conjecture. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/181.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
   },
   "185": {
     "rationale": [
@@ -476,6 +565,20 @@
     ],
     "score": 62
   },
+  "304": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 025 ('Short Egyptian fractions'), claims to resolve this problem: N(b) ≪ log log b, which is the right order. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/025.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "306": {
     "assessed": "2026-10-06",
     "rationale": [
@@ -585,6 +688,20 @@
     ],
     "score": 99
   },
+  "371": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 012 ('Independent largest prime factors of consecutive integers'), claims to resolve this problem: P(n) < P(n+1) on a set of density 1/2 (the Erdős–Pomerance joint Dickman conjecture). The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/012.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "375": {
     "rationale": [
       "Grimm’s conjecture would imply a major prime-gap improvement. A finite bipartite matching formulation does not remove the number-theoretic obstacle."
@@ -680,6 +797,20 @@
     ],
     "score": 99
   },
+  "416": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 024 ('An asymptotic formula for the number of totients'), claims to resolve this problem: an asymptotic equivalent for V(x), and V(cx)/V(x) → c for every fixed c > 0. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/024.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "424": {
     "rationale": [
       "A modulo-three invariant gives an easy density upper bound and refutes an older almost-all formulation. It does not prove or disprove positive density."
@@ -697,6 +828,20 @@
       "Formalize the recursive sparse construction and both its local congruence and global shift properties."
     ],
     "score": 48
+  },
+  "431": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 013 ('Ostmann’s inverse Goldbach conjecture'), claims to resolve this problem: Ostmann's inverse Goldbach conjecture: no finite modification of the primes is A+B with |A|,|B| ≥ 2, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/013.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
   },
   "435": {
     "score": 35,
@@ -893,6 +1038,32 @@
     ],
     "score": 99
   },
+  "507": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 191 ('A power improvement in the Heilbronn triangle lower bound'), claims partial progress on this problem: n points in the unit square with every triangle of area at least n^{−2+c}, a power improvement of the lower bound that disproves the conjectured almost-n^{−2} upper bound. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/191.md"
+    ],
+    "assessed": "2026-10-07"
+  },
+  "508": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 158 ('The Euclidean plane cannot be colored with five colors'), claims partial progress on this problem: every 5-colouring of the plane has a monochromatic unit pair, so χ(ℝ²) ∈ {6, 7}. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/158.md"
+    ],
+    "assessed": "2026-10-07"
+  },
   "532": {
     "rationale": [
       "A successful proof transfers an existing Mathlib Hindman theorem into the finite-subset-sum formulation."
@@ -910,6 +1081,20 @@
       "Certify the positive-density construction as a separate dependency before using the final contradiction."
     ],
     "score": 43
+  },
+  "551": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 189 ('Cycle–clique Ramsey numbers'), claims to resolve this problem: R(C_m,K_n) = (m−1)(n−1)+1 for m ≥ n ≥ 3, except R(C_3,K_3) = 6. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/189.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
   },
   "583": {
     "rationale": [
@@ -1184,6 +1369,33 @@
     ],
     "score": 7
   },
+  "802": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 184 ('Correspondence coloring with a fixed forbidden subgraph'), claims to resolve this problem: the Ajtai–Erdős–Komlós–Szemerédi conjecture: a K_r-free graph of average degree d has an independent set of size Ω_r(n log d / d). The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/184.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
+  "821": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 011 ('Prime-factor statistics of $`p-1`$'), claims to resolve this problem: infinitely many n have more than n^{1−ε} totient preimages, for every ε > 0. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "824": {
     "rationale": [
       "The proved divergence of h(x)/x is much weaker than the requested nearly quadratic lower bound."
@@ -1290,6 +1502,61 @@
     "sources": [
       "atlas-data/forum/942.json"
     ]
+  },
+  "952": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 028 ('Uniformly bounded components of Gaussian-prime graphs'), claims to resolve this problem: the Gaussian moat conjecture: no infinite walk through distinct Gaussian primes has bounded steps, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/028.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
+  "968": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 026 ('Positive lower density of large prime gaps'), claims to resolve this problem: the indices where p_n/n increases have positive lower density. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/026.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
+  "970": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 021 ('A quadratic bound for Jacobsthal’s function'), claims to resolve this problem: h(k) ≪ k², Jacobsthal's quadratic bound. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/021.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
+  "978": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 020 ('Squarefree quartics and power-free polynomial values'), claims partial progress on this problem: squarefree values of irreducible quartics with the predicted density, and (d−2)-power-free density for degrees 4–8 under the local condition. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/020.md"
+    ],
+    "assessed": "2026-10-07"
   },
   "990": {
     "score": 30,
@@ -1411,6 +1678,19 @@
     ],
     "assessed": "2026-09-16"
   },
+  "1083": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 166 ('The higher-dimensional Erdős distinct-distances conjecture'), claims to resolve this problem: f_d(n) ≥ c_d n^{2/d} for every fixed d ≥ 3, the grid order. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
+  },
   "1136": {
     "rationale": [
       "An explicit dyadic residue-class construction achieves density one half, above the requested one third. This is a plausible reusable construction proof."
@@ -1441,6 +1721,20 @@
       "Supply the relevant verified equidistribution theorem or discover a genuinely elementary replacement respecting the square-size bound."
     ],
     "score": 26
+  },
+  "1150": {
+    "rationale": [
+      "openai/math, released 2026-10-06, family 076 ('Real ultraflat Littlewood polynomials and unbounded binary merit factors'), claims to resolve this problem: ±1 polynomials with modulus (1+o(1))√N on the whole unit circle for every large N, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."
+    ],
+    "requirements": [
+      "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript."
+    ],
+    "sources": [
+      "https://github.com/openai/math",
+      "https://github.com/openai/math/blob/main/lean/docs/076.md"
+    ],
+    "partial": 10,
+    "assessed": "2026-10-07"
   },
   "1187": {
     "rationale": [

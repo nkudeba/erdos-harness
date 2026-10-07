@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 106,
+    "manually_reviewed": 127,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "18241aca883a1c0c27ee8da18a5ea908709e8f0cc011ce7fb10afc89405ce098",
+    "harness_sha256": "d82d0211fc4fe3a1d0eccddfbf7dd411e26508dc331d8fa4c69bc9956d2b43e2",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "6d9f05c75e7003444343605c23df6b9b9a68edeeeceeff4c4aabf9efd888f78d"
+    "manual_reviews_sha256": "34a8a99563db0cc3e75400765ec967e22dbde4830a04a4e9a27d678c4214f749"
   },
   "problems": [
     {
@@ -36209,6 +36209,7 @@
       "score": 12,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 013 ('Ostmann’s inverse Goldbach conjecture'), claims to resolve this problem: Ostmann's inverse Goldbach conjecture: no finite modification of the primes is A+B with |A|,|B| ≥ 2, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -36216,12 +36217,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -36249,7 +36251,7 @@
         }
       ],
       "partial": {
-        "score": 51,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -36266,6 +36268,10 @@
           {
             "label": "Library fit",
             "points": 5
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -41
           }
         ],
         "rationale": [
@@ -36276,13 +36282,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/431",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/013.md"
+        ],
+        "searchFloor": null
       },
       "rank": 626,
       "tier": "Frontier"
@@ -36801,6 +36815,7 @@
       "score": 12,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 011 ('Prime-factor statistics of $`p-1`$'), claims to resolve this problem: infinitely many n have more than n^{1−ε} totient preimages, for every ε > 0. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -36808,12 +36823,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -36841,7 +36857,7 @@
         }
       ],
       "partial": {
-        "score": 45,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -36862,6 +36878,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -35
           }
         ],
         "rationale": [
@@ -36873,13 +36893,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/821",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math"
+        ],
+        "searchFloor": null
       },
       "rank": 633,
       "tier": "Frontier"
@@ -40718,6 +40745,7 @@
       "score": 9,
       "harness": "Attempted",
       "rationale": [
+        "openai/math, released 2026-10-06, family 084 ('The geometric case of the Erdős similarity conjecture'), claims partial progress on this problem: the geometric case of the similarity conjecture: for every q ∈ (0,1), compact sets of measure close to 1 with no affine copy of {q^n}. The general case stays open. Step 3's #120 engine run was stopped on 2026-10-07 because its top target was this case. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite combinatorics fits decomposition, but set/cardinality bookkeeping is substantial.",
@@ -40726,11 +40754,12 @@
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
+        "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new.",
         "Separate the combinatorial invariant from the final counting argument.",
         "Construct and verify a uniform argument or an infinite family."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -40791,13 +40820,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/120",
-      "manual": false,
+      "manual": true,
       "prize": "$100",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/084.md"
+        ],
+        "searchFloor": null
       },
       "rank": 675,
       "tier": "Frontier"
@@ -40900,6 +40937,7 @@
       "harness": "Partial result",
       "rationale": [
         "The latest program run certified several basic sublemmas, including degenerate cases. None resolves arbitrary large monochromatic sum-product sets over the naturals.",
+        "openai/math, released 2026-10-06, family 164 ('Hindman’s finite sums and products conjecture'), claims to resolve this problem: Hindman's finite sums and products conjecture. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
@@ -40910,13 +40948,14 @@
       ],
       "requirements": [
         "Bridge additive and multiplicative structure for arbitrary size; rational-number results and k≤1 cases are insufficient.",
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Check for a matching Mathlib theorem before constructing a long combinatorial proof.",
         "Construct and verify a uniform argument or an infinite family.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Do not expect a short route; scope the attempt to a partial result."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -40956,7 +40995,7 @@
         }
       ],
       "partial": {
-        "score": 48,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -40977,6 +41016,10 @@
           {
             "label": "Library fit",
             "points": -8
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -38
           }
         ],
         "rationale": [
@@ -40997,8 +41040,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": null,
-        "sources": [],
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math"
+        ],
         "searchFloor": null
       },
       "rank": 677,
@@ -41360,18 +41405,20 @@
       "score": 9,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 189 ('Cycle–clique Ramsey numbers'), claims to resolve this problem: R(C_m,K_n) = (m−1)(n−1)+1 for m ≥ n ≥ 3, except R(C_3,K_3) = 6. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Check for a matching Mathlib theorem before constructing a long combinatorial proof.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -41395,7 +41442,7 @@
         }
       ],
       "partial": {
-        "score": 42,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -41420,6 +41467,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -32
           }
         ],
         "rationale": [
@@ -41432,13 +41483,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/551",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/189.md"
+        ],
+        "searchFloor": null
       },
       "rank": 682,
       "tier": "Frontier"
@@ -41545,6 +41604,7 @@
       "score": 9,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 020 ('Squarefree quartics and power-free polynomial values'), claims partial progress on this problem: squarefree values of irreducible quartics with the predicted density, and (d−2)-power-free density for degrees 4–8 under the local condition. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -41552,12 +41612,13 @@
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results."
       ],
       "requirements": [
+        "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family.",
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -41623,13 +41684,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/978",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/020.md"
+        ],
+        "searchFloor": null
       },
       "rank": 684,
       "tier": "Frontier"
@@ -42365,6 +42434,7 @@
       "score": 8,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 024 ('An asymptotic formula for the number of totients'), claims to resolve this problem: an asymptotic equivalent for V(x), and V(cx)/V(x) → c for every fixed c > 0. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -42372,12 +42442,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -42405,7 +42476,7 @@
         }
       ],
       "partial": {
-        "score": 45,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -42426,6 +42497,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -35
           }
         ],
         "rationale": [
@@ -42437,13 +42512,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/416",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/024.md"
+        ],
+        "searchFloor": null
       },
       "rank": 692,
       "tier": "Frontier"
@@ -52153,6 +52236,7 @@
       "score": 3,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 012 ('Independent largest prime factors of consecutive integers'), claims to resolve this problem: P(n) < P(n+1) on a set of density 1/2 (the Erdős–Pomerance joint Dickman conjecture). The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -52161,13 +52245,14 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -52199,7 +52284,7 @@
         }
       ],
       "partial": {
-        "score": 45,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -52220,6 +52305,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -35
           }
         ],
         "rationale": [
@@ -52231,13 +52320,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/371",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/012.md"
+        ],
+        "searchFloor": null
       },
       "rank": 793,
       "tier": "Frontier"
@@ -55411,6 +55508,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 159 ('Erdős’s reciprocal-sum conjecture and quasipolynomial Szemerédi bounds'), claims to resolve this problem: every set of positive integers with divergent reciprocal sum contains arithmetic progressions of every finite length (the Erdős–Turán conjecture), with quasipolynomial Szemerédi bounds. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite set machinery is available; global additive structure can demand deep theorems.",
@@ -55420,13 +55518,14 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Identify whether an explicit finite construction settles the full quantifiers.",
         "Construct and verify a uniform argument or an infinite family.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -55466,7 +55565,7 @@
         }
       ],
       "partial": {
-        "score": 43,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -55483,6 +55582,10 @@
           {
             "label": "Library fit",
             "points": -3
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -33
           }
         ],
         "rationale": [
@@ -55493,13 +55596,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/3",
-      "manual": false,
+      "manual": true,
       "prize": "$5000",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/159.md"
+        ],
+        "searchFloor": null
       },
       "rank": 828,
       "tier": "Frontier"
@@ -60247,6 +60358,7 @@
       "score": 1,
       "harness": "Attempted",
       "rationale": [
+        "openai/math, released 2026-10-06, family 160 ('Superexponential van der Waerden numbers'), claims to resolve this problem: W_r(k) > k^{ck⌊log₂ r⌋} for large k, so W(k)^{1/k} → ∞. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite set machinery is available; global additive structure can demand deep theorems.",
@@ -60257,13 +60369,14 @@
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Identify whether an explicit finite construction settles the full quantifiers.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -60299,7 +60412,7 @@
         }
       ],
       "partial": {
-        "score": 57,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -60324,6 +60437,10 @@
           {
             "label": "Library fit",
             "points": -3
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -47
           }
         ],
         "rationale": [
@@ -60336,13 +60453,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/138",
-      "manual": false,
+      "manual": true,
       "prize": "$500",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/160.md"
+        ],
+        "searchFloor": null
       },
       "rank": 876,
       "tier": "Frontier"
@@ -61813,16 +61938,18 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 172 ('Classification of finite Euclidean Ramsey configurations'), claims to resolve this problem: a classification of the finite Euclidean Ramsey configurations by an algebraic condition over the coordinate field; it also disproves the Leader–Russell–Walters conjecture. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -61842,7 +61969,7 @@
         }
       ],
       "partial": {
-        "score": 40,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -61859,6 +61986,10 @@
           {
             "label": "Library fit",
             "points": -8
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -30
           }
         ],
         "rationale": [
@@ -61869,13 +62000,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/174",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/172.md"
+        ],
+        "searchFloor": null
       },
       "rank": 892,
       "tier": "Frontier"
@@ -61972,6 +62111,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 171 ('The hypercube Ramsey conjecture'), claims to resolve this problem: R(Q_n) = Θ(2^n), the Burr–Erdős hypercube conjecture. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
@@ -61980,13 +62120,14 @@
         "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Check for a matching Mathlib theorem before constructing a long combinatorial proof.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -62022,7 +62163,7 @@
         }
       ],
       "partial": {
-        "score": 38,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -62039,6 +62180,10 @@
           {
             "label": "Library fit",
             "points": -8
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -28
           }
         ],
         "rationale": [
@@ -62049,13 +62194,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/181",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math"
+        ],
+        "searchFloor": null
       },
       "rank": 894,
       "tier": "Frontier"
@@ -62072,6 +62224,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 181 ('The Erdős–Gallai cycle-decomposition conjecture'), claims to resolve this problem: every graph's edges partition into O(n) cycles and edges, the Erdős–Gallai cycle-decomposition conjecture. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
@@ -62079,12 +62232,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Build reusable graph encodings and isolate finite certificates from general graph theorems.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -62116,7 +62270,7 @@
         }
       ],
       "partial": {
-        "score": 33,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -62137,6 +62291,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -23
           }
         ],
         "rationale": [
@@ -62148,13 +62306,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/184",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/181.md"
+        ],
+        "searchFloor": null
       },
       "rank": 895,
       "tier": "Frontier"
@@ -64396,6 +64562,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 025 ('Short Egyptian fractions'), claims to resolve this problem: N(b) ≪ log log b, which is the right order. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -64404,13 +64571,14 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -64438,7 +64606,7 @@
         }
       ],
       "partial": {
-        "score": 55,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -64459,6 +64627,10 @@
           {
             "label": "Library fit",
             "points": 5
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -45
           }
         ],
         "rationale": [
@@ -64470,13 +64642,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/304",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/025.md"
+        ],
+        "searchFloor": null
       },
       "rank": 919,
       "tier": "Frontier"
@@ -68028,6 +68208,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 191 ('A power improvement in the Heilbronn triangle lower bound'), claims partial progress on this problem: n points in the unit square with every triangle of area at least n^{−2+c}, a power improvement of the lower bound that disproves the conjectured almost-n^{−2} upper bound. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
@@ -68036,12 +68217,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new.",
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -68109,13 +68291,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/507",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/191.md"
+        ],
+        "searchFloor": null
       },
       "rank": 956,
       "tier": "Frontier"
@@ -68132,6 +68322,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 158 ('The Euclidean plane cannot be colored with five colors'), claims partial progress on this problem: every 5-colouring of the plane has a monochromatic unit pair, so χ(ℝ²) ∈ {6, 7}. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
@@ -68139,12 +68330,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Read the openai/math manuscript before attacking: the frontier moved, and targets inside the claimed case are no longer new.",
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -68204,13 +68396,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/508",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/158.md"
+        ],
+        "searchFloor": null
       },
       "rank": 957,
       "tier": "Frontier"
@@ -78961,6 +79161,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 184 ('Correspondence coloring with a fixed forbidden subgraph'), claims to resolve this problem: the Ajtai–Erdős–Komlós–Szemerédi conjecture: a K_r-free graph of average degree d has an independent set of size Ω_r(n log d / d). The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
@@ -78968,12 +79169,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Build reusable graph encodings and isolate finite certificates from general graph theorems.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -79005,7 +79207,7 @@
         }
       ],
       "partial": {
-        "score": 31,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -79018,6 +79220,10 @@
           {
             "label": "Library fit",
             "points": -7
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -21
           }
         ],
         "rationale": [
@@ -79027,13 +79233,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/802",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/184.md"
+        ],
+        "searchFloor": null
       },
       "rank": 1075,
       "tier": "Frontier"
@@ -83200,6 +83414,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 028 ('Uniformly bounded components of Gaussian-prime graphs'), claims to resolve this problem: the Gaussian moat conjecture: no infinite walk through distinct Gaussian primes has bounded steps, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -83209,6 +83424,7 @@
         "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
@@ -83216,7 +83432,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -83256,7 +83472,7 @@
         }
       ],
       "partial": {
-        "score": 55,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -83281,6 +83497,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -45
           }
         ],
         "rationale": [
@@ -83293,13 +83513,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/952",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/028.md"
+        ],
+        "searchFloor": null
       },
       "rank": 1120,
       "tier": "Frontier"
@@ -83882,6 +84110,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 026 ('Positive lower density of large prime gaps'), claims to resolve this problem: the indices where p_n/n increases have positive lower density. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -83890,12 +84119,13 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -83931,7 +84161,7 @@
         }
       ],
       "partial": {
-        "score": 45,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -83952,6 +84182,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -35
           }
         ],
         "rationale": [
@@ -83963,13 +84197,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/968",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/026.md"
+        ],
+        "searchFloor": null
       },
       "rank": 1127,
       "tier": "Frontier"
@@ -84084,6 +84326,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 021 ('A quadratic bound for Jacobsthal’s function'), claims to resolve this problem: h(k) ≪ k², Jacobsthal's quadratic bound. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -84092,13 +84335,14 @@
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -84126,7 +84370,7 @@
         }
       ],
       "partial": {
-        "score": 51,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -84143,6 +84387,10 @@
           {
             "label": "Library fit",
             "points": 5
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -41
           }
         ],
         "rationale": [
@@ -84153,13 +84401,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/970",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/021.md"
+        ],
+        "searchFloor": null
       },
       "rank": 1129,
       "tier": "Frontier"
@@ -87029,6 +87285,7 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 166 ('The higher-dimensional Erdős distinct-distances conjecture'), claims to resolve this problem: f_d(n) ≥ c_d n^{2/d} for every fixed d ≥ 3, the grid order. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
@@ -87038,6 +87295,7 @@
         "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
@@ -87045,7 +87303,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -87081,7 +87339,7 @@
         }
       ],
       "partial": {
-        "score": 32,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -87102,6 +87360,10 @@
           {
             "label": "Asymptotic core",
             "points": -6
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -22
           }
         ],
         "rationale": [
@@ -87113,13 +87375,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1083",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math"
+        ],
+        "searchFloor": null
       },
       "rank": 1159,
       "tier": "Frontier"
@@ -89488,17 +89757,19 @@
       "score": 1,
       "harness": "Untried",
       "rationale": [
+        "openai/math, released 2026-10-06, family 076 ('Real ultraflat Littlewood polynomials and unbounded binary merit factors'), claims to resolve this problem: ±1 polynomials with modulus (1+o(1))√N on the whole unit circle for every large N, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Limits, function spaces and analytic estimates create a larger formalization burden.",
         "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
       ],
       "requirements": [
+        "Claimed resolved: a harness run would reconstruct or verify the claim, not find new mathematics. To check it, replay the repository's Lean proof against a faithful statement with the audit's checks, or read the manuscript.",
         "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -89522,7 +89793,7 @@
         }
       ],
       "partial": {
-        "score": 38,
+        "score": 10,
         "signals": [
           {
             "label": "Base: certified partial results",
@@ -89539,6 +89810,10 @@
           {
             "label": "Library fit",
             "points": -8
+          },
+          {
+            "label": "Manual partial-value review",
+            "points": -28
           }
         ],
         "rationale": [
@@ -89549,13 +89824,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1150",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "untried",
         "runs": 0,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-07",
+        "sources": [
+          "https://github.com/openai/math",
+          "https://github.com/openai/math/blob/main/lean/docs/076.md"
+        ],
+        "searchFloor": null
       },
       "rank": 1186,
       "tier": "Frontier"
