@@ -1,0 +1,101 @@
+{
+  "sha": "9d259649abe0b02d7a25f7589b872db679b35e21",
+  "node_id": "C_kwDOOogmB9oAKDlkMjU5NjQ5YWJlMGIwMmQ3YTI1Zjc1ODliODcyZGI2NzliMzVlMjE",
+  "commit": {
+    "author": {
+      "name": "Derek Steinkamp",
+      "email": "52836760+derekste@users.noreply.github.com",
+      "date": "2026-10-06T20:41:38Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-06T20:41:38Z"
+    },
+    "message": "feat(Wikipedia): add the repunit-prime infinitude conjecture (#5165)\n\nCloses #5160\n\n## Summary\n\nThis PR formalizes the conjecture that there are infinitely many decimal\nrepunit primes. The\nWikipedia-sourced file defines the length-`n` decimal repunit as a\nfinite geometric sum, checks the\nvalues of `R_1` through `R_5`, verifies that `R_2` is prime and `R_3` is\ncomposite, and states that\nthe set of lengths producing primes is infinite.\n\n## Formalization choices\n\n`repunit10 n` is defined as\n\n```lean\n∑ i in Finset.range n, 10 ^ i\n```\n\nrather than `(10 ^ n - 1) / 9`. The sum directly expresses a string of\n`n` ones and avoids both\ntruncated subtraction and division. It extends the conventional\npositive-length definition to\n`n = 0` with value zero; zero is not prime, so this total boundary value\ndoes not affect the\ninfinitude statement.\n\nThe main theorem concerns the set of prime-producing lengths. A decimal\nrepunit has a unique\nlength, so infinitude of these indices is the same mathematical claim as\ninfinitude of the prime\nvalues. Wikipedia presents this as a conjectured assertion, so the\ntheorem is a direct proposition\nand does not use `answer(sorry)`. No `FormalConjecturesForMathlib`\nchange is needed.\n\n## Intentional proof gap\n\nThe repunit definition and all concrete value, prime, and composite\ntests are complete. The only\nproof gap is the open infinitude theorem.\n\n## Verification\n\nCurrent contribution head:\n`ed2ab13719048f7ecbd4c8188e5b69c13197f7d2`, rebased onto upstream\n`169abb8e`.\n\nLocal checks on the rebased head:\n\n- exact-head static preflight passed for\n`FormalConjectures/Wikipedia/RepunitPrime.lean`;\n- the committed diff contains only that file and has no whitespace,\nmetadata, proof-gap,\n  banned-construct, or line-length findings.\n\nThe source-identical pre-rebase head\n`059048ccf69e3744e6a11e38d232f4eb88a76ec3`\npassed focused Lean elaboration and the following target on Lean 4.33.1:\n\n```text\nenv LEAN_NUM_THREADS=2 lake --wfail build FormalConjectures.Wikipedia.RepunitPrime\n```\n\nAfter upstream advanced through unrelated PR #5159, this branch was\nrebased without source\nchanges. Per author direction, current-head Lean and repository-wide\nverification were delegated\nto PR CI. On this exact head, `Build project`, `Test scripts`,\n`check-copyright`, `check-changes`,\n`scan-pr`, `labeler`, and `cla/google` succeeded; inapplicable jobs were\nskipped.\n\n## AI use\n\nAI assistance was used to research the source, design and implement the\nLean definition and\ntheorem, draft the release prose, and support verification. Before\npublication I will review the\ndefinition, tests, theorem, walkthrough, and final verification record,\nand I will take\nresponsibility for the submitted content.",
+    "tree": {
+      "sha": "d20e210cc3aea30e1c24004da82ad68832f52c3b",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/d20e210cc3aea30e1c24004da82ad68832f52c3b"
+    },
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/9d259649abe0b02d7a25f7589b872db679b35e21",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqxV0SCRC1aQ7uu5UhlAAABxUQAJAuibDpXZdR5J8sLoAu6T4H\nZZtK2D0KVRj4SPL2ZI64yDt7GJJVsgjZLOKxbKlPWXR0r1xw63Gx7NfhWgvgoqvr\nfAgwcCZiQSz9AWYKdTZmhhgLbrkxZqD5ykw2EgR9z3coOLGDLj13BPrM4yuvBghi\nFsqIphC2N0Q+rSIoNzQtcjX00XEQyutbjc5/xG+8wB3y7qxCmhUELu2WCmKTFG60\nYnsCSI+lU9/ob5kc6KrjI/XPu4pyKs/+xcJ3GW25MYqULuGqV2ufzbO3svssRMyG\n8BNS22dkv6i1ZXWLnAKC7EFYObY4c7tWKuqQGNjf9Ay2j4GoilVguDxlKixKIKL4\nA6+fhNT6cAu6st/rTokFisuvMX4m2RTUzekr/CXBjLuBN/XqUn3699f1iSPwjWGq\nXIOHFEU/CNMMl3jEO/7qEiTCXRPJCNUpudRrqQW5653VnWt3q2bmIb6l9dvtOAZO\nt/jwbJmxBGiHptXmk/u1rwP4wrRMIpKfV2Lg3dSESl39K2UcltiS4mhvEx/1zejF\ncPu+HHciWS/MsFpeMU7rJFRygWqcEwBLvKY2ZofZ3Wwpl/fKmS4bceFxyclCLYnO\nUV5yAkSJkFNteFF+pJ7Ipa4b2zrkGrqZgApkojXwzoDYRzq5xqRzNMBpZvyVtq55\nqv1QvXpBr+MAGEDCtCd/\n=BxTv\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree d20e210cc3aea30e1c24004da82ad68832f52c3b\nparent dbb5a21169ce4094913e6cad34faedd74df55157\nauthor Derek Steinkamp <52836760+derekste@users.noreply.github.com> 1791319298 +0000\ncommitter GitHub <noreply@github.com> 1791319298 +0000\n\nfeat(Wikipedia): add the repunit-prime infinitude conjecture (#5165)\n\nCloses #5160\n\n## Summary\n\nThis PR formalizes the conjecture that there are infinitely many decimal\nrepunit primes. The\nWikipedia-sourced file defines the length-`n` decimal repunit as a\nfinite geometric sum, checks the\nvalues of `R_1` through `R_5`, verifies that `R_2` is prime and `R_3` is\ncomposite, and states that\nthe set of lengths producing primes is infinite.\n\n## Formalization choices\n\n`repunit10 n` is defined as\n\n```lean\n∑ i in Finset.range n, 10 ^ i\n```\n\nrather than `(10 ^ n - 1) / 9`. The sum directly expresses a string of\n`n` ones and avoids both\ntruncated subtraction and division. It extends the conventional\npositive-length definition to\n`n = 0` with value zero; zero is not prime, so this total boundary value\ndoes not affect the\ninfinitude statement.\n\nThe main theorem concerns the set of prime-producing lengths. A decimal\nrepunit has a unique\nlength, so infinitude of these indices is the same mathematical claim as\ninfinitude of the prime\nvalues. Wikipedia presents this as a conjectured assertion, so the\ntheorem is a direct proposition\nand does not use `answer(sorry)`. No `FormalConjecturesForMathlib`\nchange is needed.\n\n## Intentional proof gap\n\nThe repunit definition and all concrete value, prime, and composite\ntests are complete. The only\nproof gap is the open infinitude theorem.\n\n## Verification\n\nCurrent contribution head:\n`ed2ab13719048f7ecbd4c8188e5b69c13197f7d2`, rebased onto upstream\n`169abb8e`.\n\nLocal checks on the rebased head:\n\n- exact-head static preflight passed for\n`FormalConjectures/Wikipedia/RepunitPrime.lean`;\n- the committed diff contains only that file and has no whitespace,\nmetadata, proof-gap,\n  banned-construct, or line-length findings.\n\nThe source-identical pre-rebase head\n`059048ccf69e3744e6a11e38d232f4eb88a76ec3`\npassed focused Lean elaboration and the following target on Lean 4.33.1:\n\n```text\nenv LEAN_NUM_THREADS=2 lake --wfail build FormalConjectures.Wikipedia.RepunitPrime\n```\n\nAfter upstream advanced through unrelated PR #5159, this branch was\nrebased without source\nchanges. Per author direction, current-head Lean and repository-wide\nverification were delegated\nto PR CI. On this exact head, `Build project`, `Test scripts`,\n`check-copyright`, `check-changes`,\n`scan-pr`, `labeler`, and `cla/google` succeeded; inapplicable jobs were\nskipped.\n\n## AI use\n\nAI assistance was used to research the source, design and implement the\nLean definition and\ntheorem, draft the release prose, and support verification. Before\npublication I will review the\ndefinition, tests, theorem, walkthrough, and final verification record,\nand I will take\nresponsibility for the submitted content.",
+      "verified_at": "2026-10-06T20:41:55Z"
+    }
+  },
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/9d259649abe0b02d7a25f7589b872db679b35e21",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/9d259649abe0b02d7a25f7589b872db679b35e21",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/9d259649abe0b02d7a25f7589b872db679b35e21/comments",
+  "author": {
+    "login": "derekste",
+    "id": 52836760,
+    "node_id": "MDQ6VXNlcjUyODM2NzYw",
+    "avatar_url": "https://avatars.githubusercontent.com/u/52836760?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/derekste",
+    "html_url": "https://github.com/derekste",
+    "followers_url": "https://api.github.com/users/derekste/followers",
+    "following_url": "https://api.github.com/users/derekste/following{/other_user}",
+    "gists_url": "https://api.github.com/users/derekste/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/derekste/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/derekste/subscriptions",
+    "organizations_url": "https://api.github.com/users/derekste/orgs",
+    "repos_url": "https://api.github.com/users/derekste/repos",
+    "events_url": "https://api.github.com/users/derekste/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/derekste/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "dbb5a21169ce4094913e6cad34faedd74df55157",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/dbb5a21169ce4094913e6cad34faedd74df55157",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/dbb5a21169ce4094913e6cad34faedd74df55157"
+    }
+  ],
+  "stats": {
+    "total": 77,
+    "additions": 77,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "0668a96c4870c642de2cfe44fdc5be9f927d3084",
+      "filename": "FormalConjectures/Wikipedia/RepunitPrime.lean",
+      "status": "added",
+      "additions": 77,
+      "deletions": 0,
+      "changes": 77,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/9d259649abe0b02d7a25f7589b872db679b35e21/FormalConjectures%2FWikipedia%2FRepunitPrime.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/9d259649abe0b02d7a25f7589b872db679b35e21/FormalConjectures%2FWikipedia%2FRepunitPrime.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FWikipedia%2FRepunitPrime.lean?ref=9d259649abe0b02d7a25f7589b872db679b35e21",
+      "patch": "@@ -0,0 +1,77 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import FormalConjecturesUtil\n+\n+/-!\n+# Decimal Repunit Primes\n+\n+A decimal repunit is a natural number whose decimal representation consists entirely of ones.\n+It is conjectured that infinitely many decimal repunits are prime.\n+\n+*References:*\n+- [Wikipedia: Repunit](https://en.wikipedia.org/wiki/Repunit#Decimal_repunit_primes)\n+- [OEIS A002275](https://oeis.org/A002275)\n+- [OEIS A004022](https://oeis.org/A004022)\n+- [OEIS A004023](https://oeis.org/A004023)\n+-/\n+\n+@[expose] public section\n+\n+namespace RepunitPrime\n+\n+/-- The decimal repunit of length $n$, defined as $1 + 10 + \\cdots + 10^{n-1}$. -/\n+def repunit10 (n : ℕ) : ℕ :=\n+  ∑ i ∈ Finset.range n, 10 ^ i\n+\n+@[category test, AMS 11]\n+theorem repunit10_one : repunit10 1 = 1 := by\n+  norm_num [repunit10, Finset.sum_range_succ]\n+\n+@[category test, AMS 11]\n+theorem repunit10_two : repunit10 2 = 11 := by\n+  norm_num [repunit10, Finset.sum_range_succ]\n+\n+@[category test, AMS 11]\n+theorem repunit10_three : repunit10 3 = 111 := by\n+  norm_num [repunit10, Finset.sum_range_succ]\n+\n+@[category test, AMS 11]\n+theorem repunit10_four : repunit10 4 = 1111 := by\n+  norm_num [repunit10, Finset.sum_range_succ]\n+\n+@[category test, AMS 11]\n+theorem repunit10_five : repunit10 5 = 11111 := by\n+  norm_num [repunit10, Finset.sum_range_succ]\n+\n+@[category test, AMS 11]\n+theorem repunit10_two_prime : (repunit10 2).Prime := by\n+  norm_num [repunit10, Finset.sum_range_succ]\n+\n+@[category test, AMS 11]\n+theorem repunit10_three_not_prime : ¬ (repunit10 3).Prime := by\n+  norm_num [repunit10, Finset.sum_range_succ, Nat.prime_def_lt]\n+  exact ⟨3, by norm_num, by norm_num, by norm_num⟩\n+\n+/-- [Wikipedia's repunit article](https://en.wikipedia.org/wiki/Repunit#Decimal_repunit_primes)\n+states: \"It has been conjectured that there are infinitely many repunit primes.\" -/\n+@[category research open, AMS 11]\n+theorem infinitely_many_repunit_primes :\n+    {n : ℕ | (repunit10 n).Prime}.Infinite := by\n+  sorry\n+\n+end RepunitPrime"
+    }
+  ]
+}

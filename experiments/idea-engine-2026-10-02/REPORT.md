@@ -641,6 +641,85 @@ sufficient: a resolution also needs human review.
 - For 3.4's Lean runs: a refused refinement is the case `--rediscover 1` exists for. It gives the stuck step its own
   informal discovery, told what Lean certified around it.
 
+**3.3 results (2026-10-07).** Rows tagged `s3-full` in `results.jsonl`.
+
+| problem | spend | claims judged | validated new | best result |
+|---|---|---|---|---|
+| #873 | $21.10 | 14 | 2 | significance 2: F(A,X,4) ≪ X^{1/3−1/700} for every strictly increasing A (r1s1/C1) |
+| #120 | $4.79 | 0 | 0 | stopped for openai/math family 084 (above) |
+| #20 | $15.90 | 15 | 0 | none new; two routes shown to fail (spread matching, and domination bounds via topological Hall) |
+| #536 | $20.24 | 14 | 0 | none new; a conditional reduction (prime-band hypothesis H plus DHJ(3) gives f(N)=o(N)), judged a restatement |
+
+- **Against the predictions:**
+  - A claim validated as new at significance ≥ 2: predicted at probability 0.5, and it happened on #873.
+  - No complete resolution, as predicted (0.03 each).
+- **#873's result came from a core angle, not from a rated target.** The session took the "hybrid archimedean / p-adic
+  determinant" angle and finished in 7 turns ($2.17). It is informal: a model referee, an adversary and two novelty
+  judges passed it, but it is neither Lean-checked nor human-reviewed. It is recorded in the Atlas as such.
+- **A false "complete" flag on #536, corrected.** `engine_complete` fell back to deep/C2, a valid restatement that both
+  settles judges had rejected. The lane started 87 s before that fix (4f4a25d) was committed, so it ran the old check.
+  - `state.json` is corrected the same way as #20's.
+  - In both runs `best_proof` is now cleared too, because a later blueprint stage would have used it. The blackboards
+    were already right: they file the claim as a restatement.
+
+**Why open targets fell short, and the v6 fix (2026-10-07).** The user asked for this to be fixed. There are four
+causes: three in targeting and one in execution.
+1. **The rubric.** The map built targets for "weeks", while the judges rated reach as the chance of a proof "in a day".
+   - `step3/rerate.py` re-rated the same 20 maps' targets under a one-week rubric that asks for a probability. It cost
+     $24.63, and `rerate.jsonl` holds the rows.
+   - OPEN targets went from 1 to 4: #488 T2, #617 T9, #686 T2 and #873 T6.
+   - But 67 of the 71 significant targets stayed low. A significant target's median one-week probability is 0.06,
+     against 0.23 for all targets.
+   - So the rubric explains a little. The old targets themselves are long shots.
+2. **No stepping stones.** The map was never asked for narrow, significant targets: the smallest open case, a single
+   parameter, almost all inputs, a conditional version.
+3. **Assignment by significance.** #873's one reachable target was never attacked, and its significance-2 result came
+   from an angle nobody had rated.
+4. **Effort.** Sessions stop when their first route ends.
+   - 74 of 90 round sessions on disk spent under 60% of their cap: a median of $1.45 of $3, 10 turns, 9.3 minutes.
+   - 14 of 18 deep dives did the same, a median of $3.43 of $6, although the deep dive's prompt already said not to stop.
+   - #20's sessions refuted their assigned route, named the corrected statement, and stopped with $2 and 74 turns left.
+   - openai/math's trace shows about 20 pivots per problem.
+
+**What changed (v6, committed):**
+- `c40eaea`: the one-week rubric, the stepping-stone ladder in the map, and expected-value order. Fixes causes 1–3.
+- `36ff7cc`: probes that MEASURE reach before round 1, and marathon legs for the deep dive's line.
+- `bc34690`: an in-session audit and a routes log; the referees check every cited theorem's hypotheses.
+- `a2b2b7d`: continuation legs. A session that stops with budget left goes back into its own sandbox to take the route
+  it named under `## Next`. Fixes cause 4.
+- `f2f692c`: the cross-problem results library, with openai/math.
+- `85b0363`: Comparator and nanoda in the audit.
+
+**3.5, the v6 screen. Pre-registered 2026-10-07, before launch.**
+- **Question.** On open problems where v5 found no reachable significant target, does a v6 map, rated under the
+  one-week rubric and then probed, find one?
+- **Problems.** The first 8 of 3.1's pre-registered order, after dropping those with a full run (#873, #20, #536) or an
+  openai/math claim (#120, #138): 7, 488, 885, 273, 686, 835, 647 and 366.
+  - Their v5 maps had 0 OPEN targets, and 2 under the new rubric (#488, #686).
+- **Protocol.** `screen.py --tag s6-probe --src step3 --total 16 --flags "--engine-sessions 0 --engine-min-target-sig 2
+  --engine-probe-items 4 --engine-probe-budget 1.5 --engine-probe-turns 50 --engine-deep-budget 0 --engine-gap-rounds 0
+  --engine-rounds 1"`.
+  - The statements, libraries and blackboards are the same as in 3.1. The v5 blackboard entries hold one summary line
+    each, so the new map does not see the old one.
+  - Each problem gets a fresh map and two judges per target.
+  - Then 4 probes: 2 on targets, by expected value, and 2 on angles. At most 2 claims are judged per probe.
+- **Predictions:**
+  1. Cost $90–130 for the 8.
+  2. Problems with an OPEN target: 5 of 8 (range 3–8). OPEN targets in all: 12 (5–24).
+  3. Validated-new claims from probes: 6 (2–14), in 4 of the 8 problems (2–7).
+  4. Validated-new claims at significance ≥ 2 from probes: 2 (0–6), in 2 of the 8 problems (0–5).
+  5. Probes with traction (score ≥ 2, or progress "strong"): 10 of 32 (4–18).
+- **Reading.** The targeting fix works if OPEN targets appear in at least half the problems. Probes on targets and
+  probes on angles are compared on validated-new claims per dollar, with no threshold; both numbers are reported.
+- **Then.** Full v6 runs on the 2 problems with the strongest measured result: 3 sessions with 3 legs each, a deep dive
+  with legs, and gap closing, $35 each. They are ranked by:
+  1. the best probe claim's validated significance;
+  2. then the number of validated-new probe claims;
+  3. then the number of OPEN targets;
+  4. then `partial`.
+
+  Their predictions are written before launch.
+
 ## Status at the session handoff (2026-10-06, updated 16:00 UTC)
 
 **Finished since the handoff.** #888's step-2 row is in, and the step-2 table below is final.
