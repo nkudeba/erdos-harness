@@ -8,7 +8,7 @@ Two rankings, printed side by side:
   new significant target low reach (all 20 of the first four problems' significance-2 and -3 targets), so the
   pre-registered rule degenerates to `partial` alone.
 
-    python3 experiments/idea-engine-2026-10-02/step3/select.py
+    python3 experiments/idea-engine-2026-10-02/step3/rank_screen.py
 """
 import json
 from collections import Counter

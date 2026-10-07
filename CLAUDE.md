@@ -940,6 +940,30 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
 - **The account has a weekly usage limit** (it resets Monday 09:00 Toronto). It stopped every lane on 2026-10-06, and
   the lanes resumed after the reset. Budget a week, not a day.
 
+**Engine v6 (2026-10-07): measure reach, think longer, audit in-session, build on other results.**
+- **Why.** Step 3's map-and-rate screen of 20 open problems found 1 OPEN target against 6 predicted. There were three
+  causes, all ours:
+  - the map built targets for "weeks" while the judges rated reach "in a day" (69 of 70 significant targets came out
+    low);
+  - the map was never asked for reachable stepping stones;
+  - assignment sorted by significance and never attacked #873's one reachable target. #873's significance-2 result
+    came from an unrated angle.
+- **Reach fix (always on).**
+  - The map builds a ladder: at least three narrow significance-2 stepping stones, each with a REACH.
+  - Judges rate reach over ONE focused week, with a probability `p_week`.
+  - Targets are ordered by expected value (`target_value`).
+- **`--engine-probe-items N`.** Short probe sessions on targets and angles before round 1. They MEASURE reach: their
+  judged claims and verdicts order round 1. With `--engine-sessions 0` this is a map-and-probe screen.
+- **`--engine-marathon-legs N`.** The deep dive's line continues for N legs, each reading every earlier leg's notebook
+  and the accumulated `## Routes` log.
+- **Self-audit (always on).** Sessions keep a routes log and audit before PROVED: the dependency chain, every cited
+  theorem's hypotheses, small cases, parameter order. Claims carry AUDIT and CONCERNS, and the judges decide the
+  concerns.
+- **`--results-library on`.** Other runs' validated results plus the openai/math families relevant to the problem
+  (`results_library.py`). Never in benchmark or masked runs, and no dev or test item ever enters it.
+- **The audit** adds Comparator and nanoda when `tools/install.sh` has been run (see the honesty rules).
+- **Off by default** until a dev screen against v5: probes, marathon and the library.
+
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses
   to start items while it is live. Pass `--allow-concurrent` deliberately.
