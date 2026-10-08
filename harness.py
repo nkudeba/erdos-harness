@@ -4127,7 +4127,9 @@ DEEP_OBJECTIVES = {
     "resolve": ("Choose the line with the best chance of SETTLING the problem as the formal statement poses it: a complete "
                 "proof, or a disproof. Look first at what the team's validated results already reduce it to, and at whether "
                 "a computation could finish it (PARI/GP, a SAT solver). Only if no settling line is plausible, choose the "
-                "line with the best chance of major progress (significance 3), and say so in the GOAL."),
+                "line with the best chance of major progress (significance 3), and say so in the GOAL. Begin the GOAL "
+                "section with one line `SETTLE CHANCE: p`, your probability that this line settles the problem within a "
+                "few more days of work like the team's (0 when no settling line is plausible)."),
 }
 
 # The map under `--engine-objective resolve`. A disproof by an explicit counterexample is a complete answer, and many
@@ -5463,7 +5465,9 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
                                          assignment=CONTINUE_ASSIGNMENT.format(leg=leg, legs=s.session_legs, next=route,
                                                                                assignment=assignment),
                                          teammates="", modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
-        dp = {"plan_cost": round(pc, 4), "goal": goal, "plan_text": plan[:9000]}
+        sc = re.search(r"(?i)SETTLE CHANCE\s*:\s*\**\s*([01](?:\.\d+)?|\.\d+)", plan)
+        dp = {"plan_cost": round(pc, 4), "goal": goal, "plan_text": plan[:9000],
+              "settle_chance": max(0.0, min(1.0, float(sc.group(1)))) if sc else None}
         try:
             reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", "deep", prompt, cont,
                                                               s.deep_turns, s.deep_budget, s.deep_effort, files=files,

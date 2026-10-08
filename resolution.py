@@ -51,6 +51,9 @@ sys.path.insert(0, str(ROOT / "benchmarks" / "timesplit"))
 sys.path.insert(0, str(ROOT))
 from atomic import atomic_write, atomic_write_json, locked       # noqa: E402
 
+# The least settle chance (the deep dive's own `SETTLE CHANCE`) that buys a deep pass, unless a claim is already rated 3.
+SETTLE_FLOOR = 0.1
+
 DEFAULTS = {
     "daily_cap_usd": 150.0,
     # Known lines that PARI/GP may now finish: #366's 5,238 open fibres need Thue solving, #686's odd cases need
@@ -306,11 +309,17 @@ def classify(run_dir: Path) -> tuple[str, dict]:
         sig = (v.get("novelty") or {}).get("significance") or 0
         if (v.get("status") == "validated-new" and sig >= 2) or v.get("status") == "valid-restatement":
             best.append((sig, H.engine_claim_key(c), " ".join(str(c.get("statement")).split())[:300], v.get("status")))
+    chance = (ej.get("deep") or {}).get("settle_chance")
     if best:
         best.sort(reverse=True)
-        return "traction", {"claims": [{"claim": k, "significance": s, "status": st, "statement": t}
-                                       for s, k, t, st in best[:5]]}
-    return "none", {}
+        info = {"claims": [{"claim": k, "significance": s, "status": st, "statement": t} for s, k, t, st in best[:5]],
+                "settle_chance": chance}
+        # The deep tier is for problems a settle could still come from. On 2026-10-08 #366's own team lead wrote that no
+        # line could settle it (a proof needs abc-strength results; a counterexample lies past the 1e22 floor).
+        if best[0][0] < 3 and isinstance(chance, (int, float)) and chance < SETTLE_FLOOR:
+            return "not ripe", info
+        return "traction", info
+    return "none", {"settle_chance": chance}
 
 
 def validated_summary(run_dir: Path) -> tuple[int, list[int], str]:

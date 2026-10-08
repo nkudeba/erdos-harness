@@ -1070,6 +1070,16 @@ class Objective(unittest.TestCase):
             self.assertIn(phrase, call.prompts("engine-deep-plan")[0])
         self.assertEqual(H.EngineSettings().objective, "advance")
 
+    def test_the_settle_chance_is_read_from_the_plan(self):
+        plan = DEEP_PLAN.replace("=== GOAL\n", "=== GOAL\nSETTLE CHANCE: 0.3\n", 1)
+        self.assertIn("SETTLE CHANCE: 0.3", plan)
+        def script(purpose, prompt, n):
+            return FRONTIER if purpose == "engine-frontier" else plan if purpose == "engine-deep-plan" else judge(purpose)
+        res = H.engine_run(FakeCall(script, cost=0.1), FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))),
+                           "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=50, deep_budget=6.0,
+                                                             objective="resolve"))
+        self.assertEqual(res["deep"]["settle_chance"], 0.3)
+
 
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""

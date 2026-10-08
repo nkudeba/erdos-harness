@@ -59,6 +59,20 @@ class Classify(Base):
         self.assertEqual(R.classify(run2)[0], "none")
 
 
+class Ripeness(Base):
+    def test_a_deep_pass_needs_a_plausible_settle_or_a_significance_3_claim(self):
+        def run(chance, sig):
+            r = self.engine_run([_claim("r1s1", "C1", "validated-new", sig)])
+            ej = json.loads((r / "engine" / "engine.json").read_text())
+            ej["deep"] = {"settle_chance": chance}
+            (r / "engine" / "engine.json").write_text(json.dumps(ej))
+            return R.classify(r)[0]
+        self.assertEqual(run(0.0, 2), "not ripe")        # #366: its own team lead saw no settling line
+        self.assertEqual(run(0.3, 2), "traction")
+        self.assertEqual(run(0.0, 3), "traction")        # a claim already rated 3 earns the deep pass anyway
+        self.assertEqual(run(None, 2), "traction")       # a run from before the field
+
+
 class Tiers(Base):
     def test_lean_then_deep_then_a_cut_off_stage_then_the_queue(self):
         cfg = R.load_cfg()
