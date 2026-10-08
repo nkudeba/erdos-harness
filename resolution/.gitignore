@@ -1,0 +1,2 @@
+# the running loop's single-instance lock: a PID, rewritten on every restart
+loop.lock
