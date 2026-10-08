@@ -85,17 +85,19 @@
     "rationale": [
       "SEARCH FLOOR IS IN VERTEX COUNT, and the reachable subclasses are swept (recorded 2026-09-11 from the forum thread, NOT rerun by us). Markstrom [Ma04]: a cubic counterexample needs >= 30 vertices; Nowbandegani-Esfandiari [NoEs11]: a bipartite one >= 32; Tranquilli arXiv:2608.02675 covers cubic bipartite n <= 58; a thread contributor extends that to n <= 62 (1.85e10 search-tree nodes, 1.22e10 at n=62 alone) - but reports that their general cubic search reached only n <= 34, and that beyond n=28 exhaustiveness rests on one unverified generator.",
       "Solved in the affirmative for minimum degree above an absolute constant by Liu-Montgomery [LiMo20], which disproves the stronger Erdos-Gyarfas conjecture; what remains open is the small-degree regime. $1000 prize, five users listed as currently working on it.",
-      "FLOOR UNIT (corrected 2026-09-11): recorded as 1.85e10 ENUMERABLE OBJECTS - the search-tree nodes the contributor reports for cubic bipartite n <= 62, 1.22e10 of them at n=62 alone - not as the parameter 62 vertices. Note the floor covers the CUBIC BIPARTITE subclass only; a counterexample need not be cubic, and the general cubic search reached just n <= 34."
+      "FLOOR UNIT (corrected 2026-09-11): recorded as 1.85e10 ENUMERABLE OBJECTS - the search-tree nodes the contributor reports for cubic bipartite n <= 62, 1.22e10 of them at n=62 alone - not as the parameter 62 vertices. Note the floor covers the CUBIC BIPARTITE subclass only; a counterexample need not be cubic, and the general cubic search reached just n <= 34.",
+      "v6 random-sample screen 2026-10-08 ($12.32, informal): 1 validated-new claims (significance 0); best: Let F(v,t) be the set (up to isomorphism preserving terminal multiplicities) of connected graphs K on v vertices with max degree 3, every vertex of internal degree d having 3−d pendant boundary edges, t = Σ(3−d) total boundary edges, and K containing no 4-cycl"
     ],
     "requirements": [
       "Do not run a generic graph search on #64: the cubic and cubic-bipartite subclasses are already cleared past anything the harness would enumerate, and a counterexample need not be cubic. Reachable partial value is formalizing Liu-Montgomery or one of the confirmed families."
     ],
     "sources": [
-      "atlas-data/forum/64.json"
+      "atlas-data/forum/64.json",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
     "search_floor": 18500000000.0,
     "search_floor_kind": "exhaustive",
-    "assessed": "2026-09-11"
+    "assessed": "2026-10-08"
   },
   "95": {
     "rationale": [
@@ -718,12 +720,17 @@
   },
   "375": {
     "rationale": [
-      "Grimm’s conjecture would imply a major prime-gap improvement. A finite bipartite matching formulation does not remove the number-theoretic obstacle."
+      "Grimm’s conjecture would imply a major prime-gap improvement. A finite bipartite matching formulation does not remove the number-theoretic obstacle.",
+      "v6 random-sample screen 2026-10-08 ($10.80, informal): 1 validated-new claims (significance 1); best: For every n ≥ 1 and every 1 ≤ k ≤ 80, if n+1,…,n+k are all composite then there are distinct primes p_i with p_i | n+i."
     ],
     "requirements": [
       "Establish a uniform Hall-type condition using new information about prime divisors of composite blocks."
     ],
-    "score": 3
+    "score": 3,
+    "sources": [
+      "experiments/idea-engine-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-08"
   },
   "376": {
     "rationale": [
@@ -1020,6 +1027,15 @@
     ],
     "score": 53
   },
+  "486": {
+    "rationale": [
+      "v6 random-sample screen 2026-10-08 ($14.80, informal): 3 validated-new claims (significance 1, 1, 1); best: Let A ⊂ N, q ≥ 1, r ∈ Z, M_{q,r}(A) = {a j : a ∈ A, j ≥ 1, j ≡ r mod q}, A_t = A∩[1,t]. Then ū_log(M_{q,r}(A) \\ M_{q,r}(A_t)) → 0 as t → ∞. Consequently for every periodic set P (e.g. b+q'Z), M_{q,r}(A) ∩ P has log density = lim_t d(M_{q,r}(A_t) ∩ P)."
+    ],
+    "sources": [
+      "experiments/idea-engine-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-08"
+  },
   "488": {
     "assessed": "2026-10-07",
     "rationale": [
@@ -1290,6 +1306,15 @@
     "sources": [
       "experiments/open-viability-2026-09-16/ASSESSMENT.md",
       "https://www.erdosproblems.com/forum/thread/686",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-08"
+  },
+  "695": {
+    "rationale": [
+      "v6 random-sample screen 2026-10-08 ($14.07, informal): 2 validated-new claims (significance 1, 0); best: Let S be one of: (a) any pair {a,b} ⊆ {2,4,…,16} except {8,14}; (b) any 3-subset of {2,4,…,16} except the 14 sets {2,6,10},{2,8,14},{4,6,10},{4,6,12},{4,8,14},{4,10,12},{4,12,14},{6,8,10},{6,8,14},{6,10,12},{8,10,14},{8,12,14},{8,14,16},{10,12,16}. Then no inf"
+    ],
+    "sources": [
       "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
     "assessed": "2026-10-08"

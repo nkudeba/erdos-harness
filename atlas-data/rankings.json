@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 129,
+    "manually_reviewed": 131,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "d004c1114ae2aa04c8785f80fb4308f1f113fbe9050c64e44e9803d768ad0476",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "37186c6ad5ddbb4c8f35ca442b5575a312b30862a12a262bfdced9086aed742f"
+    "manual_reviews_sha256": "75b534aa2609af891a04abca586f7ceee1c4ba8f68d19bf4292aba9e5c9f95ca"
   },
   "problems": [
     {
@@ -31108,7 +31108,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 3,
+        "runs": 4,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -34738,6 +34738,7 @@
       "score": 14,
       "harness": "Attempted",
       "rationale": [
+        "v6 random-sample screen 2026-10-08 ($14.07, informal): 2 validated-new claims (significance 1, 0); best: Let S be one of: (a) any pair {a,b} ⊆ {2,4,…,16} except {8,14}; (b) any 3-subset of {2,4,…,16} except the 14 sets {2,6,10},{2,8,14},{4,6,10},{4,6,12},{4,8,14},{4,10,12},{4,12,14},{6,8,10},{6,8,14},{6,10,12},{8,10,14},{8,12,14},{8,14,16},{10,12,16}. Then no inf",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -34749,7 +34750,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -34801,13 +34802,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/695",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-08",
+        "sources": [
+          "experiments/idea-engine-2026-10-02/REPORT.md"
+        ],
+        "searchFloor": null
       },
       "rank": 610,
       "tier": "Frontier"
@@ -43128,6 +43136,7 @@
       "score": 8,
       "harness": "Attempted",
       "rationale": [
+        "v6 random-sample screen 2026-10-08 ($14.80, informal): 3 validated-new claims (significance 1, 1, 1); best: Let A ⊂ N, q ≥ 1, r ∈ Z, M_{q,r}(A) = {a j : a ∈ A, j ≥ 1, j ≡ r mod q}, A_t = A∩[1,t]. Then ū_log(M_{q,r}(A) \\ M_{q,r}(A_t)) → 0 as t → ∞. Consequently for every periodic set P (e.g. b+q'Z), M_{q,r}(A) ∩ P has log density = lim_t d(M_{q,r}(A_t) ∩ P).",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -43141,7 +43150,7 @@
         "Do not expect a short route; scope the attempt to a partial result."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -43197,13 +43206,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/486",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-08",
+        "sources": [
+          "experiments/idea-engine-2026-10-02/REPORT.md"
+        ],
+        "searchFloor": null
       },
       "rank": 699,
       "tier": "Frontier"
@@ -48546,6 +48562,7 @@
         "SEARCH FLOOR IS IN VERTEX COUNT, and the reachable subclasses are swept (recorded 2026-09-11 from the forum thread, NOT rerun by us). Markstrom [Ma04]: a cubic counterexample needs >= 30 vertices; Nowbandegani-Esfandiari [NoEs11]: a bipartite one >= 32; Tranquilli arXiv:2608.02675 covers cubic bipartite n <= 58; a thread contributor extends that to n <= 62 (1.85e10 search-tree nodes, 1.22e10 at n=62 alone) - but reports that their general cubic search reached only n <= 34, and that beyond n=28 exhaustiveness rests on one unverified generator.",
         "Solved in the affirmative for minimum degree above an absolute constant by Liu-Montgomery [LiMo20], which disproves the stronger Erdos-Gyarfas conjecture; what remains open is the small-degree regime. $1000 prize, five users listed as currently working on it.",
         "FLOOR UNIT (corrected 2026-09-11): recorded as 1.85e10 ENUMERABLE OBJECTS - the search-tree nodes the contributor reports for cubic bipartite n <= 62, 1.22e10 of them at n=62 alone - not as the parameter 62 vertices. Note the floor covers the CUBIC BIPARTITE subclass only; a counterexample need not be cubic, and the general cubic search reached just n <= 34.",
+        "v6 random-sample screen 2026-10-08 ($12.32, informal): 1 validated-new claims (significance 0); best: Let F(v,t) be the set (up to isomorphism preserving terminal multiplicities) of connected graphs K on v vertices with max degree 3, every vertex of internal degree d having 3−d pendant boundary edges, t = Σ(3−d) total boundary edges, and K containing no 4-cycl",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
@@ -48563,7 +48580,7 @@
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -48650,9 +48667,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-10-08",
         "sources": [
-          "atlas-data/forum/64.json"
+          "atlas-data/forum/64.json",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": 18500000000.0
       },
@@ -52635,6 +52653,7 @@
       "harness": "Attempted",
       "rationale": [
         "Grimm’s conjecture would imply a major prime-gap improvement. A finite bipartite matching formulation does not remove the number-theoretic obstacle.",
+        "v6 random-sample screen 2026-10-08 ($10.80, informal): 1 validated-new claims (significance 1); best: For every n ≥ 1 and every 1 ≤ k ≤ 80, if n+1,…,n+k are all composite then there are distinct primes p_i with p_i | n+i.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -52649,7 +52668,7 @@
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed against the problem statement, source discussion; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -52732,8 +52751,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": null,
-        "sources": [],
+        "on": "2026-10-08",
+        "sources": [
+          "experiments/idea-engine-2026-10-02/REPORT.md"
+        ],
         "searchFloor": null
       },
       "rank": 797,
