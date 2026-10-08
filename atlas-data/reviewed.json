@@ -680,7 +680,8 @@
       "The thread carries a complete conditional argument that abc implies finitely many solutions, with an explicit bound n <= K_eps^{6/(1-5eps)}.",
       "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing.",
       "v6 screen 2026-10-08 ($10.17, informal): two validated new results at significance 1: u^3 - 1 is not powerful for 2 <= u <= 10^12 + 1 (computational), and N(X) << X^(5/16+eps) under a conditional lemma, X^(19/60+eps) unconditionally. A probe refuted the naive class-number lemma (3 not dividing h(-t) does not force y = 0 in 1 + t y^2 = u^3) with explicit counterexamples.",
-      "v6 full run 2026-10-08 ($22.36 beyond the screen, informal): of the 43,051 fibres (k,t) with kt <= 10^4, 37,813 (87.8%) contain no solution of any size, by a new descent plus cubic-residue obstruction over Q(sqrt(-t)); 29,992 of them lie outside the Bennett-Ghadermarzi range. Judged valid but routine (significance 1)."
+      "v6 full run 2026-10-08 ($22.36 beyond the screen, informal): of the 43,051 fibres (k,t) with kt <= 10^4, 37,813 (87.8%) contain no solution of any size, by a new descent plus cubic-residue obstruction over Q(sqrt(-t)); 29,992 of them lie outside the Bennett-Ghadermarzi range. Judged valid but routine (significance 1).",
+      "Resolution campaign scout 2026-10-08 ($15.69, informal): 1 validated-new claims (significance 1); best: For every ε > 0 there is C(ε) such that for all X ≥ 2, N(X) = #{1 ≤ n ≤ X : n is 2-full and n+1 is 3-full} ≤ C(ε) X^{3/10+ε}."
     ],
     "requirements": [
       "Formalize the implication with abc as an explicit hypothesis; do not assert the unconditional finiteness.",
@@ -690,7 +691,8 @@
     ],
     "sources": [
       "atlas-data/forum/366.json",
-      "experiments/idea-engine-2026-10-02/REPORT.md"
+      "experiments/idea-engine-2026-10-02/REPORT.md",
+      "resolution/results.jsonl"
     ],
     "search_floor": 1e+22,
     "search_floor_kind": "published"

@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "31eb179ad873527a96c2060e4c48fbabd3e6ecfe941056257e284bfc950590f3",
+    "harness_sha256": "fe6585c2bb56496bfca7c5496f8febb81ebda5c4f294de62da861513d0f19dbe",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "75b534aa2609af891a04abca586f7ceee1c4ba8f68d19bf4292aba9e5c9f95ca"
+    "manual_reviews_sha256": "a4c0aa9ef884f773aeeffd494604887e92b439e17a59ca3afab641b06095ce08"
   },
   "problems": [
     {
@@ -31018,6 +31018,7 @@
         "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing.",
         "v6 screen 2026-10-08 ($10.17, informal): two validated new results at significance 1: u^3 - 1 is not powerful for 2 <= u <= 10^12 + 1 (computational), and N(X) << X^(5/16+eps) under a conditional lemma, X^(19/60+eps) unconditionally. A probe refuted the naive class-number lemma (3 not dividing h(-t) does not force y = 0 in 1 + t y^2 = u^3) with explicit counterexamples.",
         "v6 full run 2026-10-08 ($22.36 beyond the screen, informal): of the 43,051 fibres (k,t) with kt <= 10^4, 37,813 (87.8%) contain no solution of any size, by a new descent plus cubic-residue obstruction over Q(sqrt(-t)); 29,992 of them lie outside the Bennett-Ghadermarzi range. Judged valid but routine (significance 1).",
+        "Resolution campaign scout 2026-10-08 ($15.69, informal): 1 validated-new claims (significance 1); best: For every ε > 0 there is C(ε) such that for all X ≥ 2, N(X) = #{1 ≤ n ≤ X : n is 2-full and n+1 is 3-full} ≤ C(ε) X^{3/10+ε}.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -31116,7 +31117,8 @@
         "on": "2026-10-08",
         "sources": [
           "atlas-data/forum/366.json",
-          "experiments/idea-engine-2026-10-02/REPORT.md"
+          "experiments/idea-engine-2026-10-02/REPORT.md",
+          "resolution/results.jsonl"
         ],
         "searchFloor": 1e+22
       },
@@ -43659,7 +43661,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 3,
+        "runs": 4,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
