@@ -1,0 +1,19 @@
+{
+ "problems": {
+  "366": {
+   "history": [
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 15.6919
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261008-112020-606408-erdos366",
+   "spend": 15.691900799999999,
+   "next": null,
+   "status": "done"
+  }
+ }
+}
