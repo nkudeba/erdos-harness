@@ -85,6 +85,36 @@ class Selection(unittest.TestCase):
             self.assertIn("Apache", json.loads(out.read_text())["license"])
 
 
+class Digests(unittest.TestCase):
+    """2026-10-08: the library carried only each openai/math family's title and one-line description. A digest gives
+    the authors' abstract, main statements and proof overview, from the release's LaTeX, so a session sees how a result
+    was proved."""
+
+    def test_a_digest_takes_the_abstract_statements_and_overview(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "build"
+            f.mkdir()
+            (f / "main.tex").write_text(
+                "\\begin{abstract}We prove $h(k)\\ll k^2$. % a comment\n\\end{abstract}\n"
+                "\\section{Introduction}\\begin{theorem}\\label{t}For every k, h(k) is at most Ck^2.\\end{theorem}\n"
+                "\\section{Plane curves}Not the overview.\n\\section{Outline of the argument}First sieve, then count boxes.\n"
+                "\\section{Boxes}Details.")
+            g = L.tex_digest(Path(d))
+        self.assertIn("ABSTRACT: We prove", g)
+        self.assertNotIn("a comment", g)
+        self.assertIn("MAIN STATEMENTS: For every k", g)
+        self.assertIn("OUTLINE OF THE ARGUMENT: First sieve, then count boxes.", g)
+        self.assertNotIn("Not the overview", g)          # "Plane" is not "plan"
+
+    def test_render_shows_how_for_two_families_at_most(self):
+        es = [{"source": "openai/math", "family": f"00{i}", "title": "T", "statement": "s", "trust": "t",
+               "digest": f"ABSTRACT: method {i}"} for i in range(3)]
+        r = L.render(es)
+        self.assertEqual(r.count("HOW IT WAS PROVED"), 2)
+        self.assertIn("method 0", r)
+        self.assertNotIn("method 2", r)
+
+
 class HarnessFlag(unittest.TestCase):
     def _h(self, **args):
         h = H.Harness.__new__(H.Harness)
