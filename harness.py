@@ -4089,9 +4089,8 @@ def engine_literature_check(call, search, s: "EngineSettings", statement: str, c
 
 
 DEEP_PLAN_PROMPT = """You lead a research team on an OPEN problem. The team has finished its rounds. One researcher now gets a much larger
-budget than any session so far, for ONE line of attack. Choose the line with the best chance of a result an expert would
-call significant: a solid partial result (significance 2) or major progress (3), never another constant inside a method's
-known ceiling. Choose a line, not a wish: the team's validated results and the barriers must make it plausible.
+budget than any session so far, for ONE line of attack. {objective} Choose a line, not a wish: the team's validated
+results and the barriers must make it plausible.
 
 PROBLEM:
 {statement}
@@ -4104,13 +4103,25 @@ EVERYTHING THE TEAM PRODUCED (each claim with its referee, adversary and novelty
 
 Write exactly these sections, each starting with its === line:
 === GOAL
-One precise statement to prove (or refute), and why an expert would rate it 2 or 3.
+One precise statement to prove (or refute), and what it would settle or why an expert would rate it 2 or 3.
 === WHY THIS LINE
 Why this line can succeed where the barriers stop others; which validated results it builds on.
 === PLAN
 The steps, in order, each precise enough to start on. Mark which steps the team has already established.
 === PITFALLS
 The errors the referees found in this team's work that this line must avoid, and the barriers it must not walk into."""
+
+# What the deep dive aims at (`EngineSettings.objective`). "advance" is the v3-v6 aim. "resolve" aims at the answer: in
+# step 2 every problem the engine solved had a complete proof from its deep dive (#1125's only from it), and step 3,
+# aimed at significant partial results, produced partial results.
+DEEP_OBJECTIVES = {
+    "advance": ("Choose the line with the best chance of a result an expert would call significant: a solid partial result "
+                "(significance 2) or major progress (3), never another constant inside a method's known ceiling."),
+    "resolve": ("Choose the line with the best chance of SETTLING the problem as the formal statement poses it: a complete "
+                "proof, or a disproof. Look first at what the team's validated results already reduce it to, and at whether "
+                "a computation could finish it (PARI/GP, a SAT solver). Only if no settling line is plausible, choose the "
+                "line with the best chance of major progress (significance 3), and say so in the GOAL."),
+}
 
 DEEP_ASSIGNMENT = """DEEP DIVE. You have the largest budget of anyone on the team, for ONE line of attack chosen by the team lead after
 reading everything the team produced. The files in prior/ are the team's notebooks: read the ones the plan names before
@@ -4203,6 +4214,7 @@ class EngineSettings:
     session_effort: str = "high"
     session_legs: int = 1            # > 1: a session that stops with budget left and a route to try is sent back (v6)
     leg_min_budget: float = 0.75     # a continuation needs at least this much of the session's own budget left
+    objective: str = "advance"       # "resolve": the deep dive aims at settling the problem (DEEP_OBJECTIVES)
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4848,7 +4860,34 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     if probes:
         gated = rank_by_probes(gated, probes)
         ledger = [c for x in probes for c in x.get("claims") or []] + ledger
+
+    def meta_review(rnd: int) -> tuple[dict, list[dict]]:
+        """The team lead reads everything the team has and writes the next round's assignments."""
+        mt, mc, merr = _discovery_call_capped(call, "engine-meta", METAREVIEW_PROMPT.format(
+            statement=statement, results=engine_results_digest(ledger), k=s.sessions,
+            frontier=fblock + (f"\n\nTARGETS AS THE JUDGES RATED THEM BEFORE ANY WORK (the bar is a new result at significance "
+                               f">= {s.min_target_sig}):\n" + engine_ratings_block(f, ratings) if ratings else "")),
+            s.frontier_effort, s.meta_budget, spend)
+        if not mt:
+            return {"error": merr, "cost": round(mc, 4)}, []
+        secs = dict((t.upper(), b) for t, b in delimited_sections(mt))
+        nxt = [re.sub(r"^\s*\d+[.)]\s*", "", l).strip() for l in (secs.get("NEXT") or "").splitlines()
+               if re.match(r"^\s*\d+[.)]", l)]
+        out = {"text": mt, "sections": {t: b[:5000] for t, b in secs.items()}, "next": nxt[: s.sessions], "cost": round(mc, 4)}
+        return out, [{"kind": "next", "text": "NEXT-ROUND ASSIGNMENT from the team lead, who has read every "
+                      "result of the first round:\n" + line + "\n\nWHAT THE TEAM ESTABLISHED IN ROUND "
+                      f"{rnd} (validated results first):\n" + clip_middle(secs.get("STATE") or "", 3000)
+                      + "\n\nLESSONS:\n" + clip_middle(secs.get("LESSONS") or "", 2000)} for line in nxt[: s.sessions]]
+
     assignments = ck["next"] if "next" in ck else engine_assignments(gated, s.sessions, s.core_share)
+    if (not assignments and rounds and len(rounds) < max(1, s.rounds) and not ck.get("partial")
+            and spend.room(s.meta_budget + s.session_budget)):
+        # A resume that adds rounds (the campaign's deep tier). The earlier run's last round had no next round to plan,
+        # so it never ran the review, and its assignments are empty: plan the next round now, from everything so far.
+        meta, assignments = meta_review(len(rounds))
+        rounds[-1]["meta"] = {k: v for k, v in (meta or {}).items() if k != "text"}
+        ck.update({"rounds": rounds, "meta": meta, "next": assignments})
+        keep()
     for rnd in range(len(rounds) + 1, max(1, s.rounds) + 1):
         if not assignments:
             break
@@ -4941,23 +4980,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
         assignments = []
         if rnd < s.rounds and spend.room(s.meta_budget + s.session_budget):
-            mt, mc, merr = _discovery_call_capped(call, "engine-meta", METAREVIEW_PROMPT.format(
-                statement=statement, results=engine_results_digest(ledger), k=s.sessions,
-                frontier=fblock + (f"\n\nTARGETS AS THE JUDGES RATED THEM BEFORE ANY WORK (the bar is a new result at significance "
-                                   f">= {s.min_target_sig}):\n" + engine_ratings_block(f, ratings) if ratings else "")),
-                s.frontier_effort, s.meta_budget, spend)
-            if mt:
-                secs = dict((t.upper(), b) for t, b in delimited_sections(mt))
-                nxt = [re.sub(r"^\s*\d+[.)]\s*", "", l).strip() for l in (secs.get("NEXT") or "").splitlines()
-                       if re.match(r"^\s*\d+[.)]", l)]
-                meta = {"text": mt, "sections": {t: b[:5000] for t, b in secs.items()}, "next": nxt[: s.sessions],
-                        "cost": round(mc, 4)}
-                assignments = [{"kind": "next", "text": "NEXT-ROUND ASSIGNMENT from the team lead, who has read every "
-                                "result of the first round:\n" + line + "\n\nWHAT THE TEAM ESTABLISHED IN ROUND "
-                                f"{rnd} (validated results first):\n" + clip_middle(secs.get("STATE") or "", 3000)
-                                + "\n\nLESSONS:\n" + clip_middle(secs.get("LESSONS") or "", 2000)} for line in nxt[: s.sessions]]
-            else:
-                meta = {"error": merr, "cost": round(mc, 4)}
+            meta, assignments = meta_review(rnd)
             rec["meta"] = {k: v for k, v in (meta or {}).items() if k != "text"}
         rounds.append(rec)
         ck.update({"rounds": rounds, "meta": meta, "next": assignments})
@@ -5361,7 +5384,8 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
             plan, pc, goal = slot["plan_text"], float(slot.get("plan_cost") or 0.0), slot.get("goal") or ""
         else:
             pt, pc, perr = _discovery_call_capped(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
-                statement=statement, frontier=fblock, results=engine_results_digest(ledger)), s.frontier_effort,
+                statement=statement, frontier=fblock, results=engine_results_digest(ledger),
+                objective=DEEP_OBJECTIVES.get(s.objective, DEEP_OBJECTIVES["advance"])), s.frontier_effort,
                 s.meta_budget, spend)
             if not pt:
                 return {"plan_cost": round(pc, 4), "error": perr}
@@ -6328,7 +6352,8 @@ class Harness:
                            marathon_leg_budget=float(g("engine_marathon_leg_budget", 8.0)),
                            marathon_leg_turns=int(g("engine_marathon_leg_turns", 300)),
                            session_legs=int(g("engine_session_legs", 1)),
-                           leg_min_budget=float(g("engine_leg_min_budget", 0.75)))
+                           leg_min_budget=float(g("engine_leg_min_budget", 0.75)),
+                           objective=str(g("engine_objective", "advance")))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -12263,6 +12288,9 @@ def build_parser() -> argparse.ArgumentParser:
                            "back into its sandbox to take it, up to this many legs within its own budget (1 = off)")
     runp.add_argument("--engine-leg-min-budget", type=float, default=0.75,
                       help="USD of the session's own budget a continuation leg needs")
+    runp.add_argument("--engine-objective", choices=["advance", "resolve"], default="advance",
+                      help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
+                           "as formalised (resolve, the campaign's setting)")
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")
     runp.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     runp.add_argument("--discover-budget", type=float, default=0.8, help="USD cap per attempt")

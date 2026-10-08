@@ -987,6 +987,42 @@ class InfraVerdicts(unittest.TestCase):
         self.assertEqual(H.engine_drop_infra(ck), [])
 
 
+class MoreRoundsOnResume(unittest.TestCase):
+    """The campaign's deep tier resumes a one-round run with two rounds. That run never planned a second round, so its
+    checkpoint holds no assignments, and without a review on resume the second round silently did not happen."""
+
+    def test_a_resume_that_adds_a_round_plans_it(self):
+        def script(purpose, prompt, n):
+            return FRONTIER if purpose == "engine-frontier" else META if purpose == "engine-meta" else judge(purpose)
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim {label}")))
+        ck = {}
+        H.engine_run(FakeCall(script, cost=0.1), sess, "PROBLEM", LEAN, H.EngineSettings(sessions=2, rounds=1, total_budget=40),
+                     checkpoint=ck, save=lambda c: None)
+        self.assertEqual(ck["next"], [])                                  # one round, nothing planned
+        call, sess2 = FakeCall(script, cost=0.1), FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim {label}")))
+        res = H.engine_run(call, sess2, "PROBLEM", LEAN, H.EngineSettings(sessions=2, rounds=2, total_budget=80),
+                           checkpoint=ck, save=lambda c: None)
+        self.assertEqual(len(call.prompts("engine-meta")), 1)
+        self.assertEqual(len(res["rounds"]), 2)
+        self.assertTrue(all("NEXT-ROUND ASSIGNMENT" in p for label, p in sess2.calls if label.startswith("r2")))
+        self.assertEqual(sorted(l for l, p in sess2.calls), ["r2s1", "r2s2"])     # round 1 was not bought again
+
+
+class Objective(unittest.TestCase):
+    """2026-10-08: the campaign aims the deep dive at settling the problem. In step 2 every solved problem had a complete
+    proof from its deep dive; step 3, aimed at significant partial results, produced partial results."""
+
+    def test_the_deep_plan_carries_the_objective(self):
+        def script(purpose, prompt, n):
+            return FRONTIER if purpose == "engine-frontier" else DEEP_PLAN if purpose == "engine-deep-plan" else judge(purpose)
+        for objective, phrase in (("resolve", "SETTLING the problem"), ("advance", "a solid partial result")):
+            call = FakeCall(script, cost=0.1)
+            H.engine_run(call, FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                         H.EngineSettings(sessions=1, rounds=1, total_budget=50, deep_budget=6.0, objective=objective))
+            self.assertIn(phrase, call.prompts("engine-deep-plan")[0])
+        self.assertEqual(H.EngineSettings().objective, "advance")
+
+
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
 

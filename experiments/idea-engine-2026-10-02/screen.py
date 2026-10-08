@@ -22,6 +22,9 @@ sys.path.insert(0, str(ROOT))
 import timesplit as T
 
 
+RESULTS_FILE = [HERE / "results.jsonl"]          # --results: the campaign keeps its rows in its own file
+
+
 def target_summary(ej: dict) -> dict:
     """The map-and-rate screen's result: every frontier target with the judges' pre-rating (step 3, 2026-10-07).
     The panel is conservative (`engine_novelty_panel`): `new` only if both judges say new, the lower significance and
@@ -75,7 +78,7 @@ def record(run_dir: Path, n: str, tag: str, rc) -> dict | None:
                             for c in ej.get("validated") or []],
            **target_summary(ej),
            "at": datetime.now().isoformat(timespec="seconds")}
-    with (HERE / "results.jsonl").open("a") as f:
+    with RESULTS_FILE[0].open("a") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return rec
 
@@ -91,7 +94,10 @@ def main() -> int:
                     "open-discovery experiment; step 3 uses step3/)")
     ap.add_argument("--resume", action="append", default=[], help="a cut-off run dir to resume first, repeatable (the "
                     "engine picks up from engine/checkpoint.json); one value per flag, so it never swallows the problems")
+    ap.add_argument("--results", help="the results file (default: this experiment's results.jsonl)")
     args = ap.parse_args()
+    if args.results:
+        RESULTS_FILE[0] = Path(args.results).resolve()
     if args.record:
         rd = (ROOT / args.record).resolve()
         rec = record(rd, rd.name.split("erdos")[-1], args.tag, json.loads((rd / "DONE").read_text()).get("exit"))
@@ -141,7 +147,7 @@ def main() -> int:
         rec = record(run_dir, n, args.tag, rc)
         if rec is None:
             print(f"#{n}: no engine record (exit {rc}); see {run_dir}/lane.log", flush=True)
-            with (HERE / f"{args.tag}.infra.jsonl").open("a") as f:
+            with (RESULTS_FILE[0].parent / f"{args.tag}.infra.jsonl").open("a") as f:
                 f.write(json.dumps({"problem": n, "run_dir": str(run_dir.relative_to(ROOT)), "exit": rc}) + "\n")
             continue
         print(f"#{n} [{args.tag}]: {len(rec['validated'])} validated new of {sum(rec['claims'].values())} claims; "
