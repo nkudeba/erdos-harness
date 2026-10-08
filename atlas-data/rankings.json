@@ -52631,14 +52631,15 @@
         "primes"
       ],
       "score": 3,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "Grimm’s conjecture would imply a major prime-gap improvement. A finite bipartite matching formulation does not remove the number-theoretic obstacle.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The catalogue identifies a finite certificate direction, but the discussion already excludes any witness below ~1.9e+10 — far past a bounded search, so the finite label promises an object that cannot be exhibited.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Establish a uniform Hall-type condition using new information about prime divisors of composite blocks.",
@@ -52724,8 +52725,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
