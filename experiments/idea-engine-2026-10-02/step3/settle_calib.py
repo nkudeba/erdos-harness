@@ -23,12 +23,15 @@ def chance(text: str):
 
 
 def main() -> int:
+    from concurrent.futures import ThreadPoolExecutor
     rows = {}
     for l in (ROOT / "benchmarks" / "timesplit" / "results" / "engine-v5-dev.jsonl").read_text().splitlines():
         r = json.loads(l)
         rows[r["problem"]] = r
     out = HERE / "settle_calib.jsonl"
-    for n, solved in ITEMS.items():
+
+    def one(item):
+        n, solved = item
         run = ROOT / rows[n]["run_dir"]
         ej = json.loads((run / "engine" / "engine.json").read_text())
         prob = json.loads((run / "problem.json").read_text())
@@ -45,6 +48,9 @@ def main() -> int:
         with out.open("a") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         print(f"#{n} solved={solved} chances={[d['chance'] for d in draws]}", flush=True)
+
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        list(ex.map(one, ITEMS.items()))
     return 0
 
 

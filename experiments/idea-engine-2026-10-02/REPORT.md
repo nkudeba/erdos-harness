@@ -916,6 +916,33 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   - If the gap is under 0.1, the number is not a ripeness screen, and the campaign keeps the scout as its only filter.
   - If the gap is at least 0.15, a pre-screen is built and itself tested on train items before use.
 
+**3.8 results (2026-10-08).** 12 calls, $4.81 (`step3/settle_calib.jsonl`).
+
+| item | settled in step 2 | SETTLE CHANCE (two draws) | mean |
+|---|---|---|---|
+| #618 | yes | 0.75, 0.75 | 0.75 |
+| #401 | yes | 0.55, 0.55 | 0.55 |
+| #888 | no | 0.20, 0.15 | 0.175 |
+| #1125 | yes | 0.12, 0.05 | 0.085 |
+| #865 | no | 0.05, 0.07 | 0.06 |
+| #570 | no | 0.05, 0.00 | 0.025 |
+
+- **The gap prediction holds:** the solved three average 0.462 and the others 0.087, a gap of 0.375 against at least
+  0.15.
+- **Perfect separation fails.** #1125, which only its deep dive settled, scored 0.085, below #888 at 0.175.
+- **The number is stable.** The two draws of every item agree to within 0.07.
+- **At a threshold of 0.3:** two picks, both settled, and no unsettled item above it, but #1125 is missed. That is high
+  precision and partial recall, the property a screen needs if the problems it passes are to be mostly settled. The
+  evidence is still only six items.
+- **Deviation from the reading written before the test.** It said "a pre-screen is built and itself tested on train
+  items before use". Instead the screen is tested inside the campaign, on open problems:
+  - every problem scoring at or above 0.3 is scouted;
+  - a fixed random quarter of those below 0.3 is scouted as a control (by a hash of the problem number);
+  - the complete-answer rates of the two arms are compared.
+
+  Why: one lane, and a train test would first need about $270 of full scouts on resolved problems. This measures the
+  screen on the distribution it is used for.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
