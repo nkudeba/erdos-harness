@@ -897,6 +897,25 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   - #486: logarithmic-density results for the sets the problem builds;
   - #695: excluded classes of prime chains.
 
+**3.8, does the deep dive's SETTLE CHANCE predict a settle? Pre-registered 2026-10-08, before any call.**
+- **Why.** The resolution campaign spends its deep pass only where the deep dive's plan states a plausible SETTLE
+  CHANCE. If the same number, asked before any work, separates solvable problems from the rest, it becomes a cheap
+  pre-screen of ripeness over the whole catalogue: a map plus one call, about $4 a problem. That pre-screen is how "most
+  problems we tackle" could come to mean significance 3.
+- **Test.** Step 2's six unrecognized dev items, with their outcomes already known: #401, #618 and #1125 were settled;
+  #570, #865 and #888 were not.
+  - For each item, the deep-dive plan prompt under the resolve objective, given only that run's frontier map and no
+    results, masked as the run was.
+  - Two independent draws per item, averaged. About $14.
+  - Script: `step3/settle_calib.py`.
+- **This is a single gate on dev, with no tuning:** the prompt and the rule are fixed now.
+- **Predictions:**
+  - The solved three average at least 0.15 more than the other three.
+  - Every solved item scores above every unsolved one: probability 0.3.
+- **Reading.**
+  - If the gap is under 0.1, the number is not a ripeness screen, and the campaign keeps the scout as its only filter.
+  - If the gap is at least 0.15, a pre-screen is built and itself tested on train items before use.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
