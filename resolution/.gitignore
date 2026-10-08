@@ -1,2 +1,4 @@
 # the running loop's single-instance lock: a PID, rewritten on every restart
 loop.lock
+# formal-conjectures sources at the pinned commit (config fc_sha): reproducible, and a prescreen sweep caches hundreds
+fc/
