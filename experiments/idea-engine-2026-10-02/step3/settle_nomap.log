@@ -1,0 +1,66 @@
+38 problems to draw (0 done) -> /Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/step3/settle_nomap.jsonl
+#570 [dev]: [0.02, 0.05] mean 0.035 $0.38 solved=False
+#865 [dev]: [0.04, 0.08] mean 0.06 $0.34 solved=False
+#618 [dev]: [0.8, 0.6] mean 0.7 $0.79 solved=True
+#7 [open]: [0.01] mean 0.01 $0.09 (map 0.03)
+#20 [open]: [0.0] mean 0.0 $0.14 (map 0.0)
+#78 [open]: [0.0] mean 0.0 $0.14 (map 0.0)
+#401 [dev]: [0.35, 0.2] mean 0.275 $1.18 solved=True
+#64 [open]: [0.0] mean 0.0 $0.14 (map 0.0)
+#156 [open]: [0.03] mean 0.03 $0.14 (map 0.03)
+#273 [open]: [0.25] mean 0.25 $0.13 (map 0.09)
+#364 [open]: [0.0] mean 0.0 $0.13 (map 0.0)
+#307 [open]: [0.08] mean 0.08 $0.19 (map 0.0)
+#366 [open]: [0.03] mean 0.03 $0.18 (map 0.01)
+#377 [open]: [0.02] mean 0.02 $0.37 (map 0.0)
+#375 [open]: [0.0] mean 0.0 $0.09 (map 0.0)
+#888 [dev]: [0.04, 0.08] mean 0.06 $1.24 solved=False
+#486 [open]: [0.03] mean 0.03 $0.28 (map 0.035)
+#458 [open]: [0.02] mean 0.02 $0.31 (map 0.0)
+#617 [open]: [0.04] mean 0.04 $0.13 (map 0.03)
+#455 [open]: [0.01] mean 0.01 $0.38 (map 0.0)
+#396 [open]: [0.02] mean 0.02 $0.48 (map 0.015)
+#647 [open]: [0.02] mean 0.02 $0.37 (map 0.04)
+#488 [open]: [0.15] mean 0.15 $0.34 (map 0.04)
+#1125 [dev]: [0.3, 0.08] mean 0.19 $2.81 solved=True
+#677 [open]: [0.02] mean 0.02 $0.29 (map 0.01)
+#536 [open]: [0.0] mean 0.0 $0.63 (map 0.045)
+#835 [open]: [0.0] mean 0.0 $0.55 (map 0.015)
+#873 [open]: [0.03] mean 0.03 $0.28 (map 0.01)
+#686 [open]: [0.0] mean 0.0 $0.82 (map 0.0)
+#695 [open]: [0.02] mean 0.02 $1.02 (map 0.0)
+Traceback (most recent call last):
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/step3/settle_nomap.py", line 113, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/step3/settle_nomap.py", line 108, in main
+    list(ex.map(one, todo))
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/step3/settle_nomap.py", line 94, in one
+    draws = [draw(j["statement"], j["lean"], j["masked"]) for _ in range(j["k"])]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/step3/settle_nomap.py", line 94, in <listcomp>
+    draws = [draw(j["statement"], j["lean"], j["masked"]) for _ in range(j["k"])]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/step3/settle_nomap.py", line 38, in draw
+    text = be.complete("engine-settle-prescreen", prompt(statement, lean), effort_override="high", budget_override=2.0)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 373, in complete
+    return self._run(purpose, prompt, ["--tools", "", "--system-prompt", self.TEXT_SYSTEM_PROMPT], None,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/harness.py", line 360, in _run
+    raise RuntimeError(f"claude -p returned an error result ({purpose}): {last_err[:600]}")
+RuntimeError: claude -p returned an error result (engine-settle-prescreen): success: You've hit your session limit · resets 6:50pm (America/Toronto)

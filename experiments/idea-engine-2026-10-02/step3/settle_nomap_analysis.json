@@ -1,0 +1,20 @@
+{
+  "complete": true,
+  "decision": "sweep",
+  "completed_problems": 38,
+  "expected_problems": 38,
+  "recorded_draws": 44,
+  "expected_draws": 44,
+  "missing": [],
+  "invalid": [],
+  "dev_complete": true,
+  "dev_settled_mean": 0.38833333333333336,
+  "dev_unsettled_mean": 0.051666666666666666,
+  "dev_gap": 0.33666666666666667,
+  "open_pairs": 32,
+  "open_spearman": 0.3952403467250283,
+  "correlation_prediction_met": true,
+  "known_cost_usd": 17.0225,
+  "unknown_cost_rows": 0,
+  "mean_cost_per_recorded_draw_usd": 0.386875
+}

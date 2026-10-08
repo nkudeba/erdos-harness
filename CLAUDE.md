@@ -1042,3 +1042,11 @@ Two operating notes:
   to start items while it is live. Pass `--allow-concurrent` deliberately.
 - Lean runs share the machine's compile capacity with any other lane, and a saturated machine turns compile timeouts
   into apparent mathematical failures.
+
+**Opt-in long computation tier (2026-10-08).** `long_compute.py prepare` copies and hashes explicitly selected case
+scripts; `long_compute.py run <job-dir>` executes them through `sandbox_argv`, with two hours per case and four hours
+total by default, without holding a model call open. It checkpoints between scripts, preserves output, skips completed
+cases on resume, and retries timeouts only with `--retry-timeouts`. Process success is not mathematical success; no
+floor or proof is inferred automatically. Review internal script timers (some #366 scripts stop themselves at 108 s)
+before extending them. See `docs/long-computation-tier.md`. This tier passed controller tests and a real SAT sandbox
+smoke test; improved mathematical performance and multi-hour reliability have not yet been established.

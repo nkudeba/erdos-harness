@@ -1058,6 +1058,74 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
     counted against the daily cap) and order screens by it.
   - Otherwise keep the forum order.
 
+**3.10 interim analysis (2026-10-08, Codex continuation during the Claude session limit).**
+- **Coverage:** 30 of 38 problems, comprising 36 of 44 required draws. All six dev items have both draws;
+  24 of 32 open problems have their one draw. The screenshot handoff's 28/38 was an earlier snapshot of problems,
+  not the number of model draws. The saved log ends at Claude's session limit (reset reported as 18:50 Toronto).
+- **Dev separation:** settled mean 0.38833, unsettled mean 0.05167, gap **0.33667**, exceeding the registered 0.15
+  criterion. Every settled item's mean exceeds every unsettled item's mean. These six cases were selected from
+  earlier outcomes; this is screening evidence, not a calibrated probability of resolving an open problem.
+- **Open ranking, incomplete:** tie-aware Spearman correlation **0.46782** on the 24 completed pairs, above the
+  predicted 0.3. Missing: #885, #940, #955, #1061, #1068, #886, #951 and #1203. Their absence can change the final
+  correlation. In particular, the formal-statement check on #951 is still missing from this map-free experiment.
+- **Recorded spend:** $14.3568 for the 36 saved draws, **$0.3988 per recorded draw**, below the predicted $0.50.
+  This total covers saved rows only, not any interrupted calls that failed before writing a row.
+- **Decision: pending.** Do not launch the queue sweep or change campaign priorities from this partial sample.
+  The pre-registered decision requires dev gap >= 0.15 and open correlation > 0; the >= 0.3 correlation is a
+  separate prediction, not a new gate added after seeing the data.
+- **Reproduce without model calls:**
+  `python3 experiments/idea-engine-2026-10-02/step3/settle_nomap.py --analyze`.
+  Analysis recomputes means from the draws, uses average ranks for ties, and fails closed on missing, duplicate or
+  invalid draws. `--sweep` now checks this completed calibration before fetching the queue or calling a model.
+  Eight offline regression tests pass in `tests/test_settle_nomap.py`.
+- **Continuation:** once Claude is available and the single model lane is free, resume `settle_nomap.py --calib`
+  and rerun `--analyze`. The existing resume skips the 30 saved problems. The campaign already reads
+  `resolution/prescreen.jsonl` to order its remaining queue; a separate edit to `config.json` is unnecessary.
+- **Assistance:** Codex analyzed the existing Claude draws and added the offline gate; no replacement model draws,
+  new mathematical results, or model spend were introduced. The existing campaign loop was left running.
+
+**3.10 continuation infrastructure (2026-10-08).** The operator clarified that all three handoff steps were intended.
+- The calibration resume was submitted for execution, but automatic approval review rejected it because the existing
+  campaign loop still owns the model lane. Permission to pause and subsequently resume that loop was requested.
+  No new Claude response was obtained; the eight missing results and the full sweep remain outstanding.
+- The screening runner now makes calls serially. An executor's queued calls could otherwise keep running after a hard
+  provider error. Before each sweep problem it reserves the full $2 call cap against both the invocation's
+  `--max-spend` and the campaign daily cap. Ten offline tests cover analysis, gating, stopping and budget checks.
+- A model-free long computation tier is implemented in `long_compute.py`: two-hour case allowance and four-hour total
+  allowance by default, immutable script copies, the existing sandbox, per-case output and checkpoints, and explicit
+  timeout retries. Eight controller tests and a real sandbox SAT smoke test pass. This establishes infrastructure
+  behavior, not improved mathematical performance. Details: `docs/long-computation-tier.md`.
+- No open-problem computation was launched from the partial screen. The queue-wide low-ripeness condition is not yet
+  measured. Existing #366 scripts also have internal 108-second stops, so they require review before longer replay.
+
+**Authorized continuation launched (2026-10-08, 18:38 Toronto).** The operator approved pausing the campaign and
+restoring it after calibration and the qualifying sweep. `step3/continue_nomap.py` now owns that continuation in
+`runs/nomap-continuation-20261008-183828/`. It paused the campaign, its sleeping #873 screen and caffeinate child.
+A fresh calibration attempt confirmed Claude's session limit, with reset at 18:50; one retry is scheduled inside the
+running continuation for 18:53 Toronto. The sweep runs only after the full calibration passes and remains bounded by
+the existing daily cap plus a $150 additional-spend cap. The controller restores the paused processes on normal exit,
+error or handled interruption. Read its `state.json` for live status; `step3/CONTINUATION.md` records the final status.
+This is an execution-in-progress record, not a completed calibration or sweep. A budget stop can leave the sweep
+incomplete; the saved rows permit a later resume without repeating completed problems.
+
+**3.10 results (2026-10-08, 19:15 Toronto).** All 38 problems and 44 draws, $17.02 ($0.39 a draw, against a predicted
+under $0.50). The last 8 draws were made under the continuation above (`step3/settle_nomap.jsonl`,
+`step3/settle_nomap_analysis.json`).
+- **Dev:** the settled three scored 0.70, 0.275 and 0.19, the others 0.06, 0.06 and 0.035.
+  - That is a gap of 0.337, against a predicted at least 0.15.
+  - Every settled item is above every unsettled one. With a map (3.8b) the gap was 0.373.
+- **Open:** a rank correlation of 0.395 with 3.9b's map-based means over all 32, against a predicted at least 0.3.
+  - The map-free number is more optimistic on a few problems: #273 0.25 against 0.09 with a map, #488 0.15 against
+    0.04.
+- **Decision, by the pre-registered rule: sweep.** It started at 19:15 Toronto under the continuation.
+- **Correction to the interim note above.** The running loop started at 14:03 Toronto, before `resolution.queue`
+  learned to read the prescreen (1312895, 14:24).
+  - So it does not read `resolution/prescreen.jsonl`, and its own daily-cap check does not count the sweep.
+  - It does re-read `config.json` every iteration, and screens the `priority` list first. So
+    `step3/prescreen_priority.py` waits for the continuation to exit, then writes the sweep's ranking there: every
+    problem at or above 0.1, highest first.
+  - A restarted loop orders the whole queue by the prescreen.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
