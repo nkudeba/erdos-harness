@@ -776,6 +776,24 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
        forum discussion of an unsolved problem.
 - **Selection** (`step3/rank_s6.py`, fixed before the screen): #686, then #488, provisional until #273 is re-judged.
 
+**3.6, full v6 runs on the screen's top 2. Pre-registered 2026-10-08, before launch.**
+- **Question.** Can depth turn the screen's minor traction into a significant result? Depth here means sessions that
+  keep going, a deep dive and gap closing.
+- **Problems.** The top 2 by `step3/rank_s6.py` after #273's re-judging. Before it: #686, then #488.
+- **Protocol.** Each problem's screen run is resumed, so its map, ratings and probes are reused, not bought again:
+  - `screen.py --tag s6-full --total <its screen spend + 35> --resume <its screen run>`;
+  - flags: `--engine-sessions 3 --engine-rounds 1 --engine-deep-budget 6 --engine-gap-rounds 2 --engine-gap-max 2
+    --engine-session-legs 3 --engine-min-target-sig 2 --engine-probe-items 4`.
+  - Round 1's assignments follow the probes' measured traction. The marathon and the results library stay off, so that
+    session legs are the one depth change being tested.
+- **Predictions:**
+  1. Spend $30–35 each beyond the screen.
+  2. Round sessions that use a second leg: at least 4 of 6. Median session cost at least $2.40 of the $3 cap, against
+     $1.44 before legs.
+  3. New validated-new claims across both runs: 4 (1–10).
+  4. At least one validated-new claim at significance ≥ 2: probability 0.25.
+  5. A complete resolution: 0.01 each.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
