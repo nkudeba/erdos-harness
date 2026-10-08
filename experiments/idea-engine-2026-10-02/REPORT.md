@@ -1005,6 +1005,36 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   - Predictions: #951 falls below 0.3; at most 2 problems at or above 0.3; a median of at most 0.05.
   - Every pass is imported to the campaign's pass arm (`resolution.py import-screens`).
 
+**3.8b and 3.9b results (2026-10-08).**
+- **3.8b** (`step3/settle_calib_b.jsonl`):
+
+  | item | settled in step 2 | SETTLE CHANCE (two draws) | mean | 3.8 mean |
+  |---|---|---|---|---|
+  | #618 | yes | 0.55, 0.80 | 0.675 | 0.75 |
+  | #401 | yes | 0.45, 0.60 | 0.525 | 0.55 |
+  | #1125 | yes | 0.05, 0.20 | 0.125 | 0.085 |
+  | #888 | no | 0.10, 0.10 | 0.10 | 0.175 |
+  | #865 | no | 0.07, 0.06 | 0.065 | 0.06 |
+  | #570 | no | 0.03, 0.05 | 0.04 | 0.025 |
+
+  - The prediction holds: 0.442 against 0.068, a gap of 0.373.
+  - Every solved item now scores above every unsolved one, but #1125 clears #888 by only 0.025. Its draws are also the
+    least stable (0.15 apart).
+  - The screen keeps its basis.
+- **3.9b** (`step3/settle_open_b.jsonl`, $25.73):
+  - #951 fell from 0.575 to 0.005, as predicted.
+  - Nothing is at or above 0.3 (predicted at most 2), and the median is 0.005 (predicted at most 0.05).
+  - The draws agree within 0.1 on all 32.
+  - The highest: #273 0.09, #1068 0.065, #536 0.045, #647 and #488 0.04, #486 0.035.
+  - The best lines are mostly witness searches whose chance is capped by computation: #273's covering system with lcm
+    10^7-10^11, #647's n between 10^22 and 10^27, #488's exhaustive search.
+- **Reading.**
+  - By the engine's own estimate, none of these 32 problems is ripe. They look like the dev items it failed on (0.04 to
+    0.10), not the ones it settled (0.125 to 0.675).
+  - They are step 3's well-studied and high-`partial` problems, not the campaign's queue. So the fixed bar is not yet
+    known to be empty on the queue. 3.10's sweep would show the queue's distribution, at a tenth of a map's price.
+  - Nothing is imported.
+
 **3.10, a map-free SETTLE CHANCE to order the queue. Pre-registered 2026-10-08, before any call.**
 - **Why.** The campaign's queue puts the least-discussed problems first, and forum size is a weak proxy.
   - 98 of the 615 queued problems have an empty forum thread. They include the Littlewood conjecture (#495), the
