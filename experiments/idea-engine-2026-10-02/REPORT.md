@@ -726,6 +726,56 @@ causes: three in targeting and one in execution.
 #885 and #273. #686, #835, #647 and #366 failed at their first call at no cost, and were relaunched after the reset with
 the same protocol. The results are held until all 8 are in.
 
+**3.5 results (2026-10-08, 01:00 UTC).** All 8 problems ran, with $82.53 of engine spend. #273's numbers are provisional
+until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-probe` in `results.jsonl`.
+
+| problem | OPEN targets | validated-new from probes (significance) | probes with traction | spend |
+|---|---|---|---|---|
+| #7 | 0 | 0 | 3 of 4 | $7.66 |
+| #488 | 1 | 1 (1) | 3 of 4 | $12.23 |
+| #885 | 0 | 1 (1) | 3 of 4 | $9.75 |
+| #273 | 0 | 0, pending re-judging | 1 of 4 | $6.52 |
+| #686 | 0 | 3 (1, 1, 1) | 2 of 4 | $13.06 |
+| #835 | 0 | 0 | 3 of 4 | $11.92 |
+| #647 | 0 | 1 (1) | 3 of 4 | $11.21 |
+| #366 | 0 | 2 (1, 1) | 4 of 4 | $10.17 |
+
+- **Against the predictions:**
+
+  | prediction | predicted | observed |
+  |---|---|---|
+  | cost | $90–130 | $82.53 |
+  | problems with an OPEN target | 5 (3–8) | **1, a miss** |
+  | OPEN targets | 12 (5–24) | **1, a miss** |
+  | validated-new from probes | 6 (2–14), in 4 problems (2–7) | 8, in 5 problems |
+  | validated-new at significance ≥ 2 | 2 (0–6), in 2 problems (0–5) | 0, the bottom of the range |
+  | probes with traction | 10 of 32 (4–18) | 22, above the range |
+
+- **The targeting fix fails its pre-registered test:** 1 of 8 problems, not at least half.
+- **Why it fails.** The fix did what it was built to do, and that was not the binding constraint.
+  - Every map built the ladder, with stepping stones rated significance 2 and medium or high reach.
+  - The judges rated the reachable stepping stones significance 1, a minor improvement. The significant ones stayed at
+    low reach: a one-week chance of 0.15 or less.
+  - The probes agree with the judges. Their own success estimates on significant lines were 0.01–0.10, and their
+    traction came from minor results. On #488 the one OPEN target's natural route was refuted by explicit
+    counterexamples.
+  - So on these 8 problems the shortfall is not a harness artefact. A significant result is not a week's work here. The
+    rubric, the ladder and the order are still right: they make reach measurable and spend it sensibly. They cannot make
+    a hard problem easy.
+- **Probes are worth keeping.**
+  - 8 validated-new results, all significance 1, cost $31 of probe spend, about $4 each. That is cheaper than the full
+    runs' rate.
+  - Probes on targets and probes on angles yield about the same: 0.29 and 0.23 validated-new results per dollar.
+  - 22 of 32 probes found traction.
+- **What this says about the operator's question.**
+  - On the most-studied open problems, the harness makes steady minor progress cheaply, and reaches significant progress
+    rarely: one result in step 3, #873's.
+  - Two experiments test the ways past this, in order:
+    1. Depth. The full v6 runs on the top 2 below have sessions that keep going, a deep dive and gap closing.
+    2. Selection. A screen of a random sample of typical open problems: the step-3 twenty have 4.5 times the median
+       forum discussion of an unsolved problem.
+- **Selection** (`step3/rank_s6.py`, fixed before the screen): #686, then #488, provisional until #273 is re-judged.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
