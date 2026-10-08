@@ -986,6 +986,21 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
 - **What it writes:** `resolution/results.jsonl` and an Atlas finding. A verified open-problem proof goes to
   `resolution/REVIEW-NEEDED.md`, with `claimEligible` false until human review.
 - **The queue:** four known lines first (#366, #686, #488, #873), then the least-studied unsolved problems.
+  - Step 3.7 found that typical problems did no better than heavily studied ones. So the order matters less than the
+    strength of each attempt.
+- **What makes an attempt stronger:**
+  - **Decide by computation.** Under `--engine-objective resolve`, the map has a DECIDE section naming the computation
+    that could settle the problem, and T1 must be the complete answer. A feasible plan leads round 1 and the probes.
+    Its sessions run scripts for up to 10 minutes (`--engine-decide-seconds`): the runner's cap and the CLI's
+    `BASH_DEFAULT_TIMEOUT_MS`, checked live.
+  - **The results library** is on, including openai/math method digests: each Erdős-related family's abstract, main
+    statements and proof overview, from the release's LaTeX (`results_library.py --digest-openai`).
+  - **The deep dive states `SETTLE CHANCE: p`.** A problem gets the $40 deep pass only if p ≥ 0.1 (`SETTLE_FLOOR`) or a
+    claim is already rated 3. #366's own team lead saw no settling line.
+- **Lean on partial results:** every validated-new PROVED claim at significance ≥ 2 gets its own Lean run under a fresh
+  id. The harness formalizes the claim, with a crosscheck judge, then proves it from the engine's chain.
+- **Restarts are safe:** one loop at a time (an exclusive lock), and a stage records its run at launch, so an
+  interrupted stage resumes.
 - **Pacing:**
   - one lane: it waits while any driver runs;
   - a daily cap in `resolution/config.json`, default $150;
