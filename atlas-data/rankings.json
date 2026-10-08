@@ -48541,7 +48541,7 @@
         "cycles"
       ],
       "score": 5,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "SEARCH FLOOR IS IN VERTEX COUNT, and the reachable subclasses are swept (recorded 2026-09-11 from the forum thread, NOT rerun by us). Markstrom [Ma04]: a cubic counterexample needs >= 30 vertices; Nowbandegani-Esfandiari [NoEs11]: a bipartite one >= 32; Tranquilli arXiv:2608.02675 covers cubic bipartite n <= 58; a thread contributor extends that to n <= 62 (1.85e10 search-tree nodes, 1.22e10 at n=62 alone) - but reports that their general cubic search reached only n <= 34, and that beyond n=28 exhaustiveness rests on one unverified generator.",
         "Solved in the affirmative for minimum degree above an absolute constant by Liu-Montgomery [LiMo20], which disproves the stronger Erdos-Gyarfas conjecture; what remains open is the small-degree regime. $1000 prize, five users listed as currently working on it.",
@@ -48552,7 +48552,8 @@
         "The catalogue identifies a finite certificate direction. It supplies no guarantee that a witness is small or within our search budget.",
         "An optimal bound or classification is requested; a single construction may cover only one direction.",
         "An unresolved prize problem receives a conservative difficulty prior.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Do not run a generic graph search on #64: the cubic and cubic-bipartite subclasses are already cleared past anything the harness would enumerate, and a counterexample need not be cubic. Reachable partial value is formalizing Liu-Montgomery or one of the confirmed families.",
@@ -48643,8 +48644,8 @@
       "manual": true,
       "prize": "$1000",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
