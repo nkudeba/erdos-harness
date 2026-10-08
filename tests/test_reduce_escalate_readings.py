@@ -25,12 +25,12 @@ class SandboxReachesTheSolver(unittest.TestCase):
 
     def test_argv_names_the_solver_path_when_one_exists(self):
         argv = H.sandbox_argv(Path("/tmp/x.py"))
-        self.assertEqual(argv[:2], [H.sys.executable, "-I"])
+        i = argv.index(H.sys.executable)                 # after the Seatbelt prefix on macOS (sandbox_prefix)
+        self.assertEqual(argv[i:i + 3], [H.sys.executable, "-I", "-c"])
         if H.SOLVER_AVAILABLE:
-            self.assertIn("sys.path.insert", argv[3])
-            self.assertIn("site-packages", argv[3])
-        else:
-            self.assertEqual(argv[2], "/tmp/x.py")
+            self.assertIn("sys.path.insert", argv[i + 3])
+            self.assertIn("site-packages", argv[i + 3])
+        self.assertIn(f"exec(open({str(Path('/tmp/x.py').resolve())!r}).read())", argv[i + 3])   # /private/tmp on macOS
 
     def test_a_relative_script_path_still_runs(self):
         """The sandbox runs with cwd set to the script's directory, so a relative path handed in by a

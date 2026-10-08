@@ -16,5 +16,7 @@ echo "== rust $(date -u +%FT%TZ)"
 echo "== nanoda $(date -u +%FT%TZ)"
 [ -d nanoda_lib ] || git clone --depth 1 https://github.com/ammkrn/nanoda_lib.git nanoda_lib
 (cd nanoda_lib && "$HOME/.cargo/bin/cargo" build --release)
+echo "== cypari2 (PARI/GP for the research sandbox) $(date -u +%FT%TZ)"
+python3 -c "import cypari2" 2>/dev/null || python3 -m pip install --only-binary=:all: cypari2
 echo "== done $(date -u +%FT%TZ)"
 ls -la comparator/.lake/build/bin lean4export/.lake/build/bin nanoda_lib/target/release 2>&1 | grep -E "comparator|lean4export|nanoda_bin"

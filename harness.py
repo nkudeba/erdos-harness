@@ -1292,10 +1292,49 @@ def sandbox_argv(script: Path) -> list[str]:
     # resolved, which hid this until a caller passed a relative one.
     path = str(Path(script).resolve())
     site = solver_site_dir()
+    # The exploration runner fills in its own folder: its command is built once, around a placeholder script.
+    folder = SANDBOX_DIR_TOKEN if path == EXPLORE_PLACEHOLDER else str(Path(path).parent)
+    prefix = sandbox_prefix(folder)
     if not site:
-        return [sys.executable, "-I", path]
-    return [sys.executable, "-I", "-c",
-            f"import sys;sys.path.insert(0,{site!r});exec(open({path!r}).read())"]
+        return prefix + [sys.executable, "-I", "-c", PARI_SECURE + f"exec(open({path!r}).read())"]
+    return prefix + [sys.executable, "-I", "-c",
+                     PARI_SECURE + f"import sys;sys.path.insert(0,{site!r});exec(open({path!r}).read())"]
+
+
+# PARI/GP (cypari2) can run shell commands and read and write files. Secure mode, set before the script runs, refuses
+# system, extern, write and install, and cannot be switched off without a confirmation no script can give (tested
+# 2026-10-08). It does NOT stop file reads (readstr, fileopen) or getenv; the Seatbelt profile below does.
+PARI_SECURE = ("try:\n import cypari2 as _cp\n _cp.Pari().default('secure', 1)\n del _cp\n"
+               "except ImportError:\n pass\n")
+SANDBOX_DIR_TOKEN = "/__SANDBOX_DIR__"
+
+
+def sandbox_prefix(folder: str) -> list[str]:
+    """`sandbox-exec -p <profile>` on macOS, else nothing. The static screen reads the script's text, so it cannot see a
+    name built at runtime: `pari("read" + "str(...)")` reads any file, and so did `np.loadtxt(path)` before the screen
+    named it. The profile is enforced by the kernel:
+    - no network;
+    - no process but the Python interpreter (PARI's `system` would start a shell);
+    - no reads under the home directory except `folder` and the user site packages (pysat, cypari2): the repository
+      holds the benchmark's answers and every other run;
+    - no writes anywhere but `folder`.
+    Measured 2026-10-08: PARI and numpy work inside it; a read of the repository, a write to the home directory and a
+    network connection all fail."""
+    if sys.platform != "darwin" or not Path("/usr/bin/sandbox-exec").exists():
+        return []
+    home = str(Path.home())
+    profile = "\n".join([
+        "(version 1)",
+        "(allow default)",
+        "(deny network*)",
+        "(deny process-exec*)",
+        f'(allow process-exec* (subpath "{Path(sys.base_prefix).resolve()}"))',
+        f'(deny file-read* (subpath "{home}"))',
+        f'(allow file-read* (subpath "{home}/Library/Python") (subpath "{folder}"))',
+        "(deny file-write*)",
+        f'(allow file-write* (subpath "{folder}") (literal "/dev/null"))',
+    ])
+    return ["/usr/bin/sandbox-exec", "-p", profile]
 
 
 SOLVER_LINE = ("  PLUS the SAT solver `pysat` (python-sat), which IS available: "
@@ -2154,10 +2193,15 @@ def statement_shape(statement: str) -> str | None:
 
 ALLOWED_PY_MODULES = {"math", "itertools", "functools", "collections", "fractions", "random", "time", "heapq",
                       "bisect", "operator", "string", "typing", "dataclasses", "decimal", "statistics", "array",
-                      "json", "re", "pysat"}
+                      "json", "re", "pysat", "cypari2"}
 FORBIDDEN_PY_TOKENS = re.compile(r"__import__|\bopen\s*\(|\bexec\s*\(|\beval\s*\(|\bcompile\s*\(|\binput\s*\(|\bos\.|\bsys\.|"
                                  r"subprocess|socket|shutil|pathlib|urllib|requests|ctypes|signal\.|threading|multiprocessing|"
-                                 r"importlib|builtins|globals\s*\(|getattr\s*\(")
+                                 r"importlib|builtins|globals\s*\(|getattr\s*\(|"
+                                 # PARI/GP's shell, file and environment functions, and numpy's file readers; the
+                                 # Seatbelt profile also stops a name built at runtime (sandbox_prefix)
+                                 r"\b(?:system|extern|externstr|install|default|getenv|read|readstr|readvec|fileopen|"
+                                 r"fileread|filereadstr|fileextern|filewrite1?|write1?|writebin|writetex|loadtxt|"
+                                 r"genfromtxt|fromfile|fromregex)\s*\(|\.load\s*\(")
 
 
 def unsafe_python(code: str, allowed: set[str] | None = None, extra: re.Pattern | None = None) -> str | None:
@@ -2202,6 +2246,7 @@ FORBIDDEN = re.compile(%(forbidden)r)
 EXTRA = re.compile(%(extra)r)
 ARGV = %(argv)r
 PLACEHOLDER = %(placeholder)r
+DIR_TOKEN = %(dir_token)r
 SECONDS = %(seconds)d
 
 
@@ -2240,7 +2285,8 @@ if bad:
     print("REFUSED: `%%s` is not allowed. Allowed imports: %%s. No files, OS access, network or subprocesses."
           %% (bad, ", ".join(sorted(ALLOWED))))
     sys.exit(2)
-cmd = [str(script) if a == PLACEHOLDER else a.replace(repr(PLACEHOLDER), repr(str(script))) for a in ARGV]
+cmd = [str(script) if a == PLACEHOLDER else a.replace(repr(PLACEHOLDER), repr(str(script))).replace(DIR_TOKEN, str(here))
+       for a in ARGV]
 try:
     r = subprocess.run(cmd, cwd=str(here), capture_output=True, text=True, timeout=SECONDS,
                        env={"PATH": "/usr/bin:/bin", "HOME": str(here)})
@@ -2265,7 +2311,7 @@ def explore_runner_source() -> str:
     `sandbox_argv`, the one builder of isolated interpreter commands, with a placeholder the runner fills in."""
     return EXPLORE_RUNNER % {"allowed": sorted(EXPLORE_MODULES), "forbidden": FORBIDDEN_PY_TOKENS.pattern,
                              "extra": EXPLORE_FORBIDDEN.pattern, "argv": sandbox_argv(Path(EXPLORE_PLACEHOLDER)),
-                             "placeholder": EXPLORE_PLACEHOLDER, "seconds": EXPLORE_SECONDS}
+                             "placeholder": EXPLORE_PLACEHOLDER, "dir_token": SANDBOX_DIR_TOKEN, "seconds": EXPLORE_SECONDS}
 
 
 def decompose_prompt(problem: dict, statement: str, literature: str, history: str,
@@ -3753,7 +3799,10 @@ attack every claimed proof, and a false claim costs the team more than no claim.
 
 YOUR TOOLS. Write Python scripts in the sandbox with the Write tool and run each one with `./run.sh <script.py>`.
 Scripts may import only: {modules}. A run is capped at {seconds} s and its output at 20,000 characters, so print
-compact tables.
+compact tables. `cypari2` is PARI/GP, for computational number theory: `from cypari2 import Pari; pari = Pari()`, then
+for example `pari('thue(thueinit(x^3-2,1),1)')` (Thue equations), `bnfinit` and `bnfcertify` (class groups, units),
+`ellinit`, `ellrank` and `ellratpoints` (elliptic curves), `hyperellratpoints`, `nfroots`, `polredabs`, `qfbclassno`,
+`lfun`. For a large computation raise the stack first with `pari.allocatemem(2*10**9)`.
 
 HOW TO WORK.
 - Start by computing: the smallest cases, the extremal examples, and the families that come closest to breaking the
