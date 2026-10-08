@@ -1585,6 +1585,19 @@
       "atlas-data/forum/942.json"
     ]
   },
+  "951": {
+    "rationale": [
+      "Reading (2026-10-08): the site's sentence omits 'for all large x'. The EVERYWHERE version is disproved on the forum (third-party, not verified by us): on 28 Jan 2026 Nat Sothanaphan with ChatGPT showed that 101/42, 367/103 and 113/24 generate a free multiplicative semigroup whose elements differ by at least 1 (Matveev's bound plus de Weger's LLL reduction). The Barreto-Leeham step extends this to an infinite sequence, so the count beats pi(x) just below 5; a later note does the same just below 7, 11, 13 and 17. formal-conjectures' main theorem is the EVENTUAL version (for all sufficiently large x), which the thread calls harder and which stays open."
+    ],
+    "requirements": [
+      "Target the eventual version: a bound for all large x, or a sequence beating pi(x) for arbitrarily large x. Finite constructions at small x do not touch the formal statement. The resolution campaign's screen first scored this 0.575 by reading the informal sentence (REPORT 3.9)."
+    ],
+    "sources": [
+      "https://www.erdosproblems.com/forum/thread/951",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
+    ],
+    "assessed": "2026-10-08"
+  },
   "952": {
     "rationale": [
       "openai/math, released 2026-10-06, family 028 ('Uniformly bounded components of Gaussian-prime graphs'), claims to resolve this problem: the Gaussian moat conjecture: no infinite walk through distinct Gaussian primes has bounded steps, so the answer is no. The repository's catalogue has a Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."

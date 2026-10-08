@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 131,
+    "manually_reviewed": 132,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "37caea9600866cad7f8920b3d866d0464f350a776b77b67d1d57889fd242ebf6",
+    "harness_sha256": "4a3352d2bc9378e3fe07829881a2b29981481c028d714f688f1d68a4c3ea0cb3",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "a4c0aa9ef884f773aeeffd494604887e92b439e17a59ca3afab641b06095ce08"
+    "manual_reviews_sha256": "4ebd76c98f1aa8e8f656e17169b4017f222be9a1b44e15c1f284c1af475c9d68"
   },
   "problems": [
     {
@@ -37649,6 +37649,7 @@
       "score": 12,
       "harness": "Attempted",
       "rationale": [
+        "Reading (2026-10-08): the site's sentence omits 'for all large x'. The EVERYWHERE version is disproved on the forum (third-party, not verified by us): on 28 Jan 2026 Nat Sothanaphan with ChatGPT showed that 101/42, 367/103 and 113/24 generate a free multiplicative semigroup whose elements differ by at least 1 (Matveev's bound plus de Weger's LLL reduction). The Barreto-Leeham step extends this to an infinite sequence, so the count beats pi(x) just below 5; a later note does the same just below 7, 11, 13 and 17. formal-conjectures' main theorem is the EVENTUAL version (for all sufficiently large x), which the thread calls harder and which stays open.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -37657,12 +37658,13 @@
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
+        "Target the eventual version: a bound for all large x, or a sequence beating pi(x) for arbitrarily large x. Finite constructions at small x do not touch the formal statement. The resolution campaign's screen first scored this 0.575 by reading the informal sentence (REPORT 3.9).",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -37728,13 +37730,21 @@
         ]
       },
       "url": "https://www.erdosproblems.com/951",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-08",
+        "sources": [
+          "https://www.erdosproblems.com/forum/thread/951",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
+        ],
+        "searchFloor": null
       },
       "rank": 642,
       "tier": "Frontier"
