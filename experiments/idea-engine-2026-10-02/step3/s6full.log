@@ -1,0 +1,14 @@
+{'problem': '686', 'best_validated_sig': 1, 'validated_new': 3, 'open_targets': 0, 'partial': 63, 'spend': 13.0626078, 'run_dir': 'runs/20261007-175521-700171-erdos686'}
+{'problem': '366', 'best_validated_sig': 1, 'validated_new': 2, 'open_targets': 0, 'partial': 62, 'spend': 10.166688200000001, 'run_dir': 'runs/20261007-201851-327230-erdos366'}
+{'problem': '488', 'best_validated_sig': 1, 'validated_new': 1, 'open_targets': 1, 'partial': 69, 'spend': 12.229464199999999, 'run_dir': 'runs/20261007-140927-589154-erdos488'}
+{'problem': '885', 'best_validated_sig': 1, 'validated_new': 1, 'open_targets': 0, 'partial': 68, 'spend': 9.749969399999998, 'run_dir': 'runs/20261007-145213-803542-erdos885'}
+{'problem': '647', 'best_validated_sig': 1, 'validated_new': 1, 'open_targets': 0, 'partial': 63, 'spend': 11.211735400000006, 'run_dir': 'runs/20261007-192826-987509-erdos647'}
+{'problem': '7', 'best_validated_sig': -1, 'validated_new': 0, 'open_targets': 0, 'partial': 80, 'spend': 7.662986999999999, 'run_dir': 'runs/20261007-134629-451043-erdos7'}
+{'problem': '273', 'best_validated_sig': -1, 'validated_new': 0, 'open_targets': 0, 'partial': 64, 'spend': 9.084259600000001, 'run_dir': 'runs/20261007-152147-910484-erdos273'}
+{'problem': '835', 'best_validated_sig': -1, 'validated_new': 0, 'open_targets': 0, 'partial': 63, 'spend': 11.922665199999999, 'run_dir': 'runs/20261007-184003-681389-erdos835'}
+selected: ['686', '366']
+S6FULL #686 runs/20261007-175521-700171-erdos686 total 48.06 2026-10-08T01:41:11Z
+#686 [s6-full]: 5 validated new of 22 claims; targets 10 (new 7, sig>=2 2, open 0); best None; probes: measured 0, traction 2, best 4.412; $37.18288379999997
+S6FULL #366 runs/20261007-201851-327230-erdos366 total 45.17 2026-10-08T03:48:33Z
+#366 [s6-full]: 2 validated new of 25 claims; targets 10 (new 6, sig>=2 1, open 0); best None; probes: measured 0, traction 4, best 4.825; $32.53480720000001
+S6FULL-DONE 2026-10-08T05:23:31Z

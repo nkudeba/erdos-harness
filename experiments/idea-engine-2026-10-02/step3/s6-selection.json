@@ -1,0 +1,81 @@
+{
+ "rule": "The rule was fixed before the screen launched. Rank the problems by:\n1. the best probe claim's validated significance (validated-new only);\n2. then the number of validated-new probe claims;\n3. then the number of OPEN targets (new, significance >= 2, reach medium or high);\n4. then `partial`.\nTake the top 2. Writes step3/s6-selection.json.",
+ "ranked": [
+  {
+   "problem": "686",
+   "best_validated_sig": 1,
+   "validated_new": 3,
+   "open_targets": 0,
+   "partial": 63,
+   "spend": 13.0626078,
+   "run_dir": "runs/20261007-175521-700171-erdos686"
+  },
+  {
+   "problem": "366",
+   "best_validated_sig": 1,
+   "validated_new": 2,
+   "open_targets": 0,
+   "partial": 62,
+   "spend": 10.166688200000001,
+   "run_dir": "runs/20261007-201851-327230-erdos366"
+  },
+  {
+   "problem": "488",
+   "best_validated_sig": 1,
+   "validated_new": 1,
+   "open_targets": 1,
+   "partial": 69,
+   "spend": 12.229464199999999,
+   "run_dir": "runs/20261007-140927-589154-erdos488"
+  },
+  {
+   "problem": "885",
+   "best_validated_sig": 1,
+   "validated_new": 1,
+   "open_targets": 0,
+   "partial": 68,
+   "spend": 9.749969399999998,
+   "run_dir": "runs/20261007-145213-803542-erdos885"
+  },
+  {
+   "problem": "647",
+   "best_validated_sig": 1,
+   "validated_new": 1,
+   "open_targets": 0,
+   "partial": 63,
+   "spend": 11.211735400000006,
+   "run_dir": "runs/20261007-192826-987509-erdos647"
+  },
+  {
+   "problem": "7",
+   "best_validated_sig": -1,
+   "validated_new": 0,
+   "open_targets": 0,
+   "partial": 80,
+   "spend": 7.662986999999999,
+   "run_dir": "runs/20261007-134629-451043-erdos7"
+  },
+  {
+   "problem": "273",
+   "best_validated_sig": -1,
+   "validated_new": 0,
+   "open_targets": 0,
+   "partial": 64,
+   "spend": 9.084259600000001,
+   "run_dir": "runs/20261007-152147-910484-erdos273"
+  },
+  {
+   "problem": "835",
+   "best_validated_sig": -1,
+   "validated_new": 0,
+   "open_targets": 0,
+   "partial": 63,
+   "spend": 11.922665199999999,
+   "run_dir": "runs/20261007-184003-681389-erdos835"
+  }
+ ],
+ "selected": [
+  "686",
+  "366"
+ ]
+}

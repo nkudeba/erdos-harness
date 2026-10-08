@@ -798,6 +798,40 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   4. At least one validated-new claim at significance ≥ 2: probability 0.25.
   5. A complete resolution: 0.01 each.
 
+**3.6 results (2026-10-08, 05:23 UTC).** Rows tagged `s6-full` in `results.jsonl`.
+
+| problem | spend beyond the screen | new validated-new | the deep dive's line, and what stopped it |
+|---|---|---|---|
+| #686 | $24.12 | 2, both significance 1: "4 is not k-representable" for every even k ≤ 340, and again for k ≤ 200 | settle the first odd cases. k = 3 is done: X³−X = 4(Y³−Y) has only the trivial points and ±(3,2), by Thue equations. It is judged routine and is still conditional. k = 5, the significance-2 piece, needs Prym–Chabauty, which is infeasible without a computer-algebra system. |
+| #366 | $22.36 | 0 | exclude every fibre with kt ≤ 10⁴. 37,813 of 43,051 fibres (87.8%) are closed for every n, by a new descent with a cubic-residue obstruction. It is valid but judged routine. The 5,238 open fibres need Thue and elliptic-logarithm solving, "not available in this sandbox (no PARI/Magma)". |
+
+- **Against the predictions:**
+
+  | prediction | predicted | observed |
+  |---|---|---|
+  | spend beyond the screen | $30–35 each | $24.12 and $22.36, under |
+  | round sessions using a second leg | at least 4 of 6 | **6 of 6** |
+  | median session cost | at least $2.40 of $3 | **$2.65** (it was $1.44 before legs) |
+  | new validated-new claims | 4 (1–10) | 2 |
+  | validated-new at significance ≥ 2 | probability 0.25 | 0 |
+  | complete resolution | 0.01 each | 0 |
+
+- **Reading.**
+  - Session legs work as built. Every session kept going and spent most of its budget, and the deep dives went three
+    legs deep.
+  - More effort produced more valid work: results judged valid in both runs, three times the claims of the screen. But
+    the judges rated it routine or significance 1.
+  - **In both runs the significance-2 line stopped at missing tools, not at missing ideas.**
+    - #686's team lead planned Prym–Chabauty plus a Mordell–Weil sieve for k = 5.
+    - #366's planned integral points on about 10⁴ Mordell curves.
+    - Both sessions said in their notebooks that this is infeasible without PARI or Magma.
+  - The sandbox offers numpy, sympy and networkx only. Many Erdős problems are number-theoretic, so a computer-algebra
+    system is the most concrete capability gap step 3 has found. The proposal: PARI/GP through `cypari2`.
+    - Its Thue solver, class groups and units, elliptic-curve ranks and hyperelliptic rational points cover most of what
+      these two lines needed. Chabauty itself is not in PARI.
+    - The static screen must block PARI's `system`, `extern`, file I/O and `install`, because PARI can run shell commands.
+    - It is not built. It awaits the operator's decision.
+
 **3.7, the v6 screen on TYPICAL open problems. Pre-registered 2026-10-08, before launch.**
 - **Question.** Is 3.5's result a property of the harness, or of the problems it was pointed at?
   - The step-3 twenty have a median of 7,688 characters of forum comments.
