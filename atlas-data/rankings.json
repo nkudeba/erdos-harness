@@ -50062,13 +50062,14 @@
         "primes"
       ],
       "score": 4,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The source explicitly connects the obstacle to prime gaps and Legendre’s conjecture. The compact LCM inequality is misleading.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The catalogue identifies a finite certificate direction, but the discussion already excludes any witness below ~1e+20 — far past a bounded search, so the finite label promises an object that cannot be exhibited."
+        "The catalogue identifies a finite certificate direction, but the discussion already excludes any witness below ~1e+20 — far past a bounded search, so the finite label promises an object that cannot be exhibited.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Prove the required uniform control on prime powers between consecutive primes.",
@@ -50139,8 +50140,8 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
