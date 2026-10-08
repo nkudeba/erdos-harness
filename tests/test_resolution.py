@@ -26,7 +26,7 @@ class Base(unittest.TestCase):
         d = Path(self.tmp.name)
         for name, val in (("CAMP", d), ("STATE", d / "state.json"), ("RESULTS", d / "results.jsonl"),
                           ("CONFIG", d / "config.json"), ("LOG", d / "log"), ("REVIEW", d / "REVIEW-NEEDED.md"),
-                          ("SCREEN_RESULTS", d / "screen-results.jsonl")):
+                          ("SCREEN_RESULTS", d / "screen-results.jsonl"), ("PRESCREEN", d / "prescreen.jsonl")):
             p = patch.object(R, name, val)
             p.start()
             self.addCleanup(p.stop)
@@ -96,6 +96,10 @@ class Tiers(Base):
                 f.write(json.dumps({"at": at, "spend": spend}) + "\n")
         self.assertEqual(R.spent_since(24, now), 15.0)
         self.assertEqual(R.spent_since(168, now), 115.0)
+        # a prescreen sweep beside the loop counts too
+        R.PRESCREEN.write_text(json.dumps({"problem": "1", "mean": 0.1, "cost": 0.4,
+                                           "at": (now - timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ")}) + "\n")
+        self.assertAlmostEqual(R.spent_since(24, now), 15.4)
 
 
 class Screen(Base):
@@ -284,6 +288,10 @@ class Queue(Base):
         with patch.object(R, "ROOT", fake_root), patch.object(R, "forum_chars", lambda n: chars[n]):
             q = R.queue({"problems": {"2": {}}}, {"priority": [3]})
         self.assertEqual(q, [3, 4, 1])          # 3 by priority; 5 claimed, 2 taken, 6 solved; then least studied
+        # a prescreen's chance, where one exists, orders the rest first (REPORT 3.10)
+        R.PRESCREEN.write_text(json.dumps({"problem": "1", "mean": 0.4}) + "\n" + json.dumps({"problem": "4", "mean": None}) + "\n")
+        with patch.object(R, "ROOT", fake_root), patch.object(R, "forum_chars", lambda n: chars[n]):
+            self.assertEqual(R.queue({"problems": {"2": {}}}, {"priority": [3]}), [3, 1, 4])
 
 
 class Lean(Base):

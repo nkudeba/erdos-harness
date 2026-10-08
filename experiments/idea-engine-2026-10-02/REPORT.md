@@ -972,6 +972,62 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
     the bar must become relative (scout the top of the screened pool). That change would be recorded here, as a
     deviation, before it is made.
 
+**3.9 results (2026-10-08).** 32 problems, $23.82 (`step3/settle_open.jsonl`).
+- **Against the predictions:**
+  - one problem at or above 0.3, #951 at 0.575 (draws 0.60, 0.55), against a predicted 2 (range 0-5);
+  - a median of 0.01, against at most 0.05;
+  - the two draws within 0.1 on all 32, against at least 28.
+- **The next highest:** #273 and #647 at 0.10, #536 at 0.07, #486 and #488 at 0.055, #1068 at 0.045. Nothing else is
+  above 0.04.
+- **#951's pass is an artifact, and it exposed a defect.**
+  - Its line is a counterexample to the informal wording: three rationals below 4.9 (101/42, 367/103, 113/24) whose
+    products stay at least 1 apart, which beats π(4.9) = 2.
+  - The forum posted exactly that on 28 January 2026 (Sothanaphan with ChatGPT, by Matveev's bound and LLL reduction).
+  - It leaves formal-conjectures' statement untouched. That statement asks only for all large x (`∀ᶠ x in atTop`), the
+    "eventually" version, which the same thread calls harder.
+  - The draws could not know this. The deep plan's prompt showed the informal statement and the map, never the
+    formal statement, although the resolve objective asks for settling "as the formal statement poses it". The engine's
+    own deep dive had the same blind spot.
+- **What changed.**
+  - #951 is not imported.
+  - The deep plan's prompt now carries the Lean statement, for the deep dive and the screen alike.
+  - Every 3.8 and 3.9 number was drawn without it, so both are drawn again with the same maps (3.8b and 3.9b below).
+  - #951's corrected reading goes to the Atlas.
+- **Population.** These maps came mostly from step 3's well-studied and high-`partial` problems. The campaign's queue is
+  a different population.
+
+**3.8b and 3.9b, the screen again with the formal statement. Pre-registered 2026-10-08, before any call.**
+- **3.8b.** 3.8's six dev items, two draws each, masked, from the same maps (`step3/settle_calib.py`, about $5).
+  - Prediction: the solved three average at least 0.15 more than the other three (3.8 gave 0.375).
+  - Reading: if the gap falls under 0.1, the screen loses its basis. The campaign's bar is then suspended, and the scout
+    becomes the only filter again, until the question is re-examined.
+- **3.9b.** The same 32 maps, two draws each (`step3/settle_open.py`, about $24).
+  - Predictions: #951 falls below 0.3; at most 2 problems at or above 0.3; a median of at most 0.05.
+  - Every pass is imported to the campaign's pass arm (`resolution.py import-screens`).
+
+**3.10, a map-free SETTLE CHANCE to order the queue. Pre-registered 2026-10-08, before any call.**
+- **Why.** The campaign's queue puts the least-discussed problems first, and forum size is a weak proxy.
+  - 98 of the 615 queued problems have an empty forum thread. They include the Littlewood conjecture (#495), the
+    prime-power conjecture for projective planes (#723) and infinitely many amicable pairs (#830).
+  - The screen proper costs $3-6 a problem, mostly for the map.
+  - So screening the queue in its present order would take weeks, and pay first for famous problems with no settling
+    line.
+  - The same question asked without a map costs about $0.40.
+- **Test.** `step3/settle_nomap.py --calib`: the screen's prompt, with the formal statement and the map slot empty,
+  about $18. It runs after 3.8b and 3.9b, against their numbers.
+  - 3.8's six dev items, two draws each, masked as their runs were.
+  - 3.9's 32 open problems, one draw each.
+- **Use.** The number would only ORDER the queue (`resolution.queue` reads `resolution/prescreen.jsonl`). Every
+  problem still gets the screen proper before any scout, so the arms are untouched.
+- **Predictions:**
+  - dev: the solved three average at least 0.15 more than the other three (with a map the gap was 0.375);
+  - open: a positive rank correlation with 3.9b's map-based means, at least 0.3;
+  - cost: under $0.50 a call.
+- **Reading.**
+  - If the dev gap is at least 0.15 and the open correlation is positive, sweep the whole queue (about $150-300,
+    counted against the daily cap) and order screens by it.
+  - Otherwise keep the forum order.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

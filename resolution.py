@@ -48,6 +48,7 @@ CAMP = ROOT / "resolution"
 STATE = CAMP / "state.json"
 RESULTS = CAMP / "results.jsonl"
 SCREEN_RESULTS = CAMP / "screen-results.jsonl"
+PRESCREEN = CAMP / "prescreen.jsonl"
 CONFIG = CAMP / "config.json"
 LOG = CAMP / "resolution.log"
 REVIEW = CAMP / "REVIEW-NEEDED.md"
@@ -144,13 +145,16 @@ def rows() -> list[dict]:
 
 
 def spent_since(hours: float = 24.0, now: datetime | None = None) -> float:
+    """What the campaign spent in the window: its stages, plus any prescreen sweep (`prescreen.jsonl`, one row and its
+    `cost` per problem), which runs beside the loop."""
     now = now or datetime.now(timezone.utc)
     cut = now - timedelta(hours=hours)
     total = 0.0
-    for r in rows():
+    pre = [json.loads(l) for l in PRESCREEN.read_text().splitlines() if l.strip()] if PRESCREEN.exists() else []
+    for r in rows() + [{"at": x.get("at"), "spend": x.get("cost")} for x in pre]:
         try:
             at = datetime.strptime(r["at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        except (KeyError, ValueError):
+        except (KeyError, TypeError, ValueError):
             continue
         if at >= cut:
             total += float(r.get("spend") or 0.0)
@@ -170,6 +174,21 @@ def forum_chars(n: int) -> int:
     return len((t[i:] if i >= 0 else "").split("All comments are the responsibility of the user")[0])
 
 
+def prescreen() -> dict[int, float]:
+    """Each queued problem's map-free SETTLE CHANCE, when a sweep has drawn one (REPORT 3.10, `step3/settle_nomap.py
+    --sweep`). It only orders the queue: every problem still gets the screen proper before any scout."""
+    out: dict[int, float] = {}
+    if PRESCREEN.exists():
+        for line in PRESCREEN.read_text().splitlines():
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(r.get("mean"), (int, float)):
+                out[int(r["problem"])] = float(r["mean"])
+    return out
+
+
 def queue(state: dict, cfg: dict) -> list[int]:
     """The order problems are tried in. The configured priority list first, then every problem the Atlas lists as
     unsolved, least studied first and higher `partial` breaking ties. A problem openai/math claims, and one the campaign
@@ -184,8 +203,12 @@ def queue(state: dict, cfg: dict) -> list[int]:
         claimed = set()
     taken = {int(k) for k in state.get("problems", {})}
     first = [int(n) for n in cfg.get("priority") or [] if int(n) in unsolved]
+    # Forum size is a weak proxy: 98 queued problems have an empty thread, the Littlewood conjecture (#495) among them.
+    # A prescreen's chance, where one exists, comes first.
+    pre = prescreen()
     rest = sorted((n for n in unsolved if n not in first),
-                  key=lambda n: (forum_chars(n), -float(((unsolved[n].get("partial") or {}).get("score")) or 0), n))
+                  key=lambda n: (-pre.get(n, 0.0), forum_chars(n),
+                                 -float(((unsolved[n].get("partial") or {}).get("score")) or 0), n))
     return [n for n in first + rest if n not in taken and n not in claimed]
 
 

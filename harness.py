@@ -4102,6 +4102,10 @@ results and the barriers must make it plausible.
 PROBLEM:
 {statement}
 
+THE FORMAL STATEMENT (Lean). Settling the problem means proving this or its negation exactly as written: its
+quantifiers, its domain and its conventions decide what counts, not the informal wording above.
+{lean}
+
 THE FRONTIER MAP:
 {frontier}
 
@@ -4877,7 +4881,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     have = ck.get("settle_screen") if isinstance(ck.get("settle_screen"), dict) else None
     if s.settle_draws > 0 and sum(1 for d in (have or {}).get("draws") or []
                                   if isinstance(d.get("chance"), (int, float))) < s.settle_draws:
-        ck["settle_screen"] = engine_settle_screen(call, s, statement, fblock, spend, have)
+        ck["settle_screen"] = engine_settle_screen(call, s, statement, lean, fblock, spend, have)
         keep()
     dropped = engine_drop_infra(ck)
     if dropped:
@@ -5451,7 +5455,7 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
             plan, pc, goal = slot["plan_text"], float(slot.get("plan_cost") or 0.0), slot.get("goal") or ""
         else:
             pt, pc, perr = _discovery_call_capped(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
-                statement=statement, frontier=fblock, results=engine_results_digest(ledger),
+                statement=statement, lean=lean, frontier=fblock, results=engine_results_digest(ledger),
                 objective=DEEP_OBJECTIVES.get(s.objective, DEEP_OBJECTIVES["advance"])), s.frontier_effort,
                 s.meta_budget, spend)
             if not pt:
@@ -5522,14 +5526,17 @@ def settle_chance(text: str) -> float | None:
 SETTLE_SCREEN_RESULTS = "(none yet: this assessment comes before any work)"
 
 
-def engine_settle_screen(call, s: "EngineSettings", statement: str, fblock: str, spend: _DiscoverySpend,
+def engine_settle_screen(call, s: "EngineSettings", statement: str, lean: str, fblock: str, spend: _DiscoverySpend,
                          have: dict | None = None) -> dict:
     """The ripeness screen (`--engine-settle-draws N`): the deep plan's SETTLE CHANCE, asked N times in parallel of the
     frontier map alone. The prompt holds the statement and the map and nothing a session produced, so a draw made after
     work began is still the same instrument, and a resume re-draws only the draws that gave no number.
     Why: on step 2's six unrecognized dev items the mean of two draws was 0.46 on the three the engine went on to settle
-    and 0.09 on the other three (REPORT 3.8). It ranks, it does not decide: #1125, settled, scored 0.085."""
-    prompt = DEEP_PLAN_PROMPT.format(statement=statement, frontier=fblock, results=SETTLE_SCREEN_RESULTS,
+    and 0.09 on the other three (REPORT 3.8). It ranks, it does not decide: #1125, settled, scored 0.085.
+    The formal statement is in the prompt because "settle" means settling IT. Without it #951 scored 0.575 for a
+    counterexample to the informal wording, which the forum had already posted, and which leaves formal-conjectures'
+    "for all large x" open (REPORT 3.9)."""
+    prompt = DEEP_PLAN_PROMPT.format(statement=statement, lean=lean, frontier=fblock, results=SETTLE_SCREEN_RESULTS,
                                      objective=DEEP_OBJECTIVES["resolve"])
     draws = list((have or {}).get("draws") or [])
     need = max(0, s.settle_draws - sum(1 for d in draws if isinstance(d.get("chance"), (int, float))))

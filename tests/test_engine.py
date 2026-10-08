@@ -1068,6 +1068,7 @@ class Objective(unittest.TestCase):
             H.engine_run(call, FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
                          H.EngineSettings(sessions=1, rounds=1, total_budget=50, deep_budget=6.0, objective=objective))
             self.assertIn(phrase, call.prompts("engine-deep-plan")[0])
+            self.assertIn(LEAN, call.prompts("engine-deep-plan")[0])     # "as the formal statement poses it" needs it
         self.assertEqual(H.EngineSettings().objective, "advance")
 
     def test_the_settle_chance_is_read_from_the_plan(self):
@@ -1108,16 +1109,17 @@ class SettleScreen(unittest.TestCase):
         self.assertIn(H.SETTLE_SCREEN_RESULTS, prompt)
         self.assertIn("SETTLE CHANCE", prompt)           # the resolve objective, whatever the run's own
         self.assertIn("Richter", prompt)                 # the map
+        self.assertIn(LEAN, prompt)                      # what "settle" means: #951 scored 0.575 without it
         self.assertIn("Prove the core", res["settle_screen"]["draws"][0]["goal"])
         self.assertIsNone(H.engine_run(self._call([0.4]), sess, "PROBLEM", LEAN,
                                        H.EngineSettings(sessions=0, rounds=1, total_budget=20)).get("settle_screen"))
 
     def test_a_resume_draws_again_only_where_a_draw_gave_no_number(self):
         call, s, spend = self._call([None, 0.5, 0.1]), H.EngineSettings(settle_draws=2), H._DiscoverySpend(10)
-        first = H.engine_settle_screen(call, s, "PROBLEM", "MAP", spend)
+        first = H.engine_settle_screen(call, s, "PROBLEM", LEAN, "MAP", spend)
         self.assertEqual(sorted(str(d["chance"]) for d in first["draws"]), ["0.5", "None"])
         self.assertEqual(first["mean"], 0.5)
-        again = H.engine_settle_screen(call, s, "PROBLEM", "MAP", spend, have=first)
+        again = H.engine_settle_screen(call, s, "PROBLEM", LEAN, "MAP", spend, have=first)
         self.assertEqual(len(call.prompts("engine-settle-screen")), 3)
         self.assertAlmostEqual(again["mean"], 0.3)
         self.assertAlmostEqual(again["cost"], 0.6)

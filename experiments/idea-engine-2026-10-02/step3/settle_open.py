@@ -6,6 +6,9 @@ the campaign runs. One row per problem in `step3/settle_open.jsonl`; a problem a
 resumes. `resolution.py import-screens` takes the rows at or above the bar into the campaign.
 
     python3 experiments/idea-engine-2026-10-02/step3/settle_open.py [--dry-run]
+
+3.9b: the prompt carries the formal statement (the run's frozen Lean statement). 3.9's draws, made without it, are in
+settle_open.jsonl; these go to settle_open_b.jsonl.
 """
 import json, sys
 from concurrent.futures import ThreadPoolExecutor
@@ -17,7 +20,7 @@ ROOT = HERE.parents[2]
 sys.path.insert(0, str(ROOT))
 import harness as H
 
-OUT = HERE / "settle_open.jsonl"
+OUT = HERE / "settle_open_b.jsonl"
 
 
 def targets() -> dict[int, Path]:
@@ -51,7 +54,10 @@ def call(purpose, prompt, effort, budget):
 
 def main() -> int:
     done = {json.loads(l)["problem"] for l in OUT.read_text().splitlines() if l.strip()} if OUT.exists() else set()
-    todo = {n: r for n, r in sorted(targets().items()) if n not in done}
+    first = HERE / "settle_open.jsonl"                   # 3.9b re-draws 3.9's exact maps, so the two compare
+    pool = ({json.loads(l)["problem"]: ROOT / json.loads(l)["run_dir"] for l in first.read_text().splitlines() if l.strip()}
+            if first.exists() else targets())
+    todo = {n: r for n, r in sorted(pool.items()) if n not in done}
     print(f"{len(todo)} problems to draw ({len(done)} done)", flush=True)
     if "--dry-run" in sys.argv:
         for n, r in todo.items():
@@ -63,7 +69,8 @@ def main() -> int:
         n, run = item
         ck = json.loads((run / "engine" / "checkpoint.json").read_text())
         statement = json.loads((run / "problem.json").read_text())["statement"]
-        scr = H.engine_settle_screen(call, s, statement, H.frontier_block(ck["frontier"]), H._DiscoverySpend(10.0))
+        lean = json.loads((run / "state.json").read_text())["statement"]
+        scr = H.engine_settle_screen(call, s, statement, lean, H.frontier_block(ck["frontier"]), H._DiscoverySpend(10.0))
         settings = (json.loads((run / "engine" / "engine.json").read_text()).get("settings") or {}
                     if (run / "engine" / "engine.json").exists() else {})
         rec = {"problem": n, "run_dir": str(run.relative_to(ROOT)), "objective": settings.get("objective", "advance"),

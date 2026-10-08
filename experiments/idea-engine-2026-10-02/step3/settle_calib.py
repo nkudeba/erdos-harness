@@ -3,6 +3,9 @@
 Step 2's six unrecognized dev items with known outcomes. For each, the deep-dive plan prompt under the resolve objective,
 given only that run's frontier map (KNOWN, BARRIERS, CORE) and no results, masked as the run was; two draws each.
 
+3.8b (2026-10-08): the prompt now carries the formal statement, as the deep plan's does since 3.9 showed it missing.
+3.8's own draws, made with the prompt at 216100e, are in settle_calib.jsonl; these go to settle_calib_b.jsonl.
+
     python3 experiments/idea-engine-2026-10-02/step3/settle_calib.py
 """
 import json, re, sys
@@ -28,14 +31,15 @@ def main() -> int:
     for l in (ROOT / "benchmarks" / "timesplit" / "results" / "engine-v5-dev.jsonl").read_text().splitlines():
         r = json.loads(l)
         rows[r["problem"]] = r
-    out = HERE / "settle_calib.jsonl"
+    out = HERE / "settle_calib_b.jsonl"
 
     def one(item):
         n, solved = item
         run = ROOT / rows[n]["run_dir"]
         ej = json.loads((run / "engine" / "engine.json").read_text())
         prob = json.loads((run / "problem.json").read_text())
-        prompt = H.DEEP_PLAN_PROMPT.format(statement=prob["statement"], frontier=H.frontier_block(ej["frontier"]),
+        lean = json.loads((run / "state.json").read_text())["statement"]
+        prompt = H.DEEP_PLAN_PROMPT.format(statement=prob["statement"], lean=lean, frontier=H.frontier_block(ej["frontier"]),
                                            results="(none yet: this assessment comes before any work)",
                                            objective=H.DEEP_OBJECTIVES["resolve"])
         draws = []
