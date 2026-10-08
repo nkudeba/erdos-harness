@@ -1,1 +1,23 @@
 #366 [resolve-scout]: 1 validated new of 13 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $15.691900799999999
+Traceback (most recent call last):
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/screen.py", line 161, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/experiments/idea-engine-2026-10-02/screen.py", line 137, in main
+    rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 2134, in _communicate
+    self.wait(timeout=self._remaining_time(endtime))
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 2040, in _wait
+    time.sleep(delay)
+KeyboardInterrupt
+#686 [resolve-scout]: 0 validated new of 12 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $16.619813799999996

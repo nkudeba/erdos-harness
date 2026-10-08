@@ -14,6 +14,22 @@
    "spend": 15.691900799999999,
    "next": null,
    "status": "done"
+  },
+  "686": {
+   "history": [
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 16.6198
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261008-133931-530035-erdos686",
+   "spend": 16.619813799999996,
+   "next": null,
+   "status": "done",
+   "claims_todo": []
   }
  }
 }
