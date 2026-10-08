@@ -84,6 +84,37 @@ class Tiers(Base):
         self.assertEqual(R.spent_since(168, now), 115.0)
 
 
+class Restarts(Base):
+    """2026-10-08: a Ctrl-C mid-scout and a restart began #366 afresh, abandoning $9.85 of work, and a second terminal ran
+    a second loop that would have raced the first."""
+
+    def test_an_interrupted_scout_is_adopted_by_its_work(self):
+        root = self.d / "root"
+        for name, spend in (("20261008-112020-000001-erdos366", 9.85), ("20261008-130320-000002-erdos366", 1.2),
+                            ("20261008-140000-000003-erdos366", None)):
+            r = root / "runs" / name
+            (r / "engine").mkdir(parents=True)
+            (r / "problem.json").write_text(json.dumps({"id": "366", "notes": "OPEN problem. Research engine screen resolve-scout (no Lean)."}))
+            if spend is not None:
+                (r / "engine" / "checkpoint.json").write_text(json.dumps({"spend": spend}))
+        other = root / "runs" / "20261008-150000-000004-erdos366"          # not a campaign run
+        (other / "engine").mkdir(parents=True)
+        (other / "problem.json").write_text(json.dumps({"id": "366", "notes": "Research engine screen s6-probe"}))
+        (other / "engine" / "checkpoint.json").write_text(json.dumps({"spend": 50.0}))
+        with patch.object(R, "ROOT", root):
+            self.assertEqual(R.adopt_run(366), "runs/20261008-112020-000001-erdos366")
+            self.assertIsNone(R.adopt_run(999))
+
+    def test_a_second_loop_exits(self):
+        first = R.single_instance()
+        self.assertIsNotNone(first)
+        self.assertIsNone(R.single_instance())
+        first.close()
+        again = R.single_instance()
+        self.assertIsNotNone(again)
+        again.close()
+
+
 class Queue(Base):
     def test_priority_first_then_least_studied_and_never_a_claimed_or_taken_problem(self):
         ranks = {"problems": [{"id": n, "status": "Unsolved", "partial": {"score": 50}} for n in (1, 2, 3, 4, 5)]

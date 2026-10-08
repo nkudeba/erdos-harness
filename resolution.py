@@ -229,18 +229,60 @@ def screen_row(n: int, tag: str) -> dict | None:
     return out
 
 
-def run_screen(n: int, tag: str, total: float, flags: str, resume: str | None = None) -> tuple[dict | None, int]:
+def engine_runs(n: int) -> list[Path]:
+    """This problem's engine runs started by the campaign, newest first."""
+    out = []
+    for r in (ROOT / "runs").glob(f"*-erdos{n}"):
+        try:
+            if "Research engine screen resolve-" in json.loads((r / "problem.json").read_text()).get("notes", ""):
+                out.append(r)
+        except (OSError, ValueError):
+            continue
+    return sorted(out, key=lambda r: r.name, reverse=True)
+
+
+def run_progress(run: Path) -> float:
+    try:
+        return float(json.loads((run / "engine" / "checkpoint.json").read_text()).get("spend") or 0.0)
+    except (OSError, ValueError):
+        return 0.0
+
+
+def adopt_run(n: int) -> str | None:
+    """After an interruption: the campaign's run of this problem with the most work in its checkpoint, to resume. On
+    2026-10-08 a restart began #366's scout afresh and abandoned a run holding its map and a whole round ($9.85),
+    because the run dir was recorded only when a stage finished."""
+    runs = [r for r in engine_runs(n) if run_progress(r) > 0]
+    return str(max(runs, key=run_progress).relative_to(ROOT)) if runs else None
+
+
+def run_screen(n: int, tag: str, total: float, flags: str, resume: str | None = None,
+               on_start=None) -> tuple[dict | None, int]:
     """One engine pass through screen.py, the one path that runs the engine on an open problem. It waits out a usage
-    limit and resumes the same run. Returns its results row (None on an infrastructure failure) and its exit code."""
+    limit and resumes the same run. `on_start(run_dir)` is called as soon as the run exists, so an interrupted stage
+    can be resumed. Returns its results row (None on an infrastructure failure) and its exit code."""
     cmd = [sys.executable, str(SCREEN), "--tag", tag, "--src", str(CAMP), "--total", str(round(total, 2)),
            "--flags", flags, "--results", str(SCREEN_RESULTS)]
     cmd += ["--resume", resume] if resume else [str(n)]
     before = screen_row(n, tag)
-    r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=12 * 3600)
-    with (CAMP / "screen.log").open("a") as f:
-        f.write(r.stdout[-6000:] + r.stderr[-3000:])
+    known = set(engine_runs(n))
+    with (CAMP / "screen.log").open("a") as out:
+        proc = subprocess.Popen(cmd, cwd=ROOT, stdout=out, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
+        reported = bool(resume)
+        deadline = time.time() + 12 * 3600
+        while proc.poll() is None:
+            if not reported:
+                new = [r for r in engine_runs(n) if r not in known]
+                if new and on_start:
+                    on_start(str(new[0].relative_to(ROOT)))
+                    reported = True
+            if time.time() > deadline:
+                proc.terminate()
+                break
+            time.sleep(5)
+        rc = proc.wait()
     row = screen_row(n, tag)
-    return (row if row is not None and row != before else None), r.returncode
+    return (row if row is not None and row != before else None), rc
 
 
 def classify(run_dir: Path) -> tuple[str, dict]:
@@ -412,9 +454,18 @@ def step(cfg: dict) -> bool:
                 return True
             p["prepped"] = True
         p["running"] = "scout"
+        if not p.get("run_dir"):
+            p["run_dir"] = adopt_run(n)                  # a scout cut off before this fix recorded none
         save_state(state)
-        log(f"#{n}: scout")
-        row, rc = run_screen(n, "resolve-scout", cfg["scout"]["total"], cfg["scout"]["flags"], p.get("run_dir"))
+        log(f"#{n}: scout" + (f" (resuming {p['run_dir']})" if p.get("run_dir") else ""))
+
+        def started(run_dir: str) -> None:
+            st2 = load_state()
+            st2["problems"].setdefault(key, {}).update({"run_dir": run_dir})
+            save_state(st2)
+            p["run_dir"] = run_dir
+        row, rc = run_screen(n, "resolve-scout", cfg["scout"]["total"], cfg["scout"]["flags"], p.get("run_dir"),
+                             on_start=started)
     elif action == "deep":
         p["running"] = "deep"
         save_state(state)
@@ -508,7 +559,26 @@ def status() -> None:
         print(f"REVIEW NEEDED: {REVIEW.relative_to(ROOT)}")
 
 
+def single_instance():
+    """An exclusive lock held for the loop's lifetime. A second loop (a second terminal) exits at once instead of racing
+    the first for the same problem, as two did on 2026-10-08."""
+    import fcntl
+    CAMP.mkdir(exist_ok=True)
+    fh = open(CAMP / "loop.lock", "w")
+    try:
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return None
+    fh.write(str(__import__("os").getpid()))
+    fh.flush()
+    return fh
+
+
 def loop() -> None:
+    lock = single_instance()
+    if lock is None:
+        log("another resolution campaign loop is already running; this one exits")
+        return
     log("resolution campaign loop starting")
     while True:
         cfg = load_cfg()
