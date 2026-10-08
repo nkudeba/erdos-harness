@@ -798,6 +798,33 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   4. At least one validated-new claim at significance ≥ 2: probability 0.25.
   5. A complete resolution: 0.01 each.
 
+**3.7, the v6 screen on TYPICAL open problems. Pre-registered 2026-10-08, before launch.**
+- **Question.** Is 3.5's result a property of the harness, or of the problems it was pointed at?
+  - The step-3 twenty have a median of 7,688 characters of forum comments.
+  - All 639 unsolved problems have a median of 1,697.
+- **Sample.** `step3/sample_open.py --k 12`, seed 20261007. It is uniform over the Atlas's unsolved problems, minus:
+  - step 3's twenty;
+  - openai/math's claims;
+  - any problem with a campaign blackboard.
+
+  The script walks the shuffled list until 12 have a single formal-conjectures main theorem at step 3's pinned commit.
+  It skipped 12.
+- **The 12 problems:** #1055, #458, #377, #955, #940, #1061, #695, #486, #375, #64, #78 and #1068.
+  - Their median forum discussion is 1,820 characters.
+  - None is a time-split item.
+  - None has a claimed resolution on its proof-claims page (refreshed now).
+- **Protocol.** Identical to 3.5: `screen.py --tag s7-sample --src step3 --total 16`, with 3.5's flags.
+- **Predictions:**
+  1. Cost $85–130.
+  2. Problems with an OPEN target: 3 of 12 (range 1–7). 3.5 had 1 of 8.
+  3. Validated-new claims from probes: 12 (4–24), in 7 of 12 problems (4–10).
+  4. Validated-new claims at significance ≥ 2: 1 (0–4), in 1 problem (0–3). 3.5 had 0.
+- **Reading.**
+  - Both screens' rates are reported with their counts, and no threshold is set: 8 and 12 problems separate only large
+    differences.
+  - A higher rate of significance-2 targets or results here would say the harness's reach depends on how studied a
+    problem is. Equal rates would say the limit is the harness.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

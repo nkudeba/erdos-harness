@@ -1,0 +1,228 @@
+{
+ "seed": 20261007,
+ "fc_sha": "9d259649abe0b02d7a25f7589b872db679b35e21",
+ "candidates": 592,
+ "order_head": [
+  131,
+  475,
+  1055,
+  839,
+  458,
+  377,
+  955,
+  940,
+  1053,
+  1170,
+  724,
+  580,
+  265,
+  1061,
+  791,
+  695,
+  486,
+  293,
+  375,
+  1070,
+  64,
+  78,
+  573,
+  1068,
+  1004,
+  579,
+  50,
+  357,
+  19,
+  398,
+  1065,
+  672,
+  410,
+  640,
+  1151,
+  1184,
+  906,
+  288,
+  408,
+  787,
+  700,
+  544,
+  928,
+  1117,
+  130,
+  1133,
+  390,
+  117,
+  670,
+  412,
+  1101,
+  911,
+  774,
+  169,
+  876,
+  761,
+  85,
+  840,
+  40,
+  84,
+  973,
+  276,
+  354,
+  1016,
+  348,
+  338,
+  1094,
+  102,
+  1066,
+  665,
+  143,
+  1137,
+  173,
+  261,
+  971,
+  420,
+  749,
+  1177,
+  1142,
+  996
+ ],
+ "picked": [
+  {
+   "problem": 1055,
+   "form": "assertion",
+   "statement_chars": 547,
+   "digest_chars": 276
+  },
+  {
+   "problem": 458,
+   "form": "answer-iff",
+   "statement_chars": 178,
+   "digest_chars": 3464
+  },
+  {
+   "problem": 377,
+   "form": "answer-iff",
+   "statement_chars": 285,
+   "digest_chars": 1097
+  },
+  {
+   "problem": 955,
+   "form": "answer-iff",
+   "statement_chars": 210,
+   "digest_chars": 650
+  },
+  {
+   "problem": 940,
+   "form": "answer-iff",
+   "statement_chars": 153,
+   "digest_chars": 2815
+  },
+  {
+   "problem": 1061,
+   "form": "answer-iff",
+   "statement_chars": 303,
+   "digest_chars": 1175
+  },
+  {
+   "problem": 695,
+   "form": "answer-iff",
+   "statement_chars": 221,
+   "digest_chars": 612
+  },
+  {
+   "problem": 486,
+   "form": "answer-iff",
+   "statement_chars": 144,
+   "digest_chars": 3240
+  },
+  {
+   "problem": 375,
+   "form": "answer-iff",
+   "statement_chars": 221,
+   "digest_chars": 7285
+  },
+  {
+   "problem": 64,
+   "form": "answer-iff",
+   "statement_chars": 213,
+   "digest_chars": 6817
+  },
+  {
+   "problem": 78,
+   "form": "assertion",
+   "statement_chars": 468,
+   "digest_chars": 4850
+  },
+  {
+   "problem": 1068,
+   "form": "answer-iff",
+   "statement_chars": 195,
+   "digest_chars": 1114
+  }
+ ],
+ "skipped": [
+  {
+   "problem": 131,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 475,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 839,
+   "why": "no main theorem (parts: parts.i, parts.ii)"
+  },
+  {
+   "problem": 1053,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 1170,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 724,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 580,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 265,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 791,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 293,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 1070,
+   "why": "no formal-conjectures file"
+  },
+  {
+   "problem": 573,
+   "why": "no formal-conjectures file"
+  }
+ ],
+ "depth": {
+  "step-3 twenty": {
+   "n": 20,
+   "median_forum_comment_chars": 7687.5,
+   "median_refs": 3.0
+  },
+  "all unsolved": {
+   "n": 639,
+   "median_forum_comment_chars": 1697,
+   "median_refs": 2
+  },
+  "sample": {
+   "n": 12,
+   "median_forum_comment_chars": 1820.5,
+   "median_refs": 2.5
+  }
+ }
+}
