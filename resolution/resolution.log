@@ -14,3 +14,5 @@
 [2026-10-08T18:03:54Z] resolution campaign loop starting
 [2026-10-08T18:03:54Z] #686: scout (resuming runs/20261008-133931-530035-erdos686)
 [2026-10-08T19:06:50Z] #686: scout -> none ($16.62; 0 validated new [])
+[2026-10-08T19:06:56Z] #488: screen
+[2026-10-08T19:26:13Z] #488: screen -> screened out (settle chance 0.04, draws [0.05, 0.03]; $3.02)

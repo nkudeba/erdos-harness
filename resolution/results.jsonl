@@ -1,2 +1,3 @@
 {"at": "2026-10-08T17:39:17Z", "problem": 366, "tier": "scout", "outcome": "none", "spend": 15.6919, "run_dir": "runs/20261008-112020-606408-erdos366", "validated_new": 1, "significance": [1]}
 {"at": "2026-10-08T19:06:50Z", "problem": 686, "tier": "scout", "outcome": "none", "spend": 16.6198, "run_dir": "runs/20261008-133931-530035-erdos686", "validated_new": 0, "significance": [], "arm": null, "settle_screen": 0.01, "settle_chance": 0.0}
+{"at": "2026-10-08T19:26:13Z", "problem": 488, "tier": "screen", "outcome": "screened out", "settle_chance": 0.04, "draws": [0.05, 0.03], "spend": 3.0234, "run_dir": "runs/20261008-150656-555418-erdos488"}

@@ -21,3 +21,4 @@ Traceback (most recent call last):
     time.sleep(delay)
 KeyboardInterrupt
 #686 [resolve-scout]: 0 validated new of 12 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $16.619813799999996
+#488 [resolve-screen]: 0 validated new of 0 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $3.023396
