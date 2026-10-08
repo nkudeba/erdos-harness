@@ -776,12 +776,14 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
        forum discussion of an unsolved problem.
 - **#273's re-judging** ($2.56, after the usage-limit fix) broke both would-be search-floor raises. The flaws: a
   recursion that never clamps a bound at 0, and a filter that is invalid for negative τ. The floor stays at 110,880.
-- **Selection** (`step3/rank_s6.py`, fixed before the screen): #686, then #488.
+- **Selection** (`step3/rank_s6.py`, fixed before the screen): #686, then #366.
+  - #366's two validated-new results outrank #488's one, and the rule checks that before OPEN targets.
+  - An earlier draft of this line said #488. It was written from a ranking run before #366's row existed.
 
 **3.6, full v6 runs on the screen's top 2. Pre-registered 2026-10-08, before launch.**
 - **Question.** Can depth turn the screen's minor traction into a significant result? Depth here means sessions that
   keep going, a deep dive and gap closing.
-- **Problems.** The top 2 by `step3/rank_s6.py` after #273's re-judging. Before it: #686, then #488.
+- **Problems.** The top 2 by `step3/rank_s6.py` after #273's re-judging: #686, then #366.
 - **Protocol.** Each problem's screen run is resumed, so its map, ratings and probes are reused, not bought again:
   - `screen.py --tag s6-full --total <its screen spend + 35> --resume <its screen run>`;
   - flags: `--engine-sessions 3 --engine-rounds 1 --engine-deep-budget 6 --engine-gap-rounds 2 --engine-gap-max 2
