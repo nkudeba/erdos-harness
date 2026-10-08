@@ -54678,11 +54678,12 @@
         "ramsey theory"
       ],
       "score": 2,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
-        "An unresolved prize problem receives a conservative difficulty prior."
+        "An unresolved prize problem receives a conservative difficulty prior.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Check for a matching Mathlib theorem before constructing a long combinatorial proof."
@@ -54739,8 +54740,8 @@
       "manual": false,
       "prize": "$100",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
