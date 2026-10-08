@@ -734,7 +734,7 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
 | #7 | 0 | 0 | 3 of 4 | $7.66 |
 | #488 | 1 | 1 (1) | 3 of 4 | $12.23 |
 | #885 | 0 | 1 (1) | 3 of 4 | $9.75 |
-| #273 | 0 | 0, pending re-judging | 1 of 4 | $6.52 |
+| #273 | 0 | 0 (re-judged: 4 broken, 1 routine) | 1 of 4 | $9.08 |
 | #686 | 0 | 3 (1, 1, 1) | 2 of 4 | $13.06 |
 | #835 | 0 | 0 | 3 of 4 | $11.92 |
 | #647 | 0 | 1 (1) | 3 of 4 | $11.21 |
@@ -774,7 +774,9 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
     1. Depth. The full v6 runs on the top 2 below have sessions that keep going, a deep dive and gap closing.
     2. Selection. A screen of a random sample of typical open problems: the step-3 twenty have 4.5 times the median
        forum discussion of an unsolved problem.
-- **Selection** (`step3/rank_s6.py`, fixed before the screen): #686, then #488, provisional until #273 is re-judged.
+- **#273's re-judging** ($2.56, after the usage-limit fix) broke both would-be search-floor raises. The flaws: a
+  recursion that never clamps a bound at 0, and a filter that is invalid for negative τ. The floor stays at 110,880.
+- **Selection** (`step3/rank_s6.py`, fixed before the screen): #686, then #488.
 
 **3.6, full v6 runs on the screen's top 2. Pre-registered 2026-10-08, before launch.**
 - **Question.** Can depth turn the screen's minor traction into a significant result? Depth here means sessions that
