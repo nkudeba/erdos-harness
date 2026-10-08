@@ -672,17 +672,19 @@
     ]
   },
   "366": {
-    "assessed": "2026-10-07",
+    "assessed": "2026-10-08",
     "partial": 62,
     "rationale": [
       "The thread carries a complete conditional argument that abc implies finitely many solutions, with an explicit bound n <= K_eps^{6/(1-5eps)}.",
       "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing.",
-      "v6 screen 2026-10-08 ($10.17, informal): two validated new results at significance 1: u^3 - 1 is not powerful for 2 <= u <= 10^12 + 1 (computational), and N(X) << X^(5/16+eps) under a conditional lemma, X^(19/60+eps) unconditionally. A probe refuted the naive class-number lemma (3 not dividing h(-t) does not force y = 0 in 1 + t y^2 = u^3) with explicit counterexamples."
+      "v6 screen 2026-10-08 ($10.17, informal): two validated new results at significance 1: u^3 - 1 is not powerful for 2 <= u <= 10^12 + 1 (computational), and N(X) << X^(5/16+eps) under a conditional lemma, X^(19/60+eps) unconditionally. A probe refuted the naive class-number lemma (3 not dividing h(-t) does not force y = 0 in 1 + t y^2 = u^3) with explicit counterexamples.",
+      "v6 full run 2026-10-08 ($22.36 beyond the screen, informal): of the 43,051 fibres (k,t) with kt <= 10^4, 37,813 (87.8%) contain no solution of any size, by a new descent plus cubic-residue obstruction over Q(sqrt(-t)); 29,992 of them lie outside the Bennett-Ghadermarzi range. Judged valid but routine (significance 1)."
     ],
     "requirements": [
       "Formalize the implication with abc as an explicit hypothesis; do not assert the unconditional finiteness.",
       "A bounded search is futile below 10^22. Value here is the conditional finiteness argument or a certified special case, not enumeration.",
-      "Any route through class numbers must avoid that lemma; the counterexample list is in the run's engine.json."
+      "Any route through class numbers must avoid that lemma; the counterexample list is in the run's engine.json.",
+      "The 5,238 open fibres (2,438 with k = 1) need Thue and elliptic-logarithm solving: PARI's thue with a certified bnf, or Magma. Not available in the sandbox."
     ],
     "sources": [
       "atlas-data/forum/366.json",
@@ -1277,18 +1279,20 @@
     "score": 8,
     "rationale": [
       "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4.",
-      "v6 screen 2026-10-08 ($13.06, informal): three validated new results at significance 1: N = 4 is not k-representable for k in {6, 8, 10, 12, 14, 16, 20, 24} beyond the gap-1 cases; any solution with N = 4 has s = n+k >= k^3/10^4, with explicit interval bounds (s >= 1.23e7 at k = 1000); and the k = 5, N = 4 curve reduces to an explicit genus-2 quotient."
+      "v6 screen 2026-10-08 ($13.06, informal): three validated new results at significance 1: N = 4 is not k-representable for k in {6, 8, 10, 12, 14, 16, 20, 24} beyond the gap-1 cases; any solution with N = 4 has s = n+k >= k^3/10^4, with explicit interval bounds (s >= 1.23e7 at k = 1000); and the k = 5, N = 4 curve reduces to an explicit genus-2 quotient.",
+      "v6 full run 2026-10-08 ($24.12 beyond the screen, informal): validated new at significance 1: 4 is not k-representable for every even k <= 340 (Runge's method). The deep dive settled k = 3: X^3 - X = 4(Y^3 - Y) has only the 9 trivial integral points and +-(3,2), via 12 cubic Thue equations over Z[2^(1/3)]; judged routine and still conditional. The k = 3 pipeline also settles every square N = t^2, t <= 16: only N = 9 and 16 are 3-representable."
     ],
     "requirements": [
       "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary.",
-      "The significance-2 target is that 4 is not k-representable for every even k; the interval method grows the lower bound but gives no finiteness on its own."
+      "The significance-2 target is that 4 is not k-representable for every even k; the interval method grows the lower bound but gives no finiteness on its own.",
+      "k = 5 (the first odd case past Runge) needs Prym-Chabauty plus a Mordell-Weil sieve on the genus-6 curve; infeasible without a computer-algebra system (PARI/Magma), which the sandbox lacks."
     ],
     "sources": [
       "experiments/open-viability-2026-09-16/ASSESSMENT.md",
       "https://www.erdosproblems.com/forum/thread/686",
       "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
-    "assessed": "2026-10-07"
+    "assessed": "2026-10-08"
   },
   "699": {
     "rationale": [
