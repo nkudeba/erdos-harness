@@ -56,13 +56,16 @@ DEFAULTS = {
     # Known lines that PARI/GP may now finish: #366's 5,238 open fibres need Thue solving, #686's odd cases need
     # computational arithmetic geometry; #488 has its next rung; #873 has the step-3 significance-2 result.
     "priority": [366, 686, 488, 873],
+    # --results-library on: other runs' validated results and the openai/math families relevant to the problem, so one
+    # run builds on another's (never in a benchmark run; no dev or test item enters it).
     "scout": {"total": 18.0,
               "flags": "--engine-objective resolve --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
-                       "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2"},
-    "deep": {"extra": 30.0,
+                       "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2 "
+                       "--results-library on"},
+    "deep": {"extra": 40.0,
              "flags": "--engine-objective resolve --engine-sessions 3 --engine-rounds 2 --engine-core-share 0.67 "
-                      "--engine-deep-budget 5 --engine-marathon-legs 1 --engine-marathon-leg-budget 8 "
-                      "--engine-gap-rounds 2 --engine-gap-max 2 --engine-session-legs 3"},
+                      "--engine-deep-budget 5 --engine-marathon-legs 2 --engine-marathon-leg-budget 8 "
+                      "--engine-gap-rounds 2 --engine-gap-max 2 --engine-session-legs 3 --results-library on"},
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6},
     "max_errors": 2,
     "fc_sha": None,
@@ -492,6 +495,11 @@ def status() -> None:
     print(f"daily cap ${cfg['daily_cap_usd']:.0f}; spent last 24h ${spent_since():.2f}, last 7 days ${spent_since(168):.2f}")
     for k, v in sorted(by.items()):
         print(f"  {k}: {len(v)}  {sorted(v)[:20]}")
+    tackled = [int(n) for n, p in st.get("problems", {}).items() if p.get("run_dir")]
+    sig3 = sorted({int(r["problem"]) for r in rows() if r.get("outcome") in ("complete", "verified")
+                   or 3 in (r.get("significance") or [])})
+    print(f"significance 3 (a complete answer, or a claim both novelty judges rate 3): {len(sig3)} of {len(tackled)} "
+          f"problems tackled {sig3}")
     act, n = next_action(st, cfg)
     print(f"next: {act} {n or ''}")
     for r in rows()[-8:]:
