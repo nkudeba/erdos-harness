@@ -1,0 +1,13 @@
+REJUDGE-START 2026-10-08T01:01:06Z
+#273 [s6-probe]: 0 validated new of 8 claims; targets 10 (new 9, sig>=2 3, open 0); best None; probes: measured 0, traction 1, best 2.382; $9.084259600000001
+273 done 2026-10-08T01:11:48Z
+resumed runs/20261006-021530-371636-discover-erdos87647 exit 2 2026-10-08T01:18:54Z
+#570: truth=true complete=False answer=None validated_new=1 sig2=1 $12.19 (recorded)
+resumed runs/20261006-021530-371674-discover-erdos72562 exit 2 2026-10-08T01:25:33Z
+#865: truth=true complete=False answer=None validated_new=7 sig2=4 $15.58 (recorded)
+resumed runs/20261006-021530-371610-discover-erdos77933 exit 3 2026-10-08T01:40:45Z
+#1125: truth=true complete=True answer=true validated_new=2 sig2=0 $16.73 (recorded)
+#570: truth=true recognized_true=False complete=False answer=None correct=False claim=None grade $0.0
+#865: truth=true recognized_true=False complete=False answer=None correct=False claim=None grade $0.0
+#1125: truth=true recognized_true=False complete=True answer=true correct=True claim=deep/C1 grade $0.0
+REJUDGE-DONE 2026-10-08T01:40:46Z

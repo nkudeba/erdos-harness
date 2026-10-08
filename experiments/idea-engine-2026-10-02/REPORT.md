@@ -932,17 +932,25 @@ cost more than #1125 or #401. Decide before launching:
 | #204 | false | yes | yes | yes | 0 | $13.18 |
 | #392 | true | yes | yes | yes | 0 | $11.68 |
 | **#401** | true | no | **yes** | **yes** | 1 (0) | $8.16 |
-| #570 | true | no | no | — | 0 | $9.98 |
+| #570 | true | no | no | — | 1 (1)* | $12.19* |
 | **#618** | true | no | **yes** | **yes** | 5 (4) | $19.40 |
-| #865 | true | no | no | — | 5 (3) | $13.35 |
+| #865 | true | no | no | — | 7 (4)* | $15.58* |
 | #888 | true | no | no | — | 4 (1) | $22.66 |
-| **#1125** | true | no | **yes** | **yes**, Lean-verified | 1 (0) | $13.04 |
+| **#1125** | true | no | **yes** | **yes**, Lean-verified | 2 (0)* | $16.73* |
+
+\* Completed on 2026-10-08, after the usage-limit fix: the weekly limit of 2026-10-06 had left these verdicts and every
+gap rating unjudged. Spend includes the re-judging. The re-judged claims met the v6 referee prompt.
+- #570 gains deep/C1: for even k = 2ℓ ≥ 4 and every H with m ≥ m₀(k) edges and no isolated vertices,
+  R(C_k, H) ≤ 2m + ℓ − 1. It was validated new at significance 2 by one judge and 3 by the other. The settles judges
+  say it does not settle the problem, which asks for every k and m.
+- #865 gains |A| ≤ (20/27)N + 83/27 for every triangle-free A ⊆ [1, N], at significance 2. That is a gap-closing claim,
+  conditional until its re-judged lemma r1s1/C4r was found valid.
 
 **Against the predictions written before launch:**
 - Clean complete proofs on the true side: predicted 1 of 8 (range 0–2), observed **3 of the 6 unrecognized items**,
   with #1125 verified in Lean.
 - Complete proofs on the wrong side: predicted 0, observed 0.
-- Both-judge significance-2 claims: predicted 2, observed 8.
+- Both-judge significance-2 claims: predicted 2, observed 10: 8 before the repair, plus #570's and #865's.
 - Spend: predicted about $200, observed $111.
 - The two recognized items were also solved correctly. They are reported apart and count for nothing.
 
