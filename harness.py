@@ -3729,7 +3729,7 @@ rule out.
 
 === CORE
 The precise statement that remains: what, given KNOWN, would finish the problem. Then say why it is hard.
-
+{objective_block}
 Then exactly {targets} blocks of this form:
 === TARGET T1
 TYPE: QUANT | SPECIAL | CONDITIONAL | STRUCTURE | ANALOGUE | NEGATIVE | REDUCTION
@@ -4123,6 +4123,19 @@ DEEP_OBJECTIVES = {
                 "line with the best chance of major progress (significance 3), and say so in the GOAL."),
 }
 
+# The map under `--engine-objective resolve`. A disproof by an explicit counterexample is a complete answer, and many
+# Erdos problems have fallen that way; the team needs the deciding computation spelled out before it can run it.
+FRONTIER_RESOLVE_BLOCK = """
+=== DECIDE
+Can a finite computation settle the problem? If the statement is false: the smallest counterexample it would take, and
+the range where none is yet excluded (give the published and forum search floors). If it is true: whether it reduces to
+a finite check. Give the search precisely: the objects, the encoding (a SAT instance via pysat, an exact search, PARI/GP
+for number theory), the range, and its size in objects. Or write NONE and why no computation can settle it.
+
+TARGET T1 below must be the complete answer itself: the precise statement, or its negation if DIRECTION says FALSE.
+"""
+
+
 DEEP_ASSIGNMENT = """DEEP DIVE. You have the largest budget of anyone on the team, for ONE line of attack chosen by the team lead after
 reading everything the team produced. The files in prior/ are the team's notebooks: read the ones the plan names before
 you start, and reuse their results instead of re-deriving them.
@@ -4283,7 +4296,7 @@ def parse_frontier(text: str) -> dict:
                 out["angles"].append({"id": (title.split() + ["A"])[1][:8], "technique": section_field(body, "TECHNIQUE")[:400],
                                       "idea": idea[:2500], "barriers": section_field(body, "BARRIERS")[:1200],
                                       "first_step": section_field(body, "FIRST STEP")[:1200]})
-        elif t in ("DIRECTION", "KNOWN", "BARRIERS", "CORE"):
+        elif t in ("DIRECTION", "KNOWN", "BARRIERS", "CORE", "DECIDE"):
             out[t.lower()] = body.strip()
     d = out["direction"]
     ans = re.search(r"\b(TRUE|FALSE)\b", d, re.I)
@@ -4329,7 +4342,27 @@ def engine_assignments(f: dict, n: int, core_share: float) -> list[dict]:
     return picks[:n]
 
 
+def decide_plan(f: dict) -> str | None:
+    """The map's DECIDE section when it names a computation, else None (no section, or NONE)."""
+    d = " ".join(str(f.get("decide") or "").split())
+    return None if not d or re.match(r"(?i)\**\s*none\b", d) else d[:3000]
+
+
+def decide_item(f: dict) -> dict | None:
+    plan = decide_plan(f)
+    return {"kind": "decide", "id": "D1", "plan": plan, "answer": f.get("answer")} if plan else None
+
+
 def assignment_text(a: dict) -> str:
+    if a.get("kind") == "decide":
+        return ("DECIDE THE PROBLEM BY COMPUTATION (D1). The team lead's plan:\n" + str(a.get("plan")) + "\n"
+                "Encode the search exactly: pysat for combinatorial witnesses, cypari2 (PARI/GP) for number-theoretic ones. "
+                "Each script run is capped (see YOUR TOOLS), and scripts cannot write files, so split the search into "
+                "ranges a run can finish and print what each range found. Start from the smallest range no published "
+                "or forum search has excluded. A counterexample settles the problem: check it independently, by a "
+                "second method, and record it as a REFUTED claim with the witness. A completed search that finds none "
+                "is a new search floor: record it with the exact range and method. If the plan is infeasible, say "
+                "exactly why, and decide the largest case you can.")
     if a.get("kind") == "angle":
         return (f"ATTACK THE CORE by this angle ({a.get('id')}).\nTECHNIQUE: {a.get('technique')}\nIDEA: {a.get('idea')}\n"
                 f"BARRIERS: {a.get('barriers')}\nFIRST STEP: {a.get('first_step')}\n"
@@ -4811,7 +4844,8 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     if isinstance(ck.get("frontier"), dict) and ck["frontier"].get("text"):
         f = ck["frontier"]
     else:
-        fprompt = FRONTIER_PROMPT.format(statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles)
+        fprompt = FRONTIER_PROMPT.format(statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles,
+                                         objective_block=FRONTIER_RESOLVE_BLOCK if s.objective == "resolve" else "")
         ft, fc, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, s.frontier_budget)
         spend.add(fc)
         if ft is None and "budget" in str(ferr) and spend.room(1.5 * s.frontier_budget):
@@ -4852,6 +4886,9 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     probes = ck.get("probes") if isinstance(ck.get("probes"), list) else None
     if probes is None and s.probe_items > 0:
         items = probe_candidates(gated, s.probe_items)
+        d = decide_item(f) if s.objective == "resolve" else None
+        if d and items:
+            items = [d] + items[:-1]
         if items:
             probes = ck["probes"] = engine_probe(call, session, s, statement, lean, fblock, sess_context, known, items, spend,
                                                  search, ck=ck, keep=keep, workers=workers)
@@ -4879,7 +4916,13 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                       f"{rnd} (validated results first):\n" + clip_middle(secs.get("STATE") or "", 3000)
                       + "\n\nLESSONS:\n" + clip_middle(secs.get("LESSONS") or "", 2000)} for line in nxt[: s.sessions]]
 
-    assignments = ck["next"] if "next" in ck else engine_assignments(gated, s.sessions, s.core_share)
+    if "next" in ck:
+        assignments = ck["next"]
+    else:
+        assignments = engine_assignments(gated, s.sessions, s.core_share)
+        d = decide_item(f) if s.objective == "resolve" else None
+        if d and assignments and not any(a.get("kind") == "decide" for a in assignments):
+            assignments = [d] + assignments[:-1]          # the deciding computation leads; it can settle the problem
     if (not assignments and rounds and len(rounds) < max(1, s.rounds) and not ck.get("partial")
             and spend.room(s.meta_budget + s.session_budget)):
         # A resume that adds rounds (the campaign's deep tier). The earlier run's last round had no next round to plan,

@@ -1008,6 +1008,47 @@ class MoreRoundsOnResume(unittest.TestCase):
         self.assertEqual(sorted(l for l, p in sess2.calls), ["r2s1", "r2s2"])     # round 1 was not bought again
 
 
+class DecideByComputation(unittest.TestCase):
+    """2026-10-08, resolve objective: the map spells out the computation that could settle the problem (a counterexample
+    search, a finite check), and that computation leads round 1 and the probes. A disproof is a complete answer."""
+
+    DECIDE = ("=== DECIDE\nIf false, a counterexample is a set of at most 40 residues; none is excluded above lcm 10^6. "
+              "Encode as SAT with pysat over lcm in (10^6, 2*10^6], about 3*10^5 instances.\n")
+
+    def _script(self, frontier):
+        def script(purpose, prompt, n):
+            return frontier if purpose == "engine-frontier" else DEEP_PLAN if purpose == "engine-deep-plan" else judge(purpose)
+        return script
+
+    def test_the_section_is_asked_for_and_parsed_only_when_resolving(self):
+        call = FakeCall(self._script(FRONTIER), cost=0.1)
+        H.engine_run(call, FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                     H.EngineSettings(sessions=1, rounds=1, total_budget=40, objective="resolve"))
+        self.assertIn("=== DECIDE", call.prompts("engine-frontier")[0])
+        self.assertIn("TARGET T1 below must be the complete answer", call.prompts("engine-frontier")[0])
+        call = FakeCall(self._script(FRONTIER), cost=0.1)
+        H.engine_run(call, FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                     H.EngineSettings(sessions=1, rounds=1, total_budget=40))
+        self.assertNotIn("=== DECIDE", call.prompts("engine-frontier")[0])
+        f = H.parse_frontier(FRONTIER.replace("=== TARGET T1", self.DECIDE + "=== TARGET T1"))
+        self.assertIn("pysat", H.decide_plan(f))
+        self.assertIsNone(H.decide_plan(H.parse_frontier(FRONTIER.replace("=== TARGET T1", "=== DECIDE\nNONE: no finite witness.\n=== TARGET T1"))))
+
+    def test_the_computation_leads_round_one_and_the_probes(self):
+        frontier = FRONTIER.replace("=== TARGET T1", self.DECIDE + "=== TARGET T1")
+        sess = FakeSession(lambda label, prompt: notebook(("REFUTED", "NEGATIVE", "a counterexample with 37 residues")))
+        H.engine_run(FakeCall(self._script(frontier), cost=0.1), sess, "PROBLEM", LEAN,
+                     H.EngineSettings(sessions=2, rounds=1, total_budget=60, objective="resolve", probe_items=2), workers=2)
+        prompts = dict(sess.calls)
+        self.assertIn("DECIDE THE PROBLEM BY COMPUTATION", prompts["p1"])
+        self.assertIn("DECIDE THE PROBLEM BY COMPUTATION", prompts["r1s1"])
+        self.assertNotIn("DECIDE THE PROBLEM BY COMPUTATION", prompts["r1s2"].split("YOUR TEAMMATES")[0])   # a teammate's
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
+        H.engine_run(FakeCall(self._script(frontier), cost=0.1), sess, "PROBLEM", LEAN,
+                     H.EngineSettings(sessions=2, rounds=1, total_budget=60), workers=2)
+        self.assertFalse(any("DECIDE THE PROBLEM" in p for l, p in sess.calls))         # advance: unchanged
+
+
 class Objective(unittest.TestCase):
     """2026-10-08: the campaign aims the deep dive at settling the problem. In step 2 every solved problem had a complete
     proof from its deep dive; step 3, aimed at significant partial results, produced partial results."""
