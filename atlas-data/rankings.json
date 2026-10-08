@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "06e6e8e7e2b108c088f8d86e135bbed1416718ed04738b74f7756cb496f62b02",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "58ca27c2658a0a2e554289db0c251e68b7e64e0a66177b08dd0f070deb838230"
+    "manual_reviews_sha256": "1ef7231a08ae78d8dd60d41d90b5d460d67c1765e5995ebecf48efbfa7eb426d"
   },
   "problems": [
     {
@@ -30543,6 +30543,7 @@
       "harness": "Attempted",
       "rationale": [
         "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5.",
+        "v6 screen 2026-10-08 ($9.75, informal): validated new at significance 1: an explicit near-configuration R = {0, 2062016, 14170112, 24040016, 78094016}, C = {872^2, 4328^2, 5003^2, 11672^2, -1496512} with r+c a perfect square for 24 of the 25 pairs (all but (0, -1496512)).",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Divisor and prime-factor APIs are represented in previous successful runs.",
@@ -30551,11 +30552,12 @@
       ],
       "requirements": [
         "The open frontier is k = 5. A witness for it would be a certifiable partial result; the full problem needs a construction for every k.",
+        "Complete such a configuration, or prove the obstruction the probes' genus-5 curve (Jacobian a product of elliptic curves) points to.",
         "Resolve natural/integer coercions and retrieve factorization lemmas early.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -30621,10 +30623,11 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-06",
+        "on": "2026-10-07",
         "sources": [
           "atlas-data/forum/885.json",
-          "https://www.erdosproblems.com/forum/thread/885"
+          "https://www.erdosproblems.com/forum/thread/885",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": null
       },
@@ -30929,6 +30932,7 @@
       "rationale": [
         "The thread carries a complete conditional argument that abc implies finitely many solutions, with an explicit bound n <= K_eps^{6/(1-5eps)}.",
         "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing.",
+        "v6 screen 2026-10-08 ($10.17, informal): two validated new results at significance 1: u^3 - 1 is not powerful for 2 <= u <= 10^12 + 1 (computational), and N(X) << X^(5/16+eps) under a conditional lemma, X^(19/60+eps) unconditionally. A probe refuted the naive class-number lemma (3 not dividing h(-t) does not force y = 0 in 1 + t y^2 = u^3) with explicit counterexamples.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -30940,12 +30944,13 @@
       "requirements": [
         "Formalize the implication with abc as an explicit hypothesis; do not assert the unconditional finiteness.",
         "A bounded search is futile below 10^22. Value here is the conditional finiteness argument or a certified special case, not enumeration.",
+        "Any route through class numbers must avoid that lemma; the counterexample list is in the run's engine.json.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -31022,9 +31027,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-10-07",
         "sources": [
-          "atlas-data/forum/366.json"
+          "atlas-data/forum/366.json",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": 1e+22
       },
@@ -31276,6 +31282,7 @@
         "A witness would certify finitely many divisor inequalities, but the source ties the existence problem to much harder prime-pattern questions.",
         "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground.",
         "Forum, 2026-10-06: an uncertified GPU search (veljjanoski) reports no solution with 24 < n <= 1e22. That raises the recorded 9.17e18 floor; the count is of n, the enumerable object. A kernel-checked Lean exclusion reaches 1e13 (standard axioms, no native_decide), and its writeup argues that no finite table of modular sieve stages can prove the statement.",
+        "v6 screen 2026-10-08 ($11.21, informal): validated new at significance 1: N(x) <= x exp(-(log x)^theta) for every theta < 1/(2+1/log 2), where N(x) counts n <= x with tau(n-k) <= k+2 for all 1 <= k < n.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -31287,11 +31294,12 @@
         "Use a sieve-backed search beyond the known example 24, retaining a compact certificate for every m below the witness.",
         "Enumeration is futile below ~9e18. The live routes are the modular/prime-chain reductions or formalising the density-zero bounds, not search.",
         "Enumeration is futile below 1e22 (published, not rerun). A resolution needs a structural argument, and the sieve-table writeup suggests finitely many modular stages cannot supply one.",
+        "A counting bound does not decide whether any such n exists beyond the known ones; the published search floor stands.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -31374,10 +31382,11 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-06",
+        "on": "2026-10-07",
         "sources": [
           "atlas-data/forum/647.json",
-          "https://github.com/veljjanoski/erdos647"
+          "https://github.com/veljjanoski/erdos647",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": 1e+22
       },
@@ -35364,6 +35373,7 @@
         "The reason is intrinsic: k <= slack*L, so the inequality bites exactly when slack is tiny. The 20 eliminated are the tight candidates; the nine survivors all have slack 0.02-0.08 and thousands of units of excess to absorb any imbalance. Tightness is both what makes a candidate look attackable AND what this test needs, so the algebra consumed exactly the candidates a search would have preferred and left the ones that are loose for both.",
         "Viability assessment 2026-09-16 (operator session, no paid run; experiments/open-viability-2026-09-16/ASSESSMENT.md): of the 639 open problems, #273 is the only one whose FULL resolution can be a finite certificate at a plausibly reachable size - two disjoint distinct-modulus covering systems over H2, lcm likely 1e5-1e7, 50-100 congruences. Every other finite-certificate open problem is either a believed-true conjecture whose certificate would be a counterexample (#742, #23, #583, #628; #617 fixed cases do not resolve the universal statement) or has a witness floor far past reach (#7 lcm 1.15e7, #366 1e22, #647 9.2e18, #364 >1e28); #835's first open case is a ~2M-variable colouring of J(20,10) after k=4 and k=6, also with k+1 prime, failed.",
         "Third-party claims on the live thread and claims page, NOT verified here: ideal_ombrer (12 Jul 2026, AI-assisted, repo paper_273) claims the 149 moduli with p <= 877 cannot cover Z on their own via the BBMST distortion sieve with an exact rational certificate, so any covering uses some modulus p-1 with p > 877, and that sum 1/(p-1) >= 1 + exp(-3.36e21) follows from Filaseta-Kalogirou (arXiv:2407.15280) because the 3-smooth (Pierpont) moduli sum to about 0.706 < 11/12. Zeraoulia (proof-claims page, 27 Jul 2026, GPT-5.6) claims L >= 393120 by a parity-capacity argument plus forced-residue CRT density; our own exhaustive floor is 110880 and our nine Fourier survivors below 400000 include 393120, so the two are not in conflict but neither confirms the other.",
+        "v6 screen 2026-10-08 ($9.08 including re-judging after the usage-limit fix): nothing new. Two would-be search-floor raises were broken on review: 'L >= 6,652,800 for distinct moduli p-1' (its slice recursion never clamps the bound at 0, while the slice lemma needs f >= 0) and 'no covering with moduli in Qodd below lcm 6e8' (its filter F4 is invalid when tau = (1-A_p)/p < 0). The floor stays 110,880 (exhaustive).",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -35381,10 +35391,11 @@
         "The nine surviving candidates need a genuinely different lever: the residue-free bound has no bite when slack is large. Either strengthen to an exact minimum over d-th roots of unity, combine several d simultaneously, or encode those nine for SAT.",
         "Do not attempt subset branch-and-bound on the nine survivors: the propagation decision is complete and returns nothing. They need SAT or new mathematics, and they are WORSE SAT targets than the ones already tried - larger (L=110k-393k, |A|=52-72) and looser (more residue freedom) than L=100800, which did not decide in 37 minutes.",
         "Expansion needed for the affirmative side, in order: (a) a constructive exact-cover/SAT search in the halved two-system form that fixes forced moduli, enumerates free subsets outside the solver, adds the fibre/Fourier inequalities and the Mirsky-Newman condition as constraints, breaks residue-translation symmetry, and extends candidate lcms past the 400000 compute cap (screen and propagation cost milliseconds per L); (b) a Lean certificate format for a found covering system that the kernel checks without enumerating L residues (CRT/tree certificate or Bool-reflected checker), since kernel decide timed out at 420 s on 3003 cases and native_decide is banned. Neither helps the negative side, which needs a distortion-type nonexistence theorem for the p-1 pool: research, not engineering. Treat the p > 877 and L >= 393120 claims as unverified until rerun.",
+        "A computational floor raise must clamp every intermediate bound at 0 and ship a certificate for each UNSAT case (DRAT/LRAT); a single solver run is not a proof.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -35448,7 +35459,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-16",
+        "on": "2026-10-07",
         "sources": [
           "scratchpad probe p273_floor.py (divisor sieve to 3e6)",
           "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/273.lean",
@@ -35462,7 +35473,8 @@
           "knowledge/reductions/273/fourier_propagate.py",
           "experiments/open-viability-2026-09-16/ASSESSMENT.md",
           "https://www.erdosproblems.com/forum/thread/273",
-          "https://www.erdosproblems.com/forum/thread/273/proof-claims"
+          "https://www.erdosproblems.com/forum/thread/273/proof-claims",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": 110880.0
       },
@@ -42959,6 +42971,7 @@
         "Expert signal against tractability: Tao states the problem stays hard after four simultaneous weakenings; a contributor reports 13 natural approaches killed by explicit counterexamples; one clean inclusion-exclusion reduction was refuted.",
         "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled.",
         "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us.",
+        "v6 screen 2026-10-08 ($12.23, informal): validated new at significance 1, with no prior result found by the literature check: the inequality n F(m) < 2 m F(n) holds for every A with |A| = 3 and all m > n >= max A. Probes refuted the natural termwise reductions (peeling the min-first or max-first element fails by an unbounded factor) and showed peeling alone cannot prove the all-primes case.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -42973,6 +42986,7 @@
         "Verify the third-party refutation claim before any attempt; it may make the whole target moot.",
         "Do not run as a search target. Exhaustive reach is max(A) ~ 12-14; the claimed counterexample uses 257-smooth numbers in (T, 256T] with T non-explicit, unreachable by enumeration in principle.",
         "Available value is formalizing the proved special cases (|A| <= 2, min(A) = 2) and the closed form F(x) = sum over nonempty I of (-1)^(|I|+1) floor(x / lcm I). DeepMind's formal-conjectures already has a faithful statement, so there is no novelty in the statement step.",
+        "Next rung: |A| = 4, by classifying the minimum element's cofactor sets with avoid-density <= 1/2. A general proof needs either an ordering that always peels (conjectured, unproved) or a genuine sieve inequality.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target.",
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
@@ -42980,7 +42994,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -43072,11 +43086,12 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-06",
+        "on": "2026-10-07",
         "sources": [
           "experiments/open-top3/488-assessment.md",
           "atlas-data/forum/488.json",
-          "https://github.com/shoal-rat/erdos-488-lean"
+          "https://github.com/shoal-rat/erdos-488-lean",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": null
       },
@@ -43284,6 +43299,7 @@
       "harness": "Attempted",
       "rationale": [
         "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4.",
+        "v6 screen 2026-10-08 ($13.06, informal): three validated new results at significance 1: N = 4 is not k-representable for k in {6, 8, 10, 12, 14, 16, 20, 24} beyond the gap-1 cases; any solution with N = 4 has s = n+k >= k^3/10^4, with explicit interval bounds (s >= 1.23e7 at k = 1000); and the k = 5, N = 4 curve reduces to an explicit genus-2 quotient.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -43292,11 +43308,12 @@
       ],
       "requirements": [
         "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary.",
+        "The significance-2 target is that 4 is not k-representable for every even k; the interval method grows the lower bound but gives no finiteness on its own.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -43375,10 +43392,11 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-16",
+        "on": "2026-10-07",
         "sources": [
           "experiments/open-viability-2026-09-16/ASSESSMENT.md",
-          "https://www.erdosproblems.com/forum/thread/686"
+          "https://www.erdosproblems.com/forum/thread/686",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": null
       },
@@ -44137,6 +44155,7 @@
         "Our fibre/Fourier test (see #273, knowledge/reductions/273/) transfers to #7 verbatim - every divisor m>1 of odd L is admissible, the reciprocal screen becomes 'L is ODD ABUNDANT' (smallest 945), and the condition collapses to: max over n|L, n<L of (2n - sigma(n)) <= sigma(L) - 2L. It eliminates 191 of the 391 candidates below 200,000 (including 945: 58 > 30 at n=189) and gives a floor of 3,465. That is roughly 3,300x WEAKER than the floor already on the forum, so the transfer is superseded on arrival and banks nothing for #7.",
         "A full resolution claim on the thread (jinooklee, 02 May 2026: Erdos-Selfridge via sieve monotonicity, Lean 4 + three BBMST axioms) was REFUTED in-thread - a commenter gives decisive evidence that the assumed axiom bbmst_sf_lt_1 is false, and Thomas Bloom states he assumes the proof is flawed absent expert vouching or an axiom-free formalisation. #7 is open. Related published theorems: BBMST22 settles the odd SQUAREFREE case negatively; Hough-Nielsen prove some modulus is divisible by 2 or 3; BBMST prove the lcm must be divisible by 9 or 15. Prizes: Erdos $25 for nonexistence, Selfridge $2000 for an explicit example.",
         "Forum, 2026-10-06: three papers show that a distinct covering system with odd moduli greater than 1 needs omega(lcm) >= 7, then 8, then 9. A fourth proves noncoverage whenever every modulus has at most three prime divisors. Lean formalisations are reported with them, and the unrestricted conjecture stays open. Unverified by us.",
+        "v6 map-and-probe screen 2026-10-08 ($7.66, informal): no target both significant and reachable (the judges' one-week chance was at most 0.15 for every significance-2 target) and 4 probes found nothing new. A probe proved an obstruction, judged routine: fibered reweighting on the 3-adic tower charges level j at 2^-j, not 3^-j, so fibre-dependent distortion gains little once v_3(m) <= 2.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -44147,11 +44166,12 @@
         "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it.",
         "Do not run a bounded lcm search on #7: the recorded floor of 11,486,475 already exceeds anything the harness would reach, and certificate methods of this family are documented to stop exactly at the strongly abundant smooth moduli where the hard core lives.",
         "If #7 is attempted, the reachable partial value is formalizing BBMST22 (odd squarefree case) or Hough-Nielsen, not a search. Any use of the 11,486,475 floor must carry the caveat that it rests on an unrefereed preprint we did not rerun.",
+        "Do not re-run fibre-dependent 3-adic distortion as a route to the v_3 <= 2 case; it moves the 3-coordinate halfway to the prime-2 profile.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-06 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -44230,11 +44250,12 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-06",
+        "on": "2026-10-07",
         "sources": [
           "atlas-data/forum/7.json",
           "knowledge/reductions/273/fourier_transfer_erdos7.py",
-          "https://www.erdosproblems.com/forum/thread/7"
+          "https://www.erdosproblems.com/forum/thread/7",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": 11486475.0
       },
@@ -47503,6 +47524,7 @@
       "rationale": [
         "AlphaProof proved J(18,9) != 10 and that proof is in a PR to formal-conjectures; the problem reduces to Johnson-graph chromatic numbers, with k=4 known via chi(J(6,3))=6.",
         "Equivalent to asking whether chi(J(2k,k)) = k+1 for some k>2 (Johnson graph). Published chromatic-number tables already settle 3<=k<=8 NEGATIVELY, and Ma-Tang proved chi > k+1 for every k>2 not of the form p-1 with p prime. So the open frontier is k in {10,12,16,18,22,...}, and the smallest, k=10, is a chromatic-number question on J(20,10) with 184,756 vertices and 167,960 rainbow constraints - not a small SAT instance. The 'finite example' label is real but the reachable cases are all decided.",
+        "v6 screen 2026-10-08 ($11.92): nothing new. Structural facts about colour-permuting automorphisms of large sets LSQS(20) were judged routine or known; no significance-2 target was judged reachable in a week.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
@@ -47512,11 +47534,12 @@
       "requirements": [
         "Reuse the existing formal-conjectures material on Johnson graphs; the k+1 prime cases are the documented obstruction.",
         "Do not encode k<=8; it re-derives published results. Any attempt must start at k=10 and handle a ~2M-variable colouring instance, or exploit the Johnson-graph structure and the Ma-Tang restriction to k=p-1.",
+        "A significance-2 step was not reachable at week scale by the judges' rating; a long attack on one symmetric construction would be the next try.",
         "Build reusable graph encodings and isolate finite certificates from general graph theorems.",
         "Set an explicit search bound and prove that any found certificate resolves the exact target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-11 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -47591,9 +47614,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-11",
+        "on": "2026-10-07",
         "sources": [
-          "atlas-data/forum/835.json"
+          "atlas-data/forum/835.json",
+          "experiments/idea-engine-2026-10-02/REPORT.md"
         ],
         "searchFloor": 8.0
       },

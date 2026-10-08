@@ -28,22 +28,25 @@
       "PUBLISHED SEARCH FLOOR (recorded 2026-09-11, NOT rerun by us): a preprint linked from the #7 forum thread (egeozturk, 18 Aug 2026, 'Closed-form nonexistence certificates for odd covering systems') claims no covering system with distinct odd moduli > 1 has lcm below 11,486,475, by a search-free hierarchy of closed-form certificates in exact rational arithmetic - extending an earlier search-based 2e6 computation. UNREFEREED preprint, self-described as undergraduate work, not verified by us. Its own stated stopping point is the strongly abundant smooth moduli, first uncertified case 11486475 = 3^3*5^2*7*11*13*17.",
       "Our fibre/Fourier test (see #273, knowledge/reductions/273/) transfers to #7 verbatim - every divisor m>1 of odd L is admissible, the reciprocal screen becomes 'L is ODD ABUNDANT' (smallest 945), and the condition collapses to: max over n|L, n<L of (2n - sigma(n)) <= sigma(L) - 2L. It eliminates 191 of the 391 candidates below 200,000 (including 945: 58 > 30 at n=189) and gives a floor of 3,465. That is roughly 3,300x WEAKER than the floor already on the forum, so the transfer is superseded on arrival and banks nothing for #7.",
       "A full resolution claim on the thread (jinooklee, 02 May 2026: Erdos-Selfridge via sieve monotonicity, Lean 4 + three BBMST axioms) was REFUTED in-thread - a commenter gives decisive evidence that the assumed axiom bbmst_sf_lt_1 is false, and Thomas Bloom states he assumes the proof is flawed absent expert vouching or an axiom-free formalisation. #7 is open. Related published theorems: BBMST22 settles the odd SQUAREFREE case negatively; Hough-Nielsen prove some modulus is divisible by 2 or 3; BBMST prove the lcm must be divisible by 9 or 15. Prizes: Erdos $25 for nonexistence, Selfridge $2000 for an explicit example.",
-      "Forum, 2026-10-06: three papers show that a distinct covering system with odd moduli greater than 1 needs omega(lcm) >= 7, then 8, then 9. A fourth proves noncoverage whenever every modulus has at most three prime divisors. Lean formalisations are reported with them, and the unrestricted conjecture stays open. Unverified by us."
+      "Forum, 2026-10-06: three papers show that a distinct covering system with odd moduli greater than 1 needs omega(lcm) >= 7, then 8, then 9. A fourth proves noncoverage whenever every modulus has at most three prime divisors. Lean formalisations are reported with them, and the unrestricted conjecture stays open. Unverified by us.",
+      "v6 map-and-probe screen 2026-10-08 ($7.66, informal): no target both significant and reachable (the judges' one-week chance was at most 0.15 for every significance-2 target) and 4 probes found nothing new. A probe proved an obstruction, judged routine: fibered reweighting on the 3-adic tower charges level j at 2^-j, not 3^-j, so fibre-dependent distortion gains little once v_3(m) <= 2."
     ],
     "requirements": [
       "Develop a new construction or a general exclusion theorem; bounded searches and the squarefree special case do not solve it.",
       "Do not run a bounded lcm search on #7: the recorded floor of 11,486,475 already exceeds anything the harness would reach, and certificate methods of this family are documented to stop exactly at the strongly abundant smooth moduli where the hard core lives.",
-      "If #7 is attempted, the reachable partial value is formalizing BBMST22 (odd squarefree case) or Hough-Nielsen, not a search. Any use of the 11,486,475 floor must carry the caveat that it rests on an unrefereed preprint we did not rerun."
+      "If #7 is attempted, the reachable partial value is formalizing BBMST22 (odd squarefree case) or Hough-Nielsen, not a search. Any use of the 11,486,475 floor must carry the caveat that it rests on an unrefereed preprint we did not rerun.",
+      "Do not re-run fibre-dependent 3-adic distortion as a route to the v_3 <= 2 case; it moves the 3-coordinate halfway to the prime-2 profile."
     ],
     "score": 7,
     "sources": [
       "atlas-data/forum/7.json",
       "knowledge/reductions/273/fourier_transfer_erdos7.py",
-      "https://www.erdosproblems.com/forum/thread/7"
+      "https://www.erdosproblems.com/forum/thread/7",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
     "search_floor": 11486475.0,
     "search_floor_kind": "published",
-    "assessed": "2026-10-06"
+    "assessed": "2026-10-07"
   },
   "8": {
     "rationale": [
@@ -453,7 +456,7 @@
     "partial": 70
   },
   "273": {
-    "assessed": "2026-09-16",
+    "assessed": "2026-10-07",
     "partial": 64,
     "rationale": [
       "Statement disambiguation: the site's bare wording omits 'distinct'. Erdos-Graham [ErGr80] and google-deepmind/formal-conjectures (StrictCoveringSystem, injective_moduli) both require DISTINCT moduli; without that the problem is trivially YES (0,1,2,3 mod 4, and 4=5-1). Any formalisation without injective moduli is unfaithful.",
@@ -473,7 +476,8 @@
       "Propagation eliminates exactly the same 20 candidates and deletes ZERO moduli at all nine survivors - the full admissible set already satisfies every constraint there, so no subset search can improve on it. The survivors fall short by 1944 to 19326; the closest, L=302400, misses by 1944 against a budget of 6700 (a 29 percent gap), versus 55440 which is over by only 16. Regression: 3130 genuine covering systems built across L=12..720, zero false kills.",
       "The reason is intrinsic: k <= slack*L, so the inequality bites exactly when slack is tiny. The 20 eliminated are the tight candidates; the nine survivors all have slack 0.02-0.08 and thousands of units of excess to absorb any imbalance. Tightness is both what makes a candidate look attackable AND what this test needs, so the algebra consumed exactly the candidates a search would have preferred and left the ones that are loose for both.",
       "Viability assessment 2026-09-16 (operator session, no paid run; experiments/open-viability-2026-09-16/ASSESSMENT.md): of the 639 open problems, #273 is the only one whose FULL resolution can be a finite certificate at a plausibly reachable size - two disjoint distinct-modulus covering systems over H2, lcm likely 1e5-1e7, 50-100 congruences. Every other finite-certificate open problem is either a believed-true conjecture whose certificate would be a counterexample (#742, #23, #583, #628; #617 fixed cases do not resolve the universal statement) or has a witness floor far past reach (#7 lcm 1.15e7, #366 1e22, #647 9.2e18, #364 >1e28); #835's first open case is a ~2M-variable colouring of J(20,10) after k=4 and k=6, also with k+1 prime, failed.",
-      "Third-party claims on the live thread and claims page, NOT verified here: ideal_ombrer (12 Jul 2026, AI-assisted, repo paper_273) claims the 149 moduli with p <= 877 cannot cover Z on their own via the BBMST distortion sieve with an exact rational certificate, so any covering uses some modulus p-1 with p > 877, and that sum 1/(p-1) >= 1 + exp(-3.36e21) follows from Filaseta-Kalogirou (arXiv:2407.15280) because the 3-smooth (Pierpont) moduli sum to about 0.706 < 11/12. Zeraoulia (proof-claims page, 27 Jul 2026, GPT-5.6) claims L >= 393120 by a parity-capacity argument plus forced-residue CRT density; our own exhaustive floor is 110880 and our nine Fourier survivors below 400000 include 393120, so the two are not in conflict but neither confirms the other."
+      "Third-party claims on the live thread and claims page, NOT verified here: ideal_ombrer (12 Jul 2026, AI-assisted, repo paper_273) claims the 149 moduli with p <= 877 cannot cover Z on their own via the BBMST distortion sieve with an exact rational certificate, so any covering uses some modulus p-1 with p > 877, and that sum 1/(p-1) >= 1 + exp(-3.36e21) follows from Filaseta-Kalogirou (arXiv:2407.15280) because the 3-smooth (Pierpont) moduli sum to about 0.706 < 11/12. Zeraoulia (proof-claims page, 27 Jul 2026, GPT-5.6) claims L >= 393120 by a parity-capacity argument plus forced-residue CRT density; our own exhaustive floor is 110880 and our nine Fourier survivors below 400000 include 393120, so the two are not in conflict but neither confirms the other.",
+      "v6 screen 2026-10-08 ($9.08 including re-judging after the usage-limit fix): nothing new. Two would-be search-floor raises were broken on review: 'L >= 6,652,800 for distinct moduli p-1' (its slice recursion never clamps the bound at 0, while the slice lemma needs f >= 0) and 'no covering with moduli in Qodd below lcm 6e8' (its filter F4 is invalid when tau = (1-A_p)/p < 0). The floor stays 110,880 (exhaustive)."
     ],
     "requirements": [
       "An affirmative resolution is a finite certificate but must exhibit two disjoint distinct-modulus covering systems over H; a bounded search is only worth running above lcm 55440, and the reciprocal budget is razor thin (best smooth L' <= 4e6 gives f = 2.30, i.e. 0.30 of total slack across both families).",
@@ -486,7 +490,8 @@
       "Do not spend solver time on L=55440 or L=100800; both are eliminated by algebra. Run the fibre/Fourier screen at every d BEFORE any SAT encoding - it is free and it killed 20 of 29 candidates that four solver runs could not.",
       "The nine surviving candidates need a genuinely different lever: the residue-free bound has no bite when slack is large. Either strengthen to an exact minimum over d-th roots of unity, combine several d simultaneously, or encode those nine for SAT.",
       "Do not attempt subset branch-and-bound on the nine survivors: the propagation decision is complete and returns nothing. They need SAT or new mathematics, and they are WORSE SAT targets than the ones already tried - larger (L=110k-393k, |A|=52-72) and looser (more residue freedom) than L=100800, which did not decide in 37 minutes.",
-      "Expansion needed for the affirmative side, in order: (a) a constructive exact-cover/SAT search in the halved two-system form that fixes forced moduli, enumerates free subsets outside the solver, adds the fibre/Fourier inequalities and the Mirsky-Newman condition as constraints, breaks residue-translation symmetry, and extends candidate lcms past the 400000 compute cap (screen and propagation cost milliseconds per L); (b) a Lean certificate format for a found covering system that the kernel checks without enumerating L residues (CRT/tree certificate or Bool-reflected checker), since kernel decide timed out at 420 s on 3003 cases and native_decide is banned. Neither helps the negative side, which needs a distortion-type nonexistence theorem for the p-1 pool: research, not engineering. Treat the p > 877 and L >= 393120 claims as unverified until rerun."
+      "Expansion needed for the affirmative side, in order: (a) a constructive exact-cover/SAT search in the halved two-system form that fixes forced moduli, enumerates free subsets outside the solver, adds the fibre/Fourier inequalities and the Mirsky-Newman condition as constraints, breaks residue-translation symmetry, and extends candidate lcms past the 400000 compute cap (screen and propagation cost milliseconds per L); (b) a Lean certificate format for a found covering system that the kernel checks without enumerating L residues (CRT/tree certificate or Bool-reflected checker), since kernel decide timed out at 420 s on 3003 cases and native_decide is banned. Neither helps the negative side, which needs a distortion-type nonexistence theorem for the p-1 pool: research, not engineering. Treat the p > 877 and L >= 393120 claims as unverified until rerun.",
+      "A computational floor raise must clamp every intermediate bound at 0 and ship a certificate for each UNSAT case (DRAT/LRAT); a single solver run is not a proof."
     ],
     "score": 12,
     "search_floor": 110880.0,
@@ -504,7 +509,8 @@
       "knowledge/reductions/273/fourier_propagate.py",
       "experiments/open-viability-2026-09-16/ASSESSMENT.md",
       "https://www.erdosproblems.com/forum/thread/273",
-      "https://www.erdosproblems.com/forum/thread/273/proof-claims"
+      "https://www.erdosproblems.com/forum/thread/273/proof-claims",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
     "brief_updated": "2026-09-11"
   },
@@ -666,18 +672,21 @@
     ]
   },
   "366": {
-    "assessed": "2026-09-11",
+    "assessed": "2026-10-07",
     "partial": 62,
     "rationale": [
       "The thread carries a complete conditional argument that abc implies finitely many solutions, with an explicit bound n <= K_eps^{6/(1-5eps)}.",
-      "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing."
+      "OEIS A060355 gives no example for n < 10^22, which is 13 orders of magnitude past what a bounded search can reach. Only two pairs are known (8,9 and 12167,12168) and the ABC conjecture implies finiteness, so a search is expected to find nothing.",
+      "v6 screen 2026-10-08 ($10.17, informal): two validated new results at significance 1: u^3 - 1 is not powerful for 2 <= u <= 10^12 + 1 (computational), and N(X) << X^(5/16+eps) under a conditional lemma, X^(19/60+eps) unconditionally. A probe refuted the naive class-number lemma (3 not dividing h(-t) does not force y = 0 in 1 + t y^2 = u^3) with explicit counterexamples."
     ],
     "requirements": [
       "Formalize the implication with abc as an explicit hypothesis; do not assert the unconditional finiteness.",
-      "A bounded search is futile below 10^22. Value here is the conditional finiteness argument or a certified special case, not enumeration."
+      "A bounded search is futile below 10^22. Value here is the conditional finiteness argument or a certified special case, not enumeration.",
+      "Any route through class numbers must avoid that lemma; the counterexample list is in the run's engine.json."
     ],
     "sources": [
-      "atlas-data/forum/366.json"
+      "atlas-data/forum/366.json",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
     "search_floor": 1e+22,
     "search_floor_kind": "published"
@@ -1010,26 +1019,29 @@
     "score": 53
   },
   "488": {
-    "assessed": "2026-10-06",
+    "assessed": "2026-10-07",
     "rationale": [
       "There is a plausible finite counting/counterexample workflow, but the easy counterexamples in the discussion concern the alternate non-divisibility typo.",
       "Assessed 2026-09-10: a bounded search over ~1.2e13 (A,n,m) triples across 13,870 sets found zero violations, and every near-miss comes from families already PROVED safe (singletons give exactly 2 - 1/a, pairs and min(A)=2 likewise).",
       "This makes proximity-to-threshold ranking actively misleading here: a search walks up a closed provably-safe family reporting 1.997, 1.9999, 1.999999 while proving nothing. In the genuinely open regime (primitive, |A|>=3) the margin GROWS with |A|: 0.08 at |A|=3, 0.19 at 4, 0.37 at 5.",
       "Expert signal against tractability: Tao states the problem stays hard after four simultaneous weakenings; a contributor reports 13 natural approaches killed by explicit counterexamples; one clean inclusion-exclusion reduction was refuted.",
       "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled.",
-      "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us."
+      "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us.",
+      "v6 screen 2026-10-08 ($12.23, informal): validated new at significance 1, with no prior result found by the literature check: the inequality n F(m) < 2 m F(n) holds for every A with |A| = 3 and all m > n >= max A. Probes refuted the natural termwise reductions (peeling the min-first or max-first element fails by an unbounded factor) and showed peeling alone cannot prove the all-primes case."
     ],
     "requirements": [
       "Use the divisibility definition as printed; certify the full finite counts for A, n and m with n at least max(A).",
       "Verify the third-party refutation claim before any attempt; it may make the whole target moot.",
       "Do not run as a search target. Exhaustive reach is max(A) ~ 12-14; the claimed counterexample uses 257-smooth numbers in (T, 256T] with T non-explicit, unreachable by enumeration in principle.",
-      "Available value is formalizing the proved special cases (|A| <= 2, min(A) = 2) and the closed form F(x) = sum over nonempty I of (-1)^(|I|+1) floor(x / lcm I). DeepMind's formal-conjectures already has a faithful statement, so there is no novelty in the statement step."
+      "Available value is formalizing the proved special cases (|A| <= 2, min(A) = 2) and the closed form F(x) = sum over nonempty I of (-1)^(|I|+1) floor(x / lcm I). DeepMind's formal-conjectures already has a faithful statement, so there is no novelty in the statement step.",
+      "Next rung: |A| = 4, by classifying the minimum element's cofactor sets with avoid-density <= 1/2. A general proof needs either an ordering that always peels (conjectured, unproved) or a genuine sieve inequality."
     ],
     "score": 8,
     "sources": [
       "experiments/open-top3/488-assessment.md",
       "atlas-data/forum/488.json",
-      "https://github.com/shoal-rat/erdos-488-lean"
+      "https://github.com/shoal-rat/erdos-488-lean",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ]
   },
   "493": {
@@ -1155,20 +1167,23 @@
     "rationale": [
       "A witness would certify finitely many divisor inequalities, but the source ties the existence problem to much harder prime-pattern questions.",
       "Heavily searched despite the $44 prize: Hughes and bentrd to about 9.17e18, Iden to 1e12, a 41-residue-class frontier exhaustively to 6.16e17, and a Lean-verified range 24 < n <= 1e8. A bounded search re-derives known ground.",
-      "Forum, 2026-10-06: an uncertified GPU search (veljjanoski) reports no solution with 24 < n <= 1e22. That raises the recorded 9.17e18 floor; the count is of n, the enumerable object. A kernel-checked Lean exclusion reaches 1e13 (standard axioms, no native_decide), and its writeup argues that no finite table of modular sieve stages can prove the statement."
+      "Forum, 2026-10-06: an uncertified GPU search (veljjanoski) reports no solution with 24 < n <= 1e22. That raises the recorded 9.17e18 floor; the count is of n, the enumerable object. A kernel-checked Lean exclusion reaches 1e13 (standard axioms, no native_decide), and its writeup argues that no finite table of modular sieve stages can prove the statement.",
+      "v6 screen 2026-10-08 ($11.21, informal): validated new at significance 1: N(x) <= x exp(-(log x)^theta) for every theta < 1/(2+1/log 2), where N(x) counts n <= x with tau(n-k) <= k+2 for all 1 <= k < n."
     ],
     "requirements": [
       "Use a sieve-backed search beyond the known example 24, retaining a compact certificate for every m below the witness.",
       "Enumeration is futile below ~9e18. The live routes are the modular/prime-chain reductions or formalising the density-zero bounds, not search.",
-      "Enumeration is futile below 1e22 (published, not rerun). A resolution needs a structural argument, and the sieve-table writeup suggests finitely many modular stages cannot supply one."
+      "Enumeration is futile below 1e22 (published, not rerun). A resolution needs a structural argument, and the sieve-table writeup suggests finitely many modular stages cannot supply one.",
+      "A counting bound does not decide whether any such n exists beyond the known ones; the published search floor stands."
     ],
     "score": 18,
     "search_floor": 1e+22,
     "search_floor_kind": "published",
-    "assessed": "2026-10-06",
+    "assessed": "2026-10-07",
     "sources": [
       "atlas-data/forum/647.json",
-      "https://github.com/veljjanoski/erdos647"
+      "https://github.com/veljjanoski/erdos647",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ]
   },
   "649": {
@@ -1261,16 +1276,19 @@
   "686": {
     "score": 8,
     "rationale": [
-      "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4."
+      "Assessed 2026-09-16 from the thread (36 comments): every non-square N is representable with k=2 via Pell (Kovac and Cambie; AlphaProof formalised this case in formal-conjectures PR 2398), and the k=2 case is fully classified (Sothanaphan, 08 Mar 2026: N non-square, or N = A_r(y)^2 from (y+sqrt(y^2-1))^r). For squares, N = 4, 25, 49, 64, 81 are the open values below 100: not representable for k <= 4 (k=4 reduces to k=2), excluded at k=3 for N = 4, 49, 64 via Chan's method with Bennett's irrationality measures (vilc), and Kovac's root-expansion trick excludes N=4 and N=64 at k=6; 25 and 81 at k=3 and everything at k >= 5 are open. Quanyu Tang conjectures N = p^2 (p >= 5 prime) is never representable. Finiteness for fixed N and k >= 3 is known (Beukers-Shorey-Tijdeman / Rakaczki) but ineffective for k >= 4.",
+      "v6 screen 2026-10-08 ($13.06, informal): three validated new results at significance 1: N = 4 is not k-representable for k in {6, 8, 10, 12, 14, 16, 20, 24} beyond the gap-1 cases; any solution with N = 4 has s = n+k >= k^3/10^4, with explicit interval bounds (s >= 1.23e7 at k = 1000); and the k = 5, N = 4 curve reduces to an explicit genus-2 quotient."
     ],
     "requirements": [
-      "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary."
+      "Not a full-solution target: the expected answer is NO, but a disproof needs non-representability of ONE square (say N=4) for ALL k, i.e. an argument uniform in k, and a YES needs a representation believed not to exist. Certifiable partial value: Kovac's even-k exclusion for N=4 at a fixed k, and the k=2 classification, both elementary.",
+      "The significance-2 target is that 4 is not k-representable for every even k; the interval method grows the lower bound but gives no finiteness on its own."
     ],
     "sources": [
       "experiments/open-viability-2026-09-16/ASSESSMENT.md",
-      "https://www.erdosproblems.com/forum/thread/686"
+      "https://www.erdosproblems.com/forum/thread/686",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
-    "assessed": "2026-09-16"
+    "assessed": "2026-10-07"
   },
   "699": {
     "rationale": [
@@ -1421,17 +1439,20 @@
     "score": 9
   },
   "835": {
-    "assessed": "2026-09-11",
+    "assessed": "2026-10-07",
     "rationale": [
       "AlphaProof proved J(18,9) != 10 and that proof is in a PR to formal-conjectures; the problem reduces to Johnson-graph chromatic numbers, with k=4 known via chi(J(6,3))=6.",
-      "Equivalent to asking whether chi(J(2k,k)) = k+1 for some k>2 (Johnson graph). Published chromatic-number tables already settle 3<=k<=8 NEGATIVELY, and Ma-Tang proved chi > k+1 for every k>2 not of the form p-1 with p prime. So the open frontier is k in {10,12,16,18,22,...}, and the smallest, k=10, is a chromatic-number question on J(20,10) with 184,756 vertices and 167,960 rainbow constraints - not a small SAT instance. The 'finite example' label is real but the reachable cases are all decided."
+      "Equivalent to asking whether chi(J(2k,k)) = k+1 for some k>2 (Johnson graph). Published chromatic-number tables already settle 3<=k<=8 NEGATIVELY, and Ma-Tang proved chi > k+1 for every k>2 not of the form p-1 with p prime. So the open frontier is k in {10,12,16,18,22,...}, and the smallest, k=10, is a chromatic-number question on J(20,10) with 184,756 vertices and 167,960 rainbow constraints - not a small SAT instance. The 'finite example' label is real but the reachable cases are all decided.",
+      "v6 screen 2026-10-08 ($11.92): nothing new. Structural facts about colour-permuting automorphisms of large sets LSQS(20) were judged routine or known; no significance-2 target was judged reachable in a week."
     ],
     "requirements": [
       "Reuse the existing formal-conjectures material on Johnson graphs; the k+1 prime cases are the documented obstruction.",
-      "Do not encode k<=8; it re-derives published results. Any attempt must start at k=10 and handle a ~2M-variable colouring instance, or exploit the Johnson-graph structure and the Ma-Tang restriction to k=p-1."
+      "Do not encode k<=8; it re-derives published results. Any attempt must start at k=10 and handle a ~2M-variable colouring instance, or exploit the Johnson-graph structure and the Ma-Tang restriction to k=p-1.",
+      "A significance-2 step was not reachable at week scale by the judges' rating; a long attack on one symmetric construction would be the next try."
     ],
     "sources": [
-      "atlas-data/forum/835.json"
+      "atlas-data/forum/835.json",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
     "score": 6,
     "search_floor": 8.0,
@@ -1497,16 +1518,19 @@
   },
   "885": {
     "rationale": [
-      "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5."
+      "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5.",
+      "v6 screen 2026-10-08 ($9.75, informal): validated new at significance 1: an explicit near-configuration R = {0, 2062016, 14170112, 24040016, 78094016}, C = {872^2, 4328^2, 5003^2, 11672^2, -1496512} with r+c a perfect square for 24 of the 25 pairs (all but (0, -1496512))."
     ],
     "requirements": [
-      "The open frontier is k = 5. A witness for it would be a certifiable partial result; the full problem needs a construction for every k."
+      "The open frontier is k = 5. A witness for it would be a certifiable partial result; the full problem needs a construction for every k.",
+      "Complete such a configuration, or prove the obstruction the probes' genus-5 curve (Jacobian a product of elliptic curves) points to."
     ],
     "sources": [
       "atlas-data/forum/885.json",
-      "https://www.erdosproblems.com/forum/thread/885"
+      "https://www.erdosproblems.com/forum/thread/885",
+      "experiments/idea-engine-2026-10-02/REPORT.md"
     ],
-    "assessed": "2026-10-06"
+    "assessed": "2026-10-07"
   },
   "929": {
     "rationale": [
