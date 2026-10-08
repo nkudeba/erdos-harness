@@ -35,6 +35,17 @@ class Retry(unittest.TestCase):
                 H.ClaudeCliBackend(None, 10).complete("t", "x")
         self.assertEqual(sleeps, [45, 90, 180])
 
+    def test_interrupted_stream_is_retried(self):
+        """#1055, 2026-10-08: a call killed after its init event (a stream cut by a system sleep) was a hard failure."""
+        init = json.dumps({"type": "system", "subtype": "init", "cwd": "/x", "session_id": "s"})
+        done = "\n".join([init, json.dumps({"type": "result", "subtype": "success", "is_error": False, "result": "PONG",
+                                             "total_cost_usd": 0.1, "num_turns": 1})])
+        seq = [_resp(-15, stdout=init + "\n"), _resp(0, stdout=done)]
+        sleeps = []
+        with patch.object(H, "run_tracked", side_effect=seq), patch.object(H.time, "sleep", sleeps.append):
+            self.assertEqual(H.ClaudeCliBackend(None, 10).complete("t", "x"), "PONG")
+        self.assertEqual(sleeps, [45])
+
     def test_record_carries_harness_notes(self):
         h = H.Harness.__new__(H.Harness)
         attempts = []

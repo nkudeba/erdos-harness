@@ -107,6 +107,8 @@ def parse_cli_stream(stdout: str) -> tuple[dict, list[str]]:
         d = json.loads(s)
         if not isinstance(d, dict):
             raise ValueError("not an object")
+        if d.get("type") not in (None, "result"):
+            raise ValueError("no result event")      # a stream cut after its first event (init) is not a result
         return d, []
     result, texts = None, []
     for line in s.splitlines():
@@ -342,7 +344,12 @@ class ClaudeCliBackend:
             if (r.returncode == 0 and not meta.get("is_error")) or meta.get("recovered_over_budget"):
                 return text
             last_err = f"{meta.get('subtype')}: {text.strip()[:400]} {r.stderr.strip()[:400]}".strip()
-            if attempt < self.RETRIES and (self.TRANSIENT_RE.search(last_err) or (r.returncode != 0 and not r.stdout.strip())):
+            # A stream with no result event is an interrupted call, not an answer: the process was killed, or its
+            # connection died across a system sleep. On 2026-10-08 the battery ran out 8 minutes into #1055's frontier
+            # map; after the wake the stream sat on a dead socket, and once killed it read as a hard failure because
+            # its first line (the init event) had arrived. It is retried like a timeout.
+            interrupted = r.returncode != 0 and (not r.stdout.strip() or bool(meta.get("parse_failed")))
+            if attempt < self.RETRIES and (self.TRANSIENT_RE.search(last_err) or interrupted):
                 delay = self.BACKOFF_S[min(attempt, len(self.BACKOFF_S) - 1)]
                 print(f"[{now()}] backend/retry purpose={purpose} attempt={attempt + 1}/{self.RETRIES} "
                       f"in {delay}s: {last_err[:200]}", file=sys.stderr, flush=True)
