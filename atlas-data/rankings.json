@@ -15,7 +15,7 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "055188066f78d6278c017ed72b18ba2ae4f510329f0e587c2c0762c8d5ce846c",
+    "harness_sha256": "15f122bda10e3da4c34cd913717651dd689619bb21425cc88c75950dece643f9",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
     "manual_reviews_sha256": "37186c6ad5ddbb4c8f35ca442b5575a312b30862a12a262bfdced9086aed742f"
   },
@@ -27969,11 +27969,12 @@
         "binomial coefficients"
       ],
       "score": 25,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
-        "Arithmetic and divisibility match the existing successful proof corpus."
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
@@ -28034,8 +28035,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
