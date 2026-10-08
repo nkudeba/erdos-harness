@@ -1005,6 +1005,7 @@ class MoreRoundsOnResume(unittest.TestCase):
         res = H.engine_run(call, sess2, "PROBLEM", LEAN, H.EngineSettings(sessions=2, rounds=2, total_budget=80),
                            checkpoint=ck, save=lambda c: None)
         self.assertEqual(len(call.prompts("engine-meta")), 1)
+        self.assertIn(LEAN, call.prompts("engine-meta")[0])          # the team lead plans against the formal statement
         self.assertEqual(len(res["rounds"]), 2)
         self.assertTrue(all("NEXT-ROUND ASSIGNMENT" in p for label, p in sess2.calls if label.startswith("r2")))
         self.assertEqual(sorted(l for l, p in sess2.calls), ["r2s1", "r2s2"])     # round 1 was not bought again

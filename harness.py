@@ -3980,6 +3980,10 @@ METAREVIEW_PROMPT = """You lead a research team on an OPEN problem. One round of
 PROBLEM:
 {statement}
 
+THE FORMAL STATEMENT (Lean). Settling the problem means proving this or its negation exactly as written: its
+quantifiers, its domain and its conventions decide what counts, not the informal wording above.
+{lean}
+
 THE FRONTIER MAP:
 {frontier}
 
@@ -4921,7 +4925,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     def meta_review(rnd: int) -> tuple[dict, list[dict]]:
         """The team lead reads everything the team has and writes the next round's assignments."""
         mt, mc, merr = _discovery_call_capped(call, "engine-meta", METAREVIEW_PROMPT.format(
-            statement=statement, results=engine_results_digest(ledger), k=s.sessions,
+            statement=statement, lean=lean, results=engine_results_digest(ledger), k=s.sessions,
             frontier=fblock + (f"\n\nTARGETS AS THE JUDGES RATED THEM BEFORE ANY WORK (the bar is a new result at significance "
                                f">= {s.min_target_sig}):\n" + engine_ratings_block(f, ratings) if ratings else "")),
             s.frontier_effort, s.meta_budget, spend)
