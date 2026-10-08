@@ -70,6 +70,9 @@ DEFAULTS = {
                       "--engine-deep-budget 5 --engine-marathon-legs 2 --engine-marathon-leg-budget 8 "
                       "--engine-gap-rounds 2 --engine-gap-max 2 --engine-session-legs 3 --results-library on"},
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6},
+    # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
+    # (candidates, a crosscheck judge, recorded readings) and proves it with the engine's chain as the blueprint.
+    "lean_claims": {"min_significance": 2, "budget": 15.0, "extend": 5.0, "extend_max": 30.0, "cycles": 4},
     "max_errors": 2,
     "fc_sha": None,
 }
@@ -364,6 +367,61 @@ def build_lean_run(n: int, engine_run: Path, claim: str, answer: str) -> Path:
     return run_dir
 
 
+def claims_for_lean(run_dir: Path, min_sig: int, skip: set[str]) -> list[str]:
+    """Validated-new PROVED claims at `min_sig` or more, strongest first, minus `skip` (the complete answer, which the
+    main Lean stage covers, and claims already sent)."""
+    import harness as H
+    try:
+        ej = json.loads((run_dir / "engine" / "engine.json").read_text())
+    except (OSError, ValueError):
+        return []
+    out = []
+    for c in ej.get("ledger") or []:
+        v = c.get("validation") or {}
+        sig = int((v.get("novelty") or {}).get("significance") or 0)
+        k = H.engine_claim_key(c)
+        if c.get("status") == "PROVED" and v.get("status") == "validated-new" and sig >= min_sig and k not in skip:
+            out.append((sig, k))
+    return [k for s, k in sorted(out, reverse=True)]
+
+
+def build_claim_lean_run(n: int, engine_run: Path, claim: str, k: int) -> Path:
+    """A Lean run for one partial result. Its statement is the CLAIM, which the harness formalizes itself (no statement
+    is preset), under a fresh id so it never mixes with the problem's own program directory."""
+    import harness as H
+    ej = json.loads((engine_run / "engine" / "engine.json").read_text())
+    sess, cid = claim.split("/", 1)
+    c = next(x for x in ej["ledger"] if x.get("session") == sess and x.get("id") == cid)
+    chain = H.engine_chain_text(c, ej["ledger"])
+    orig = json.loads((engine_run / "problem.json").read_text())
+    sid = str(10_000_000 + n * 100 + k)
+    prob = {"id": sid, "statement": " ".join(str(c.get("statement")).split()), "tags": orig.get("tags") or [],
+            "notes": (f"A partial result on Erdős problem #{n}, not the problem itself: claim {claim} of the research-engine "
+                      f"run {engine_run.name}, proved informally and validated by its judges. Formalize THIS statement.")}
+    run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-resolve-claim-erdos{sid}"
+    run_dir.mkdir(parents=True)
+    (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
+    disc = {"decision": {"commit": "pos", "answer": "true", "share": 1.0},
+            "best_proof": {"text": chain, "answer": "true", "complete": True, "claim": claim},
+            "guidance": f"An informal proof of this statement, refereed and validated as new, unverified ({engine_run.name}, "
+                        f"{claim}, with every lemma under it):\n" + chain[:24000],
+            "refereed_complete": True, "mode": "engine-resolution-claim"}
+    (run_dir / "state.json").write_text(json.dumps({
+        "problem_input": prob, "mode": "research", "invocations": [], "discovery": disc, "partial_of": n, "claim": claim,
+        "assistance": [f"none: the informal proof is the harness's own research-engine output ({engine_run.name}, {claim})"]},
+        indent=2, ensure_ascii=False))
+    return run_dir
+
+
+def claim_lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
+    lc = cfg["lean_claims"]
+    return [sys.executable, str(ROOT / "harness.py"), "run", "--problem", str(run_dir / "problem.json"), "--resume",
+            str(run_dir), "--discover", "on", "--mode", "research", "--allow-research", "--blueprint", "on",
+            "--residual-view", "outline", "--research-cycles", str(lc["cycles"]), "--run-budget", str(lc["budget"]),
+            "--budget-extend", str(lc["extend"]), "--budget-extend-max", str(lc["extend_max"]), "--skip-literature",
+            "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
+
+
 def lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
     lc = cfg["lean"]
     return [sys.executable, str(ROOT / "harness.py"), "run", "--problem", str(run_dir / "problem.json"), "--resume",
@@ -373,13 +431,13 @@ def lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
             "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
 
 
-def run_lean(run_dir: Path, cfg: dict) -> tuple[int, str]:
-    """Run (or resume) the Lean stage, waiting out a usage limit up to three times."""
+def run_lean(run_dir: Path, cfg: dict, cmd: list[str] | None = None) -> tuple[int, str]:
+    """Run (or resume) a Lean stage, waiting out a usage limit up to three times."""
     import timesplit as T
     rc = 1
     for _ in range(4):
         with (run_dir / "lane.log").open("a") as f:
-            rc = subprocess.run(lean_cmd(run_dir, cfg), cwd=ROOT, stdout=f, stderr=subprocess.STDOUT,
+            rc = subprocess.run(cmd or lean_cmd(run_dir, cfg), cwd=ROOT, stdout=f, stderr=subprocess.STDOUT,
                                 stdin=subprocess.DEVNULL, timeout=20 * 3600).returncode
         tail = (run_dir / "lane.log").read_text(errors="replace")[-6000:]
         if rc != 1 or not T.LIMIT_RE.search(tail):
@@ -439,6 +497,9 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     for n, p in probs.items():
         if p.get("running") and p.get("errors", 0) < cfg["max_errors"]:
             return p["running"], int(n)
+    for n, p in probs.items():
+        if p.get("claims_todo") and p.get("errors", 0) < cfg["max_errors"]:
+            return "lean-claim", int(n)
     q = queue(state, cfg)
     return ("scout", q[0]) if q else ("idle", None)
 
@@ -481,6 +542,30 @@ def step(cfg: dict) -> bool:
         prior = float(p.get("spend") or 0.0)
         log(f"#{n}: deep pass on {p['run_dir']}")
         row, rc = run_screen(n, "resolve-deep", prior + cfg["deep"]["extra"], cfg["deep"]["flags"], p["run_dir"])
+    elif action == "lean-claim":
+        claim = p["claims_todo"][0]
+        engine_run = ROOT / p["run_dir"]
+        done = p.setdefault("claims_done", {})
+        rec = done.setdefault(claim, {})
+        if not rec.get("lean_run"):
+            rec["lean_run"] = str(build_claim_lean_run(n, engine_run, claim, len(done)).relative_to(ROOT))
+            save_state(state)
+        lean_run = ROOT / rec["lean_run"]
+        log(f"#{n}: Lean on partial result {claim} in {lean_run.name}")
+        rc, line = run_lean(lean_run, cfg, claim_lean_cmd(lean_run, cfg))
+        spend = run_spend(lean_run)
+        rec.update({"rc": rc, "summary": line, "verified": rc == 0})
+        p["claims_todo"] = p["claims_todo"][1:]
+        save_state(state)
+        result({"problem": n, "tier": "lean-claim", "claim": claim, "outcome": "verified" if rc == 0 else "not verified",
+                "rc": rc, "spend": spend, "lean_run": rec["lean_run"], "summary": line})
+        stmt = json.loads((lean_run / "problem.json").read_text())["statement"]
+        if rc == 0:
+            record_atlas(n, f"Resolution campaign {datetime.now().date()}: the partial result {claim} is CERTIFIED IN LEAN "
+                            f"({lean_run.name}; the harness formalized the claim with a crosscheck judge, then the audit): "
+                            f"{stmt[:260]}")
+        commit(["resolution"], f"resolution: #{n} Lean on {claim}: {'verified' if rc == 0 else 'not verified'}")
+        return True
     else:                                                # lean
         p["running"] = "lean"
         save_state(state)
@@ -530,6 +615,10 @@ def step(cfg: dict) -> bool:
     else:
         p.update({"next": None, "status": "done" if outcome == "none" else outcome})
     p["history"].append({"tier": action, "outcome": outcome, "spend": delta})
+    skip = set((p.get("claims_done") or {})) | set(p.get("claims_todo") or [])
+    if outcome == "complete":
+        skip.add(info["claim"])
+    p["claims_todo"] = (p.get("claims_todo") or []) + claims_for_lean(run_dir, cfg["lean_claims"]["min_significance"], skip)
     save_state(state)
     result({"problem": n, "tier": action, "outcome": outcome, "spend": delta, "run_dir": row["run_dir"],
             "validated_new": n_new, "significance": sigs, **info})

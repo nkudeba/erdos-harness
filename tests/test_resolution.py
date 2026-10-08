@@ -129,6 +129,39 @@ class Restarts(Base):
         again.close()
 
 
+class ClaimLean(Base):
+    """2026-10-08, the operator: "Wherever possible do a Lean check." A validated-new claim at significance 2 or more
+    gets a Lean run of its own after the problem's main tiers."""
+
+    def test_which_claims_and_how_the_run_is_built(self):
+        run = self.engine_run([_claim("r1s1", "C1", "validated-new", 2, statement="the k = 3 case holds"),
+                               _claim("r1s2", "C1", "validated-new", 1), _claim("deep", "C1", "validated-new", 3),
+                               _claim("r1s3", "C1", "broken", 3)])
+        self.assertEqual(R.claims_for_lean(run, 2, set()), ["deep/C1", "r1s1/C1"])
+        self.assertEqual(R.claims_for_lean(run, 2, {"deep/C1"}), ["r1s1/C1"])
+        with patch.object(R, "ROOT", self.d):
+            lean = R.build_claim_lean_run(99, run, "r1s1/C1", 1)
+            cmd = R.claim_lean_cmd(lean, R.load_cfg())
+        prob = json.loads((lean / "problem.json").read_text())
+        st = json.loads((lean / "state.json").read_text())
+        self.assertEqual((prob["id"], prob["statement"]), ("10009901", "the k = 3 case holds"))
+        self.assertNotIn("statement", st)                     # the harness formalizes the claim itself
+        self.assertEqual((st["partial_of"], st["claim"]), (99, "r1s1/C1"))
+        self.assertIn("the k = 3 case holds", st["discovery"]["best_proof"]["text"])
+        self.assertNotIn("--open", cmd)
+        self.assertNotIn("--benchmark", cmd)
+
+    def test_the_claim_tier_comes_after_the_problem_tiers(self):
+        cfg = R.load_cfg()
+        st = {"problems": {"5": {"claims_todo": ["r1s1/C1"]}, "6": {"next": "deep"}}}
+        with patch.object(R, "queue", lambda s, c: [8]):
+            self.assertEqual(R.next_action(st, cfg), ("deep", 6))
+            st["problems"]["6"]["next"] = None
+            self.assertEqual(R.next_action(st, cfg), ("lean-claim", 5))
+            st["problems"]["5"]["claims_todo"] = []
+            self.assertEqual(R.next_action(st, cfg), ("scout", 8))
+
+
 class Queue(Base):
     def test_priority_first_then_least_studied_and_never_a_claimed_or_taken_problem(self):
         ranks = {"problems": [{"id": n, "status": "Unsolved", "partial": {"score": 50}} for n in (1, 2, 3, 4, 5)]
