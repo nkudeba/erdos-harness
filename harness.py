@@ -272,7 +272,7 @@ class ClaudeCliBackend:
         return self.prove_effort, self.call_budget_usd
 
     def _run(self, purpose: str, prompt: str, extra: list[str], cwd: Path | None,
-             effort_override: str | None = None, budget_override: float | None = None) -> str:
+             effort_override: str | None = None, budget_override: float | None = None, env_extra: dict | None = None) -> str:
         effort, budget = self._tuning(purpose)
         if effort_override:
             effort = effort_override
@@ -302,7 +302,8 @@ class ClaudeCliBackend:
         last_err = ""
         for attempt in range(self.RETRIES + 1):
             try:
-                r = run_tracked(cmd, input=prompt, timeout=self.timeout, env=clean_env(), cwd=str(cwd) if cwd else None)
+                r = run_tracked(cmd, input=prompt, timeout=self.timeout, env={**clean_env(), **(env_extra or {})},
+                                cwd=str(cwd) if cwd else None)
             except subprocess.TimeoutExpired:
                 # a hung/slow provider call: retry once more if budget allows, else surface as RuntimeError
                 last_err = f"timeout after {self.timeout}s"
@@ -398,14 +399,20 @@ class ClaudeCliBackend:
     )
 
     def complete_explore(self, purpose: str, prompt: str, sandbox: Path, max_turns: int,
-                         budget: float | None = None, effort: str | None = None, system_prompt: str | None = None) -> str:
+                         budget: float | None = None, effort: str | None = None, system_prompt: str | None = None,
+                         script_seconds: int | None = None) -> str:
         """Tool-using exploration confined to `sandbox`: files may be written there, the only command is `./run.sh`
         (the screened `python -I` runner), and nothing reaches Lean or the web."""
         extra = ["--tools", "Bash", "Read", "Edit", "Write", "Grep", "Glob",
                  "--allowedTools", "Bash(./run.sh:*)", "Edit(./**)", "Write(./**)", *scoped_read_rules([]),
                  "--max-turns", str(max_turns), "--permission-mode", "acceptEdits",
                  "--system-prompt", system_prompt or self.EXPLORE_SYSTEM_PROMPT]
-        return self._run(purpose, prompt, extra, sandbox, effort_override=effort, budget_override=budget)
+        # The CLI's Bash tool kills a command after 2 minutes unless told otherwise; a longer sandbox cap needs both.
+        env = None
+        if script_seconds and script_seconds > EXPLORE_SECONDS:
+            ms = str((int(script_seconds) + 60) * 1000)
+            env = {"BASH_DEFAULT_TIMEOUT_MS": ms, "BASH_MAX_TIMEOUT_MS": ms}
+        return self._run(purpose, prompt, extra, sandbox, effort_override=effort, budget_override=budget, env_extra=env)
 
     def complete_agentic(self, purpose: str, prompt: str, sandbox: Path, max_turns: int,
                          read_paths: list[str] | None = None) -> str:
@@ -2306,12 +2313,12 @@ with open(here / "runs.log", "a") as log:
 EXPLORE_PLACEHOLDER = "/__EXPLORE_SCRIPT__.py"
 
 
-def explore_runner_source() -> str:
+def explore_runner_source(seconds: int = 0) -> str:
     """The sandbox runner, with the screen and the interpreter command line. The command line comes from
     `sandbox_argv`, the one builder of isolated interpreter commands, with a placeholder the runner fills in."""
     return EXPLORE_RUNNER % {"allowed": sorted(EXPLORE_MODULES), "forbidden": FORBIDDEN_PY_TOKENS.pattern,
                              "extra": EXPLORE_FORBIDDEN.pattern, "argv": sandbox_argv(Path(EXPLORE_PLACEHOLDER)),
-                             "placeholder": EXPLORE_PLACEHOLDER, "dir_token": SANDBOX_DIR_TOKEN, "seconds": EXPLORE_SECONDS}
+                             "placeholder": EXPLORE_PLACEHOLDER, "dir_token": SANDBOX_DIR_TOKEN, "seconds": int(seconds or EXPLORE_SECONDS)}
 
 
 def decompose_prompt(problem: dict, statement: str, literature: str, history: str,
@@ -4228,6 +4235,7 @@ class EngineSettings:
     session_legs: int = 1            # > 1: a session that stops with budget left and a route to try is sent back (v6)
     leg_min_budget: float = 0.75     # a continuation needs at least this much of the session's own budget left
     objective: str = "advance"       # "resolve": the deep dive aims at settling the problem (DEEP_OBJECTIVES)
+    decide_seconds: int = 600        # the per-script cap in a decide-by-computation session (others keep EXPLORE_SECONDS)
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4960,22 +4968,24 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
             # On #455 and #1203 two of four sessions drifted onto the same tractable target and proved the same constant.
             teammates = ("\nYOUR TEAMMATES THIS ROUND, working in parallel (do not duplicate them; if your work meets "
                          "theirs, cite it and push past it):\n" + "\n".join(mates) + "\n") if mates else ""
+            secs = int(s.decide_seconds) if a.get("kind") == "decide" else EXPLORE_SECONDS
             prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
                                            assignment=assignment_text(a), teammates=teammates,
-                                           modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+                                           modules=", ".join(sorted(EXPLORE_MODULES)), seconds=secs)
 
             def cont(leg, route):
                 return SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
                                              assignment=CONTINUE_ASSIGNMENT.format(leg=leg, legs=s.session_legs, next=route,
                                                                                    assignment=assignment_text(a)),
                                              teammates=teammates, modules=", ".join(sorted(EXPLORE_MODULES)),
-                                             seconds=EXPLORE_SECONDS)
+                                             seconds=secs)
             with lock:
                 slot = legs_ck.setdefault(label, {})
             try:
                 reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", label, prompt, cont,
                                                                   s.session_turns, s.session_budget, s.session_effort,
-                                                                  slot=slot, keep=keep, lock=lock)
+                                                                  slot=slot, keep=keep, lock=lock,
+                                                                  session_kw={"seconds": secs} if secs != EXPLORE_SECONDS else None)
                 claims = parse_claims(notebook)
                 for c in claims:
                     c["session"], c["_kind"] = label, a.get("kind")
@@ -5205,7 +5215,8 @@ def parse_next_route(notebook: str) -> str | None:
 
 def engine_session_legs(session, s: "EngineSettings", spend: _DiscoverySpend, purpose: str, label: str, prompt: str,
                         cont_prompt, turns: int, budget: float, effort, files: dict | None = None,
-                        slot: dict | None = None, keep=None, lock=None) -> tuple[str, str, float, int]:
+                        slot: dict | None = None, keep=None, lock=None,
+                        session_kw: dict | None = None) -> tuple[str, str, float, int]:
     """One research session that keeps going (v6, `s.session_legs`). Returns (reply, notebook, cost, legs).
 
     Outside the time-split dev and test sets, 52 of 63 round sessions on disk stopped under 60% of their cap (median $1.44
@@ -5222,7 +5233,8 @@ def engine_session_legs(session, s: "EngineSettings", spend: _DiscoverySpend, pu
         reply, notebook = slot.get("reply") or "", slot.get("notebook") or ""
         cost, legs = float(slot.get("cost") or 0.0), int(slot["legs"])
     else:
-        reply, notebook, cost = session(purpose, prompt, label, turns, budget, effort, **({"files": files} if files else {}))
+        reply, notebook, cost = session(purpose, prompt, label, turns, budget, effort, **({"files": files} if files else {}),
+                                        **(session_kw or {}))
         cost, legs = float(cost or 0.0), 1
         with lock:
             slot.update({"legs": 1, "reply": (reply or "")[-3000:], "notebook": notebook, "cost": round(cost, 4)})
@@ -5234,7 +5246,8 @@ def engine_session_legs(session, s: "EngineSettings", spend: _DiscoverySpend, pu
             break
         legs += 1
         try:
-            r2, nb2, c2 = session(purpose, cont_prompt(legs, route), label, turns, left, effort, keep_notebook=True)
+            r2, nb2, c2 = session(purpose, cont_prompt(legs, route), label, turns, left, effort, keep_notebook=True,
+                                  **(session_kw or {}))
         except DiscoveryCallFailed as e:
             cost += float(e.cost or 0.0)
             with lock:
@@ -5330,11 +5343,13 @@ def engine_probe(call, session, s: "EngineSettings", statement: str, lean: str, 
         label = f"p{i}"
         if label in done:
             return done[label]
+        secs = int(s.decide_seconds) if a.get("kind") == "decide" else EXPLORE_SECONDS
         prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
                                        assignment=PROBE_ASSIGNMENT.format(line=assignment_text(a)), teammates="",
-                                       modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+                                       modules=", ".join(sorted(EXPLORE_MODULES)), seconds=secs)
         try:
-            reply, notebook, cost = session("engine-probe", prompt, label, s.probe_turns, s.probe_budget, s.session_effort)
+            reply, notebook, cost = session("engine-probe", prompt, label, s.probe_turns, s.probe_budget, s.session_effort,
+                                            **({"seconds": secs} if secs != EXPLORE_SECONDS else {}))
             claims = parse_claims(notebook)
             for c in claims:
                 c["session"], c["_kind"] = label, "probe"
@@ -6396,7 +6411,8 @@ class Harness:
                            marathon_leg_turns=int(g("engine_marathon_leg_turns", 300)),
                            session_legs=int(g("engine_session_legs", 1)),
                            leg_min_budget=float(g("engine_leg_min_budget", 0.75)),
-                           objective=str(g("engine_objective", "advance")))
+                           objective=str(g("engine_objective", "advance")),
+                           decide_seconds=int(g("engine_decide_seconds", 600)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -6432,7 +6448,7 @@ class Harness:
         their own costs. Budget-checked and logged like every call; a cut-off session still yields its notebook."""
         lock = threading.Lock()
 
-        def session(purpose, prompt, label, turns, budget, effort, files=None, keep_notebook=False):
+        def session(purpose, prompt, label, turns, budget, effort, files=None, keep_notebook=False, seconds=None):
             self._check_run_budget(purpose)
             prompt = self._outbound(self._with_research_guidance(purpose, prompt))
             run_budget = getattr(self.args, "run_budget", None)
@@ -6443,7 +6459,7 @@ class Harness:
                 raise DiscoveryCallFailed(f"backend {type(backend).__name__} has no tool-using sessions")
             sb = self.run_dir / "engine" / "sessions" / label
             sb.mkdir(parents=True, exist_ok=True)
-            (sb / "runner.py").write_text(explore_runner_source())
+            (sb / "runner.py").write_text(explore_runner_source(seconds or EXPLORE_SECONDS))
             run_sh = sb / "run.sh"
             run_sh.write_text(f'#!/bin/sh\nexec "{sys.executable}" "$(dirname "$0")/runner.py" "$@"\n')
             run_sh.chmod(0o755)
@@ -6460,7 +6476,8 @@ class Harness:
             t0, text = time.time(), ""
             try:
                 text = backend.complete_explore(purpose, prompt, sb, turns, budget=budget, effort=effort,
-                                                system_prompt=ENGINE_SYSTEM_PROMPT)
+                                                system_prompt=ENGINE_SYSTEM_PROMPT,
+                                                **({"script_seconds": seconds} if seconds else {}))
             except (RuntimeError, subprocess.TimeoutExpired) as e:
                 if ClaudeCliBackend.HARD_RE.search(str(e)):
                     raise                   # usage limit, auth: infrastructure, stop the run (it is resumable)
@@ -12331,6 +12348,8 @@ def build_parser() -> argparse.ArgumentParser:
                            "back into its sandbox to take it, up to this many legs within its own budget (1 = off)")
     runp.add_argument("--engine-leg-min-budget", type=float, default=0.75,
                       help="USD of the session's own budget a continuation leg needs")
+    runp.add_argument("--engine-decide-seconds", type=int, default=600,
+                      help="per-script cap, in seconds, for a decide-by-computation session (others keep 120 s)")
     runp.add_argument("--engine-objective", choices=["advance", "resolve"], default="advance",
                       help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
                            "as formalised (resolve, the campaign's setting)")

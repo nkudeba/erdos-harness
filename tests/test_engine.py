@@ -86,11 +86,13 @@ class FakeSession:
     def __init__(self, notebooks, cost=1.0):
         self.notebooks, self.cost, self.calls, self.lock = notebooks, cost, [], threading.Lock()
 
-    def __call__(self, purpose, prompt, label, turns, budget, effort, files=None):
+    def __call__(self, purpose, prompt, label, turns, budget, effort, files=None, **kw):
         with self.lock:
             self.calls.append((label, prompt))
             self.files = getattr(self, "files", {})
             self.files[label] = dict(files or {})
+            self.kw = getattr(self, "kw", {})
+            self.kw[label] = dict(kw)
         nb = self.notebooks(label, prompt)
         if isinstance(nb, Exception):
             raise nb
@@ -1043,6 +1045,11 @@ class DecideByComputation(unittest.TestCase):
         self.assertIn("DECIDE THE PROBLEM BY COMPUTATION", prompts["p1"])
         self.assertIn("DECIDE THE PROBLEM BY COMPUTATION", prompts["r1s1"])
         self.assertNotIn("DECIDE THE PROBLEM BY COMPUTATION", prompts["r1s2"].split("YOUR TEAMMATES")[0])   # a teammate's
+        # a decide session's scripts may run 10 minutes, in its prompt and its sandbox; the others keep 2
+        self.assertEqual((sess.kw["p1"].get("seconds"), sess.kw["r1s1"].get("seconds")), (600, 600))
+        self.assertNotIn("seconds", sess.kw["r1s2"])
+        self.assertIn("A run is capped at 600 s", prompts["r1s1"])
+        self.assertIn("A run is capped at 120 s", prompts["r1s2"])
         sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
         H.engine_run(FakeCall(self._script(frontier), cost=0.1), sess, "PROBLEM", LEAN,
                      H.EngineSettings(sessions=2, rounds=1, total_budget=60), workers=2)

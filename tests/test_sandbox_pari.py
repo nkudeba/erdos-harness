@@ -39,6 +39,21 @@ class Screen(unittest.TestCase):
             self.assertIsNotNone(H.unsafe_python("import numpy as np\n" + bad, H.EXPLORE_MODULES, H.EXPLORE_FORBIDDEN), bad)
         self.assertIsNone(H.unsafe_python("import json\nprint(json.loads('[1]'))"))      # loads is not load(
 
+    def test_a_longer_script_cap_reaches_the_runner_and_the_cli(self):
+        self.assertIn("SECONDS = 600", H.explore_runner_source(600))
+        self.assertIn(f"SECONDS = {H.EXPLORE_SECONDS}", H.explore_runner_source())
+        seen = {}
+
+        class B(H.ClaudeCliBackend):
+            def _run(self, purpose, prompt, extra, cwd, effort_override=None, budget_override=None, env_extra=None):
+                seen["env"] = env_extra
+                return "ok"
+        b = B.__new__(B)
+        b.complete_explore("p", "x", Path("/tmp"), 5, script_seconds=600)
+        self.assertEqual(seen["env"], {"BASH_DEFAULT_TIMEOUT_MS": "660000", "BASH_MAX_TIMEOUT_MS": "660000"})
+        b.complete_explore("p", "x", Path("/tmp"), 5)
+        self.assertIsNone(seen["env"])
+
     def test_the_session_prompt_names_pari(self):
         self.assertIn("cypari2", H.SESSION_PROMPT)
         self.assertIn("thueinit", H.SESSION_PROMPT)
