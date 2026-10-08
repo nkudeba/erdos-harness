@@ -972,6 +972,46 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
 - **The audit** adds Comparator and nanoda when `tools/install.sh` has been run (see the honesty rules).
 - **Off by default** until a dev screen against v5: probes, marathon, session legs and the library.
 
+**The resolution campaign, `resolution.py` (2026-10-08).** Not `campaign.py`, the campaign DAG.
+- **Why.** The operator's direction: aim at significance-3 results, check everything possible in Lean, and run without
+  human intervention.
+  - Step 2 showed the engine can settle problems: 3 of 6 unrecognized dev items, one proved in Lean.
+  - Step 3 aimed it at the most-studied open problems and at partial targets, and got partial results.
+- **What it does.** Each open problem moves scout → deep → Lean, each tier resuming the last.
+  - **scout:** the engine on the whole problem, with `--engine-objective resolve`, so the deep dive aims at settling it.
+  - **deep:** for a problem with traction. It adds a round planned by the team lead (a resume that adds rounds now
+    plans them), a marathon leg and gap closing.
+  - **Lean:** for a complete answer, meaning both settles judges agree. It is a normal open-problem run, never a
+    benchmark run, with the whole chain as its blueprint, committed to the direction the chain proves, then the audit.
+- **What it writes:** `resolution/results.jsonl` and an Atlas finding. A verified open-problem proof goes to
+  `resolution/REVIEW-NEEDED.md`, with `claimEligible` false until human review.
+- **The queue:** four known lines first (#366, #686, #488, #873), then the least-studied unsolved problems.
+- **Pacing:**
+  - one lane: it waits while any driver runs;
+  - a daily cap in `resolution/config.json`, default $150;
+  - usage limits are waited out.
+- **Running it unattended is the operator's decision.** The permission system refused both a LaunchAgent and a loop
+  started from a session. Run `caffeinate -s python3 resolution.py loop` yourself, or `python3 resolution.py once` for
+  one stage; `python3 resolution.py status` shows where it is.
+
+**PARI/GP in the research sandbox (2026-10-08).** `cypari2` (PARI 2.15.4) is an allowed module for every model-written
+script, and the session prompt names its Thue, class-group, elliptic-curve and rational-point functions. Both v6 full
+runs had stopped at a significance-2 step with "infeasible without PARI/Magma". Three layers keep scripts contained:
+- the static screen names PARI's shell, file and environment functions, and numpy's file readers (`np.loadtxt` could
+  read the benchmark's answers before this);
+- PARI runs in secure mode, set before the script (`PARI_SECURE`);
+- on macOS every sandboxed script runs under a Seatbelt profile (`sandbox_prefix`): no network, no process but the
+  interpreter, no reads under the home directory outside the script's folder, and no writes outside it.
+
+A name built at runtime gets past the screen, and the kernel stops it. `tests/test_sandbox_pari.py` covers this.
+
+**Robustness fixes the same day:**
+- **A usage limit is a hard error.** `HARD_RE` now matches "You've hit your session limit" and "…weekly limit". A
+  resume also drops every judge verdict and rating that an infrastructure failure produced, and judges those claims
+  again (`engine_drop_infra`). That repair gave step-2 dev #570 a significance-2 result its judges had never seen.
+- **An interrupted model call is retried.** A stream with no result event is either a kill or a connection that died
+  across a system sleep. On 2026-10-08 a dead battery cost #1055's map this way.
+
 Two operating notes:
 - A `discover-screen` or in-run lane matches `pgrep -f "harness.py run"`, so another lane's `timesplit.py run` refuses
   to start items while it is live. Pass `--allow-concurrent` deliberately.
