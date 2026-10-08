@@ -9,6 +9,11 @@ open problems and at partial targets, and produced partial results. So the campa
 problems where an answer is most likely within reach, and sends every complete answer to Lean.
 
 A problem moves through tiers. Each tier resumes the run before it, so nothing is bought twice.
+- **screen**: the engine's frontier map and two draws of its team lead's SETTLE CHANCE from the map alone, before any
+  work (about $3-6). A problem at or above `screen.pass` (0.3) is scouted; one below it is scouted only in the control
+  arm, a fixed share (`screen.control`, a quarter) chosen by a hash of its number. On step 2's dev items the number put
+  the problems the engine went on to settle first (mean 0.46 against 0.09) but missed #1125 (0.085), so the control arm
+  measures what the bar costs (REPORT 3.8).
 - **scout**: the engine on the whole problem, with the deep dive aimed at settling it (`--engine-objective resolve`) and
   PARI/GP in its sandbox. A complete answer is a valid claim that BOTH settles judges say answers the formal statement.
 - **deep**: a problem with traction gets a second, longer pass on the same run: a round planned by the team lead, the
@@ -29,11 +34,12 @@ Pacing:
     python3 resolution.py status
     python3 resolution.py queue [--show 20]
     python3 resolution.py once          # the next stage, then stop
+    python3 resolution.py import-screens --file experiments/idea-engine-2026-10-02/step3/settle_open.jsonl
     python3 resolution.py loop          # forever: what the LaunchAgent runs
 """
 from __future__ import annotations
 
-import argparse, importlib.util, json, re, subprocess, sys, time
+import argparse, hashlib, importlib.util, json, re, subprocess, sys, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -61,8 +67,12 @@ DEFAULTS = {
     "priority": [366, 686, 488, 873],
     # --results-library on: other runs' validated results and the openai/math families relevant to the problem, so one
     # run builds on another's (never in a benchmark run; no dev or test item enters it).
+    # The ripeness screen (REPORT 3.8): the map and two SETTLE CHANCE draws, no sessions. The scout resumes its run.
+    "screen": {"total": 12.0, "pass": 0.3, "control": 0.25,
+               "flags": "--engine-objective resolve --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
+                        "--engine-settle-draws 2 --results-library on"},
     "scout": {"total": 18.0,
-              "flags": "--engine-objective resolve --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
+              "flags": "--engine-objective resolve --engine-settle-draws 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
                        "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2 "
                        "--results-library on"},
     "deep": {"extra": 40.0,
@@ -98,6 +108,16 @@ def load_state() -> dict:
 def save_state(st: dict) -> None:
     CAMP.mkdir(exist_ok=True)
     atomic_write_json(STATE, st, indent=1)
+
+
+def save_problem(n, p: dict) -> None:
+    """Write one problem's entry and nothing else, re-reading the file under its lock. A stage that saved the whole state
+    it read when it started would erase any entry written meanwhile (an import, a test, another tool)."""
+    CAMP.mkdir(exist_ok=True)
+    with locked(STATE):
+        st = load_state()
+        st.setdefault("problems", {})[str(n)] = p
+        atomic_write_json(STATE, st, indent=1)
 
 
 def log(msg: str) -> None:
@@ -337,6 +357,56 @@ def validated_summary(run_dir: Path) -> tuple[int, list[int], str]:
     return len(new), sigs, (" ".join(str(best.get("statement")).split())[:240] if best else "")
 
 
+def screen_result(run_dir: Path) -> dict | None:
+    """The ripeness screen the engine recorded (`settle_screen`: its draws and their mean), or None."""
+    try:
+        ej = json.loads((run_dir / "engine" / "engine.json").read_text())
+    except (OSError, ValueError):
+        return None
+    return ej.get("settle_screen") if isinstance(ej.get("settle_screen"), dict) else None
+
+
+def arm(n: int, chance: float, cfg: dict) -> str:
+    """`pass` (scouted), `control` (below the bar and scouted anyway: a fixed share of problems, chosen by a hash of the
+    number and never by the chance) or `screened out`. Comparing the two scouted arms' settle rates measures the screen
+    on the problems it is used for."""
+    sc = cfg["screen"]
+    if chance >= float(sc["pass"]):
+        return "pass"
+    h = int(hashlib.sha256(f"resolution-control-{n}".encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
+    return "control" if h < float(sc["control"]) else "screened out"
+
+
+def finish_screen(n: int, p: dict, cfg: dict, run_dir: Path, delta: float) -> bool:
+    scr = screen_result(run_dir) or {}
+    chance, draws = scr.get("mean"), [d.get("chance") for d in scr.get("draws") or []]
+    if chance is None:                                   # no draw gave a number: resume re-draws, max_errors gives up
+        p["errors"] = int(p.get("errors") or 0) + 1
+        p["running"] = "screen" if p["errors"] < cfg["max_errors"] else None
+        p["status"] = None if p["running"] else "screen failed"
+        save_problem(n, p)
+        result({"problem": n, "tier": "screen", "outcome": "no settle chance", "draws": draws, "spend": delta,
+                "run_dir": p["run_dir"]})
+        log(f"#{n}: screen gave no settle chance (draws {draws}); errors {p['errors']}")
+        return True
+    a = arm(n, chance, cfg)
+    p.update({"settle_chance": chance, "arm": a, "next": None if a == "screened out" else "scout",
+              "status": "screened out" if a == "screened out" else "screened"})
+    p["history"].append({"tier": "screen", "outcome": a, "settle_chance": chance, "spend": delta})
+    save_problem(n, p)
+    result({"problem": n, "tier": "screen", "outcome": a, "settle_chance": chance, "draws": draws, "spend": delta,
+            "run_dir": p["run_dir"]})
+    log(f"#{n}: screen -> {a} (settle chance {chance:.2f}, draws {draws}; ${delta:.2f})")
+    goal = next((d.get("goal") for d in scr.get("draws") or [] if d.get("goal")), "") or ""
+    line = " ".join(re.sub(r"(?i)SETTLE CHANCE\s*:\s*\S+", "", goal).replace("*", "").split())[:260]
+    record_atlas(n, f"Resolution campaign ripeness screen {datetime.now().date()}: SETTLE CHANCE {chance:.2f}, the mean of "
+                    f"{len(draws)} draws of the research engine's team lead reading only its frontier map, before any work "
+                    f"(an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled "
+                    f"first without separating them)." + (f" The line it would take: {line}" if line else ""))
+    commit(["resolution"], f"resolution: #{n} screen -> {a} (settle chance {chance:.2f})")
+    return True
+
+
 # ---------------------------------------------------------------- Lean
 
 def build_lean_run(n: int, engine_run: Path, claim: str, answer: str) -> Path:
@@ -488,7 +558,8 @@ def commit(paths: list[str], msg: str) -> None:
 # ---------------------------------------------------------------- one step
 
 def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
-    """lean first, then deep, then a stage cut off part way, then the next problem in the queue."""
+    """lean first, then deep, then a stage cut off part way, then Lean on partial results, then a screened problem's
+    scout (the pass arm first, highest settle chance first, then the control arm), then the next problem's screen."""
     probs = state.get("problems", {})
     for want in ("lean", "deep"):
         for n, p in probs.items():
@@ -500,8 +571,12 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     for n, p in probs.items():
         if p.get("claims_todo") and p.get("errors", 0) < cfg["max_errors"]:
             return "lean-claim", int(n)
+    pending = [(p.get("arm") == "pass", float(p.get("settle_chance") or 0.0), -int(n)) for n, p in probs.items()
+               if p.get("next") == "scout" and p.get("errors", 0) < cfg["max_errors"]]
+    if pending:
+        return "scout", -max(pending)[2]
     q = queue(state, cfg)
-    return ("scout", q[0]) if q else ("idle", None)
+    return ("screen", q[0]) if q else ("idle", None)
 
 
 def step(cfg: dict) -> bool:
@@ -513,32 +588,31 @@ def step(cfg: dict) -> bool:
         return False
     p = state["problems"].setdefault(str(n), {"history": []})
     key = str(n)
-    if action == "scout":
+    if action in ("screen", "scout"):
         if not p.get("prepped"):
             info = prep(n, cfg)
             if not info["ok"]:
                 p.update({"status": "skipped", "why": info["why"], "next": None})
-                save_state(state)
+                save_problem(n, p)
                 result({"problem": n, "tier": "prep", "outcome": "skipped", "why": info["why"], "spend": 0.0})
                 log(f"#{n}: skipped ({info['why']})")
                 return True
             p["prepped"] = True
-        p["running"] = "scout"
+        p["running"] = action
         if not p.get("run_dir"):
-            p["run_dir"] = adopt_run(n)                  # a scout cut off before this fix recorded none
-        save_state(state)
-        log(f"#{n}: scout" + (f" (resuming {p['run_dir']})" if p.get("run_dir") else ""))
+            p["run_dir"] = adopt_run(n)                  # a stage cut off before its run dir was recorded
+        save_problem(n, p)
+        log(f"#{n}: {action}" + (f" (resuming {p['run_dir']})" if p.get("run_dir") else ""))
 
         def started(run_dir: str) -> None:
-            st2 = load_state()
-            st2["problems"].setdefault(key, {}).update({"run_dir": run_dir})
-            save_state(st2)
             p["run_dir"] = run_dir
-        row, rc = run_screen(n, "resolve-scout", cfg["scout"]["total"], cfg["scout"]["flags"], p.get("run_dir"),
-                             on_start=started)
+            save_problem(key, p)
+        # a screened problem's scout resumes the screen's run, so its total counts the screen's spend
+        row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
+                             cfg[action]["flags"], p.get("run_dir"), on_start=started)
     elif action == "deep":
         p["running"] = "deep"
-        save_state(state)
+        save_problem(n, p)
         prior = float(p.get("spend") or 0.0)
         log(f"#{n}: deep pass on {p['run_dir']}")
         row, rc = run_screen(n, "resolve-deep", prior + cfg["deep"]["extra"], cfg["deep"]["flags"], p["run_dir"])
@@ -549,14 +623,14 @@ def step(cfg: dict) -> bool:
         rec = done.setdefault(claim, {})
         if not rec.get("lean_run"):
             rec["lean_run"] = str(build_claim_lean_run(n, engine_run, claim, len(done)).relative_to(ROOT))
-            save_state(state)
+            save_problem(n, p)
         lean_run = ROOT / rec["lean_run"]
         log(f"#{n}: Lean on partial result {claim} in {lean_run.name}")
         rc, line = run_lean(lean_run, cfg, claim_lean_cmd(lean_run, cfg))
         spend = run_spend(lean_run)
         rec.update({"rc": rc, "summary": line, "verified": rc == 0})
         p["claims_todo"] = p["claims_todo"][1:]
-        save_state(state)
+        save_problem(n, p)
         result({"problem": n, "tier": "lean-claim", "claim": claim, "outcome": "verified" if rc == 0 else "not verified",
                 "rc": rc, "spend": spend, "lean_run": rec["lean_run"], "summary": line})
         stmt = json.loads((lean_run / "problem.json").read_text())["statement"]
@@ -568,11 +642,11 @@ def step(cfg: dict) -> bool:
         return True
     else:                                                # lean
         p["running"] = "lean"
-        save_state(state)
+        save_problem(n, p)
         engine_run = ROOT / p["run_dir"]
         if not p.get("lean_run"):
             p["lean_run"] = str(build_lean_run(n, engine_run, p["complete"]["claim"], p["complete"]["answer"]).relative_to(ROOT))
-            save_state(state)
+            save_problem(n, p)
         lean_run = ROOT / p["lean_run"]
         log(f"#{n}: Lean on {p['complete']['claim']} ({p['complete']['answer']}) in {lean_run.name}")
         rc, line = run_lean(lean_run, cfg)
@@ -581,7 +655,7 @@ def step(cfg: dict) -> bool:
         p.update({"running": None, "next": None, "status": "verified" if verified else "lean-partial",
                   "lean_summary": line})
         p["history"].append({"tier": "lean", "rc": rc, "summary": line})
-        save_state(state)
+        save_problem(n, p)
         result({"problem": n, "tier": "lean", "outcome": "verified" if verified else "not verified", "rc": rc,
                 "spend": spend, "lean_run": p["lean_run"], "summary": line})
         if verified:
@@ -598,7 +672,7 @@ def step(cfg: dict) -> bool:
     if row is None:
         p["errors"] = int(p.get("errors") or 0) + 1
         p["running"] = None if p["errors"] >= cfg["max_errors"] else action
-        save_state(state)
+        save_problem(n, p)
         result({"problem": n, "tier": action, "outcome": "infrastructure", "rc": rc, "spend": 0.0})
         log(f"#{n}: {action} failed (exit {rc}); errors {p['errors']}")
         return True
@@ -606,6 +680,8 @@ def step(cfg: dict) -> bool:
     total = float(row.get("spend_run") or 0.0)
     delta = round(total - float(p.get("spend") or 0.0), 4)
     p.update({"run_dir": row["run_dir"], "spend": total, "running": None})
+    if action == "screen":
+        return finish_screen(n, p, cfg, run_dir, delta)
     outcome, info = classify(run_dir)
     n_new, sigs, best = validated_summary(run_dir)
     if outcome == "complete":
@@ -619,9 +695,10 @@ def step(cfg: dict) -> bool:
     if outcome == "complete":
         skip.add(info["claim"])
     p["claims_todo"] = (p.get("claims_todo") or []) + claims_for_lean(run_dir, cfg["lean_claims"]["min_significance"], skip)
-    save_state(state)
+    save_problem(n, p)
     result({"problem": n, "tier": action, "outcome": outcome, "spend": delta, "run_dir": row["run_dir"],
-            "validated_new": n_new, "significance": sigs, **info})
+            "validated_new": n_new, "significance": sigs, "arm": p.get("arm"),
+            "settle_screen": (screen_result(run_dir) or {}).get("mean"), **info})
     log(f"#{n}: {action} -> {outcome} (${delta:.2f}; {n_new} validated new {sigs})")
     if outcome == "complete":
         record_atlas(n, f"Resolution campaign {datetime.now().date()} (${total:.2f}, informal): the research engine wrote a complete "
@@ -634,6 +711,33 @@ def step(cfg: dict) -> bool:
     return True
 
 
+def import_screens(path: Path, cfg: dict) -> list[int]:
+    """Take screen rows made outside the campaign into it (REPORT 3.9: two draws from a map already on disk). Only a row
+    at or above the bar comes in, as the pass arm labelled as a backfill. Its map may predate the resolve objective, so a
+    problem below the bar is not screened out on it: it keeps its place in the queue and gets the proper screen in turn.
+    Every row's cost is logged once, so the daily cap counts it."""
+    eligible, took = set(queue(load_state(), cfg)), []
+    seen = {(r.get("problem"), r.get("map_run")) for r in rows() if r.get("source") == "backfill"}
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        n, m = int(r["problem"]), r.get("mean")
+        if (n, r["run_dir"]) in seen:
+            continue
+        passed = m is not None and m >= float(cfg["screen"]["pass"]) and n in eligible
+        result({"problem": n, "tier": "screen", "outcome": "pass" if passed else "below the bar or not a target",
+                "settle_chance": m, "draws": r.get("draws"), "spend": float(r.get("cost") or 0.0), "source": "backfill",
+                "map_run": r["run_dir"]})
+        if passed:
+            save_problem(n, {"history": [{"tier": "screen", "outcome": "pass", "settle_chance": m, "map_run": r["run_dir"]}],
+                             "settle_chance": m, "arm": "pass", "screen_source": f"backfill from {r['run_dir']}",
+                             "next": "scout", "status": "screened"})
+            log(f"#{n}: screen (backfill from {r['run_dir']}) -> pass (settle chance {m:.2f})")
+            took.append(n)
+    return took
+
+
 # ---------------------------------------------------------------- entry points
 
 def status() -> None:
@@ -644,11 +748,25 @@ def status() -> None:
     print(f"daily cap ${cfg['daily_cap_usd']:.0f}; spent last 24h ${spent_since():.2f}, last 7 days ${spent_since(168):.2f}")
     for k, v in sorted(by.items()):
         print(f"  {k}: {len(v)}  {sorted(v)[:20]}")
-    tackled = [int(n) for n, p in st.get("problems", {}).items() if p.get("run_dir")]
+    tackled = [int(n) for n, p in st.get("problems", {}).items()
+               if any(h.get("tier") in ("scout", "deep", "lean") for h in p.get("history") or [])]
     sig3 = sorted({int(r["problem"]) for r in rows() if r.get("outcome") in ("complete", "verified")
                    or 3 in (r.get("significance") or [])})
     print(f"significance 3 (a complete answer, or a claim both novelty judges rate 3): {len(sig3)} of {len(tackled)} "
           f"problems tackled {sig3}")
+    arms: dict = {}
+    for n, p in st.get("problems", {}).items():
+        if p.get("arm") or p.get("settle_chance") is not None:
+            a = arms.setdefault(p.get("arm") or "priority", {"screened": 0, "scouted": 0, "complete": 0, "chance": 0.0,
+                                                             "backfill": 0})
+            a["screened"] += 1
+            a["backfill"] += bool(p.get("screen_source"))
+            a["chance"] += float(p.get("settle_chance") or 0.0)
+            a["scouted"] += any(h.get("tier") == "scout" for h in p.get("history") or [])
+            a["complete"] += bool(p.get("complete"))
+    for k, a in sorted(arms.items()):
+        print(f"screen arm {k}: {a['screened']} screened ({a['backfill']} from maps on disk; mean settle chance "
+              f"{a['chance'] / a['screened']:.2f}), {a['scouted']} scouted, {a['complete']} complete")
     act, n = next_action(st, cfg)
     print(f"next: {act} {n or ''}")
     for r in rows()[-8:]:
@@ -698,8 +816,9 @@ def loop() -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["status", "queue", "once", "loop"])
+    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens"])
     ap.add_argument("--show", type=int, default=20)
+    ap.add_argument("--file", help="import-screens: a jsonl of screen rows (step3/settle_open.jsonl)")
     a = ap.parse_args()
     CAMP.mkdir(exist_ok=True)
     if a.cmd == "status":
@@ -709,6 +828,8 @@ def main() -> int:
         print(f"{len(q)} problems queued; first {a.show}:")
         for n in q[: a.show]:
             print(f"  #{n}  forum {forum_chars(n)} chars")
+    elif a.cmd == "import-screens":
+        print("imported to the pass arm:", import_screens(Path(a.file), load_cfg()))
     elif a.cmd == "once":
         wait_for_lane()
         step(load_cfg())

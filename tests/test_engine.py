@@ -1081,6 +1081,62 @@ class Objective(unittest.TestCase):
         self.assertEqual(res["deep"]["settle_chance"], 0.3)
 
 
+class SettleScreen(unittest.TestCase):
+    """2026-10-08, REPORT 3.8: the deep plan's SETTLE CHANCE, asked of the map alone before any work, put the dev items the
+    engine went on to settle first. `--engine-settle-draws N` makes it a stage of its own, the campaign's ripeness
+    screen, and a scout resumes the screen's run without buying the map again."""
+
+    def _call(self, chances):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-settle-screen":
+                c = chances[n]
+                return "=== GOAL\n" + (f"SETTLE CHANCE: {c}\n" if c is not None else "") + "Prove the core.\n=== PLAN\n1. go"
+            return judge(purpose)
+        return FakeCall(script, cost=0.2)
+
+    def test_a_map_and_settle_screen_runs_no_session_and_sees_no_result(self):
+        call, sess = self._call([0.4, 0.2]), FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=0, rounds=1, total_budget=20,
+                                                                         settle_draws=2, gap_rounds=0))
+        self.assertEqual(sess.calls, [])
+        self.assertEqual(sorted(d["chance"] for d in res["settle_screen"]["draws"]), [0.2, 0.4])
+        self.assertAlmostEqual(res["settle_screen"]["mean"], 0.3)
+        self.assertAlmostEqual(res["spend"], 0.6)
+        prompt = call.prompts("engine-settle-screen")[0]
+        self.assertIn(H.SETTLE_SCREEN_RESULTS, prompt)
+        self.assertIn("SETTLE CHANCE", prompt)           # the resolve objective, whatever the run's own
+        self.assertIn("Richter", prompt)                 # the map
+        self.assertIn("Prove the core", res["settle_screen"]["draws"][0]["goal"])
+        self.assertIsNone(H.engine_run(self._call([0.4]), sess, "PROBLEM", LEAN,
+                                       H.EngineSettings(sessions=0, rounds=1, total_budget=20)).get("settle_screen"))
+
+    def test_a_resume_draws_again_only_where_a_draw_gave_no_number(self):
+        call, s, spend = self._call([None, 0.5, 0.1]), H.EngineSettings(settle_draws=2), H._DiscoverySpend(10)
+        first = H.engine_settle_screen(call, s, "PROBLEM", "MAP", spend)
+        self.assertEqual(sorted(str(d["chance"]) for d in first["draws"]), ["0.5", "None"])
+        self.assertEqual(first["mean"], 0.5)
+        again = H.engine_settle_screen(call, s, "PROBLEM", "MAP", spend, have=first)
+        self.assertEqual(len(call.prompts("engine-settle-screen")), 3)
+        self.assertAlmostEqual(again["mean"], 0.3)
+        self.assertAlmostEqual(again["cost"], 0.6)
+        self.assertEqual((H.settle_chance("**SETTLE CHANCE:** 0.25"), H.settle_chance("SETTLE CHANCE: 1.5"),
+                          H.settle_chance("no line")), (0.25, 1.0, None))
+
+    def test_the_scout_resumes_the_screen_and_keeps_its_record(self):
+        ck = {}
+        H.engine_run(self._call([0.4, 0.2]), FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                     H.EngineSettings(sessions=0, rounds=1, total_budget=20, settle_draws=2, gap_rounds=0),
+                     checkpoint=ck, save=lambda c: None)
+        call, sess = self._call([0.9]), FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=40, gap_rounds=0),
+                           checkpoint=ck, save=lambda c: None)
+        self.assertEqual((call.prompts("engine-frontier"), call.prompts("engine-settle-screen")), ([], []))
+        self.assertEqual(len(sess.calls), 1)
+        self.assertAlmostEqual(res["settle_screen"]["mean"], 0.3)
+
+
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
 

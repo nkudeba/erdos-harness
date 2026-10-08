@@ -4238,6 +4238,7 @@ class EngineSettings:
     leg_min_budget: float = 0.75     # a continuation needs at least this much of the session's own budget left
     objective: str = "advance"       # "resolve": the deep dive aims at settling the problem (DEEP_OBJECTIVES)
     decide_seconds: int = 600        # the per-script cap in a decide-by-computation session (others keep EXPLORE_SECONDS)
+    settle_draws: int = 0            # > 0: the ripeness screen, SETTLE CHANCE asked this many times of the map alone (3.8)
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4873,6 +4874,11 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     fblock = frontier_block(f)
     known = clip_middle(fblock + ("\n\nLITERATURE:\n" + s.library if s.library.strip() else ""), 16000)
     sess_context = ("\n" + clip_middle(context, 12000) + "\n") if context else ""
+    have = ck.get("settle_screen") if isinstance(ck.get("settle_screen"), dict) else None
+    if s.settle_draws > 0 and sum(1 for d in (have or {}).get("draws") or []
+                                  if isinstance(d.get("chance"), (int, float))) < s.settle_draws:
+        ck["settle_screen"] = engine_settle_screen(call, s, statement, fblock, spend, have)
+        keep()
     dropped = engine_drop_infra(ck)
     if dropped:
         everything = list(_ck_claims(ck))
@@ -5099,6 +5105,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                                   for leg in (marathon or {}).get("legs") or []],
                          "stopped": (marathon or {}).get("stopped")} if marathon else None,
             "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings, "gaps": gaps,
+            "settle_screen": ck.get("settle_screen"),
             "recognized": engine_recognized({"frontier": f, "ledger": ledger}),
             "guidance": engine_guidance(f, ledger, meta)}
 
@@ -5465,9 +5472,7 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
                                          assignment=CONTINUE_ASSIGNMENT.format(leg=leg, legs=s.session_legs, next=route,
                                                                                assignment=assignment),
                                          teammates="", modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
-        sc = re.search(r"(?i)SETTLE CHANCE\s*:\s*\**\s*([01](?:\.\d+)?|\.\d+)", plan)
-        dp = {"plan_cost": round(pc, 4), "goal": goal, "plan_text": plan[:9000],
-              "settle_chance": max(0.0, min(1.0, float(sc.group(1)))) if sc else None}
+        dp = {"plan_cost": round(pc, 4), "goal": goal, "plan_text": plan[:9000], "settle_chance": settle_chance(plan)}
         try:
             reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", "deep", prompt, cont,
                                                               s.deep_turns, s.deep_budget, s.deep_effort, files=files,
@@ -5506,6 +5511,40 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
     engine_resolve(claims)
     return {**dp, "claims": len(claims),
             "validated": sum(1 for c in claims if (c.get("validation") or {}).get("status") == "validated-new")}
+
+
+def settle_chance(text: str) -> float | None:
+    """The `SETTLE CHANCE: p` line a deep plan writes under the resolve objective, clamped to [0, 1]."""
+    m = re.search(r"(?i)SETTLE CHANCE\s*:\s*\**\s*([01](?:\.\d+)?|\.\d+)", text or "")
+    return max(0.0, min(1.0, float(m.group(1)))) if m else None
+
+
+SETTLE_SCREEN_RESULTS = "(none yet: this assessment comes before any work)"
+
+
+def engine_settle_screen(call, s: "EngineSettings", statement: str, fblock: str, spend: _DiscoverySpend,
+                         have: dict | None = None) -> dict:
+    """The ripeness screen (`--engine-settle-draws N`): the deep plan's SETTLE CHANCE, asked N times in parallel of the
+    frontier map alone. The prompt holds the statement and the map and nothing a session produced, so a draw made after
+    work began is still the same instrument, and a resume re-draws only the draws that gave no number.
+    Why: on step 2's six unrecognized dev items the mean of two draws was 0.46 on the three the engine went on to settle
+    and 0.09 on the other three (REPORT 3.8). It ranks, it does not decide: #1125, settled, scored 0.085."""
+    prompt = DEEP_PLAN_PROMPT.format(statement=statement, frontier=fblock, results=SETTLE_SCREEN_RESULTS,
+                                     objective=DEEP_OBJECTIVES["resolve"])
+    draws = list((have or {}).get("draws") or [])
+    need = max(0, s.settle_draws - sum(1 for d in draws if isinstance(d.get("chance"), (int, float))))
+    if need:
+        with ThreadPoolExecutor(max_workers=need) as ex:
+            outs = list(ex.map(lambda _: _discovery_call(call, "engine-settle-screen", prompt, s.frontier_effort,
+                                                         s.meta_budget), range(need)))
+        spend.add(sum(cost for _, cost, _ in outs))
+        for text, cost, err in outs:
+            goal = dict((k.upper(), b) for k, b in delimited_sections(text or "")).get("GOAL") or text or ""
+            draws.append({"chance": settle_chance(text), "cost": round(cost, 4), "goal": goal[:1500],
+                          **({"error": err} if text is None else {})})
+    vals = [d["chance"] for d in draws if isinstance(d.get("chance"), (int, float))]
+    return {"draws": draws, "mean": round(sum(vals) / len(vals), 4) if vals else None,
+            "cost": round(sum(float(d.get("cost") or 0.0) for d in draws), 4)}
 
 
 def engine_with_lemmas(chosen: list[dict], claims: list[dict], cap: int) -> list[dict]:
@@ -6416,7 +6455,8 @@ class Harness:
                            session_legs=int(g("engine_session_legs", 1)),
                            leg_min_budget=float(g("engine_leg_min_budget", 0.75)),
                            objective=str(g("engine_objective", "advance")),
-                           decide_seconds=int(g("engine_decide_seconds", 600)))
+                           decide_seconds=int(g("engine_decide_seconds", 600)),
+                           settle_draws=int(g("engine_settle_draws", 0)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -12354,6 +12394,10 @@ def build_parser() -> argparse.ArgumentParser:
                       help="USD of the session's own budget a continuation leg needs")
     runp.add_argument("--engine-decide-seconds", type=int, default=600,
                       help="per-script cap, in seconds, for a decide-by-computation session (others keep 120 s)")
+    runp.add_argument("--engine-settle-draws", type=int, default=0,
+                      help="the ripeness screen: after the map and before any work, ask the deep plan's SETTLE CHANCE "
+                           "this many times of the map alone (engine.json settle_screen; REPORT 3.8). With "
+                           "--engine-sessions 0 --engine-deep-budget 0 a run is a map-and-settle screen")
     runp.add_argument("--engine-objective", choices=["advance", "resolve"], default="advance",
                       help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
                            "as formalised (resolve, the campaign's setting)")

@@ -977,7 +977,16 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   human intervention.
   - Step 2 showed the engine can settle problems: 3 of 6 unrecognized dev items, one proved in Lean.
   - Step 3 aimed it at the most-studied open problems and at partial targets, and got partial results.
-- **What it does.** Each open problem moves scout → deep → Lean, each tier resuming the last.
+- **What it does.** Each open problem moves screen → scout → deep → Lean, each tier resuming the last.
+  - **screen** (`--engine-settle-draws 2 --engine-sessions 0`, about $3-6): the map, then two draws of the deep plan's
+    SETTLE CHANCE from the map alone, before any work. On step 2's dev items its mean was 0.46 on the three the engine
+    settled and 0.09 on the rest, with #1125 (settled, 0.085) the miss (REPORT 3.8).
+    - A problem at or above 0.3 is scouted.
+    - Below the bar, a fixed quarter chosen by a hash of the number is scouted anyway, as the control arm. Every row
+      carries its arm, so the two arms' settle rates measure the screen.
+    - Scouts take the pass arm first, highest chance first.
+    - `import-screens` takes passes drawn from maps already on disk (REPORT 3.9). Nothing is screened out on such a
+      draw, because those maps predate the resolve objective.
   - **scout:** the engine on the whole problem, with `--engine-objective resolve`, so the deep dive aims at settling it.
   - **deep:** for a problem with traction. It adds a round planned by the team lead (a resume that adds rounds now
     plans them), a marathon leg and gap closing.
@@ -1000,7 +1009,8 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
 - **Lean on partial results:** every validated-new PROVED claim at significance ≥ 2 gets its own Lean run under a fresh
   id. The harness formalizes the claim, with a crosscheck judge, then proves it from the engine's chain.
 - **Restarts are safe:** one loop at a time (an exclusive lock), and a stage records its run at launch, so an
-  interrupted stage resumes.
+  interrupted stage resumes. A stage writes only its own problem's entry (`save_problem`, under the state file's lock).
+  A stage used to save the whole state it read when it started, which erased any entry written meanwhile.
 - **Pacing:**
   - one lane: it waits while any driver runs;
   - a daily cap in `resolution/config.json`, default $150;

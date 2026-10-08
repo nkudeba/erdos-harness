@@ -943,6 +943,35 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   Why: one lane, and a train test would first need about $270 of full scouts on resolved problems. This measures the
   screen on the distribution it is used for.
 
+**The screen, built (2026-10-08).** `--engine-settle-draws N` makes the 3.8 question a stage of the engine, and
+`resolution.py` runs it as the campaign's first tier:
+- the map and two draws, with no session, for about $3-6;
+- a scout resumes the screen's run, so the map is bought once;
+- the arms are recorded on every row.
+
+**3.9, the screen on the open problems whose maps are on disk. Pre-registered 2026-10-08, before any call.**
+- **Why.** Before the campaign spends a screen on each problem, learn whether anything on the open catalogue clears
+  the 0.3 bar. Dev items were problems someone resolved in 2026, so they were ripe by construction. The open catalogue
+  may give almost nothing above 0.1.
+- **Test.** The 32 open campaign targets with a frontier map on disk (step 3's screens, the v3 runs, and #366's scout).
+  For each, two draws from its latest map with the screen's own code (`engine_settle_screen`), about $25. Script:
+  `step3/settle_open.py`.
+- **Deviation from the screen proper.** Most of these maps were built under the advance objective, without the DECIDE
+  section or the results library, and three by v3. So:
+  - a problem at or above 0.3 enters the campaign's pass arm, labelled as a backfill;
+  - its scout builds a fresh map and draws the screen again there, so both numbers are on record;
+  - a problem below the bar is NOT screened out on this evidence. It keeps its place in the queue and gets the proper
+    screen in turn.
+- **Predictions:**
+  - 2 problems at or above 0.3 (range 0-5);
+  - a median mean of at most 0.05;
+  - the two draws within 0.1 of each other on at least 28 of 32.
+- **Reading.**
+  - If at least one passes, the campaign scouts it first.
+  - If none passes, a fixed bar empties the pass arm on open problems. The campaign then runs only its control arm, and
+    the bar must become relative (scout the top of the screened pool). That change would be recorded here, as a
+    deviation, before it is made.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

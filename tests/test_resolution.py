@@ -84,9 +84,9 @@ class Tiers(Base):
             st["problems"]["5"]["next"] = None
             self.assertEqual(R.next_action(st, cfg), ("scout", 7))
             st["problems"]["7"]["running"] = None
-            self.assertEqual(R.next_action(st, cfg), ("scout", 8))
+            self.assertEqual(R.next_action(st, cfg), ("screen", 8))                         # a new problem: its screen
             st["problems"]["7"].update({"running": "scout", "errors": cfg["max_errors"]})   # gave up on it
-            self.assertEqual(R.next_action(st, cfg), ("scout", 8))
+            self.assertEqual(R.next_action(st, cfg), ("screen", 8))
 
     def test_the_daily_cap_counts_the_last_24_hours(self):
         now = datetime(2026, 10, 8, 12, tzinfo=timezone.utc)
@@ -96,6 +96,115 @@ class Tiers(Base):
                 f.write(json.dumps({"at": at, "spend": spend}) + "\n")
         self.assertEqual(R.spent_since(24, now), 15.0)
         self.assertEqual(R.spent_since(168, now), 115.0)
+
+
+class Screen(Base):
+    """2026-10-08, REPORT 3.8: a cheap SETTLE CHANCE from the map alone decides which problems are scouted. A problem below
+    the bar is still scouted in the control arm, a fixed quarter chosen by its number, so the arms measure the screen."""
+
+    def _screened(self, mean, draws=None):
+        run = self.engine_run([])
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        ej["settle_screen"] = {"mean": mean, "draws": [{"chance": c, "goal": "SETTLE CHANCE: 0.4\nProve the core by a sieve."}
+                                                       for c in (draws if draws is not None else [mean])]}
+        (run / "engine" / "engine.json").write_text(json.dumps(ej))
+        return run
+
+    def test_the_arms(self):
+        cfg = R.load_cfg()
+        self.assertEqual(R.arm(5, 0.3, cfg), "pass")
+        lows = [R.arm(n, 0.05, cfg) for n in range(1, 1218)]
+        self.assertEqual(set(lows), {"control", "screened out"})
+        self.assertTrue(0.2 < lows.count("control") / len(lows) < 0.3)
+        # by the number, never by the chance
+        self.assertEqual([R.arm(n, 0.0, cfg) for n in range(1, 60)], [R.arm(n, 0.29, cfg) for n in range(1, 60)])
+
+    def test_a_screen_sends_a_problem_to_its_scout_or_screens_it_out(self):
+        cfg = R.load_cfg()
+        control = next(n for n in range(1, 999) if R.arm(n, 0.0, cfg) == "control")
+        out = next(n for n in range(1, 999) if R.arm(n, 0.0, cfg) == "screened out")
+        with patch.object(R, "record_atlas") as atlas, patch.object(R, "commit"):
+            for n, mean, want in ((11, 0.45, "pass"), (out, 0.05, "screened out"), (control, 0.05, "control")):
+                state = {"problems": {str(n): {"history": [], "run_dir": "runs/x", "spend": 3.2}}}
+                p = state["problems"][str(n)]
+                R.finish_screen(n, p, cfg, self._screened(mean), 3.2)
+                self.assertEqual((p["arm"], p["next"]), (want, None if want == "screened out" else "scout"))
+            self.assertIn("SETTLE CHANCE 0.45", atlas.call_args_list[0][0][1])
+            self.assertIn("Prove the core by a sieve", atlas.call_args_list[0][0][1])
+        self.assertEqual([(r["tier"], r["outcome"]) for r in R.rows()],
+                         [("screen", "pass"), ("screen", "screened out"), ("screen", "control")])
+
+    def test_a_screen_with_no_number_is_tried_again_then_given_up(self):
+        cfg = R.load_cfg()
+        state = {"problems": {"12": {"history": [], "run_dir": "runs/x"}}}
+        p = state["problems"]["12"]
+        with patch.object(R, "record_atlas") as atlas, patch.object(R, "commit"):
+            R.finish_screen(12, p, cfg, self._screened(None, [None, None]), 3.0)
+            self.assertEqual((p["running"], p["errors"]), ("screen", 1))
+            R.finish_screen(12, p, cfg, self._screened(None, [None, None]), 0.5)
+            self.assertEqual((p["running"], p["status"]), (None, "screen failed"))
+            atlas.assert_not_called()
+
+    def test_scouts_take_the_pass_arm_first_highest_chance_first_then_the_control_arm(self):
+        cfg = R.load_cfg()
+        st = {"problems": {"1": {"next": "scout", "arm": "control", "settle_chance": 0.05},
+                           "2": {"next": "scout", "arm": "pass", "settle_chance": 0.4},
+                           "3": {"next": "scout", "arm": "pass", "settle_chance": 0.6}}}
+        with patch.object(R, "queue", lambda s, c: [8]):
+            for want in (3, 2, 1):
+                self.assertEqual(R.next_action(st, cfg), ("scout", want))
+                st["problems"][str(want)]["next"] = None
+            self.assertEqual(R.next_action(st, cfg), ("screen", 8))
+
+    def test_a_scout_resumes_the_screen_run_and_its_budget_counts_the_screen(self):
+        cfg, seen = R.load_cfg(), {}
+
+        def fake(n, tag, total, flags, resume=None, on_start=None):
+            seen.update(tag=tag, total=total, flags=flags, resume=resume)
+            return None, 1
+        R.save_state({"problems": {"7": {"history": [], "next": "scout", "arm": "pass", "settle_chance": 0.5,
+                                         "prepped": True, "run_dir": "runs/r7", "spend": 4.0}}})
+        with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []):
+            R.step(cfg)
+        self.assertEqual((seen["tag"], seen["total"], seen["resume"]), ("resolve-scout", 22.0, "runs/r7"))
+        self.assertIn("--engine-settle-draws 2", seen["flags"])    # a backfilled pass gets the screen on its own map
+        R.save_state({"problems": {}})
+        with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: [9]), \
+                patch.object(R, "prep", lambda n, c: {"ok": True}), patch.object(R, "adopt_run", lambda n: None):
+            R.step(cfg)
+        self.assertEqual((seen["tag"], seen["total"], seen["resume"]), ("resolve-screen", 12.0, None))
+        for flag in ("--engine-sessions 0", "--engine-settle-draws 2", "--engine-deep-budget 0", "--engine-objective resolve"):
+            self.assertIn(flag, seen["flags"])
+
+
+class Backfill(Base):
+    """REPORT 3.9: screens drawn from maps already on disk. A pass enters the pass arm; nothing is screened out on them."""
+
+    def test_only_a_pass_comes_in_and_each_row_is_logged_once(self):
+        cfg = R.load_cfg()
+        f = self.d / "open.jsonl"
+        f.write_text("\n".join(json.dumps(r) for r in (
+            {"problem": 20, "run_dir": "runs/a", "mean": 0.4, "draws": [0.4, 0.4], "cost": 0.6},
+            {"problem": 64, "run_dir": "runs/b", "mean": 0.05, "draws": [0.1, 0.0], "cost": 0.5},
+            {"problem": 99, "run_dir": "runs/c", "mean": 0.9, "draws": [0.9, 0.9], "cost": 0.5})) + "\n")
+        R.save_state({"problems": {"7": {"history": [], "status": "done"}}})
+        with patch.object(R, "queue", lambda s, c: [20, 64]):           # #99 is not a campaign target
+            self.assertEqual(R.import_screens(f, cfg), [20])
+            self.assertEqual(R.import_screens(f, cfg), [])                # a second import adds nothing
+        st = R.load_state()["problems"]
+        self.assertEqual((st["20"]["arm"], st["20"]["next"]), ("pass", "scout"))
+        self.assertNotIn("64", st)                                        # keeps its place in the queue
+        self.assertIn("7", st)                                            # other entries survive
+        self.assertAlmostEqual(R.spent_since(), 1.6)
+
+    def test_a_stage_writes_only_its_own_problem(self):
+        R.save_state({"problems": {"1": {"history": []}}})
+        p = R.load_state()["problems"]["1"]
+        R.save_problem(2, {"history": [], "status": "imported meanwhile"})
+        p["status"] = "done"
+        R.save_problem(1, p)
+        self.assertEqual({k: v.get("status") for k, v in R.load_state()["problems"].items()},
+                         {"1": "done", "2": "imported meanwhile"})
 
 
 class Restarts(Base):
@@ -159,7 +268,7 @@ class ClaimLean(Base):
             st["problems"]["6"]["next"] = None
             self.assertEqual(R.next_action(st, cfg), ("lean-claim", 5))
             st["problems"]["5"]["claims_todo"] = []
-            self.assertEqual(R.next_action(st, cfg), ("scout", 8))
+            self.assertEqual(R.next_action(st, cfg), ("screen", 8))
 
 
 class Queue(Base):
