@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "4a3352d2bc9378e3fe07829881a2b29981481c028d714f688f1d68a4c3ea0cb3",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "4ebd76c98f1aa8e8f656e17169b4017f222be9a1b44e15c1f284c1af475c9d68"
+    "manual_reviews_sha256": "b1e494b70982dbed24dc2d45431fc799fa5945888ce8670d13bd3bd2bff67e02"
   },
   "problems": [
     {
@@ -43254,6 +43254,7 @@
         "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled.",
         "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us.",
         "v6 screen 2026-10-08 ($12.23, informal): validated new at significance 1, with no prior result found by the literature check: the inequality n F(m) < 2 m F(n) holds for every A with |A| = 3 and all m > n >= max A. Probes refuted the natural termwise reductions (peeling the min-first or max-first element fails by an unbounded factor) and showed peeling alone cannot prove the all-primes case.",
+        "Resolution campaign ripeness screen 2026-10-08: SETTLE CHANCE 0.04, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Claim (P), adaptive peeling. Let A ⊂ [2,∞) be a finite primitive set with |A| ≥ 2, and let n ≥ max A and m > n. For a ∈ A, let G_a(x) = #{ j ≤ x/a : aj ∉ M(A∖{a}) }, the number of private multiples of a up to x. Here M(·) denotes the set of multiples. Then the",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -43276,7 +43277,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-07 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -43368,12 +43369,13 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-07",
+        "on": "2026-10-08",
         "sources": [
           "experiments/open-top3/488-assessment.md",
           "atlas-data/forum/488.json",
           "https://github.com/shoal-rat/erdos-488-lean",
-          "experiments/idea-engine-2026-10-02/REPORT.md"
+          "experiments/idea-engine-2026-10-02/REPORT.md",
+          "resolution/results.jsonl"
         ],
         "searchFloor": null
       },
@@ -81593,7 +81595,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 1,
+        "runs": 2,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },

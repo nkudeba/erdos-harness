@@ -1039,7 +1039,7 @@
     "assessed": "2026-10-08"
   },
   "488": {
-    "assessed": "2026-10-07",
+    "assessed": "2026-10-08",
     "rationale": [
       "There is a plausible finite counting/counterexample workflow, but the easy counterexamples in the discussion concern the alternate non-divisibility typo.",
       "Assessed 2026-09-10: a bounded search over ~1.2e13 (A,n,m) triples across 13,870 sets found zero violations, and every near-miss comes from families already PROVED safe (singletons give exactly 2 - 1/a, pairs and min(A)=2 likewise).",
@@ -1047,7 +1047,8 @@
       "Expert signal against tractability: Tao states the problem stays hard after four simultaneous weakenings; a contributor reports 13 natural approaches killed by explicit counterexamples; one clean inclusion-exclusion reduction was refuted.",
       "UNVERIFIED third-party counterexample claim dated 2026-09-05 on the site's proof-claims page, said to be Lean-checked on an external host. erdosproblems.com still classes the problem open. If it stands, the problem is already settled.",
       "Proof-claims page, 2026-10-06: a partial claim with Lean sources (shoal-rat, GPT-6 Astra). For a finite primitive set G with n >= max G and E_G(n) = F_G(n)-|G| <= 15, an auxiliary bound implies the strict inequality for every m > n. It is explicitly partial, and the unrestricted problem stays unresolved. Unverified by us.",
-      "v6 screen 2026-10-08 ($12.23, informal): validated new at significance 1, with no prior result found by the literature check: the inequality n F(m) < 2 m F(n) holds for every A with |A| = 3 and all m > n >= max A. Probes refuted the natural termwise reductions (peeling the min-first or max-first element fails by an unbounded factor) and showed peeling alone cannot prove the all-primes case."
+      "v6 screen 2026-10-08 ($12.23, informal): validated new at significance 1, with no prior result found by the literature check: the inequality n F(m) < 2 m F(n) holds for every A with |A| = 3 and all m > n >= max A. Probes refuted the natural termwise reductions (peeling the min-first or max-first element fails by an unbounded factor) and showed peeling alone cannot prove the all-primes case.",
+      "Resolution campaign ripeness screen 2026-10-08: SETTLE CHANCE 0.04, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Claim (P), adaptive peeling. Let A ⊂ [2,∞) be a finite primitive set with |A| ≥ 2, and let n ≥ max A and m > n. For a ∈ A, let G_a(x) = #{ j ≤ x/a : aj ∉ M(A∖{a}) }, the number of private multiples of a up to x. Here M(·) denotes the set of multiples. Then the"
     ],
     "requirements": [
       "Use the divisibility definition as printed; certify the full finite counts for A, n and m with n at least max(A).",
@@ -1061,7 +1062,8 @@
       "experiments/open-top3/488-assessment.md",
       "atlas-data/forum/488.json",
       "https://github.com/shoal-rat/erdos-488-lean",
-      "experiments/idea-engine-2026-10-02/REPORT.md"
+      "experiments/idea-engine-2026-10-02/REPORT.md",
+      "resolution/results.jsonl"
     ]
   },
   "493": {
