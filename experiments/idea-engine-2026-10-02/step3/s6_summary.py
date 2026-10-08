@@ -19,9 +19,11 @@ ROOT = HERE.parents[2]
 
 
 def main() -> int:
+    import sys
+    tag = sys.argv[sys.argv.index("--tag") + 1] if "--tag" in sys.argv else "s6-probe"
     rows = {}
     for line in (HERE.parent / "results.jsonl").read_text().splitlines():
-        if '"s6-probe"' in line:
+        if f'"{tag}"' in line:
             r = json.loads(line)
             rows[str(r["problem"])] = r
     tot = {"open": 0, "with_open": 0, "new": 0, "with_new": 0, "new2": 0, "with_new2": 0, "traction": 0, "probes": 0,

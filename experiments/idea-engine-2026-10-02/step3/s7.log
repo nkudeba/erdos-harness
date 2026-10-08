@@ -1,0 +1,13 @@
+#1055: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261008-012433-589799-erdos1055/lane.log
+#458 [s7-sample]: 0 validated new of 9 claims; targets 10 (new 6, sig>=2 1, open 0); best None; probes: measured 0, traction 2, best 2.397; $9.9359112
+#377 [s7-sample]: 0 validated new of 9 claims; targets 10 (new 6, sig>=2 2, open 0); best None; probes: measured 0, traction 1, best 2.39; $12.2110402
+#955 [s7-sample]: 0 validated new of 11 claims; targets 10 (new 7, sig>=2 6, open 0); best None; probes: measured 0, traction 2, best 2.428; $9.178460399999999
+#940 [s7-sample]: 0 validated new of 10 claims; targets 10 (new 3, sig>=2 1, open 0); best None; probes: measured 0, traction 3, best 2.413; $8.785272800000001
+#1061 [s7-sample]: 0 validated new of 16 claims; targets 10 (new 4, sig>=2 2, open 1); best 2; probes: measured 0, traction 3, best 2.397; $11.899821199999998
+#695 [s7-sample]: 2 validated new of 12 claims; targets 10 (new 7, sig>=2 0, open 0); best None; probes: measured 0, traction 3, best 4.397; $14.069773
+#486 [s7-sample]: 3 validated new of 8 claims; targets 10 (new 4, sig>=2 4, open 1); best 2; probes: measured 0, traction 4, best 5.425; $14.800061799999996
+#375 [s7-sample]: 1 validated new of 9 claims; targets 10 (new 6, sig>=2 2, open 0); best None; probes: measured 0, traction 3, best 5.388; $10.7955596
+#64 [s7-sample]: 1 validated new of 9 claims; targets 10 (new 9, sig>=2 4, open 0); best None; probes: measured 0, traction 4, best 3.39; $12.3212054
+#78 [s7-sample]: 0 validated new of 9 claims; targets 10 (new 8, sig>=2 6, open 0); best None; probes: measured 0, traction 1, best 3.425; $10.8136298
+#1068 [s7-sample]: 0 validated new of 10 claims; targets 10 (new 8, sig>=2 5, open 0); best None; probes: measured 0, traction 4, best 2.487; $9.272749999999998
+S7SAMPLE-DONE 2026-10-08T15:20:13Z

@@ -859,6 +859,44 @@ until its re-judging finishes. Scored by `step3/s6_summary.py`; rows tagged `s6-
   - A higher rate of significance-2 targets or results here would say the harness's reach depends on how studied a
     problem is. Equal rates would say the limit is the harness.
 
+**3.7 results (2026-10-08, 15:20 UTC).** 11 of 12 problems ran, for $124.08 (rows tagged `s7-sample`).
+- **#1055 was lost to infrastructure.** The battery died 8 minutes into its map; see "An interrupted model call is
+  retried".
+
+| problem | OPEN targets | validated-new from probes (significance) | probes with traction | spend |
+|---|---|---|---|---|
+| #458 | 0 | 0 | 2 of 4 | $9.94 |
+| #377 | 0 | 0 | 1 of 4 | $12.21 |
+| #955 | 0 | 0 | 2 of 4 | $9.18 |
+| #940 | 0 | 0 | 3 of 4 | $8.79 |
+| #1061 | 1 | 0 | 3 of 4 | $11.90 |
+| #695 | 0 | 2 (1, 0) | 3 of 4 | $14.07 |
+| #486 | 1 | 3 (1, 1, 1) | 4 of 4 | $14.80 |
+| #375 | 0 | 1 (1) | 3 of 4 | $10.80 |
+| #64 | 0 | 1 (0) | 4 of 4 | $12.32 |
+| #78 | 0 | 0 | 1 of 4 | $10.81 |
+| #1068 | 0 | 0 | 4 of 4 | $9.27 |
+
+- **Against the predictions:**
+
+  | prediction | predicted | observed |
+  |---|---|---|
+  | cost | $85–130 | $124.08 |
+  | problems with an OPEN target | 3 of 12 (1–7) | 2 of 11 |
+  | validated-new from probes | 12 (4–24), in 7 problems (4–10) | 7, in 4 problems |
+  | validated-new at significance ≥ 2 | 1 (0–4) | 0 |
+
+- **Reading, as pre-registered: the limit is the harness, not the problem choice.** Typical problems did no better than
+  3.5's heavily studied ones:
+  - OPEN targets on 2 of 11 problems, against 1 of 8;
+  - validated-new results on 4 of 11 problems, against 5 of 8;
+  - significance ≥ 2 on neither.
+  So choosing less-studied problems does not by itself raise the yield. The attempts have to get stronger.
+- **Examples of the new results (all significance ≤ 1):**
+  - #375: the statement holds for every run of up to 80 consecutive composites;
+  - #486: logarithmic-density results for the sets the problem builds;
+  - #695: excluded classes of prime chains.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
