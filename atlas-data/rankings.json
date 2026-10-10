@@ -74641,19 +74641,18 @@
         "distances"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "An optimal bound or classification is requested; a single construction may cover only one direction.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Separate upper and lower bounds and check that they meet the requested precision.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
@@ -74676,16 +74675,12 @@
           "points": -5
         },
         {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
           "label": "Statement-interpretation risk",
           "points": -3
         },
         {
           "label": "Score floor / ceiling",
-          "points": 10
+          "points": 2
         }
       ],
       "partial": {
@@ -74724,8 +74719,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
