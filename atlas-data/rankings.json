@@ -68923,20 +68923,19 @@
         "analysis"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Limits, function spaces and analytic estimates create a larger formalization burden.",
         "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Freeze domains and convergence hypotheses and assemble the missing analytic lemmas.",
         "Construct and verify a uniform argument or an infinite family.",
-        "Prove the asymptotic statement with its full quantifiers and error control.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
+        "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
       "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
@@ -68962,12 +68961,8 @@
           "points": -9
         },
         {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
           "label": "Score floor / ceiling",
-          "points": 18
+          "points": 10
         }
       ],
       "partial": {
@@ -69006,8 +69001,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
