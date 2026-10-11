@@ -30287,6 +30287,77 @@
       "tier": "Research"
     },
     {
+      "id": 197,
+      "statement": "Can $\\mathbb{N}$ be partitioned into two sets, each of which can be permuted to avoid monotone 3-term arithmetic progressions?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "arithmetic progressions"
+      ],
+      "score": 20,
+      "harness": "Attempted",
+      "rationale": [
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
+      ],
+      "requirements": [],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        }
+      ],
+      "partial": {
+        "score": 46,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Library fit",
+            "points": 0
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "Reachable partial results still need the relevant Mathlib development."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/197",
+      "manual": false,
+      "prize": "no",
+      "evidence": {
+        "best": "attempted",
+        "runs": 1,
+        "benchmarkRuns": 0,
+        "certifiedMax": 0
+      },
+      "rank": 556,
+      "tier": "Research"
+    },
+    {
       "id": 699,
       "statement": "Is it true that for every $1\\leq i<j\\leq n/2$ there exists some prime $p\\geq i$ such that\\[p\\mid \\textrm{gcd}\\left(\\binom{n}{i}, \\binom{n}{j}\\right)?\\]",
       "status": "Unsolved",
@@ -30459,7 +30530,7 @@
         "searchFloor": 4.17e+19
       },
       "brief": "---\nproblem: 699\nupdated: 2026-09-12\nrun: 20260911-195529-727426-erdos699\noutcome: partial\nsolved: false\ncertified: 10\nsearch_floor: 4.17e+19\ncost_usd: 30.54\n---\n\n## What the problem asks\n\nFor any n and positions 1 ≤ i < j ≤ n/2, must the two binomial coefficients C(n,i) and C(n,j) share a prime factor at least i? A binomial coefficient counts choices of a given size. The prime is allowed to equal i. The full statement remains unproved here.\n\n## What we tried\n\nThe inherited research run ended with a session-limit failure in the positive direction and partial results in the negative direction. Its aggregate records contain 10 certified declaration names, 54 model calls, 83 Lean checks, and $30.54 spend. Those counts describe the harness run, not the later operator-assisted continuation. No additional paid harness calls were launched by Codex; Codex session cost is unavailable. The existing published search floor of roughly 4.17 × 10^19 candidate triples was preserved; it was not rerun.\n\nCodex continued directly in Lean using Mathlib's Lucas theorem. Claude repaired one failed proof tactic and moved the results into a shared binomial-coefficient library. This was assisted work, not an autonomous resolution.\n\n## What we found\n\nThe carry lemma and the stronger reduction are mechanically verified: if any number among n,n−1,…,n−i+1 has a prime factor greater than j, that prime divides both binomial coefficients. Therefore a counterexample would force every prime factor of every number in that block to be at most j. This property is called j-smoothness. It is a necessary condition for a counterexample, not a proof that counterexamples are impossible.\n\nThe proposed next route, Conjecture D, is false at (10,3,5). These binomial coefficients are 120 and 252; the shared prime 3 satisfies #699 but is missed by the proposed units-digit test. The test remains useful as a sufficient condition. It can also find primes between i and j, as p=5 at (16,3,7) demonstrates; only the narrower block-prime argument requires p>j.\n\nA later direct argument for i=3 rules out odd n and gives n ≤ (9/4)·4^r+1 for even n, where r counts factors of two in n. Its intermediate numerical checks passed, but it is a written argument for review, not a new Lean-certified result: the separate formal check timed out. It leaves r unbounded and does not address i≥4. Details are in experiments/699-higher-carries/REPORT.md.\n\n## What would move it\n\nFirst audit and finish formalizing the written i=3 localization argument; the prior Lean check timed out. Next bring n−2 into the simultaneous constraints from n and n−1, retaining higher-digit carries and the prime p=i=3. Seek a contradiction valid for every r=v₂(n), or prove an absolute cutoff with a feasible exhaustive check. If this route fails, record the exact obstruction before another research run. A bounded check of r cannot settle the unbounded argument; completing i=3 still leaves i≥4.\n\nThe harness automatically includes these next steps from atlas-data/research-guidance/699.md in its research and proof prompts, including resumed runs. Reuse the certified BinomialCoefficients library, reject the refuted Conjecture D, and preserve the published search floor. Full details and the distinction between certified results and drafts are in the linked research guidance and experiment reports.\n",
-      "rank": 556,
+      "rank": 557,
       "tier": "Research"
     },
     {
@@ -30554,7 +30625,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 557,
+      "rank": 558,
       "tier": "Research"
     },
     {
@@ -30611,7 +30682,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 558,
+      "rank": 559,
       "tier": "Research"
     },
     {
@@ -30715,7 +30786,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 559,
+      "rank": 560,
       "tier": "Research"
     },
     {
@@ -30770,7 +30841,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 560,
+      "rank": 561,
       "tier": "Research"
     },
     {
@@ -30824,7 +30895,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 561,
+      "rank": 562,
       "tier": "Research"
     },
     {
@@ -30881,7 +30952,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 562,
+      "rank": 563,
       "tier": "Research"
     },
     {
@@ -30936,7 +31007,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 563,
+      "rank": 564,
       "tier": "Research"
     },
     {
@@ -30999,7 +31070,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 564,
+      "rank": 565,
       "tier": "Research"
     },
     {
@@ -31122,7 +31193,7 @@
         ],
         "searchFloor": 1e+22
       },
-      "rank": 565,
+      "rank": 566,
       "tier": "Research"
     },
     {
@@ -31246,7 +31317,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 566,
+      "rank": 567,
       "tier": "Research"
     },
     {
@@ -31353,7 +31424,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 567,
+      "rank": 568,
       "tier": "Research"
     },
     {
@@ -31478,7 +31549,7 @@
         ],
         "searchFloor": 1e+22
       },
-      "rank": 568,
+      "rank": 569,
       "tier": "Research"
     },
     {
@@ -31539,7 +31610,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 569,
+      "rank": 570,
       "tier": "Research"
     },
     {
@@ -31625,7 +31696,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 570,
+      "rank": 571,
       "tier": "Research"
     },
     {
@@ -31688,7 +31759,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 571,
+      "rank": 572,
       "tier": "Research"
     },
     {
@@ -31778,7 +31849,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 572,
+      "rank": 573,
       "tier": "Research"
     },
     {
@@ -31862,7 +31933,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 573,
+      "rank": 574,
       "tier": "Research"
     },
     {
@@ -31946,7 +32017,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 574,
+      "rank": 575,
       "tier": "Research"
     },
     {
@@ -32035,7 +32106,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 575,
+      "rank": 576,
       "tier": "Research"
     },
     {
@@ -32119,7 +32190,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 576,
+      "rank": 577,
       "tier": "Research"
     },
     {
@@ -32208,7 +32279,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 577,
+      "rank": 578,
       "tier": "Research"
     },
     {
@@ -32291,7 +32362,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 578,
+      "rank": 579,
       "tier": "Research"
     },
     {
@@ -32375,7 +32446,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 579,
+      "rank": 580,
       "tier": "Research"
     },
     {
@@ -32463,7 +32534,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 580,
+      "rank": 581,
       "tier": "Research"
     },
     {
@@ -32518,7 +32589,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 581,
+      "rank": 582,
       "tier": "Research"
     },
     {
@@ -32572,7 +32643,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 582,
+      "rank": 583,
       "tier": "Research"
     },
     {
@@ -32661,7 +32732,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 583,
+      "rank": 584,
       "tier": "Research"
     },
     {
@@ -32750,7 +32821,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 584,
+      "rank": 585,
       "tier": "Research"
     },
     {
@@ -32804,7 +32875,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 585,
+      "rank": 586,
       "tier": "Research"
     },
     {
@@ -32858,7 +32929,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 586,
+      "rank": 587,
       "tier": "Research"
     },
     {
@@ -32913,7 +32984,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 587,
+      "rank": 588,
       "tier": "Research"
     },
     {
@@ -33002,7 +33073,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 588,
+      "rank": 589,
       "tier": "Research"
     },
     {
@@ -33104,7 +33175,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 589,
+      "rank": 590,
       "tier": "Research"
     },
     {
@@ -33189,7 +33260,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 590,
+      "rank": 591,
       "tier": "Research"
     },
     {
@@ -33274,7 +33345,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 591,
+      "rank": 592,
       "tier": "Research"
     },
     {
@@ -33354,7 +33425,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 592,
+      "rank": 593,
       "tier": "Research"
     },
     {
@@ -33434,7 +33505,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 593,
+      "rank": 594,
       "tier": "Research"
     },
     {
@@ -33513,7 +33584,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 594,
+      "rank": 595,
       "tier": "Research"
     },
     {
@@ -33598,7 +33669,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 595,
+      "rank": 596,
       "tier": "Research"
     },
     {
@@ -33652,7 +33723,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 596,
+      "rank": 597,
       "tier": "Research"
     },
     {
@@ -33716,7 +33787,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 597,
+      "rank": 598,
       "tier": "Research"
     },
     {
@@ -33782,7 +33853,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 598,
+      "rank": 599,
       "tier": "Research"
     },
     {
@@ -33866,7 +33937,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 599,
+      "rank": 600,
       "tier": "Research"
     },
     {
@@ -33951,7 +34022,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 600,
+      "rank": 601,
       "tier": "Research"
     },
     {
@@ -34031,7 +34102,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 601,
+      "rank": 602,
       "tier": "Research"
     },
     {
@@ -34116,7 +34187,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 602,
+      "rank": 603,
       "tier": "Research"
     },
     {
@@ -34216,7 +34287,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 603,
+      "rank": 604,
       "tier": "Frontier"
     },
     {
@@ -34310,7 +34381,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 604,
+      "rank": 605,
       "tier": "Frontier"
     },
     {
@@ -34406,7 +34477,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 605,
+      "rank": 606,
       "tier": "Frontier"
     },
     {
@@ -34484,7 +34555,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 606,
+      "rank": 607,
       "tier": "Frontier"
     },
     {
@@ -34558,7 +34629,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 607,
+      "rank": 608,
       "tier": "Frontier"
     },
     {
@@ -34618,7 +34689,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 608,
+      "rank": 609,
       "tier": "Frontier"
     },
     {
@@ -34726,7 +34797,7 @@
         ],
         "searchFloor": 1006700565.0
       },
-      "rank": 609,
+      "rank": 610,
       "tier": "Frontier"
     },
     {
@@ -34819,7 +34890,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 610,
+      "rank": 611,
       "tier": "Frontier"
     },
     {
@@ -34923,7 +34994,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 611,
+      "rank": 612,
       "tier": "Frontier"
     },
     {
@@ -35008,7 +35079,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 612,
+      "rank": 613,
       "tier": "Frontier"
     },
     {
@@ -35121,7 +35192,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 613,
+      "rank": 614,
       "tier": "Frontier"
     },
     {
@@ -35203,83 +35274,6 @@
         ]
       },
       "url": "https://www.erdosproblems.com/17",
-      "manual": false,
-      "prize": "no",
-      "evidence": {
-        "best": "untried",
-        "runs": 0,
-        "benchmarkRuns": 0,
-        "certifiedMax": 0
-      },
-      "rank": 614,
-      "tier": "Frontier"
-    },
-    {
-      "id": 197,
-      "statement": "Can $\\mathbb{N}$ be partitioned into two sets, each of which can be permuted to avoid monotone 3-term arithmetic progressions?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "arithmetic progressions"
-      ],
-      "score": 12,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
-      ],
-      "requirements": [
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        }
-      ],
-      "partial": {
-        "score": 46,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Library fit",
-            "points": 0
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "Reachable partial results still need the relevant Mathlib development."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/197",
       "manual": false,
       "prize": "no",
       "evidence": {
