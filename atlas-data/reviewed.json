@@ -1788,6 +1788,15 @@
     "partial": 10,
     "assessed": "2026-10-07"
   },
+  "1133": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.08, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target: prove the statement (no disproof) using a tiled-window construction with a multi-point dual witness that survives undersampling. Construction of y. Fix W (large, depending on C) and ε ≤ c/(W log W). 1. Apply close-pair elimination if it applies. Duplic"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-13"
+  },
   "1136": {
     "rationale": [
       "An explicit dyadic residue-class construction achieves density one half, above the requested one third. This is a plausible reusable construction proof."
