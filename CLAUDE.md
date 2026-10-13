@@ -992,8 +992,23 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     plans them), a marathon leg and gap closing.
   - **Lean:** for a complete answer, meaning both settles judges agree. It is a normal open-problem run, never a
     benchmark run, with the whole chain as its blueprint, committed to the direction the chain proves, then the audit.
-- **What it writes:** `resolution/results.jsonl` and an Atlas finding. A verified open-problem proof goes to
-  `resolution/REVIEW-NEEDED.md`, with `claimEligible` false until human review.
+- **Two tracks, by intent** (`--engine-intent-judges 2`, REPORT 3.11). Judges classify the screen's line and every
+  settling claim: new mathematics about the problem as posed, a formalization gap, or a known result.
+  - A pass goes to the **new-mathematics** track unless they name a gap or a known result. Those go to the
+    **statement-findings** track.
+  - New-math problems whose scout did not settle them get the **program** tier: the research program, the analytical
+    deep tier ($90).
+- **The research program** (`--engine-program-cycles N`, harness `engine_program`): the deductive loop's rules in
+  informal mathematics.
+  - A lead writes a proof skeleton: a target, lemmas, and a glue that a referee and an adversary must pass.
+  - Sessions attack the open lemmas, each judged against the lemma as stated.
+  - Refutations and failures shape the next plan.
+  - A closed skeleton becomes one chain for the settles judges and Lean.
+- **What it writes:** `resolution/results.jsonl` and an Atlas finding.
+  - A verified open-problem proof judged new mathematics goes to `resolution/REVIEW-NEEDED.md`, with `claimEligible`
+    false until human review.
+  - A verified gap or known result goes to `resolution/STATEMENT-FINDINGS.md`: a finding about the formal statement,
+    never a resolution.
 - **The queue:** four known lines first (#366, #686, #488, #873), then the least-studied unsolved problems.
   - Step 3.7 found that typical problems did no better than heavily studied ones. So the order matters less than the
     strength of each attempt.

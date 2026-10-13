@@ -1140,6 +1140,156 @@ class SettleScreen(unittest.TestCase):
         self.assertAlmostEqual(res["settle_screen"]["mean"], 0.3)
 
 
+PLAN = """=== TARGET
+ANSWER: TRUE
+Every n satisfies P(n).
+=== LEMMA L1
+STATEMENT: P holds for every prime.
+DIFFICULTY: elementary
+ROUTE: induction on the prime.
+TEST: primes below 100.
+=== LEMMA L2
+STATEMENT: P is multiplicative.
+DIFFICULTY: moderate
+ROUTE: the Chinese remainder theorem.
+TEST: n below 100.
+=== GLUE
+Factor n into primes. By L1 each prime factor satisfies P, and by L2 so does their product.
+=== CHANGES
+The first skeleton.
+"""
+
+
+class ResearchProgram(unittest.TestCase):
+    """2026-10-13, the analytical deep tier: a proof skeleton whose glue is refereed, lemma sessions judged against each
+    lemma as stated, and one assembled chain the settles judges and the campaign's Lean tier see."""
+
+    def _call(self, plans, glue_ok=True, settles_on="Every n satisfies"):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-program-plan":
+                return plans[min(n, len(plans) - 1)]
+            if purpose == "engine-referee" and "The target follows from the lemmas" in prompt and not glue_ok:
+                return judge(purpose, valid=False)
+            if purpose == "engine-settles":
+                return "```json\n" + json.dumps({"settles": settles_on in prompt, "answer": "true"}) + "\n```"
+            if purpose == "engine-intent":
+                return "```json\n" + json.dumps({"class": "new-math", "why": "nothing like it is known", "source": None}) + "\n```"
+            return judge(purpose)
+        return FakeCall(script, cost=0.1)
+
+    def _settings(self, **kw):
+        base = dict(sessions=0, rounds=1, total_budget=120, program_cycles=3, program_budget=80, gap_rounds=0,
+                    settles_max=3, intent_judges=2)
+        base.update(kw)
+        return H.EngineSettings(**base)
+
+    def test_the_parser_and_the_adoption_rule(self):
+        plan = H.parse_program_plan(PLAN.replace("=== LEMMA L1\nSTATEMENT: P holds for every prime.",
+                                                 "=== LEMMA L1\nUSE: r1s1/C1"))
+        self.assertEqual((plan["answer"], plan["target"]), ("true", "Every n satisfies P(n)."))
+        self.assertEqual([(l["id"], l["use"], l["difficulty"]) for l in plan["lemmas"]],
+                         [("L1", "r1s1/C1", "elementary"), ("L2", "", "moderate")])
+        self.assertIn("By L1", plan["glue"])
+        valid = {"r1s1/C1": {"statement": "P holds for every prime.", "proof": "By C2 and induction.", "_chain": "x C2"}}
+        sk, why = H.program_resolve_plan(plan, None, valid, [])
+        self.assertEqual([l["status"] for l in sk["lemmas"]], ["established", "open"])
+        self.assertNotIn("C2", sk["lemmas"][0]["proof"])                    # another notebook's numbers never cite
+        self.assertIsNone(H.program_resolve_plan(plan, None, {}, [])[0])      # an unknown key is refused
+        self.assertIsNone(H.program_resolve_plan(plan, None, valid, ["P is multiplicative."])[0])   # refuted before
+        easy = {"lemmas": [{"status": "open", "difficulty": "elementary", "statement": "a"}]}
+        hard = {"lemmas": [{"status": "open", "difficulty": "hard", "statement": "b"}]}
+        self.assertTrue(H.program_better(easy, hard, 0)[0])
+        self.assertFalse(H.program_better(hard, easy, 0)[0])
+        self.assertTrue(H.program_better(hard, easy, 1)[0])                   # a new route after a stalled cycle
+
+    def test_a_skeleton_closes_into_one_chain_the_settles_judges_see(self):
+        call = self._call([PLAN])
+        sess = FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "whatever the session wrote")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, self._settings())
+        self.assertTrue(res["program"]["done"])
+        self.assertIn(LEAN, call.prompts("engine-program-plan")[0])
+        self.assertEqual(sorted(l for l, _ in sess.calls), ["p1L1", "p1L2"])
+        self.assertIn("PROVE LEMMA L2", dict(sess.calls)["p1L2"])
+        comp = H.engine_complete(res)
+        self.assertEqual((comp["session"], comp["id"]), ("program", "C3"))
+        chain = H.engine_chain_text(comp, res["ledger"])
+        self.assertIn("P holds for every prime.", chain)
+        self.assertIn("P is multiplicative.", chain)
+        self.assertEqual(comp["validation"]["intent"]["class"], "new-math")
+        # the lemma referee judged the LEMMA's statement, not the session's
+        self.assertTrue(any("P holds for every prime." in p for p in call.prompts("engine-referee")))
+
+    def test_a_refuted_lemma_kills_the_skeleton_and_the_next_plan_routes_around_it(self):
+        plan2 = PLAN.replace("P is multiplicative.", "P holds for every product of two primes.").replace(
+            "The first skeleton.", "L2 was refuted; this route avoids it.")
+        call = self._call([PLAN, plan2])
+
+        def nb(label, prompt):
+            refute = label == "p1L2"
+            return notebook(("REFUTED" if refute else "PROVED", "QUANT", "n = 6 breaks it" if refute else "fine"))
+        res = H.engine_run(call, FakeSession(nb), "PROBLEM", LEAN, self._settings())
+        self.assertEqual(res["program"]["refuted"], ["P is multiplicative."])
+        self.assertIn("P is multiplicative.", call.prompts("engine-program-plan")[1].split("REFUTED STATEMENTS")[1])
+        self.assertTrue(res["program"]["done"])
+        self.assertIn("P holds for every product of two primes.", H.engine_chain_text(H.engine_complete(res), res["ledger"]))
+
+    def test_a_broken_glue_is_refused_and_the_program_stalls_out(self):
+        call = self._call([PLAN], glue_ok=False)
+        sess = FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, self._settings(program_stall=2))
+        self.assertEqual(sess.calls, [])
+        self.assertFalse(res["program"]["done"])
+        self.assertIn("without a discharge", res["program"]["stop"])
+        self.assertTrue(all("glue did not pass" in r["why"] for r in res["program"]["refused"]))
+        self.assertIsNone(H.engine_complete(res))
+
+    def test_a_resume_buys_neither_the_plan_nor_a_finished_attack_twice(self):
+        ck, crashed = {}, {"done": False}
+
+        def nb(label, prompt):
+            if label == "p1L2" and not crashed["done"]:
+                crashed["done"] = True
+                return Crash("battery")
+            return notebook(("PROVED", "QUANT", "x"))
+        with self.assertRaises(Crash):
+            H.engine_run(self._call([PLAN]), FakeSession(nb), "PROBLEM", LEAN, self._settings(), workers=1,
+                         checkpoint=ck, save=lambda c: None)
+        call, sess = self._call([PLAN]), FakeSession(nb)
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, self._settings(), workers=1, checkpoint=ck, save=lambda c: None)
+        self.assertEqual(call.prompts("engine-program-plan"), [])
+        self.assertEqual([l for l, _ in sess.calls], ["p1L2"])
+        self.assertTrue(res["program"]["done"])
+
+    def test_the_intent_panel_and_the_screen(self):
+        P = H.intent_panel
+        self.assertEqual(P([{"class": "new-math"}, {"class": "new-math"}])["class"], "new-math")
+        self.assertEqual(P([{"class": "new-math"}, {"class": "known-result", "source": "Ruzsa 1998"}])["class"], "known-result")
+        self.assertEqual(P([{"class": "formalization-gap"}, {"class": "known-result"}])["class"], "formalization-gap")
+        self.assertEqual(P([{"error": "x"}, {"class": "new-math"}])["class"], "unclear")
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-settle-screen":
+                return "=== GOAL\nSETTLE CHANCE: 0.85\nDisprove it with the regular n-gon.\n=== PLAN\n1."
+            if purpose == "engine-intent":
+                return "```json\n" + json.dumps({"class": "formalization-gap", "why": "the n-gon is degenerate", "source": None}) + "\n```"
+            return judge(purpose)
+        call = FakeCall(script, cost=0.1)
+        res = H.engine_run(call, FakeSession(lambda l, p: ""), "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=0, rounds=1, total_budget=20, settle_draws=2, intent_judges=2,
+                                            gap_rounds=0))
+        self.assertEqual(res["intent"]["class"], "formalization-gap")
+        self.assertIn("regular n-gon", call.prompts("engine-intent")[0])
+        low = FakeCall(lambda pu, pr, n: FRONTIER if pu == "engine-frontier" else
+                       "=== GOAL\nSETTLE CHANCE: 0.05\nNo line.\n" if pu == "engine-settle-screen" else judge(pu), cost=0.1)
+        H.engine_run(low, FakeSession(lambda l, p: ""), "PROBLEM", LEAN,
+                     H.EngineSettings(sessions=0, rounds=1, total_budget=20, settle_draws=2, intent_judges=2, gap_rounds=0))
+        self.assertEqual(low.prompts("engine-intent"), [])                  # below the bar, not classified
+
+
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
 

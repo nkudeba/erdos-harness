@@ -52,6 +52,7 @@ PRESCREEN = CAMP / "prescreen.jsonl"
 CONFIG = CAMP / "config.json"
 LOG = CAMP / "resolution.log"
 REVIEW = CAMP / "REVIEW-NEEDED.md"
+FINDINGS = CAMP / "STATEMENT-FINDINGS.md"
 SCREEN = ROOT / "experiments" / "idea-engine-2026-10-02" / "screen.py"
 sys.path.insert(0, str(ROOT / "atlas-data"))
 sys.path.insert(0, str(ROOT / "benchmarks" / "timesplit"))
@@ -71,15 +72,22 @@ DEFAULTS = {
     # The ripeness screen (REPORT 3.8): the map and two SETTLE CHANCE draws, no sessions. The scout resumes its run.
     "screen": {"total": 12.0, "pass": 0.3, "control": 0.25,
                "flags": "--engine-objective resolve --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
-                        "--engine-settle-draws 2 --results-library on"},
+                        "--engine-settle-draws 2 --engine-intent-judges 2 --results-library on"},
     "scout": {"total": 18.0,
-              "flags": "--engine-objective resolve --engine-settle-draws 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
+              "flags": "--engine-objective resolve --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
                        "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2 "
                        "--results-library on"},
     "deep": {"extra": 40.0,
-             "flags": "--engine-objective resolve --engine-sessions 3 --engine-rounds 2 --engine-core-share 0.67 "
-                      "--engine-deep-budget 5 --engine-marathon-legs 2 --engine-marathon-leg-budget 8 "
+             "flags": "--engine-objective resolve --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 2 "
+                      "--engine-core-share 0.67 --engine-deep-budget 5 --engine-marathon-legs 2 --engine-marathon-leg-budget 8 "
                       "--engine-gap-rounds 2 --engine-gap-max 2 --engine-session-legs 3 --results-library on"},
+    # The analytical deep tier for the new-mathematics track: the research program (harness `engine_program`), a proof
+    # skeleton whose glue is refereed and whose lemmas are attacked and judged one by one, resuming the scout's run.
+    "program": {"extra": 90.0,
+                "flags": "--engine-objective resolve --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 "
+                         "--engine-core-share 0.67 --engine-deep-budget 5 --engine-program-cycles 6 "
+                         "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
+                         "--engine-session-legs 3 --engine-gap-rounds 2 --engine-gap-max 2 --results-library on"},
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
     # (candidates, a crosscheck judge, recorded readings) and proves it with the engine's chain as the blueprint.
@@ -347,8 +355,10 @@ def classify(run_dir: Path) -> tuple[str, dict]:
     if comp is not None:
         st = (comp.get("validation") or {}).get("settles") or {}
         answer = st.get("answer") or ("true" if comp.get("status") == "PROVED" else "false")
+        intent = (comp.get("validation") or {}).get("intent") or {}
         return "complete", {"claim": H.engine_claim_key(comp), "answer": answer,
-                            "statement": " ".join(str(comp.get("statement")).split())[:400]}
+                            "statement": " ".join(str(comp.get("statement")).split())[:400],
+                            "intent": intent.get("class"), "intent_source": intent.get("source")}
     best = []
     for c in ej.get("ledger") or []:
         v = c.get("validation") or {}
@@ -380,13 +390,27 @@ def validated_summary(run_dir: Path) -> tuple[int, list[int], str]:
     return len(new), sigs, (" ".join(str(best.get("statement")).split())[:240] if best else "")
 
 
+def engine_json(run_dir: Path) -> dict:
+    try:
+        return json.loads((run_dir / "engine" / "engine.json").read_text())
+    except (OSError, ValueError):
+        return {}
+
+
 def screen_result(run_dir: Path) -> dict | None:
     """The ripeness screen the engine recorded (`settle_screen`: its draws and their mean), or None."""
-    try:
-        ej = json.loads((run_dir / "engine" / "engine.json").read_text())
-    except (OSError, ValueError):
-        return None
+    ej = engine_json(run_dir)
     return ej.get("settle_screen") if isinstance(ej.get("settle_screen"), dict) else None
+
+
+def track_for(arm_: str, intent: str | None) -> str | None:
+    """A pass whose line the intent judges call a formalization gap or a known result goes to the statement-findings
+    track: the scout and Lean, reported as a finding about the formal statement. Every other pass is a candidate for new
+    mathematics and gets the research program. The control arm stays a measurement. REPORT 3.10: the prescreen's five
+    best scores were all gaps or known results."""
+    if arm_ == "pass":
+        return "statement" if intent in ("formalization-gap", "known-result") else "new-math"
+    return "control" if arm_ == "control" else None
 
 
 def arm(n: int, chance: float, cfg: dict) -> str:
@@ -413,13 +437,16 @@ def finish_screen(n: int, p: dict, cfg: dict, run_dir: Path, delta: float) -> bo
         log(f"#{n}: screen gave no settle chance (draws {draws}); errors {p['errors']}")
         return True
     a = arm(n, chance, cfg)
+    intent = (engine_json(run_dir).get("intent") or {}).get("class")
+    track = track_for(a, intent)
     p.update({"settle_chance": chance, "arm": a, "next": None if a == "screened out" else "scout",
-              "status": "screened out" if a == "screened out" else "screened"})
-    p["history"].append({"tier": "screen", "outcome": a, "settle_chance": chance, "spend": delta})
+              "status": "screened out" if a == "screened out" else "screened", "track": track, "intent": intent})
+    p["history"].append({"tier": "screen", "outcome": a, "settle_chance": chance, "spend": delta, "track": track})
     save_problem(n, p)
     result({"problem": n, "tier": "screen", "outcome": a, "settle_chance": chance, "draws": draws, "spend": delta,
-            "run_dir": p["run_dir"]})
-    log(f"#{n}: screen -> {a} (settle chance {chance:.2f}, draws {draws}; ${delta:.2f})")
+            "run_dir": p["run_dir"], "track": track, "intent": intent})
+    log(f"#{n}: screen -> {a} (settle chance {chance:.2f}, draws {draws}; ${delta:.2f})"
+        + (f"; track {track} (intent {intent})" if track and track != "control" else ""))
     goal = next((d.get("goal") for d in scr.get("draws") or [] if d.get("goal")), "") or ""
     line = " ".join(re.sub(r"(?i)SETTLE CHANCE\s*:\s*\S+", "", goal).replace("*", "").split())[:260]
     record_atlas(n, f"Resolution campaign ripeness screen {datetime.now().date()}: SETTLE CHANCE {chance:.2f}, the mean of "
@@ -584,6 +611,20 @@ def flag_for_review(n: int, run_dir: Path, summary: str, claim: str, engine_run:
     atomic_write(REVIEW, text)
 
 
+def flag_statement_finding(n: int, run_dir: Path, summary: str, complete: dict, engine_run: Path) -> None:
+    head = ("# Findings about formal statements\n\nEach entry is a Lean proof, verified and audited, that settles "
+            "formal-conjectures' statement of an OPEN problem along a line its intent judges classified as a gap between "
+            "the problem and its formalization, or as a known result. It is not a resolution of the problem as posed. A "
+            "gap is worth reporting to formal-conjectures, and a known result to erdosproblems.com.\n")
+    text = FINDINGS.read_text() if FINDINGS.exists() else head
+    text += (f"\n## #{n} — {complete.get('intent')} — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\n"
+             f"- answer: {complete.get('answer')}; statement: {complete.get('statement')}\n"
+             + (f"- source named by the judges: {complete.get('intent_source')}\n" if complete.get("intent_source") else "")
+             + f"- Lean run: `{run_dir.relative_to(ROOT)}`\n- informal proof: `{engine_run.relative_to(ROOT)}` claim "
+             f"{complete.get('claim')}\n- summary: `{summary}`\n")
+    atomic_write(FINDINGS, text)
+
+
 def commit(paths: list[str], msg: str) -> None:
     """Best effort: commit the resolution campaign's own files. The publisher commits atlas-data."""
     subprocess.run(["git", "add", "--", *paths], cwd=ROOT, capture_output=True)
@@ -599,7 +640,7 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     """lean first, then deep, then a stage cut off part way, then Lean on partial results, then a screened problem's
     scout (the pass arm first, highest settle chance first, then the control arm), then the next problem's screen."""
     probs = state.get("problems", {})
-    for want in ("lean", "deep"):
+    for want in ("lean", "program", "deep"):
         for n, p in probs.items():
             if p.get("next") == want and p.get("errors", 0) < cfg["max_errors"]:
                 return want, int(n)
@@ -648,12 +689,12 @@ def step(cfg: dict) -> bool:
         # a screened problem's scout resumes the screen's run, so its total counts the screen's spend
         row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
                              cfg[action]["flags"], p.get("run_dir"), on_start=started)
-    elif action == "deep":
-        p["running"] = "deep"
+    elif action in ("deep", "program"):
+        p["running"] = action
         save_problem(n, p)
         prior = float(p.get("spend") or 0.0)
-        log(f"#{n}: deep pass on {p['run_dir']}")
-        row, rc = run_screen(n, "resolve-deep", prior + cfg["deep"]["extra"], cfg["deep"]["flags"], p["run_dir"])
+        log(f"#{n}: {'research program' if action == 'program' else 'deep pass'} on {p['run_dir']}")
+        row, rc = run_screen(n, f"resolve-{action}", prior + cfg[action]["extra"], cfg[action]["flags"], p["run_dir"])
     elif action == "lean-claim":
         claim = p["claims_todo"][0]
         engine_run = ROOT / p["run_dir"]
@@ -694,9 +735,17 @@ def step(cfg: dict) -> bool:
                   "lean_summary": line})
         p["history"].append({"tier": "lean", "rc": rc, "summary": line})
         save_problem(n, p)
+        cls = (p.get("complete") or {}).get("intent")
         result({"problem": n, "tier": "lean", "outcome": "verified" if verified else "not verified", "rc": rc,
-                "spend": spend, "lean_run": p["lean_run"], "summary": line})
-        if verified:
+                "spend": spend, "lean_run": p["lean_run"], "summary": line, "track": p.get("track"), "intent": cls})
+        if verified and cls in ("formalization-gap", "known-result"):
+            flag_statement_finding(n, lean_run, line, p["complete"], engine_run)
+            src = p["complete"].get("intent_source")
+            record_atlas(n, f"Resolution campaign {datetime.now().date()}: formal-conjectures' statement is settled IN LEAN "
+                            f"({p['complete']['answer']}, {lean_run.name}, audited), along a line its intent judges call a "
+                            f"{cls}{' (' + str(src) + ')' if src else ''}. A finding about the formal statement, not a "
+                            f"resolution of the problem as posed.")
+        elif verified:
             flag_for_review(n, lean_run, line, p["complete"]["claim"], engine_run)
             record_atlas(n, f"Resolution campaign {datetime.now().date()}: the research engine's complete answer ({p['complete']['claim']}, "
                             f"{p['complete']['answer']}) is PROVED IN LEAN on formal-conjectures' statement and passed the "
@@ -731,9 +780,16 @@ def step(cfg: dict) -> bool:
         return finish_screen(n, p, cfg, run_dir, delta)
     outcome, info = classify(run_dir)
     n_new, sigs, best = validated_summary(run_dir)
+    if p.get("arm") == "pass" and not p.get("track"):        # screened before tracks: its scout classified the line
+        p["intent"] = (engine_json(run_dir).get("intent") or {}).get("class")
+        p["track"] = track_for("pass", p["intent"])
+    chance = info.get("settle_chance")
+    ripe = not (isinstance(chance, (int, float)) and chance < SETTLE_FLOOR)
     if outcome == "complete":
         p.update({"next": "lean", "status": "complete", "complete": info})
-    elif outcome == "traction" and action == "scout":
+    elif action == "scout" and p.get("track") == "new-math" and ripe:
+        p.update({"next": "program", "status": "program", "traction": info})
+    elif outcome == "traction" and action == "scout" and p.get("track") != "statement":
         p.update({"next": "deep", "status": "traction", "traction": info})
     else:
         p.update({"next": None, "status": "done" if outcome == "none" else outcome})
@@ -751,6 +807,16 @@ def step(cfg: dict) -> bool:
         record_atlas(n, f"Resolution campaign {datetime.now().date()} (${total:.2f}, informal): the research engine wrote a complete "
                         f"answer ({info['answer']}) that a referee, an adversary and both settles judges accepted: "
                         f"{info['statement'][:300]}. Sent to Lean.")
+    elif action == "program":
+        prog = engine_json(run_dir).get("program") or {}
+        sk = prog.get("skeleton") or {}
+        est = [l for l in sk.get("lemmas") or [] if l.get("status") == "established"]
+        op = [l for l in sk.get("lemmas") or [] if l.get("status") == "open"]
+        record_atlas(n, f"Resolution campaign research program {datetime.now().date()} (${total:.2f}, informal): "
+                        f"{prog.get('cycles')} cycle(s), stopped: {prog.get('stop')}. "
+                        + (f"Skeleton for {str(sk.get('answer')).upper()}: {len(est)} lemma(s) established, {len(op)} open. "
+                           + "Open: " + " | ".join(" ".join(str(l.get('statement')).split())[:160] for l in op[:3])
+                           if sk else "No skeleton passed its glue check."))
     elif n_new:
         record_atlas(n, f"Resolution campaign {action} {datetime.now().date()} (${total:.2f}, informal): {n_new} validated-new claims "
                         f"(significance {', '.join(map(str, sigs))}); best: {best}")
@@ -796,7 +862,22 @@ def status() -> None:
     for k, v in sorted(by.items()):
         print(f"  {k}: {len(v)}  {sorted(v)[:20]}")
     tackled = [int(n) for n, p in st.get("problems", {}).items()
-               if any(h.get("tier") in ("scout", "deep", "lean") for h in p.get("history") or [])]
+               if any(h.get("tier") in ("scout", "deep", "program", "lean") for h in p.get("history") or [])]
+    tracks: dict = {}
+    for n, p in st.get("problems", {}).items():
+        if int(n) not in tackled:
+            continue
+        x = tracks.setdefault(p.get("track") or "before tracks", {"tackled": 0, "complete": 0, "verified": 0, "new": 0})
+        x["tackled"] += 1
+        x["complete"] += bool(p.get("complete"))
+        x["verified"] += p.get("status") == "verified"
+        x["new"] += bool(p.get("complete")) and (p.get("complete") or {}).get("intent") == "new-math"
+    for tr in ("new-math", "statement", "control", "before tracks"):
+        if tr in tracks:
+            x = tracks[tr]
+            print(f"track {tr}: {x['tackled']} tackled, {x['complete']} complete answer(s)"
+                  + (f", {x['new']} judged new mathematics" if tr != "statement" else "")
+                  + f", {x['verified']} verified in Lean")
     sig3 = sorted({int(r["problem"]) for r in rows() if r.get("outcome") in ("complete", "verified")
                    or 3 in (r.get("significance") or [])})
     print(f"significance 3 (a complete answer, or a claim both novelty judges rate 3): {len(sig3)} of {len(tackled)} "
@@ -820,6 +901,8 @@ def status() -> None:
         print("  ", {k: r.get(k) for k in ("at", "problem", "tier", "outcome", "spend", "validated_new", "significance")})
     if REVIEW.exists():
         print(f"REVIEW NEEDED: {REVIEW.relative_to(ROOT)}")
+    if FINDINGS.exists():
+        print(f"statement findings: {FINDINGS.relative_to(ROOT)}")
 
 
 def single_instance():

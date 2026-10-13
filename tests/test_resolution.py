@@ -26,7 +26,8 @@ class Base(unittest.TestCase):
         d = Path(self.tmp.name)
         for name, val in (("CAMP", d), ("STATE", d / "state.json"), ("RESULTS", d / "results.jsonl"),
                           ("CONFIG", d / "config.json"), ("LOG", d / "log"), ("REVIEW", d / "REVIEW-NEEDED.md"),
-                          ("SCREEN_RESULTS", d / "screen-results.jsonl"), ("PRESCREEN", d / "prescreen.jsonl")):
+                          ("SCREEN_RESULTS", d / "screen-results.jsonl"), ("PRESCREEN", d / "prescreen.jsonl"),
+                          ("FINDINGS", d / "STATEMENT-FINDINGS.md")):
             p = patch.object(R, name, val)
             p.start()
             self.addCleanup(p.stop)
@@ -234,6 +235,81 @@ class Backfill(Base):
         R.save_problem(1, p)
         self.assertEqual({k: v.get("status") for k, v in R.load_state()["problems"].items()},
                          {"1": "done", "2": "imported meanwhile"})
+
+
+class Tracks(Base):
+    """2026-10-13: a pass goes to the new-mathematics track unless its intent judges call the line a formalization gap or
+    a known result; new mathematics gets the research program; a verified statement finding is reported as one."""
+
+    def _finish_scout(self, n, track, ledger, deep_chance=None):
+        run = self.engine_run(ledger)
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        ej["deep"] = {"settle_chance": deep_chance}
+        (run / "engine" / "engine.json").write_text(json.dumps(ej))
+        R.save_state({"problems": {str(n): {"history": [], "next": "scout", "arm": "pass" if track != "control" else "control",
+                                            "prepped": True, "run_dir": str(run), "spend": 3.0,
+                                            **({"track": track} if track else {})}}})
+        with patch.object(R, "run_screen", lambda *a, **k: ({"run_dir": str(run), "spend_run": 21.0}, 0)), \
+                patch.object(R, "queue", lambda s, c: []), patch.object(R, "record_atlas"), patch.object(R, "commit"):
+            R.step(R.load_cfg())
+        return R.load_state()["problems"][str(n)]
+
+    def test_the_intent_decides_the_track(self):
+        self.assertEqual(R.track_for("pass", "new-math"), "new-math")
+        self.assertEqual(R.track_for("pass", None), "new-math")              # unclassified: keep the candidate
+        self.assertEqual(R.track_for("pass", "formalization-gap"), "statement")
+        self.assertEqual(R.track_for("pass", "known-result"), "statement")
+        self.assertEqual(R.track_for("control", "known-result"), "control")
+        self.assertIsNone(R.track_for("screened out", "new-math"))
+        run = self.engine_run([])
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        ej.update({"settle_screen": {"mean": 0.85, "draws": [{"chance": 0.85, "goal": "the regular n-gon"}]},
+                   "intent": {"class": "formalization-gap"}})
+        (run / "engine" / "engine.json").write_text(json.dumps(ej))
+        state = {"problems": {"655": {"history": [], "run_dir": "runs/x"}}}
+        p = state["problems"]["655"]
+        with patch.object(R, "record_atlas"), patch.object(R, "commit"):
+            R.finish_screen(655, p, R.load_cfg(), run, 3.0)
+        self.assertEqual((p["arm"], p["track"], p["intent"]), ("pass", "statement", "formalization-gap"))
+
+    def test_new_mathematics_gets_the_research_program(self):
+        p = self._finish_scout(11, "new-math", [_claim("r1s1", "C1", "validated-new", 1)])
+        self.assertEqual((p["next"], p["status"]), ("program", "program"))
+        p = self._finish_scout(12, "new-math", [], deep_chance=0.02)      # its own team lead saw no route
+        self.assertIsNone(p["next"])
+        p = self._finish_scout(13, "statement", [_claim("r1s1", "C1", "validated-new", 2)])
+        self.assertIsNone(p["next"])                                        # a statement finding gets no deep pass
+        p = self._finish_scout(14, "control", [_claim("r1s1", "C1", "validated-new", 2)])
+        self.assertEqual(p["next"], "deep")                                 # the control arm keeps its protocol
+        p = self._finish_scout(15, None, [_claim("r1s1", "C1", "validated-new", 1)])
+        self.assertEqual((p["track"], p["next"]), ("new-math", "program"))  # a pass screened before tracks
+
+    def test_the_program_stage_resumes_the_scout_run(self):
+        seen = {}
+
+        def fake(n, tag, total, flags, resume=None, on_start=None):
+            seen.update(tag=tag, total=total, flags=flags, resume=resume)
+            return None, 1
+        R.save_state({"problems": {"7": {"history": [], "next": "program", "track": "new-math", "run_dir": "runs/r7",
+                                         "spend": 21.0}}})
+        with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []):
+            R.step(R.load_cfg())
+        self.assertEqual((seen["tag"], seen["total"], seen["resume"]), ("resolve-program", 111.0, "runs/r7"))
+        self.assertIn("--engine-program-cycles 6", seen["flags"])
+
+    def test_a_verified_statement_finding_is_reported_as_one(self):
+        run, lean = self.engine_run([]), self.d / "runs" / "lean"
+        lean.mkdir(parents=True)
+        (lean / "SUMMARY.line").write_text("RUN-SUMMARY problem=655 exit=0 spend=$4.00")
+        complete = {"claim": "program/C3", "answer": "false", "statement": "the regular n-gon", "intent": "formalization-gap"}
+        R.save_state({"problems": {"655": {"history": [], "next": "lean", "track": "statement", "run_dir": str(run),
+                                           "lean_run": str(lean), "complete": complete}}})
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_lean", lambda *a, **k: (0, "RUN-SUMMARY exit=0")), \
+                patch.object(R, "record_atlas") as atlas, patch.object(R, "commit"), patch.object(R, "queue", lambda s, c: []):
+            R.step(R.load_cfg())
+        self.assertIn("## #655 — formalization-gap", R.FINDINGS.read_text())
+        self.assertFalse(R.REVIEW.exists())
+        self.assertIn("not a resolution of the problem as posed", atlas.call_args[0][1])
 
 
 class Restarts(Base):

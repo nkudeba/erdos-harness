@@ -1184,6 +1184,69 @@ pinned formal statement (2026-10-09, about 05:00 UTC; $38.95). Seven scored at l
     `tests/test_resolution.py`.
 - **The campaign-side part needs a loop restart.** The parser and screen fixes apply from the next stage.
 
+**3.11, the analytical deep tier and the intent check (built 2026-10-13).**
+- **Why.**
+  - Step 2 settled 3 of 6 unrecognized problems first solved in 2026. Step 3 and the campaign settled none of about 40
+    open problems.
+  - The engine's own settle chance agrees. It is at most 0.09 on the 32 mapped open problems, and 0.125 to 0.675 on the
+    dev items it settled.
+  - Its highest prescreen scores were statements easier than the problem.
+  - So the harness needs sustained, structured work on genuine candidates, and a way to tell those candidates from
+    findings about a statement.
+- **The intent check** (`--engine-intent-judges N`, harness `engine_intent`):
+  - N judges classify a line or a result: new mathematics about the problem as posed, a gap between it and its formal
+    statement, or a known result.
+  - The reading is conservative: new mathematics only if every judge says so.
+  - It runs on the screen's line when the screen reaches 0.3, and on every claim the settles judges pass.
+- **The research program** (`--engine-program-cycles N`, harness `engine_program`). It is the informal counterpart of
+  the deductive loop, with the same rules: progress is a discharge, and refused routes, refutations and failures are
+  remembered. A cycle:
+  - the lead writes or revises a proof skeleton: the target (the formal statement or its negation), a few lemmas, and
+    a glue argument;
+  - a referee and an adversary check the glue;
+  - a skeleton is adopted only if it is better than the one in force: its hardest open lemma easier, then fewer open
+    lemmas, or any valid new route after a stalled cycle;
+  - sessions attack the open lemmas, easiest first. Each claimed proof is judged against the lemma AS STATED, so a
+    weaker result cannot establish it;
+  - a refuted lemma kills the skeleton and is never proposed again. A failure leaves a digest the next plan must
+    answer.
+
+  When every lemma is established, the lemmas and theorem become one chain in their own notebook. The chain-aware
+  statuses, the whole-chain referee, the novelty and settles judges, and the campaign's Lean tier see it like any claim.
+  Covered by `tests/test_engine.py` (`ResearchProgram`).
+- **In the campaign:**
+  - A pass goes to the **new-mathematics** track unless its intent judges call the line a formalization gap or a known
+    result; those go to the **statement-findings** track.
+  - New-math problems whose scout did not settle them get the `program` tier ($90), unless the scout's team lead saw no
+    route.
+  - A verified proof goes to `REVIEW-NEEDED.md` only when its judges call it new mathematics. Otherwise it goes to
+    `STATEMENT-FINDINGS.md`.
+  - `status` counts each track apart.
+
+**3.11 test, pre-registered 2026-10-13, before any call.** Does the research program settle what the engine alone did
+not?
+- **Items:** step 2's three unrecognized dev items the v5 engine left unsettled: #570, #865 and #888. Fresh aliases,
+  masked, open framing.
+- **Protocol:**
+  - `timesplit.py discover-screen --split dev --items 570 865 888 --discover-mode engine --tag program-v1-dev
+    --discover-total-budget 78`, with step 2's engine flags.
+  - Added: `--engine-program-cycles 6 --engine-program-budget 50 --engine-program-session-budget 4
+    --engine-program-lemmas 3 --engine-session-legs 2 --engine-intent-judges 2`.
+  - It runs on the live harness, so it differs from step 2 by v6 as well as by the program. It is a test of the deep
+    tier, not an ablation.
+- **Grading:** step 2's settles rule, on the TRUE side, with recognized items reported apart. A complete chain then goes
+  to Lean, which alone makes it a solve.
+- **Predictions:**
+  - complete chains on the TRUE side on 1 of 3 (range 0-2);
+  - a skeleton adopted on all 3;
+  - at least one lemma established on 2 of 3;
+  - $60-80 an item.
+- **Reading.**
+  - No complete chain: the tier is not shown to add settling power. It stays in the campaign as unproven, and the next
+    change is chosen from where its skeletons stalled: glue, lemma failures, or the plan.
+  - At least one: the first evidence that sustained, structured work adds capability beyond the v5 engine.
+- **Status:** written before launch. It waits for the operator's approval of about $225, because of the weekly limit.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

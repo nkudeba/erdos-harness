@@ -4247,6 +4247,14 @@ class EngineSettings:
     objective: str = "advance"       # "resolve": the deep dive aims at settling the problem (DEEP_OBJECTIVES)
     decide_seconds: int = 600        # the per-script cap in a decide-by-computation session (others keep EXPLORE_SECONDS)
     settle_draws: int = 0            # > 0: the ripeness screen, SETTLE CHANCE asked this many times of the map alone (3.8)
+    intent_judges: int = 0           # > 0: judges classify the screen's line and any settling claim (INTENT_PROMPT)
+    intent_min: float = 0.3          # the least screen settle chance whose line is classified
+    program_cycles: int = 0          # > 0: the research program, the analytical deep tier (engine_program)
+    program_budget: float = 60.0
+    program_session_budget: float = 4.0
+    program_turns: int = 150
+    program_lemmas: int = 3          # open lemmas attacked per cycle, easiest first
+    program_stall: int = 2           # cycles in a row without a discharge before the program stops
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4647,7 +4655,7 @@ def _claim_text(c: dict) -> str:
 
 
 def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict, spend: _DiscoverySpend,
-                    lemmas: list[dict] | None = None) -> dict:
+                    lemmas: list[dict] | None = None, novelty: bool = True) -> dict:
     """A step referee and an adversary, in parallel; a novelty judge only when both pass. `lemmas`: the claims of the
     same notebook that the proof cites, shown to both judges as given (each is judged on its own; `engine_resolve`
     joins the verdicts)."""
@@ -4662,7 +4670,8 @@ def engine_validate(call, s: EngineSettings, statement: str, known: str, c: dict
     spend.add(rc + ac)
     v: dict = {"referee": json_tail_any(rt) if rt else {"error": rerr},
                "adversary": json_tail_any(at) if at else {"error": aerr}, "cost": round(rc + ac, 4)}
-    if (v["referee"].get("valid") is True and v["adversary"].get("broken") is False and spend.room(2 * s.novelty_budget)):
+    if (novelty and v["referee"].get("valid") is True and v["adversary"].get("broken") is False
+            and spend.room(2 * s.novelty_budget)):
         # Two judges and the conservative verdict: on #1203 one call called a result new and another, for the same
         # constant by the same route, routine.
         nprompt = NOVELTY_PROMPT.format(statement=statement, known=known, claim=claim)
@@ -4887,6 +4896,13 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                                   if isinstance(d.get("chance"), (int, float))) < s.settle_draws:
         ck["settle_screen"] = engine_settle_screen(call, s, statement, lean, fblock, spend, have)
         keep()
+    scr = ck.get("settle_screen") if isinstance(ck.get("settle_screen"), dict) else None
+    if (s.intent_judges > 0 and scr and isinstance(scr.get("mean"), (int, float)) and scr["mean"] >= s.intent_min
+            and not (isinstance(ck.get("intent"), dict) and ck["intent"].get("class"))):
+        best = max((d for d in scr.get("draws") or [] if isinstance(d.get("chance"), (int, float))),
+                   key=lambda d: d["chance"], default={})
+        ck["intent"] = engine_intent(call, s, statement, lean, fblock, best.get("goal") or "", spend)
+        keep()
     dropped = engine_drop_infra(ck)
     if dropped:
         everything = list(_ck_claims(ck))
@@ -5072,6 +5088,11 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         marathon = engine_marathon(call, session, s, statement, lean, fblock, sess_context, known, ledger, deep, spend,
                                    search, ck=ck, keep=keep)
         ledger = ledger + [c for leg in marathon.get("legs") or [] for c in leg.get("claims_list") or []]
+    program = None
+    if s.program_cycles > 0:
+        program = engine_program(call, session, s, statement, lean, fblock, sess_context, known, ledger, spend, ck=ck,
+                                 keep=keep, workers=workers)
+        ledger = ledger + [c for c in program.pop("claims") if not any(c is x for x in ledger)]
     repairs = ck.setdefault("repairs", {})
     fixable = [c for c in ledger if engine_fixable(c) and engine_claim_key(c) not in repairs]
     for c in sorted(fixable, key=_claim_rank, reverse=True)[: max(0, s.repair_max - len(repairs))]:
@@ -5096,6 +5117,13 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
             break
         c["validation"]["settles"] = engine_settles(call, s, statement, lean, c, spend)
         keep()
+    for c in ledger:                                     # a settling claim: new mathematics, or a finding about the statement?
+        v = c.get("validation") or {}
+        if (s.intent_judges > 0 and (v.get("settles") or {}).get("settles") and "intent" not in v
+                and spend.room(s.intent_judges * s.judge_budget)):
+            v["intent"] = engine_intent(call, s, statement, lean, fblock,
+                                        f"{_claim_text(c)}\n\nPROOF:\n{clip_middle(c.get('proof') or '', 8000)}", spend)
+            keep()
     validated = [c for c in ledger if (c.get("validation") or {}).get("status") == "validated-new"]
     ans, conf = f.get("answer"), f.get("confidence")
     decision = {"answer": ans, "share": conf or 0.0, "score": {}, "best": None,
@@ -5113,7 +5141,8 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                                   for leg in (marathon or {}).get("legs") or []],
                          "stopped": (marathon or {}).get("stopped")} if marathon else None,
             "decision": decision, "spend": round(spend.total, 4), "settings": s.as_dict(), "ratings": ratings, "gaps": gaps,
-            "settle_screen": ck.get("settle_screen"),
+            "settle_screen": ck.get("settle_screen"), "intent": ck.get("intent"),
+            "program": {k: v for k, v in program.items() if k != "claims"} if program else None,
             "recognized": engine_recognized({"frontier": f, "ledger": ledger}),
             "guidance": engine_guidance(f, ledger, meta)}
 
@@ -5757,6 +5786,554 @@ def engine_gap_phase(call, session, s: "EngineSettings", statement: str, lean: s
             "claims": len(rec["claims"]), "rejudged": len(rec["rejudged"])}
 
 
+# ---------------------------------------------------------------- the research program: the analytical deep tier
+#
+# The informal counterpart of the deductive loop. Its unit of progress is a PROOF SKELETON: a target (the formal
+# statement or its negation), a few lemmas and a GLUE argument deriving the target from them. A cycle:
+#   1. the lead writes or revises the skeleton from everything validated, refuted and failed so far;
+#   2. a referee and an adversary check the glue, and a new skeleton is adopted only if its glue holds and it is better
+#      (its hardest open lemma easier, then fewer open lemmas; any valid route after a stalled cycle);
+#   3. research sessions attack the open lemmas, easiest first, and each claimed proof is judged against the lemma AS
+#      STATED. A pass establishes it; a valid refutation kills the skeleton and the statement is never proposed again; a
+#      failure leaves a digest the next plan must answer (split it, or change the route, after two failures);
+#   4. a cycle that established nothing, or adopted nothing easier, counts toward the stall limit.
+# When every lemma is established, the lemmas and the theorem become one chain in their own notebook ("program"), so
+# the chain-aware statuses, the whole-chain referee, the novelty and settles judges and the campaign's Lean tier all
+# see it like any other claim.
+# Why: step 3's sessions settled for what they could prove (significance 1 or 2 inside a method's ceiling), and the
+# deep dive pushed one line once. Open problems need sustained, structured work towards the whole answer, and the
+# deductive loop's rules (progress is a discharge; refused routes and failures are remembered) are what made it work
+# in Lean.
+
+PROGRAM_PLAN_PROMPT = """You lead a long research program on an OPEN problem. Its unit of progress is a PROOF SKELETON: the
+target, a short list of lemmas, and a GLUE argument that derives the target from the lemmas. A lemma is ESTABLISHED once a
+referee and an adversary have passed its proof; the open lemmas are the program's whole remaining task. You write the
+skeleton; research sessions then attack its open lemmas one at a time, and next cycle you revise it from what they found.
+The aim is new mathematics: a skeleton that settles the problem as Erdős posed it.
+
+PROBLEM:
+{statement}
+
+THE FORMAL STATEMENT (Lean). The target is this statement or its negation, exactly as written: its quantifiers, its
+domain and its conventions decide what counts, not the informal wording above.
+{lean}
+
+THE FRONTIER MAP:
+{frontier}
+
+VALIDATED RESULTS (a referee and an adversary passed each; reuse one as a lemma by its key):
+{established}
+
+THE SKELETON IN FORCE:
+{skeleton}
+
+REFUTED STATEMENTS (never propose these again, in any disguise):
+{refuted}
+
+WHAT FAILED, AND WHERE:
+{failures}
+
+Rules:
+- Every open lemma must be precise, self-contained, checkable on small cases, and strictly easier than the target. A
+  lemma that is the target in disguise, or assumes it, wastes the cycle.
+- Keep an established lemma by its key (USE: L2, or USE: r1s3/C2). Do not restate it.
+- A lemma that has failed twice must be split into smaller lemmas or replaced by a different route.
+- Prefer the skeleton whose hardest open lemma is easiest, then the one with the fewest open lemmas.
+- If the route settles only the formal statement through a gap between it and the problem as posed, or rebuilds a
+  published proof, say so under CHANGES.
+- The GLUE must be a complete and rigorous derivation of the target from the lemmas as stated, citing them as L1, L2, ...
+
+Write exactly these sections, each starting with its === line:
+=== TARGET
+ANSWER: TRUE (the formal statement holds) or FALSE (its negation holds)
+The exact statement the skeleton proves.
+=== LEMMA L1
+USE: <the key of an established lemma or validated result>   (for an established lemma, write only this line)
+STATEMENT: <for an open lemma>
+DIFFICULTY: elementary | moderate | hard
+ROUTE: how to prove it, and what it builds on
+TEST: the small cases or computation that would refute it
+(one === LEMMA block per lemma, numbered L1, L2, ... in order)
+=== GLUE
+The derivation of the target from L1, L2, ...
+=== CHANGES
+What changed from the skeleton in force and why it is better, or NONE to keep the skeleton in force."""
+
+PROGRAM_LEMMA_ASSIGNMENT = """PROVE LEMMA {id} OF THE TEAM'S PROOF SKELETON (research program, cycle {cycle}). The skeleton reduces
+the whole problem to its lemmas. The established ones have passed a referee and an adversary; {id} is open. Their
+statements and proofs are in established/ in your sandbox.
+
+TARGET ({answer}): {target}
+
+THE SKELETON:
+{skeleton}
+
+THE LEMMA TO PROVE, {id}:
+{lemma}
+SUGGESTED ROUTE: {route}
+TEST: {test}
+
+EARLIER ATTEMPTS ON {id} AND WHERE THEY BROKE:
+{failures}
+
+Test the lemma on small cases first. Then:
+- If it is true, prove it completely. Record it as claim C1, with STATEMENT exactly the lemma above, STATUS PROVED and
+  the full PROOF. Cite established lemmas by their L-number and your own claims C2, C3, ... by number.
+- If it is false, record C1 with STATEMENT the lemma, STATUS REFUTED, and the counterexample or disproof. If a corrected
+  version is true and would still serve the glue, prove it as C2 and say so under CONCERNS.
+- If you cannot finish, record what you did prove as claims, and name the exact missing step under ## Next."""
+
+DIFFICULTY_RANK = {"elementary": 0, "moderate": 1, "hard": 2}
+
+
+def _norm_statement(text: str) -> str:
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", str(text or "").lower()).split())
+
+
+def _named_fields(body: str, names: tuple) -> dict:
+    rx = re.compile(r"(?mi)^[ \t]*[*_]*(" + "|".join(names) + r")[*_]*[ \t]*:[*_]*[ \t]*")
+    marks = list(rx.finditer(body or ""))
+    out: dict = {}
+    for i, m in enumerate(marks):
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(body)
+        out.setdefault(m.group(1).upper(), body[m.end():end].strip())
+    return out
+
+
+def parse_program_plan(text: str) -> dict:
+    """A lead's skeleton: the target and its answer, the lemmas (each `USE: key`, or a statement with its difficulty,
+    route and test), the glue and the changes. `=== X` delimited, so LaTeX cannot break it."""
+    out: dict = {"answer": None, "target": "", "lemmas": [], "glue": "", "changes": ""}
+    for title, body in delimited_sections(text or ""):
+        head = title.strip().upper()
+        if head.startswith("TARGET"):
+            m = re.search(r"(?i)ANSWER\s*:\s*[*_]*\s*(TRUE|FALSE)", body)
+            out["answer"] = m.group(1).lower() if m else None
+            out["target"] = re.sub(r"(?im)^[ \t]*[*_]*ANSWER[*_]*\s*:[^\n]*\n?", "", body, count=1).strip()[:4000]
+        elif head.startswith("LEMMA"):
+            m = re.match(r"LEMMA\s+(L\d+)", head)
+            f = _named_fields(body, ("USE", "STATEMENT", "DIFFICULTY", "ROUTE", "TEST"))
+            use = (f.get("USE") or "").split()
+            diff = _first_word(f.get("DIFFICULTY", "")).lower()
+            out["lemmas"].append({"id": m.group(1) if m else f"L{len(out['lemmas']) + 1}",
+                                  "use": use[0].strip("`*.,;()[]") if use else "",
+                                  "statement": (f.get("STATEMENT") or "")[:3000],
+                                  "difficulty": diff if diff in DIFFICULTY_RANK else "moderate",
+                                  "route": (f.get("ROUTE") or "")[:2000], "test": (f.get("TEST") or "")[:1000]})
+        elif head.startswith("GLUE"):
+            out["glue"] = body.strip()[:16000]
+        elif head.startswith("CHANGES"):
+            out["changes"] = body.strip()[:3000]
+    return out
+
+
+def program_open(sk: dict | None) -> list[dict]:
+    return [l for l in (sk or {}).get("lemmas") or [] if l.get("status") == "open"]
+
+
+def program_hardness(sk: dict) -> tuple:
+    """(the hardest open lemma's difficulty, the number of open lemmas): smaller is better, in that order."""
+    op = program_open(sk)
+    return (max((DIFFICULTY_RANK.get(l.get("difficulty"), 1) for l in op), default=-1), len(op))
+
+
+def program_better(new: dict, cur: dict | None, stall: int) -> tuple[bool, str]:
+    """Adopt a skeleton (whose glue already passed) only if it is better than the one in force. After a cycle without
+    progress any valid new route may replace the incumbent: a stuck route is not made easier by waiting."""
+    if cur is None:
+        return True, "the first skeleton"
+    if any(l.get("status") == "refuted" for l in cur.get("lemmas") or []):
+        return True, "the skeleton in force has a refuted lemma"
+    if program_hardness(new) < program_hardness(cur):
+        return True, "its hardest open lemma is easier, or it has fewer open lemmas"
+    if stall >= 1 and ({_norm_statement(l["statement"]) for l in program_open(new)}
+                       != {_norm_statement(l["statement"]) for l in program_open(cur)}):
+        return True, "a different route after a cycle without progress"
+    return False, "not easier than the skeleton in force"
+
+
+def _neutral_cites(text: str) -> str:
+    """Claim numbers from another notebook become S-numbers, so they never read as citations of the program's own
+    lemmas once the chain is assembled (CITE_RE matches any `C<n>`)."""
+    return re.sub(r"\bC(\d+)\b", r"S\1", text or "")
+
+
+def program_resolve_plan(plan: dict, cur: dict | None, valid: dict, refuted: list[str]) -> tuple[dict | None, str]:
+    """A parsed plan as a skeleton: each `USE` resolved to an established lemma of the skeleton in force or to a validated
+    claim of the ledger, each other lemma open (keeping the attempts and failures of the same statement in force).
+    Returns (skeleton, why refused)."""
+    if plan.get("answer") not in ("true", "false") or not plan.get("target") or not plan.get("glue") or not plan.get("lemmas"):
+        return None, "the plan lacks a target, an answer, lemmas or a glue"
+    prior = {l["id"]: l for l in (cur or {}).get("lemmas") or []}
+    prior_by_text = {_norm_statement(l["statement"]): l for l in prior.values()}
+    dead = {_norm_statement(x) for x in refuted}
+    target = _norm_statement(plan["target"])
+    lemmas = []
+    for l in plan["lemmas"]:
+        key = l.get("use")
+        if key:
+            if key in prior and prior[key].get("status") == "established":
+                lemmas.append({**prior[key], "id": l["id"]})
+            elif key in valid:
+                c = valid[key]
+                lemmas.append({"id": l["id"], "statement": c.get("statement") or "", "status": "established", "by": key,
+                               "proof": _neutral_cites(c.get("_chain") or c.get("proof") or ""), "difficulty": "elementary",
+                               "route": "", "test": "", "attempts": 0, "failures": []})
+            else:
+                return None, f"{l['id']} uses {key}, which is not an established lemma or a validated result"
+            continue
+        if not l.get("statement"):
+            return None, f"{l['id']} has neither USE nor a STATEMENT"
+        norm = _norm_statement(l["statement"])
+        if norm in dead:
+            return None, f"{l['id']} restates a refuted statement"
+        if norm == target:
+            return None, f"{l['id']} is the target restated"
+        old = prior_by_text.get(norm)
+        if old is not None and old.get("status") == "established":
+            lemmas.append({**old, "id": l["id"]})
+            continue
+        lemmas.append({"id": l["id"], "statement": l["statement"], "status": "open", "difficulty": l["difficulty"],
+                       "route": l["route"], "test": l["test"],
+                       "attempts": int((old or {}).get("attempts") or 0), "failures": list((old or {}).get("failures") or [])})
+    return {"answer": plan["answer"], "target": plan["target"], "lemmas": lemmas, "glue": plan["glue"],
+            "changes": plan.get("changes") or ""}, ""
+
+
+def program_skeleton_text(sk: dict | None, room: int = 9000) -> str:
+    if not sk:
+        return "(none yet: write the first)"
+    lines = [f"TARGET (ANSWER {str(sk.get('answer')).upper()}): {sk.get('target')}"]
+    for l in sk.get("lemmas") or []:
+        tag = {"established": f"ESTABLISHED{' by ' + l['by'] if l.get('by') else ''}", "refuted": "REFUTED"}.get(
+            l.get("status"), f"OPEN, {l.get('difficulty')}, {l.get('attempts', 0)} failed attempt(s)")
+        lines.append(f"{l['id']} [{tag}]: {clip_middle(l.get('statement') or '', 1500)}")
+    lines.append("GLUE:\n" + clip_middle(sk.get("glue") or "", 4000))
+    return clip_middle("\n".join(lines), room)
+
+
+def program_failures_text(sk: dict | None, st: dict, room: int = 6000) -> str:
+    out = []
+    for l in (sk or {}).get("lemmas") or []:
+        for f in (l.get("failures") or [])[-3:]:
+            out.append(f"- {l['id']} (cycle {f.get('cycle')}): {f.get('why')}" + (f"; next: {f['next']}" if f.get("next") else ""))
+    for r in (st.get("refused") or [])[-4:]:
+        out.append(f"- a skeleton refused in cycle {r.get('cycle')}: {r.get('why')}")
+    return clip_middle("\n".join(out), room) or "(none yet)"
+
+
+def program_established_text(valid: dict, room: int = 9000) -> str:
+    lines = [f"[{k}] {clip_middle(c.get('statement') or '', 700)}" for k, c in valid.items()]
+    return clip_middle("\n".join(lines), room) or "(none yet)"
+
+
+def program_check_glue(call, s: "EngineSettings", statement: str, known: str, sk: dict, spend: _DiscoverySpend) -> dict:
+    """A referee and an adversary decide whether the glue derives the target from the lemmas as stated."""
+    claim = {"id": "G", "status": "PROVED", "type": "REDUCTION",
+             "statement": f"The target follows from the lemmas {', '.join(l['id'] for l in sk['lemmas'])} as stated. "
+                          f"TARGET: {sk['target']}",
+             "proof": sk["glue"], "beyond": "the reduction of the target to the lemmas of a proof skeleton"}
+    lem = [{"id": l["id"], "statement": l["statement"]} for l in sk["lemmas"]]
+    return engine_validate(call, s, statement, known, claim, spend, lemmas=lem, novelty=False)
+
+
+def program_judge_lemma(call, s: "EngineSettings", statement: str, known: str, sk: dict, lemma: dict, att: dict,
+                        spend: _DiscoverySpend) -> dict:
+    """The verdict on one attack: `established` (with its proof, every notebook lemma under it included), `refuted`, or
+    `open` (with why). The claim is judged as asserting the LEMMA's own statement, so a session that proved something
+    weaker cannot establish the lemma."""
+    claims = att.get("claims") or []
+    pick = next((c for c in claims if c.get("id") == "C1" and c.get("status") in ("PROVED", "REFUTED")), None) \
+        or next((c for c in claims if c.get("status") in ("PROVED", "REFUTED")), None)
+    if pick is None:
+        return {"result": "open", "why": "no proof or refutation of the lemma was written"}
+    if "session_statement" not in pick:
+        pick["session_statement"] = pick.get("statement")
+        pick["statement"] = lemma["statement"]
+    engine_resolve(claims)
+    est = [{"id": l["id"], "statement": l["statement"]} for l in sk["lemmas"] if l.get("status") == "established"]
+    for c in engine_with_lemmas([pick], claims, s.validate_max):
+        if c.get("validation"):
+            continue
+        if not spend.room(2 * s.judge_budget):
+            c["validation"] = {"status": "unjudged", "skipped": "engine budget"}
+            continue
+        c["validation"] = engine_validate(call, s, statement, known, c, spend,
+                                          lemmas=engine_lemmas(c, claims) + est, novelty=False)
+    engine_resolve(claims)
+    status = (pick.get("validation") or {}).get("status")
+    if _valid_status(status):
+        if pick["status"] == "PROVED":
+            return {"result": "established", "claim": engine_claim_key(pick),
+                    "proof": _neutral_cites(engine_chain_text(pick, claims))}
+        return {"result": "refuted", "claim": engine_claim_key(pick)}
+    return {"result": "open", "claim": engine_claim_key(pick), "why": _objection(pick) or f"its proof is {status}"}
+
+
+def program_assemble(call, s: "EngineSettings", statement: str, known: str, sk: dict, spend: _DiscoverySpend) -> list[dict]:
+    """The complete argument as its own notebook: lemma Lk becomes claim Ck and the theorem cites them, so
+    `engine_resolve` makes the theorem valid only while every lemma is, `engine_chain_text` prints it whole, and the
+    theorem itself is judged as one chain, with the novelty panel."""
+    idmap = {l["id"]: f"C{i}" for i, l in enumerate(sk["lemmas"], 1)}
+
+    def relabel(text: str) -> str:
+        return re.sub(r"\bL(\d+)\b", lambda m: idmap.get(f"L{m.group(1)}", m.group(0)), _neutral_cites(text))
+    out = [{"session": "program", "id": idmap[l["id"]], "statement": l["statement"], "status": "PROVED", "type": "OTHER",
+            "proof": l.get("proof") or "", "beyond": "", "_kind": "program-lemma",
+            "validation": {"status": "valid-unrated", "own_status": "valid-unrated", "program": l.get("by") or l.get("claim")}}
+           for l in sk["lemmas"]]
+    thm = {"session": "program", "id": f"C{len(out) + 1}", "statement": sk["target"], "status": "PROVED",
+           "type": "REDUCTION", "proof": relabel(sk["glue"]), "_kind": "program",
+           "beyond": "a complete argument assembled by the research program from lemmas each of which passed a referee "
+                     "and an adversary"}
+    lem = [{"id": idmap[l["id"]], "statement": l["statement"]} for l in sk["lemmas"]]
+    thm["validation"] = engine_validate(call, s, statement, known, thm, spend, lemmas=lem)
+    return out + [thm]
+
+
+def engine_program(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
+                   known: str, ledger: list, spend: _DiscoverySpend, ck: dict | None = None, keep=None,
+                   workers: int = 4) -> dict:
+    """The research program (`s.program_cycles` cycles, `s.program_budget` dollars; see the section comment above).
+    Everything it buys is checkpointed in `ck["program"]`: each plan, glue verdict, attack and lemma verdict, so a resume
+    buys none of them twice. Returns its record, with `claims`: the attacks' claims and, when the skeleton closed, the
+    assembled chain, for the ledger."""
+    ck = ck if ck is not None else {}
+    keep = keep or (lambda: None)
+    st = ck.setdefault("program", {})
+    for k, dflt in (("cycles", []), ("refused", []), ("refuted", []), ("stall", 0)):
+        st.setdefault(k, dflt)
+    st.setdefault("start_spend", round(spend.total, 4))
+    lock = threading.RLock()
+
+    def room(x: float) -> bool:
+        return spend.room(x) and spend.total + x <= st["start_spend"] + s.program_budget
+
+    def valid_claims() -> dict:
+        engine_resolve(ledger)
+        out = {}
+        for c in ledger:
+            if c.get("session") != "program" and c.get("status") == "PROVED" \
+                    and _valid_status((c.get("validation") or {}).get("status")):
+                out[engine_claim_key(c)] = {**c, "_chain": engine_chain_text(c, ledger)}
+        return out
+
+    def finish() -> None:
+        sk = st["skeleton"]
+        if "final" not in st and room(2 * s.judge_budget + 2 * s.novelty_budget):
+            st["final"] = program_assemble(call, s, statement, known, sk, spend)
+            st["done"] = True
+            st["stop"] = "every lemma established"
+            keep()
+        elif "final" not in st:
+            st["stop"] = "budget, with every lemma established"
+
+    while not st.get("done"):
+        cyc = st["cycles"][-1] if st["cycles"] and not st["cycles"][-1].get("finished") else None
+        if cyc is None:
+            if len(st["cycles"]) >= s.program_cycles:
+                st["stop"] = f"{s.program_cycles} cycles"
+                break
+            if st["stall"] >= s.program_stall:
+                st["stop"] = f"{st['stall']} cycles without a discharge"
+                break
+            if not room(s.meta_budget + s.program_session_budget):
+                st["stop"] = "budget"
+                break
+            cyc = {"cycle": len(st["cycles"]) + 1, "attacks": {}, "legs": {}}
+            st["cycles"].append(cyc)
+            keep()
+        n = cyc["cycle"]
+        before = st.get("skeleton")
+        progress = False
+        if "plan" not in cyc:
+            vc = valid_claims()
+            prompt = PROGRAM_PLAN_PROMPT.format(statement=statement, lean=lean, frontier=fblock,
+                                                established=program_established_text(vc),
+                                                skeleton=program_skeleton_text(before),
+                                                refuted="\n".join(f"- {clip_middle(x, 600)}" for x in st["refuted"][-12:]) or "(none)",
+                                                failures=program_failures_text(before, st))
+            pt, pc, perr = _discovery_call_capped(call, "engine-program-plan", prompt, s.frontier_effort, s.meta_budget, spend)
+            cyc["plan"] = {"text": (pt or "")[:24000], "cost": round(pc, 4), "error": perr}
+            keep()
+            decision = "no plan" if not pt else None
+            if pt:
+                plan = parse_program_plan(pt)
+                if before is not None and _norm_statement(plan.get("changes")) in ("none", "") \
+                        and not any(l.get("status") == "refuted" for l in before["lemmas"]):
+                    decision = "kept the skeleton in force"
+                else:
+                    new, why = program_resolve_plan(plan, before, vc, st["refuted"])
+                    if new is not None and not room(2 * s.judge_budget):
+                        new, why = None, "no budget to check its glue"
+                    if new is not None:
+                        g = program_check_glue(call, s, statement, known, new, spend)
+                        new["glue_validation"] = {k: g.get(k) for k in ("status", "referee", "adversary", "cost")}
+                        if not _valid_status(g.get("status")):
+                            new, why = None, "its glue did not pass: " + (_objection({"validation": g}) or str(g.get("status")))
+                    if new is not None:
+                        ok, why = program_better(new, before, st["stall"])
+                        if ok:
+                            new["cycle"] = n
+                            progress = before is None or program_hardness(new) < program_hardness(before)
+                            st["skeleton"] = new
+                            decision = f"adopted: {why}"
+                        else:
+                            new = None
+                    if new is None:
+                        st["refused"].append({"cycle": n, "why": why})
+                        decision = f"refused: {why}"
+            cyc["decision"] = decision
+            cyc["plan_progress"] = progress
+            keep()
+        progress = progress or bool(cyc.get("plan_progress"))
+        sk = st.get("skeleton")
+        if sk is None:
+            cyc["finished"] = True
+            st["stall"] += 1
+            keep()
+            continue
+        if not program_open(sk) and not any(l.get("status") == "refuted" for l in sk["lemmas"]):
+            cyc["finished"] = True
+            finish()
+            keep()
+            break
+        todo = sorted(program_open(sk), key=lambda l: (DIFFICULTY_RANK.get(l.get("difficulty"), 1), l.get("attempts", 0),
+                                                       l["id"]))[: max(1, s.program_lemmas)]
+        per = s.program_session_budget + 2 * s.judge_budget
+        fit = [l for i, l in enumerate(todo) if l["id"] in cyc["attacks"] or room((i + 1) * per)]
+
+        def attack(lemma: dict) -> None:
+            label = f"p{n}{lemma['id']}"
+            assign = PROGRAM_LEMMA_ASSIGNMENT.format(
+                id=lemma["id"], cycle=n, answer=str(sk.get("answer")).upper(), target=sk["target"],
+                skeleton=program_skeleton_text(sk), lemma=lemma["statement"],
+                route=lemma.get("route") or "(none suggested)", test=lemma.get("test") or "(none suggested)",
+                failures="\n".join(f"- cycle {f.get('cycle')}: {f.get('why')}" for f in lemma.get("failures") or []) or "(none)")
+            prompt = SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                           assignment=assign, teammates="", modules=", ".join(sorted(EXPLORE_MODULES)),
+                                           seconds=EXPLORE_SECONDS)
+
+            def cont(leg, route):
+                return SESSION_PROMPT.format(statement=statement, lean=lean, frontier=fblock, context=sess_context,
+                                             assignment=CONTINUE_ASSIGNMENT.format(leg=leg, legs=s.session_legs, next=route,
+                                                                                   assignment=assign),
+                                             teammates="", modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
+            files = {f"established/{l['id']}.md": f"STATEMENT: {l['statement']}\n\nPROOF:\n{l.get('proof') or ''}"
+                     for l in sk["lemmas"] if l.get("status") == "established"}
+            with lock:
+                slot = cyc["legs"].setdefault(label, {})
+            try:
+                reply, nb, cost, legs = engine_session_legs(session, s, spend, "engine-session", label, prompt, cont,
+                                                            s.program_turns, s.program_session_budget, s.session_effort,
+                                                            files=files or None, slot=slot, keep=keep, lock=lock)
+                claims = parse_claims(nb)
+                for c in claims:
+                    c["session"], c["_kind"] = label, "program-attack"
+                att = {"label": label, "claims": claims, "cost": round(float(cost or 0.0), 4), "legs": legs,
+                       "next": parse_next_route(nb) or ""}
+            except DiscoveryCallFailed as e:
+                att = {"label": label, "claims": [], "cost": round(e.cost, 4), "error": str(e)[:300]}
+            with lock:
+                spend.add(att["cost"])
+                cyc["attacks"][lemma["id"]] = att
+                cyc["legs"].pop(label, None)
+            keep()
+
+        pending = [l for l in fit if l["id"] not in cyc["attacks"]]
+        if pending:
+            with ThreadPoolExecutor(max_workers=max(1, min(workers, len(pending)))) as ex:
+                list(ex.map(attack, pending))
+        by_id = {l["id"]: l for l in sk["lemmas"]}
+        for lid, att in cyc["attacks"].items():
+            lemma = by_id.get(lid)
+            if lemma is None or "verdict" in att:
+                continue
+            v = program_judge_lemma(call, s, statement, known, sk, lemma, att, spend) if att.get("claims") else \
+                {"result": "open", "why": att.get("error") or "the session wrote no claim"}
+            att["verdict"] = v
+            if v["result"] == "established":
+                lemma.update({"status": "established", "proof": v["proof"], "claim": v.get("claim")})
+                progress = True
+            elif v["result"] == "refuted":
+                lemma["status"] = "refuted"
+                st["refuted"].append(lemma["statement"])
+            else:
+                lemma["attempts"] = int(lemma.get("attempts") or 0) + 1
+                lemma.setdefault("failures", []).append({"cycle": n, "why": str(v.get("why"))[:800],
+                                                         "next": str(att.get("next") or "")[:400]})
+            keep()
+        cyc["finished"] = True
+        cyc["progress"] = progress
+        st["stall"] = 0 if progress else st["stall"] + 1
+        keep()
+        if not program_open(sk) and not any(l.get("status") == "refuted" for l in sk["lemmas"]):
+            finish()
+            keep()
+            break
+    claims = [c for cyc in st["cycles"] for att in (cyc.get("attacks") or {}).values() for c in att.get("claims") or []]
+    return {"cycles": len(st["cycles"]), "stop": st.get("stop"), "done": bool(st.get("done")),
+            "skeleton": st.get("skeleton"), "refused": st["refused"], "refuted": st["refuted"],
+            "spend": round(spend.total - st["start_spend"], 4), "claims": claims + list(st.get("final") or [])}
+
+
+# ---------------------------------------------------------------- intent: new mathematics, or a finding about the statement
+
+INTENT_PROMPT = """Two questions about an OPEN problem and a line of attack on it.
+
+PROBLEM, as posed on erdosproblems.com:
+{statement}
+
+THE FORMAL STATEMENT (Lean, formal-conjectures):
+{lean}
+
+WHAT IS KNOWN (the team's frontier map):
+{frontier}
+
+THE LINE, OR THE RESULT:
+{line}
+
+1. Does it settle the problem AS POSED, or only the formal statement through a gap between the two: a weaker or
+   different hypothesis, a quantifier, a degenerate case the problem plainly did not mean, a misformalized definition?
+2. Is its key result already published, or does it follow directly from a published theorem? Name the source if so.
+
+End with exactly one ```json block:
+{{"class": "new-math" | "formalization-gap" | "known-result" | "unclear", "why": "<one or two sentences>",
+ "source": "<the publication, or null>"}}
+"new-math" means that settling the problem along this line would be new mathematics about the problem as posed."""
+
+
+def intent_panel(judges: list[dict]) -> dict:
+    """The conservative reading: `new-math` only when every judge says so; a formalization gap or a known result as soon
+    as one judge names it; otherwise unclear."""
+    classes = [str(j.get("class") or "").lower() for j in judges]
+    if classes and all(c == "new-math" for c in classes):
+        cls = "new-math"
+    elif "formalization-gap" in classes:
+        cls = "formalization-gap"
+    elif "known-result" in classes:
+        cls = "known-result"
+    else:
+        cls = "unclear"
+    return {"class": cls, "judges": judges,
+            "source": next((j.get("source") for j in judges if j.get("source")), None)}
+
+
+def engine_intent(call, s: "EngineSettings", statement: str, lean: str, fblock: str, line: str,
+                  spend: _DiscoverySpend) -> dict:
+    """`s.intent_judges` judges, in parallel, classify a line or a result: new mathematics about the problem as posed, a
+    gap between it and its formal statement, or a known result. Why: the prescreen's five best scores were all one of
+    the last two (REPORT 3.10), and a settle along such a line is a finding about the statement, not a solved problem."""
+    prompt = INTENT_PROMPT.format(statement=statement, lean=lean, frontier=fblock, line=clip_middle(line or "", 12000))
+    with ThreadPoolExecutor(max_workers=max(1, s.intent_judges)) as ex:
+        outs = list(ex.map(lambda _: _discovery_call(call, "engine-intent", prompt, s.judge_effort, s.judge_budget),
+                           range(max(1, s.intent_judges))))
+    spend.add(sum(cost for _, cost, _ in outs))
+    out = intent_panel([json_tail_any(tx) if tx else {"error": err} for tx, _, err in outs])
+    out["cost"] = round(sum(cost for _, cost, _ in outs), 4)
+    return out
+
+
 def engine_chain_text(c: dict, ledger: list[dict]) -> str:
     """A claim with every lemma under it, deepest first, each in its best version with statement and proof: the
     complete informal argument, for a blueprint or a reader. A gap-closed lemma is labelled with the id the proofs cite."""
@@ -5864,6 +6441,20 @@ def engine_report(res: dict, title: str) -> str:
         lines.append("\n## Meta-review\n\n" + res["meta"]["text"])
     if (res.get("deep") or {}).get("goal"):
         lines.append("\n## Deep dive\n\nGOAL: " + res["deep"]["goal"])
+    if res.get("intent"):
+        lines.append(f"\n## Intent of the screen's line\n\n{res['intent'].get('class')}"
+                     + (f" (source: {res['intent']['source']})" if res["intent"].get("source") else ""))
+    prog = res.get("program") or {}
+    if prog.get("skeleton"):
+        sk = prog["skeleton"]
+        lines.append(f"\n## Research program\n\n{prog.get('cycles')} cycle(s), ${prog.get('spend')}; stopped: "
+                     f"{prog.get('stop') or 'running'}.\n\nTARGET ({str(sk.get('answer')).upper()}): {sk.get('target')}\n")
+        for l in sk.get("lemmas") or []:
+            lines.append(f"- **{l['id']}** [{l.get('status')}{', ' + l['difficulty'] if l.get('status') == 'open' else ''}]"
+                         f" {l.get('statement')}")
+        lines.append("\nGLUE:\n\n" + (sk.get("glue") or ""))
+        if prog.get("refuted"):
+            lines.append("\nRefuted lemmas:\n" + "\n".join(f"- {x}" for x in prog["refuted"]))
     return "\n".join(lines) + "\n"
 
 
@@ -6467,7 +7058,13 @@ class Harness:
                            leg_min_budget=float(g("engine_leg_min_budget", 0.75)),
                            objective=str(g("engine_objective", "advance")),
                            decide_seconds=int(g("engine_decide_seconds", 600)),
-                           settle_draws=int(g("engine_settle_draws", 0)))
+                           settle_draws=int(g("engine_settle_draws", 0)),
+                           intent_judges=int(g("engine_intent_judges", 0)), intent_min=float(g("engine_intent_min", 0.3)),
+                           program_cycles=int(g("engine_program_cycles", 0)),
+                           program_budget=float(g("engine_program_budget", 60.0)),
+                           program_session_budget=float(g("engine_program_session_budget", 4.0)),
+                           program_lemmas=int(g("engine_program_lemmas", 3)),
+                           program_stall=int(g("engine_program_stall", 2)))
         s.library = self._library_text(10000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -12409,6 +13006,18 @@ def build_parser() -> argparse.ArgumentParser:
                       help="the ripeness screen: after the map and before any work, ask the deep plan's SETTLE CHANCE "
                            "this many times of the map alone (engine.json settle_screen; REPORT 3.8). With "
                            "--engine-sessions 0 --engine-deep-budget 0 a run is a map-and-settle screen")
+    runp.add_argument("--engine-intent-judges", type=int, default=0,
+                      help="judges classify the screen's line (at or above --engine-intent-min) and any settling claim: "
+                           "new mathematics, a gap between the problem and its formal statement, or a known result")
+    runp.add_argument("--engine-intent-min", type=float, default=0.3)
+    runp.add_argument("--engine-program-cycles", type=int, default=0,
+                      help="the research program, the analytical deep tier: a proof skeleton whose glue is refereed, "
+                           "lemma sessions judged against each lemma as stated, at most this many cycles")
+    runp.add_argument("--engine-program-budget", type=float, default=60.0)
+    runp.add_argument("--engine-program-session-budget", type=float, default=4.0)
+    runp.add_argument("--engine-program-lemmas", type=int, default=3, help="open lemmas attacked per cycle")
+    runp.add_argument("--engine-program-stall", type=int, default=2,
+                      help="cycles in a row without a discharge before the program stops")
     runp.add_argument("--engine-objective", choices=["advance", "resolve"], default="advance",
                       help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
                            "as formalised (resolve, the campaign's setting)")
