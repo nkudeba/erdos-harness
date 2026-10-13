@@ -574,7 +574,10 @@ def record_atlas(n: int, rationale: str, requirement: str | None = None) -> None
 def flag_for_review(n: int, run_dir: Path, summary: str, claim: str, engine_run: Path) -> None:
     head = ("# Verified results awaiting human review\n\nEach entry is a Lean proof of an OPEN problem's formal statement "
             "that passed the harness's verification and audit. The honesty rules require independent human review before "
-            "any claim of resolution; until then `claimEligible` stays false.\n")
+            "any claim of resolution; until then `claimEligible` stays false.\n\nCheck two things first. Does the proof "
+            "settle the problem as Erdős posed it, or only the formal statement's wording (a gap in the formalization)? "
+            "And is the result already published? The prescreen's highest scores were mostly one or the other "
+            "(REPORT 3.10: #655's regular n-gon, #32's Ruzsa 1998).\n")
     text = REVIEW.read_text() if REVIEW.exists() else head
     text += (f"\n## #{n} — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}\n- Lean run: `{run_dir.relative_to(ROOT)}`"
              f"\n- informal proof: `{engine_run.relative_to(ROOT)}` claim {claim}\n- summary: `{summary}`\n")

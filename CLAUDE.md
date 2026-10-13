@@ -1011,6 +1011,15 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
 - **Restarts are safe:** one loop at a time (an exclusive lock), and a stage records its run at launch, so an
   interrupted stage resumes. A stage writes only its own problem's entry (`save_problem`, under the state file's lock).
   A stage used to save the whole state it read when it started, which erased any entry written meanwhile.
+- **A usage limit is an outage, not a verdict** (`limit_wait`). A stage that ended on one waits for the stated reset
+  and resumes, with no error counted. The weekly limit's dated reset ("resets Oct 13 at 9am") was once read as no time
+  at all. From 2026-10-09 to 10-13 the campaign then dropped ten problems it never screened, among them the prescreen's
+  top nine.
+- **The queue follows the map-free prescreen** (`resolution/prescreen.jsonl`, from `step3/settle_nomap.py --sweep`;
+  REPORT 3.10), then forum size. 156 of the 264 problems with a pinned formal statement are swept.
+  - Its top scores mostly flag statements easier than the problem: a formalization gap (#655's regular n-gon) or a
+    published result (#32, #695).
+  - A settle there is a formalization or literature finding, so review it for intent.
 - **Pacing:**
   - one lane: it waits while any driver runs;
   - a daily cap in `resolution/config.json`, default $150;
