@@ -60,3 +60,5 @@
 [2026-10-13T13:54:59Z] #197: screen failed (exit -15); errors 2
 [2026-10-13T13:55:03Z] #1133: screen
 [2026-10-13T14:18:10Z] #1133: screen -> screened out (settle chance 0.08, draws [0.08, 0.08]; $3.20)
+[2026-10-13T14:18:20Z] #295: screen
+[2026-10-13T14:35:31Z] #295: screen -> control (settle chance 0.00, draws [0.0, 0.0]; $2.66)

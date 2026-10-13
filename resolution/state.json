@@ -136,6 +136,24 @@
    "arm": "screened out",
    "next": null,
    "status": "screened out"
+  },
+  "295": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "control",
+     "settle_chance": 0.0,
+     "spend": 2.6559
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261013-101820-907954-erdos295",
+   "spend": 2.655948,
+   "settle_chance": 0.0,
+   "arm": "control",
+   "next": "scout",
+   "status": "screened"
   }
  }
 }
