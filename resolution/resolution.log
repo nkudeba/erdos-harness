@@ -67,3 +67,5 @@
 [2026-10-13T15:04:01Z] resolution campaign loop starting
 [2026-10-13T15:04:01Z] #873: screen (resuming runs/20261008-152622-627325-erdos873)
 [2026-10-13T15:07:11Z] #873: screen -> screened out (settle chance 0.01, draws [0.0, 0.02]; $2.34)
+[2026-10-13T15:07:17Z] #655: screen (resuming runs/20261009-225323-779500-erdos655)
+[2026-10-13T15:14:42Z] #655: screen -> pass (settle chance 0.88, draws [0.9, 0.85]; $1.11)
