@@ -62,3 +62,8 @@
 [2026-10-13T14:18:10Z] #1133: screen -> screened out (settle chance 0.08, draws [0.08, 0.08]; $3.20)
 [2026-10-13T14:18:20Z] #295: screen
 [2026-10-13T14:35:31Z] #295: screen -> control (settle chance 0.00, draws [0.0, 0.0]; $2.66)
+[2026-10-13T14:35:38Z] #295: scout (resuming runs/20261013-101820-907954-erdos295)
+[2026-10-13T14:55:24Z] reset 10 problems failed only by the weekly usage limit (873, 655, 769, 520, 32, 695, 517, 1068, 103, 197); their screens resume
+[2026-10-13T15:04:01Z] resolution campaign loop starting
+[2026-10-13T15:04:01Z] #873: screen (resuming runs/20261008-152622-627325-erdos873)
+[2026-10-13T15:07:11Z] #873: screen -> screened out (settle chance 0.01, draws [0.0, 0.02]; $2.34)
