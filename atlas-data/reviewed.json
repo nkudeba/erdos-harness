@@ -1235,6 +1235,15 @@
     ],
     "assessed": "2026-09-23"
   },
+  "655": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.88, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Prove the negation of `erdos_655` exactly as stated, using the regular n-gon. Concretely, prove `¬ ∃ c > 0, ∀ᶠ n in atTop, ∀ X, #X = n → IsValid X → (1+c)n/2 ≤ distinctDistances X` by establishing the following key lemma. Key lemma. For every n ≥ 3 there is X "
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-13"
+  },
   "672": {
     "rationale": [
       "Many low lengths are already excluded by deep Diophantine results. A negative-integer example does not satisfy the positive-integer contract."
