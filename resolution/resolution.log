@@ -16,3 +16,47 @@
 [2026-10-08T19:06:50Z] #686: scout -> none ($16.62; 0 validated new [])
 [2026-10-08T19:06:56Z] #488: screen
 [2026-10-08T19:26:13Z] #488: screen -> screened out (settle chance 0.04, draws [0.05, 0.03]; $3.02)
+[2026-10-08T19:26:22Z] #873: screen
+[2026-10-09T04:59:15Z] resolution campaign loop starting
+[2026-10-09T04:59:16Z] #873: screen (resuming runs/20261008-152622-627325-erdos873)
+[2026-10-09T17:05:16Z] #873: screen failed (exit -15); errors 1
+[2026-10-09T17:05:16Z] #873: screen (resuming runs/20261008-152622-627325-erdos873)
+[2026-10-10T02:53:20Z] #873: screen failed (exit 0); errors 2
+[2026-10-10T02:53:23Z] #655: screen
+[2026-10-10T04:53:40Z] #655: screen failed (exit 0); errors 1
+[2026-10-10T04:53:40Z] #655: screen (resuming runs/20261009-225323-779500-erdos655)
+[2026-10-10T06:53:54Z] #655: screen failed (exit 0); errors 2
+[2026-10-10T06:53:57Z] #769: screen
+[2026-10-10T08:54:18Z] #769: screen failed (exit 0); errors 1
+[2026-10-10T08:54:19Z] #769: screen (resuming runs/20261010-025357-947738-erdos769)
+[2026-10-10T10:54:40Z] #769: screen failed (exit 0); errors 2
+[2026-10-10T10:55:46Z] #520: screen
+[2026-10-10T12:56:07Z] #520: screen failed (exit 0); errors 1
+[2026-10-10T12:56:07Z] #520: screen (resuming runs/20261010-065546-519040-erdos520)
+[2026-10-10T14:56:32Z] #520: screen failed (exit 0); errors 2
+[2026-10-10T14:57:35Z] #32: screen
+[2026-10-10T16:57:56Z] #32: screen failed (exit 0); errors 1
+[2026-10-10T16:57:56Z] #32: screen (resuming runs/20261010-105736-023318-erdos32)
+[2026-10-10T18:58:17Z] #32: screen failed (exit 0); errors 2
+[2026-10-10T18:59:21Z] #695: screen
+[2026-10-10T20:59:41Z] #695: screen failed (exit 0); errors 1
+[2026-10-10T20:59:41Z] #695: screen (resuming runs/20261010-145921-154479-erdos695)
+[2026-10-11T03:08:22Z] #695: screen failed (exit 0); errors 2
+[2026-10-11T03:08:25Z] #517: screen
+[2026-10-11T05:08:44Z] #517: screen failed (exit 0); errors 1
+[2026-10-11T05:08:44Z] #517: screen (resuming runs/20261010-230825-708026-erdos517)
+[2026-10-11T07:09:00Z] #517: screen failed (exit 0); errors 2
+[2026-10-11T07:09:03Z] #1068: screen
+[2026-10-11T09:09:19Z] #1068: screen failed (exit 0); errors 1
+[2026-10-11T09:09:19Z] #1068: screen (resuming runs/20261011-030903-886292-erdos1068)
+[2026-10-11T17:47:20Z] #1068: screen failed (exit 0); errors 2
+[2026-10-11T17:47:23Z] #103: screen
+[2026-10-11T19:47:38Z] #103: screen failed (exit 0); errors 1
+[2026-10-11T19:47:39Z] #103: screen (resuming runs/20261011-134723-544082-erdos103)
+[2026-10-11T21:47:54Z] #103: screen failed (exit 0); errors 2
+[2026-10-11T21:47:57Z] #197: screen
+[2026-10-11T23:48:12Z] #197: screen failed (exit 0); errors 1
+[2026-10-11T23:48:13Z] #197: screen (resuming runs/20261011-174757-518493-erdos197)
+[2026-10-13T13:54:59Z] #197: screen failed (exit -15); errors 2
+[2026-10-13T13:55:03Z] #1133: screen
+[2026-10-13T14:18:10Z] #1133: screen -> screened out (settle chance 0.08, draws [0.08, 0.08]; $3.20)

@@ -1,3 +1,24 @@
 {"at": "2026-10-08T17:39:17Z", "problem": 366, "tier": "scout", "outcome": "none", "spend": 15.6919, "run_dir": "runs/20261008-112020-606408-erdos366", "validated_new": 1, "significance": [1]}
 {"at": "2026-10-08T19:06:50Z", "problem": 686, "tier": "scout", "outcome": "none", "spend": 16.6198, "run_dir": "runs/20261008-133931-530035-erdos686", "validated_new": 0, "significance": [], "arm": null, "settle_screen": 0.01, "settle_chance": 0.0}
 {"at": "2026-10-08T19:26:13Z", "problem": 488, "tier": "screen", "outcome": "screened out", "settle_chance": 0.04, "draws": [0.05, 0.03], "spend": 3.0234, "run_dir": "runs/20261008-150656-555418-erdos488"}
+{"at": "2026-10-09T17:05:16Z", "problem": 873, "tier": "screen", "outcome": "infrastructure", "rc": -15, "spend": 0.0}
+{"at": "2026-10-10T02:53:20Z", "problem": 873, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T04:53:40Z", "problem": 655, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T06:53:54Z", "problem": 655, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T08:54:18Z", "problem": 769, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T10:54:40Z", "problem": 769, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T12:56:07Z", "problem": 520, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T14:56:32Z", "problem": 520, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T16:57:56Z", "problem": 32, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T18:58:17Z", "problem": 32, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-10T20:59:41Z", "problem": 695, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T03:08:22Z", "problem": 695, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T05:08:44Z", "problem": 517, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T07:09:00Z", "problem": 517, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T09:09:19Z", "problem": 1068, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T17:47:20Z", "problem": 1068, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T19:47:38Z", "problem": 103, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T21:47:54Z", "problem": 103, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-11T23:48:12Z", "problem": 197, "tier": "screen", "outcome": "infrastructure", "rc": 0, "spend": 0.0}
+{"at": "2026-10-13T13:54:59Z", "problem": 197, "tier": "screen", "outcome": "infrastructure", "rc": -15, "spend": 0.0}
+{"at": "2026-10-13T14:18:10Z", "problem": 1133, "tier": "screen", "outcome": "screened out", "settle_chance": 0.08, "draws": [0.08, 0.08], "spend": 3.1974, "run_dir": "runs/20261013-095503-262897-erdos1133"}

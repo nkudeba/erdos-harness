@@ -1,4 +1,18 @@
 {
  "daily_cap_usd": 150.0,
- "fc_sha": "9d259649abe0b02d7a25f7589b872db679b35e21"
+ "fc_sha": "9d259649abe0b02d7a25f7589b872db679b35e21",
+ "priority": [
+  655,
+  769,
+  520,
+  32,
+  695,
+  517,
+  1068,
+  103,
+  197,
+  1133,
+  295
+ ],
+ "priority_source": "prescreen sweep, 156 problems, mean >= 0.1 (REPORT 3.10; step3/prescreen_priority.py)"
 }

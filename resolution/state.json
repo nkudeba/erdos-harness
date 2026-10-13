@@ -48,6 +48,94 @@
    "arm": "screened out",
    "next": null,
    "status": "screened out"
+  },
+  "873": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261008-152622-627325-erdos873",
+   "errors": 2
+  },
+  "655": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261009-225323-779500-erdos655",
+   "errors": 2
+  },
+  "769": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261010-025357-947738-erdos769",
+   "errors": 2
+  },
+  "520": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261010-065546-519040-erdos520",
+   "errors": 2
+  },
+  "32": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261010-105736-023318-erdos32",
+   "errors": 2
+  },
+  "695": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261010-145921-154479-erdos695",
+   "errors": 2
+  },
+  "517": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261010-230825-708026-erdos517",
+   "errors": 2
+  },
+  "1068": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261011-030903-886292-erdos1068",
+   "errors": 2
+  },
+  "103": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261011-134723-544082-erdos103",
+   "errors": 2
+  },
+  "197": {
+   "history": [],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261011-174757-518493-erdos197",
+   "errors": 2
+  },
+  "1133": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.08,
+     "spend": 3.1974
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261013-095503-262897-erdos1133",
+   "spend": 3.197408,
+   "settle_chance": 0.08,
+   "arm": "screened out",
+   "next": null,
+   "status": "screened out"
   }
  }
 }
