@@ -1444,6 +1444,15 @@
     "search_floor_kind": "exhaustive",
     "assessed": "2026-09-11"
   },
+  "769": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.65, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove: `¬ TSLowerBound`, which refutes `erdos_769` exactly as written. It follows from this explicit bound: > Theorem (odd-n upper bound). Let A := ⌊n/3⌋. There is an explicit n₀ (about 2200) such that for every odd n ≥ n₀, every k ≥ 1 + 2ⁿ·A^{n+1"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-13"
+  },
   "779": {
     "rationale": [
       "The search interval is enormous, known small cases are checked, and heuristic failure is extremely unlikely. Finding a counterexample is not an attractive generic-search plan."
