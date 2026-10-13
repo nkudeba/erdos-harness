@@ -1110,6 +1110,15 @@
     ],
     "assessed": "2026-10-07"
   },
+  "520": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.16, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target: disprove `erdos_520`. The plan is to prove the following statement. (★) On the canonical space Ω₀ = (Primes → {±1}) with the product of fair coin measures, let f be the Rademacher multiplicative extension. Then almost surely M_f(N) / √(N log log N) → 0"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-13"
+  },
   "532": {
     "rationale": [
       "A successful proof transfers an existing Mathlib Hindman theorem into the finite-subset-sum formulation."
