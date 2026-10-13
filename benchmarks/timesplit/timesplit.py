@@ -2279,6 +2279,23 @@ def engine_screen_record(run_dir: Path, item: dict, alias, rc, facts: dict, args
             "gaps": ej.get("gaps"), "protocol": {**protocol(args), "screen": "engine", "discovery_flags": flags}}
 
 
+def run_harness_lane(cmd: list[str], log, env: dict, timeout: float) -> int:
+    """One harness run with a wall-clock cap. On the cap it gets SIGTERM, so it ends its tracked model sessions before it
+    exits (`run_tracked`), and only then SIGKILL. `subprocess.run(timeout=...)` sends SIGKILL at once: on 2026-10-13 that
+    cut off a research-program item at 3 hours, left three lemma sessions running and billing as orphans, and crashed the
+    whole screen with the exception."""
+    proc = subprocess.Popen(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, env=env)
+    try:
+        return proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.terminate()
+        try:
+            return proc.wait(timeout=180)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            return proc.wait()
+
+
 def discover_screen(args) -> int:
     """The no-Lean screen for changes to discovery: the in-run stage alone (`harness.py --stop-after discover`) on
     each item, recorded in the result-record shape so `ideas --tag <tag>` grades it, plus what decides conversion
@@ -2318,21 +2335,33 @@ def discover_screen(args) -> int:
         return 0
     print(f"discover-screen {args.tag}: {len([i for i in items if i['problem'] not in done])} item(s); {' '.join(flags)}",
           flush=True)
+    aliases_file = RESULTS / f"{args.tag}.aliases.jsonl"
     for item in items:
         if item["problem"] in done:
             continue
-        mask = json.loads((ROOT / item["mask"]["file"]).read_text())
-        alias = alias_for(item["problem"], f"discover-{args.tag}", taken)
-        statement = re.sub(rf"\berdos_{mask['alias_id']}\b", f"erdos_{alias}", mask["statement_lean"])
-        run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-discover-erdos{alias}"
-        run_dir.mkdir(parents=True)
-        prob = {"id": str(alias), "statement": mask["statement_en"], "tags": mask.get("tags") or [], "imports": mask["imports"],
-                "benchmark": {"kind": "time-split", "reference": "withheld (benchmarks/timesplit/pool.json)"}}
-        (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
-        (run_dir / "state.json").write_text(json.dumps({"statement": statement, "problem_input": prob, "mode": "research",
-                                                        "invocations": [], "benchmark": True}, indent=2, ensure_ascii=False))
-        with (RESULTS / f"{args.tag}.aliases.jsonl").open("a") as f:
-            f.write(json.dumps({"alias": alias, "problem": item["problem"], "run_dir": str(run_dir.relative_to(ROOT))}) + "\n")
+        # An item cut off part way resumes its own run: the engine checkpoints everything it buys. Starting it afresh
+        # would buy the map, the round, the deep dive and every program cycle again ($46 for 2026-10-13's first item).
+        earlier = [json.loads(l) for l in aliases_file.read_text().splitlines() if l.strip()] if aliases_file.exists() else []
+        mine = [a for a in earlier if a["problem"] == item["problem"]
+                and (ROOT / a["run_dir"] / ("engine/checkpoint.json" if engine else "state.json")).exists()]
+        if engine and mine:
+            alias, run_dir = mine[-1]["alias"], ROOT / mine[-1]["run_dir"]
+            print(f"#{item['problem']}: resuming {run_dir.relative_to(ROOT)}", flush=True)
+        else:
+            mask = json.loads((ROOT / item["mask"]["file"]).read_text())
+            alias = alias_for(item["problem"], f"discover-{args.tag}", taken)
+            statement = re.sub(rf"\berdos_{mask['alias_id']}\b", f"erdos_{alias}", mask["statement_lean"])
+            run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-discover-erdos{alias}"
+            run_dir.mkdir(parents=True)
+            prob = {"id": str(alias), "statement": mask["statement_en"], "tags": mask.get("tags") or [],
+                    "imports": mask["imports"],
+                    "benchmark": {"kind": "time-split", "reference": "withheld (benchmarks/timesplit/pool.json)"}}
+            (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
+            (run_dir / "state.json").write_text(json.dumps({"statement": statement, "problem_input": prob,
+                                                            "mode": "research", "invocations": [], "benchmark": True},
+                                                           indent=2, ensure_ascii=False))
+            with aliases_file.open("a") as f:
+                f.write(json.dumps({"alias": alias, "problem": item["problem"], "run_dir": str(run_dir.relative_to(ROOT))}) + "\n")
         lib_flags, lib = [], None
         if args.library_root:
             lib = ROOT / args.library_root / str(item["problem"])
@@ -2348,12 +2377,12 @@ def discover_screen(args) -> int:
         env = dict(os.environ, **({"ERDOS_KNOWLEDGE": str((ROOT / args.knowledge).resolve())} if args.knowledge else {}))
         for attempt in range(4):
             with (run_dir / "lane.log").open("a") as log:
-                rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                                    env=env, timeout=3 * 3600).returncode
+                # an engine run with the research program takes hours: its budget bounds it, the cap only guards hangs
+                rc = run_harness_lane(cmd, log, env, (12 if engine else 3) * 3600)
             text = (run_dir / "lane.log").read_text(errors="replace")[-6000:]
             if rc != 1 or not LIMIT_RE.search(text):
                 break
-            wait = seconds_until_reset(text)
+            wait = seconds_until_reset(text, cap_hours=24 * 7)
             print(f"#{item['problem']}: usage limit; waiting {wait / 60:.0f} min, then resuming", flush=True)
             time.sleep(wait)
         else:

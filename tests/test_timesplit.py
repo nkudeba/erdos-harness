@@ -3,7 +3,7 @@
 No network and no model calls: every source is a fixture. What must never regress is the contamination
 boundary -- no docstring, comment or problem number reaches a frozen statement -- and the scoring rule that a
 verified proof of the WRONG direction is flagged, never counted."""
-import importlib.util, json, tempfile, unittest
+import os, importlib.util, json, tempfile, unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -295,6 +295,17 @@ class DiscoverFirst(unittest.TestCase):
                          "open Real\n\ndef f (n : ℕ) : ℕ := n\n\ntheorem erdos_12 :\n    ¬ (∀ (n : ℕ), f n ≤ n + 1) := by\n  sorry")
         st = "theorem erdos_3 :\n    ∃ n : ℕ,\n      n = 2 := by\n  sorry"
         self.assertEqual(T.negated_statement(st), "theorem erdos_3 :\n    ¬ (∃ n : ℕ,\n      n = 2) := by\n  sorry")
+
+
+class HarnessLane(unittest.TestCase):
+    """2026-10-13: a 3-hour `subprocess.run` timeout SIGKILLed a research-program item, orphaned its model sessions and
+    crashed the screen. The cap now sends SIGTERM first, so a run ends its own sessions, and returns a code."""
+
+    def test_the_cap_terminates_and_returns(self):
+        import io, signal, sys as _sys, tempfile
+        with tempfile.TemporaryFile() as log:
+            rc = T.run_harness_lane([_sys.executable, "-c", "import time; time.sleep(30)"], log, dict(os.environ), 1)
+        self.assertEqual(rc, -signal.SIGTERM)
 
 
 class UsageLimit(unittest.TestCase):
