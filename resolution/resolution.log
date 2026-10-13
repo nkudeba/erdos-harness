@@ -69,3 +69,7 @@
 [2026-10-13T15:07:11Z] #873: screen -> screened out (settle chance 0.01, draws [0.0, 0.02]; $2.34)
 [2026-10-13T15:07:17Z] #655: screen (resuming runs/20261009-225323-779500-erdos655)
 [2026-10-13T15:14:42Z] #655: screen -> pass (settle chance 0.88, draws [0.9, 0.85]; $1.11)
+[2026-10-13T15:14:48Z] #769: screen (resuming runs/20261010-025357-947738-erdos769)
+[2026-10-13T16:19:01Z] resolution campaign loop starting
+[2026-10-13T16:19:01Z] #769: screen (resuming runs/20261010-025357-947738-erdos769)
+[2026-10-13T16:38:08Z] #769: screen -> pass (settle chance 0.65, draws [0.65, 0.65]; $2.91); track new-math (intent new-math)
