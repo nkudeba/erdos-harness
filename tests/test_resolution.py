@@ -181,6 +181,31 @@ class Screen(Base):
             self.assertIn(flag, seen["flags"])
 
 
+class UsageLimit(Base):
+    """2026-10-09 to 10-13: the weekly limit made every screen fail twice, and the campaign gave up ten problems it
+    never screened. A stage that ends on a usage limit now waits for the stated reset and resumes, with no error."""
+
+    def test_a_limit_is_an_outage_not_an_error(self):
+        cfg, run = R.load_cfg(), self.d / "runs" / "20261011-174757-518493-erdos197"
+        run.mkdir(parents=True)
+        (run / "lane.log").write_text("...\nRuntimeError: claude -p returned an error result (engine-frontier): success: "
+                                      "You've hit your weekly limit · resets Oct 13 at 9am (America/Toronto)\n")
+        R.save_state({"problems": {"197": {"history": [], "running": "screen", "prepped": True, "run_dir": str(run)}}})
+        slept = []
+        with patch.object(R, "run_screen", lambda *a, **k: (None, 0)), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R.time, "sleep", slept.append):
+            R.step(cfg)
+        p = R.load_state()["problems"]["197"]
+        self.assertEqual((p.get("errors"), p["running"], p["limit_waits"]), (None, "screen", 1))
+        self.assertTrue(slept and slept[0] > 60)
+        self.assertEqual(R.rows()[-1]["outcome"], "usage limit")
+        # a failure that is not a limit still counts
+        (run / "lane.log").write_text("Traceback ...\nValueError: something else broke\n")
+        with patch.object(R, "run_screen", lambda *a, **k: (None, 0)), patch.object(R, "queue", lambda s, c: []):
+            R.step(cfg)
+        self.assertEqual(R.load_state()["problems"]["197"]["errors"], 1)
+
+
 class Backfill(Base):
     """REPORT 3.9: screens drawn from maps already on disk. A pass enters the pass arm; nothing is screened out on them."""
 

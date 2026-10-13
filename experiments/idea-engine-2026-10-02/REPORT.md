@@ -1126,6 +1126,64 @@ under $0.50). The last 8 draws were made under the continuation above (`step3/se
     problem at or above 0.1, highest first.
   - A restarted loop orders the whole queue by the prescreen.
 
+**3.10 sweep checkpoint and controller recovery (2026-10-08, 23:40 Toronto).**
+- The eligible sweep has 264 problems (the campaign queue has 613 entries; many lack a parseable pinned formal
+  statement). At this checkpoint, 117 have valid draws, costing $28.7754; seven score at least 0.3. Leading scores:
+  #655 0.85, #769 0.80, #520 0.55. These are uncalibrated model screening scores, not proofs or independently verified
+  assessments. The queue-wide distribution is still incomplete.
+- The continuation controller was no longer present, while the sweep survived as orphan PID 84701 and the old
+  campaign tree remained stopped. Its original `finally` block therefore cannot be relied upon to restore the lane.
+  The cause of the controller's disappearance is not established.
+- `step3/recover_sweep.py` now supplies one detached recovery watcher, PID 46245. It waits for the whole sweep process
+  group, including Claude children, before updating priorities. It then replaces the stopped, outdated campaign
+  interpreter with a fresh loop that resumes persisted checkpoints and counts prescreen costs toward the daily cap.
+  The operator already authorized pausing the campaign and restoring it after screening. Recovery status lives in
+  `runs/nomap-continuation-20261008-183828/recovery.json`; the sweep continues without another model lane.
+- An orphan's eventual exit code is unavailable to this watcher and is recorded as null, never inferred as success.
+  The priority writer now locks the whole configuration read-modify-write. Current priorities were refreshed from
+  saved rows, and will be refreshed again when the sweep stops.
+- The long computation tier remains opt-in. Seven promising scores in an incomplete sweep do not yet establish
+  the handoff's condition that almost nothing clears 0.3; no new open-problem computation or resolution is claimed.
+
+**3.10 sweep, final (2026-10-13).** The weekly limit stopped the sweep at 156 of the 264 queued problems that have a
+pinned formal statement (2026-10-09, about 05:00 UTC; $38.95). Seven scored at least 0.3: #655 0.85, #769 0.80, #520
+0.55, #32 0.45, #695 0.40, #517 0.30 and #1068 0.30.
+- **Read the top five's reasoning before trusting them.** None proposes new mathematics.
+  - #655 (0.85): disprove formal-conjectures' statement with a regular n-gon, which has about n/2 distinct distances
+    and meets the stated condition. That is a gap in the statement or the formalization, not progress on the problem
+    Erdős meant.
+  - #769 (0.80): a disproof that uses the statement's "for every n ≥ N" quantifier on prime dimensions only.
+  - #520 (0.55), #32 (0.45) and #695 (0.40): the formal statement would follow from published results, as the draws
+    recall them: an almost-sure bound for random multiplicative functions; Ruzsa 1998 for #32; Ford–Konyagin–Luca 2010
+    for #695.
+  - A Lean proof of any of these would still settle formal-conjectures' statement, and a machine-checked disproof of
+    a benchmark statement is worth reporting. But it is a formalization or literature finding, not a solved open
+    problem. Each needs the human review the honesty rules already require, and these labels.
+- **The prescreen's highest scores therefore point at statements that are easier than the problem.** The screen proper
+  reads the forum digest, and a scout's settles judges read the formal statement. Neither asks whether a settle follows
+  the problem's intent, so the review file must carry this caveat.
+- The other 108 problems are unswept. Resume with `step3/settle_nomap.py --sweep`; it skips the done rows. They are the
+  most-discussed part of the queue.
+
+**The weekly limit cost the campaign ten problems, and the fix (2026-10-13).**
+- **What happened.**
+  - Codex's recovery watcher restarted the campaign on 2026-10-09, with the sweep's top problems first. The weekly limit
+    was then in force until 2026-10-13 09:00 Toronto.
+  - The limit's message reads "resets Oct 13 at 9am (America/Toronto)". The reset parser understood only "resets 9am",
+    so it fell back to 30 minutes.
+  - Each screen retried four times in two hours, failed, and counted an error. After two errors the campaign dropped
+    the problem.
+  - In four days it dropped #873 and the top nine of the sweep (#655, #769, #520, #32, #695, #517, #1068, #103, #197),
+    none of them ever screened. No model spend was lost: every call failed at once.
+- **The fix.**
+  - `seconds_until_reset` reads dated resets and their zone.
+  - `screen.py` and the Lean stage wait up to a week for a stated reset.
+  - The campaign treats a stage that ended on a usage limit as an outage: no error, a wait to the reset, the same run
+    resumed (`limit_wait`), at most 20 times running.
+  - The ten problems were reset to resume their screens. Covered by `tests/test_timesplit.py` and
+    `tests/test_resolution.py`.
+- **The campaign-side part needs a loop restart.** The parser and screen fixes apply from the next stage.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

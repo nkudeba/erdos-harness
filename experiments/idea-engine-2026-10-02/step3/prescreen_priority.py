@@ -14,7 +14,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 sys.path.insert(0, str(ROOT / "atlas-data"))
-from atomic import atomic_write_json                # noqa: E402
+from atomic import atomic_write_json, locked        # noqa: E402
 
 CONFIG = ROOT / "resolution" / "config.json"
 PRESCREEN = ROOT / "resolution" / "prescreen.jsonl"
@@ -49,12 +49,13 @@ def main() -> int:
     if not order:
         print("no prescreen rows; config unchanged")
         return 0
-    cfg = json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
-    cfg.update({"priority": order, "priority_source": f"prescreen sweep, {len(rows)} problems, mean >= {a.min} "
-                                                      f"(REPORT 3.10; step3/prescreen_priority.py)"})
     print(f"priority ({len(order)}): {order[:30]}")
     if not a.dry_run:
-        atomic_write_json(CONFIG, cfg, indent=1)
+        with locked(CONFIG):
+            cfg = json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
+            cfg.update({"priority": order, "priority_source": f"prescreen sweep, {len(rows)} problems, mean >= {a.min} "
+                                                              f"(REPORT 3.10; step3/prescreen_priority.py)"})
+            atomic_write_json(CONFIG, cfg, indent=1)
     return 0
 
 

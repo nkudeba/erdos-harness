@@ -524,18 +524,30 @@ def lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
             "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
 
 
+def limit_wait(run_dir: Path) -> float | None:
+    """Seconds to the stated reset when a stage's run ended on a usage limit (its log's last lines), else None. From
+    2026-10-09 to 10-13 the weekly limit made every screen fail twice and the campaign gave up ten problems it never
+    screened: a limit is an outage, not a verdict on the problem."""
+    import timesplit as T
+    try:
+        tail = (run_dir / "lane.log").read_text(errors="replace")[-1500:]
+    except OSError:
+        return None
+    return T.seconds_until_reset(tail, cap_hours=24 * 7) if T.LIMIT_RE.search(tail) else None
+
+
 def run_lean(run_dir: Path, cfg: dict, cmd: list[str] | None = None) -> tuple[int, str]:
-    """Run (or resume) a Lean stage, waiting out a usage limit up to three times."""
+    """Run (or resume) a Lean stage, waiting out each usage limit to its stated reset."""
     import timesplit as T
     rc = 1
-    for _ in range(4):
+    for _ in range(12):
         with (run_dir / "lane.log").open("a") as f:
             rc = subprocess.run(cmd or lean_cmd(run_dir, cfg), cwd=ROOT, stdout=f, stderr=subprocess.STDOUT,
                                 stdin=subprocess.DEVNULL, timeout=20 * 3600).returncode
         tail = (run_dir / "lane.log").read_text(errors="replace")[-6000:]
         if rc != 1 or not T.LIMIT_RE.search(tail):
             break
-        wait = T.seconds_until_reset(tail)
+        wait = T.seconds_until_reset(tail, cap_hours=24 * 7)
         log(f"{run_dir.name}: usage limit; waiting {wait / 60:.0f} min, then resuming")
         time.sleep(wait)
     line = (run_dir / "SUMMARY.line").read_text().strip() if (run_dir / "SUMMARY.line").exists() else ""
@@ -691,7 +703,16 @@ def step(cfg: dict) -> bool:
                             f"({p['complete']['claim']}) did not close: {line[:200]}")
         commit(["resolution"], f"resolution: #{n} Lean {'verified' if verified else 'not verified'}")
         return True
-    # scout or deep finished
+    # screen, scout or deep finished
+    wait = limit_wait(ROOT / p["run_dir"]) if row is None and p.get("run_dir") else None
+    if wait is not None and int(p.get("limit_waits") or 0) < 20:
+        p["limit_waits"] = int(p.get("limit_waits") or 0) + 1
+        p["running"] = action
+        save_problem(n, p)
+        result({"problem": n, "tier": action, "outcome": "usage limit", "rc": rc, "spend": 0.0})
+        log(f"#{n}: {action} stopped by a usage limit; waiting {wait / 3600:.1f} h for its reset, then resuming")
+        time.sleep(wait)
+        return True
     if row is None:
         p["errors"] = int(p.get("errors") or 0) + 1
         p["running"] = None if p["errors"] >= cfg["max_errors"] else action
@@ -702,7 +723,7 @@ def step(cfg: dict) -> bool:
     run_dir = ROOT / row["run_dir"]
     total = float(row.get("spend_run") or 0.0)
     delta = round(total - float(p.get("spend") or 0.0), 4)
-    p.update({"run_dir": row["run_dir"], "spend": total, "running": None})
+    p.update({"run_dir": row["run_dir"], "spend": total, "running": None, "limit_waits": 0})
     if action == "screen":
         return finish_screen(n, p, cfg, run_dir, delta)
     outcome, info = classify(run_dir)

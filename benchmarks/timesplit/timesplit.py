@@ -1615,19 +1615,44 @@ def launch(item: dict, tag: str, proto: dict, args, ctx: dict) -> dict:
 
 
 LIMIT_RE = re.compile(r"hit your (?:session |usage |weekly )?limit|usage limit|rate limit|overloaded", re.I)
-RESET_RE = re.compile(r"resets\s+(\d{1,2})(?::(\d{2}))?\s*([ap]m)", re.I)
+# "resets 8:10am", and the weekly limit's dated form "resets Oct 13 at 9am (America/Toronto)". Until 2026-10-13 only the
+# first was read: the dated reset fell back to a 30-minute wait, so during a four-day weekly limit every screen retried
+# for two hours, failed, and cost the campaign ten problems that were never screened.
+RESET_RE = re.compile(r"resets\s+(?:(?P<mon>Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(?P<day>\d{1,2})"
+                      r"(?:,\s*\d{4})?\s+(?:at\s+)?)?(?P<h>\d{1,2})(?::(?P<m>\d{2}))?\s*(?P<ap>[ap]m)"
+                      r"(?:\s*\((?P<tz>[A-Za-z]+(?:/[A-Za-z_]+)+)\))?", re.I)
+_MONTHS = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 
 
 def seconds_until_reset(text: str, now: datetime | None = None, cap_hours: float = 6.0) -> float:
-    """Seconds to wait for the provider's stated reset ("resets 8:10am"), plus a margin; 30 min if none is stated."""
-    now = now or datetime.now()
+    """Seconds to wait for the provider's stated reset, plus a margin; 30 min if none is stated. A dated reset ("resets
+    Oct 13 at 9am") is waited for to that day, up to `cap_hours`. The stated zone is used when `now` is aware or absent;
+    a naive `now` is read in the reset's own zone, as before."""
+    from datetime import timedelta
+    from zoneinfo import ZoneInfo
     m = RESET_RE.search(text or "")
     if not m:
         return 1800.0
-    hour = int(m.group(1)) % 12 + (12 if m.group(3).lower() == "pm" else 0)
-    target = now.replace(hour=hour, minute=int(m.group(2) or 0), second=0, microsecond=0)
-    if target <= now:
-        from datetime import timedelta
+    try:
+        tz = ZoneInfo(m.group("tz")) if m.group("tz") else None
+    except Exception:                                    # noqa: BLE001 - an unknown zone name: read the time locally
+        tz = None
+    if now is None:
+        now = datetime.now(tz) if tz else datetime.now()
+    elif now.tzinfo is not None and tz is not None:
+        now = now.astimezone(tz)
+    hour = int(m.group("h")) % 12 + (12 if m.group("ap").lower() == "pm" else 0)
+    target = now.replace(hour=hour, minute=int(m.group("m") or 0), second=0, microsecond=0)
+    if m.group("mon"):
+        try:
+            target = target.replace(month=_MONTHS.index(m.group("mon").lower()[:3]) + 1, day=int(m.group("day")))
+        except ValueError:
+            return 1800.0
+        if (now - target).days > 180:                    # "resets Jan 2" read on Dec 31
+            target = target.replace(year=target.year + 1)
+        if target <= now:
+            target = now
+    elif target <= now:
         target = target + timedelta(days=1) if (now - target).total_seconds() > 3600 else now
     return min((target - now).total_seconds() + 180.0, cap_hours * 3600)
 

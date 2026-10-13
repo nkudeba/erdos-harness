@@ -141,7 +141,8 @@ def main() -> int:
                 break
             # A usage limit stops the run (exit 1), and the run is resumable: wait for the stated reset, then resume the
             # same run dir. On 2026-10-07 the session limit failed four problems in a row at their first call.
-            wait = T.seconds_until_reset(tail)
+            # A dated reset ("resets Oct 13 at 9am", the weekly limit) is waited for in one go, up to a week.
+            wait = T.seconds_until_reset(tail, cap_hours=24 * 7)
             print(f"#{n}: usage limit; waiting {wait / 60:.0f} min, then resuming", flush=True)
             time.sleep(wait)
         rec = record(run_dir, n, args.tag, rc)

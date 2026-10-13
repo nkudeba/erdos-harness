@@ -308,6 +308,23 @@ class UsageLimit(unittest.TestCase):
         self.assertAlmostEqual(T.seconds_until_reset("resets 7:20am", now), 180.0)     # just passed: go now
         self.assertLessEqual(T.seconds_until_reset("resets 5am", now), 6 * 3600)          # tomorrow, capped
 
+    def test_the_weekly_limit_s_dated_reset(self):
+        """2026-10-09 to 10-13: "resets Oct 13 at 9am (America/Toronto)" was read as no time at all, so every screen
+        waited 30 minutes four times, failed, and the campaign gave up ten never-screened problems."""
+        from datetime import datetime, timezone
+        from zoneinfo import ZoneInfo
+        msg = "You've hit your weekly limit · resets Oct 13 at 9am (America/Toronto)"
+        now = datetime(2026, 10, 9, 1, 0)
+        self.assertEqual(T.seconds_until_reset(msg, now), 6 * 3600)                     # capped by default
+        self.assertAlmostEqual(T.seconds_until_reset(msg, now, cap_hours=24 * 7), (4 * 24 + 8) * 3600 + 180)
+        toronto = datetime(2026, 10, 13, 8, 0, tzinfo=ZoneInfo("America/Toronto"))
+        self.assertAlmostEqual(T.seconds_until_reset(msg, toronto), 3600 + 180)
+        self.assertAlmostEqual(T.seconds_until_reset(msg, datetime(2026, 10, 13, 12, 0, tzinfo=timezone.utc)), 3600 + 180)
+        self.assertAlmostEqual(T.seconds_until_reset(msg, datetime(2026, 10, 13, 10, 0)), 180.0)    # passed: go now
+        self.assertAlmostEqual(T.seconds_until_reset("resets Jan 2 at 9am", datetime(2026, 12, 31, 22, 0), cap_hours=99),
+                               35 * 3600 + 180)                                                   # into the new year
+        self.assertTrue(T.LIMIT_RE.search(msg))
+
     def test_limit_detection(self):
         self.assertTrue(T.LIMIT_RE.search('RuntimeError("claude -p returned an error result (literature): success: '
                                           "You've hit your session limit · resets 8:10am"))
