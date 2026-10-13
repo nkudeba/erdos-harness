@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 133,
+    "manually_reviewed": 134,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "4a3352d2bc9378e3fe07829881a2b29981481c028d714f688f1d68a4c3ea0cb3",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "674343cd2b23ff78b3f281f374dc90ec73b503c5fc5ba6ea061248d6fa312477"
+    "manual_reviews_sha256": "5d7aa0a534431a8820837193b8db77f0b66b7c799875bef704b441ab36b0c0d3"
   },
   "problems": [
     {
@@ -41341,6 +41341,7 @@
       "score": 9,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. This line aims at major progress instead, and is ranked honestly below. Why no line settles the problem. The formal statement is equivalent to the informal one. It reads `Tendsto (fun N => (↑(k N):ℝ) − (e−1)·N) atTop atTop`. Any ",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -41354,7 +41355,7 @@
         "Separate upper and lower bounds and check that they meet the requested precision."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-13 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -41410,13 +41411,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/295",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-13",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 681,
       "tier": "Frontier"

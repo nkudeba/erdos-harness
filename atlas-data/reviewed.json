@@ -567,6 +567,15 @@
       "experiments/open-top3/287-assessment.md"
     ]
   },
+  "295": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. This line aims at major progress instead, and is ranked honestly below. Why no line settles the problem. The formal statement is equivalent to the informal one. It reads `Tendsto (fun N => (↑(k N):ℝ) − (e−1)·N) atTop atTop`. Any "
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-13"
+  },
   "303": {
     "rationale": [
       "An existing partition theorem is the natural route. The expression looks like a rational witness problem, but the universal colouring quantifier is essential."
