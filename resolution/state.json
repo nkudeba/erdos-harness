@@ -253,13 +253,27 @@
      "outcome": "reset",
      "at": "2026-10-13T14:55:24Z",
      "why": "both failures were the weekly usage limit (2026-10-09 to 10-13), whose reset time the parser could not read; the problem was never screened"
+    },
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.17,
+     "spend": 2.0347,
+     "track": null
     }
    ],
    "prepped": true,
-   "running": "screen",
+   "running": null,
    "run_dir": "runs/20261011-030903-886292-erdos1068",
    "errors": 0,
-   "status": null
+   "status": "screened out",
+   "spend": 2.0347239999999998,
+   "limit_waits": 0,
+   "settle_chance": 0.17,
+   "arm": "screened out",
+   "next": null,
+   "track": null,
+   "intent": null
   },
   "103": {
    "history": [
