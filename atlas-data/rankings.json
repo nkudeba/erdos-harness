@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "e6ddad9f44dbcf88f1691e5c3aa06073f3bb850e4b2df443c187339faa224305",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "7bd680eb6a5948a61f0310ceb414b91801dab5011c54078fb70741a22ef63be2"
+    "manual_reviews_sha256": "47df7f95ba92cd2ba5991e0f610dd57db8629ea5ce8aa7958d42ef57e08b80e9"
   },
   "problems": [
     {
@@ -78560,6 +78560,7 @@
         "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.65, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove: `¬ TSLowerBound`, which refutes `erdos_769` exactly as written. It follows from this explicit bound: > Theorem (odd-n upper bound). Let A := ⌊n/3⌋. There is an explicit n₀ (about 2200) such that for every odd n ≥ n₀, every k ≥ 1 + 2ⁿ·A^{n+1",
         "Resolution campaign 2026-10-14 ($17.50, informal): the research engine wrote a complete answer (false) that a referee, an adversary and both settles judges accepted: (a) For every odd n ≥ 253, gcd{aⁿ − 1 : 2 ≤ a ≤ L}=1 where L = ⌊n/4⌋+1. (b) Hence every k ≥ 1 + (2ⁿ−2)(Lⁿ−1) is admissible, and the cutoff c(n) (which exists and is unique) satisfies c(n) < (2L)ⁿ ≤ (n/2+2)ⁿ. (c) TSLowerBound is false: for all A, B > 0 and all N, there are an odd n ≥ N and a c with I. Sent to Lean.",
         "Resolution campaign 2026-10-14 ($6.78): Lean on the engine's complete answer (deep/C1) did not close: RUN-SUMMARY problem=769 exit=2 outcome=not_proved directions=neg:proved_unverified verified=None spend=$6.78 llm_calls=21 lean_checks=108 lemmas=12 fatals=0 wall=49m mode=research dir=runs/20261014-16",
+        "Resolution campaign 2026-10-14: the research engine's complete answer (deep/C1, false) is PROVED IN LEAN on formal-conjectures' statement and passed the audit (20261014-162417-471965-resolve-lean-erdos769 (re-verified by the operator after an audit fix)). Open problem: awaiting human review before any claim of resolution.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
