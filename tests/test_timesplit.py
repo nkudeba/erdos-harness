@@ -201,6 +201,58 @@ class FormalConjecturesLibrary(unittest.TestCase):
         _, names = T.fcm_inline([], "theorem x (G : SimpleGraph V) : χ(G) = 3 := by sorry", T.fcm_decls())
         self.assertEqual(names, ["notation χ("])
 
+    def plane(self):
+        geo = T.CACHE / "fcm" / "FormalConjecturesForMathlib" / "Geometry"
+        geo.mkdir(parents=True)
+        (geo / "2d.lean").write_text("scoped[EuclideanGeometry] notation \"ℝ²\" => EuclideanSpace ℝ (Fin 2)\n")
+        (geo / "Metric.lean").write_text(
+            "variable {X : Type*} [MetricSpace X]\n\nnoncomputable def distanceSet (points : Finset X) : Finset ℝ :=\n"
+            "  points.offDiag.image fun (pair : X × X) => dist pair.1 pair.2\n\n"
+            "noncomputable def distinctDistances (points : Finset X) : ℕ :=\n  #(distanceSet points)\n")
+        return T.parse_fc("open EuclideanGeometry\n\n/-- Q. -/\n@[category research open]\ntheorem erdos_655 : ∃ c > (0 : ℝ), "
+                          "∀ (X : Finset ℝ²), (1 + c) ≤ distinctDistances X := by\n  sorry\n", 655)
+
+    def test_a_notation_scoped_to_a_namespace_is_inlined(self):
+        # `scoped[EuclideanGeometry] notation "ℝ²"` was invisible to the declaration pattern (#655, 2026-10-14)
+        self.plane()
+        _, names = T.fcm_inline(["unexpected token '²'"], "def V (X : Finset ℝ²) : Prop := True", T.fcm_decls())
+        self.assertEqual(names, ["notation ℝ²"])
+
+    def test_one_statement_is_repaired_in_rounds_until_it_compiles(self):
+        import harness as H
+        fc = self.plane()
+
+        class Idx:
+            by_name = {"EuclideanGeometry.angle": ("Mathlib.Geometry.Euclidean.Basic", "def", "")}
+
+            def lookup(self, name):
+                return None
+
+        class Checker:
+            calls = []
+
+            def check(self, src, dest):
+                self.calls.append(src)
+                n = next(i for i, l in enumerate(src.splitlines(), 1) if "theorem erdos_" in l)
+                for missing, err in (("import Mathlib.Geometry.Euclidean.Basic", "unknown namespace `EuclideanGeometry`"),
+                                     ('notation "ℝ²"', "unexpected token '²'; expected ')'"),
+                                     ("def distinctDistances", "Unknown identifier `distinctDistances`")):
+                    if missing not in src:
+                        return {"ok": False, "timeout": False, "errors": [f"line {n}:4: {err}"]}
+                return {"ok": True, "timeout": False, "errors": []}
+
+        ck = Checker()
+        r = T.freeze_compiling(H, fc, 655, ck, Idx(), T.fcm_decls())
+        self.assertTrue(r["ok"], r["errors"])
+        self.assertIn("Mathlib.Geometry.Euclidean.Basic", r["imports"])
+        # the notation first (the parser stops at `ℝ²`), then the definition and its dependency, in a second round
+        self.assertEqual(r["inlined"], ["notation ℝ²", "distanceSet", "distinctDistances"])
+        self.assertEqual([d["file"] for d in r["decls"]], ["FormalConjecturesForMathlib/Geometry/2d.lean"]
+                         + ["FormalConjecturesForMathlib/Geometry/Metric.lean"] * 2)
+        self.assertLess(r["statement"].index("def distanceSet"), r["statement"].index("def distinctDistances"))
+        self.assertNotIn("namespace TSB", ck.calls[-1])             # the last check is the run's own, unwrapped
+        self.assertFalse(T.freeze_compiling(H, fc, 655, ck, Idx(), [])["ok"])     # nothing to inline: it fails
+
 
 class ImportResolution(unittest.TestCase):
     class Idx:

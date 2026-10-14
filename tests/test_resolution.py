@@ -413,6 +413,73 @@ class Lean(Base):
         self.assertNotIn("--benchmark", cmd)
         self.assertEqual(cmd[cmd.index("--discover") + 1], "on")      # open mode reads the seeded decision
 
+    def fc_and_run(self):
+        """A formal-conjectures file at the pinned commit and an engine run frozen from it, as the screen freezes."""
+        import timesplit as T
+        (self.d / "fc").mkdir(exist_ok=True)
+        (self.d / "fc" / "99.lean").write_text("/-- Q. -/\n@[category research open]\ntheorem erdos_99 : True := by\n  sorry\n")
+        run = self.engine_run([])
+        st = json.loads((run / "state.json").read_text())
+        st["statement"] = T.frozen_statement(T.parse_fc((self.d / "fc" / "99.lean").read_text(), 99), 99)
+        (run / "state.json").write_text(json.dumps(st))
+        return run
+
+    def frozen(self, ok=True):
+        return {"ok": ok, "statement": "def V : Prop := True\n\ntheorem erdos_99 : True := by\n  sorry",
+                "imports": ["Mathlib.Tactic", "Mathlib.Geometry.Euclidean.Basic"], "inlined": ["V"], "classical": False,
+                "files": ["FormalConjecturesForMathlib/V.lean"], "errors": [] if ok else ["unknown namespace `EuclideanGeometry`"],
+                "decls": [{"name": "V", "file": "FormalConjecturesForMathlib/V.lean", "text": "def V : Prop := True"}]}
+
+    def test_a_statement_that_cannot_compile_blocks_the_stage_before_any_spend(self):
+        # 2026-10-14: #655's Lean stage ended after $0.06 on `unknown namespace EuclideanGeometry`
+        import timesplit as T
+        run = self.fc_and_run()
+        complete = {"claim": "deep/C1", "answer": "true", "statement": "s", "intent": "new-math"}
+        R.save_state({"problems": {"99": {"history": [], "next": "lean", "run_dir": str(run), "complete": complete}}})
+        launched = []
+        with patch.object(R, "ROOT", self.d), patch.object(T, "freeze_compiling", lambda *a, **k: self.frozen(False)), \
+                patch("harness.decl_index", lambda: None), patch.object(R, "commit"), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "run_lean", lambda *a, **k: launched.append(a) or (0, "")):
+            R.step(R.load_cfg())
+        p = R.load_state()["problems"]["99"]
+        self.assertEqual((p["status"], p["next"], p["running"]), ("lean-blocked", None, None))
+        self.assertIn("EuclideanGeometry", p["lean_blocked"])
+        self.assertFalse(launched)
+        self.assertIsNone(p.get("lean_run"))
+        self.assertEqual(json.loads(R.RESULTS.read_text().splitlines()[-1])["outcome"], "blocked")
+
+    def test_an_inlined_definition_must_read_the_same_at_the_campaigns_commit(self):
+        import timesplit as T
+        run = self.fc_and_run()
+        pages = {"same": "/-- doc -/\ndef V : Prop := True\n", "changed": "def V : Prop := False\n"}
+        for page, ok in (("same", True), ("changed", False)):
+            with patch.object(T, "freeze_compiling", lambda *a, **k: self.frozen()), patch("harness.decl_index", lambda: None), \
+                    patch.object(T, "fetch", lambda url, dest, **k: pages[page]):
+                r = R.lean_statement(99, run, {"fc_sha": "abc"})
+            self.assertEqual(r["ok"], ok, page)
+        self.assertIn("reads differently at the pinned commit", r["why"])
+
+    def test_the_built_run_carries_the_compiling_statement_and_its_imports(self):
+        run = self.engine_run([_claim("deep", "C1", "validated-new", 3, statement="it holds")])
+        with patch.object(R, "ROOT", self.d):
+            lean = R.build_lean_run(99, run, "deep/C1", "true", self.frozen())
+        self.assertEqual(json.loads((lean / "problem.json").read_text())["imports"][-1], "Mathlib.Geometry.Euclidean.Basic")
+        st = json.loads((lean / "state.json").read_text())
+        self.assertTrue(st["statement"].startswith("def V"))
+        self.assertIn("made to compile by resolution.lean_statement", st["statement_source"])
+        self.assertIn("inlined from formal-conjectures V", st["statement_source"])
+
+    def test_an_operator_can_send_a_complete_answer_back_to_lean(self):
+        complete = {"claim": "deep/C1", "answer": "false", "statement": "s", "intent": "formalization-gap"}
+        R.save_state({"problems": {"655": {"history": [], "status": "lean-partial", "next": None, "complete": complete,
+                                           "lean_run": "runs/old"}, "7": {"history": [], "running": "scout"}}})
+        self.assertIn("back to the Lean stage", R.requeue_lean(655))
+        p = R.load_state()["problems"]["655"]
+        self.assertEqual((p["next"], p["status"], p["lean_run"]), ("lean", "complete", None))
+        self.assertEqual(p["history"][-1]["previous"], "runs/old")
+        self.assertEqual(R.next_action(R.load_state(), R.load_cfg()), ("lean", 655))
+        self.assertIn("no complete answer", R.requeue_lean(7))
+
     def test_a_verified_result_is_flagged_for_review(self):
         run = self.engine_run([])
         with patch.object(R, "ROOT", self.d):

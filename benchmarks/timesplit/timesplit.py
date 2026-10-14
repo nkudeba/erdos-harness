@@ -770,7 +770,10 @@ def modules_for(errors: list[str], idx, have: list[str]) -> list[str]:
             inside = sorted((k for k in idx.by_name if k.startswith(u + ".")), key=len)[:1]
             mods |= {idx.by_name[k][0] for k in inside}
     return sorted(m for m in mods if m not in have)
-FCM_DECL = re.compile(r"^(?:@\[[^\]]*\]\s*)*(?:(?:noncomputable|private|protected|scoped|public|nonrec|partial|unsafe)\s+)*"
+# `scoped[NS]` is Mathlib's scoped-to-a-namespace modifier: formal-conjectures declares `ℝ²` that way (Geometry/2d.lean),
+# and without it every statement over the plane failed on its first `ℝ²` (#655, 2026-10-14).
+FCM_DECL = re.compile(r"^(?:@\[[^\]]*\]\s*)*(?:(?:noncomputable|private|protected|scoped(?:\[[^\]]*\])?|public|nonrec|partial|"
+                      r"unsafe)\s+)*"
                       r"(?P<kind>def|abbrev|irreducible_def|structure|class|inductive|instance|notation|infix|infixl|"
                       r"infixr|prefix|postfix)\b\s*(?P<name>[^\s:({\[]*)")
 
@@ -820,8 +823,9 @@ def fcm_decls() -> list[dict]:
     return out
 
 
-def fcm_inline(errors: list[str], statement: str, decls: list[dict], idx=None) -> tuple[list[str], list[str]]:
-    """(blocks to prepend, names inlined) for a statement that fails on names only formal-conjectures defines."""
+def fcm_inline(errors: list[str], statement: str, decls: list[dict], idx=None, with_decls: bool = False) -> tuple:
+    """(blocks to prepend, names inlined) for a statement that fails on names only formal-conjectures defines; with
+    `with_decls`, the chosen declarations too, so a caller can check each against another commit's source."""
     by_last: dict[str, list[dict]] = {}
     for d in decls:
         if d["last"]:
@@ -859,7 +863,8 @@ def fcm_inline(errors: list[str], statement: str, decls: list[dict], idx=None) -
     for d in chosen:
         inner = "\n".join(d["opens"] + d["vars"] + [d["text"]])
         blocks.append(f"namespace {d['ns']}\n{inner}\nend {d['ns']}" if d["ns"] else inner)
-    return blocks, [d["name"] or f"notation {d['lead']}" for d in chosen]
+    names = [d["name"] or f"notation {d['lead']}" for d in chosen]
+    return (blocks, names, chosen) if with_decls else (blocks, names)
 
 
 def batch_check(H, checker, statements: dict[str, str], size: int,
@@ -892,6 +897,51 @@ def batch_check(H, checker, statements: dict[str, str], size: int,
             ok |= set(chunk) - bad
     errors.pop("*", None)
     return ok, errors
+
+
+def freeze_compiling(H, fc: dict, alias: int, checker, idx=None, decls: list[dict] | None = None,
+                     rounds: int = 8) -> dict:
+    """One frozen statement through the mask builder's repair loop, for a caller with no pool (the resolution
+    campaign's Lean tier). It adds:
+    - the Mathlib modules its errors name;
+    - `open scoped Classical` on a decidability error;
+    - the formal-conjectures declarations it uses, inlined verbatim.
+
+    Inlining repeats while it finds something new, because a round sees only what the parser reached: #655's `ℝ²` hid
+    `distinctDistances` until the notation was in. The last check compiles the statement exactly as a run will, outside
+    the batch namespace. Returns {ok, statement, imports, inlined (names), files (their source files), classical,
+    errors, decls (the inlined declarations: name, file, text)}."""
+    imports, blocks, names, chosen, classical = list(H.DEFAULT_IMPORTS), [], [], [], False
+    statement, errs = frozen_statement(fc, alias), []
+
+    def out(ok: bool) -> dict:
+        return {"ok": ok, "statement": statement, "imports": imports, "inlined": names, "classical": classical,
+                "files": sorted({d["file"] for d in chosen}), "errors": [] if ok else errs[:3],
+                "decls": [{"name": nm, "file": d["file"], "text": d["text"]} for nm, d in zip(names, chosen)]}
+
+    for _ in range(rounds):
+        passed, errors = batch_check(H, checker, {str(alias): statement}, 1, imports)
+        if str(alias) in passed:
+            res = checker.check(H.compose(statement, imports), ROOT / "runs" / "adhoc" / f"freeze-{alias}.lean")
+            errs = [str(e)[:400] for e in res.get("errors", [])] or (["timeout"] if res.get("timeout") else [])
+            return out(bool(res.get("ok")))
+        errs = errors.get(str(alias)) or ["no error attributed (timeout?)"]
+        mods = modules_for(errs, idx, imports)
+        if mods:
+            imports += mods
+            continue
+        if "Decidable" in " ".join(errs) and not classical:
+            classical = True
+        else:
+            new = fcm_inline(errs, statement, decls, idx, with_decls=True) if decls else ([], [], [])
+            fresh = [(b, nm, d) for b, nm, d in zip(*new) if b not in blocks]
+            if not fresh:
+                break
+            blocks += [b for b, _, _ in fresh]
+            names += [nm for _, nm, _ in fresh]
+            chosen += [d for _, _, d in fresh]
+        statement = frozen_statement(fc, alias, extra=blocks, classical=classical)
+    return out(False)
 
 
 def judge(H, item: dict, mask: dict, backend) -> dict:

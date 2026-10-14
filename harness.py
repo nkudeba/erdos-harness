@@ -8959,7 +8959,11 @@ for the SAT solver instead of enumerating it.
                     neg = b
                     break
         if not neg:
-            self.log.event("open", "negation_failed")
+            # A statement that does not elaborate fails every negation for the same reason; say which it was. #655's
+            # campaign stage read as a failed negation when its frozen statement lacked an import (2026-10-14).
+            frozen = self.check(pos, "frozen-check")
+            self.log.event("open", "negation_failed", frozen_compiles=bool(frozen.get("ok")),
+                           first_error=None if frozen.get("ok") else str((frozen.get("errors") or [""])[0])[:200])
             self.report(False)
             return 2
         self.state["statement_neg"] = neg

@@ -992,6 +992,16 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     plans them), a marathon leg and gap closing.
   - **Lean:** for a complete answer, meaning both settles judges agree. It is a normal open-problem run, never a
     benchmark run, with the whole chain as its blueprint, committed to the direction the chain proves, then the audit.
+  - **The statement is made to compile first** (`resolution.lean_statement`, 2026-10-14). The screen freezes the text
+    alone and the engine never compiles it, so #655's Lean stage ended after $0.06 on `unknown namespace
+    EuclideanGeometry`: formal-conjectures statements use that library's own names (`ℝ²`, `distinctDistances`) and
+    Mathlib beyond `Mathlib.Tactic`.
+    - It runs the time-split mask builder's repair loop (`timesplit.freeze_compiling`): imports, `open scoped
+      Classical`, and formal-conjectures declarations inlined verbatim, in rounds.
+    - Every inlined declaration must read the same at the campaign's pinned commit, because the local copy of the
+      library is the benchmark's.
+    - A statement that still fails is `lean-blocked`, at no cost. `resolution.py requeue-lean --problem N` sends a
+      complete answer back to Lean, and it is the operator's call.
 - **Two tracks, by intent** (`--engine-intent-judges 2`, REPORT 3.11). Judges classify the screen's line and every
   settling claim: new mathematics about the problem as posed, a formalization gap, or a known result.
   - A pass goes to the **new-mathematics** track unless they name a gap or a known result. Those go to the

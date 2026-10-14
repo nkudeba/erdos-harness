@@ -462,7 +462,45 @@ def finish_screen(n: int, p: dict, cfg: dict, run_dir: Path, delta: float) -> bo
 
 # ---------------------------------------------------------------- Lean
 
-def build_lean_run(n: int, engine_run: Path, claim: str, answer: str) -> Path:
+FC_RAW = "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/{sha}/{path}"
+
+
+def lean_statement(n: int, engine_run: Path, cfg: dict) -> dict:
+    """The engine run's frozen statement, made to compile before any Lean money is spent.
+
+    The screen freezes the text alone, and the engine never compiles it. A statement in formal-conjectures' own
+    vocabulary (`ℝ²`, `distinctDistances`), or one beyond `Mathlib.Tactic` (Euclidean geometry, SimpleGraph), reached
+    the Lean tier unable to elaborate: #655's stage ended after $0.06 on `unknown namespace EuclideanGeometry`
+    (2026-10-14). This runs the benchmark's own repair loop (`timesplit.freeze_compiling`): imports,
+    `open scoped Classical`, formal-conjectures declarations inlined verbatim. The local copy of that library is the
+    benchmark's, at the benchmark's commit, so every inlined declaration must also read the same at the campaign's
+    pinned commit. -> {ok, statement, imports, inlined, classical, why}"""
+    import harness as H
+    import timesplit as T
+    st = json.loads((engine_run / "state.json").read_text())
+    path = CAMP / "fc" / f"{n}.lean"
+    src = path.read_text() if path.exists() else ""
+    fc = T.parse_fc(src, int(n)) if src.strip() else {"error": "no formal-conjectures file"}
+    if fc.get("error"):
+        return {"ok": False, "why": f"formal-conjectures parse: {fc['error']}"[:300]}
+    if T.frozen_statement(fc, int(n)).strip() != (st.get("statement") or "").strip():
+        return {"ok": False, "why": "the engine run's statement differs from formal-conjectures at the pinned commit"}
+    decls = T.fcm_decls() if (T.CACHE / "fcm").exists() else []
+    r = T.freeze_compiling(H, fc, int(n), H.LeanChecker(H.FORMAL, 900), H.decl_index(), decls)
+    if not r["ok"]:
+        return {**r, "why": "does not compile: " + "; ".join(r["errors"])[:300]}
+    for d in r["decls"]:
+        try:
+            pinned = T.fetch(FC_RAW.format(sha=cfg["fc_sha"], path=d["file"]), CAMP / "fcm" / cfg["fc_sha"] / d["file"],
+                             pause=0.1)
+        except Exception as e:                           # noqa: BLE001 - a fetch failure blocks, never guesses
+            return {**r, "ok": False, "why": f"could not fetch {d['file']} at the pinned commit: {str(e)[:120]}"}
+        if d["text"].strip() not in T.strip_comments(pinned):
+            return {**r, "ok": False, "why": f"`{d['name']}` reads differently at the pinned commit ({d['file']})"}
+    return {**r, "why": None}
+
+
+def build_lean_run(n: int, engine_run: Path, claim: str, answer: str, frozen: dict | None = None) -> Path:
     """A normal open-problem run (not a benchmark: a verified proof belongs in knowledge/ and the Atlas) on the engine
     run's frozen statement, with the engine's whole chain as the proof the blueprint follows, committed to the direction
     the chain proves. Open mode formalizes the negation when the chain is a disproof."""
@@ -473,6 +511,16 @@ def build_lean_run(n: int, engine_run: Path, claim: str, answer: str) -> Path:
     chain = H.engine_chain_text(c, ej["ledger"])
     st = json.loads((engine_run / "state.json").read_text())
     prob = json.loads((engine_run / "problem.json").read_text())
+    statement, source = st["statement"], st.get("statement_source")
+    if frozen and frozen.get("ok"):
+        # the run compiles under these imports; the harness reads them from problem.json
+        prob = {**prob, "imports": frozen["imports"]}
+        statement = frozen["statement"]
+        extra = [m for m in frozen["imports"] if m not in H.DEFAULT_IMPORTS]
+        source = ((source or "") + "; made to compile by resolution.lean_statement"
+                  + (f": imports {', '.join(extra)}" if extra else "")
+                  + (f"; inlined from formal-conjectures {', '.join(frozen['inlined'])}" if frozen.get("inlined") else "")
+                  + ("; open scoped Classical" if frozen.get("classical") else ""))
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-resolve-lean-erdos{n}"
     run_dir.mkdir(parents=True)
     (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
@@ -483,8 +531,8 @@ def build_lean_run(n: int, engine_run: Path, claim: str, answer: str) -> Path:
                          + chain[:24000]),
             "refereed_complete": True, "mode": "engine-resolution"}
     (run_dir / "state.json").write_text(json.dumps({
-        "statement": st["statement"], "problem_input": prob, "mode": "research", "invocations": [], "discovery": disc,
-        "statement_source": st.get("statement_source"),
+        "statement": statement, "problem_input": prob, "mode": "research", "invocations": [], "discovery": disc,
+        "statement_source": source,
         "assistance": [f"none: the informal proof is the harness's own research-engine output ({engine_run.name}, "
                        f"{claim}); no operator input"]}, indent=2, ensure_ascii=False))
     return run_dir
@@ -729,7 +777,20 @@ def step(cfg: dict) -> bool:
         save_problem(n, p)
         engine_run = ROOT / p["run_dir"]
         if not p.get("lean_run"):
-            p["lean_run"] = str(build_lean_run(n, engine_run, p["complete"]["claim"], p["complete"]["answer"]).relative_to(ROOT))
+            fz = lean_statement(n, engine_run, cfg)
+            if not fz.get("ok"):
+                # nothing spent: a statement that cannot elaborate would end the stage at its first check
+                why = str(fz.get("why") or "unknown")[:300]
+                p.update({"running": None, "next": None, "status": "lean-blocked", "lean_blocked": why})
+                p["history"].append({"tier": "lean", "outcome": "blocked", "why": why})
+                save_problem(n, p)
+                result({"problem": n, "tier": "lean", "outcome": "blocked", "why": why, "spend": 0.0,
+                        "track": p.get("track"), "intent": (p.get("complete") or {}).get("intent")})
+                log(f"#{n}: Lean blocked before any spend: {why}")
+                commit(["resolution"], f"resolution: #{n} Lean blocked (frozen statement)")
+                return True
+            p["lean_run"] = str(build_lean_run(n, engine_run, p["complete"]["claim"], p["complete"]["answer"],
+                                               fz).relative_to(ROOT))
             save_problem(n, p)
         lean_run = ROOT / p["lean_run"]
         log(f"#{n}: Lean on {p['complete']['claim']} ({p['complete']['answer']}) in {lean_run.name}")
@@ -949,9 +1010,27 @@ def loop() -> None:
             time.sleep(3600)
 
 
+def requeue_lean(n: int) -> str:
+    """Send a problem's complete answer back to the Lean stage, for a stage that never reached the mathematics: #655's
+    first one ended at its first check, on a frozen statement that could not compile (2026-10-14). The old run stays
+    in the history. An operator's decision; the loop never requeues by itself."""
+    p = load_state().get("problems", {}).get(str(n))
+    if not p or not p.get("complete"):
+        return f"#{n}: no complete answer to send to Lean"
+    if p.get("running"):
+        return f"#{n}: a stage is running ({p['running']}); requeue when it ends"
+    old = p.get("lean_run")
+    p.setdefault("history", []).append({"tier": "lean", "outcome": "requeued", "previous": old,
+                                        "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
+    p.update({"next": "lean", "status": "complete", "lean_run": None, "lean_blocked": None})
+    save_problem(n, p)
+    return f"#{n}: back to the Lean stage (previous run {old})"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens"])
+    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean"])
+    ap.add_argument("--problem", type=int, help="requeue-lean: the problem")
     ap.add_argument("--show", type=int, default=20)
     ap.add_argument("--file", help="import-screens: a jsonl of screen rows (step3/settle_open.jsonl)")
     a = ap.parse_args()
@@ -965,6 +1044,10 @@ def main() -> int:
             print(f"  #{n}  forum {forum_chars(n)} chars")
     elif a.cmd == "import-screens":
         print("imported to the pass arm:", import_screens(Path(a.file), load_cfg()))
+    elif a.cmd == "requeue-lean":
+        if a.problem is None:
+            ap.error("requeue-lean needs --problem")
+        print(requeue_lean(a.problem))
     elif a.cmd == "once":
         wait_for_lane()
         step(load_cfg())
