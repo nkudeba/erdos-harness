@@ -79,3 +79,6 @@
 [2026-10-13T19:28:16Z] another harness run is live; waiting for the lane
 [2026-10-14T03:43:52Z] #32: screen (resuming runs/20261010-105736-023318-erdos32)
 [2026-10-14T04:10:44Z] #32: screen -> screened out (settle chance 0.00, draws [0.0, 0.0]; $4.57)
+[2026-10-14T04:10:50Z] another harness run is live; waiting for the lane
+[2026-10-14T07:07:03Z] #695: screen (resuming runs/20261010-145921-154479-erdos695)
+[2026-10-14T07:50:06Z] #695: screen -> screened out (settle chance 0.01, draws [0.02, 0.0]; $5.49)
