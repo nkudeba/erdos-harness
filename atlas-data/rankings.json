@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "f8e7f03779108b7e7e32c2f696a9320ed10081f599f69b32b961b849b0321a0b",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "3a87db3555938cace6017849536ace9eeddeeada391379300f0150bfd15771c1"
+    "manual_reviews_sha256": "734c5d20c7b098e76969073bffe2159b69157b5bbda31c46567cb7a457412aaf"
   },
   "problems": [
     {
@@ -34812,6 +34812,7 @@
       "harness": "Attempted",
       "rationale": [
         "v6 random-sample screen 2026-10-08 ($14.07, informal): 2 validated-new claims (significance 1, 0); best: Let S be one of: (a) any pair {a,b} ⊆ {2,4,…,16} except {8,14}; (b) any 3-subset of {2,4,…,16} except the 14 sets {2,6,10},{2,8,14},{4,6,10},{4,6,12},{4,8,14},{4,10,12},{4,12,14},{6,8,10},{6,8,14},{6,10,12},{8,10,14},{8,12,14},{8,14,16},{10,12,16}. Then no inf",
+        "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: I do not think any settling line is plausible. The formal statement is the full first question: every chain, of every starting prime, must satisfy (1/k)·log q_k → ∞. - A disproof needs an explicit infinite chain with q_k ≤ C^k infinitely often. No finite compu",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -34823,7 +34824,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-08 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -34884,9 +34885,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-08",
+        "on": "2026-10-14",
         "sources": [
-          "experiments/idea-engine-2026-10-02/REPORT.md"
+          "experiments/idea-engine-2026-10-02/REPORT.md",
+          "resolution/results.jsonl"
         ],
         "searchFloor": null
       },
