@@ -1322,6 +1322,51 @@ for x > 1, and π(x) > x/log x for x ≥ 17.
 - **Harness lesson:** `--child-cycles 1` starved the recursive children. The upper bound's child had certified 3 of its 4
   pieces and planned its next move, and was cut off each time.
 
+**3.11, #888 finished by the operator (2026-10-14).** The formal statement is proved in Lean, with no premise left
+(`benchmarks/timesplit/evidence/888/`). It is operator-assisted, so not a solve.
+- **What the operator did.** In a Claude Code session, with no harness model calls:
+  - took out both Rosser–Schoenfeld premises;
+  - proved π(x) < 5·x/log x from Mathlib's `Chebyshev.pi_le_log4_mul_div`, a module the run already imported;
+  - proved the two dyadic prime counts `box_part` used from the central binomial coefficient: Erdős's proof of
+    Bertrand's postulate, kept quantitative, about 200 lines;
+  - changed the constants in `hyp_rough` and `hyp_smooth_tail`. Their proofs are otherwise unchanged.
+- **The audit: 13 of 15 checks pass, verdict FAIL.**
+  - All 9 Lean checks pass, Comparator and nanoda included. The proof is mechanically verified.
+  - `faithfulness_judges` fails: the verification-time judge never ran, because the run never verified by itself.
+  - `no_identity_in_prompts` fails. 8 engine prompts contain "Erdős", always as the model's own citation of a classical
+    result ("Erdős's bound" for multiplicative Sidon sets), carried from one session's notebook into later prompts.
+- **Lesson.** The plan asked for more than the proof needed: sharp published constants, where a Mathlib-provable
+  constant was enough. A premise with a numeric constant should first be tried with the constant left free, before the
+  sharp form is cited.
+- **Cost:** harness $131.33 (engine $37.24, Lean $94.09); the finish took none.
+
+**A campaign bug, found 2026-10-14: the Lean tier could not compile #655's statement.**
+- **What happened.**
+  - #655's scout settled formal-conjectures' statement: answer false, along a line the intent judges call a
+    formalization gap (the regular n-gon).
+  - Its Lean stage (`runs/20261014-143931-223074-resolve-lean-erdos655`) ended after $0.06 and one minute. The negation
+    check failed on `unknown namespace EuclideanGeometry`, the model's negation failed the same way, and open mode
+    ended (`open/negation_failed`, exit 2).
+- **Cause.**
+  - The screen freezes the statement as text, and the engine never compiles it.
+  - formal-conjectures statements use that library's own names (`ℝ²`, `distinctDistances`) and Mathlib beyond
+    `Mathlib.Tactic`.
+  - The time-split mask builder repairs exactly this before a benchmark run. The campaign never did.
+  - The inliner's declaration pattern also missed `scoped[NS] notation`, the form formal-conjectures uses for `ℝ²`.
+- **Fix.**
+  - `timesplit.freeze_compiling` runs the mask builder's repair loop on one statement, inlining in rounds. A round sees
+    only what the parser reached, and `ℝ²` hid `distinctDistances`.
+  - `FCM_DECL` accepts `scoped[NS]`.
+  - `resolution.lean_statement` runs before every Lean stage:
+    - every inlined declaration must read the same at the campaign's pinned commit;
+    - a statement that still fails is `lean-blocked`, at no cost;
+    - `build_lean_run` writes the imports into the run's `problem.json`.
+  - When open mode cannot negate a statement, it now logs whether the frozen statement itself compiles.
+- **#655 now compiles:** one more import (`Mathlib.Geometry.Euclidean.Angle.Oriented.Affine`), and the notation `ℝ²`,
+  `distanceSet` and `distinctDistances` inlined.
+- **Requeue.** `resolution.py requeue-lean --problem 655` sends it back to Lean. It has to run after the loop restarts
+  on the new code: the running loop would rebuild the uncompilable statement.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
