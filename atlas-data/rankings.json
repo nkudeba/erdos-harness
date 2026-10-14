@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "f8e7f03779108b7e7e32c2f696a9320ed10081f599f69b32b961b849b0321a0b",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "8564fce00ce172102b6149262f32ff67a6317fcda39cb95039acae2dbb8e3e34"
+    "manual_reviews_sha256": "467b13ce50f9932b981803601110c51583496d60409c2c91b234705d31c0c88b"
   },
   "problems": [
     {
@@ -41360,6 +41360,7 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. This line aims at major progress instead, and is ranked honestly below. Why no line settles the problem. The formal statement is equivalent to the informal one. It reads `Tendsto (fun N => (↑(k N):ℝ) − (e−1)·N) atTop atTop`. Any ",
+        "Resolution campaign scout 2026-10-14 ($18.07, informal): 1 validated-new claims (significance 1); best: Let N ≥ 2, let m₀ = m₀(N) be the least m with Σ_{n=N}^{N+m−1} 1/n ≥ 1, and put M = N + m₀ − 2, so that Σ_N^M 1/n < 1 ≤ Σ_N^{M+1} 1/n. Assume hypothesis H(N): there are ≥ 8 primes in (2(M+1)/3, 5M/6], 2(M+1)/3 ≥ max(N,5), and M+1 ≥ 14. Then:",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -41373,7 +41374,7 @@
         "Separate upper and lower bounds and check that they meet the requested precision."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-13 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -41438,7 +41439,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-13",
+        "on": "2026-10-14",
         "sources": [
           "resolution/results.jsonl"
         ],
