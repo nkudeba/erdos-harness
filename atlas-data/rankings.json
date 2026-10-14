@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "eaf6c124a94fb0dc4deb4b8ea70d9da85cf95e40e6f97ef0fcb3f754ff265161",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "410820288c3b99bd102b49e342aebf3453e2009029209fc9a05921f0de11cbce"
+    "manual_reviews_sha256": "72b5240debfd7a737b10b9271b8e43f36afe270fbe7bb33af6bdea4035094cd2"
   },
   "problems": [
     {
@@ -42313,6 +42313,97 @@
       "tier": "Frontier"
     },
     {
+      "id": 1110,
+      "statement": "Let $p>q\\geq 2$ be two coprime integers. We call $n$ representable if it is the sum of integers of the form $p^kq^l$, none of which divide each other. If $\\{p,q\\}\\neq \\{2,3\\}$ then what can be said about the density of non-representable numbers? Are there infinitely many coprime non-representable numbers?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "number theory"
+      ],
+      "score": 9,
+      "harness": "Attempted",
+      "rationale": [
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
+        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
+      ],
+      "requirements": [
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Construct and verify a uniform argument or an infinite family.",
+        "Prove the asymptotic statement with its full quantifiers and error control."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Unbounded quantifier",
+          "points": -5
+        },
+        {
+          "label": "Asymptotic or density target",
+          "points": -9
+        }
+      ],
+      "partial": {
+        "score": 45,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Library fit",
+            "points": 5
+          },
+          {
+            "label": "Asymptotic core",
+            "points": -6
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "Reachable partial results still need the relevant Mathlib development.",
+          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/1110",
+      "manual": false,
+      "prize": "no",
+      "evidence": {
+        "best": "attempted",
+        "runs": 1,
+        "benchmarkRuns": 0,
+        "certifiedMax": 0
+      },
+      "rank": 691,
+      "tier": "Frontier"
+    },
+    {
       "id": 9,
       "statement": "Let $A$ be the set of all odd integers $\\geq 1$ not of the form $p+2^{k}+2^l$ (where $k,l\\geq 0$ and $p$ is prime). Is the upper density of $A$ positive?",
       "status": "Unsolved",
@@ -42405,7 +42496,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 691,
+      "rank": 692,
       "tier": "Frontier"
     },
     {
@@ -42500,7 +42591,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 692,
+      "rank": 693,
       "tier": "Frontier"
     },
     {
@@ -42638,7 +42729,7 @@
         ],
         "searchFloor": 4e+19
       },
-      "rank": 693,
+      "rank": 694,
       "tier": "Frontier"
     },
     {
@@ -42733,7 +42824,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 694,
+      "rank": 695,
       "tier": "Frontier"
     },
     {
@@ -42828,7 +42919,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 695,
+      "rank": 696,
       "tier": "Frontier"
     },
     {
@@ -42936,7 +43027,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 696,
+      "rank": 697,
       "tier": "Frontier"
     },
     {
@@ -43030,7 +43121,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 697,
+      "rank": 698,
       "tier": "Frontier"
     },
     {
@@ -43125,7 +43216,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 698,
+      "rank": 699,
       "tier": "Frontier"
     },
     {
@@ -43243,7 +43334,7 @@
         "searchFloor": null
       },
       "brief": "---\nproblem: 455\nupdated: 2026-10-02\nrun: 20261001-230105-000000-erdos455\noutcome: partial\nsolved: false\ncertified: 2\ncost_usd: 18.99\n---\n\n## What the problem asks\n\nA prime is a whole number above 1 that only 1 and itself divide evenly, such as 2, 3, 5 or 7. Take an endless list of primes in increasing order, q_1 < q_2 < …. A gap is the difference between one prime in the list and the next. The rule is that gaps never shrink: each gap is at least as big as the one before. The question is whether such a list must outgrow every fixed multiple of n², the square of a prime's position n in the list. Put another way: must q_n divided by n² eventually pass every number? The catalogue lists the problem as open. It also says no finite computation can settle it.\n\n## What we tried\n\nThis was a research run: an automated attempt to build a proof by splitting the problem into smaller claims, each checked by Lean, a program that verifies proofs step by step. Before any Lean work, a discovery stage wrote twelve informal attempts in three independent draws. Every attempt judged the answer \"yes\", so the run worked only toward \"yes\". None of them was a complete proof that the automatic referee accepted.\n\nThe run was allowed six cycles of planning and proving. It ran three, then stopped, because two cycles in a row settled nothing new. When the one hard claim failed in Lean, the harness tried a fresh informal attack on that claim alone. It told that attack what Lean had already proved. This found no proof either. The cost was $18.99 of a $40 cap. A human chose the problem and the settings. The exact statement came from formal-conjectures, an outside collection of formal statements. The run was also given summaries of six papers and the problem's forum discussion. It was given no proof ideas beyond those.\n\n## What we found\n\nThe problem is not solved. Lean certified two facts, and both passed the project's checks: the proof was re-checked by Lean's kernel, it uses only the standard axioms, and it has no unfinished steps.\n\n- **The gap bound.** Take any finite run of primes whose gaps never shrink. Then the i-th gap is at least i/6. Adding the gaps up shows that q_n is at least about n²/12, so q_n/n² can never fall below roughly 1/12. Richter proved a stronger version of this in 1976, with 0.352 in place of 1/12. So this is a machine-checked proof of a weaker form of a known result, not new mathematics.\n- **A bridge.** If the gaps never shrink, the distance from q_k to q_n is at least (n − k) times the gap at k.\n\nWith these, the problem reduces to one claim. Fix any number C. For large n, there is no run of about n/2 primes below C·n² whose gaps never shrink and stay at most 2Cn. This claim is as hard as the problem itself. The harness tried three times to split it into easier pieces. Each time, a separate automatic judge pointed out that the pieces were the same claim in new words, because the gap bound already supplies the extra conditions for free.\n\n## What would move it\n\nThe missing step is a proof that the gaps skip almost every even number. Among the even numbers up to x, the ones that actually occur as gaps must be a vanishing fraction as x grows. That would take a sieve, meaning a counting method strong enough to bound long, nearly square-shaped patterns of primes uniformly. The informal attempts also suggest that tricks based only on a few fixed small primes cannot work; this was not checked. A future run starts from this run's notes, kept in the problem's campaign blackboard.\n\n*Corrected by hand on 2026-10-02 from the automatic brief of run `20261001-230105-000000-erdos455`. The automatic version said six cycles had run, where three ran, and it left out the gap bound. A machine-checked proof certifies the statement it names, not the problem. Nothing here has had independent human review.*\n",
-      "rank": 699,
+      "rank": 700,
       "tier": "Frontier"
     },
     {
@@ -43338,7 +43429,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 700,
+      "rank": 701,
       "tier": "Frontier"
     },
     {
@@ -43438,7 +43529,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 701,
+      "rank": 702,
       "tier": "Frontier"
     },
     {
@@ -43584,7 +43675,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 702,
+      "rank": 703,
       "tier": "Frontier"
     },
     {
@@ -43679,7 +43770,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 703,
+      "rank": 704,
       "tier": "Frontier"
     },
     {
@@ -43773,7 +43864,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 704,
+      "rank": 705,
       "tier": "Frontier"
     },
     {
@@ -43891,7 +43982,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 705,
+      "rank": 706,
       "tier": "Frontier"
     },
     {
@@ -43985,7 +44076,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 706,
+      "rank": 707,
       "tier": "Frontier"
     },
     {
@@ -44138,7 +44229,7 @@
         ],
         "searchFloor": 2.64e+17
       },
-      "rank": 707,
+      "rank": 708,
       "tier": "Frontier"
     },
     {
@@ -44232,7 +44323,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 708,
+      "rank": 709,
       "tier": "Frontier"
     },
     {
@@ -44327,7 +44418,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 709,
+      "rank": 710,
       "tier": "Frontier"
     },
     {
@@ -44421,7 +44512,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 710,
+      "rank": 711,
       "tier": "Frontier"
     },
     {
@@ -44516,7 +44607,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 711,
+      "rank": 712,
       "tier": "Frontier"
     },
     {
@@ -44626,7 +44717,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 712,
+      "rank": 713,
       "tier": "Frontier"
     },
     {
@@ -44750,7 +44841,7 @@
         ],
         "searchFloor": 11486475.0
       },
-      "rank": 713,
+      "rank": 714,
       "tier": "Frontier"
     },
     {
@@ -44836,7 +44927,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 714,
+      "rank": 715,
       "tier": "Frontier"
     },
     {
@@ -44946,7 +45037,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 715,
+      "rank": 716,
       "tier": "Frontier"
     },
     {
@@ -45029,7 +45120,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 716,
+      "rank": 717,
       "tier": "Frontier"
     },
     {
@@ -45113,7 +45204,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 717,
+      "rank": 718,
       "tier": "Frontier"
     },
     {
@@ -45215,7 +45306,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 718,
+      "rank": 719,
       "tier": "Frontier"
     },
     {
@@ -45296,7 +45387,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 719,
+      "rank": 720,
       "tier": "Frontier"
     },
     {
@@ -45391,7 +45482,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 720,
+      "rank": 721,
       "tier": "Frontier"
     },
     {
@@ -45503,7 +45594,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 721,
+      "rank": 722,
       "tier": "Frontier"
     },
     {
@@ -45584,7 +45675,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 722,
+      "rank": 723,
       "tier": "Frontier"
     },
     {
@@ -45685,7 +45776,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 723,
+      "rank": 724,
       "tier": "Frontier"
     },
     {
@@ -45759,7 +45850,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 724,
+      "rank": 725,
       "tier": "Frontier"
     },
     {
@@ -45852,7 +45943,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 725,
+      "rank": 726,
       "tier": "Frontier"
     },
     {
@@ -45963,7 +46054,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 726,
+      "rank": 727,
       "tier": "Frontier"
     },
     {
@@ -46038,7 +46129,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 727,
+      "rank": 728,
       "tier": "Frontier"
     },
     {
@@ -46119,7 +46210,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 728,
+      "rank": 729,
       "tier": "Frontier"
     },
     {
@@ -46220,7 +46311,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 729,
+      "rank": 730,
       "tier": "Frontier"
     },
     {
@@ -46296,7 +46387,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 730,
+      "rank": 731,
       "tier": "Frontier"
     },
     {
@@ -46393,7 +46484,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 731,
+      "rank": 732,
       "tier": "Frontier"
     },
     {
@@ -46495,7 +46586,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 732,
+      "rank": 733,
       "tier": "Frontier"
     },
     {
@@ -46585,7 +46676,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 733,
+      "rank": 734,
       "tier": "Frontier"
     },
     {
@@ -46688,7 +46779,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 734,
+      "rank": 735,
       "tier": "Frontier"
     },
     {
@@ -46778,7 +46869,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 735,
+      "rank": 736,
       "tier": "Frontier"
     },
     {
@@ -46868,7 +46959,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 736,
+      "rank": 737,
       "tier": "Frontier"
     },
     {
@@ -46959,7 +47050,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 737,
+      "rank": 738,
       "tier": "Frontier"
     },
     {
@@ -47055,7 +47146,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 738,
+      "rank": 739,
       "tier": "Frontier"
     },
     {
@@ -47151,7 +47242,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 739,
+      "rank": 740,
       "tier": "Frontier"
     },
     {
@@ -47246,7 +47337,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 740,
+      "rank": 741,
       "tier": "Frontier"
     },
     {
@@ -47337,7 +47428,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 741,
+      "rank": 742,
       "tier": "Frontier"
     },
     {
@@ -47427,7 +47518,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 742,
+      "rank": 743,
       "tier": "Frontier"
     },
     {
@@ -47523,7 +47614,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 743,
+      "rank": 744,
       "tier": "Frontier"
     },
     {
@@ -47613,7 +47704,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 744,
+      "rank": 745,
       "tier": "Frontier"
     },
     {
@@ -47714,7 +47805,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 745,
+      "rank": 746,
       "tier": "Frontier"
     },
     {
@@ -47818,7 +47909,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 746,
+      "rank": 747,
       "tier": "Frontier"
     },
     {
@@ -47908,7 +47999,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 747,
+      "rank": 748,
       "tier": "Frontier"
     },
     {
@@ -48022,7 +48113,7 @@
         ],
         "searchFloor": 8.0
       },
-      "rank": 748,
+      "rank": 749,
       "tier": "Frontier"
     },
     {
@@ -48112,7 +48203,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 749,
+      "rank": 750,
       "tier": "Frontier"
     },
     {
@@ -48208,7 +48299,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 750,
+      "rank": 751,
       "tier": "Frontier"
     },
     {
@@ -48299,7 +48390,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 751,
+      "rank": 752,
       "tier": "Frontier"
     },
     {
@@ -48397,7 +48488,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 752,
+      "rank": 753,
       "tier": "Frontier"
     },
     {
@@ -48492,7 +48583,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 753,
+      "rank": 754,
       "tier": "Frontier"
     },
     {
@@ -48582,7 +48673,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 754,
+      "rank": 755,
       "tier": "Frontier"
     },
     {
@@ -48672,7 +48763,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 755,
+      "rank": 756,
       "tier": "Frontier"
     },
     {
@@ -48763,7 +48854,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 756,
+      "rank": 757,
       "tier": "Frontier"
     },
     {
@@ -48893,7 +48984,7 @@
         ],
         "searchFloor": 18500000000.0
       },
-      "rank": 757,
+      "rank": 758,
       "tier": "Frontier"
     },
     {
@@ -48972,7 +49063,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 758,
+      "rank": 759,
       "tier": "Frontier"
     },
     {
@@ -49088,7 +49179,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 759,
+      "rank": 760,
       "tier": "Frontier"
     },
     {
@@ -49193,7 +49284,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 760,
+      "rank": 761,
       "tier": "Frontier"
     },
     {
@@ -49310,7 +49401,7 @@
         "searchFloor": 1000000000.0
       },
       "brief": "---\nproblem: 677\nupdated: 2026-09-11\nrun: 20260910-191150-338872-erdos677\noutcome: not_proved\nsolved: false\ncertified: 12\nsearch_floor: 1000000000.0\ncost_usd: 34.25\n---\n\n## What the problem asks\n\nTake a run of whole numbers, say the k numbers just after n: n+1, n+2, up to n+k. Their \"least common multiple\" is the smallest number that every one of them divides into evenly. Call it M(n,k). The question, from Erdős, is whether this value can ever repeat: if you slide the run far enough along the number line so the new run starts at or beyond n+k (that is, m ≥ n+k, so the two runs do not overlap), must the least common multiple always be different? The problem is listed as open on the problem catalogue, and remains open. Nothing here changes that.\n\n## What we tried\n\nWe ran the harness in research mode on the problem, with some context supplied by the operator. Two directions were pursued: trying to prove the statement, and trying to break it by finding one concrete example of a repeat. The proving direction hit an infrastructure error and produced nothing usable. The disproving direction returned partial progress. Alongside the run, an earlier assessment had already reduced the question to more tractable pieces and swept ranges of numbers by computer looking for a repeat. Twelve small side results were written out and machine-checked in the Lean proof system, which verifies each step mechanically. The run cost $34.25 and recorded four infrastructure failures.\n\n## What we found\n\nNo repeat was found, and no proof was produced. The two easiest cases, k = 1 and k = 2 (runs of one or two numbers), are settled by elementary reasoning: there the least common multiple simply grows as you slide along, so it cannot repeat. The general case is untouched. A computer sweep found no example anywhere it looked; the recorded search bound is 1,000,000,000, and its recorded kind is exhaustive, meaning every case in that range was actually enumerated. For the k = 3 case the whole question collapses to one equation in two unknowns, and the only solution found in the swept range involves overlapping runs, which the statement permits. Repeats do occur, but only for runs that overlap by a small gap.\n\n## What would move it\n\nTwo routes. To break the statement, someone needs one explicit triple of numbers (n, k, m) with the runs not overlapping and the two least common multiples equal. Our evidence says not to look by brute force: the swept ranges are empty and the structure found there suggests a bounded search is close to futile. To prove it, someone needs a general argument that works for every run length k at once. The known number-theory tools give results only for one fixed k at a time, and even k = 3 already turns into a hard equation-solving problem. Worth formalising meanwhile: the k ≤ 2 cases, a periodicity fact, and a smoothness fact. Those are side results, not the problem.\n\n*Written automatically at the end of run `20260910-191150-338872-erdos677`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 761,
+      "rank": 762,
       "tier": "Frontier"
     },
     {
@@ -49412,7 +49503,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 762,
+      "rank": 763,
       "tier": "Frontier"
     },
     {
@@ -49496,7 +49587,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 763,
+      "rank": 764,
       "tier": "Frontier"
     },
     {
@@ -49607,7 +49698,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 764,
+      "rank": 765,
       "tier": "Frontier"
     },
     {
@@ -49695,7 +49786,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 765,
+      "rank": 766,
       "tier": "Frontier"
     },
     {
@@ -49796,7 +49887,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 766,
+      "rank": 767,
       "tier": "Frontier"
     },
     {
@@ -49881,7 +49972,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 767,
+      "rank": 768,
       "tier": "Frontier"
     },
     {
@@ -49987,7 +50078,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 768,
+      "rank": 769,
       "tier": "Frontier"
     },
     {
@@ -50087,7 +50178,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 769,
+      "rank": 770,
       "tier": "Frontier"
     },
     {
@@ -50187,7 +50278,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 770,
+      "rank": 771,
       "tier": "Frontier"
     },
     {
@@ -50293,7 +50384,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 771,
+      "rank": 772,
       "tier": "Frontier"
     },
     {
@@ -50380,7 +50471,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 772,
+      "rank": 773,
       "tier": "Frontier"
     },
     {
@@ -50481,7 +50572,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 773,
+      "rank": 774,
       "tier": "Frontier"
     },
     {
@@ -50580,7 +50671,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 774,
+      "rank": 775,
       "tier": "Frontier"
     },
     {
@@ -50671,7 +50762,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 775,
+      "rank": 776,
       "tier": "Frontier"
     },
     {
@@ -50756,7 +50847,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 776,
+      "rank": 777,
       "tier": "Frontier"
     },
     {
@@ -50850,7 +50941,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 777,
+      "rank": 778,
       "tier": "Frontier"
     },
     {
@@ -50942,7 +51033,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 778,
+      "rank": 779,
       "tier": "Frontier"
     },
     {
@@ -51043,7 +51134,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 779,
+      "rank": 780,
       "tier": "Frontier"
     },
     {
@@ -51122,7 +51213,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 780,
+      "rank": 781,
       "tier": "Frontier"
     },
     {
@@ -51205,7 +51296,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 781,
+      "rank": 782,
       "tier": "Frontier"
     },
     {
@@ -51301,7 +51392,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 782,
+      "rank": 783,
       "tier": "Frontier"
     },
     {
@@ -51390,7 +51481,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 783,
+      "rank": 784,
       "tier": "Frontier"
     },
     {
@@ -51479,7 +51570,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 784,
+      "rank": 785,
       "tier": "Frontier"
     },
     {
@@ -51565,7 +51656,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 785,
+      "rank": 786,
       "tier": "Frontier"
     },
     {
@@ -51656,7 +51747,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 786,
+      "rank": 787,
       "tier": "Frontier"
     },
     {
@@ -51759,7 +51850,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 787,
+      "rank": 788,
       "tier": "Frontier"
     },
     {
@@ -51862,7 +51953,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 788,
+      "rank": 789,
       "tier": "Frontier"
     },
     {
@@ -51961,7 +52052,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 789,
+      "rank": 790,
       "tier": "Frontier"
     },
     {
@@ -52050,7 +52141,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 790,
+      "rank": 791,
       "tier": "Frontier"
     },
     {
@@ -52197,7 +52288,7 @@
         "searchFloor": 1e+18
       },
       "brief": "---\nproblem: 242\nupdated: 2026-09-24\nrun: 20260923-113735-833279-erdos242\noutcome: partial\nsolved: false\ncertified: 8\nsearch_floor: 1e+18\ncost_usd: 15.94\n---\n\n## What the problem asks\n\nTake any whole number n larger than 2. The question is whether 4/n can always be written as a sum of three fractions of the form 1/x, where x is a whole number and the three x's are all different. Such a fraction, with 1 on top, is called a unit fraction. For example, 4/3 = 1/1 + 1/4 + 1/12. The catalogue lists the problem as open and \"falsifiable\". That means a single number n with no such sum would disprove it. The claim must hold for every n, and nobody has shown that it does.\n\n## What we tried\n\nWe ran an automated research program in two directions. One direction tried to prove the claim. The other tried to find a number n where it fails. Each direction splits the goal into smaller statements. It tries to settle each one and passes the rest to the next cycle. Both directions stopped after 2 cycles because no further piece could be settled. The small results were checked in Lean. Lean is a computer system that verifies proofs line by line. The formal version reads n as a whole number and treats the equation as exact arithmetic with fractions. These are the standard readings. No outside help was recorded. The run cost $15.94.\n\n## What we found\n\nThis work is partial. The problem is not solved. The most useful reduction is this: if 4/p has a sum for a prime p, then so does 4/n for every multiple n of p. A prime is a number whose only divisors are 1 and itself. Explicit formulas then handle every prime except those leaving remainder 1 when divided by 24. Eight lemmas were certified, meaning checked in Lean. They cover several of these formula families. An earlier note on the same day also records extra families based on remainders when divided by 840 and by 11. One open statement remains. It is the hard core of the problem. The summary reduction statements were written in Lean but not proved there. No counterexample was found.\n\n## What would move it\n\nThe run searched for no new numbers. A published check, which we did not rerun, reports that the claim holds for all n up to 10^18. So a counterexample search within reach is not useful. Notes on the problem suggest certifying more of the known published formula families. That would shrink the remaining open case further. It would still not solve the problem. A full answer needs one of two things. The first is one formula that covers all remaining primes. The second is an actual counterexample beyond the checked range. The counterexample stage failed in every cycle of an earlier run on this problem. It has since been fixed, so later runs should use the working version.\n\n*Written automatically at the end of run `20260923-113735-833279-erdos242`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 791,
+      "rank": 792,
       "tier": "Frontier"
     },
     {
@@ -52290,7 +52381,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 792,
+      "rank": 793,
       "tier": "Frontier"
     },
     {
@@ -52376,7 +52467,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 793,
+      "rank": 794,
       "tier": "Frontier"
     },
     {
@@ -52477,7 +52568,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 794,
+      "rank": 795,
       "tier": "Frontier"
     },
     {
@@ -52572,7 +52663,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 795,
+      "rank": 796,
       "tier": "Frontier"
     },
     {
@@ -52653,7 +52744,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 796,
+      "rank": 797,
       "tier": "Frontier"
     },
     {
@@ -52767,7 +52858,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 797,
+      "rank": 798,
       "tier": "Frontier"
     },
     {
@@ -52847,7 +52938,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 798,
+      "rank": 799,
       "tier": "Frontier"
     },
     {
@@ -52967,7 +53058,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 799,
+      "rank": 800,
       "tier": "Frontier"
     },
     {
@@ -53063,7 +53154,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 800,
+      "rank": 801,
       "tier": "Frontier"
     },
     {
@@ -53143,7 +53234,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 801,
+      "rank": 802,
       "tier": "Frontier"
     },
     {
@@ -53240,7 +53331,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 802,
+      "rank": 803,
       "tier": "Frontier"
     },
     {
@@ -53320,7 +53411,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 803,
+      "rank": 804,
       "tier": "Frontier"
     },
     {
@@ -53402,7 +53493,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 804,
+      "rank": 805,
       "tier": "Frontier"
     },
     {
@@ -53497,7 +53588,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 805,
+      "rank": 806,
       "tier": "Frontier"
     },
     {
@@ -53582,7 +53673,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 806,
+      "rank": 807,
       "tier": "Frontier"
     },
     {
@@ -53662,7 +53753,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 807,
+      "rank": 808,
       "tier": "Frontier"
     },
     {
@@ -53776,7 +53867,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 808,
+      "rank": 809,
       "tier": "Frontier"
     },
     {
@@ -53861,7 +53952,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 809,
+      "rank": 810,
       "tier": "Frontier"
     },
     {
@@ -53963,7 +54054,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 810,
+      "rank": 811,
       "tier": "Frontier"
     },
     {
@@ -54059,7 +54150,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 811,
+      "rank": 812,
       "tier": "Frontier"
     },
     {
@@ -54154,7 +54245,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 812,
+      "rank": 813,
       "tier": "Frontier"
     },
     {
@@ -54244,7 +54335,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 813,
+      "rank": 814,
       "tier": "Frontier"
     },
     {
@@ -54339,7 +54430,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 814,
+      "rank": 815,
       "tier": "Frontier"
     },
     {
@@ -54422,7 +54513,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 815,
+      "rank": 816,
       "tier": "Frontier"
     },
     {
@@ -54518,7 +54609,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 816,
+      "rank": 817,
       "tier": "Frontier"
     },
     {
@@ -54614,7 +54705,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 817,
+      "rank": 818,
       "tier": "Frontier"
     },
     {
@@ -54700,7 +54791,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 818,
+      "rank": 819,
       "tier": "Frontier"
     },
     {
@@ -54801,7 +54892,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 819,
+      "rank": 820,
       "tier": "Frontier"
     },
     {
@@ -54896,7 +54987,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 820,
+      "rank": 821,
       "tier": "Frontier"
     },
     {
@@ -54976,7 +55067,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 821,
+      "rank": 822,
       "tier": "Frontier"
     },
     {
@@ -55072,7 +55163,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 822,
+      "rank": 823,
       "tier": "Frontier"
     },
     {
@@ -55173,7 +55264,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 823,
+      "rank": 824,
       "tier": "Frontier"
     },
     {
@@ -55279,7 +55370,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 824,
+      "rank": 825,
       "tier": "Frontier"
     },
     {
@@ -55365,7 +55456,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 825,
+      "rank": 826,
       "tier": "Frontier"
     },
     {
@@ -55466,7 +55557,7 @@
         "benchmarkRuns": 3,
         "certifiedMax": 0
       },
-      "rank": 826,
+      "rank": 827,
       "tier": "Frontier"
     },
     {
@@ -55551,7 +55642,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 827,
+      "rank": 828,
       "tier": "Frontier"
     },
     {
@@ -55637,7 +55728,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 828,
+      "rank": 829,
       "tier": "Frontier"
     },
     {
@@ -55722,7 +55813,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 829,
+      "rank": 830,
       "tier": "Frontier"
     },
     {
@@ -55821,7 +55912,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 830,
+      "rank": 831,
       "tier": "Frontier"
     },
     {
@@ -55921,7 +56012,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 831,
+      "rank": 832,
       "tier": "Frontier"
     },
     {
@@ -56008,7 +56099,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 832,
+      "rank": 833,
       "tier": "Frontier"
     },
     {
@@ -56128,7 +56219,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 833,
+      "rank": 834,
       "tier": "Frontier"
     },
     {
@@ -56238,7 +56329,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 834,
+      "rank": 835,
       "tier": "Frontier"
     },
     {
@@ -56359,7 +56450,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 835,
+      "rank": 836,
       "tier": "Frontier"
     },
     {
@@ -56465,7 +56556,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 836,
+      "rank": 837,
       "tier": "Frontier"
     },
     {
@@ -56576,7 +56667,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 837,
+      "rank": 838,
       "tier": "Frontier"
     },
     {
@@ -56689,7 +56780,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 838,
+      "rank": 839,
       "tier": "Frontier"
     },
     {
@@ -56815,7 +56906,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 839,
+      "rank": 840,
       "tier": "Frontier"
     },
     {
@@ -56921,7 +57012,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 840,
+      "rank": 841,
       "tier": "Frontier"
     },
     {
@@ -57037,7 +57128,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 841,
+      "rank": 842,
       "tier": "Frontier"
     },
     {
@@ -57134,7 +57225,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 842,
+      "rank": 843,
       "tier": "Frontier"
     },
     {
@@ -57234,7 +57325,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 843,
+      "rank": 844,
       "tier": "Frontier"
     },
     {
@@ -57350,7 +57441,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 844,
+      "rank": 845,
       "tier": "Frontier"
     },
     {
@@ -57457,7 +57548,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 845,
+      "rank": 846,
       "tier": "Frontier"
     },
     {
@@ -57563,7 +57654,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 846,
+      "rank": 847,
       "tier": "Frontier"
     },
     {
@@ -57684,7 +57775,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 847,
+      "rank": 848,
       "tier": "Frontier"
     },
     {
@@ -57778,7 +57869,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 848,
+      "rank": 849,
       "tier": "Frontier"
     },
     {
@@ -57856,7 +57947,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 849,
+      "rank": 850,
       "tier": "Frontier"
     },
     {
@@ -57946,7 +58037,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 850,
+      "rank": 851,
       "tier": "Frontier"
     },
     {
@@ -58041,7 +58132,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 851,
+      "rank": 852,
       "tier": "Frontier"
     },
     {
@@ -58141,7 +58232,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 852,
+      "rank": 853,
       "tier": "Frontier"
     },
     {
@@ -58242,7 +58333,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 853,
+      "rank": 854,
       "tier": "Frontier"
     },
     {
@@ -58348,7 +58439,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 854,
+      "rank": 855,
       "tier": "Frontier"
     },
     {
@@ -58446,7 +58537,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 855,
+      "rank": 856,
       "tier": "Frontier"
     },
     {
@@ -58565,7 +58656,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 856,
+      "rank": 857,
       "tier": "Frontier"
     },
     {
@@ -58650,7 +58741,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 857,
+      "rank": 858,
       "tier": "Frontier"
     },
     {
@@ -58749,7 +58840,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 858,
+      "rank": 859,
       "tier": "Frontier"
     },
     {
@@ -58833,7 +58924,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 859,
+      "rank": 860,
       "tier": "Frontier"
     },
     {
@@ -58938,7 +59029,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 860,
+      "rank": 861,
       "tier": "Frontier"
     },
     {
@@ -59033,7 +59124,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 861,
+      "rank": 862,
       "tier": "Frontier"
     },
     {
@@ -59139,7 +59230,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 862,
+      "rank": 863,
       "tier": "Frontier"
     },
     {
@@ -59244,7 +59335,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 863,
+      "rank": 864,
       "tier": "Frontier"
     },
     {
@@ -59350,7 +59441,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 864,
+      "rank": 865,
       "tier": "Frontier"
     },
     {
@@ -59450,7 +59541,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 865,
+      "rank": 866,
       "tier": "Frontier"
     },
     {
@@ -59553,7 +59644,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 866,
+      "rank": 867,
       "tier": "Frontier"
     },
     {
@@ -59638,7 +59729,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 867,
+      "rank": 868,
       "tier": "Frontier"
     },
     {
@@ -59654,6 +59745,7 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.25, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The goal is to settle `erdos_103` exactly as written, by first pinning down the convention in `Metric.IsSeparated'` and then exploiting it if it permits. Step 0 (decisive). Read the actual definition of `Metric.IsSeparated'` in the project's ForMathlib or form",
+        "Resolution campaign scout 2026-10-14 ($17.82, informal): 3 validated-new claims (significance 1, 1, 1); best: Let 0 < s < √2, φ_s = 2 arcsin(s/2) (< π/2), κ_s = 2 s √(φ_s / sin φ_s). Let A be a 1-separated n-set with diam A = D(n), P = conv A. If p, q ∈ A ∩ ∂P with |pq| ≤ s, then the line ℓ = pq supports P (so [p,q] ⊂ ∂P, i.e. p,q on one edge of P)",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
@@ -59721,7 +59813,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 868,
+      "rank": 869,
       "tier": "Frontier"
     },
     {
@@ -59824,7 +59916,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 869,
+      "rank": 870,
       "tier": "Frontier"
     },
     {
@@ -59910,7 +60002,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 870,
+      "rank": 871,
       "tier": "Frontier"
     },
     {
@@ -59990,7 +60082,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 871,
+      "rank": 872,
       "tier": "Frontier"
     },
     {
@@ -60100,7 +60192,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 872,
+      "rank": 873,
       "tier": "Frontier"
     },
     {
@@ -60184,7 +60276,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 873,
+      "rank": 874,
       "tier": "Frontier"
     },
     {
@@ -60280,7 +60372,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 874,
+      "rank": 875,
       "tier": "Frontier"
     },
     {
@@ -60376,7 +60468,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 875,
+      "rank": 876,
       "tier": "Frontier"
     },
     {
@@ -60484,7 +60576,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 876,
+      "rank": 877,
       "tier": "Frontier"
     },
     {
@@ -60574,7 +60666,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 877,
+      "rank": 878,
       "tier": "Frontier"
     },
     {
@@ -60668,7 +60760,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 878,
+      "rank": 879,
       "tier": "Frontier"
     },
     {
@@ -60777,7 +60869,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 879,
+      "rank": 880,
       "tier": "Frontier"
     },
     {
@@ -60902,7 +60994,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 880,
+      "rank": 881,
       "tier": "Frontier"
     },
     {
@@ -61008,7 +61100,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 881,
+      "rank": 882,
       "tier": "Frontier"
     },
     {
@@ -61118,7 +61210,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 882,
+      "rank": 883,
       "tier": "Frontier"
     },
     {
@@ -61226,7 +61318,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 883,
+      "rank": 884,
       "tier": "Frontier"
     },
     {
@@ -61310,7 +61402,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 884,
+      "rank": 885,
       "tier": "Frontier"
     },
     {
@@ -61383,7 +61475,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 885,
+      "rank": 886,
       "tier": "Frontier"
     },
     {
@@ -61488,7 +61580,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 886,
+      "rank": 887,
       "tier": "Frontier"
     },
     {
@@ -61582,7 +61674,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 887,
+      "rank": 888,
       "tier": "Frontier"
     },
     {
@@ -61671,7 +61763,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 888,
+      "rank": 889,
       "tier": "Frontier"
     },
     {
@@ -61764,7 +61856,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 889,
+      "rank": 890,
       "tier": "Frontier"
     },
     {
@@ -61867,7 +61959,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 890,
+      "rank": 891,
       "tier": "Frontier"
     },
     {
@@ -61966,7 +62058,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 891,
+      "rank": 892,
       "tier": "Frontier"
     },
     {
@@ -62072,7 +62164,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 892,
+      "rank": 893,
       "tier": "Frontier"
     },
     {
@@ -62169,7 +62261,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 893,
+      "rank": 894,
       "tier": "Frontier"
     },
     {
@@ -62273,7 +62365,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 894,
+      "rank": 895,
       "tier": "Frontier"
     },
     {
@@ -62356,7 +62448,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 895,
+      "rank": 896,
       "tier": "Frontier"
     },
     {
@@ -62449,7 +62541,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 896,
+      "rank": 897,
       "tier": "Frontier"
     },
     {
@@ -62529,7 +62621,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 897,
+      "rank": 898,
       "tier": "Frontier"
     },
     {
@@ -62642,7 +62734,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 898,
+      "rank": 899,
       "tier": "Frontier"
     },
     {
@@ -62755,7 +62847,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 899,
+      "rank": 900,
       "tier": "Frontier"
     },
     {
@@ -62851,7 +62943,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 900,
+      "rank": 901,
       "tier": "Frontier"
     },
     {
@@ -62951,7 +63043,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 901,
+      "rank": 902,
       "tier": "Frontier"
     },
     {
@@ -63050,7 +63142,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 902,
+      "rank": 903,
       "tier": "Frontier"
     },
     {
@@ -63134,7 +63226,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 903,
+      "rank": 904,
       "tier": "Frontier"
     },
     {
@@ -63233,7 +63325,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 904,
+      "rank": 905,
       "tier": "Frontier"
     },
     {
@@ -63318,7 +63410,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 905,
+      "rank": 906,
       "tier": "Frontier"
     },
     {
@@ -63429,7 +63521,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 906,
+      "rank": 907,
       "tier": "Frontier"
     },
     {
@@ -63539,7 +63631,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 907,
+      "rank": 908,
       "tier": "Frontier"
     },
     {
@@ -63643,7 +63735,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 908,
+      "rank": 909,
       "tier": "Frontier"
     },
     {
@@ -63749,7 +63841,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 909,
+      "rank": 910,
       "tier": "Frontier"
     },
     {
@@ -63856,7 +63948,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 910,
+      "rank": 911,
       "tier": "Frontier"
     },
     {
@@ -63946,7 +64038,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 911,
+      "rank": 912,
       "tier": "Frontier"
     },
     {
@@ -64044,7 +64136,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 912,
+      "rank": 913,
       "tier": "Frontier"
     },
     {
@@ -64145,7 +64237,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 913,
+      "rank": 914,
       "tier": "Frontier"
     },
     {
@@ -64234,7 +64326,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 914,
+      "rank": 915,
       "tier": "Frontier"
     },
     {
@@ -64323,7 +64415,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 915,
+      "rank": 916,
       "tier": "Frontier"
     },
     {
@@ -64407,7 +64499,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 916,
+      "rank": 917,
       "tier": "Frontier"
     },
     {
@@ -64492,7 +64584,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 917,
+      "rank": 918,
       "tier": "Frontier"
     },
     {
@@ -64593,7 +64685,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 918,
+      "rank": 919,
       "tier": "Frontier"
     },
     {
@@ -64690,7 +64782,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 919,
+      "rank": 920,
       "tier": "Frontier"
     },
     {
@@ -64781,7 +64873,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 920,
+      "rank": 921,
       "tier": "Frontier"
     },
     {
@@ -64883,7 +64975,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 921,
+      "rank": 922,
       "tier": "Frontier"
     },
     {
@@ -64994,7 +65086,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 922,
+      "rank": 923,
       "tier": "Frontier"
     },
     {
@@ -65096,7 +65188,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 923,
+      "rank": 924,
       "tier": "Frontier"
     },
     {
@@ -65208,7 +65300,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 924,
+      "rank": 925,
       "tier": "Frontier"
     },
     {
@@ -65304,7 +65396,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 925,
+      "rank": 926,
       "tier": "Frontier"
     },
     {
@@ -65393,7 +65485,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 926,
+      "rank": 927,
       "tier": "Frontier"
     },
     {
@@ -65484,7 +65576,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 927,
+      "rank": 928,
       "tier": "Frontier"
     },
     {
@@ -65586,7 +65678,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 928,
+      "rank": 929,
       "tier": "Frontier"
     },
     {
@@ -65696,7 +65788,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 929,
+      "rank": 930,
       "tier": "Frontier"
     },
     {
@@ -65793,7 +65885,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 930,
+      "rank": 931,
       "tier": "Frontier"
     },
     {
@@ -65898,7 +65990,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 931,
+      "rank": 932,
       "tier": "Frontier"
     },
     {
@@ -65994,7 +66086,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 932,
+      "rank": 933,
       "tier": "Frontier"
     },
     {
@@ -66089,7 +66181,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 933,
+      "rank": 934,
       "tier": "Frontier"
     },
     {
@@ -66189,7 +66281,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 934,
+      "rank": 935,
       "tier": "Frontier"
     },
     {
@@ -66289,7 +66381,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 935,
+      "rank": 936,
       "tier": "Frontier"
     },
     {
@@ -66410,7 +66502,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 936,
+      "rank": 937,
       "tier": "Frontier"
     },
     {
@@ -66492,7 +66584,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 937,
+      "rank": 938,
       "tier": "Frontier"
     },
     {
@@ -66576,7 +66668,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 938,
+      "rank": 939,
       "tier": "Frontier"
     },
     {
@@ -66700,7 +66792,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 939,
+      "rank": 940,
       "tier": "Frontier"
     },
     {
@@ -66807,7 +66899,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 940,
+      "rank": 941,
       "tier": "Frontier"
     },
     {
@@ -66909,7 +67001,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 941,
+      "rank": 942,
       "tier": "Frontier"
     },
     {
@@ -67022,7 +67114,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 942,
+      "rank": 943,
       "tier": "Frontier"
     },
     {
@@ -67118,7 +67210,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 943,
+      "rank": 944,
       "tier": "Frontier"
     },
     {
@@ -67214,7 +67306,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 944,
+      "rank": 945,
       "tier": "Frontier"
     },
     {
@@ -67310,7 +67402,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 945,
+      "rank": 946,
       "tier": "Frontier"
     },
     {
@@ -67407,7 +67499,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 946,
+      "rank": 947,
       "tier": "Frontier"
     },
     {
@@ -67497,7 +67589,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 947,
+      "rank": 948,
       "tier": "Frontier"
     },
     {
@@ -67609,7 +67701,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 948,
+      "rank": 949,
       "tier": "Frontier"
     },
     {
@@ -67704,7 +67796,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 949,
+      "rank": 950,
       "tier": "Frontier"
     },
     {
@@ -67794,7 +67886,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 950,
+      "rank": 951,
       "tier": "Frontier"
     },
     {
@@ -67891,7 +67983,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 951,
+      "rank": 952,
       "tier": "Frontier"
     },
     {
@@ -67997,7 +68089,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 952,
+      "rank": 953,
       "tier": "Frontier"
     },
     {
@@ -68060,7 +68152,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 953,
+      "rank": 954,
       "tier": "Frontier"
     },
     {
@@ -68146,7 +68238,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 954,
+      "rank": 955,
       "tier": "Frontier"
     },
     {
@@ -68248,7 +68340,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 955,
+      "rank": 956,
       "tier": "Frontier"
     },
     {
@@ -68334,7 +68426,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 956,
+      "rank": 957,
       "tier": "Frontier"
     },
     {
@@ -68429,7 +68521,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 957,
+      "rank": 958,
       "tier": "Frontier"
     },
     {
@@ -68542,7 +68634,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 958,
+      "rank": 959,
       "tier": "Frontier"
     },
     {
@@ -68647,7 +68739,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 959,
+      "rank": 960,
       "tier": "Frontier"
     },
     {
@@ -68737,7 +68829,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 960,
+      "rank": 961,
       "tier": "Frontier"
     },
     {
@@ -68829,7 +68921,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 961,
+      "rank": 962,
       "tier": "Frontier"
     },
     {
@@ -68923,7 +69015,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 962,
+      "rank": 963,
       "tier": "Frontier"
     },
     {
@@ -69018,7 +69110,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 963,
+      "rank": 964,
       "tier": "Frontier"
     },
     {
@@ -69121,7 +69213,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 964,
+      "rank": 965,
       "tier": "Frontier"
     },
     {
@@ -69225,7 +69317,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 965,
+      "rank": 966,
       "tier": "Frontier"
     },
     {
@@ -69327,7 +69419,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 966,
+      "rank": 967,
       "tier": "Frontier"
     },
     {
@@ -69429,7 +69521,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 967,
+      "rank": 968,
       "tier": "Frontier"
     },
     {
@@ -69537,7 +69629,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 968,
+      "rank": 969,
       "tier": "Frontier"
     },
     {
@@ -69627,7 +69719,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 969,
+      "rank": 970,
       "tier": "Frontier"
     },
     {
@@ -69712,7 +69804,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 970,
+      "rank": 971,
       "tier": "Frontier"
     },
     {
@@ -69808,7 +69900,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 971,
+      "rank": 972,
       "tier": "Frontier"
     },
     {
@@ -69888,7 +69980,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 972,
+      "rank": 973,
       "tier": "Frontier"
     },
     {
@@ -69997,7 +70089,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 973,
+      "rank": 974,
       "tier": "Frontier"
     },
     {
@@ -70086,7 +70178,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 974,
+      "rank": 975,
       "tier": "Frontier"
     },
     {
@@ -70176,7 +70268,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 975,
+      "rank": 976,
       "tier": "Frontier"
     },
     {
@@ -70260,7 +70352,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 976,
+      "rank": 977,
       "tier": "Frontier"
     },
     {
@@ -70351,7 +70443,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 977,
+      "rank": 978,
       "tier": "Frontier"
     },
     {
@@ -70442,7 +70534,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 978,
+      "rank": 979,
       "tier": "Frontier"
     },
     {
@@ -70526,7 +70618,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 979,
+      "rank": 980,
       "tier": "Frontier"
     },
     {
@@ -70611,7 +70703,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 980,
+      "rank": 981,
       "tier": "Frontier"
     },
     {
@@ -70696,7 +70788,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 981,
+      "rank": 982,
       "tier": "Frontier"
     },
     {
@@ -70775,7 +70867,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 982,
+      "rank": 983,
       "tier": "Frontier"
     },
     {
@@ -70856,7 +70948,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 983,
+      "rank": 984,
       "tier": "Frontier"
     },
     {
@@ -70954,7 +71046,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 984,
+      "rank": 985,
       "tier": "Frontier"
     },
     {
@@ -71044,7 +71136,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 985,
+      "rank": 986,
       "tier": "Frontier"
     },
     {
@@ -71138,7 +71230,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 986,
+      "rank": 987,
       "tier": "Frontier"
     },
     {
@@ -71233,7 +71325,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 987,
+      "rank": 988,
       "tier": "Frontier"
     },
     {
@@ -71313,7 +71405,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 988,
+      "rank": 989,
       "tier": "Frontier"
     },
     {
@@ -71402,7 +71494,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 989,
+      "rank": 990,
       "tier": "Frontier"
     },
     {
@@ -71492,7 +71584,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 990,
+      "rank": 991,
       "tier": "Frontier"
     },
     {
@@ -71581,7 +71673,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 991,
+      "rank": 992,
       "tier": "Frontier"
     },
     {
@@ -71670,7 +71762,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 992,
+      "rank": 993,
       "tier": "Frontier"
     },
     {
@@ -71770,7 +71862,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 993,
+      "rank": 994,
       "tier": "Frontier"
     },
     {
@@ -71855,7 +71947,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 994,
+      "rank": 995,
       "tier": "Frontier"
     },
     {
@@ -71949,7 +72041,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 995,
+      "rank": 996,
       "tier": "Frontier"
     },
     {
@@ -72038,7 +72130,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 996,
+      "rank": 997,
       "tier": "Frontier"
     },
     {
@@ -72128,7 +72220,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 997,
+      "rank": 998,
       "tier": "Frontier"
     },
     {
@@ -72234,7 +72326,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 998,
+      "rank": 999,
       "tier": "Frontier"
     },
     {
@@ -72329,7 +72421,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 999,
+      "rank": 1000,
       "tier": "Frontier"
     },
     {
@@ -72428,7 +72520,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1000,
+      "rank": 1001,
       "tier": "Frontier"
     },
     {
@@ -72518,7 +72610,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1001,
+      "rank": 1002,
       "tier": "Frontier"
     },
     {
@@ -72599,7 +72691,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1002,
+      "rank": 1003,
       "tier": "Frontier"
     },
     {
@@ -72704,7 +72796,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1003,
+      "rank": 1004,
       "tier": "Frontier"
     },
     {
@@ -72803,7 +72895,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1004,
+      "rank": 1005,
       "tier": "Frontier"
     },
     {
@@ -72888,7 +72980,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1005,
+      "rank": 1006,
       "tier": "Frontier"
     },
     {
@@ -72977,7 +73069,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1006,
+      "rank": 1007,
       "tier": "Frontier"
     },
     {
@@ -73077,7 +73169,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1007,
+      "rank": 1008,
       "tier": "Frontier"
     },
     {
@@ -73162,7 +73254,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1008,
+      "rank": 1009,
       "tier": "Frontier"
     },
     {
@@ -73241,7 +73333,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1009,
+      "rank": 1010,
       "tier": "Frontier"
     },
     {
@@ -73336,7 +73428,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1010,
+      "rank": 1011,
       "tier": "Frontier"
     },
     {
@@ -73415,7 +73507,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1011,
+      "rank": 1012,
       "tier": "Frontier"
     },
     {
@@ -73494,7 +73586,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1012,
+      "rank": 1013,
       "tier": "Frontier"
     },
     {
@@ -73582,7 +73674,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1013,
+      "rank": 1014,
       "tier": "Frontier"
     },
     {
@@ -73676,7 +73768,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1014,
+      "rank": 1015,
       "tier": "Frontier"
     },
     {
@@ -73766,7 +73858,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1015,
+      "rank": 1016,
       "tier": "Frontier"
     },
     {
@@ -73858,7 +73950,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1016,
+      "rank": 1017,
       "tier": "Frontier"
     },
     {
@@ -73949,7 +74041,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1017,
+      "rank": 1018,
       "tier": "Frontier"
     },
     {
@@ -74039,7 +74131,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1018,
+      "rank": 1019,
       "tier": "Frontier"
     },
     {
@@ -74121,7 +74213,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1019,
+      "rank": 1020,
       "tier": "Frontier"
     },
     {
@@ -74212,7 +74304,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1020,
+      "rank": 1021,
       "tier": "Frontier"
     },
     {
@@ -74286,7 +74378,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1021,
+      "rank": 1022,
       "tier": "Frontier"
     },
     {
@@ -74375,7 +74467,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1022,
+      "rank": 1023,
       "tier": "Frontier"
     },
     {
@@ -74466,7 +74558,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1023,
+      "rank": 1024,
       "tier": "Frontier"
     },
     {
@@ -74550,7 +74642,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1024,
+      "rank": 1025,
       "tier": "Frontier"
     },
     {
@@ -74651,7 +74743,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1025,
+      "rank": 1026,
       "tier": "Frontier"
     },
     {
@@ -74742,7 +74834,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1026,
+      "rank": 1027,
       "tier": "Frontier"
     },
     {
@@ -74849,7 +74941,7 @@
         "searchFloor": null
       },
       "brief": "---\nproblem: 655\nupdated: 2026-10-14\nrun: 20261014-143931-223074-resolve-lean-erdos655\noutcome: running\nsolved: false\ncertified: 0\ncost_usd: 0.02\n---\n\n## What the problem asks\n\nTake n points on a flat sheet of paper. There is one rule. Draw a circle centred on any one of the points. That circle may pass through at most two of the other points, never three. Now measure the distance between every pair of points and count how many different lengths appear. The question is whether that count must always be noticeably more than half of n. \"Noticeably more\" means at least (1+c) times n/2, for some fixed positive number c, once n is large enough. A \"yes\" means every such set has many different distances. A \"no\" means some sets have few.\n\n## What we tried\n\nThis run is still going. It has cost $0.02 so far and has no recorded infrastructure failures. Its mode is research. No outside help is recorded. Its job is to check an earlier informal answer in Lean. Lean is a program that checks every step of a proof by machine. The run has not finished any such check. No search over cases was done in this run, so we report no search bound. Any bound would have unrecorded provenance. On 2026-10-13, an earlier screening step gave a \"settle chance\" of 0.88. That number is an unchecked guess by a model, made before any work began. It is not evidence.\n\n## What we found\n\nThis run has found nothing new yet. It has no machine-checked results. An earlier campaign on 2026-10-14 cost $15.30 and worked only informally. It proposed the answer \"no.\" Its example spaces n points evenly around a circle, like the corners of a regular polygon. The campaign argues that this shape obeys the circle rule. It also argues that it has at most about n/2 + 1 different distances. That is too few for any fixed c once n is large. A referee, an adversary and two judges, all automated, accepted this argument. It has not been checked by Lean. The problem is not settled by this record.\n\n## What would move it\n\nThe clearest next step is for this run to finish the Lean check of the polygon argument. Lean would need to confirm three things. First, the evenly spaced points number exactly n. Second, they obey the circle rule. Third, they give at most about n/2 + 1 different distances. If all three pass, the formal statement would be shown false as written. Even then, a reader should check that the formal statement matches the published question. If the check fails, the informal argument needs repair or a different example. Until then, treat the \"no\" answer as a plausible claim, not a result.\n\n*Written automatically at the end of run `20261014-143931-223074-resolve-lean-erdos655`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 1027,
+      "rank": 1028,
       "tier": "Frontier"
     },
     {
@@ -74940,7 +75032,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1028,
+      "rank": 1029,
       "tier": "Frontier"
     },
     {
@@ -75046,7 +75138,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1029,
+      "rank": 1030,
       "tier": "Frontier"
     },
     {
@@ -75130,7 +75222,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1030,
+      "rank": 1031,
       "tier": "Frontier"
     },
     {
@@ -75215,7 +75307,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1031,
+      "rank": 1032,
       "tier": "Frontier"
     },
     {
@@ -75306,7 +75398,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1032,
+      "rank": 1033,
       "tier": "Frontier"
     },
     {
@@ -75392,7 +75484,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1033,
+      "rank": 1034,
       "tier": "Frontier"
     },
     {
@@ -75482,7 +75574,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1034,
+      "rank": 1035,
       "tier": "Frontier"
     },
     {
@@ -75577,7 +75669,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1035,
+      "rank": 1036,
       "tier": "Frontier"
     },
     {
@@ -75678,7 +75770,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1036,
+      "rank": 1037,
       "tier": "Frontier"
     },
     {
@@ -75767,7 +75859,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1037,
+      "rank": 1038,
       "tier": "Frontier"
     },
     {
@@ -75864,7 +75956,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1038,
+      "rank": 1039,
       "tier": "Frontier"
     },
     {
@@ -75959,7 +76051,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1039,
+      "rank": 1040,
       "tier": "Frontier"
     },
     {
@@ -76071,7 +76163,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1040,
+      "rank": 1041,
       "tier": "Frontier"
     },
     {
@@ -76172,7 +76264,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1041,
+      "rank": 1042,
       "tier": "Frontier"
     },
     {
@@ -76268,7 +76360,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1042,
+      "rank": 1043,
       "tier": "Frontier"
     },
     {
@@ -76359,7 +76451,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1043,
+      "rank": 1044,
       "tier": "Frontier"
     },
     {
@@ -76472,7 +76564,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1044,
+      "rank": 1045,
       "tier": "Frontier"
     },
     {
@@ -76569,7 +76661,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1045,
+      "rank": 1046,
       "tier": "Frontier"
     },
     {
@@ -76665,7 +76757,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1046,
+      "rank": 1047,
       "tier": "Frontier"
     },
     {
@@ -76760,7 +76852,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1047,
+      "rank": 1048,
       "tier": "Frontier"
     },
     {
@@ -76854,7 +76946,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1048,
+      "rank": 1049,
       "tier": "Frontier"
     },
     {
@@ -76943,7 +77035,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1049,
+      "rank": 1050,
       "tier": "Frontier"
     },
     {
@@ -77029,7 +77121,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1050,
+      "rank": 1051,
       "tier": "Frontier"
     },
     {
@@ -77138,7 +77230,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1051,
+      "rank": 1052,
       "tier": "Frontier"
     },
     {
@@ -77237,7 +77329,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1052,
+      "rank": 1053,
       "tier": "Frontier"
     },
     {
@@ -77317,7 +77409,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1053,
+      "rank": 1054,
       "tier": "Frontier"
     },
     {
@@ -77406,7 +77498,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1054,
+      "rank": 1055,
       "tier": "Frontier"
     },
     {
@@ -77494,7 +77586,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1055,
+      "rank": 1056,
       "tier": "Frontier"
     },
     {
@@ -77597,7 +77689,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1056,
+      "rank": 1057,
       "tier": "Frontier"
     },
     {
@@ -77697,7 +77789,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1057,
+      "rank": 1058,
       "tier": "Frontier"
     },
     {
@@ -77787,7 +77879,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1058,
+      "rank": 1059,
       "tier": "Frontier"
     },
     {
@@ -77840,7 +77932,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1059,
+      "rank": 1060,
       "tier": "Frontier"
     },
     {
@@ -77924,7 +78016,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1060,
+      "rank": 1061,
       "tier": "Frontier"
     },
     {
@@ -77988,7 +78080,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1061,
+      "rank": 1062,
       "tier": "Frontier"
     },
     {
@@ -78088,7 +78180,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1062,
+      "rank": 1063,
       "tier": "Frontier"
     },
     {
@@ -78192,7 +78284,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1063,
+      "rank": 1064,
       "tier": "Frontier"
     },
     {
@@ -78277,7 +78369,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1064,
+      "rank": 1065,
       "tier": "Frontier"
     },
     {
@@ -78362,7 +78454,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1065,
+      "rank": 1066,
       "tier": "Frontier"
     },
     {
@@ -78442,7 +78534,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1066,
+      "rank": 1067,
       "tier": "Frontier"
     },
     {
@@ -78544,7 +78636,7 @@
         "searchFloor": null
       },
       "brief": "---\nproblem: 769\nupdated: 2026-10-14\nrun: 20261014-162417-471965-resolve-lean-erdos769\noutcome: not_proved\nsolved: false\ncertified: 12\ncost_usd: 6.69\n---\n\n## What the problem asks\n\nTake a cube in n dimensions, where n is the number of directions it extends in. Can you cut it exactly into k smaller cubes? Here every piece must be a shrunken copy of the big cube, sitting square to it. Mathematicians call such copies \"homothetic\". For some values of k this cannot be done. Let c(n) be the smallest number such that every k from c(n) upward works. The question asks for good estimates of c(n). In particular, is c(n) always at least some fixed fraction of n^n, which is n multiplied by itself n times? That is the meaning of the symbol \"≫\" here.\n\n## What we tried\n\nThis run worked toward the \"no\" answer. The goal was to show c(n) can grow more slowly than any fixed fraction of n^n. The work was done in Lean, which is software that checks each step of a proof mechanically. The plan split the argument into 13 smaller claims, called hypotheses. All 13 were marked as dealt with. Twelve were certified, meaning Lean accepted their proofs. The thirteenth, named `erdos_769_neg_hyp_noCommon`, is not on the certified list. The overall structure fit together. But the final check of the whole proof did not pass. So the \"no\" direction is recorded as proved but unverified. The run cost $6.69.\n\n## What we found\n\nThe problem has **not** been solved. The most useful finding is a step that removes the geometry. Two moves are possible. You can cut the cube into a grid of a^n equal smaller cubes. You can also replace any one piece with a scaled copy of a full cutting. So k = 1 plus any sum of numbers of the form a^n − 1 always works. What remains is pure arithmetic about which totals such sums can reach. A related step says that for odd n ≥ 253, no whole number above 1 divides all of 2^n − 1, 3^n − 1, and so on up to (n/4 + 1)^n − 1. That was checked by computer only for odd n from 253 to 1801. These steps were checked by hand. In Lean they were stated but not proved. No search bound was recorded.\n\n## What would move it\n\nThe final verification must pass. Someone needs to find why the full proof failed the last check even though its parts fit together. The uncertified hypothesis, `noCommon`, needs a proof that Lean accepts. It is the claim that no number above 1 divides all of the a^n − 1 values. The stated arithmetic steps also need real Lean proofs, since they now rest on placeholders. Separately, an earlier informal attempt, not part of this run, wrote a full \"no\" answer. Reviewers accepted it, and it was sent to Lean. A finished, verified Lean proof would be needed before calling the question settled.\n\n*Written automatically at the end of run `20261014-162417-471965-resolve-lean-erdos769`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 1067,
+      "rank": 1068,
       "tier": "Frontier"
     },
     {
@@ -78635,7 +78727,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1068,
+      "rank": 1069,
       "tier": "Frontier"
     },
     {
@@ -78735,7 +78827,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1069,
+      "rank": 1070,
       "tier": "Frontier"
     },
     {
@@ -78830,7 +78922,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1070,
+      "rank": 1071,
       "tier": "Frontier"
     },
     {
@@ -78925,7 +79017,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1071,
+      "rank": 1072,
       "tier": "Frontier"
     },
     {
@@ -79026,7 +79118,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1072,
+      "rank": 1073,
       "tier": "Frontier"
     },
     {
@@ -79127,7 +79219,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1073,
+      "rank": 1074,
       "tier": "Frontier"
     },
     {
@@ -79217,7 +79309,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1074,
+      "rank": 1075,
       "tier": "Frontier"
     },
     {
@@ -79301,7 +79393,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1075,
+      "rank": 1076,
       "tier": "Frontier"
     },
     {
@@ -79412,7 +79504,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1076,
+      "rank": 1077,
       "tier": "Frontier"
     },
     {
@@ -79514,7 +79606,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1077,
+      "rank": 1078,
       "tier": "Frontier"
     },
     {
@@ -79592,7 +79684,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1078,
+      "rank": 1079,
       "tier": "Frontier"
     },
     {
@@ -79683,7 +79775,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1079,
+      "rank": 1080,
       "tier": "Frontier"
     },
     {
@@ -79784,7 +79876,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1080,
+      "rank": 1081,
       "tier": "Frontier"
     },
     {
@@ -79868,7 +79960,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1081,
+      "rank": 1082,
       "tier": "Frontier"
     },
     {
@@ -79967,7 +80059,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1082,
+      "rank": 1083,
       "tier": "Frontier"
     },
     {
@@ -80057,7 +80149,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1083,
+      "rank": 1084,
       "tier": "Frontier"
     },
     {
@@ -80162,7 +80254,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1084,
+      "rank": 1085,
       "tier": "Frontier"
     },
     {
@@ -80246,7 +80338,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1085,
+      "rank": 1086,
       "tier": "Frontier"
     },
     {
@@ -80335,7 +80427,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1086,
+      "rank": 1087,
       "tier": "Frontier"
     },
     {
@@ -80431,7 +80523,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1087,
+      "rank": 1088,
       "tier": "Frontier"
     },
     {
@@ -80515,7 +80607,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1088,
+      "rank": 1089,
       "tier": "Frontier"
     },
     {
@@ -80606,7 +80698,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1089,
+      "rank": 1090,
       "tier": "Frontier"
     },
     {
@@ -80691,7 +80783,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1090,
+      "rank": 1091,
       "tier": "Frontier"
     },
     {
@@ -80782,7 +80874,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1091,
+      "rank": 1092,
       "tier": "Frontier"
     },
     {
@@ -80881,7 +80973,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1092,
+      "rank": 1093,
       "tier": "Frontier"
     },
     {
@@ -80972,7 +81064,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1093,
+      "rank": 1094,
       "tier": "Frontier"
     },
     {
@@ -81063,7 +81155,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1094,
+      "rank": 1095,
       "tier": "Frontier"
     },
     {
@@ -81160,7 +81252,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1095,
+      "rank": 1096,
       "tier": "Frontier"
     },
     {
@@ -81250,7 +81342,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1096,
+      "rank": 1097,
       "tier": "Frontier"
     },
     {
@@ -81344,7 +81436,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1097,
+      "rank": 1098,
       "tier": "Frontier"
     },
     {
@@ -81449,7 +81541,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1098,
+      "rank": 1099,
       "tier": "Frontier"
     },
     {
@@ -81541,7 +81633,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1099,
+      "rank": 1100,
       "tier": "Frontier"
     },
     {
@@ -81636,7 +81728,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1100,
+      "rank": 1101,
       "tier": "Frontier"
     },
     {
@@ -81740,7 +81832,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1101,
+      "rank": 1102,
       "tier": "Frontier"
     },
     {
@@ -81835,7 +81927,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1102,
+      "rank": 1103,
       "tier": "Frontier"
     },
     {
@@ -81924,7 +82016,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1103,
+      "rank": 1104,
       "tier": "Frontier"
     },
     {
@@ -82025,7 +82117,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1104,
+      "rank": 1105,
       "tier": "Frontier"
     },
     {
@@ -82104,7 +82196,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1105,
+      "rank": 1106,
       "tier": "Frontier"
     },
     {
@@ -82195,7 +82287,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1106,
+      "rank": 1107,
       "tier": "Frontier"
     },
     {
@@ -82279,7 +82371,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1107,
+      "rank": 1108,
       "tier": "Frontier"
     },
     {
@@ -82391,7 +82483,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1108,
+      "rank": 1109,
       "tier": "Frontier"
     },
     {
@@ -82471,7 +82563,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1109,
+      "rank": 1110,
       "tier": "Frontier"
     },
     {
@@ -82562,7 +82654,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1110,
+      "rank": 1111,
       "tier": "Frontier"
     },
     {
@@ -82662,7 +82754,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1111,
+      "rank": 1112,
       "tier": "Frontier"
     },
     {
@@ -82736,7 +82828,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1112,
+      "rank": 1113,
       "tier": "Frontier"
     },
     {
@@ -82830,7 +82922,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1113,
+      "rank": 1114,
       "tier": "Frontier"
     },
     {
@@ -82919,7 +83011,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1114,
+      "rank": 1115,
       "tier": "Frontier"
     },
     {
@@ -83027,7 +83119,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1115,
+      "rank": 1116,
       "tier": "Frontier"
     },
     {
@@ -83132,7 +83224,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1116,
+      "rank": 1117,
       "tier": "Frontier"
     },
     {
@@ -83274,7 +83366,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1117,
+      "rank": 1118,
       "tier": "Frontier"
     },
     {
@@ -83381,7 +83473,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1118,
+      "rank": 1119,
       "tier": "Frontier"
     },
     {
@@ -83465,7 +83557,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1119,
+      "rank": 1120,
       "tier": "Frontier"
     },
     {
@@ -83569,7 +83661,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1120,
+      "rank": 1121,
       "tier": "Frontier"
     },
     {
@@ -83698,7 +83790,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1121,
+      "rank": 1122,
       "tier": "Frontier"
     },
     {
@@ -83793,7 +83885,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1122,
+      "rank": 1123,
       "tier": "Frontier"
     },
     {
@@ -83883,7 +83975,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1123,
+      "rank": 1124,
       "tier": "Frontier"
     },
     {
@@ -83974,7 +84066,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1124,
+      "rank": 1125,
       "tier": "Frontier"
     },
     {
@@ -84064,7 +84156,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1125,
+      "rank": 1126,
       "tier": "Frontier"
     },
     {
@@ -84170,7 +84262,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1126,
+      "rank": 1127,
       "tier": "Frontier"
     },
     {
@@ -84265,7 +84357,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1127,
+      "rank": 1128,
       "tier": "Frontier"
     },
     {
@@ -84382,7 +84474,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1128,
+      "rank": 1129,
       "tier": "Frontier"
     },
     {
@@ -84481,7 +84573,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1129,
+      "rank": 1130,
       "tier": "Frontier"
     },
     {
@@ -84586,7 +84678,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1130,
+      "rank": 1131,
       "tier": "Frontier"
     },
     {
@@ -84686,7 +84778,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1131,
+      "rank": 1132,
       "tier": "Frontier"
     },
     {
@@ -84780,7 +84872,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1132,
+      "rank": 1133,
       "tier": "Frontier"
     },
     {
@@ -84870,7 +84962,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1133,
+      "rank": 1134,
       "tier": "Frontier"
     },
     {
@@ -84984,7 +85076,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1134,
+      "rank": 1135,
       "tier": "Frontier"
     },
     {
@@ -85080,7 +85172,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1135,
+      "rank": 1136,
       "tier": "Frontier"
     },
     {
@@ -85182,7 +85274,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1136,
+      "rank": 1137,
       "tier": "Frontier"
     },
     {
@@ -85279,7 +85371,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1137,
+      "rank": 1138,
       "tier": "Frontier"
     },
     {
@@ -85373,7 +85465,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1138,
+      "rank": 1139,
       "tier": "Frontier"
     },
     {
@@ -85474,7 +85566,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1139,
+      "rank": 1140,
       "tier": "Frontier"
     },
     {
@@ -85573,7 +85665,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1140,
+      "rank": 1141,
       "tier": "Frontier"
     },
     {
@@ -85669,7 +85761,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1141,
+      "rank": 1142,
       "tier": "Frontier"
     },
     {
@@ -85760,7 +85852,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1142,
+      "rank": 1143,
       "tier": "Frontier"
     },
     {
@@ -85843,7 +85935,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1143,
+      "rank": 1144,
       "tier": "Frontier"
     },
     {
@@ -85938,7 +86030,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1144,
+      "rank": 1145,
       "tier": "Frontier"
     },
     {
@@ -86034,7 +86126,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1145,
+      "rank": 1146,
       "tier": "Frontier"
     },
     {
@@ -86131,7 +86223,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1146,
+      "rank": 1147,
       "tier": "Frontier"
     },
     {
@@ -86226,7 +86318,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1147,
+      "rank": 1148,
       "tier": "Frontier"
     },
     {
@@ -86324,7 +86416,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1148,
+      "rank": 1149,
       "tier": "Frontier"
     },
     {
@@ -86450,7 +86542,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1149,
+      "rank": 1150,
       "tier": "Frontier"
     },
     {
@@ -86560,7 +86652,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1150,
+      "rank": 1151,
       "tier": "Frontier"
     },
     {
@@ -86655,7 +86747,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1151,
+      "rank": 1152,
       "tier": "Frontier"
     },
     {
@@ -86756,7 +86848,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1152,
+      "rank": 1153,
       "tier": "Frontier"
     },
     {
@@ -86862,7 +86954,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1153,
+      "rank": 1154,
       "tier": "Frontier"
     },
     {
@@ -86958,7 +87050,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1154,
+      "rank": 1155,
       "tier": "Frontier"
     },
     {
@@ -87062,7 +87154,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1155,
+      "rank": 1156,
       "tier": "Frontier"
     },
     {
@@ -87146,7 +87238,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1156,
+      "rank": 1157,
       "tier": "Frontier"
     },
     {
@@ -87252,7 +87344,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1157,
+      "rank": 1158,
       "tier": "Frontier"
     },
     {
@@ -87358,7 +87450,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1158,
+      "rank": 1159,
       "tier": "Frontier"
     },
     {
@@ -87442,7 +87534,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1159,
+      "rank": 1160,
       "tier": "Frontier"
     },
     {
@@ -87562,7 +87654,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 1160,
+      "rank": 1161,
       "tier": "Frontier"
     },
     {
@@ -87668,7 +87760,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1161,
+      "rank": 1162,
       "tier": "Frontier"
     },
     {
@@ -87772,7 +87864,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1162,
+      "rank": 1163,
       "tier": "Frontier"
     },
     {
@@ -87861,7 +87953,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1163,
+      "rank": 1164,
       "tier": "Frontier"
     },
     {
@@ -87952,7 +88044,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1164,
+      "rank": 1165,
       "tier": "Frontier"
     },
     {
@@ -88052,7 +88144,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1165,
+      "rank": 1166,
       "tier": "Frontier"
     },
     {
@@ -88157,7 +88249,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1166,
+      "rank": 1167,
       "tier": "Frontier"
     },
     {
@@ -88263,7 +88355,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1167,
+      "rank": 1168,
       "tier": "Frontier"
     },
     {
@@ -88359,7 +88451,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1168,
+      "rank": 1169,
       "tier": "Frontier"
     },
     {
@@ -88458,7 +88550,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1169,
+      "rank": 1170,
       "tier": "Frontier"
     },
     {
@@ -88554,7 +88646,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 1170,
+      "rank": 1171,
       "tier": "Frontier"
     },
     {
@@ -88642,102 +88734,6 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1109",
-      "manual": false,
-      "prize": "no",
-      "evidence": {
-        "best": "untried",
-        "runs": 0,
-        "benchmarkRuns": 0,
-        "certifiedMax": 0
-      },
-      "rank": 1171,
-      "tier": "Frontier"
-    },
-    {
-      "id": 1110,
-      "statement": "Let $p>q\\geq 2$ be two coprime integers. We call $n$ representable if it is the sum of integers of the form $p^kq^l$, none of which divide each other. If $\\{p,q\\}\\neq \\{2,3\\}$ then what can be said about the density of non-representable numbers? Are there infinitely many coprime non-representable numbers?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "number theory"
-      ],
-      "score": 1,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
-        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
-      ],
-      "requirements": [
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Construct and verify a uniform argument or an infinite family.",
-        "Prove the asymptotic statement with its full quantifiers and error control.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Unbounded quantifier",
-          "points": -5
-        },
-        {
-          "label": "Asymptotic or density target",
-          "points": -9
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        }
-      ],
-      "partial": {
-        "score": 45,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Library fit",
-            "points": 5
-          },
-          {
-            "label": "Asymptotic core",
-            "points": -6
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "Reachable partial results still need the relevant Mathlib development.",
-          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/1110",
       "manual": false,
       "prize": "no",
       "evidence": {
