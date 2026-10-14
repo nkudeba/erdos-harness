@@ -104,18 +104,23 @@
      "outcome": "requeued",
      "previous": "runs/20261014-143931-223074-resolve-lean-erdos655",
      "at": "2026-10-14T23:19:41Z"
+    },
+    {
+     "tier": "lean",
+     "rc": 3,
+     "summary": "RUN-SUMMARY problem=655 exit=3 outcome=partial directions=neg:partial verified=None spend=$2.54 llm_calls=15 lean_checks=43 lemmas=0 fatals=0 wall=33m mode=research dir=runs/20261014-192027-911113-resolve-lean-erdos655"
     }
    ],
    "prepped": true,
-   "running": "lean",
+   "running": null,
    "run_dir": "runs/20261009-225323-779500-erdos655",
    "errors": 0,
-   "status": "complete",
+   "status": "lean-partial",
    "spend": 15.296993000000008,
    "limit_waits": 0,
    "settle_chance": 0.875,
    "arm": "pass",
-   "next": "lean",
+   "next": null,
    "intent": "formalization-gap",
    "track": "statement",
    "complete": {
@@ -127,7 +132,7 @@
    },
    "claims_todo": [],
    "lean_run": "runs/20261014-192027-911113-resolve-lean-erdos655",
-   "lean_summary": "RUN-SUMMARY problem=655 exit=2 outcome=running verified=None spend=$0.06 llm_calls=2 lean_checks=2 lemmas=0 fatals=0 wall=1m mode=research dir=runs/20261014-143931-223074-resolve-lean-erdos655",
+   "lean_summary": "RUN-SUMMARY problem=655 exit=3 outcome=partial directions=neg:partial verified=None spend=$2.54 llm_calls=15 lean_checks=43 lemmas=0 fatals=0 wall=33m mode=research dir=runs/20261014-192027-911113-resolve-lean-erdos655",
    "lean_blocked": null
   },
   "769": {
