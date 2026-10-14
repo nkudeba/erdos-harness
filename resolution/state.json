@@ -282,13 +282,27 @@
      "outcome": "reset",
      "at": "2026-10-13T14:55:24Z",
      "why": "both failures were the weekly usage limit (2026-10-09 to 10-13), whose reset time the parser could not read; the problem was never screened"
+    },
+    {
+     "tier": "screen",
+     "outcome": "control",
+     "settle_chance": 0.25,
+     "spend": 1.0745,
+     "track": "control"
     }
    ],
    "prepped": true,
-   "running": "screen",
+   "running": null,
    "run_dir": "runs/20261011-134723-544082-erdos103",
    "errors": 0,
-   "status": null
+   "status": "screened",
+   "spend": 1.0744599999999997,
+   "limit_waits": 0,
+   "settle_chance": 0.25,
+   "arm": "control",
+   "next": "scout",
+   "track": "control",
+   "intent": null
   },
   "197": {
    "history": [
