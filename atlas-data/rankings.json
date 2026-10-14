@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 142,
+    "manually_reviewed": 143,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "eaf6c124a94fb0dc4deb4b8ea70d9da85cf95e40e6f97ef0fcb3f754ff265161",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "72b5240debfd7a737b10b9271b8e43f36afe270fbe7bb33af6bdea4035094cd2"
+    "manual_reviews_sha256": "7bd680eb6a5948a61f0310ceb414b91801dab5011c54078fb70741a22ef63be2"
   },
   "problems": [
     {
@@ -42323,6 +42323,7 @@
       "score": 9,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.06, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (pilot pair (p,q) = (5,2)). There is an explicit family n(B), B ∈ 𝔅, where: - n(B) has the shape (a·5^B + b)/d, or the two-parameter shape a·5^B + b·2^K; - 𝔅 is infinite (an arithmetic progression, possibly with 2-adic restrictions on B); - ",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -42336,7 +42337,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -42392,13 +42393,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1110",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-14",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 691,
       "tier": "Frontier"

@@ -1879,6 +1879,15 @@
     "partial": 10,
     "assessed": "2026-10-07"
   },
+  "1110": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.06, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (pilot pair (p,q) = (5,2)). There is an explicit family n(B), B ∈ 𝔅, where: - n(B) has the shape (a·5^B + b)/d, or the two-parameter shape a·5^B + b·2^K; - 𝔅 is infinite (an arithmetic progression, possibly with 2-adic restrictions on B); - "
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-14"
+  },
   "1133": {
     "rationale": [
       "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.08, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target: prove the statement (no disproof) using a tiled-window construction with a multi-point dual witness that survives undersampling. Construction of y. Fix W (large, depending on C) and ε ≤ c/(W log W). 1. Apply close-pair elimination if it applies. Duplic"
