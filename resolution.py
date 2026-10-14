@@ -88,10 +88,13 @@ DEFAULTS = {
                          "--engine-core-share 0.67 --engine-deep-budget 5 --engine-program-cycles 6 "
                          "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
                          "--engine-session-legs 3 --engine-gap-rounds 2 --engine-gap-max 2 --results-library on"},
-    "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6},
+    # Recursive children get 3 cycles and one more level: with the default 1, #888's upper-bound child certified 3 of its
+    # 4 pieces, planned its next move, and was cut off twice; with 4 cycles and depth 3 it finished (REPORT 3.11).
+    "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
     # (candidates, a crosscheck judge, recorded readings) and proves it with the engine's chain as the blueprint.
-    "lean_claims": {"min_significance": 2, "budget": 15.0, "extend": 5.0, "extend_max": 30.0, "cycles": 4},
+    "lean_claims": {"min_significance": 2, "budget": 15.0, "extend": 5.0, "extend_max": 30.0, "cycles": 4,
+                    "child_cycles": 3, "residual_depth": 3},
     "max_errors": 2,
     "fc_sha": None,
 }
@@ -539,6 +542,7 @@ def claim_lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
             str(run_dir), "--discover", "on", "--mode", "research", "--allow-research", "--blueprint", "on",
             "--residual-view", "outline", "--research-cycles", str(lc["cycles"]), "--run-budget", str(lc["budget"]),
             "--budget-extend", str(lc["extend"]), "--budget-extend-max", str(lc["extend_max"]), "--skip-literature",
+            "--child-cycles", str(lc.get("child_cycles", 3)), "--residual-depth", str(lc.get("residual_depth", 3)),
             "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
 
 
@@ -548,6 +552,7 @@ def lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
             str(run_dir), "--open", "--discover", "on", "--mode", "research", "--allow-research", "--blueprint", "on",
             "--residual-view", "outline", "--research-cycles", str(lc["cycles"]), "--run-budget", str(lc["budget"]),
             "--budget-extend", str(lc["extend"]), "--budget-extend-max", str(lc["extend_max"]), "--skip-literature",
+            "--child-cycles", str(lc.get("child_cycles", 3)), "--residual-depth", str(lc.get("residual_depth", 3)),
             "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
 
 

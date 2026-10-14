@@ -364,6 +364,8 @@ class ClaimLean(Base):
         self.assertIn("the k = 3 case holds", st["discovery"]["best_proof"]["text"])
         self.assertNotIn("--open", cmd)
         self.assertNotIn("--benchmark", cmd)
+        self.assertEqual(cmd[cmd.index("--child-cycles") + 1], "3")        # REPORT 3.11: children were starved at 1
+        self.assertEqual(cmd[cmd.index("--residual-depth") + 1], "3")
 
     def test_the_claim_tier_comes_after_the_problem_tiers(self):
         cfg = R.load_cfg()
