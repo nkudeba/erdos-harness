@@ -330,10 +330,17 @@ def header_lines(src: str) -> list[str]:
 
 def comparator_files(candidate: str, frozen: str, main: str, defs: list[str], base: str) -> tuple[str, str, dict]:
     """The challenge module (the frozen statement under the proof's own header), the solution module (the proof) and
-    Comparator's config, for module prefix `base`."""
+    Comparator's config, for module prefix `base`.
+
+    `definition_names` stays EMPTY. Comparator already requires every declaration the theorem's statement uses to be
+    the same in the solution as in the challenge, the frozen statement's own definitions and structures included.
+    A name in `definition_names` is a definition HOLE: the solution may fill it with any body of the same type. Until
+    2026-10-14 the frozen definitions were listed there, which exempted their bodies from Comparator's comparison
+    (`statement_identity` still compared them) and made Comparator stop on #769's `structure Cube` ("Challenge
+    constant is not a definition"), failing a sound proof."""
     challenge = "\n".join(header_lines(candidate)).rstrip() + "\n\n" + strip_imports(frozen).strip() + "\n"
     cfg = {"challenge_module": f"{base}.Challenge", "solution_module": f"{base}.Solution", "theorem_names": [main],
-           "definition_names": list(defs), "permitted_axioms": sorted(STD_AXIOMS)}
+           "definition_names": [], "permitted_axioms": sorted(STD_AXIOMS)}
     return challenge, candidate, cfg
 
 

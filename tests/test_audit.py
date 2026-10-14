@@ -88,7 +88,9 @@ class ComparatorWiring(unittest.TestCase):
         self.assertIn("theorem erdos_T : f 1 = 1 := by\n  sorry", ch)
         self.assertEqual(sol, proof)
         self.assertEqual((cfg["challenge_module"], cfg["solution_module"]), ("Formal.Audit.AX.Challenge", "Formal.Audit.AX.Solution"))
-        self.assertEqual((cfg["theorem_names"], cfg["definition_names"]), (["erdos_T"], ["f"]))
+        # no definition HOLES: Comparator compares every declaration the statement uses, `f` included; a hole would
+        # let the solution give `f` any body of the same type (and crashed on #769's `structure Cube`)
+        self.assertEqual((cfg["theorem_names"], cfg["definition_names"]), (["erdos_T"], []))
         self.assertEqual(set(cfg["permitted_axioms"]), A.STD_AXIOMS)
 
     def test_no_tools_means_no_checks(self):
@@ -118,6 +120,26 @@ class LeanChecks(unittest.TestCase):
         frozen = "theorem erdos_T : (2 : ℕ) < 3 := by\n  sorry\n"
         honest = "import Mathlib.Tactic\n\ntheorem erdos_T : (2 : ℕ) < 3 := by\n  norm_num\n"
         r = A.lean_checks(honest, frozen, ["Mathlib.Tactic"], "test-honest")
+        self.assertTrue(all(c["ok"] for c in r.values()), r)
+
+    def test_a_frozen_definition_given_another_body_fails_comparator_too(self):
+        # With the frozen definitions listed as holes (until 2026-10-14), Comparator accepted this: `Small` keeps its
+        # type and gets the body `True`. Only `statement_identity` caught it.
+        frozen = "def Small (n : ℕ) : Prop := n < 2\n\ntheorem erdos_T : Small 3 := by\n  sorry\n"
+        tampered = ("import Mathlib.Tactic\n\ndef Small (n : ℕ) : Prop := True\n\n"
+                    "theorem erdos_T : Small 3 := by\n  trivial\n")
+        r = A.lean_checks(tampered, frozen, ["Mathlib.Tactic"], "test-hole")
+        self.assertFalse(r["statement_identity"]["ok"])
+        if "comparator" in r:
+            self.assertFalse(r["comparator"]["ok"])
+
+    def test_a_statement_with_a_structure_passes_comparator(self):
+        # #769's frozen statement declares `structure Cube`; Comparator stopped on it ("not a definition")
+        frozen = ("structure Box where\n  side : ℕ\n\ndef Big (b : Box) : Prop := 1 ≤ b.side\n\n"
+                  "theorem erdos_T : Big ⟨2⟩ := by\n  sorry\n")
+        honest = ("import Mathlib.Tactic\n\nstructure Box where\n  side : ℕ\n\ndef Big (b : Box) : Prop := 1 ≤ b.side\n\n"
+                  "theorem erdos_T : Big ⟨2⟩ := by\n  unfold Big\n  norm_num\n")
+        r = A.lean_checks(honest, frozen, ["Mathlib.Tactic"], "test-structure")
         self.assertTrue(all(c["ok"] for c in r.values()), r)
 
 

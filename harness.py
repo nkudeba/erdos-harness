@@ -12813,6 +12813,70 @@ def run_summary_line(run_dir: Path, exit_code: int | None = None) -> str:
     return RUN_SUMMARY_PREFIX + " " + " ".join(fields)
 
 
+def cmd_reverify(args) -> int:
+    """Re-run final verification on a finished run's own proof, never the search for one. For a proof a verifier bug
+    left `proved_unverified`: #769's closed residual (2026-10-14) failed only Comparator, because the audit had passed
+    the frozen statement's `structure Cube` to it as a definition hole (fixed in `audit.comparator_files`).
+
+    Each direction of an --open run is rebuilt as `run_open` builds it, and `stage_verify` runs in full: the mechanical
+    guard, the audit and the faithfulness judge, which is the only model call. The run's DONE files, open report and
+    summary line are updated, and the re-verification is recorded in its `assistance`. Exit 0 = proved and verified."""
+    run_dir = Path(args.run).resolve()
+    pstate = json.loads((run_dir / "state.json").read_text())
+    directions = [d for d in ("pos", "neg") if (run_dir / d / "state.json").exists()]
+    results = dict(pstate.get("open_results") or {})
+    note = (f"{now()} operator re-verification (`harness.py reverify`): final verification re-run on the run's own "
+            f"proof after a verifier fix; no new search")
+    verified = {}
+    for d in directions or [None]:
+        cdir = run_dir / d if d else run_dir
+        if not json.loads((cdir / "state.json").read_text()).get("proof"):
+            continue
+        ns = build_parser().parse_args(["run", "--problem", str(run_dir / "problem.json"), "--resume", str(cdir),
+                                        "--backend", args.backend, "--model", args.model or DEFAULT_CLAUDE_MODEL,
+                                        "--audit", "on", "--no-brief"])
+        h = Harness(ns)
+        if d:
+            h.direction = d
+            h.thm_name = f"erdos_{h.problem['id']}" + ("_neg" if d == "neg" else "")
+        before = (h.state.get("verify") or {}).get("all_clear")
+        v = h.stage_verify()
+        outcome = "proved" if v.get("all_clear") is True else "proved_unverified"
+        rc = 0 if outcome == "proved" else 2
+        h.state["outcome"] = outcome
+        h.state["stop_reason"] = ("the residual skeleton closed: no hypothesis left, final verification cleared"
+                                  if rc == 0 else "the proof compiled but final verification did not clear (re-verified)")
+        h.state.setdefault("assistance", []).append(f"{note}: all_clear {before} -> {v.get('all_clear')}")
+        h.save()
+        (cdir / "DONE").write_text(json.dumps({"proved": True, "outcome": outcome, "exit": rc,
+                                               "verify": v.get("all_clear"), "reverified": now()}))
+        h.log.event("run", "reverified", outcome=outcome, all_clear=v.get("all_clear"), was=before)
+        if d:
+            results[d] = rc
+            if rc == 0 and not pstate.get("benchmark"):
+                out = KNOWLEDGE / "open" / str(h.problem["id"]) / run_dir.name
+                out.mkdir(parents=True, exist_ok=True)
+                (out / f"Erdos{h.problem['id']}_{d}.lean").write_text(compose(h.state["proof"], h.imports))
+        verified[d or "run"] = v.get("all_clear")
+        print(f"{d or 'run'}: {outcome} (all_clear {before} -> {v.get('all_clear')})", flush=True)
+    if not verified:
+        print("no proof to re-verify", flush=True)
+        return 2
+    if directions:
+        rc = 0 if 0 in results.values() else 3 if 3 in results.values() else 2
+        pstate["open_results"] = results
+        pstate.setdefault("assistance", []).append(f"{note}: {verified}")
+        (run_dir / "state.json").write_text(json.dumps(pstate, indent=2, ensure_ascii=False))
+        (run_dir / "DONE").write_text(json.dumps({"open": results, "exit": rc, "reverified": now(),
+                                                  "open_reviews": pstate.get("open_reviews", {})}))
+        with (run_dir / "report.md").open("a") as f:
+            f.write(f"\n## Re-verified {now()}\n\n{note}. Results: {json.dumps(verified)}.\n")
+    else:
+        rc = 0 if verified.get("run") is True else 2
+    emit_run_summary(run_dir, rc)
+    return rc
+
+
 def emit_run_summary(run_dir: Path, exit_code: int | None = None, persist: bool = True) -> str:
     """Print the one-line summary; persist it only for the run that produced it.
 
@@ -13178,6 +13242,12 @@ def build_parser() -> argparse.ArgumentParser:
                     help="also overwrite SUMMARY.line / summary-log.tsv (default: reprint only, never clobber "
                          "the record the run itself wrote)")
 
+    rv = sub.add_parser("reverify", help="re-run final verification on a finished run's own proof (after a verifier "
+                                         "fix); never searches for a proof")
+    rv.add_argument("--run", required=True, help="the run directory (an --open run re-verifies each direction's proof)")
+    rv.add_argument("--backend", choices=["claude-cli", "codex-cli"], default="claude-cli")
+    rv.add_argument("--model", default=None)
+
     im = sub.add_parser("improve", help="self-improvement loop: run → retrospect → regress, per cycle")
     im.add_argument("--problems", nargs="+", required=True)
     im.add_argument("--cycles", type=int, default=1)
@@ -13216,6 +13286,8 @@ def main():
         return cmd_brief(args)
     if args.cmd == "summary":
         return cmd_summary(args)
+    if args.cmd == "reverify":
+        return cmd_reverify(args)
     h = Harness(args)
     rc = 1
     try:

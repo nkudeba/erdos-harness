@@ -795,31 +795,7 @@ def step(cfg: dict) -> bool:
         lean_run = ROOT / p["lean_run"]
         log(f"#{n}: Lean on {p['complete']['claim']} ({p['complete']['answer']}) in {lean_run.name}")
         rc, line = run_lean(lean_run, cfg)
-        spend = run_spend(lean_run)
-        verified = rc == 0
-        p.update({"running": None, "next": None, "status": "verified" if verified else "lean-partial",
-                  "lean_summary": line})
-        p["history"].append({"tier": "lean", "rc": rc, "summary": line})
-        save_problem(n, p)
-        cls = (p.get("complete") or {}).get("intent")
-        result({"problem": n, "tier": "lean", "outcome": "verified" if verified else "not verified", "rc": rc,
-                "spend": spend, "lean_run": p["lean_run"], "summary": line, "track": p.get("track"), "intent": cls})
-        if verified and cls in ("formalization-gap", "known-result"):
-            flag_statement_finding(n, lean_run, line, p["complete"], engine_run)
-            src = p["complete"].get("intent_source")
-            record_atlas(n, f"Resolution campaign {datetime.now().date()}: formal-conjectures' statement is settled IN LEAN "
-                            f"({p['complete']['answer']}, {lean_run.name}, audited), along a line its intent judges call a "
-                            f"{cls}{' (' + str(src) + ')' if src else ''}. A finding about the formal statement, not a "
-                            f"resolution of the problem as posed.")
-        elif verified:
-            flag_for_review(n, lean_run, line, p["complete"]["claim"], engine_run)
-            record_atlas(n, f"Resolution campaign {datetime.now().date()}: the research engine's complete answer ({p['complete']['claim']}, "
-                            f"{p['complete']['answer']}) is PROVED IN LEAN on formal-conjectures' statement and passed the "
-                            f"audit ({lean_run.name}). Open problem: awaiting human review before any claim of resolution.")
-        else:
-            record_atlas(n, f"Resolution campaign {datetime.now().date()} (${spend:.2f}): Lean on the engine's complete answer "
-                            f"({p['complete']['claim']}) did not close: {line[:200]}")
-        commit(["resolution"], f"resolution: #{n} Lean {'verified' if verified else 'not verified'}")
+        record_lean(n, p, lean_run, rc, line)
         return True
     # screen, scout or deep finished
     wait = limit_wait(ROOT / p["run_dir"]) if row is None and p.get("run_dir") else None
@@ -1010,6 +986,57 @@ def loop() -> None:
             time.sleep(3600)
 
 
+def record_lean(n: int, p: dict, lean_run: Path, rc: int, line: str, how: str = "lean") -> None:
+    """Record a finished main Lean stage: the problem's status, a results row, the review or statement-findings file,
+    the Atlas and a commit. `how` is "lean" for a stage the loop ran and "reverify" for an operator's re-verification
+    of that stage's own proof (`reverify_lean`)."""
+    engine_run = ROOT / p["run_dir"]
+    spend = run_spend(lean_run)
+    verified = rc == 0
+    p.update({"running": None, "next": None, "status": "verified" if verified else "lean-partial", "lean_summary": line})
+    p["history"].append({"tier": "lean", "rc": rc, "summary": line, **({"how": how} if how != "lean" else {})})
+    save_problem(n, p)
+    cls = (p.get("complete") or {}).get("intent")
+    result({"problem": n, "tier": "lean", "outcome": "verified" if verified else "not verified", "rc": rc,
+            "spend": spend, "lean_run": p["lean_run"], "summary": line, "track": p.get("track"), "intent": cls,
+            **({"how": how} if how != "lean" else {})})
+    again = " (re-verified by the operator after an audit fix)" if how == "reverify" else ""
+    if verified and cls in ("formalization-gap", "known-result"):
+        flag_statement_finding(n, lean_run, line, p["complete"], engine_run)
+        src = p["complete"].get("intent_source")
+        record_atlas(n, f"Resolution campaign {datetime.now().date()}: formal-conjectures' statement is settled IN LEAN "
+                        f"({p['complete']['answer']}, {lean_run.name}, audited{again}), along a line its intent judges call "
+                        f"a {cls}{' (' + str(src) + ')' if src else ''}. A finding about the formal statement, not a "
+                        f"resolution of the problem as posed.")
+    elif verified:
+        flag_for_review(n, lean_run, line, p["complete"]["claim"], engine_run)
+        record_atlas(n, f"Resolution campaign {datetime.now().date()}: the research engine's complete answer ({p['complete']['claim']}, "
+                        f"{p['complete']['answer']}) is PROVED IN LEAN on formal-conjectures' statement and passed the "
+                        f"audit ({lean_run.name}{again}). Open problem: awaiting human review before any claim of resolution.")
+    else:
+        record_atlas(n, f"Resolution campaign {datetime.now().date()} (${spend:.2f}): Lean on the engine's complete answer "
+                        f"({p['complete']['claim']}) did not close{again}: {line[:200]}")
+    commit(["resolution"], f"resolution: #{n} Lean {'verified' if verified else 'not verified'}{again}")
+
+
+def reverify_lean(n: int) -> str:
+    """Re-run final verification on a problem's finished main Lean stage, then record it as the loop would. For a
+    proof a verifier bug left unverified: #769's closed residual failed only Comparator, on an audit bug. No new
+    search; the faithfulness judge is the only model call. An operator's decision."""
+    p = load_state().get("problems", {}).get(str(n))
+    if not p or not p.get("lean_run") or not p.get("complete"):
+        return f"#{n}: no finished Lean stage to re-verify"
+    if p.get("running"):
+        return f"#{n}: a stage is running ({p['running']}); re-verify when it ends"
+    lean_run = ROOT / p["lean_run"]
+    with (lean_run / "lane.log").open("a") as f:
+        rc = subprocess.run([sys.executable, str(ROOT / "harness.py"), "reverify", "--run", str(lean_run)], cwd=ROOT,
+                            stdout=f, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, timeout=4 * 3600).returncode
+    line = (lean_run / "SUMMARY.line").read_text().strip() if (lean_run / "SUMMARY.line").exists() else ""
+    record_lean(n, p, lean_run, rc, line, how="reverify")
+    return f"#{n}: re-verified, exit {rc}: {line[:200]}"
+
+
 def requeue_lean(n: int) -> str:
     """Send a problem's complete answer back to the Lean stage, for a stage that never reached the mathematics: #655's
     first one ended at its first check, on a frozen statement that could not compile (2026-10-14). The old run stays
@@ -1029,8 +1056,8 @@ def requeue_lean(n: int) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean"])
-    ap.add_argument("--problem", type=int, help="requeue-lean: the problem")
+    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean", "reverify-lean"])
+    ap.add_argument("--problem", type=int, help="requeue-lean, reverify-lean: the problem")
     ap.add_argument("--show", type=int, default=20)
     ap.add_argument("--file", help="import-screens: a jsonl of screen rows (step3/settle_open.jsonl)")
     a = ap.parse_args()
@@ -1044,10 +1071,10 @@ def main() -> int:
             print(f"  #{n}  forum {forum_chars(n)} chars")
     elif a.cmd == "import-screens":
         print("imported to the pass arm:", import_screens(Path(a.file), load_cfg()))
-    elif a.cmd == "requeue-lean":
+    elif a.cmd in ("requeue-lean", "reverify-lean"):
         if a.problem is None:
-            ap.error("requeue-lean needs --problem")
-        print(requeue_lean(a.problem))
+            ap.error(f"{a.cmd} needs --problem")
+        print((requeue_lean if a.cmd == "requeue-lean" else reverify_lean)(a.problem))
     elif a.cmd == "once":
         wait_for_lane()
         step(load_cfg())
