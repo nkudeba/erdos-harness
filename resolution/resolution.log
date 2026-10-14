@@ -90,3 +90,9 @@
 [2026-10-14T08:26:06Z] #103: screen -> control (settle chance 0.25, draws [0.3, 0.2]; $1.07)
 [2026-10-14T08:26:12Z] #197: screen (resuming runs/20261011-174757-518493-erdos197)
 [2026-10-14T08:53:09Z] #197: screen -> screened out (settle chance 0.05, draws [0.06, 0.04]; $4.13)
+[2026-10-14T08:53:15Z] another harness run is live; waiting for the lane
+[2026-10-14T09:41:18Z] #295: scout (resuming runs/20261013-101820-907954-erdos295)
+[2026-10-14T16:09:25Z] resolution campaign loop starting
+[2026-10-14T16:09:26Z] another harness run is live; waiting for the lane
+[2026-10-14T17:31:32Z] #295: scout (resuming runs/20261013-101820-907954-erdos295)
+[2026-10-14T17:53:54Z] #295: scout -> none ($15.41; 1 validated new [1])
