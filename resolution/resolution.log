@@ -96,3 +96,5 @@
 [2026-10-14T16:09:26Z] another harness run is live; waiting for the lane
 [2026-10-14T17:31:32Z] #295: scout (resuming runs/20261013-101820-907954-erdos295)
 [2026-10-14T17:53:54Z] #295: scout -> none ($15.41; 1 validated new [1])
+[2026-10-14T17:54:00Z] #655: scout (resuming runs/20261009-225323-779500-erdos655)
+[2026-10-14T18:39:24Z] #655: scout -> complete ($14.19; 3 validated new [1, 1, 1])
