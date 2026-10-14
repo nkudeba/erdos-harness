@@ -1280,6 +1280,26 @@ not?
     alone makes it a solve.
   - `engine_complete` now prefers the program's assembled chain on a tie.
 
+**3.11, #888 in Lean (2026-10-14).** Not verified: 8 of 9 steps certified, $45.08
+(`runs/20261013-234514-534186-hardlean-erdos41635`, `results/program-v1-dev-lean.jsonl`).
+- **Certified:**
+  - the whole lower bound: the semiprimes satisfy the condition, Mertens' lower bound on Σ 1/p, and their count;
+  - the upper bound's tools: the configuration exclusion, a Cauchy–Schwarz pair bound, an octahedron count, the box
+    lemma and a square-cancellation fact.
+- **Open:** the upper bound's core, |A| ≤ C·n·log log n / log n. Its proof splits A into dyadic boxes, with cases.
+- **Two passes stalled the same way.**
+  - Each cycle gives the open core to a recursive child that runs one cycle. The child proposes a split, and the
+    refinement judge rules the pieces not easier. Two such cycles end the program.
+  - The second pass was operator-funded: the stall counter was reset, the cap raised to $75, and `--rediscover 1` added.
+    It is recorded in the run's assistance. Its rediscovery was two medium-effort attempts, too shallow to give a
+    Lean-friendly breakdown.
+  - It spent $10.79 of the $40 approved.
+- **Reading.**
+  - The informal chain is complete and refereed. The gap is formalization: a long analytic argument needs a
+    fine-grained blueprint the loop can attack piece by piece.
+  - The likely next move is a hard-step pass on the core alone: the engine writes a detailed step-by-step proof, and
+    Lean takes it with its own budget. That is how #435's hard step was certified.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

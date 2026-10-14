@@ -1,0 +1,1 @@
+RUN-SUMMARY problem=41635 exit=3 outcome=partial verified=None spend=$34.29 llm_calls=64 lean_checks=268 lemmas=11 residual=open:1,published:0,certified:8 fatals=0 wall=201m mode=research dir=runs/20261013-234514-534186-hardlean-erdos41635 stop="deductive research program ran 5 of 6 cycle(s); residual: 1 open conjecture(s), "
