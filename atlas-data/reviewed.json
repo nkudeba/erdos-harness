@@ -72,6 +72,15 @@
       "experiments/idea-engine-2026-10-02/REPORT.md"
     ]
   },
+  "32": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line can plausibly settle `erdos_32` as written, so this line aims at major progress instead. - Why proving it (TRUE) is out of reach. A proof would need a complement with A(N) = o((log N)²). By the random-model barrier, any construction that uses only prop"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-14"
+  },
   "34": {
     "rationale": [
       "The disproof needs a family of permutations with quadratically many consecutive sums. One unusually good finite permutation does not refute little-o."
