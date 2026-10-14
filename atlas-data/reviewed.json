@@ -340,6 +340,15 @@
     ],
     "score": 68
   },
+  "197": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.05, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (YES direction). Exhibit sliver sequences s_k, s'_k → ∞ with s_k, s'_k = o(a_k), and set - b_k = 2a_k − s_k, - a_{k+1} = 2b_k − s'_k, - A = {small explicit set} ∪ ⋃_k (a_k, b_k], and B = ℕ ∖ A. Then prove that both A and B are permutable. He"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-14"
+  },
   "198": {
     "rationale": [
       "The harness already verified a factorial-based Sidon construction meeting every infinite arithmetic progression."
