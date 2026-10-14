@@ -1300,6 +1300,28 @@ not?
   - The likely next move is a hard-step pass on the core alone: the engine writes a detailed step-by-step proof, and
     Lean takes it with its own budget. That is how #435's hard step was certified.
 
+**3.11, #888 in Lean, resume 2 (2026-10-14, 17:31 UTC).** $94.09 in all, against a $95 cap. Every conjecture in the
+proof tree is certified: 17 lemmas, 0 open. Two published premises remain: Rosser–Schoenfeld 1962, π(x) < 1.25506·x/log x
+for x > 1, and π(x) > x/log x for x ≥ 17.
+- **What changed.**
+  - The resume gave recursive children 4 cycles instead of 1 (`--child-cycles 4 --residual-depth 3`).
+  - The upper bound's child then finished its own plan.
+  - A depth-3 child certified the analytic core, `box_to_bound`, from 4 certified pieces and the two premises.
+  - The refinement spliced up to the top.
+- **What it is.** A Lean-certified conditional theorem: #888's formal statement follows from 17 certified lemmas and two
+  textbook bounds on π(x). The premises enter as hypotheses, never as axioms. It is not yet a complete verification,
+  and it is assisted: operator-funded resumes, recorded in the run.
+- **Why the premises stayed open.**
+  - The plan wrote them with Rosser–Schoenfeld's exact constants, which are hard to formalise.
+  - The Θ statement needs only Chebyshev-strength bounds, π(x) ≍ x/log x with some constants. Mathlib's
+    `NumberTheory/Chebyshev.lean` supplies their ingredients: θ(x) ≤ log 4 · x, and ψ ≤ π·log.
+  - This is the Nagura lesson again: a published premise is not free when Mathlib lacks it, and here the plan asked for
+    more than it needed.
+- **To finish:** replace the two premises with Chebyshev-strength bounds, prove those from Mathlib, and re-certify the
+  lemmas that used the exact constants (`hyp_rough`, `hyp_smooth_tail`, and whatever uses the lower bound).
+- **Harness lesson:** `--child-cycles 1` starved the recursive children. The upper bound's child had certified 3 of its 4
+  pieces and planned its next move, and was cut off each time.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your
