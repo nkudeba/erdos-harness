@@ -7,3 +7,9 @@
 #647: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261007-154636-132610-erdos647/lane.log
 #366: no engine record (exit 1); see /Users/nicolas.kudeba/workspace/erdos-harness/runs/20261007-154638-856596-erdos366/lane.log
 S6PROBE-DONE 2026-10-07T19:46:41Z
+S6PROBE-RESUME 2026-10-07T21:55:21Z after the session limit: 686 835 647 366
+#686 [s6-probe]: 3 validated new of 9 claims; targets 10 (new 7, sig>=2 2, open 0); best None; probes: measured 0, traction 2, best 4.412; $13.0626078
+#835 [s6-probe]: 0 validated new of 9 claims; targets 10 (new 5, sig>=2 3, open 0); best None; probes: measured 0, traction 3, best 2.6; $11.922665199999999
+#647 [s6-probe]: 1 validated new of 11 claims; targets 10 (new 7, sig>=2 1, open 0); best None; probes: measured 0, traction 3, best 4.383; $11.211735400000006
+#366 [s6-probe]: 2 validated new of 10 claims; targets 10 (new 6, sig>=2 1, open 0); best None; probes: measured 0, traction 4, best 4.825; $10.166688200000001
+S6PROBE-DONE 2026-10-08T01:00:37Z
