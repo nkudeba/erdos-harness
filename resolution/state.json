@@ -142,18 +142,23 @@
      "tier": "scout",
      "outcome": "complete",
      "spend": 14.5891
+    },
+    {
+     "tier": "lean",
+     "rc": 2,
+     "summary": "RUN-SUMMARY problem=769 exit=2 outcome=not_proved directions=neg:proved_unverified verified=None spend=$6.78 llm_calls=21 lean_checks=108 lemmas=12 fatals=0 wall=49m mode=research dir=runs/20261014-162417-471965-resolve-lean-erdos769"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261010-025357-947738-erdos769",
    "errors": 0,
-   "status": "complete",
+   "status": "lean-partial",
    "spend": 17.498321000000008,
    "limit_waits": 0,
    "settle_chance": 0.65,
    "arm": "pass",
-   "next": "lean",
+   "next": null,
    "track": "new-math",
    "intent": "new-math",
    "complete": {
@@ -163,7 +168,9 @@
     "intent": "new-math",
     "intent_source": null
    },
-   "claims_todo": []
+   "claims_todo": [],
+   "lean_run": "runs/20261014-162417-471965-resolve-lean-erdos769",
+   "lean_summary": "RUN-SUMMARY problem=769 exit=2 outcome=not_proved directions=neg:proved_unverified verified=None spend=$6.78 llm_calls=21 lean_checks=108 lemmas=12 fatals=0 wall=49m mode=research dir=runs/20261014-162417-471965-resolve-lean-erdos769"
   },
   "520": {
    "history": [
