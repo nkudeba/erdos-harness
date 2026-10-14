@@ -397,6 +397,35 @@ class Queue(Base):
             self.assertEqual(R.queue({"problems": {"2": {}}}, {"priority": [3]}), [3, 1, 4])
 
 
+class Digest(unittest.TestCase):
+    """The engine's problem digest carries the page's notes and the proof claims. Until 2026-10-14 both were cut on
+    markers the pages lack, and #769's 'new' Lean-verified disproof was a weaker form of two claims posted there."""
+
+    def test_page_notes_and_proof_claims_reach_the_digest(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("od_screen", Path(R.__file__).parent / "experiments" /
+                                                      "open-discovery-2026-10-02" / "screen.py")
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "atlas-data" / "forum").mkdir(parents=True)
+            nav = "Forum\n Inbox\n Go\n Go\n Random\n"
+            thread = (nav + "Let c(n) be minimal such that ...\n#9: [Er74b]\nHudelson proved c(n) < 6^n.\n Proof expositions (0)\n"
+                      " Order by\n oldest first\n Best bounds are due to Connor and Marmorino.\n")
+            claims = (nav + "Let c(n) be minimal such that ...\n There are 2 proof claims (partial or full) for this problem.\n"
+                      "A proof \nclaimed by Jeffrey Zeng (using an OpenAI internal model).\n Summary:\n c(n) = o(n^n).\n")
+            (Path(tmp) / "atlas-data" / "forum" / "9.json").write_text(json.dumps({"thread": thread, "claims": claims,
+                                                                                     "fetched": "2026-10-14"}))
+            with patch.object(m, "ROOT", Path(tmp)):
+                text = m.thread_digest("9")
+        page = text.split("## Page\n")[1].split("## Forum comments")[0]
+        self.assertIn("Hudelson proved", page)
+        self.assertNotIn("Inbox", page)                                  # the navigation is not the page
+        self.assertIn("Connor and Marmorino", text)
+        self.assertIn("## Proof claims page\nThere are 2 proof claims", text)
+        self.assertIn("claimed by Jeffrey Zeng", text)
+
+
 class Lean(Base):
     def test_the_lean_run_is_a_normal_open_problem_run_committed_to_the_chains_direction(self):
         both = {"settles": True, "answer": "false", "judges": [{"settles": True}, {"settles": True}]}
