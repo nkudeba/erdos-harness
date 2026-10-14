@@ -1,9 +1,17 @@
 # erdosproblems.com #366: problem page and forum thread (fetched 2026-10-08T15:20:20Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Are there any $2$-full $n$ such that $n+1$ is $3$-full? That is, if $p\mid n$ then $p^2\mid n$ and if $p\mid n+1$ then $p^3\mid n+1$. 
+#366: [Er76d,p.31][ErGr80,p.68]
+number theory | 
+powerful
+Erdős originally asked Mahler whether there are infinitely many pairs of consecutive powerful numbers, but Mahler immediately observed that the answer is yes from the infinitely many solutions to the Pell equation $x^2=8y^2+1$. 
+Note that $8$ is 3-full and $9$ is $2$-full. Erdős and Graham asked if this is the only pair of such consecutive integers. Stephan has observed that $12167=23^3$ and $12168=2^33^213^2$ (a pair already known to Golomb [Go70]) is another example, but (by OEIS A060355) there are no other examples for $n<10^{22}$.
+In [Er76d] Erdős asks the weaker question of whether there are any consecutive pairs of $3$-full integers (which is also discussed in problem B16 of Guy's collection [Gu04]).
+Turturean notes in the comments that the ABC conjecture implies there are only finitely many such $n$.
+Additional thanks to: Stijn Cambie, David Turturean, Ralf Stephan, Wouter van Doorn, and Desmond Weisenberg
 
 ## Forum comments
 Order by
@@ -49,3 +57,26 @@ This observation was identified with AI assistance (an automated research pipeli
  0
  🤖
  0
+
+## Proof claims page
+There is 1 proof claim (partial or full) for this problem.
+ Appearing on this page is no guarantee of proof correctness, and does not mean that anyone associated with this site has examined any part of the proof.
+ Submit your own proof claim
+A proof 
+claimed by Theofil Xeff (using GPT 5.6 Sol high, Fable 5 high).
+ Summary:
+ Assuming Baker’s explicit $abc$ conjecture, I prove that any $2$-full integer $n$ followed by a $3$-full integer $n+1$ must satisfy
+$$n<10^{16136778163}.$$
+This does not solve the problem, but it turns David Turturean’s earlier observation that $abc$ implies finitely many solutions into a concrete upper bound.
+The intuition is that $2$-full and $3$-full numbers have unusually few distinct prime factors compared with their size. Thus the product of the distinct primes dividing $n(n+1)$ is much smaller than $n+1$. The $abc$ conjecture says that this cannot happen in the equation $n+1=(n)+1$ once $n$ becomes too large. Making that comparison explicit using Baker’s version of $abc$, together with estimates for prime factors and factorials, gives the bound above.
+ Notes:
+ The proof was fully developed by GPT 5.6 Sol high and formally verified in Lean using Fable 5 high and GPT 5.6 Sol high.
+| 
+ External link to proof
+ |
+ External link to formalisation
+ |
+ Submitted 2026-07-22 08:23:38 by 
+ fefemath
+ ▶
+ Comments (1)

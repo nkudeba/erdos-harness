@@ -1,9 +1,15 @@
 # erdosproblems.com #488: problem page and forum thread (fetched 2026-10-08T19:06:56Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Let $A$ be a finite set and\[B=\{ n \geq 1 : a\mid n\textrm{ for some }a\in A\}.\]Is it true that, for every $m>n\geq \max(A)$,\[\frac{\lvert B\cap [1,m]\rvert }{m}< 2\frac{\lvert B\cap [1,n]\rvert}{n}?\]
+#488: [Er61,p.236][Er66,p.150][Er80,p.112]
+number theory
+The constant $2$ would be the best possible here, as witnessed by taking $A=\{a\}$, $n=2a-1$, and $m=2a$.
+This problem is also discussed in problem E5 of Guy's collection [Gu04].
+In [Er61] this problem is as stated above, but with $a\mid n$ in the definition of $B$ replaced by $a\nmid n$. This is most likely a typo (especially since the problem is also given as stated above in [Er66]). There have been several counterexamples given for this alternate problem. Cambie has observed that, if $A$ is the set of primes bounded above by $n$, and $m=2n$, then\[\frac{\lvert B\cap [1,m]\rvert }{m}=\frac{\pi(2n)-\pi(n)+1}{2n}\sim \frac{1}{2\log n}\]while\[\frac{\lvert B\cap [1,n]\rvert}{n}=\frac{1}{n}.\]Further concrete counterexamples, found by Alexeev and Aristotle, are given in the comments section.
+Additional thanks to: Boris Alexeev, Stijn Cambie, Wouter van Doorn, and Koizumi
 
 ## Forum comments
 Order by
@@ -106,3 +112,52 @@ For pairwise coprime \(Q\), Hall–Hildebrand type bounds on the complementary u
  0
  The commentary gives an example where $A$ is a singleton of size around $n/2$, and the ratio is close to 2. There is a somewhat different example where $A$ now consists of numbers much smaller than $n$, and the ratio is about 1.03; nowhere near a counterexample, but still uniformly bounded away from 1, and indicative of the complexity of the problem.
 The counterexample comes from taking $A$ to be the primes between $n^{1/3}$ and $n^{1/2}$, and $m$ to be extremely large compared to $n$. The density at $m$ is then about $1 - \prod_{n^{1/3} < p < n^{1/2}} (1-\frac{1}{p})$, which by Mertens' theorem is about $1/3 = 0.333\dots$. The density at $n$ can be computed by inclusion-exclusion to be about $\sum_{n^{1/3} < p < n^{1/2}} 1/p - \sum_{n^{1/3} < p_1 < p_2 < n^{1/2}} 1/p_1 p_2$ which computes to $\log(3/2) - \frac{1}{2} \log^2(3/2) = 0.32326413$. The ratio here is $1.03114853\
+
+## Proof claims page
+There are 3 proof claims (partial or full) for this problem.
+ Appearing on this page is no guarantee of proof correctness, and does not mean that anyone associated with this site has examined any part of the proof.
+ Submit your own proof claim
+A proof 
+claimed by shoal-rat (project curator) (using GPT-6 Astra (OpenAI Codex)).
+ Summary:
+ Let G be a finite primitive set, F_G(x) the count of integers up to x divisible by a member of G, and E_G(n)=F_G(n)-|G|. We prove that, when n>=max G and E_G(n)<=15, the auxiliary bound sum_{g in G} floor(n/g)+|G|<=2F_G(n) holds. It implies the original strict inequality F_G(m)/m<2F_G(n)/n for every m>n. The proof reduces a possible failure to finitely many quotient profiles and verifies complete certificates in Lean. We also show that excess 16 is the exact first point where this auxiliary bound can fail, using a primitive, collectively coprime example. This example still satisfies the original inequality. Related counterexamples in the paper concern auxiliary conjectures, not problem #488 itself.
+ Notes:
+ Full paper, Lean sources, and reproducibility materials: https://github.com/shoal-rat/erdos-488-lean . The claim is partial; the unrestricted problem is not resolved by this project.
+| 
+ External link to proof
+ |
+ External link to formalisation
+ |
+ Submitted 2026-09-29 08:09:28 by 
+ Fevernop
+ ▶
+ Comments (0)
+A proof 
+claimed by Declan Gessel (using GPT-6 Astra (Codex)).
+ Summary:
+ We give a counterexample to Erdős problem #488. For a fixed finite set, the fraction of whole numbers divisible by a member of the set can more than double as we count further, even when both endpoints are at least as large as every member.
+Our set consists of numbers greater than T and at most 256T whose prime factors are all below 257. A counting argument guarantees a choice of T where these numbers grow slowly, giving an upper bound on the covered count at the first endpoint.
+At a larger endpoint, we construct many distinct multiples of members of the set. This gives a lower bound there. Comparing the bounds proves that the fraction more than doubles.
+The proof has been formalized and checked in Lean.
+ Notes:
+ It was machine-checked through Jig: https://jig.so/p/398?s=40
+| 
+ External link to proof
+ |
+ External link to formalisation
+ |
+ Submitted 2026-09-05 23:44:58 by 
+ declangessel
+ ▶
+ Comments (0)
+A proof 
+claimed by Lucas Ewing (using GPT 5.6).
+ Summary:
+ Upped to 7 primitives
+| 
+ External link to proof
+ |
+ Submitted 2026-08-28 01:00:00 by 
+ luew2
+ ▶
+ Comments (0)

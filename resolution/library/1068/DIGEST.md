@@ -1,9 +1,18 @@
 # erdosproblems.com #1068: problem page and forum thread (fetched 2026-10-11T07:09:03Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Does every graph with chromatic number $\aleph_1$ contain a countable subgraph which is infinitely vertex-connected?
+#1068: [Va99,7.90] 
+graph theory | 
+set theory | 
+chromatic number
+This is described in [BoPi24] as a 'version of the Erdős-Hajnal problem' (which is [1067]), but it does not seem to appear in [ErHa66].
+We say a graph is infinitely (vertex) connected if any two vertices are connected by infinitely many pairwise vertex-disjoint paths.
+Soukup [So15] constructed a graph with uncountable chromatic number in which every uncountable set is finitely vertex-connected. A simpler construction was given by Bowler and Pitz [BoPi24].
+See also [1067].
+Additional thanks to: ebarschkis
 
 ## Forum comments
 Order by
