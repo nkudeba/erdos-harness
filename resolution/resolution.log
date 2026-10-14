@@ -88,3 +88,5 @@
 [2026-10-14T08:18:20Z] #1068: screen -> screened out (settle chance 0.17, draws [0.04, 0.3]; $2.03)
 [2026-10-14T08:18:26Z] #103: screen (resuming runs/20261011-134723-544082-erdos103)
 [2026-10-14T08:26:06Z] #103: screen -> control (settle chance 0.25, draws [0.3, 0.2]; $1.07)
+[2026-10-14T08:26:12Z] #197: screen (resuming runs/20261011-174757-518493-erdos197)
+[2026-10-14T08:53:09Z] #197: screen -> screened out (settle chance 0.05, draws [0.06, 0.04]; $4.13)
