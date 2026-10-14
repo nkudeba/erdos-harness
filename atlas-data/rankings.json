@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "eaf6c124a94fb0dc4deb4b8ea70d9da85cf95e40e6f97ef0fcb3f754ff265161",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "79d35b9e161b78501a1de45c0466c2d84a50f2372a3a727179bbbc20f97c442b"
+    "manual_reviews_sha256": "410820288c3b99bd102b49e342aebf3453e2009029209fc9a05921f0de11cbce"
   },
   "problems": [
     {
@@ -78455,10 +78455,11 @@
         "geometry"
       ],
       "score": 1,
-      "harness": "Attempted",
+      "harness": "Partial result",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.65, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove: `¬ TSLowerBound`, which refutes `erdos_769` exactly as written. It follows from this explicit bound: > Theorem (odd-n upper bound). Let A := ⌊n/3⌋. There is an explicit n₀ (about 2200) such that for every odd n ≥ n₀, every k ≥ 1 + 2ⁿ·A^{n+1",
         "Resolution campaign 2026-10-14 ($17.50, informal): the research engine wrote a complete answer (false) that a referee, an adversary and both settles judges accepted: (a) For every odd n ≥ 253, gcd{aⁿ − 1 : 2 ≤ a ≤ L}=1 where L = ⌊n/4⌋+1. (b) Hence every k ≥ 1 + (2ⁿ−2)(Lⁿ−1) is admissible, and the cutoff c(n) (which exists and is unique) satisfies c(n) < (2L)ⁿ ≤ (n/2+2)ⁿ. (c) TSLowerBound is false: for all A, B > 0 and all N, there are an odd n ≥ N and a c with I. Sent to Lean.",
+        "Resolution campaign 2026-10-14 ($6.78): Lean on the engine's complete answer (deep/C1) did not close: RUN-SUMMARY problem=769 exit=2 outcome=not_proved directions=neg:proved_unverified verified=None spend=$6.78 llm_calls=21 lean_checks=108 lemmas=12 fatals=0 wall=49m mode=research dir=runs/20261014-16",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
@@ -78530,10 +78531,10 @@
       "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "attempted",
+        "best": "partial",
         "runs": 2,
         "benchmarkRuns": 0,
-        "certifiedMax": 6
+        "certifiedMax": 13
       },
       "assessed": {
         "on": "2026-10-14",
@@ -78542,6 +78543,7 @@
         ],
         "searchFloor": null
       },
+      "brief": "---\nproblem: 769\nupdated: 2026-10-14\nrun: 20261014-162417-471965-resolve-lean-erdos769\noutcome: not_proved\nsolved: false\ncertified: 12\ncost_usd: 6.69\n---\n\n## What the problem asks\n\nTake a cube in n dimensions, where n is the number of directions it extends in. Can you cut it exactly into k smaller cubes? Here every piece must be a shrunken copy of the big cube, sitting square to it. Mathematicians call such copies \"homothetic\". For some values of k this cannot be done. Let c(n) be the smallest number such that every k from c(n) upward works. The question asks for good estimates of c(n). In particular, is c(n) always at least some fixed fraction of n^n, which is n multiplied by itself n times? That is the meaning of the symbol \"≫\" here.\n\n## What we tried\n\nThis run worked toward the \"no\" answer. The goal was to show c(n) can grow more slowly than any fixed fraction of n^n. The work was done in Lean, which is software that checks each step of a proof mechanically. The plan split the argument into 13 smaller claims, called hypotheses. All 13 were marked as dealt with. Twelve were certified, meaning Lean accepted their proofs. The thirteenth, named `erdos_769_neg_hyp_noCommon`, is not on the certified list. The overall structure fit together. But the final check of the whole proof did not pass. So the \"no\" direction is recorded as proved but unverified. The run cost $6.69.\n\n## What we found\n\nThe problem has **not** been solved. The most useful finding is a step that removes the geometry. Two moves are possible. You can cut the cube into a grid of a^n equal smaller cubes. You can also replace any one piece with a scaled copy of a full cutting. So k = 1 plus any sum of numbers of the form a^n − 1 always works. What remains is pure arithmetic about which totals such sums can reach. A related step says that for odd n ≥ 253, no whole number above 1 divides all of 2^n − 1, 3^n − 1, and so on up to (n/4 + 1)^n − 1. That was checked by computer only for odd n from 253 to 1801. These steps were checked by hand. In Lean they were stated but not proved. No search bound was recorded.\n\n## What would move it\n\nThe final verification must pass. Someone needs to find why the full proof failed the last check even though its parts fit together. The uncertified hypothesis, `noCommon`, needs a proof that Lean accepts. It is the claim that no number above 1 divides all of the a^n − 1 values. The stated arithmetic steps also need real Lean proofs, since they now rest on placeholders. Separately, an earlier informal attempt, not part of this run, wrote a full \"no\" answer. Reviewers accepted it, and it was sent to Lean. A finished, verified Lean proof would be needed before calling the question settled.\n\n*Written automatically at the end of run `20261014-162417-471965-resolve-lean-erdos769`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
       "rank": 1067,
       "tier": "Frontier"
     },
