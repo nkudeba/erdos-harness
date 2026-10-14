@@ -93,18 +93,23 @@
      "tier": "scout",
      "outcome": "complete",
      "spend": 14.1909
+    },
+    {
+     "tier": "lean",
+     "rc": 2,
+     "summary": "RUN-SUMMARY problem=655 exit=2 outcome=running verified=None spend=$0.06 llm_calls=2 lean_checks=2 lemmas=0 fatals=0 wall=1m mode=research dir=runs/20261014-143931-223074-resolve-lean-erdos655"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261009-225323-779500-erdos655",
    "errors": 0,
-   "status": "complete",
+   "status": "lean-partial",
    "spend": 15.296993000000008,
    "limit_waits": 0,
    "settle_chance": 0.875,
    "arm": "pass",
-   "next": "lean",
+   "next": null,
    "intent": "formalization-gap",
    "track": "statement",
    "complete": {
@@ -114,7 +119,9 @@
     "intent": "formalization-gap",
     "intent_source": "erdosproblems.com #655 forum discussion (Hunter, Jan 2026); regular-polygon distance count: Altman, Amer. Math. Monthly 1963"
    },
-   "claims_todo": []
+   "claims_todo": [],
+   "lean_run": "runs/20261014-143931-223074-resolve-lean-erdos655",
+   "lean_summary": "RUN-SUMMARY problem=655 exit=2 outcome=running verified=None spend=$0.06 llm_calls=2 lean_checks=2 lemmas=0 fatals=0 wall=1m mode=research dir=runs/20261014-143931-223074-resolve-lean-erdos655"
   },
   "769": {
    "history": [
