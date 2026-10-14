@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 139,
+    "manually_reviewed": 141,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "f8e7f03779108b7e7e32c2f696a9320ed10081f599f69b32b961b849b0321a0b",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "db2fd0bdb5758592c59a6fab16d71934c1d2f03d8343d9936d6ce70f4eec01be"
+    "manual_reviews_sha256": "5444e00d8356a7af6d0ce087f7d39f85917e13a01793a59692f561b3b5d5fa6d"
   },
   "problems": [
     {
@@ -59644,6 +59644,7 @@
       "score": 1,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.25, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The goal is to settle `erdos_103` exactly as written, by first pinning down the convention in `Metric.IsSeparated'` and then exploiting it if it permits. Step 0 (decisive). Read the actual definition of `Metric.IsSeparated'` in the project's ForMathlib or form",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
@@ -59654,7 +59655,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -59696,13 +59697,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/103",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-14",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 868,
       "tier": "Frontier"
@@ -86951,6 +86959,7 @@
       "score": 1,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.17, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible on the mathematics alone, so the chosen line is aimed at major progress (significance 3). It has a cheap settling check bolted on as Step 0. The 0.04 is almost entirely the chance that Step 0 finds a degenerate convention in the f",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Set-theoretic independence and infinite-cardinal arguments do not fit the current arithmetic-heavy workflow.",
@@ -86964,7 +86973,7 @@
         "Do not expect a short route; scope the attempt to a partial result."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -87023,13 +87032,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1068",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 2,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-14",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 1155,
       "tier": "Frontier"
