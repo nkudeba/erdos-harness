@@ -1283,12 +1283,14 @@
   },
   "655": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.88, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Prove the negation of `erdos_655` exactly as stated, using the regular n-gon. Concretely, prove `¬ ∃ c > 0, ∀ᶠ n in atTop, ∀ X, #X = n → IsValid X → (1+c)n/2 ≤ distinctDistances X` by establishing the following key lemma. Key lemma. For every n ≥ 3 there is X "
+      "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.88, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Prove the negation of `erdos_655` exactly as stated, using the regular n-gon. Concretely, prove `¬ ∃ c > 0, ∀ᶠ n in atTop, ∀ X, #X = n → IsValid X → (1+c)n/2 ≤ distinctDistances X` by establishing the following key lemma. Key lemma. For every n ≥ 3 there is X ",
+      "Resolution campaign 2026-10-14 ($15.30, informal): the research engine wrote a complete answer (false) that a referee, an adversary and both settles judges accepted: For every c > 0 and every n with n ≥ ⌈2/c⌉+3, the n-gon X_n = {e(ζ^j) : 0 ≤ j < n} (ζ = exp(2πi/n), e: ℂ ≅ ℝ² isometry) satisfies #X_n = n, IsValid X_n, and |{dist p q : p,q ∈ X_n}| ≤ ⌊n/2⌋+1 < (1+c)n/2. Hence ¬erdos_655.. Sent to Lean.",
+      "Resolution campaign 2026-10-14 ($0.06): Lean on the engine's complete answer (deep/C1) did not close: RUN-SUMMARY problem=655 exit=2 outcome=running verified=None spend=$0.06 llm_calls=2 lean_checks=2 lemmas=0 fatals=0 wall=1m mode=research dir=runs/20261014-143931-223074-resolve-lean-erdos655"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-13"
+    "assessed": "2026-10-14"
   },
   "672": {
     "rationale": [
