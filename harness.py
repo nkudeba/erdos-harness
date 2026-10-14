@@ -6374,7 +6374,11 @@ def engine_complete(res: dict) -> dict | None:
                        and c.get("status") in ("PROVED", "REFUTED") and "settles" not in (c.get("validation") or {})]
     if not done:
         return None
-    done.sort(key=lambda c: (c.get("status") != "PROVED", -(((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0)))
+    # On a tie the research program's assembled chain comes first: every piece of it was refereed, while a session's
+    # claim may lean on a result it only cites. On 2026-10-13 dev #888 had both: an upper bound "together with" a lower
+    # bound from the map, and the program's chain that proved both directions.
+    done.sort(key=lambda c: (c.get("status") != "PROVED", -(((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0),
+                             c.get("_kind") != "program"))
     return done[0]
 
 

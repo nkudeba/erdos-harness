@@ -1218,6 +1218,10 @@ class ResearchProgram(unittest.TestCase):
         self.assertIn("P holds for every prime.", chain)
         self.assertIn("P is multiplicative.", chain)
         self.assertEqual(comp["validation"]["intent"]["class"], "new-math")
+        # a session claim that settles at the same significance does not displace the assembled chain
+        rival = {"session": "r1s1", "id": "C1", "status": "PROVED", "statement": "Every n satisfies P(n), with R5.",
+                 "proof": "p", "validation": {**comp["validation"], "status": "validated-new"}}
+        self.assertEqual(H.engine_complete({"ledger": [rival] + res["ledger"]})["session"], "program")
         # the lemma referee judged the LEMMA's statement, not the session's
         self.assertTrue(any("P holds for every prime." in p for p in call.prompts("engine-referee")))
 

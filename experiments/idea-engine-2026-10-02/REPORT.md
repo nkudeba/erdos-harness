@@ -1247,6 +1247,39 @@ not?
   - At least one: the first evidence that sustained, structured work adds capability beyond the v5 engine.
 - **Status:** written before launch. It waits for the operator's approval of about $225, because of the weekly limit.
 
+**3.11 results (2026-10-14, 03:44 UTC).** $156.07 in all (`benchmarks/timesplit/results/program-v1-dev.jsonl`).
+
+| item | settled | research program | validated new (significance ≥ 2) | spend |
+|---|---|---|---|---|
+| #570 | no | 6 cycles; 7 lemmas established, 3 open | 6 (4) | $61.99 |
+| #865 | no | 6 cycles; 4 established, 2 open | 5 (3) | $56.84 |
+| #888 | **yes, TRUE side, unrecognized** | 1 cycle; 3 of 3 established, chain assembled | 1 (0) | $37.24 |
+
+- **Against the predictions:**
+  - complete chains on the TRUE side: 1 of 3, as predicted;
+  - a skeleton adopted on all 3, as predicted;
+  - at least one lemma established on all 3, against 2 of 3;
+  - spend $37-62 an item, against $60-80. #888 stopped early because its skeleton closed.
+- **Where #888's settle came from.** Two chains pass the settles judges.
+  - A round-1 session (`r1s2/C2`) proved the upper bound, |A| ≤ C·n·log log n / log n. It cites the lower bound from
+    the map's KNOWN section.
+  - The research program (`program/C4`) closed in one cycle. It reused that upper bound as L1 and proved the matching
+    lower bound itself: the semiprimes pq ≤ n satisfy the condition (L2), and there are at least ½·n·log log n / log n
+    of them (L3). Its theorem is formal-conjectures' exact Θ statement, and it passed the whole-chain referee.
+  - So the settle is not the program's alone: the decisive upper bound came from an ordinary session. The program
+    turned it into a self-contained, two-sided chain, which is the better blueprint.
+  - The step-2 v5 engine had failed on #888. Between the two runs, v6 and the luck of one draw both differ.
+- **Recognition.** The engine named a related problem, #121, never #888 (`recognized_true` false). The intent judges
+  call `r1s2/C2` a known result and `program/C4` new mathematics. On a problem resolved in 2026, "known" may only mean
+  the judges recall the answer.
+- **On the two unsettled items, the program stopped at its cycle cap with hard lemmas open.** Its failures were real
+  proof gaps the referee found: a proof assuming special structure the lemma did not have. They were not format
+  failures.
+- **Next.**
+  - #888's chain went to Lean (`hardsteps_lean.py --claim program/C4 --full-run --chain`, $25, extensible to $60). Lean
+    alone makes it a solve.
+  - `engine_complete` now prefers the program's assembled chain on a tie.
+
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
   pattern did not match the CLI's own wording: "You've hit your session limit · resets 4:50pm" and "You've hit your

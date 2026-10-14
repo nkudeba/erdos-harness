@@ -1,0 +1,30 @@
+discover-screen program-v1-dev: 3 item(s); --discover-mode engine --engine-total-budget 78.0 --engine-sessions 3 --engine-rounds 1 --engine-deep-budget 6 --engine-gap-rounds 2 --engine-gap-max 2 --engine-program-cycles 6 --engine-program-budget 50 --engine-program-session-budget 4 --engine-program-lemmas 3 --engine-session-legs 2 --engine-intent-judges 2
+Traceback (most recent call last):
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/benchmarks/timesplit/timesplit.py", line 2859, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/benchmarks/timesplit/timesplit.py", line 2852, in main
+    return {"build": build, "probe": probe, "freeze": freeze, "judge": judge_cmd, "run": run, "score": score,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nicolas.kudeba/workspace/erdos-harness/benchmarks/timesplit/timesplit.py", line 2351, in discover_screen
+    rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 2134, in _communicate
+    self.wait(timeout=self._remaining_time(endtime))
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/subprocess.py", line 2038, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['/Library/Frameworks/Python.framework/Versions/3.11/bin/python3', '/Users/nicolas.kudeba/workspace/erdos-harness/harness.py', 'run', '--problem', '/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261013-121954-456476-discover-erdos79105/problem.json', '--resume', '/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261013-121954-456476-discover-erdos79105', '--mode', 'research', '--allow-research', '--benchmark', '--masked', '--no-brief', '--skip-literature', '--stop-after', 'discover', '--discover-mode', 'engine', '--engine-total-budget', '78.0', '--engine-sessions', '3', '--engine-rounds', '1', '--engine-deep-budget', '6', '--engine-gap-rounds', '2', '--engine-gap-max', '2', '--engine-program-cycles', '6', '--engine-program-budget', '50', '--engine-program-session-budget', '4', '--engine-program-lemmas', '3', '--engine-session-legs', '2', '--engine-intent-judges', '2', '--run-budget', '79.5', '--backend', 'claude-cli', '--model', 'claude-opus-5-5']' timed out after 10799.99983908399 seconds
+discover-screen program-v1-dev: 3 item(s); --discover-mode engine --engine-total-budget 78.0 --engine-sessions 3 --engine-rounds 1 --engine-deep-budget 6 --engine-gap-rounds 2 --engine-gap-max 2 --engine-program-cycles 6 --engine-program-budget 50 --engine-program-session-budget 4 --engine-program-lemmas 3 --engine-session-legs 2 --engine-intent-judges 2
+#570: resuming runs/20261013-121954-456476-discover-erdos79105
+#570: truth=true complete=False answer=None validated_new=6 sig2=4 $61.99
+#865: truth=true complete=False answer=None validated_new=5 sig2=3 $56.84
+#888: truth=true complete=True answer=true validated_new=1 sig2=0 $37.24
