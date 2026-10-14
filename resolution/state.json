@@ -423,6 +423,28 @@
    "status": "done",
    "limit_waits": 0,
    "claims_todo": []
+  },
+  "1110": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "control",
+     "settle_chance": 0.06,
+     "spend": 2.5554,
+     "track": "control"
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261014-181205-866183-erdos1110",
+   "spend": 2.555376,
+   "limit_waits": 0,
+   "settle_chance": 0.06,
+   "arm": "control",
+   "next": "scout",
+   "status": "screened",
+   "track": "control",
+   "intent": null
   }
  }
 }

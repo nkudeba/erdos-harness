@@ -104,3 +104,5 @@
 [2026-10-14T20:24:17Z] #769: Lean on deep/C1 (false) in 20261014-162417-471965-resolve-lean-erdos769
 [2026-10-14T21:13:21Z] #103: scout (resuming runs/20261011-134723-544082-erdos103)
 [2026-10-14T22:11:56Z] #103: scout -> none ($16.74; 3 validated new [1, 1, 1])
+[2026-10-14T22:12:05Z] #1110: screen
+[2026-10-14T22:29:52Z] #1110: screen -> control (settle chance 0.06, draws [0.04, 0.08]; $2.56)
