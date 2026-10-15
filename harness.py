@@ -4434,6 +4434,14 @@ The checker verifies the claim from scratch, independently of the code that foun
 tests every required property directly, and prints the single line CERTIFIED only if all of them hold. Scripts cannot
 read files, so embed the object in the checker. The harness re-runs every checker after your session and shows the
 referee its source and its output. A claim whose checker fails is treated as unproved.
+
+LONG COMPUTATIONS. A run is capped (see YOUR TOOLS). When a search needs hours, write it as one self-contained script
+named long_<name>.py: deterministic, printing a progress line at least every few minutes and, at the end, one line
+`RESULT: <what it found, or that it found nothing in the exact range searched>`. Test it on a small range first. Then
+list it in the notebook, one line each:
+LONG: long_<name>.py | <hours, at most 2> | <what it decides>
+After your session the harness runs it for up to that long, without a model, and the team's next stage reads its
+output. Never claim what a long computation will find before it has run.
 """
 
 
@@ -7282,14 +7290,19 @@ class Harness:
         if not p:
             return ""
         path = Path(p)
+        extra = ""
         if path.is_dir():
+            # COMPUTE.md: the campaign's long computations for this problem (resolution.run_long). Last, so the
+            # middle clip keeps it whole.
+            compute = path / "COMPUTE.md"
+            extra = ("\n\n" + compute.read_text().strip()) if compute.is_file() else ""
             path = path / "DIGEST.md"
         try:
             text = path.read_text().strip()
         except OSError:
             self.log.event("library", "missing", path=str(path))
             return ""
-        return clip_middle(text, room)
+        return clip_middle(text + extra, room)
 
     def _discovery_settings(self) -> DiscoverySettings:
         a = self.args

@@ -182,7 +182,7 @@ class Screen(Base):
         self.assertIn("--engine-settle-draws 2", seen["flags"])    # a backfilled pass gets the screen on its own map
         R.save_state({"problems": {}})
         with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: [9]), \
-                patch.object(R, "prep", lambda n, c: {"ok": True}), patch.object(R, "adopt_run", lambda n: None):
+                patch.object(R, "prep", lambda n, c: {"ok": True}), patch.object(R, "adopt_run", lambda n, **k: None):
             R.step(cfg)
         self.assertEqual((seen["tag"], seen["total"], seen["resume"]), ("resolve-screen", 12.0, None))
         for flag in ("--engine-sessions 0", "--engine-settle-draws 2", "--engine-deep-budget 0", "--engine-objective resolve"):
@@ -491,6 +491,43 @@ class LanesAndFreshness(Base):
         self.assertEqual(q[:3], [11, 1, 2])                  # record twice per round, but it has only one target left
         self.assertEqual(R.QUEUE_LANE[21], "settle")         # off as a track, #21 is still an ordinary settle target
 
+    def test_a_settle_screen_out_is_screened_again_once_by_a_computational_lane(self):
+        state = {"problems": {"13": {}, "21": {"status": "screened out", "kind": "settle", "history": []}}}
+        today = R.datetime(2026, 10, 15, tzinfo=R.timezone.utc)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "prescreen", lambda: {}), patch.object(R, "forum_chars", lambda n: n), \
+                patch.object(R, "fresh_targets", lambda c: ORIGINAL_FRESH_TARGETS(c, now=today)):
+            q = R.queue(state, {"priority": []})
+            self.assertEqual(R.QUEUE_LANE[21], "explicit")
+            state["problems"]["21"]["rescreened"] = True
+            self.assertNotIn(21, R.queue(state, {"priority": []}))
+        R.save_state({"problems": {"21": {"status": "screened out", "kind": "settle", "run_dir": "runs/old", "spend": 3.0,
+                                          "settle_chance": 0.01, "prepped": True, "history": []}}})
+        seen = {}
+        R.QUEUE_LANE.clear()
+        R.QUEUE_LANE[21] = "explicit"
+        with patch.object(R, "queue", lambda s, c: [21]), patch.object(R, "adopt_run", lambda n, **k: None), \
+                patch.object(R, "run_screen", lambda n, tag, total, flags, resume=None, on_start=None:
+                             (seen.update(flags=flags, resume=resume) or (None, 1))):
+            R.step(R.load_cfg())
+        p = R.load_state()["problems"]["21"]
+        self.assertEqual((p["kind"], p["previous"]["run_dir"], p["rescreened"]), ("explicit", "runs/old", True))
+        self.assertIsNone(seen["resume"])                      # a new run, not the settle run resumed
+        self.assertIn("--engine-objective explicit", seen["flags"])
+
+    def test_a_rescreen_never_adopts_the_run_it_replaces(self):
+        def run(name, spend):
+            r = self.d / "runs" / name
+            (r / "engine").mkdir(parents=True)
+            (r / "problem.json").write_text(json.dumps({"notes": "Research engine screen resolve-screen (no Lean)."}))
+            (r / "engine" / "checkpoint.json").write_text(json.dumps({"spend": spend}))
+            return str(r.relative_to(self.d))
+        old, new = run("20261010-090000-000000-erdos21", 5.0), run("20261015-170000-000000-erdos21", 1.0)
+        with patch.object(R, "ROOT", self.d):
+            self.assertEqual(R.adopt_run(21), old)                                  # the most work wins, as before
+            self.assertEqual(R.adopt_run(21, exclude={old}), new)
+            self.assertEqual(R.adopt_run(21, after="20261015-160000"), new)
+            self.assertIsNone(R.adopt_run(21, exclude={old}, after="20261016-000000"))
+
     def test_the_objective_follows_the_kind(self):
         cfg = R.load_cfg()
         self.assertIn("--engine-objective resolve", R.stage_flags(cfg, "scout", {}))
@@ -554,6 +591,64 @@ class LanesAndFreshness(Base):
             self.assertFalse(R.refresh_sources(R.load_cfg()))           # within the window: nothing fetched
         self.assertEqual(json.loads(R.CONFIG.read_text())["fc_head_sha"], "abc123")
         self.assertTrue(list((self.d / "fresh").glob("problems-*.yaml")))
+
+
+class Compute(Base):
+    """The computation tier (2026-10-15): a record run's sessions ask for long computations, the campaign runs them in
+    the sandbox with no model calls, and the next stage reads the output."""
+
+    def session(self, run, label, notebook, scripts):
+        sb = run / "engine" / "sessions" / label
+        sb.mkdir(parents=True, exist_ok=True)
+        (sb / "NOTEBOOK.md").write_text(notebook)
+        for name, body in scripts.items():
+            (sb / name).write_text(body)
+
+    def test_requests_are_read_once_and_only_for_real_scripts(self):
+        run = self.engine_run([])
+        self.session(run, "r1s1", "## Next\nLONG: long_search.py | 1.5 h | decides a(15)\nLONG: long_gone.py | 1 | x\n",
+                     {"long_search.py": "print('RESULT: none')\n"})
+        reqs = R.long_requests(run, set())
+        self.assertEqual([(r["key"], r["hours"], r["purpose"]) for r in reqs], [("r1s1/long_search.py", 1.5, "decides a(15)")])
+        self.assertEqual(R.long_requests(run, {"r1s1/long_search.py"}), [])
+
+    def test_a_computation_runs_without_a_model_and_its_output_reaches_the_library(self):
+        run = self.engine_run([])
+        self.session(run, "deep", "LONG: long_count.py | 0.1 | counts to three\n",
+                     {"long_count.py": "for i in range(3):\n    print('progress', i)\nprint('RESULT: three')\n"})
+        p = {"history": [], "kind": "record"}
+        R.save_state({"problems": {"9": p}})
+        ran = R.run_long(9, p, run, R.load_cfg())
+        self.assertEqual([(r["status"], r["result"]) for r in ran], [("completed", True)])
+        text = (self.d / "library" / "9" / "COMPUTE.md").read_text()
+        self.assertIn("RESULT: three", text)
+        self.assertIn("evidence, not a result", text)
+        self.assertEqual(R.load_state()["problems"]["9"]["computed"], ["deep/long_count.py"])
+        self.assertEqual(R.run_long(9, R.load_state()["problems"]["9"], run, R.load_cfg()), [])     # never twice
+
+    def test_a_result_earns_one_follow_up_pass(self):
+        run = self.engine_run([])
+        self.session(run, "r1s1", "LONG: long_x.py | 0.1 | x\n", {"long_x.py": "print('RESULT: a(15) = 52')\n"})
+        R.save_state({"problems": {"9": {"history": [], "kind": "record", "running": "scout", "run_dir": str(run),
+                                         "prepped": True, "next": None}}})
+        fake = lambda *a, **k: ({"run_dir": str(run.relative_to(self.d)), "spend_run": 5.0}, 0)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "classify", lambda rd: ("none", {})), patch.object(R, "record_atlas"), patch.object(R, "commit"):
+            R.step(R.load_cfg())
+        p = R.load_state()["problems"]["9"]
+        self.assertEqual((p["next"], p["status"], p["followups"]), ("deep", "compute-followup", 1))
+
+    def test_the_engine_reads_the_computation_after_the_digest(self):
+        import harness as H
+        lib = self.d / "library" / "9"
+        lib.mkdir(parents=True)
+        (lib / "DIGEST.md").write_text("the page")
+        (lib / "COMPUTE.md").write_text("## Long computation\nRESULT: three")
+        h = H.Harness.__new__(H.Harness)
+        h.args = type("A", (), {"library": str(lib)})()
+        h.log = type("L", (), {"event": lambda *a, **k: None})()
+        text = h._library_text()
+        self.assertLess(text.index("the page"), text.index("RESULT: three"))
 
 
 ORIGINAL_SITE_CLAIMS = R.site_claims

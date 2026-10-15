@@ -95,6 +95,8 @@ DEFAULTS = {
                          "--engine-session-legs 3 --engine-gap-rounds 2 --engine-gap-max 2 --results-library on"},
     # Recursive children get 3 cycles and one more level: with the default 1, #888's upper-bound child certified 3 of its
     # 4 pieces, planned its next move, and was cut off twice; with 4 cycles and depth 3 it finished (REPORT 3.11).
+    # Long computations a record or explicit run's sessions ask for (run_long): no model calls, so hours cost no usage.
+    "compute": {"case_seconds": 7200, "total_seconds": 14400, "max_requests": 2, "followups": 1},
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
     # (candidates, a crosscheck judge, recorded readings) and proves it with the engine's chain as the blueprint.
@@ -341,10 +343,16 @@ def queue(state: dict, cfg: dict) -> list[int]:
                   key=lambda n: (-pre.get(n, 0.0), forum_chars(n),
                                  -float(((unsolved[n].get("partial") or {}).get("score")) or 0), n))
     ok = lambda n: n not in taken and n not in claimed and not site_claims(n)
+    # A settle screen-out says nothing about a record or an explicit threshold: those lanes may screen it again, once,
+    # under their own objective (#1094, "with finitely many exceptions", scored 0.01 as a settle target).
+    again = lambda n: (((state.get("problems") or {}).get(str(n)) or {}).get("status") == "screened out"
+                       and (state["problems"][str(n)].get("kind") or "settle") == "settle"
+                       and not state["problems"][str(n)].get("rescreened")
+                       and n not in claimed and not site_claims(n))
     first = [n for n in first if ok(n)]
     lanes = {"fresh": [n for n in fresh_targets(cfg) if n in unsolved and ok(n)],
-             "record": [n for n in survey_targets("record", cfg) if n in unsolved and ok(n)],
-             "explicit": [n for n in survey_targets("explicit", cfg) if n in unsolved and ok(n)],
+             "record": [n for n in survey_targets("record", cfg) if n in unsolved and (ok(n) or again(n))],
+             "explicit": [n for n in survey_targets("explicit", cfg) if n in unsolved and (ok(n) or again(n))],
              "settle": [n for n in rest if ok(n)]}
     # The lanes interleave by weight (`mix`), so one lane's long list never starves the others.
     mix = cfg.get("mix") or {}
@@ -459,11 +467,14 @@ def run_progress(run: Path) -> float:
         return 0.0
 
 
-def adopt_run(n: int) -> str | None:
+def adopt_run(n: int, exclude: set | frozenset = frozenset(), after: str | None = None) -> str | None:
     """After an interruption: the campaign's run of this problem with the most work in its checkpoint, to resume. On
     2026-10-08 a restart began #366's scout afresh and abandoned a run holding its map and a whole round ($9.85),
-    because the run dir was recorded only when a stage finished."""
-    runs = [r for r in engine_runs(n) if run_progress(r) > 0]
+    because the run dir was recorded only when a stage finished. A re-screen under another objective passes its old
+    run as `exclude` and its start as `after` (run names begin with their local start time, YYYYMMDD-HHMMSS), so it
+    never resumes the settle run it replaces."""
+    runs = [r for r in engine_runs(n) if run_progress(r) > 0 and str(r.relative_to(ROOT)) not in exclude
+            and (after is None or r.name[:15] >= after)]
     return str(max(runs, key=run_progress).relative_to(ROOT)) if runs else None
 
 
@@ -873,6 +884,15 @@ def step(cfg: dict) -> bool:
         return False
     p = state["problems"].setdefault(str(n), {"history": []})
     key = str(n)
+    lane = QUEUE_LANE.get(int(n))
+    if action == "screen" and p.get("status") == "screened out" and lane in ("record", "explicit"):
+        # a re-screen under another objective is a new engine run; the settle attempt stays in `previous`
+        p["previous"] = {k: p.get(k) for k in ("status", "run_dir", "settle_chance", "arm", "kind", "spend", "track",
+                                               "intent")}
+        for k in ("status", "run_dir", "settle_chance", "arm", "next", "track", "intent", "lane", "kind"):
+            p.pop(k, None)
+        p.update({"spend": 0.0, "rescreened": True, "rescreen_at": datetime.now().strftime("%Y%m%d-%H%M%S")})
+        p["history"].append({"tier": "queue", "outcome": f"rescreen as {LANE_KIND[lane]}"})
     if action in ("screen", "scout"):
         if not p.get("prepped"):
             info = prep(n, cfg)
@@ -893,8 +913,9 @@ def step(cfg: dict) -> bool:
             skip_claimed(n, p, k)
             return True
         p["running"] = action
-        if not p.get("run_dir"):
-            p["run_dir"] = adopt_run(n)                  # a stage cut off before its run dir was recorded
+        if not p.get("run_dir"):                         # a stage cut off before its run dir was recorded
+            p["run_dir"] = adopt_run(n, exclude={(p.get("previous") or {}).get("run_dir")} - {None},
+                                     after=p.get("rescreen_at"))
         save_problem(n, p)
         log(f"#{n}: {action}" + (f" (resuming {p['run_dir']})" if p.get("run_dir") else ""))
 
@@ -1033,6 +1054,17 @@ def step(cfg: dict) -> bool:
         record_atlas(n, f"Resolution campaign {action} {datetime.now().date()} (${total:.2f}, informal): {n_new} validated-new claims "
                         f"(significance {', '.join(map(str, sigs))}); best: {best}")
     commit(["resolution"], f"resolution: #{n} {action} -> {outcome}")
+    if (p.get("kind") or "settle") in ("record", "explicit") and action in ("scout", "deep", "program"):
+        ran = run_long(n, p, run_dir, cfg)
+        cc = cfg.get("compute") or {}
+        if (any(r["result"] for r in ran) and not p.get("next")
+                and int(p.get("followups") or 0) < int(cc.get("followups", 1))):
+            # the computation found something: one more pass, to read it and certify it
+            p.update({"next": "deep", "status": "compute-followup", "followups": int(p.get("followups") or 0) + 1})
+            save_problem(n, p)
+            log(f"#{n}: a long computation reported a RESULT; one follow-up pass to certify it")
+        if ran:
+            commit(["resolution"], f"resolution: #{n} long computation(s): {', '.join(r['status'] or '?' for r in ran)}")
     return True
 
 
@@ -1208,6 +1240,72 @@ def reverify_lean(n: int) -> str:
     line = (lean_run / "SUMMARY.line").read_text().strip() if (lean_run / "SUMMARY.line").exists() else ""
     record_lean(n, p, lean_run, rc, line, how="reverify", spend=round(max(0.0, run_spend(lean_run) - before), 4))
     return f"#{n}: re-verified, exit {rc}: {line[:200]}"
+
+
+LONG_RE = re.compile(r"(?m)^[ \t]*[-*]?[ \t]*LONG:[ \t]*`?(long_[\w.-]*\.py)`?[ \t]*\|[ \t]*([\d.]+)[ \t]*[a-z]*[ \t]*\|"
+                     r"[ \t]*(.+)$")
+
+
+def long_requests(run_dir: Path, done: set[str]) -> list[dict]:
+    """The long computations an engine run's sessions asked for (`LONG: long_x.py | hours | what it decides` in a
+    notebook), minus those already run."""
+    out = []
+    for nb in sorted((run_dir / "engine" / "sessions").glob("*/NOTEBOOK.md")):
+        for m in LONG_RE.finditer(nb.read_text(errors="replace")):
+            key = f"{nb.parent.name}/{m.group(1)}"
+            script = nb.parent / m.group(1)
+            if key in done or not script.is_file() or any(r["key"] == key for r in out):
+                continue
+            out.append({"key": key, "script": script, "hours": float(m.group(2)), "purpose": m.group(3).strip()[:300]})
+    return out
+
+
+def run_long(n: int, p: dict, run_dir: Path, cfg: dict) -> list[dict]:
+    """The computation tier (2026-10-15). It runs each long computation a record or explicit run's sessions asked for,
+    through `long_compute.py`: the sandbox, a cap per case and in total, and no model calls, so hours of search cost no
+    usage. Its output goes where the engine's next stage reads it, the problem's library (COMPUTE.md). A completed
+    process is evidence, not a result: the next stage must certify anything it found."""
+    import long_compute as LC
+    cc = cfg.get("compute") or {}
+    todo = long_requests(run_dir, set(p.get("computed") or []))[: int(cc.get("max_requests", 2))]
+    left = float(cc.get("total_seconds", 14400))
+    ran = []
+    for r in todo:
+        if left < 60:
+            break
+        secs = max(60.0, min(float(cc.get("case_seconds", 7200)), r["hours"] * 3600, left))
+        job = run_dir / "long" / r["key"].replace("/", "-").removesuffix(".py")
+        log(f"#{n}: long computation {r['key']} for up to {secs / 3600:.1f} h ({r['purpose'][:100]})")
+        try:
+            if not (job / "manifest.json").exists():
+                LC.prepare(job, [r["script"]], str(n), r["purpose"], "the session's own request", seconds=secs,
+                           total_seconds=secs)
+            st = LC.run(job)
+        except Exception as e:                           # noqa: BLE001 - a refused or broken script is skipped, not retried
+            log(f"#{n}: long computation {r['key']} not run: {type(e).__name__}: {str(e)[:200]}")
+            p.setdefault("computed", []).append(r["key"])
+            continue
+        a = (st.get("attempts") or [{}])[-1]
+        out = job / str(a.get("output") or "")
+        tail = out.read_text(errors="replace")[-6000:] if out.is_file() else ""
+        elapsed = float(sum(x.get("elapsed", 0) for x in st.get("attempts") or []))
+        left -= elapsed
+        lib = CAMP / "library" / str(n)
+        lib.mkdir(parents=True, exist_ok=True)
+        with (lib / "COMPUTE.md").open("a") as f:
+            f.write(f"\n## Long computation {r['key']} ({datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC)\n"
+                    f"What it decides, in the session's words: {r['purpose']}\n"
+                    f"Process: {a.get('status')}, exit {a.get('exit_code')}, {elapsed:.0f} s of {secs:.0f} s allowed. A "
+                    f"completed process is evidence, not a result: certify anything it found before claiming it.\n"
+                    f"Last output:\n```\n{tail}\n```\n")
+        p.setdefault("computed", []).append(r["key"])
+        found = bool(re.search(r"(?m)^RESULT:", tail))
+        ran.append({"key": r["key"], "status": a.get("status"), "elapsed": round(elapsed), "result": found})
+        result({"problem": n, "tier": "compute", "outcome": a.get("status"), "spend": 0.0, "key": r["key"],
+                "elapsed": round(elapsed), "result": found})
+    if todo:
+        save_problem(n, p)
+    return ran
 
 
 def requeue_lean(n: int) -> str:
