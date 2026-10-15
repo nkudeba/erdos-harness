@@ -1,0 +1,221 @@
+{
+  "sha": "e750f777b32aeae464c01809e0d223dd62e99fab",
+  "node_id": "C_kwDOOogmB9oAKGU3NTBmNzc3YjMyYWVhZTQ2NGMwMTgwOWUwZDIyM2RkNjJlOTlmYWI",
+  "commit": {
+    "author": {
+      "name": "danielmercorjob-eng",
+      "email": "daniel.mercorjob@gmail.com",
+      "date": "2026-10-15T16:05:10Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-15T16:05:10Z"
+    },
+    "message": "feat(FormalConjecturesForMathlib/GroupTheory): numerical invariants of groups and group actions (#6879)\n\nAdds numerical invariants of finite groups and of group actions that are\nnot in Mathlib, as `ℕ`-valued definitions, so that inequalities between\ngroup invariants can be stated.\n\n**Invariants of a group** (`Group` namespace)\n\n| File | Definitions |\n|---|---|\n| `GroupTheory/PrimeDivisors.lean` | `numPrimeDivisors`,\n`largestPrimeDivisor` |\n| `GroupTheory/DerivedLength.lean` | `derivedLength` |\n| `GroupTheory/ElementOrders.lean` | `numElementOrders`,\n`maxElementOrder`, `numInvolutions` |\n| `GroupTheory/RationalClasses.lean` | `numRationalClasses`,\n`numGaloisStableClasses` |\n| `GroupTheory/SubgroupCounts.lean` | `numNormalSubgroups`,\n`numMaximalSubgroupClasses` |\n| `RepresentationTheory/CharacterDegree.lean` | `maxCharacterDegree` |\n\n**Invariants of an action** (`MulAction` namespace; for `G ≤ Equiv.Perm\nα`, of the permutation representation)\n\n| File | Definitions |\n|---|---|\n| `GroupTheory/GroupAction/MovedPoints.lean` | `movedPoints`,\n`numMovedPoints`, `minimalDegree` |\n| `GroupTheory/GroupAction/OrbitCounts.lean` | `numOrbits`,\n`numOrbitals` |\n| `GroupTheory/GroupAction/TransitivityDegree.lean` |\n`transitivityDegree` |\n| `GroupTheory/GroupAction/InvolutionFixedPoints.lean` |\n`minInvolutionFixedPoints`, `maxInvolutionFixedPoints` |\n\n**Formalisation choices**\n\n- Each docstring states the value in degenerate cases. `derivedLength`\nis `0` for non-solvable groups (`sInf ∅`). `largestPrimeDivisor` and\n`maxInvolutionFixedPoints` are `0` when nothing qualifies.\n`transitivityDegree` only considers `k ≤ Nat.card α`: for finite `α`,\nevery action is `k`-transitive for `k > Nat.card α`. For infinite `α`,\n`Nat.card α = 0`, so `transitivityDegree` is `0`.\n- `numRationalClasses` counts conjugacy classes of cyclic subgroups.\n`numGaloisStableClasses` counts the classes fixed by `g ↦ g ^ k` for `k`\ncoprime to the order of `g`.\n- `maxCharacterDegree` is the largest `Module.finrank ℂ V` of a simple\n`V : FDRep ℂ G`, since Mathlib has no API for character degrees.\n- The sanity lemmas pin down these boundary cases, for example\n`derivedLength_of_not_isSolvable`, `minInvolutionFixedPoints_le_card`\n(the identity fixes every point), `numOrbits_eq_one` for transitive\nactions, `numNormalSubgroups_pos`, and `transitivityDegree_of_infinite`.\n\n**Checks**\n\n- `lake --wfail build` passes for each new module, for\n`FormalConjecturesForMathlib` and for `FormalConjecturesUtil`.\n- There is no `sorry`, and each file imports only the Mathlib modules it\nneeds.\n\n---------\n\nCo-authored-by: Paul Lezeau <paul.lezeau@gmail.com>",
+    "tree": {
+      "sha": "77d03578a0e181b6a257550ca5a4a5bca3cb6a8a",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/77d03578a0e181b6a257550ca5a4a5bca3cb6a8a"
+    },
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/e750f777b32aeae464c01809e0d223dd62e99fab",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq0PnGCRC1aQ7uu5UhlAAA/DwQAEG4a5ctp+iC0vNKReqBhIMT\nagpkMrXuIThefdJ3Rhzsx+S6FeiRzh/oe8m5n+deaKVKYVughvG+QZjXfMkPUTP9\nWQOMukK7+dQfD5N4k0a2Pc02JrbjPWu0cFwHevVr1E+Io8H70Jgcd9TNtwVPCW64\n6D++80x5rfNUQce2nJINEIufeDwIjlBxV7X9SM+Wh0TkQyxXAoMc5vmaxLLJ5jb5\nCY8gj0jWO8lr7tqxQpsbj3A6omk0XE10n6wVeiPuw0lomtn38nPkJy2jLExvdyPG\nAdwZ7MtrIfA+fBXnCPli44DlGsZlF7dJ/psidsfaeyoFCYO8w/A7is0HZBg63K+O\no6YUqeXY7VJ7JgkHf4fx4TToc7t3y95bWCSiyUYglhyMTxLunhcHHRwj6uYlsxxU\nv2XcJPejSEYQbKfkdNBZYBGBSzLeDKKPagPVoztqO9rXdZn4Qe0OHdLmT5TemLiY\nmmTf+AXnLaBhht2bzjd01wkljymFI+sSkTxaIoj78X9hQ6K/CfobeFtpZHoiZYzN\nw4xmyU6FuJCLjAmzl9bvGXckO+lx59AzjCQLCLNCj+/XIVaROdd+19deg0kZY122\nRX4jrWXLuEdin6XjzQ5DInpPMPx3Mtq+yvc6lO36VMksZvGB5ON5YfUq76+lgsN+\n9vsRpjqir18wIqZokUH4\n=3spK\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 77d03578a0e181b6a257550ca5a4a5bca3cb6a8a\nparent 32ac619d83ac8943c968142436f782525d75a49f\nauthor danielmercorjob-eng <daniel.mercorjob@gmail.com> 1792080310 +0000\ncommitter GitHub <noreply@github.com> 1792080310 +0000\n\nfeat(FormalConjecturesForMathlib/GroupTheory): numerical invariants of groups and group actions (#6879)\n\nAdds numerical invariants of finite groups and of group actions that are\nnot in Mathlib, as `ℕ`-valued definitions, so that inequalities between\ngroup invariants can be stated.\n\n**Invariants of a group** (`Group` namespace)\n\n| File | Definitions |\n|---|---|\n| `GroupTheory/PrimeDivisors.lean` | `numPrimeDivisors`,\n`largestPrimeDivisor` |\n| `GroupTheory/DerivedLength.lean` | `derivedLength` |\n| `GroupTheory/ElementOrders.lean` | `numElementOrders`,\n`maxElementOrder`, `numInvolutions` |\n| `GroupTheory/RationalClasses.lean` | `numRationalClasses`,\n`numGaloisStableClasses` |\n| `GroupTheory/SubgroupCounts.lean` | `numNormalSubgroups`,\n`numMaximalSubgroupClasses` |\n| `RepresentationTheory/CharacterDegree.lean` | `maxCharacterDegree` |\n\n**Invariants of an action** (`MulAction` namespace; for `G ≤ Equiv.Perm\nα`, of the permutation representation)\n\n| File | Definitions |\n|---|---|\n| `GroupTheory/GroupAction/MovedPoints.lean` | `movedPoints`,\n`numMovedPoints`, `minimalDegree` |\n| `GroupTheory/GroupAction/OrbitCounts.lean` | `numOrbits`,\n`numOrbitals` |\n| `GroupTheory/GroupAction/TransitivityDegree.lean` |\n`transitivityDegree` |\n| `GroupTheory/GroupAction/InvolutionFixedPoints.lean` |\n`minInvolutionFixedPoints`, `maxInvolutionFixedPoints` |\n\n**Formalisation choices**\n\n- Each docstring states the value in degenerate cases. `derivedLength`\nis `0` for non-solvable groups (`sInf ∅`). `largestPrimeDivisor` and\n`maxInvolutionFixedPoints` are `0` when nothing qualifies.\n`transitivityDegree` only considers `k ≤ Nat.card α`: for finite `α`,\nevery action is `k`-transitive for `k > Nat.card α`. For infinite `α`,\n`Nat.card α = 0`, so `transitivityDegree` is `0`.\n- `numRationalClasses` counts conjugacy classes of cyclic subgroups.\n`numGaloisStableClasses` counts the classes fixed by `g ↦ g ^ k` for `k`\ncoprime to the order of `g`.\n- `maxCharacterDegree` is the largest `Module.finrank ℂ V` of a simple\n`V : FDRep ℂ G`, since Mathlib has no API for character degrees.\n- The sanity lemmas pin down these boundary cases, for example\n`derivedLength_of_not_isSolvable`, `minInvolutionFixedPoints_le_card`\n(the identity fixes every point), `numOrbits_eq_one` for transitive\nactions, `numNormalSubgroups_pos`, and `transitivityDegree_of_infinite`.\n\n**Checks**\n\n- `lake --wfail build` passes for each new module, for\n`FormalConjecturesForMathlib` and for `FormalConjecturesUtil`.\n- There is no `sorry`, and each file imports only the Mathlib modules it\nneeds.\n\n---------\n\nCo-authored-by: Paul Lezeau <paul.lezeau@gmail.com>",
+      "verified_at": "2026-10-15T16:05:27Z"
+    }
+  },
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/e750f777b32aeae464c01809e0d223dd62e99fab",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/e750f777b32aeae464c01809e0d223dd62e99fab",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/e750f777b32aeae464c01809e0d223dd62e99fab/comments",
+  "author": {
+    "login": "danielmercorjob-eng",
+    "id": 336067208,
+    "node_id": "U_kgDOFAf6iA",
+    "avatar_url": "https://avatars.githubusercontent.com/u/336067208?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/danielmercorjob-eng",
+    "html_url": "https://github.com/danielmercorjob-eng",
+    "followers_url": "https://api.github.com/users/danielmercorjob-eng/followers",
+    "following_url": "https://api.github.com/users/danielmercorjob-eng/following{/other_user}",
+    "gists_url": "https://api.github.com/users/danielmercorjob-eng/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/danielmercorjob-eng/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/danielmercorjob-eng/subscriptions",
+    "organizations_url": "https://api.github.com/users/danielmercorjob-eng/orgs",
+    "repos_url": "https://api.github.com/users/danielmercorjob-eng/repos",
+    "events_url": "https://api.github.com/users/danielmercorjob-eng/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/danielmercorjob-eng/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "32ac619d83ac8943c968142436f782525d75a49f",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/32ac619d83ac8943c968142436f782525d75a49f",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/32ac619d83ac8943c968142436f782525d75a49f"
+    }
+  ],
+  "stats": {
+    "total": 545,
+    "additions": 545,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "f6041ebc01991d9cc17c9b1dc1aaa6bae0e14d53",
+      "filename": "FormalConjecturesForMathlib.lean",
+      "status": "modified",
+      "additions": 10,
+      "deletions": 0,
+      "changes": 10,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -161,6 +161,15 @@ public import FormalConjecturesForMathlib.Geometry.Metric\n public import FormalConjecturesForMathlib.Geometry.OrdinaryLines\n public import FormalConjecturesForMathlib.Geometry.«2d»\n public import FormalConjecturesForMathlib.Geometry.«3d»\n+public import FormalConjecturesForMathlib.GroupTheory.DerivedLength\n+public import FormalConjecturesForMathlib.GroupTheory.ElementOrders\n+public import FormalConjecturesForMathlib.GroupTheory.GroupAction.InvolutionFixedPoints\n+public import FormalConjecturesForMathlib.GroupTheory.GroupAction.MovedPoints\n+public import FormalConjecturesForMathlib.GroupTheory.GroupAction.OrbitCounts\n+public import FormalConjecturesForMathlib.GroupTheory.GroupAction.TransitivityDegree\n+public import FormalConjecturesForMathlib.GroupTheory.PrimeDivisors\n+public import FormalConjecturesForMathlib.GroupTheory.RationalClasses\n+public import FormalConjecturesForMathlib.GroupTheory.SubgroupCounts\n public import FormalConjecturesForMathlib.GroupTheory.Torsion\n public import FormalConjecturesForMathlib.InformationTheory.FiniteEntropy\n public import FormalConjecturesForMathlib.Lean.Elab.InfoTree.Util\n@@ -213,6 +222,7 @@ public import FormalConjecturesForMathlib.Order.Interval.Finset.Nat\n public import FormalConjecturesForMathlib.Order.Nat\n public import FormalConjecturesForMathlib.Order.Unimodular\n public import FormalConjecturesForMathlib.Probability.FiniteMethod\n+public import FormalConjecturesForMathlib.RepresentationTheory.CharacterDegree\n public import FormalConjecturesForMathlib.RepresentationTheory.Homological.ContCohomology.Sha\n public import FormalConjecturesForMathlib.RingTheory.Bialgebra.Cohomology\n public import FormalConjecturesForMathlib.RingTheory.Bialgebra.TrivialModule"
+    },
+    {
+      "sha": "291269eae21804ccd0d8ebaab63a4f4ef2de8549",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/DerivedLength.lean",
+      "status": "added",
+      "additions": 60,
+      "deletions": 0,
+      "changes": 60,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FDerivedLength.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FDerivedLength.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FDerivedLength.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,60 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.GroupTheory.Solvable\n+public import Mathlib.Order.Lattice.Nat\n+\n+@[expose] public section\n+\n+/-!\n+# Derived length\n+\n+`Group.derivedLength G` is the length of the derived series of `G`: the least `k` with\n+`derivedSeries G k = ⊥`, which exists exactly when `G` is solvable (`Group.IsSolvable`).\n+-/\n+\n+namespace Group\n+\n+variable (G : Type*) [Group G]\n+\n+/-- The derived length of `G`: the least `k` with `derivedSeries G k = ⊥`. It is `0` if there is\n+none, that is, if `G` is not solvable. -/\n+noncomputable def derivedLength : ℕ := sInf {k : ℕ | derivedSeries G k = ⊥}\n+\n+\n+theorem derivedLength_of_not_isSolvable (h : ¬ IsSolvable G) : derivedLength G = 0 := by\n+  have : {k : ℕ | derivedSeries G k = ⊥} = ∅ :=\n+    Set.eq_empty_of_forall_notMem fun k hk => h ⟨⟨k, hk⟩⟩\n+  simp [derivedLength, this]\n+\n+theorem derivedLength_of_subsingleton [Subsingleton G] : derivedLength G = 0 :=\n+  Nat.sInf_eq_zero.mpr (Or.inl (by simpa using Subgroup.eq_bot_of_subsingleton ⊤))\n+\n+example [IsSimpleGroup G] : derivedLength G = 1 ↔ IsMulCommutative G := by\n+  rw [←commutator_eq_bot_iff, derivedLength, ←derivedSeries_one]\n+  refine ⟨fun hk => ?_, fun hk => ?_⟩\n+  · change 1 ∈ {k : ℕ | derivedSeries G k = ⊥}\n+    rw [←hk]\n+    apply Nat.sInf_mem (by grind [Nat.nonempty_of_pos_sInf])\n+  · apply le_antisymm\n+    · apply Nat.sInf_le\n+      grind\n+    · by_contra! h\n+      change 1 ∈ {k : ℕ | derivedSeries G k = ⊥} at hk\n+      grind [ Nat.sInf_eq_zero, derivedSeries_zero, top_ne_bot]\n+\n+end Group"
+    },
+    {
+      "sha": "bc4a6f155756ea39ab5711b491d86e43fa99fd90",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/ElementOrders.lean",
+      "status": "added",
+      "additions": 48,
+      "deletions": 0,
+      "changes": 48,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FElementOrders.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FElementOrders.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FElementOrders.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,48 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Data.Set.Card\n+public import Mathlib.GroupTheory.OrderOfElement\n+\n+@[expose] public section\n+\n+/-!\n+# Orders of elements\n+\n+* `Group.numElementOrders G`: the number of distinct orders of elements of `G`;\n+* `Group.maxElementOrder G`: the largest order of an element;\n+* `Group.numInvolutions G`: the number of elements of order `2`.\n+-/\n+\n+namespace Group\n+\n+variable (G : Type*) [Group G]\n+\n+/-- The number of distinct orders of elements of `G`. -/\n+noncomputable def numElementOrders : ℕ := (Set.range (orderOf : G → ℕ)).ncard\n+\n+/-- The largest order of an element of `G` (`0` if the orders are unbounded). -/\n+noncomputable def maxElementOrder : ℕ := sSup (Set.range (orderOf : G → ℕ))\n+\n+/-- The number of involutions of `G`, its elements of order `2`. -/\n+noncomputable def numInvolutions : ℕ := {g : G | orderOf g = 2}.ncard\n+\n+\n+theorem numInvolutions_le_card [Finite G] : numInvolutions G ≤ Nat.card G :=\n+  Set.ncard_le_card _\n+\n+end Group"
+    },
+    {
+      "sha": "3d349ecccae9c2d7dae84d3e69d5c4d1cef72c6b",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/GroupAction/InvolutionFixedPoints.lean",
+      "status": "added",
+      "additions": 59,
+      "deletions": 0,
+      "changes": 59,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FInvolutionFixedPoints.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FInvolutionFixedPoints.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FInvolutionFixedPoints.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,59 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Data.Set.Card\n+public import Mathlib.GroupTheory.GroupAction.Defs\n+public import Mathlib.GroupTheory.GroupAction.FixedPoints\n+public import Mathlib.GroupTheory.OrderOfElement\n+\n+@[expose] public section\n+\n+/-!\n+# Fixed points of involutions\n+\n+* `MulAction.minInvolutionFixedPoints G α`: the least number of points fixed by an element of\n+  order at most `2`;\n+* `MulAction.maxInvolutionFixedPoints G α`: the largest number of points fixed by an involution.\n+\n+If `G` is the Galois group of a polynomial over $\\mathbb{Q}$, acting on its complex roots, then\n+complex conjugation restricts to an element of `G` of order at most `2`, and the real roots are\n+the points that it fixes. So the number of real roots is at least `minInvolutionFixedPoints G α`.\n+If some root is not real, complex conjugation has order `2`, and the number of real roots is also\n+at most `maxInvolutionFixedPoints G α`. This upper bound needs a non-real root: the roots of\n+$x^2 - 2$ are real and the only involution swaps them, so the maximum is `0`.\n+-/\n+\n+namespace MulAction\n+\n+variable (G α : Type*) [Group G] [MulAction G α]\n+\n+/-- The least number of points fixed by an element of order at most `2`; it is `Nat.card α`\n+if `G` has no involution, since the identity fixes every point. -/\n+noncomputable def minInvolutionFixedPoints : ℕ :=\n+  sInf {k : ℕ | ∃ g : G, g ^ 2 = 1 ∧ (fixedBy α g).ncard = k}\n+\n+/-- The largest number of points fixed by an involution (`0` if `G` has none). -/\n+noncomputable def maxInvolutionFixedPoints : ℕ :=\n+  sSup {k : ℕ | ∃ g : G, orderOf g = 2 ∧ (fixedBy α g).ncard = k}\n+\n+\n+/-- The identity has order at most `2` and fixes every point. -/\n+theorem minInvolutionFixedPoints_le_card [Finite α] :\n+    minInvolutionFixedPoints G α ≤ Nat.card α :=\n+  Nat.sInf_le ⟨1, one_pow 2, by rw [fixedBy_one_eq_univ, Set.ncard_univ]⟩\n+\n+end MulAction"
+    },
+    {
+      "sha": "f65fb2786f76d59f34f87adc54a9f5a96638ff31",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/GroupAction/MovedPoints.lean",
+      "status": "added",
+      "additions": 57,
+      "deletions": 0,
+      "changes": 57,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FMovedPoints.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FMovedPoints.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FMovedPoints.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,57 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Data.Set.Card\n+public import Mathlib.GroupTheory.GroupAction.Defs\n+public import Mathlib.Order.Lattice.Nat\n+\n+@[expose] public section\n+\n+/-!\n+# Moved points and the minimal degree\n+\n+* `MulAction.movedPoints G α`: the points of `α` moved by some element of `G`;\n+* `MulAction.numMovedPoints G α`: their number, the degree of a permutation group;\n+* `MulAction.minimalDegree G α`: the least number of points moved by an element that moves one.\n+-/\n+\n+namespace MulAction\n+\n+variable (G α : Type*) [Group G] [MulAction G α]\n+\n+/-- The points moved by some element of `G`. -/\n+def movedPoints : Set α := {a : α | ∃ g : G, g • a ≠ a}\n+\n+/-- The number of points moved by some element of `G`. -/\n+noncomputable def numMovedPoints : ℕ := (movedPoints G α).ncard\n+\n+/-- The least number of points moved by an element that moves some point (`0` if no element\n+moves a point). -/\n+noncomputable def minimalDegree : ℕ :=\n+  sInf {k : ℕ | ∃ g : G, (fixedBy α g)ᶜ.Nonempty ∧ (fixedBy α g)ᶜ.ncard = k}\n+\n+\n+@[simp]\n+theorem movedPoints_of_subsingleton [Subsingleton G] : movedPoints G α = ∅ := by\n+  ext a\n+  simp [movedPoints, Subsingleton.elim _ (1 : G)]\n+\n+@[simp]\n+theorem numMovedPoints_of_subsingleton [Subsingleton G] : numMovedPoints G α = 0 := by\n+  simp [numMovedPoints]\n+\n+end MulAction"
+    },
+    {
+      "sha": "24b9b41499c694f4bf85519d5811057e8ff681be",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/GroupAction/OrbitCounts.lean",
+      "status": "added",
+      "additions": 49,
+      "deletions": 0,
+      "changes": 49,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FOrbitCounts.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FOrbitCounts.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FOrbitCounts.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,49 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.GroupTheory.GroupAction.Quotient\n+public import Mathlib.SetTheory.Cardinal.Finite\n+\n+@[expose] public section\n+\n+/-!\n+# Numbers of orbits and orbitals\n+\n+* `MulAction.numOrbits G α`: the number of orbits of `G` on `α`, fixed points included;\n+* `MulAction.numOrbitals G α`: the number of orbitals, the orbits of `G` on `α × α`; for a\n+  transitive action this is its rank, the number of orbits of a point stabiliser.\n+-/\n+\n+namespace MulAction\n+\n+variable (G α : Type*) [Group G] [MulAction G α]\n+\n+/-- The number of orbits of `G` on `α`, fixed points included. -/\n+noncomputable def numOrbits : ℕ := Nat.card (orbitRel.Quotient G α)\n+\n+/-- The number of orbits of `G` on `α × α`. -/\n+noncomputable def numOrbitals : ℕ := Nat.card (orbitRel.Quotient G (α × α))\n+\n+\n+theorem numOrbits_eq_one [IsPretransitive G α] [Nonempty α] : numOrbits G α = 1 := by\n+  rw [numOrbits, Nat.card_eq_one_iff_unique]\n+  refine ⟨⟨fun a b => Quotient.inductionOn₂ a b fun x y => ?_⟩,\n+    ⟨Quotient.mk _ (Classical.arbitrary α)⟩⟩\n+  obtain ⟨g, hg⟩ := exists_smul_eq G y x\n+  exact Quotient.sound (orbitRel_apply.mpr ⟨g, hg⟩)\n+\n+end MulAction"
+    },
+    {
+      "sha": "5154239e8821c8aa69c54f5e44ffabfc96af241a",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/GroupAction/TransitivityDegree.lean",
+      "status": "added",
+      "additions": 50,
+      "deletions": 0,
+      "changes": 50,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FTransitivityDegree.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FTransitivityDegree.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FGroupAction%2FTransitivityDegree.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,50 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.GroupTheory.GroupAction.MultipleTransitivity\n+\n+@[expose] public section\n+\n+/-!\n+# The degree of transitivity\n+\n+`MulAction.transitivityDegree G α` is the largest `k ≤ Nat.card α` such that the action of `G` on\n+`α` is `k`-transitive (`MulAction.IsMultiplyPretransitive`). For finite `α`, every action is\n+`k`-transitive for `k > Nat.card α`, because there is no injection `Fin k ↪ α`; hence the bound.\n+For infinite `α`, `Nat.card α = 0`, so `transitivityDegree G α = 0`\n+(`transitivityDegree_of_infinite`).\n+-/\n+\n+namespace MulAction\n+\n+variable (G α : Type*) [Group G] [MulAction G α]\n+\n+/-- The largest `k ≤ Nat.card α` such that the action is `k`-transitive; it is `0` for infinite\n+`α`. -/\n+noncomputable def transitivityDegree : ℕ :=\n+  sSup {k : ℕ | k ≤ Nat.card α ∧ IsMultiplyPretransitive G α k}\n+\n+\n+theorem transitivityDegree_le_card [Finite α] : transitivityDegree G α ≤ Nat.card α :=\n+  csSup_le' fun _ hk => hk.1\n+\n+/-- For infinite `α`, `Nat.card α = 0`, so the degree is `0`. -/\n+theorem transitivityDegree_of_infinite [Infinite α] : transitivityDegree G α = 0 :=\n+  Nat.eq_zero_of_le_zero <| csSup_le' fun _ hk => by\n+    simpa [Nat.card_eq_zero_of_infinite] using hk.1\n+\n+end MulAction"
+    },
+    {
+      "sha": "bcb8b0e6313b2196ab918651ba5c4260046656fe",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/PrimeDivisors.lean",
+      "status": "added",
+      "additions": 55,
+      "deletions": 0,
+      "changes": 55,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FPrimeDivisors.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FPrimeDivisors.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FPrimeDivisors.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,55 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Algebra.Group.Defs\n+public import Mathlib.Data.Nat.PrimeFin\n+public import Mathlib.SetTheory.Cardinal.Finite\n+public import Mathlib.NumberTheory.ArithmeticFunction.Misc\n+public import FormalConjecturesForMathlib.Data.Nat.MaxPrimeFac\n+\n+@[expose] public section\n+\n+/-!\n+# Prime divisors of the order of a group\n+\n+* `Group.numPrimeDivisors G`: the number of distinct primes dividing `Nat.card G`;\n+* `Group.largestPrimeDivisor G`: the largest of them, or `0` if there is none.\n+-/\n+\n+namespace Group\n+\n+variable (G : Type*) [Group G]\n+\n+open scoped Nat ArithmeticFunction.sigma\n+\n+/-- The number of distinct primes dividing the order of `G`. -/\n+noncomputable def numPrimeDivisors : ℕ := σ 0 (Nat.card G).primeFactors.card\n+\n+/-- The largest prime dividing the order of `G`, or `0` if there is none (`G` trivial or\n+infinite). -/\n+noncomputable def largestPrimeDivisor : ℕ := (Nat.card G).maxPrimeFac\n+\n+\n+@[simp]\n+theorem numPrimeDivisors_of_subsingleton [Subsingleton G] : numPrimeDivisors G = 0 := by\n+  simp [numPrimeDivisors]\n+\n+@[simp]\n+theorem largestPrimeDivisor_of_subsingleton [Subsingleton G] : largestPrimeDivisor G = 1 := by\n+  simp [largestPrimeDivisor]\n+\n+end Group"
+    },
+    {
+      "sha": "3e1f976090012b9fef35af50e319448f5520e222",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/RationalClasses.lean",
+      "status": "added",
+      "additions": 64,
+      "deletions": 0,
+      "changes": 64,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FRationalClasses.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FRationalClasses.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FRationalClasses.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,64 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Algebra.Group.Conj\n+public import Mathlib.Algebra.Group.Subgroup.Pointwise\n+public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic\n+public import Mathlib.Data.Set.Card\n+public import Mathlib.GroupTheory.GroupAction.ConjAct\n+public import Mathlib.GroupTheory.OrderOfElement\n+\n+@[expose] public section\n+\n+/-!\n+# Rational classes and Galois-stable conjugacy classes\n+\n+The absolute Galois group of `ℚ` acts on the conjugacy classes of a finite group `G`: it maps the\n+class of `g` to the class of `g ^ k` for `k` coprime to the order of `g`.\n+\n+* `Group.numRationalClasses G`: the number of orbits of this action on the conjugacy classes, the\n+  rational classes; two elements are in the same rational class exactly when they generate\n+  conjugate cyclic subgroups, so this is the number of conjugacy classes of cyclic subgroups;\n+* `Group.numGaloisStableClasses G`: the number of conjugacy classes fixed by the action, the\n+  classes on which every complex character of `G` takes rational values.\n+-/\n+\n+open scoped Pointwise\n+\n+namespace Group\n+\n+variable (G : Type*) [Group G]\n+\n+/-- The number of rational classes of `G`, the conjugacy classes of its cyclic subgroups. -/\n+noncomputable def numRationalClasses : ℕ :=\n+  (Set.range fun g : G => MulAction.orbit (ConjAct G) (Subgroup.zpowers g)).ncard\n+\n+/-- The number of conjugacy classes of `G` that contain `g ^ k` together with `g` for every `k`\n+coprime to the order of `g`. -/\n+noncomputable def numGaloisStableClasses : ℕ :=\n+  ((ConjClasses.mk : G → ConjClasses G) ''\n+    {g : G | ∀ k : ℕ, k.Coprime (orderOf g) → IsConj g (g ^ k)}).ncard\n+\n+\n+instance [Finite G] : Finite (ConjClasses G) :=\n+  Finite.of_surjective _ ConjClasses.mk_surjective\n+\n+theorem numGaloisStableClasses_le [Finite G] :\n+    numGaloisStableClasses G ≤ Nat.card (ConjClasses G) :=\n+  Set.ncard_le_card _\n+\n+end Group"
+    },
+    {
+      "sha": "5733bf0ad4fb95f85bd0c43e379d58d721e8a8e6",
+      "filename": "FormalConjecturesForMathlib/GroupTheory/SubgroupCounts.lean",
+      "status": "added",
+      "additions": 55,
+      "deletions": 0,
+      "changes": 55,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FSubgroupCounts.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FGroupTheory%2FSubgroupCounts.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FGroupTheory%2FSubgroupCounts.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,55 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Algebra.Group.Subgroup.Pointwise\n+public import Mathlib.Data.Set.Card\n+public import Mathlib.GroupTheory.GroupAction.ConjAct\n+public import Mathlib.Order.Atoms\n+\n+@[expose] public section\n+\n+/-!\n+# Numbers of subgroups\n+\n+* `Group.numNormalSubgroups G`: the number of normal subgroups of `G`;\n+* `Group.numMaximalSubgroupClasses G`: the number of conjugacy classes of maximal subgroups.\n+-/\n+\n+open scoped Pointwise\n+\n+namespace Group\n+\n+variable (G : Type*) [Group G]\n+\n+/-- The number of normal subgroups of `G`. -/\n+noncomputable def numNormalSubgroups : ℕ := {H : Subgroup G | H.Normal}.ncard\n+\n+/-- The number of conjugacy classes of maximal subgroups of `G`. -/\n+noncomputable def numMaximalSubgroupClasses : ℕ :=\n+  ((fun H : Subgroup G => MulAction.orbit (ConjAct G) H) '' {H : Subgroup G | IsCoatom H}).ncard\n+\n+instance [Finite G] : Finite (Subgroup G) :=\n+  Finite.of_injective _ SetLike.coe_injective\n+\n+theorem numNormalSubgroups_pos [Finite G] : 0 < numNormalSubgroups G :=\n+  (Set.ncard_pos (Set.toFinite _)).mpr ⟨⊥, Subgroup.normal_bot⟩\n+\n+example [Finite G] : 1 ≤ numNormalSubgroups G := by\n+  exact (Set.ncard_pos (Finite.of_injective _ Subtype.coe_injective)).mpr\n+    ⟨⊥, Subgroup.normal_bot⟩\n+\n+end Group"
+    },
+    {
+      "sha": "b589756120ab5b0ec48cfde2998f3bbca67a9e38",
+      "filename": "FormalConjecturesForMathlib/RepresentationTheory/CharacterDegree.lean",
+      "status": "added",
+      "additions": 38,
+      "deletions": 0,
+      "changes": 38,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FRepresentationTheory%2FCharacterDegree.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e750f777b32aeae464c01809e0d223dd62e99fab/FormalConjecturesForMathlib%2FRepresentationTheory%2FCharacterDegree.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FRepresentationTheory%2FCharacterDegree.lean?ref=e750f777b32aeae464c01809e0d223dd62e99fab",
+      "patch": "@@ -0,0 +1,38 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Data.Complex.Basic\n+public import Mathlib.RepresentationTheory.FDRep\n+\n+@[expose] public section\n+\n+/-!\n+# The largest character degree\n+\n+`Group.maxCharacterDegree G` is the largest degree of an irreducible complex character of `G`:\n+the largest dimension of a simple finite-dimensional complex representation of `G`.\n+-/\n+\n+namespace Group\n+\n+variable (G : Type*) [Group G]\n+\n+/-- The largest dimension of a simple finite-dimensional complex representation of `G`. -/\n+noncomputable def maxCharacterDegree : ℕ :=\n+  sSup {d : ℕ | ∃ V : FDRep ℂ G, CategoryTheory.Simple V ∧ Module.finrank ℂ V = d}\n+\n+end Group"
+    }
+  ]
+}
