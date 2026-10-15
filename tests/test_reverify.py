@@ -99,9 +99,11 @@ class ReverifyLean(unittest.TestCase):
                                            "lean_run": "runs/lean", "complete": complete, "track": "new-math"}}})
 
     def test_a_reverified_new_math_proof_goes_to_human_review(self):
+        (self.lean / "SUMMARY.line").write_text("RUN-SUMMARY problem=769 exit=2 spend=$6.78")
+
         def fake_run(cmd, **k):
             self.assertEqual(cmd[2:4], ["reverify", "--run"])
-            (self.lean / "SUMMARY.line").write_text("RUN-SUMMARY problem=769 exit=0 spend=$6.90")
+            (self.lean / "SUMMARY.line").write_text("RUN-SUMMARY problem=769 exit=0 spend=$6.85")
             return type("P", (), {"returncode": 0})()
         with patch.object(R.subprocess, "run", fake_run), patch.object(R, "record_atlas") as atlas, patch.object(R, "commit"), \
                 patch.object(R, "flag_for_review") as review:
@@ -111,7 +113,9 @@ class ReverifyLean(unittest.TestCase):
         review.assert_called_once()
         self.assertIn("re-verified by the operator after an audit fix", atlas.call_args[0][1])
         self.assertIn("awaiting human review", atlas.call_args[0][1])
-        self.assertEqual(json.loads(R.RESULTS.read_text().splitlines()[-1])["how"], "reverify")
+        row = json.loads(R.RESULTS.read_text().splitlines()[-1])
+        self.assertEqual(row["how"], "reverify")
+        self.assertEqual(row["spend"], 0.07)          # only what the re-verification added: the daily cap counts rows
 
     def test_nothing_to_reverify(self):
         self.assertIn("no finished Lean stage", R.reverify_lean(5))

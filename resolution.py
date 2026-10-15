@@ -1020,12 +1020,12 @@ def loop() -> None:
             time.sleep(3600)
 
 
-def record_lean(n: int, p: dict, lean_run: Path, rc: int, line: str, how: str = "lean") -> None:
+def record_lean(n: int, p: dict, lean_run: Path, rc: int, line: str, how: str = "lean", spend: float | None = None) -> None:
     """Record a finished main Lean stage: the problem's status, a results row, the review or statement-findings file,
     the Atlas and a commit. `how` is "lean" for a stage the loop ran and "reverify" for an operator's re-verification
     of that stage's own proof (`reverify_lean`)."""
     engine_run = ROOT / p["run_dir"]
-    spend = run_spend(lean_run)
+    spend = run_spend(lean_run) if spend is None else spend   # a re-verification passes only what it added
     verified = rc == 0
     p.update({"running": None, "next": None, "status": "verified" if verified else "lean-partial", "lean_summary": line})
     p["history"].append({"tier": "lean", "rc": rc, "summary": line, **({"how": how} if how != "lean" else {})})
@@ -1063,11 +1063,12 @@ def reverify_lean(n: int) -> str:
     if p.get("running"):
         return f"#{n}: a stage is running ({p['running']}); re-verify when it ends"
     lean_run = ROOT / p["lean_run"]
+    before = run_spend(lean_run)    # the daily cap counts rows: the run's earlier spend is in its own row already
     with (lean_run / "lane.log").open("a") as f:
         rc = subprocess.run([sys.executable, str(ROOT / "harness.py"), "reverify", "--run", str(lean_run)], cwd=ROOT,
                             stdout=f, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, timeout=4 * 3600).returncode
     line = (lean_run / "SUMMARY.line").read_text().strip() if (lean_run / "SUMMARY.line").exists() else ""
-    record_lean(n, p, lean_run, rc, line, how="reverify")
+    record_lean(n, p, lean_run, rc, line, how="reverify", spend=round(max(0.0, run_spend(lean_run) - before), 4))
     return f"#{n}: re-verified, exit {rc}: {line[:200]}"
 
 
