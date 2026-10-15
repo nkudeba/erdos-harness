@@ -2388,6 +2388,28 @@
    "status": "screened out",
    "track": null,
    "intent": null
+  },
+  "677": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.06,
+     "spend": 4.1581,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261015-011931-067644-erdos677",
+   "spend": 4.15806,
+   "limit_waits": 0,
+   "settle_chance": 0.06,
+   "arm": "screened out",
+   "next": null,
+   "status": "screened out",
+   "track": null,
+   "intent": null
   }
  }
 }
