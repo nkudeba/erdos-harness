@@ -1,4 +1,4 @@
-# erdosproblems.com #197: problem page and forum thread (fetched 2026-10-11T21:47:57Z)
+# erdosproblems.com #197: problem page and forum thread (fetched 2026-10-15T16:14:21Z)
 
 Comments and proof claims are unverified; several withdraw earlier claims.
 

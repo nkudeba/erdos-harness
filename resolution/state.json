@@ -21,14 +21,18 @@
      "tier": "scout",
      "outcome": "none",
      "spend": 16.6198
+    },
+    {
+     "tier": "queue",
+     "outcome": "persist (operator)"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261008-133931-530035-erdos686",
    "spend": 16.619813799999996,
-   "next": null,
-   "status": "done",
+   "next": "program",
+   "status": "persist",
    "claims_todo": []
   },
   "488": {
@@ -62,18 +66,33 @@
      "outcome": "screened out",
      "settle_chance": 0.01,
      "spend": 2.3422
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261008-152622-627325-erdos873",
    "errors": 0,
-   "status": "screened out",
-   "spend": 2.3422159999999996,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.01,
-   "arm": "screened out",
-   "next": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261008-152622-627325-erdos873",
+    "settle_chance": 0.01,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 2.3422159999999996,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "655": {
    "history": [
@@ -253,20 +272,33 @@
      "settle_chance": 0.0,
      "spend": 4.5659,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261010-105736-023318-erdos32",
    "errors": 0,
-   "status": "screened out",
-   "spend": 4.5658648,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.0,
-   "arm": "screened out",
-   "next": null,
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261010-105736-023318-erdos32",
+    "settle_chance": 0.0,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 4.5658648,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122831",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "695": {
    "history": [
@@ -282,20 +314,33 @@
      "settle_chance": 0.01,
      "spend": 5.4943,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as record (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261010-145921-154479-erdos695",
    "errors": 0,
-   "status": "screened out",
-   "spend": 5.494304,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.01,
-   "arm": "screened out",
-   "next": null,
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261010-145921-154479-erdos695",
+    "settle_chance": 0.01,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 5.494304,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "record",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "517": {
    "history": [
@@ -311,20 +356,33 @@
      "settle_chance": 0.11,
      "spend": 1.7901,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261010-230825-708026-erdos517",
    "errors": 0,
-   "status": "screened out",
-   "spend": 1.7900639999999999,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.11,
-   "arm": "screened out",
-   "next": null,
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261010-230825-708026-erdos517",
+    "settle_chance": 0.11,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 1.7900639999999999,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122831",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "1068": {
    "history": [
@@ -340,20 +398,33 @@
      "settle_chance": 0.17,
      "spend": 2.0347,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261011-030903-886292-erdos1068",
    "errors": 0,
-   "status": "screened out",
-   "spend": 2.0347239999999998,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.17,
-   "arm": "screened out",
-   "next": null,
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261011-030903-886292-erdos1068",
+    "settle_chance": 0.17,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 2.0347239999999998,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "103": {
    "history": [
@@ -374,18 +445,22 @@
      "tier": "scout",
      "outcome": "none",
      "spend": 16.7434
+    },
+    {
+     "tier": "queue",
+     "outcome": "persist (operator)"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261011-134723-544082-erdos103",
    "errors": 0,
-   "status": "done",
+   "status": "persist",
    "spend": 17.817843600000007,
    "limit_waits": 0,
    "settle_chance": 0.25,
    "arm": "control",
-   "next": null,
+   "next": "program",
    "track": "control",
    "intent": null,
    "claims_todo": []
@@ -404,20 +479,33 @@
      "settle_chance": 0.05,
      "spend": 4.1324,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261011-174757-518493-erdos197",
    "errors": 0,
-   "status": "screened out",
-   "spend": 4.1324119999999995,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.05,
-   "arm": "screened out",
-   "next": null,
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261011-174757-518493-erdos197",
+    "settle_chance": 0.05,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 4.1324119999999995,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122831",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "1133": {
    "history": [
@@ -426,16 +514,31 @@
      "outcome": "screened out",
      "settle_chance": 0.08,
      "spend": 3.1974
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261013-095503-262897-erdos1133",
-   "spend": 3.197408,
-   "settle_chance": 0.08,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out"
+   "spend": 0.0,
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261013-095503-262897-erdos1133",
+    "settle_chance": 0.08,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 3.197408,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "295": {
    "history": [
@@ -2331,19 +2434,32 @@
      "settle_chance": 0.045,
      "spend": 4.4536,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as explicit (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261015-001934-846692-erdos1192",
-   "spend": 4.453571999999999,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.045,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out",
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261015-001934-846692-erdos1192",
+    "settle_chance": 0.045,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 4.453571999999999,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "explicit",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "1088": {
    "history": [
@@ -2353,19 +2469,32 @@
      "settle_chance": 0.025,
      "spend": 1.9913,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261015-005311-673375-erdos1088",
-   "spend": 1.9912720000000002,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.025,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out",
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261015-005311-673375-erdos1088",
+    "settle_chance": 0.025,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 1.9912720000000002,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "881": {
    "history": [
@@ -2375,19 +2504,32 @@
      "settle_chance": 0.11,
      "spend": 1.4597,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as settle (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261015-010851-438056-erdos881",
-   "spend": 1.45972,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.11,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out",
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261015-010851-438056-erdos881",
+    "settle_chance": 0.11,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 1.45972,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "settle",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "677": {
    "history": [
@@ -2397,19 +2539,32 @@
      "settle_chance": 0.06,
      "spend": 4.1581,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as explicit (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261015-011931-067644-erdos677",
-   "spend": 4.15806,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.06,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out",
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261015-011931-067644-erdos677",
+    "settle_chance": 0.06,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 4.15806,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122831",
+   "kind": "explicit",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "1094": {
    "history": [
@@ -2419,19 +2574,32 @@
      "settle_chance": 0.01,
      "spend": 5.3865,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as explicit (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261015-015218-469748-erdos1094",
-   "spend": 5.386476,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.01,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out",
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261015-015218-469748-erdos1094",
+    "settle_chance": 0.01,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 5.386476,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122832",
+   "kind": "explicit",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "1207": {
    "history": [
@@ -2446,6 +2614,10 @@
      "tier": "scout",
      "outcome": "none",
      "spend": 14.2698
+    },
+    {
+     "tier": "queue",
+     "outcome": "persist (operator)"
     }
    ],
    "prepped": true,
@@ -2455,8 +2627,8 @@
    "limit_waits": 0,
    "settle_chance": 0.325,
    "arm": "pass",
-   "next": null,
-   "status": "done",
+   "next": "program",
+   "status": "persist",
    "track": "statement",
    "intent": "known-result",
    "claims_todo": []
@@ -2469,19 +2641,32 @@
      "settle_chance": 0.025,
      "spend": 3.2973,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rescreen as record (operator)"
     }
    ],
    "prepped": true,
    "running": null,
-   "run_dir": "runs/20261015-034347-661412-erdos158",
-   "spend": 3.2973359999999996,
+   "spend": 0.0,
    "limit_waits": 0,
-   "settle_chance": 0.025,
-   "arm": "screened out",
-   "next": null,
-   "status": "screened out",
-   "track": null,
-   "intent": null
+   "previous": {
+    "status": "screened out",
+    "run_dir": "runs/20261015-034347-661412-erdos158",
+    "settle_chance": 0.025,
+    "arm": "screened out",
+    "kind": null,
+    "spend": 3.2973359999999996,
+    "track": null,
+    "intent": null
+   },
+   "rescreened": true,
+   "rescreen_at": "20261015-122831",
+   "kind": "record",
+   "lane": "rescreen",
+   "next": "screen",
+   "status": "rescreen"
   },
   "1199": {
    "history": [
@@ -2501,6 +2686,10 @@
      "tier": "program",
      "outcome": "traction",
      "spend": 64.3858
+    },
+    {
+     "tier": "queue",
+     "outcome": "persist (operator)"
     }
    ],
    "prepped": true,
@@ -2510,14 +2699,15 @@
    "limit_waits": 0,
    "settle_chance": 0.3,
    "arm": "pass",
-   "next": null,
-   "status": "traction",
+   "next": "program",
+   "status": "persist",
    "track": "new-math",
    "intent": "unclear",
    "traction": {
     "settle_chance": 0.15
    },
-   "claims_todo": []
+   "claims_todo": [],
+   "program_passes": 1
   }
  }
 }
