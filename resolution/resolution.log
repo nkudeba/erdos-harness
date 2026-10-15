@@ -264,3 +264,5 @@
 [2026-10-15T05:52:09Z] #677: screen -> screened out (settle chance 0.06, draws [0.06, 0.06]; $4.16)
 [2026-10-15T05:52:18Z] #1094: screen
 [2026-10-15T06:40:12Z] #1094: screen -> screened out (settle chance 0.01, draws [0.0, 0.02]; $5.39)
+[2026-10-15T06:40:21Z] #1207: screen
+[2026-10-15T06:50:07Z] #1207: screen -> pass (settle chance 0.33, draws [0.35, 0.3]; $1.50); track statement (intent known-result)

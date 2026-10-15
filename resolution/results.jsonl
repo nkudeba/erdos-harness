@@ -191,3 +191,4 @@
 {"at": "2026-10-15T05:19:22Z", "problem": 881, "tier": "screen", "outcome": "screened out", "settle_chance": 0.11, "draws": [0.12, 0.1], "spend": 1.4597, "run_dir": "runs/20261015-010851-438056-erdos881", "track": null, "intent": null}
 {"at": "2026-10-15T05:52:09Z", "problem": 677, "tier": "screen", "outcome": "screened out", "settle_chance": 0.06, "draws": [0.06, 0.06], "spend": 4.1581, "run_dir": "runs/20261015-011931-067644-erdos677", "track": null, "intent": null}
 {"at": "2026-10-15T06:40:12Z", "problem": 1094, "tier": "screen", "outcome": "screened out", "settle_chance": 0.01, "draws": [0.0, 0.02], "spend": 5.3865, "run_dir": "runs/20261015-015218-469748-erdos1094", "track": null, "intent": null}
+{"at": "2026-10-15T06:50:07Z", "problem": 1207, "tier": "screen", "outcome": "pass", "settle_chance": 0.325, "draws": [0.35, 0.3], "spend": 1.5002, "run_dir": "runs/20261015-024021-674357-erdos1207", "track": "statement", "intent": "known-result"}
