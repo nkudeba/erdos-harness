@@ -1387,6 +1387,15 @@ for x > 1, and π(x) > x/log x for x ≥ 17.
   `distanceSet` and `distinctDistances` inlined.
 - **Requeue.** `resolution.py requeue-lean --problem 655` sends it back to Lean. It has to run after the loop restarts
   on the new code: the running loop would rebuild the uncompilable statement.
+- **The second stage** ($2.54) lost every hypothesis attack to a related bug. `split_decls` glued the inlined
+  `scoped[EuclideanGeometry] notation` to the hypothesis above it, so no sub-statement carried `ℝ²` (fixed in
+  `7ac2183`).
+- **The third stage verified it** (`runs/20261015-000603-617862-resolve-lean-erdos655`, 13 minutes, $0.88). The first
+  plan closed the proof outright, and all 9 audit checks and the faithfulness judge passed.
+  - It is a statement finding: formal-conjectures' #655 is false because the regular n-gon is valid and has ⌊n/2⌋
+    distances.
+  - It is already known: Hunter's forum note (January 2026), and Altman (1963) for the distance count. It is not a
+    resolution of the problem Erdős meant.
 
 **A usage-limit bug, found 2026-10-07: some judge verdicts were never given.**
 - **The bug.** The harness stops a run on a "hard" error (a usage limit, an auth failure), and the run is resumable. Its
