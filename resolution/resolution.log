@@ -270,3 +270,5 @@
 [2026-10-15T07:43:42Z] #1207: scout -> none ($14.27; 0 validated new [])
 [2026-10-15T07:43:47Z] #158: screen
 [2026-10-15T08:07:34Z] #158: screen -> screened out (settle chance 0.03, draws [0.02, 0.03]; $3.30)
+[2026-10-15T08:07:43Z] #1199: screen
+[2026-10-15T08:21:24Z] #1199: screen -> pass (settle chance 0.30, draws [0.3, 0.3]; $1.83); track new-math (intent unclear)

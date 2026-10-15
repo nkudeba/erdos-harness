@@ -2482,6 +2482,28 @@
    "status": "screened out",
    "track": null,
    "intent": null
+  },
+  "1199": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "pass",
+     "settle_chance": 0.3,
+     "spend": 1.8341,
+     "track": "new-math"
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261015-040743-705744-erdos1199",
+   "spend": 1.83414,
+   "limit_waits": 0,
+   "settle_chance": 0.3,
+   "arm": "pass",
+   "next": "scout",
+   "status": "screened",
+   "track": "new-math",
+   "intent": "unclear"
   }
  }
 }
