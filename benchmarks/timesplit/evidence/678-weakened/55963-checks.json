@@ -1,0 +1,35 @@
+{
+ "alias": "55963",
+ "holes": 0,
+ "passes": true,
+ "checks": {
+  "source_scan": {
+   "ok": true,
+   "detail": "no sorry, kernel bypass or elaboration-time code"
+  },
+  "imports": {
+   "ok": true,
+   "detail": "6 import(s), all Mathlib, Formal.Library or the statement's own"
+  },
+  "compiles": {
+   "ok": true,
+   "detail": "no errors"
+  },
+  "no_sorry_warning": {
+   "ok": true,
+   "detail": "0 sorry warning(s)"
+  },
+  "axioms": {
+   "ok": true,
+   "detail": "[Classical.choice, Quot.sound, propext]"
+  },
+  "statement_identity": {
+   "ok": true,
+   "detail": "the proved `erdos_55963` and 1 frozen definition(s) are structurally identical to a clean elaboration of the frozen statement (3 constant(s) compared)"
+  },
+  "kernel_replay": {
+   "ok": true,
+   "detail": "all declarations replayed"
+  }
+ }
+}

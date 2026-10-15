@@ -1726,3 +1726,73 @@ too.
 in this file included, still writes its negation with one `formalize` call. An arm pinned from the live harness after
 this fix gets its negation for free, with no model call, and its text can differ from a pin's (`∀ (hn : 2 < n), …`
 where the model wrote `2 < n → …`).
+
+**P1–P3 outcome (2026-10-15, the operator's go-ahead): 3 of 3 adopted, 1 residual closed and audited. $7.52.**
+
+Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. Directories:
+`runs/replay-weaken-20261014/<alias>-<premise>/`.
+
+| replay | premise replaced | weakened premise (the proposal's) | Lean: premise ⇒ weakened | certified by the attack | residual after | $ (proposal + attack) |
+|---|---|---|---|---|---|---|
+| P1, 81727 | Nagura, a prime in (x, 6x/5] for x ≥ 25 | `hyp_halfprime`: ∃K ∀k ≥ K ∃ prime p, k+2 ≤ 2p ∧ 2p+2 ≤ 2k | yes (its script) | yes | 0 conjectures, 1 premise (Nair) | 2.52 (0.31 + 2.21) |
+| P2, 86081 | Nagura, through the definition `e86081Nagura` | `hyp_bertrand_gap`, through a new definition | not at the time; yes after the fix below | yes | 0 conjectures, 1 premise (Nair) | 2.46 (0.21 + 2.25) |
+| P3, 55963 | Ramanujan, primes p < q in (x/2, x] for x ≥ 11 | `hyp_bertrand_gap`: ∃K ∀k ≥ K ∃ prime q, k+1 < 2q ∧ q+1 ≤ k | yes | yes | **closed: nothing open** | 2.55 (0.17 + 2.38) |
+
+- **What the proposals did.** All three read the glue correctly.
+  - Each premise was used once, to obtain one prime in about ((k+1)/2, k−1] for every large k.
+  - So each stated exactly that, with the threshold quantified existentially, and changed only the glue. No certified
+    step had to be restated.
+  - Two said why plain Bertrand misses: an odd k can have its Bertrand prime on the wrong side.
+  - Each pointed at the central-binomial argument behind Mathlib's Bertrand file.
+- **What the attacks did.** Each took the same path: a failed one-shot, a critic call, then three agentic rounds. Each
+  proved its weakened premise from Mathlib's Bertrand machinery (`primorial`, `bertrand_main_inequality`), at $2.21–2.38.
+  - For comparison, the direct attack on Nagura as stated failed ($1.50). The one on Ramanujan as stated succeeded
+    ($3.22).
+- **Audits** (`evidence/678-weakened/`, `assemble.py`; each passes all 7 of `audit.lean_checks`):
+  - 55963's replay residual, exactly as the replay left it.
+  - 81727's replay residual with Nair spliced in from the 2026-09-30 premise replay ($1.53). That splice is operator
+    assembly.
+  - Neither is an autonomous solve: each replay started from a saved final state, outside its run.
+- **Against the predictions** (valid / certified / adopted):
+  - P1: predicted 0.75 / 0.3 / 0.45, got 3 of 3.
+  - P2: predicted 0.6 / 0.25 / 0.35, got 3 of 3.
+  - P3: predicted 0.7 / 0.45 / 0.5, got 3 of 3, and its residual closed (predicted 0.4).
+  - Spend $7.52, against about $12 predicted.
+  - The predictions were too low, mostly on certification: the weakened forms are Bertrand variants, closer to
+    Ramanujan's form, which an attack had proved, than to Nagura's.
+- **How much this shows.** The three successes are ONE mathematical weakening on ONE problem, found and proved three
+  times. That is strong evidence that the mechanism works end to end, and weak evidence about how often it pays.
+- **Would the runs have closed in-run?**
+  - 55963's run ended with about $4 unused, which covers the $2.55 here.
+  - 81727's endgame had $2.70. Proposal, weakened premise and Nair need about $4.05, so it still needs
+    `--budget-extend` or a larger budget.
+- **A fix from P2, made after the replays** (`certified_context`).
+  - P2's proposal derived the weakened premise from the original through a certified step: `exact ⟨49,
+    erdos_86081_hyp_choice_q hP⟩`.
+  - The probe had only the skeleton's definitions in scope and answered `Unknown identifier`.
+  - The probe now puts back the certified steps a derivation names, with their proofs. Open hypotheses have no proof
+    namespace and stay out, so a derivation cannot lean on an unproved step.
+  - Re-checked on P2's own proposal in Lean, free: Lean now derives the weakened premise from Nagura, and not the converse.
+  - Had the fix been in place, P2's weakened premise would have kept Nagura's citation; it was certified anyway.
+- **Default:** still OFF. The evidence is one problem. Turning it on is the operator's decision (see CLAUDE.md).
+
+## Premise weakening on by default (2026-10-15, the operator's decision)
+
+- **Change:** `--premise-weaken` now defaults to `on`. `--premise-weaken off` restores the direct premise attack.
+  Nothing else changes.
+- **Why** (decided after the P1–P3 replays above):
+  - **Where it fires.** Only in the premise endgame: no conjecture open, and a published premise with a numeric
+    constant that the plan rated hard or that an attack has already failed on. There the endgame spends what is left
+    on that premise anyway; the move redirects it to the weakest form the glue needs.
+  - **What it costs.** One proposal call, $0.17–0.31 on train. A transaction that does not improve the residual
+    changes nothing in force.
+  - **What it did on train #678:** 3 of 3 adopted for $7.52, one residual closed and audited. The direct attack on
+    Nagura as stated had failed.
+- **The caveat stands:** the evidence is one weakening on one problem. Read the first runs it fires on. Their
+  `log.jsonl` carries `program/premise_weaken`, then `premise_weakened`, `weakening_not_adopted` or
+  `premise_weaken_declined`.
+- **Pins:**
+  - Time-split pins taken before this change keep the direct attack in the endgame. That includes
+    `baseline-v2-84f21c5` and every arm in this file.
+  - An arm pinned after it weakens premises in the endgame. Compare such arms only with each other, or record the
+    difference.

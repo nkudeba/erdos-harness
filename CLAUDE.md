@@ -672,7 +672,8 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
   - Two candidate fixes are in `benchmarks/timesplit/RESULTS.md`. Premise weakening, below, is the endgame's targeted
     re-plan; the adoption rule still ranks any premise below any open conjecture.
 
-**Premise weakening**, `--premise-weaken {on,off}`, **default `off`** (2026-10-14; `tests/test_premise_weaken.py`):
+**Premise weakening**, `--premise-weaken {on,off}`, **default `on` since 2026-10-15** (built 2026-10-14;
+`tests/test_premise_weaken.py`):
 - **Why.** Twice a run ended with every conjecture certified and only published premises open, stated with the sharp
   published constants that Mathlib cannot prove, while a weaker constant would have done. Train #678's third run kept
   Nagura's prime in (x, 6x/5]; its glue applies it once, at x = 11k/20, and needs only a prime in [(k+2)/2, k−1]. The
@@ -690,8 +691,10 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
      candidate must compile, so the glue goes through with W.
   3. Free re-certification of steps it restated under their old names (`_recertify_pieces`). `bridge`: the old
      certificate plus routine tactics. `restate`: the old script under the new statement. Failures are located by error
-     line, with the import header taken off (`compose_offset`).
-  4. A free probe (`_weakening_implied`): does P imply W in Lean? `peel`/`apply` tactics, then the proposal's own script.
+     line, mapped back to the body by `compose_line_map` (else `compose_offset`).
+  4. A free probe (`_weakening_implied`): does P imply W in Lean? `peel`/`apply` tactics, then the proposal's own
+     script. The script may use the skeleton's certified steps, which `certified_context` brings in with their proofs.
+     Open hypotheses have no proof and stay out.
   5. W is tried free: a Mathlib theorem the proposal names, checked in the declaration index, then the cascade. Then it
      is attacked like any premise under `--premise-attack`. A restated step still open gets one cheap attempt, with its
      old proof as a hint.
@@ -701,8 +704,24 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
        never from a plan's ledger. It is adopted, but it is not a discharge and the stall count still rises.
      - Otherwise nothing in force changes. A certified W is banked in Lemmas.lean. The attempt goes to failures (kind
        `weakening`, which `failure_counts` skips) and to the alternatives.
-- **Replays:** `benchmarks/timesplit/analysis/replay_weaken.py`, train items only. Results are in
-  `benchmarks/timesplit/RESULTS.md`, "Premise weakening".
+- **Train replays, 2026-10-15** ($7.52; `benchmarks/timesplit/analysis/replay_weaken.py`; RESULTS.md, "Premise
+  weakening"): all three #678 runs that ended in the premise endgame were adopted.
+  - Each proposal ($0.17–0.31) stated the premise the glue uses: eventually, a prime in about ((k+1)/2, k−1].
+  - Each attack ($2.21–2.38) certified it from Mathlib's Bertrand machinery. A direct attack on Nagura as stated had
+    failed.
+  - 55963's residual closed and passes the audit; 81727's passes with Nair from an earlier replay
+    (`evidence/678-weakened/`).
+  - That is ONE weakening on ONE problem, three times over. It is strong evidence that the mechanism works, and weak
+    evidence about how often it pays.
+- **On by default since 2026-10-15, the operator's decision** (RESULTS.md, "Premise weakening on by default"):
+  - It fires only in the premise endgame, on a premise rated hard or already failed. The endgame would spend what is
+    left on that premise anyway.
+  - It adds one proposal call ($0.17–0.31 on train). A transaction that does not improve the residual changes nothing
+    in force.
+  - It turned a premise a direct attack had failed on into one an attack proved.
+  - Read the first runs it fires on: `premise_weaken`, `premise_weakened`, `weakening_not_adopted` and
+    `premise_weaken_declined` in `log.jsonl`.
+  - `--premise-weaken off` restores the direct attack. Time-split pins taken before the change keep it.
 
 **Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
 was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def
