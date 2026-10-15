@@ -2460,6 +2460,28 @@
    "track": "statement",
    "intent": "known-result",
    "claims_todo": []
+  },
+  "158": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.025,
+     "spend": 3.2973,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261015-034347-661412-erdos158",
+   "spend": 3.2973359999999996,
+   "limit_waits": 0,
+   "settle_chance": 0.025,
+   "arm": "screened out",
+   "next": null,
+   "status": "screened out",
+   "track": null,
+   "intent": null
   }
  }
 }
