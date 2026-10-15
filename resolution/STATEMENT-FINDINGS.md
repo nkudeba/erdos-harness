@@ -8,3 +8,10 @@ Each entry is a Lean proof, verified and audited, that settles formal-conjecture
 - Lean run: `runs/20261014-162417-471965-resolve-lean-erdos769`
 - informal proof: `runs/20261010-025357-947738-erdos769` claim deep/C1
 - summary: `RUN-SUMMARY problem=769 exit=0 outcome=proved directions=neg:proved verified=None spend=$6.85 llm_calls=23 lean_checks=109 lemmas=12 fatals=0 wall=204m mode=research dir=runs/20261014-162417-471965-resolve-lean-erdos769`
+
+## #655 — formalization-gap — 2026-10-15 04:19 UTC
+- answer: false; statement: For every c > 0 and every n with n ≥ ⌈2/c⌉+3, the n-gon X_n = {e(ζ^j) : 0 ≤ j < n} (ζ = exp(2πi/n), e: ℂ ≅ ℝ² isometry) satisfies #X_n = n, IsValid X_n, and |{dist p q : p,q ∈ X_n}| ≤ ⌊n/2⌋+1 < (1+c)n/2. Hence ¬erdos_655.
+- source named by the judges: erdosproblems.com #655 forum discussion (Hunter, Jan 2026); regular-polygon distance count: Altman, Amer. Math. Monthly 1963
+- Lean run: `runs/20261015-000603-617862-resolve-lean-erdos655`
+- informal proof: `runs/20261009-225323-779500-erdos655` claim deep/C1
+- summary: `RUN-SUMMARY problem=655 exit=0 outcome=proved directions=neg:proved verified=None spend=$0.88 llm_calls=8 lean_checks=11 lemmas=0 fatals=0 wall=13m mode=research dir=runs/20261015-000603-617862-resolve-lean-erdos655`

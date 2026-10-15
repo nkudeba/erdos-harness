@@ -252,3 +252,5 @@
 [2026-10-15T01:20:27Z] #1188: skipped (1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped))
 [2026-10-15T01:20:27Z] #1189: skipped (1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped))
 [2026-10-15T01:20:27Z] #1212: skipped (1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped))
+[2026-10-15T04:03:03Z] resolution campaign loop starting
+[2026-10-15T04:06:03Z] #655: Lean on deep/C1 (false) in 20261015-000603-617862-resolve-lean-erdos655
