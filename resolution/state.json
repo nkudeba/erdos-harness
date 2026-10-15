@@ -109,18 +109,24 @@
      "tier": "lean",
      "rc": 3,
      "summary": "RUN-SUMMARY problem=655 exit=3 outcome=partial directions=neg:partial verified=None spend=$2.54 llm_calls=15 lean_checks=43 lemmas=0 fatals=0 wall=33m mode=research dir=runs/20261014-192027-911113-resolve-lean-erdos655"
+    },
+    {
+     "tier": "lean",
+     "outcome": "requeued",
+     "previous": "runs/20261014-192027-911113-resolve-lean-erdos655",
+     "at": "2026-10-15T01:25:48Z"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261009-225323-779500-erdos655",
    "errors": 0,
-   "status": "lean-partial",
+   "status": "complete",
    "spend": 15.296993000000008,
    "limit_waits": 0,
    "settle_chance": 0.875,
    "arm": "pass",
-   "next": null,
+   "next": "lean",
    "intent": "formalization-gap",
    "track": "statement",
    "complete": {
@@ -131,7 +137,7 @@
     "intent_source": "erdosproblems.com #655 forum discussion (Hunter, Jan 2026); regular-polygon distance count: Altman, Amer. Math. Monthly 1963"
    },
    "claims_todo": [],
-   "lean_run": "runs/20261014-192027-911113-resolve-lean-erdos655",
+   "lean_run": null,
    "lean_summary": "RUN-SUMMARY problem=655 exit=3 outcome=partial directions=neg:partial verified=None spend=$2.54 llm_calls=15 lean_checks=43 lemmas=0 fatals=0 wall=33m mode=research dir=runs/20261014-192027-911113-resolve-lean-erdos655",
    "lean_blocked": null
   },
@@ -459,19 +465,1858 @@
      "settle_chance": 0.06,
      "spend": 2.5554,
      "track": "control"
+    },
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
     }
    ],
    "prepped": true,
-   "running": "scout",
+   "running": null,
    "run_dir": "runs/20261014-181205-866183-erdos1110",
    "spend": 2.555376,
    "limit_waits": 0,
    "settle_chance": 0.06,
    "arm": "control",
-   "next": "scout",
-   "status": "screened",
+   "next": null,
+   "status": "skipped",
    "track": "control",
-   "intent": null
+   "intent": null,
+   "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+  },
+  "10": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "12": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "14": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "18": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "36": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "64": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "81": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "97": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "114": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "117": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "128": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "130": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "131": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "132": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "153": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "160": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "252": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "254": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "260": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "263": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "265": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "267": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "273": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "274": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "278": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "289": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "301": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "302": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "306": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "319": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "327": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "336": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "341": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "348": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "349": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "357": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "361": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "364": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "374": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "383": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "386": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "390": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "394": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "411": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "416": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "424": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "450": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "478": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "486": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "489": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "506": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "509": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "513": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "521": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "536": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "538": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "550": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "561": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "569": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "580": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "593": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "597": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "602": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "617": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "7 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "7 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "623": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "634": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "653": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "662": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "671": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "675": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "676": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "684": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "689": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "699": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "700": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "708": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "719": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "725": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "726": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "727": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "731": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "740": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "742": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "768": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "770": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "776": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "778": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "786": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "788": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "789": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "792": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "796": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "817": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "820": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "824": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "848": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "854": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "856": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "859": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "860": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "872": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "876": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "883": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "906": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "917": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "934": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "940": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "944": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "959": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "971": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "973": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "982": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "996": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1002": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1038": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1039": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1040": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "3 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1041": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1059": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1061": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1062": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1063": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1070": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1075": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1100": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1103": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1112": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1117": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1122": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1132": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1139": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1144": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1152": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1154": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "2 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1163": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1171": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1177": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1182": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1188": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1189": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "1212": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
   }
  }
 }
