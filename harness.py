@@ -2721,9 +2721,10 @@ def strip_comment_lines(s: str) -> str:
     return "".join(out)
 
 
-def blank_comments(s: str) -> str:
+def blank_comments(s: str, strings: bool = True) -> str:
     """`s` with every comment and string literal blanked to spaces, newlines kept. Unlike `strip_comment_lines`, which
-    puts a hash in place of a string, it keeps every character where it was, so an offset into `s` is one into this."""
+    puts a hash in place of a string, it keeps every character where it was, so an offset into `s` is one into this.
+    `strings=False` leaves string literals as they are, still read as strings, so a `--` inside one starts no comment."""
     out, i, depth, n = list(s), 0, 0, len(s)
 
     def blank(a: int, b: int) -> None:
@@ -2749,7 +2750,8 @@ def blank_comments(s: str) -> str:
             j = i + 1
             while j < n and s[j] != '"':
                 j += 2 if s[j] == "\\" else 1
-            blank(i, j + 1)
+            if strings:
+                blank(i, j + 1)
             i = j + 1
         else:
             i += 1
@@ -2850,6 +2852,92 @@ def statement_prefix(statement: str) -> str:
     if idx == -1:
         raise ValueError("frozen statement has no ':='")
     return statement[: idx + 2]
+
+
+NEG_BRACKETS = {"(": ")", "[": "]", "{": "}", "⦃": "⦄", "⟨": "⟩", "«": "»", "‹": "›"}
+NEG_COMMAND_RE = re.compile(r"(?m)^[ \t]*(?:@\[|(?:private|protected|noncomputable)\s+)*(?:theorem|lemma|def|abbrev|"
+                            r"instance|structure|class|inductive|example|axiom|opaque|namespace|section|end|open|"
+                            r"variable|universe)\b")
+# Lean's verdict on a source-built negation, compiled after it and the positive theorem. The `fun` is there for
+# universes: an `example` turns its header's universe metavariables into parameters before it elaborates its body, so
+# `example : A = ¬ B := rfl` fails on every universe-polymorphic statement (`Type u_1` against `Type u_2`, checked in
+# Lean 2026-10-15). Applied inside the header, `rfl` unifies them first. Root names, so no notation a prelude defines
+# can change what is compared.
+NEGATION_GUARD = ("example : (fun (_ : @_root_.Eq Prop (type_of% @{neg}) (_root_.Not (type_of% @{pos}))) => _root_.True)"
+                  " _root_.rfl :=\n  _root_.trivial")
+
+
+def _brackets_balanced(s: str) -> bool:
+    stack = []
+    for c in s:
+        if c in NEG_BRACKETS:
+            stack.append(NEG_BRACKETS[c])
+        elif c in NEG_BRACKETS.values() and (not stack or stack.pop() != c):
+            return False
+    return not stack
+
+
+def source_negation(statement: str, thm: str) -> tuple[str, str]:
+    """The `--open` negation of a frozen statement, built from its SOURCE text: everything above the theorem verbatim
+    (defs, opens, notation, variables), then `theorem <thm>_neg : ¬ (∀ <binders>, <P>)`, the binders before the colon
+    turned into a `∀`. Returns it with the positive declaration as written. Raises ValueError, naming the shape, on what
+    it will not rewrite: an attached `… in` command, anything after the theorem, a theorem not ending in `:= by sorry`.
+
+    Never from Lean's printed type: `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as `∀ (n : ℕ), ↑n - 1 < ↑n`,
+    which elaborates in ℕ, and Lean proves the negation built from that text (2026-10-15). Nor is the text trusted:
+    `Harness._negate_statement` keeps it only when NEGATION_GUARD shows its type IS `Not` of the frozen theorem's. A
+    `variable` the statement uses, say, turns the text into `∀ m, ¬ P m`, and the guard refuses it."""
+    b = blank_comments(statement)                      # the structure, with comments and strings blanked
+    src = blank_comments(statement, strings=False)     # the text it copies: comments dropped, strings kept
+    name = re.escape(thm) + r"(?![\w'!?]|\.(?!\{))"
+    if len(re.findall(rf"\b(?:theorem|lemma)\s+{name}", b)) != 1:
+        raise ValueError(f"not exactly one `theorem {thm}`")
+    if re.search(rf"\b{re.escape(thm)}_neg\b", b):
+        raise ValueError(f"the statement already names {thm}_neg")
+    m = re.search(rf"(?m)^[ \t]*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected|noncomputable|nonrec|unsafe)\s+)*"
+                  rf"(?:theorem|lemma)\s+{name}", b)
+    if not m:
+        raise ValueError("the theorem does not start its line")
+    if re.search(r"(?:^|\s)in\s*$", b[:m.start()]):
+        raise ValueError("an `… in` command is attached to the theorem")
+    i, univ = m.end(), ""
+    if b.startswith(".{", i):                         # explicit universes, `theorem erdos_N.{u}`
+        j = b.find("}", i)
+        if j < 0:
+            raise ValueError("unclosed universe parameters")
+        univ, i = src[i:j + 1], j + 1
+    stack, colon, k = [], None, i
+    while k < len(b) and colon is None:               # the binders end at the first colon outside brackets
+        c = b[k]
+        if c in NEG_BRACKETS:
+            stack.append(NEG_BRACKETS[c])
+        elif c in NEG_BRACKETS.values():
+            if not stack or stack.pop() != c:
+                raise ValueError("unbalanced brackets in the binders")
+        elif c == ":" and not stack:
+            if b.startswith(":=", k):
+                raise ValueError("no type before `:=`")
+            if b.startswith("::", k):
+                k += 1
+            else:
+                colon = k
+        k += 1
+    if colon is None:
+        raise ValueError("no type colon")
+    tail = re.search(r":=\s*(?:by\s+)?sorry\s*$", b[colon + 1:])
+    if not tail:
+        raise ValueError("the statement does not end with the theorem's `:= by sorry`")
+    sep = colon + 1 + tail.start()
+    if NEG_COMMAND_RE.search(b[colon + 1:sep]) or not _brackets_balanced(b[colon + 1:sep]):
+        raise ValueError("cannot delimit the proposition")
+    binders, prop = ("\n".join(ln.rstrip() for ln in s.strip().splitlines()) for s in (src[i:colon], src[colon + 1:sep]))
+    if not prop:
+        raise ValueError("empty proposition")
+    goal = f"∀ {binders},\n      {prop}" if binders else prop
+    # a directive inside the dropped header still has to reach the import header
+    carried = "".join(f"-- IMPORTS: {mod}\n" for mod in extract_directive_imports(statement[m.start():]))
+    neg = f"{statement[:m.start()]}{carried}theorem {thm}_neg{univ} :\n    ¬ ({goal}) := by\n  sorry"
+    return neg, statement[m.start():]
 
 
 def contains_frozen(attempt: str, frozen_prefix: str) -> bool:
@@ -9091,23 +9179,26 @@ for the SAT solver instead of enumerating it.
     # -- open mode: both directions ---------------------------------------------------------------
 
     def _negate_statement(self, pos: str) -> str | None:
-        """Build `theorem erdos_N_neg : ¬ (<type of erdos_N>)` from the frozen positive statement, using Lean's own
-        `#check` output for the type; keeps any `def`s that precede the theorem. Returns None if it does not compile."""
+        """The `--open` negation without a model call. `source_negation` builds `theorem erdos_N_neg : ¬ (∀ binders, P)`
+        from the frozen statement's text, and it is kept only if Lean, compiling it with the positive theorem after it,
+        confirms its type is `Not` of the frozen theorem's (NEGATION_GUARD). One compile. Otherwise None, with the reason
+        logged, and the caller asks the model as before.
+
+        It used to read the type from a `#check` in `infos`, which a plain check always leaves empty, so it never fired:
+        all 65 `--open` runs on disk paid a model call for their negation (2026-10-15). Reading that `#check` with
+        positions would not have been safe either: a printed type need not elaborate back to itself (`source_negation`)."""
         thm = f"erdos_{self.problem['id']}"
-        res = self.check(pos + f"\n\n#check @{thm}\n", "negation-check")
-        typ = None
-        for msg in res["infos"]:
-            mm = re.search(rf"{re.escape(thm)}\s*:\s*(.*)", msg, re.S)
-            if mm:
-                typ = " ".join(mm.group(1).split())
-                break
-        if not typ:
+        try:
+            neg, decl = source_negation(pos, thm)
+        except ValueError as e:
+            self.log.event("open", "negation_source_refused", reason=str(e))
             return None
-        idx = pos.find("theorem ")
-        prelude = pos[:idx] if idx > 0 else ""
-        neg = f"{prelude}theorem {thm}_neg : ¬ ({typ}) := by\n  sorry"
-        chk = self.check(neg, "negation-compile")
-        return neg if chk["ok"] else None
+        res = self.check(f"{neg}\n\n{decl}\n\n{NEGATION_GUARD.format(neg=thm + '_neg', pos=thm)}", "negation-guard")
+        if not res["ok"]:
+            self.log.event("open", "negation_source_refused", reason="the Lean guard failed",
+                           timeout=bool(res.get("timeout")), first_error=str((res.get("errors") or [""])[0])[:300])
+            return None
+        return neg
 
     def _fund_direction(self, h, budget, n: int = 2) -> None:
         """A direction's cap is ITS OWN prior spend plus half of what the run has left (all of it when the discovery
@@ -9153,13 +9244,18 @@ for the SAT solver instead of enumerating it.
         self.stage_formalize()
         pos = self.state["statement"]
         self.stage_assess()
-        neg = self.state.get("statement_neg") or self._negate_statement(pos)
+        neg = self.state.get("statement_neg")
+        if not neg:
+            neg = self._negate_statement(pos)
+            if neg:
+                self.state["negation_source"] = "source"      # the frozen text, Lean-checked; no model call
         if not neg:
             resp = self.ask("formalize", NEGATION_PROMPT.format(statement=pos, pid=pid))
             blocks = [b for b in lean_blocks(resp) if f"erdos_{pid}_neg" in b]
             for b in blocks:
                 if self.check(b, "negation-llm")["ok"] and "¬" in b:
                     neg = b
+                    self.state["negation_source"] = "model"
                     break
         if not neg:
             # A statement that does not elaborate fails every negation for the same reason; say which it was. #655's
@@ -9171,7 +9267,7 @@ for the SAT solver instead of enumerating it.
             return 2
         self.state["statement_neg"] = neg
         self.save()
-        self.log.event("open", "frozen_both", pos=pos[:200], neg=neg[:200])
+        self.log.event("open", "frozen_both", pos=pos[:200], neg=neg[:200], negation=self.state.get("negation_source"))
         # --discover on: informal attempts and a referee before any Lean. A confident decision commits the run to ONE
         # direction with the whole budget, as the runner's discover-v2..v4 did by launching without --open.
         disc = self.stage_discover() or {}

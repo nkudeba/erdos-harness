@@ -431,11 +431,22 @@ Covered by `tests/test_cluster_library.py`.
 - **A plain check's `infos` is always empty.** Lean prints every info message (`Try this`, `#check`, `#print axioms`)
   with no `file:line:col` prefix, so `LeanChecker._parse` cannot tell where one starts.
   - Read the text from `res["raw"]` (`try_this_blocks`, the axiom audit), or pass `positions=True`.
-  - `_negate_statement` reads a `#check` from `infos`, so it has never fired. Every `--open` run on disk (65 of 65)
-    paid for a model-written negation instead.
-  - Do not revive it by switching that check to positions. `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as
+  - Never rebuild a statement from a printed type. `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as
     `∀ (n : ℕ), ↑n - 1 < ↑n`, which elaborates in ℕ, and the negation built from that text is provable (checked in
     Lean, 2026-10-15).
+  - `_negate_statement` read its `#check` from `infos`, so it never fired. Every `--open` run before 2026-10-15 (65 of
+    65) paid for a model-written negation.
+  - The `--open` negation now comes from the frozen statement's SOURCE text (`source_negation`): the prelude verbatim,
+    then `theorem erdos_N_neg : ¬ (∀ binders, P)`.
+    - It is kept only if Lean accepts `NEGATION_GUARD`, compiled after it and the positive theorem: its type must be
+      `Not` of the frozen theorem's. A `variable` the statement uses turns the text into `∀ m, ¬ P m`, and the guard
+      refuses it.
+    - The guard applies `rfl` inside the header. A plain `example : A = ¬ B := rfl` fails on every universe-polymorphic
+      statement, because an `example` turns its header's universe metavariables into parameters first.
+    - Anything else falls back to the model, as before. `negation_source` in state and `negation=` on
+      `open/frozen_both` say which path ran; `open/negation_source_refused` says why the free one did not.
+    - It costs one compile and no model call. The frozen statements of #655, #769, #24202 and #45592 all passed it
+      (19-35 s each). `tests/test_open_negation.py` pins the cast hazard, universes and a used `variable` in Lean.
 - **A killed run takes its model sessions with it.** Every `claude -p` call goes through `run_tracked`. SIGTERM and
   SIGHUP terminate the tracked sessions, then the run (`terminate_children`). Killing a run used to leave its in-flight
   sessions running and billing as orphans (step 3's #120, 2026-10-07). Kill a run with plain `kill <pid>`, never

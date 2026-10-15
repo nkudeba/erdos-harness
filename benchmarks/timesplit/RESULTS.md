@@ -1695,12 +1695,34 @@ originals are untouched, and every child logs inside the copy, where its spend i
 - The same root cause was found in two more places:
   - The prove and decompose stages fed `exact?`/`apply?` suggestions to the next round's retrieval from `infos`, which
     is always empty. They now read the raw output.
-  - `_negate_statement` reads a `#check` from `infos` too, and has never fired: all 65 `--open` runs on disk paid for
-    a model-written negation. It is left as it is. A pretty-printed type does not always re-elaborate to the same
-    statement: `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as `∀ (n : ℕ), ↑n - 1 < ↑n`, which elaborates in
-    ℕ, and Lean proves the negation built from that text.
+  - `_negate_statement` read a `#check` from `infos` too, and never fired: all 65 `--open` runs on disk paid for a
+    model-written negation. It was not switched to positions. A pretty-printed type does not always re-elaborate to
+    the same statement: `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as `∀ (n : ℕ), ↑n - 1 < ↑n`, which
+    elaborates in ℕ, and Lean proves the negation built from that text. It was rebuilt from source text instead
+    (below).
 
 **Every run's cascade changes with this fix, and so does the prove stage's retrieval.** Time-split pins taken before
 it keep the old cascade, `baseline-v2-84f21c5` and every arm in this file included. In those pins a pass kept no
 partial closure and no `exact?` result. An arm pinned from the live harness after 2026-10-15 differs from them here
 too.
+
+**`--open` runs' frozen negations now come from source text** (later on 2026-10-15; CLAUDE.md, "A plain check's
+`infos` is always empty"; `tests/test_open_negation.py`, real Lean under `DEDUCTIVE_LEAN_TESTS=1`).
+- `source_negation` keeps the frozen statement's prelude verbatim and writes `theorem erdos_N_neg : ¬ (∀ binders, P)`
+  from the theorem's own text.
+- One compile keeps it only if its type is `Not` of the frozen theorem's (`NEGATION_GUARD`). Anything else goes to the
+  model as before, and the run records which path ran (`negation_source`; `negation=` on `open/frozen_both`).
+- The cast statement above now negates correctly from source, and the guard refuses the negation built from its
+  printed type.
+- Against the 65 stored model-written negations:
+  - 54 are the source-built text up to whitespace and comments.
+  - The other 11 differ only where a named hypothesis binder, `(hn : 2 < n)`, became an arrow, `2 < n →`. That is the
+    same type. All 11 were compared by eye; none was run through the guard.
+- Each model call cost a median $0.02, $2.02 over the 65 runs. The saving is small. What matters is that a
+  source-built negation is checked against the frozen theorem in Lean. A model-written one never was, and on the
+  fallback path it still is not.
+
+**Time-split pins keep the old path.** Their `_negate_statement` never fires, so every pinned `--open` run, every arm
+in this file included, still writes its negation with one `formalize` call. An arm pinned from the live harness after
+this fix gets its negation for free, with no model call, and its text can differ from a pin's (`∀ (hn : 2 < n), …`
+where the model wrote `2 < n → …`).
