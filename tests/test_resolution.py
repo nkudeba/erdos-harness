@@ -435,6 +435,16 @@ class ClaimedProblems(Base):
         self.assertIn("3 proof claim(s)", p["why"])
         self.assertFalse(ran)
 
+    def test_a_claimed_problem_gets_no_deep_or_program_pass(self):
+        # #1110: a loop older than the rule finished its scout and would have routed it to a $40 deep pass
+        for tier in ("deep", "program"):
+            R.save_state({"problems": {"1110": {"history": [], "next": tier, "run_dir": "runs/r"}}})
+            ran = []
+            with patch.object(R, "site_claims", lambda n: 3), patch.object(R, "run_screen", lambda *a, **k: ran.append(a)):
+                R.step(R.load_cfg())
+            p = R.load_state()["problems"]["1110"]
+            self.assertEqual((p["status"], p["next"], ran), ("skipped", None, []), tier)
+
 
 ORIGINAL_SITE_CLAIMS = R.site_claims
 

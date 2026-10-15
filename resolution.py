@@ -773,6 +773,10 @@ def step(cfg: dict) -> bool:
         row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
                              cfg[action]["flags"], p.get("run_dir"), on_start=started)
     elif action in ("deep", "program"):
+        k = site_claims(n)
+        if k:                                            # a claim posted after the scout, or a scout run before the rule
+            skip_claimed(n, p, k)
+            return True
         p["running"] = action
         save_problem(n, p)
         prior = float(p.get("spend") or 0.0)
