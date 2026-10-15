@@ -1390,6 +1390,35 @@ where new results are still to be had. Not yet run on a live problem.
   - at least one certified new record within the first 10 record scouts;
   - an explicit settle is rarer: under 1 in 10.
 
+**3.13: #1199 was already solved; the literature gate, the methods library, persistence (2026-10-15).**
+- **#1199 is settled in the literature.** The paper is arXiv:2607.17333, W.-X. Huang, Z. Lian, S. Shao, R. Xiao,
+  L. Xu and S. Zhang, "An affirmative answer to Owings's sumset question" (19 July 2026): every 2-colouring of ℕ has
+  an infinite B with B+B monochromatic.
+  - erdosproblems.com still listed #1199 open, with no proof claim, on 2026-10-15.
+  - The campaign had spent $83.34 on it as new mathematics (a scout and a 6-cycle research program).
+  - An OpenAlex search found the paper. The program pass is cancelled and the Atlas carries the finding.
+- **Why that happened.** Three blind spots, all fixed:
+  - the engine's knowledge stops in June 2026;
+  - the problem's page lagged;
+  - no stage searched the literature.
+- **The literature gate.** At the start of every paid campaign stage, the model names the searches, OpenAlex returns
+  mathematics papers, and a judge decides whether any settles the problem. A settled verdict at confidence ≥ 0.7 ends
+  the run before the map, and the papers reach every later prompt.
+  - It costs two small model calls a run.
+  - It is never used on a benchmark run.
+- **The methods library.** 193 proof claims plus solved problems' notes. Each problem's library gets the nearest ones.
+- **Persistence and re-screens, on the operator's direction to solve the selected problems and give the screened-out
+  ones a realistic shot:**
+  - #686, #103 and #1207 get research-program passes. #1207's answer is a known 2026 result (Lee–Pohoata–Zhu), so
+    its aim is a Lean verification, not new mathematics.
+  - 13 screened-out problems get new screens with the repaired digest, the methods library and the literature gate,
+    under their best objective. #677, #1094 and #1192 go explicit; #158 and #695 go record.
+  - #488 and #520 carry claims and stay skipped.
+- **What would show this worked.**
+  - At least one re-screen passes the 0.3 bar.
+  - The gate flags at least one more problem as already settled before any map is bought.
+  - A program pass on #686 or #103 raises its validated results.
+
 **A campaign bug, found 2026-10-14: the Lean tier could not compile #655's statement.**
 - **What happened.**
   - #655's scout settled formal-conjectures' statement: answer false, along a line the intent judges call a

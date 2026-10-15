@@ -1149,6 +1149,26 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     the Lean tier checks its inlined declarations at that commit.
   - **Freshness of everything else:** the loop refreshes the problems database and formal-conjectures' head every 6
     hours (`refresh_sources`), and the problem's forum and claims before every paid stage (`refresh_forum`).
+- **The site lags the literature: the literature gate (2026-10-15).**
+  - #1199 was settled by arXiv:2607.17333 ("An affirmative answer to Owings's sumset question", July 2026). The site
+    still listed it open with no claim, and the campaign spent $83 on it as new mathematics.
+  - Every paid stage now runs `--engine-literature-scan` before the map:
+    - the model names the problem's names and searches;
+    - OpenAlex searches mathematics papers;
+    - a judge decides whether any paper already settles the problem;
+    - a settled verdict at confidence ≥ 0.7 ends the run before the map. The campaign records it as resolved in the
+      literature (`literature_finding`) and never attacks the problem again.
+  - The papers also reach every later prompt.
+  - Never on a benchmark or masked run (`_literature_search` returns None): a paper could reveal the item's answer.
+- **The methods library** (`atlas-data/methods/build.py`, no model calls): 193 proof claims and the solved problems'
+  notes. Each problem's library gets the nearest ones (METHODS.md). The model's knowledge stops in June 2026, and these
+  are the methods that cracked neighbouring problems since.
+- **Persistence:** a program or deep pass that produced new validated results earns another program pass (`persist`:
+  $250 and 3 passes a problem). The cycles and the budget scale per pass, and `--engine-program-extend` clears the last
+  pass's stop.
+  - `resolution.py persist --problem N` gives a scouted problem its first program pass.
+  - `resolution.py rescreen --problem N` screens a screened-out problem again as a new run, under its best objective.
+    Re-screens run before program passes.
 - **Restarts are safe:** one loop at a time (an exclusive lock), and a stage records its run at launch, so an
   interrupted stage resumes. A stage writes only its own problem's entry (`save_problem`, under the state file's lock).
   A stage used to save the whole state it read when it started, which erased any entry written meanwhile.

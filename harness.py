@@ -4548,6 +4548,8 @@ class EngineSettings:
     program_lemmas: int = 3          # open lemmas attacked per cycle, easiest first
     program_stall: int = 2           # cycles in a row without a discharge before the program stops
     program_extend: bool = False     # this run extends a finished program: its stall count and stop are cleared once
+    literature_scan: bool = False    # the literature gate before the map (engine_literature); never on a benchmark
+    literature_stop: float = 0.7     # the gate's confidence at which a settled verdict ends the run
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -5181,8 +5183,91 @@ def engine_guidance(f: dict, ledger: list[dict], meta: dict | None, room: int = 
     return clip_middle("\n".join(lines), room)
 
 
+# The literature gate (2026-10-15). erdosproblems.com lags the literature: #1199 ("Owings's sumset question") was settled
+# by arXiv:2607.17333 in July 2026, the site still listed it open with no claim in October, and the campaign spent $83 on
+# it as new mathematics. The model knows the problem's names, not papers after June 2026, so it names the searches and
+# OpenAlex supplies the papers.
+LITERATURE_QUERY_PROMPT = """Before a research team spends days on an open problem, it searches the literature. Give the
+searches that would find any paper on this problem, above all one that may have SOLVED it recently.
+
+PROBLEM:
+{statement}
+
+THE PRECISE STATEMENT (Lean 4):
+```lean
+{lean}
+```
+
+Write up to 5 search queries for a scholarly search engine, one per line, each starting with `QUERY:`.
+- First, every NAME the problem goes by: a conjecture or question named after whoever asked it, a named function or
+  constant, with the key objects. For example `QUERY: Owings sumset question monochromatic`.
+- Then the mathematical core in a paper's own vocabulary: the objects, the property, the quantity.
+Short queries of 3 to 7 words work best. No quotation marks, no boolean operators."""
+
+LITERATURE_VERDICT_PROMPT = """A research team is about to attack the open problem below. A literature search returned
+these works (titles and abstracts, unverified). Does any of them claim to SETTLE the problem as stated: a full proof, a
+disproof, or a complete answer to the question asked? A partial result, a special case, a weaker bound, a related
+question or an analogue does not settle it.
+
+PROBLEM:
+{statement}
+
+THE PRECISE STATEMENT (Lean 4):
+```lean
+{lean}
+```
+
+WORKS:
+{works}
+
+End with exactly one ```json block: {{"settled": true or false, "work": "<the settling work's title, or null>",
+"answer": "true, false or null", "confidence": <0 to 1>, "why": "<one sentence>"}}"""
+
+
+def engine_literature(call, s: "EngineSettings", statement: str, lean: str, search, spend: "_DiscoverySpend") -> dict:
+    """The literature gate: the model names the searches, `search(query)` (OpenAlex, mathematics only) returns works,
+    and one judge says whether any of them already settles the problem. Returns {queries, works, text, verdict, cost}."""
+    cost = 0.0
+    qt, qc, _ = _discovery_call(call, "engine-literature-queries", LITERATURE_QUERY_PROMPT.format(statement=statement,
+                                                                                                 lean=lean), "medium", 0.5)
+    spend.add(qc)
+    cost += qc
+    queries = [m.group(1).strip().strip("`\"'") for m in re.finditer(r"(?m)^\s*QUERY:\s*(.+)$", qt or "")][:5]
+    works, seen = [], set()
+    for q in queries:
+        try:
+            hits = search(q) or []
+        except Exception:                                # noqa: BLE001 - one failed search costs one query, not the gate
+            continue
+        for w in hits:
+            key = re.sub(r"\W+", " ", str(w.get("title") or "")).strip().lower()
+            if key and key not in seen:
+                seen.add(key)
+                works.append({"title": str(w.get("title") or "")[:300], "year": str(w.get("year") or ""),
+                              "abstract": " ".join(str(w.get("abstract") or "").split())[:900], "query": q})
+    text = "\n".join(f"- {w['title']} ({w['year']})" + (f"\n  {w['abstract']}" if w["abstract"] else "")
+                     for w in works[:24])
+    verdict = {"settled": False, "why": "no works found"}
+    if works:
+        vt, vc, _ = _discovery_call(call, "engine-literature-verdict", LITERATURE_VERDICT_PROMPT.format(
+            statement=statement, lean=lean, works=clip_middle(text, 14000)), "medium", 0.8)
+        spend.add(vc)
+        cost += vc
+        verdict = json_tail_any(vt or "") or {"settled": False, "why": "the verdict gave no JSON"}
+    return {"queries": queries, "works": works[:24], "text": clip_middle(text, 9000), "verdict": verdict,
+            "cost": round(cost, 4)}
+
+
+def literature_settled(lit: dict | None, floor: float) -> bool:
+    v = (lit or {}).get("verdict") or {}
+    try:
+        return v.get("settled") is True and float(v.get("confidence") or 0) >= floor
+    except (TypeError, ValueError):
+        return False
+
+
 def engine_run(call, session, statement: str, lean: str, s: EngineSettings | None = None, workers: int = 4,
-               search=None, checkpoint: dict | None = None, save=None) -> dict:
+               search=None, checkpoint: dict | None = None, save=None, lit_search=None) -> dict:
     """Frontier map, then `rounds` x (parallel research sessions, validation, meta-review), then the optional deep dive.
     `call(purpose, prompt, effort, budget) -> (text, cost)` as in discovery; `session(purpose, prompt, label, turns,
     budget, effort) -> (reply, notebook, cost)` runs one tool-using session and may raise DiscoveryCallFailed. With
@@ -5208,7 +5293,19 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                 save(ck)
             except Exception:                            # noqa: BLE001 - a checkpoint write must not cost the run
                 pass
+    if s.literature_scan and lit_search is not None and not isinstance(ck.get("literature"), dict):
+        ck["literature"] = engine_literature(call, s, statement, lean, lit_search, spend)
+        keep()
+    lit = ck.get("literature") if isinstance(ck.get("literature"), dict) else None
+    if lit and literature_settled(lit, s.literature_stop):
+        # not an error: a finding, and the run ends before it buys a map
+        return {"stopped": "resolved in the literature", "literature": lit, "spend": round(spend.total, 4), "rounds": [],
+                "ledger": [], "validated": [], "decision": {"commit": None, "answer": None, "share": 0.0}, "guidance": "",
+                "settings": s.as_dict()}
     parts = []
+    if lit and lit.get("text"):
+        parts.append("LITERATURE SEARCH (OpenAlex, titles and abstracts found today; unverified; check whether any of it "
+                     "already settles or advances the problem):\n" + lit["text"])
     if s.blackboard.strip():
         parts.append("CAMPAIGN BLACKBOARD: what earlier runs on this problem learned. Items marked [Lean] were machine-checked; "
                      "everything else is unverified.\n" + s.blackboard.strip())
@@ -6798,6 +6895,10 @@ def engine_report(res: dict, title: str) -> str:
         lines.append("**Proof or evidence.**\n\n" + (c.get("proof") or "(none)"))
         lines.append("")
     f = res.get("frontier") or {}
+    if res.get("stopped"):
+        v = ((res.get("literature") or {}).get("verdict") or {})
+        lines.append(f"## Stopped before the map: {res['stopped']}\n\n{v.get('work')}: {v.get('why')} "
+                     f"(confidence {v.get('confidence')}, from titles and abstracts; unverified)\n")
     if res.get("ratings"):
         lines.append("## Targets as the judges rated them before any work\n\n" + engine_ratings_block(f, res["ratings"]) + "\n")
     lines.append("## Frontier map\n\n" + (f.get("text") or "(none)"))
@@ -7438,7 +7539,9 @@ class Harness:
                            program_session_budget=float(g("engine_program_session_budget", 4.0)),
                            program_lemmas=int(g("engine_program_lemmas", 3)),
                            program_stall=int(g("engine_program_stall", 2)),
-                           program_extend=bool(g("engine_program_extend", False)))
+                           program_extend=bool(g("engine_program_extend", False)),
+                           literature_scan=bool(g("engine_literature_scan", False)),
+                           literature_stop=float(g("engine_literature_stop", 0.7)))
         s.library = self._library_text(16000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -7544,6 +7647,20 @@ class Harness:
                     for w in hits]
         return search
 
+    def _literature_search(self):
+        """OpenAlex, mathematics papers only, for the literature gate; None on a benchmark or masked run, where a paper
+        could reveal the published answer to the item."""
+        if getattr(self.args, "benchmark", False) or getattr(self.args, "masked", False):
+            return None
+        import library as L
+
+        def search(query):
+            hits = L.search(query, datetime.now(timezone.utc).date() + timedelta(days=1), per_page=8,
+                            extra_filter="primary_topic.field.id:26")
+            return [{"title": w.get("title"), "year": (w.get("publication_date") or "")[:4], "abstract": L.abstract_of(w)}
+                    for w in hits]
+        return search
+
     def _stage_engine(self) -> dict:
         """--discover-mode engine: the research engine in place of the discovery rounds. It writes engine.json and
         IDEAS.md, gives later stages its validated results as guidance, and leaves the blackboard an entry."""
@@ -7575,13 +7692,17 @@ class Harness:
                          # at least 4: target ratings and judges are independent calls, and a map-and-rate screen
                          # (--engine-sessions 0) otherwise rated its 20 targets one at a time
                          self.state["statement"], s, workers=max(4, s.sessions), search=self._engine_search(),
-                         checkpoint=checkpoint, save=save)
+                         checkpoint=checkpoint, save=save, lit_search=self._literature_search())
         if res.get("error") and not (res.get("frontier") or {}).get("text"):
             # No frontier map means the engine did no work at all: a usage limit or an outage, never a result. Raising
             # makes it an infrastructure error (exit 1), so a lane waits and resumes it. On 2026-10-06 three step-2
             # items hit the weekly limit at their first call; the engine returned the error, the run exited 2, and the
             # screen recorded three $0 non-results as finished problems.
             raise RuntimeError(f"engine produced no frontier map: {res['error']}")
+        if res.get("stopped"):
+            v = ((res.get("literature") or {}).get("verdict") or {})
+            self.log.event("engine", "literature_settled", work=str(v.get("work"))[:300], why=str(v.get("why"))[:300],
+                           confidence=v.get("confidence"))
         (out / "engine.json").write_text(json.dumps({k: v for k, v in res.items() if k != "guidance"}, indent=1, ensure_ascii=False))
         (out / "IDEAS.md").write_text(engine_report(res, f"problem {self.problem['id']}, run {self.run_dir.name}"))
         best, complete = None, engine_complete(res)
@@ -14305,6 +14426,11 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-program-lemmas", type=int, default=3, help="open lemmas attacked per cycle")
     runp.add_argument("--engine-program-stall", type=int, default=2,
                       help="cycles in a row without a discharge before the program stops")
+    runp.add_argument("--engine-literature-scan", action="store_true",
+                      help="search the literature before the map (OpenAlex, mathematics only) and stop if a work already "
+                           "settles the problem; never on a benchmark run")
+    runp.add_argument("--engine-literature-stop", type=float, default=0.7,
+                      help="the literature verdict's confidence at which a settled problem ends the run")
     runp.add_argument("--engine-program-extend", action="store_true",
                       help="this run extends a finished research program (the campaign's persistence pass): clear its "
                            "stall count and stop reason once, so it plans again with whatever is new since")

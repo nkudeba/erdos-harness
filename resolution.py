@@ -76,20 +76,20 @@ DEFAULTS = {
     # run builds on another's (never in a benchmark run; no dev or test item enters it).
     # The ripeness screen (REPORT 3.8): the map and two SETTLE CHANCE draws, no sessions. The scout resumes its run.
     "screen": {"total": 12.0, "pass": 0.3, "control": 0.25,
-               "flags": "--engine-objective resolve --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
+               "flags": "--engine-objective resolve --engine-literature-scan --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
                         "--engine-settle-draws 2 --engine-intent-judges 2 --results-library on"},
     "scout": {"total": 18.0,
-              "flags": "--engine-objective resolve --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
+              "flags": "--engine-objective resolve --engine-literature-scan --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
                        "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2 "
                        "--results-library on"},
     "deep": {"extra": 40.0,
-             "flags": "--engine-objective resolve --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 2 "
+             "flags": "--engine-objective resolve --engine-literature-scan --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 2 "
                       "--engine-core-share 0.67 --engine-deep-budget 5 --engine-marathon-legs 2 --engine-marathon-leg-budget 8 "
                       "--engine-gap-rounds 2 --engine-gap-max 2 --engine-session-legs 3 --results-library on"},
     # The analytical deep tier for the new-mathematics track: the research program (harness `engine_program`), a proof
     # skeleton whose glue is refereed and whose lemmas are attacked and judged one by one, resuming the scout's run.
     "program": {"extra": 90.0,
-                "flags": "--engine-objective resolve --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 "
+                "flags": "--engine-objective resolve --engine-literature-scan --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 "
                          "--engine-core-share 0.67 --engine-deep-budget 5 --engine-program-cycles 6 "
                          "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
                          "--engine-session-legs 3 --engine-gap-rounds 2 --engine-gap-max 2 --results-library on"},
@@ -619,6 +619,27 @@ def arm(n: int, chance: float, cfg: dict) -> str:
     return "control" if h < float(sc["control"]) else "screened out"
 
 
+def literature_finding(n: int, p: dict, run_dir: Path, action: str, delta: float) -> bool:
+    """A run the engine's literature gate stopped because a paper already settles the problem (#1199: arXiv:2607.17333,
+    July 2026, while the site still listed it open). A finding, recorded once; the problem is never attacked again."""
+    ej = engine_json(run_dir)
+    if ej.get("stopped") != "resolved in the literature":
+        return False
+    v = (ej.get("literature") or {}).get("verdict") or {}
+    why = f"{v.get('work')}: {v.get('why')}"[:500]
+    p.update({"running": None, "next": None, "status": "known-result", "track": "statement", "intent": "known-result",
+              "resolved_in_literature": why})
+    p.setdefault("history", []).append({"tier": action, "outcome": "resolved in the literature", "spend": delta, "why": why})
+    save_problem(n, p)
+    result({"problem": n, "tier": action, "outcome": "resolved in the literature", "spend": delta, "why": why,
+            "run_dir": str(run_dir.relative_to(ROOT))})
+    log(f"#{n}: resolved in the literature, per the engine's gate: {why[:160]}")
+    record_atlas(n, f"Resolution campaign {datetime.now().date()}: the engine's literature gate found the problem SETTLED in "
+                    f"a paper (from its title and abstract, unverified): {why}. Not attacked further.")
+    commit(["resolution"], f"resolution: #{n} resolved in the literature")
+    return True
+
+
 def finish_screen(n: int, p: dict, cfg: dict, run_dir: Path, delta: float) -> bool:
     scr = screen_result(run_dir) or {}
     chance, draws = scr.get("mean"), [d.get("chance") for d in scr.get("draws") or []]
@@ -1038,6 +1059,8 @@ def step(cfg: dict) -> bool:
     total = float(row.get("spend_run") or 0.0)
     delta = round(total - float(p.get("spend") or 0.0), 4)
     p.update({"run_dir": row["run_dir"], "spend": total, "running": None, "limit_waits": 0})
+    if literature_finding(n, p, run_dir, action, delta):
+        return True
     if action == "screen":
         return finish_screen(n, p, cfg, run_dir, delta)
     outcome, info = classify(run_dir)

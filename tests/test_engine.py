@@ -1160,6 +1160,63 @@ The first skeleton.
 """
 
 
+class LiteratureGate(unittest.TestCase):
+    """2026-10-15: #1199 was settled by arXiv:2607.17333 in July 2026 while erdosproblems.com still listed it open, and the
+    campaign spent $83 on it. The engine now searches the literature before the map, and stops if a paper settles it."""
+
+    def script(self, settled):
+        def go(purpose, prompt, n):
+            if purpose == "engine-literature-queries":
+                return "QUERY: Owings sumset question monochromatic\nQUERY: monochromatic sumset infinite colouring\n"
+            if purpose == "engine-literature-verdict":
+                return "```json\n" + json.dumps({"settled": settled, "work": "An affirmative answer to Owings's sumset question",
+                                                  "answer": "true", "confidence": 0.95, "why": "it proves the statement"}) + "\n```"
+            if purpose == "engine-frontier":
+                return FRONTIER
+            return judge(purpose)
+        return go
+
+    def search(self, q):
+        self.queries.append(q)
+        return [{"title": "An affirmative answer to Owings's sumset question", "year": "2026", "abstract": "B+B monochromatic."},
+                {"title": "Monochromatic infinite sumsets", "year": "2017", "abstract": ""}]
+
+    def setUp(self):
+        self.queries = []
+
+    def test_a_settling_paper_ends_the_run_before_the_map(self):
+        call, ck = FakeCall(self.script(True), cost=0.05), {}
+        res = H.engine_run(call, FakeSession(lambda l, p: ""), "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=1, literature_scan=True), checkpoint=ck, lit_search=self.search)
+        self.assertEqual(res["stopped"], "resolved in the literature")
+        self.assertNotIn("error", res)                       # a finding, never an outage
+        self.assertEqual(call.prompts("engine-frontier"), [])
+        self.assertEqual(self.queries, ["Owings sumset question monochromatic", "monochromatic sumset infinite colouring"])
+        self.assertEqual(len(ck["literature"]["works"]), 2)  # deduplicated across the two queries
+
+    def test_an_unsettled_search_reaches_the_map_and_is_never_bought_twice(self):
+        call, ck = FakeCall(self.script(False), cost=0.05), {}
+        s = H.EngineSettings(sessions=0, literature_scan=True)
+        H.engine_run(call, FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s, checkpoint=ck, lit_search=self.search)
+        self.assertIn("LITERATURE SEARCH", call.prompts("engine-frontier")[0])
+        self.assertIn("Owings", call.prompts("engine-frontier")[0])
+        H.engine_run(call, FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s, checkpoint=ck, lit_search=self.search)
+        self.assertEqual(len(call.prompts("engine-literature-queries")), 1)
+
+    def test_no_search_means_no_gate(self):
+        # a benchmark or masked run passes no search: a paper could reveal the published answer
+        call = FakeCall(self.script(True), cost=0.05)
+        res = H.engine_run(call, FakeSession(lambda l, p: ""), "PROBLEM", LEAN,
+                           H.EngineSettings(sessions=0, literature_scan=True), lit_search=None)
+        self.assertNotIn("stopped", res)
+        self.assertEqual(call.prompts("engine-literature-queries"), [])
+
+    def test_a_low_confidence_verdict_does_not_stop(self):
+        self.assertFalse(H.literature_settled({"verdict": {"settled": True, "confidence": 0.5}}, 0.7))
+        self.assertTrue(H.literature_settled({"verdict": {"settled": True, "confidence": "0.8"}}, 0.7))
+        self.assertFalse(H.literature_settled({"verdict": {"settled": "yes", "confidence": 1}}, 0.7))
+
+
 class ResearchProgram(unittest.TestCase):
     """2026-10-13, the analytical deep tier: a proof skeleton whose glue is refereed, lemma sessions judged against each
     lemma as stated, and one assembled chain the settles judges and the campaign's Lean tier see."""

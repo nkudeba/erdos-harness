@@ -111,10 +111,11 @@ def arxiv_id(work: dict) -> str | None:
     return None
 
 
-def search(query: str, cutoff: date, per_page: int = 15) -> list[dict]:
+def search(query: str, cutoff: date, per_page: int = 15, extra_filter: str = "") -> list[dict]:
+    """`extra_filter`: more OpenAlex filters, comma-joined, e.g. "primary_topic.field.id:26" (mathematics)."""
     last = (cutoff - timedelta(days=1)).isoformat()
     url = (f"{OPENALEX}?search={urllib.parse.quote(query)}&filter=to_publication_date:{last}"
-           f"&per-page={per_page}&select={FIELDS}")
+           + (f",{extra_filter}" if extra_filter else "") + f"&per-page={per_page}&select={FIELDS}")
     return get_json(url).get("results") or []
 
 

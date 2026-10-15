@@ -711,6 +711,30 @@ class Persistence(Base):
         self.assertEqual(R.load_state()["problems"]["1207"]["next"], "program")
 
 
+class LiteratureFindings(Base):
+    def test_a_run_the_gate_stopped_is_a_known_result_and_never_retried(self):
+        run = self.engine_run([])
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        ej.update({"stopped": "resolved in the literature", "literature": {"verdict": {
+            "settled": True, "work": "An affirmative answer to Owings's sumset question", "why": "it proves it", "confidence": 0.95}}})
+        (run / "engine" / "engine.json").write_text(json.dumps(ej))
+        R.save_state({"problems": {"1199": {"history": [], "running": "screen", "prepped": True, "run_dir": str(run)}}})
+        fake = lambda *a, **k: ({"run_dir": str(run.relative_to(self.d)), "spend_run": 0.4}, 0)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "record_atlas") as atlas, patch.object(R, "commit"):
+            R.step(R.load_cfg())
+            self.assertEqual(R.next_action(R.load_state(), R.load_cfg()), ("idle", None))      # never attacked again
+        p = R.load_state()["problems"]["1199"]
+        self.assertEqual((p["status"], p["next"], p["track"]), ("known-result", None, "statement"))
+        self.assertIn("Owings", p["resolved_in_literature"])
+        self.assertIn("SETTLED in a paper", atlas.call_args[0][1])
+
+    def test_every_paid_stage_runs_the_gate(self):
+        cfg = R.load_cfg()
+        for stage in ("screen", "scout", "deep", "program"):
+            self.assertIn("--engine-literature-scan", R.stage_flags(cfg, stage, {}), stage)
+
+
 ORIGINAL_SITE_CLAIMS = R.site_claims
 ORIGINAL_REFRESH_SOURCES = R.refresh_sources
 ORIGINAL_FRESH_TARGETS = R.fresh_targets
