@@ -1,9 +1,13 @@
 # erdosproblems.com #686: problem page and forum thread (fetched 2026-10-08T17:39:31Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Can every integer $N\geq 2$ be written as\[N=\frac{\prod_{1\leq i\leq k}(m+i)}{\prod_{1\leq i\leq k}(n+i)}\]for some $k\geq 2$ and $m\geq n+k$?
+#686: [Er79d]
+number theory
+If $n$ and $k$ are fixed then can one say anything about the set of integers so represented?
+See also [388] and [677].
 
 ## Forum comments
 Order by

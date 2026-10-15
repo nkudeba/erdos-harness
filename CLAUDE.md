@@ -139,6 +139,17 @@ reads whatever is cached and derives its own penalties from it.
   macOS has no Landlock, so Comparator runs without its sandbox (the repo's fake-landrun shim), and each audit says so.
   #1125 passes both, and the redefined-`<` attack fails Comparator (`tests/test_audit.py`).
 
+  **Comparator gets no definition holes** (fixed 2026-10-14). It already requires every declaration the statement uses
+  to match the challenge, the frozen definitions and structures included. A name in its `definition_names` is a HOLE
+  that the proof may fill with any body of the same type.
+  - The audit used to list the frozen definitions there. Their bodies escaped Comparator's comparison (only
+    `statement_identity` compared them).
+  - It also stopped Comparator on #769's `structure Cube` ("not a definition"), which left a closed proof
+    `proved_unverified`.
+  - `harness.py reverify --run R` re-runs final verification on a run's own proof after such a fix. It never searches
+    for a proof, and it records itself in the run's `assistance`. `resolution.py reverify-lean --problem N` does the
+    same for a campaign Lean stage and records the outcome as the loop would.
+
   The last check is new, and it is not optional. The harness's own final check compares TEXT, and a redefined `<`
   lets a file prove `(3 : ℕ) < 2` with the frozen text verbatim, no `sorry` and no axioms. `tests/test_audit.py`
   shows that attack passing every text check and failing the audit.

@@ -1340,6 +1340,27 @@ for x > 1, and π(x) > x/log x for x ≥ 17.
   sharp form is cited.
 - **Cost:** harness $131.33 (engine $37.24, Lean $94.09); the finish took none.
 
+**#769: Lean-verified, then reclassified as a known result (2026-10-14).**
+- **The engine.** The scout settled formal-conjectures' statement: false. Its claim `deep/C1` is that for odd n ≥ 253,
+  gcd{aⁿ − 1 : 2 ≤ a ≤ ⌊n/4⌋+1} = 1, so c(n) < (n/2+2)ⁿ, and c(n) ≫ nⁿ fails. The intent judges called it new
+  mathematics, the campaign's first.
+- **Lean.** The deductive loop closed the negation in 2 cycles, with 12 lemmas, in 49 minutes for $6.78. Every check
+  passed except Comparator, which was an audit bug: the frozen statement's `structure Cube` had been passed as a
+  definition hole. Once that was fixed, `resolution.py reverify-lean` re-ran verification on the run's own proof
+  ($0.07). All 9 Lean checks passed, Comparator and nanoda included, and the faithfulness judge found the negation
+  exact.
+- **Not new.** erdosproblems.com's proof-claims page already had it, in stronger form:
+  - Jeffrey Zeng (an OpenAI internal model, with a sorry-free Lean formalization), 2026-07-24: the same subgroup and
+    quadratic-nonresidue argument, with generators a ≤ ⌊√(4n)⌋+1;
+  - Samuel Korsky (GPT-5.6 Pro), 2026-08-05: the Burgess exponent, plus an even-n lower bound.
+  - The engine never saw them, because its digest dropped the claims page and the page's own notes (fixed). Both
+    claims postdate the model's knowledge cutoff.
+- **What it is.** A blind, independent rediscovery, verified in Lean and audited, of a weaker form of a claimed
+  result: a time-split-style success on an open-problem target, for $24.35 ($17.50 engine, $6.85 Lean). It is a
+  known result, filed in STATEMENT-FINDINGS.md, and the review entry is withdrawn.
+- **The wider problem.** 6 of the campaign's 16 problems carry proof claims on the site: #295, #366, #488, #520, #769
+  and #1110. Until today no stage saw them.
+
 **A campaign bug, found 2026-10-14: the Lean tier could not compile #655's statement.**
 - **What happened.**
   - #655's scout settled formal-conjectures' statement: answer false, along a line the intent judges call a

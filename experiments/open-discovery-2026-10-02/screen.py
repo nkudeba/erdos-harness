@@ -26,18 +26,27 @@ import timesplit as T
 
 
 def thread_digest(n: str) -> str:
+    """The problem page (statement and the site's notes on what is known), the forum comments and the proof claims.
+
+    Until 2026-10-14 two markers silently emptied sections. The page was cut at "OPEN", a word #769's page never uses,
+    so its literature (Hadwiger, Burgess–Erdős, Hudelson, Connor–Marmorino) never reached the engine. The claims were
+    cut at "Order by", which only the THREAD page has, so no proof claim ever did: the campaign's Lean-verified
+    disproof of #769 turned out to be a weaker form of two claims posted there in July and August 2026."""
     d = json.loads((ROOT / "atlas-data" / "forum" / f"{n}.json").read_text())
     t = d.get("thread") or ""
     i = t.find("Order by")
     body = t[i:] if i >= 0 else t
     body = body.split("All comments are the responsibility of the user")[0]
-    head = t[t.find("OPEN"):t.find("Proof expositions")] if "OPEN" in t else ""
+    end = t.find("Proof expositions")
+    nav = t.rfind("Random", 0, end) if end >= 0 else -1          # the last navigation item before the statement
+    head = t[(nav + len("Random")) if nav >= 0 else 0:end] if end >= 0 else ""
     claims = d.get("claims") or ""
-    j = claims.find("Order by")
+    m = re.search(r"There (?:are|is) \d+ proof claims?", claims)
+    claims = claims[m.start():].split("All comments are the responsibility of the user")[0] if m else ""
     return (f"# erdosproblems.com #{n}: problem page and forum thread (fetched {d.get('fetched', 'recently')})\n\n"
-            "Comments are unverified; several withdraw earlier claims.\n\n## Page\n" + head.strip()[:4000]
+            "Comments and proof claims are unverified; several withdraw earlier claims.\n\n## Page\n" + head.strip()[:4000]
             + "\n\n## Forum comments\n" + body.strip()[:9000]
-            + ("\n\n## Proof claims page\n" + claims[j:][:3000] if j >= 0 else ""))
+            + ("\n\n## Proof claims page\n" + claims.strip()[:8000] if claims.strip() else ""))
 
 
 def main(nums: list[str]) -> int:

@@ -1,9 +1,15 @@
 # erdosproblems.com #655: problem page and forum thread (fetched 2026-10-10T02:53:23Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Let $x_1,\ldots,x_n\in \mathbb{R}^2$ be such that no circle whose centre is one of the $x_i$ contains three other points. Are there at least\[(1+c)\frac{n}{2}\]distinct distances determined between the $x_i$, for some constant $c>0$ and all $n$ sufficiently large?
+#655: [Er97e]
+geometry | 
+distances
+A problem of Erdős and Pach. It is easy to see that this assumption implies that there are at least $\frac{n-1}{2}$ distinct distances determined by every point.
+Zach Hunter has observed that taking $n$ points equally spaced on a circle disproves this conjecture. In the spirit of related conjectures of Erdős and others, presumably some kind of assumption that the points are in general position (e.g. no three on a line and no four on a circle) was intended.
+Additional thanks to: Zach Hunter
 
 ## Forum comments
 Order by

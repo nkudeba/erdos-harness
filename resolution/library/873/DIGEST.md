@@ -1,9 +1,12 @@
 # erdosproblems.com #873: problem page and forum thread (fetched 2026-10-08T19:26:22Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Let $A=\{a_1<a_2<\cdots\}\subseteq \mathbb{N}$ and let $F(A,X,k)$ count the number of $i$ such that\[[a_i,a_{i+1},\ldots,a_{i+k-1}] < X,\]where the left-hand side is the least common multiple. Is it true that, for every $\epsilon >0$, there exists some $k$ such that\[F(A,X,k)<X^\epsilon?\]
+#873: [Er92c]
+number theory
+A problem of Erdős and Szemerédi, who proved that for every $A$\[F(A,X,3) \ll X^{1/3}\log X,\]and there is an $A$ such that\[F(A,X,3) \gg X^{1/3}\log X\]for infinitely many $X$. There may be a sequence for which this holds for every $X$.
 
 ## Forum comments
 Order by

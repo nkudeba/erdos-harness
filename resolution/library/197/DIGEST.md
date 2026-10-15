@@ -1,9 +1,13 @@
 # erdosproblems.com #197: problem page and forum thread (fetched 2026-10-11T21:47:57Z)
 
-Comments are unverified; several withdraw earlier claims.
+Comments and proof claims are unverified; several withdraw earlier claims.
 
 ## Page
-
+Can $\mathbb{N}$ be partitioned into two sets, each of which can be permuted to avoid monotone 3-term arithmetic progressions?
+#197: [ErGr79][ErGr80]
+arithmetic progressions
+If three sets are allowed then this is possible.
+Additional thanks to: Boris Alexeev and Dustin Mixon
 
 ## Forum comments
 Order by
