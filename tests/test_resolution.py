@@ -31,6 +31,9 @@ class Base(unittest.TestCase):
             p = patch.object(R, name, val)
             p.start()
             self.addCleanup(p.stop)
+        p = patch.object(R, "site_claims", lambda n: 0)          # the real forum cache must not decide a test
+        p.start()
+        self.addCleanup(p.stop)
         self.d = d
 
     def engine_run(self, ledger) -> Path:
@@ -395,6 +398,45 @@ class Queue(Base):
         R.PRESCREEN.write_text(json.dumps({"problem": "1", "mean": 0.4}) + "\n" + json.dumps({"problem": "4", "mean": None}) + "\n")
         with patch.object(R, "ROOT", fake_root), patch.object(R, "forum_chars", lambda n: chars[n]):
             self.assertEqual(R.queue({"problems": {"2": {}}}, {"priority": [3]}), [3, 1, 4])
+
+
+class ClaimedProblems(Base):
+    """The operator's rule (2026-10-15): a problem with proof claims on erdosproblems.com is skipped."""
+
+    def test_the_claims_count_comes_from_the_cached_claims_page(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            forum = Path(tmp) / "atlas-data" / "forum"
+            forum.mkdir(parents=True)
+            (forum / "9.json").write_text(json.dumps({"claims": "Menu\n There are 3 proof claims (partial or full)"}))
+            (forum / "10.json").write_text(json.dumps({"claims": "There is 1 proof claim (partial or full)"}))
+            (forum / "11.json").write_text(json.dumps({"claims": "No proof claims yet."}))
+            with patch.object(R, "ROOT", Path(tmp)):
+                # Base stubs R.site_claims; the real function is the one captured at import
+                self.assertEqual([ORIGINAL_SITE_CLAIMS(n) for n in (9, 10, 11, 12)], [3, 1, 0, 0])
+
+    def test_the_queue_leaves_claimed_problems_out(self):
+        with patch.object(R, "site_claims", lambda n: 2 if n == 8 else 0), patch.object(R, "prescreen", lambda: {}), \
+                patch.object(R, "forum_chars", lambda n: n):
+            fake = self.d / "rk"
+            (fake / "atlas-data").mkdir(parents=True)
+            (fake / "atlas-data" / "rankings.json").write_text(json.dumps({"problems": [
+                {"id": i, "status": "Unsolved"} for i in (7, 8, 9)]}))
+            with patch.object(R, "ROOT", fake):
+                self.assertEqual(R.queue({"problems": {}}, {"priority": [8]}), [7, 9])
+
+    def test_a_screen_whose_fresh_forum_shows_claims_is_skipped_at_no_cost(self):
+        R.save_state({"problems": {}})
+        ran = []
+        with patch.object(R, "queue", lambda s, c: [8]), patch.object(R, "prep", lambda n, c: {"ok": True}), \
+                patch.object(R, "site_claims", lambda n: 3), patch.object(R, "run_screen", lambda *a, **k: ran.append(a)):
+            R.step(R.load_cfg())
+        p = R.load_state()["problems"]["8"]
+        self.assertEqual((p["status"], p["next"], p["running"]), ("skipped", None, None))
+        self.assertIn("3 proof claim(s)", p["why"])
+        self.assertFalse(ran)
+
+
+ORIGINAL_SITE_CLAIMS = R.site_claims
 
 
 class Digest(unittest.TestCase):

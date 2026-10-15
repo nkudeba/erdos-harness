@@ -12088,8 +12088,13 @@ DECL_LINE_RE = re.compile(r"(?m)^(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|n
 def split_decls(code: str) -> list[str]:
     """Top-level declaration blocks. Trailing `--` comment lines of a block belong to the NEXT declaration —
     that is where `-- PUBLISHED:` tags and derivation comments sit — so they are carried forward."""
+    # A notation or `variable` command starts its own block too. Glued to the declaration above it, the inlined
+    # `scoped[EuclideanGeometry] notation "ℝ²"` went wherever that declaration went: #655's negation placed a hypothesis
+    # just above it, so every sub-statement lost the notation (2026-10-14).
     raw = [b for b in re.split(r"\n(?=(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+)*"
-                               r"(?:lemma|theorem|def|abbrev|instance|structure|inductive|namespace|end|section|open)\s)",
+                               r"(?:lemma|theorem|def|abbrev|instance|structure|inductive|namespace|end|section|open)\s"
+                               r"|(?:@\[[^\]]*\]\s*)*(?:(?:scoped(?:\[[^\]]*\])?|local)\s+)?"
+                               r"(?:notation\d*|infixl?|infixr|prefix|postfix|variable)\b)",
                            code) if b.strip()]
     out, carry = [], ""
     for b in raw:
@@ -12780,6 +12785,10 @@ def skeleton_defs(skeleton: str, pos: int = -1) -> list[str]:
     return [d for d in split_decls(top) if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))]
 
 
+NOTATION_HEAD_RE = re.compile(r"^(?:@\[[^\]]*\]\s*)*(?:(?:scoped(?:\[[^\]]*\])?|local)\s+)?"
+                              r"(?:notation\d*|infixl?|infixr|prefix|postfix|variable)\b")
+
+
 def skeleton_context(skeleton: str, pos: int = -1) -> list[str]:
     """The defs visible from `pos` (as `skeleton_defs`) together with the top-level `open` commands in force there,
     in their original order. A hypothesis written under `open Filter` names `Tendsto` and `atTop`; extracted with
@@ -12794,7 +12803,10 @@ def skeleton_context(skeleton: str, pos: int = -1) -> list[str]:
     out = []
     for k, d in enumerate(blocks):
         s = strip_comment_lines(d).strip()
-        if is_def[k]:
+        if is_def[k] or NOTATION_HEAD_RE.match(s):
+            # A notation or `variable` block too: a statement inlined from formal-conjectures opens with
+            # `scoped[EuclideanGeometry] notation "ℝ²"`, and without it every hypothesis attack on #655's negation
+            # failed at `unexpected token '²'` (2026-10-14, six cycles, nothing attacked).
             out.append(d)
         elif re.match(r"open\s", s):
             if re.search(r"\bin$", s):

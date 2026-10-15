@@ -200,10 +200,36 @@ def prescreen() -> dict[int, float]:
     return out
 
 
+CLAIMS_RE = re.compile(r"There (?:are|is) (\d+) proof claims?")
+
+
+def site_claims(n) -> int:
+    """How many proof claims (partial or full) erdosproblems.com's claims page lists, from the cached forum fetch; 0
+    when nothing is cached. The operator's rule since 2026-10-15: a claimed problem is skipped. Attacking one mostly
+    rediscovers the claim. #769's Lean-verified disproof was a weaker form of two claims posted months before, which
+    the engine never saw, and 6 of the first 16 campaign problems carried claims."""
+    try:
+        d = json.loads((ROOT / "atlas-data" / "forum" / f"{int(n)}.json").read_text())
+    except (OSError, ValueError):
+        return 0
+    m = CLAIMS_RE.search(d.get("claims") or "")
+    return int(m.group(1)) if m else 0
+
+
+def skip_claimed(n, p: dict, k: int) -> None:
+    """Retire a problem the site already has proof claims for, before any spend on it."""
+    why = f"{k} proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    p.update({"status": "skipped", "why": why, "next": None, "running": None})
+    p.setdefault("history", []).append({"tier": "queue", "outcome": "skipped", "why": why})
+    save_problem(n, p)
+    result({"problem": int(n), "tier": "queue", "outcome": "skipped", "why": why, "spend": 0.0})
+    log(f"#{n}: skipped ({why})")
+
+
 def queue(state: dict, cfg: dict) -> list[int]:
     """The order problems are tried in. The configured priority list first, then every problem the Atlas lists as
-    unsolved, least studied first and higher `partial` breaking ties. A problem openai/math claims, and one the campaign
-    has already taken up, are left out. Step 3's heavily studied problems (4.5x the median forum discussion) gave only
+    unsolved, least studied first and higher `partial` breaking ties. A problem openai/math claims, one with proof
+    claims on erdosproblems.com, and one the campaign has already taken up, are left out. Step 3's heavily studied problems (4.5x the median forum discussion) gave only
     partial results, while recently open ones gave complete proofs, so how studied a problem is orders the queue."""
     ranks = json.loads((ROOT / "atlas-data" / "rankings.json").read_text())["problems"]
     unsolved = {int(p["id"]): p for p in ranks if p.get("status") == "Unsolved"}
@@ -220,7 +246,7 @@ def queue(state: dict, cfg: dict) -> list[int]:
     rest = sorted((n for n in unsolved if n not in first),
                   key=lambda n: (-pre.get(n, 0.0), forum_chars(n),
                                  -float(((unsolved[n].get("partial") or {}).get("score")) or 0), n))
-    return [n for n in first + rest if n not in taken and n not in claimed]
+    return [n for n in first + rest if n not in taken and n not in claimed and not site_claims(n)]
 
 
 # ---------------------------------------------------------------- preparing a problem
@@ -730,6 +756,10 @@ def step(cfg: dict) -> bool:
                 log(f"#{n}: skipped ({info['why']})")
                 return True
             p["prepped"] = True
+        k = site_claims(n)                               # prep has just refreshed the forum
+        if k:
+            skip_claimed(n, p, k)
+            return True
         p["running"] = action
         if not p.get("run_dir"):
             p["run_dir"] = adopt_run(n)                  # a stage cut off before its run dir was recorded
