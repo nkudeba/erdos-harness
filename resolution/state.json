@@ -2366,6 +2366,28 @@
    "status": "screened out",
    "track": null,
    "intent": null
+  },
+  "881": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.11,
+     "spend": 1.4597,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261015-010851-438056-erdos881",
+   "spend": 1.45972,
+   "limit_waits": 0,
+   "settle_chance": 0.11,
+   "arm": "screened out",
+   "next": null,
+   "status": "screened out",
+   "track": null,
+   "intent": null
   }
  }
 }
