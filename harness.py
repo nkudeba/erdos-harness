@@ -10606,7 +10606,8 @@ for the SAT solver instead of enumerating it.
                 self.log.event("program", "pieces_recertified", cycle=cycle,
                                pieces={n: choice[n] for n in sorted(plan)})
                 return res.get("body", text), sorted(plan)
-            off = compose_offset(text, self.imports)
+            # exact when the body's lines can be matched up (a dropped `set_option … in` shifts every later line)
+            off = compose_line_map(text, self.imports) or compose_offset(text, self.imports)
             bad = error_lines(res["errors"], off) if res.get("body", text) == text and not res.get("timeout") else set()
             failed = {n for n, (a, b) in lines.items() if any(a <= ln <= b for ln in bad)} or set(plan)
             for n in failed:

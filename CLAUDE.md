@@ -679,7 +679,7 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
      candidate must compile, so the glue goes through with W.
   3. Free re-certification of steps it restated under their old names (`_recertify_pieces`). `bridge`: the old
      certificate plus routine tactics. `restate`: the old script under the new statement. Failures are located by error
-     line, with the import header taken off (`compose_offset`).
+     line, mapped back to the body by `compose_line_map` (else `compose_offset`).
   4. A free probe (`_weakening_implied`): does P imply W in Lean? `peel`/`apply` tactics, then the proposal's own
      script. The script may use the skeleton's certified steps, which `certified_context` brings in with their proofs.
      Open hypotheses have no proof and stay out.
