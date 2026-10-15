@@ -2410,6 +2410,28 @@
    "status": "screened out",
    "track": null,
    "intent": null
+  },
+  "1094": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.01,
+     "spend": 5.3865,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "running": null,
+   "run_dir": "runs/20261015-015218-469748-erdos1094",
+   "spend": 5.386476,
+   "limit_waits": 0,
+   "settle_chance": 0.01,
+   "arm": "screened out",
+   "next": null,
+   "status": "screened out",
+   "track": null,
+   "intent": null
   }
  }
 }
