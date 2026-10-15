@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ec0aed6bbd9dc1f86ed4bd6d5e71ff697776240c0763cffb6fbe7852bd2e9bc4",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "4d7065f947145a2c33a56abfe2d54ef8b6dcee8f68629070862779d4a4e34978"
+    "manual_reviews_sha256": "414f8cebb148986efc46bedff59b406525323c6e54454faaabdf0830f43d45d3"
   },
   "problems": [
     {
@@ -49096,6 +49096,7 @@
       "harness": "Attempted",
       "rationale": [
         "Discovery screen 2026-10-02: believed TRUE; r = 2 is Ruzsa's theorem; a probabilistic thin basis gives weaker bounds for every r.",
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.04, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target statement (the Curve-Sum Covering Lemma, CSCL_r). Fix r ≥ 3. There are: - fixed integer data, namely K = O_r(1) polynomial curves γ_1,…,γ_K : A¹ → A^r over ℤ, each of the form γ_j(t) = (t, φ_{j,2}(t), …, φ_{j,r}(t)) and each non-degenerate (not containe",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite set machinery is available; global additive structure can demand deep theorems.",
@@ -49108,7 +49109,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-01 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -49164,9 +49165,10 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-01",
+        "on": "2026-10-15",
         "sources": [
-          "experiments/open-discovery-2026-10-02/REPORT.md"
+          "experiments/open-discovery-2026-10-02/REPORT.md",
+          "resolution/results.jsonl"
         ],
         "searchFloor": null
       },

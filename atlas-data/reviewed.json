@@ -1957,15 +1957,17 @@
   },
   "1192": {
     "rationale": [
-      "Discovery screen 2026-10-02: believed TRUE; r = 2 is Ruzsa's theorem; a probabilistic thin basis gives weaker bounds for every r."
+      "Discovery screen 2026-10-02: believed TRUE; r = 2 is Ruzsa's theorem; a probabilistic thin basis gives weaker bounds for every r.",
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.04, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target statement (the Curve-Sum Covering Lemma, CSCL_r). Fix r ≥ 3. There are: - fixed integer data, namely K = O_r(1) polynomial curves γ_1,…,γ_K : A¹ → A^r over ℤ, each of the form γ_j(t) = (t, φ_{j,2}(t), …, φ_{j,r}(t)) and each non-degenerate (not containe"
     ],
     "requirements": [
       "A 'block lemma' for r ≥ 3: digit curves whose r-fold sum map covers exactly with bounded fibres (Ruzsa's factorisation does not extend)."
     ],
     "sources": [
-      "experiments/open-discovery-2026-10-02/REPORT.md"
+      "experiments/open-discovery-2026-10-02/REPORT.md",
+      "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-01"
+    "assessed": "2026-10-15"
   },
   "1193": {
     "rationale": [
