@@ -2496,17 +2496,22 @@
      "tier": "scout",
      "outcome": "none",
      "spend": 17.1181
+    },
+    {
+     "tier": "program",
+     "outcome": "traction",
+     "spend": 64.3858
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261015-040743-705744-erdos1199",
-   "spend": 18.9522736,
+   "spend": 83.33805160000003,
    "limit_waits": 0,
    "settle_chance": 0.3,
    "arm": "pass",
-   "next": "program",
-   "status": "program",
+   "next": null,
+   "status": "traction",
    "track": "new-math",
    "intent": "unclear",
    "traction": {

@@ -274,3 +274,5 @@
 [2026-10-15T08:21:24Z] #1199: screen -> pass (settle chance 0.30, draws [0.3, 0.3]; $1.83); track new-math (intent unclear)
 [2026-10-15T08:21:30Z] #1199: scout (resuming runs/20261015-040743-705744-erdos1199)
 [2026-10-15T09:22:25Z] #1199: scout -> none ($17.12; 2 validated new [1, 1])
+[2026-10-15T09:22:31Z] #1199: research program on runs/20261015-040743-705744-erdos1199
+[2026-10-15T12:50:29Z] #1199: program -> traction ($64.39; 5 validated new [1, 1, 1, 1, 0])
