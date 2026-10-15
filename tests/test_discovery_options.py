@@ -70,6 +70,20 @@ class SubStatementContext(unittest.TestCase):
         self.assertIn("open Classical in\nnoncomputable def pick", sub.replace("\n\n", "\n"))
         self.assertTrue(sub.rstrip().endswith("sorry"))
 
+    def test_a_notation_below_a_hypothesis_still_reaches_its_substatement(self):
+        # #655's negation (2026-10-14): the plan put a hypothesis just above the inlined `ℝ²` notation, the notation was
+        # glued to the hypothesis's block and dropped with it, and every attack failed at `unexpected token '²'`
+        sk = ("theorem erdos_9_neg_hyp_d : ∀ n : ℕ, n ≤ n := by\n  sorry\n"
+              "scoped[EuclideanGeometry] notation \"ℝ²\" => EuclideanSpace ℝ (Fin 2)\n\n"
+              "open scoped Finset\nvariable {X : Type*} [MetricSpace X]\nnoncomputable def dd (s : Finset X) : ℕ := s.card\n\n"
+              "open EuclideanGeometry\n\ndef V (X : Finset ℝ²) : Prop := True\n\ntheorem erdos_9_neg : True := by\n  trivial")
+        blocks = H.split_decls(sk)
+        self.assertIn('scoped[EuclideanGeometry] notation "ℝ²" => EuclideanSpace ℝ (Fin 2)', blocks)
+        self.assertIn("variable {X : Type*} [MetricSpace X]", blocks)
+        sub = H.hypothesis_substatement(sk, "erdos_9_neg_hyp_d")
+        self.assertLess(sub.index('notation "ℝ²"'), sub.index("def V"))
+        self.assertLess(sub.index("variable {X"), sub.index("def dd"))
+
 
 class PlanContext(Isolated):
     def test_experiments_digest_keeps_findings_printed_early(self):
