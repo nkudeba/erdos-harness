@@ -2491,19 +2491,28 @@
      "settle_chance": 0.3,
      "spend": 1.8341,
      "track": "new-math"
+    },
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 17.1181
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261015-040743-705744-erdos1199",
-   "spend": 1.83414,
+   "spend": 18.9522736,
    "limit_waits": 0,
    "settle_chance": 0.3,
    "arm": "pass",
-   "next": "scout",
-   "status": "screened",
+   "next": "program",
+   "status": "program",
    "track": "new-math",
-   "intent": "unclear"
+   "intent": "unclear",
+   "traction": {
+    "settle_chance": 0.15
+   },
+   "claims_todo": []
   }
  }
 }
