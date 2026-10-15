@@ -353,13 +353,22 @@ class WeakeningTarget(Isolated):
 
 
 class WeakeningMoveInTheLoop(Isolated):
-    def test_off_by_default_the_premise_is_attacked_as_before(self):
+    def test_off_restores_the_direct_attack(self):
         h = _loop_harness(self.root, premise_weaken="off")
         h.run_program()
         self.assertNotIn("weaken", [p for p, _ in h.asked])
         self.assertEqual([a["name"] for a in h.attacks], ["erdos_99_hyp_sharp"])
         self.assertEqual(H.parse_residual(IN_FORCE, 99), H.parse_residual((self.pdir() / "Residual.lean").read_text(), 99))
-        self.assertEqual(H.build_parser().parse_args(["run", "--problem", "1"]).premise_weaken, "off")
+
+    def test_on_by_default_since_2026_10_15(self):
+        # the operator's decision after train #678's replays (3 of 3 adopted); a caller that never set the flag, an
+        # older stub say, gets the CLI's default too, as --premise-attack does
+        self.assertEqual(H.build_parser().parse_args(["run", "--problem", "1"]).premise_weaken, "on")
+        h = _loop_harness(self.root)
+        del h.args.premise_weaken
+        h.run_program()
+        self.assertEqual([p for p, _ in h.asked].count("weaken"), 1)
+        self.assertEqual(len(_events(h, "premise_weakened")), 1)
 
     def test_a_certified_weakening_is_adopted_and_closes_the_proof(self):
         h = _loop_harness(self.root)

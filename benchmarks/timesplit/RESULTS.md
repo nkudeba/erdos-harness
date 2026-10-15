@@ -1753,3 +1753,24 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - Re-checked on P2's own proposal in Lean, free: Lean now derives the weakened premise from Nagura, and not the converse.
   - Had the fix been in place, P2's weakened premise would have kept Nagura's citation; it was certified anyway.
 - **Default:** still OFF. The evidence is one problem. Turning it on is the operator's decision (see CLAUDE.md).
+
+## Premise weakening on by default (2026-10-15, the operator's decision)
+
+- **Change:** `--premise-weaken` now defaults to `on`. `--premise-weaken off` restores the direct premise attack.
+  Nothing else changes.
+- **Why** (decided after the P1–P3 replays above):
+  - **Where it fires.** Only in the premise endgame: no conjecture open, and a published premise with a numeric
+    constant that the plan rated hard or that an attack has already failed on. There the endgame spends what is left
+    on that premise anyway; the move redirects it to the weakest form the glue needs.
+  - **What it costs.** One proposal call, $0.17–0.31 on train. A transaction that does not improve the residual
+    changes nothing in force.
+  - **What it did on train #678:** 3 of 3 adopted for $7.52, one residual closed and audited. The direct attack on
+    Nagura as stated had failed.
+- **The caveat stands:** the evidence is one weakening on one problem. Read the first runs it fires on. Their
+  `log.jsonl` carries `program/premise_weaken`, then `premise_weakened`, `weakening_not_adopted` or
+  `premise_weaken_declined`.
+- **Pins:**
+  - Time-split pins taken before this change keep the direct attack in the endgame. That includes
+    `baseline-v2-84f21c5` and every arm in this file.
+  - An arm pinned after it weakens premises in the endgame. Compare such arms only with each other, or record the
+    difference.

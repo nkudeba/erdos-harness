@@ -11163,10 +11163,11 @@ for the SAT solver instead of enumerating it.
                         # proved here.
                         premise_pol = getattr(self.args, "premise_attack", "full")
                         skip: set = set()
-                        if (premise_pol != "off" and getattr(self.args, "premise_weaken", "off") == "on"
+                        if (premise_pol != "off" and getattr(self.args, "premise_weaken", "on") == "on"
                                 and parsed["metric"]["open_conjectures"] == 0):
-                            # --premise-weaken on: a premise stated with sharp constants, rated hard or already failed,
-                            # is first replaced by the weakest form the glue needs, then attacked in that form.
+                            # --premise-weaken on (the default since 2026-10-15): a premise stated with sharp constants,
+                            # rated hard or already failed, is first replaced by the weakest form the glue needs, then
+                            # attacked in that form.
                             target = self._weakening_target(parsed, skeleton, fails)
                             left = (self.args.run_budget - self.spent_usd()) if self.args.run_budget else None
                             if target is not None and left is not None and left < 1.0:
@@ -13945,13 +13946,15 @@ def build_parser() -> argparse.ArgumentParser:
                            "2026-09-30: premises are attacked only when nothing else is open, so a full attack "
                            "spends money with no better use, and on train #678 it proved the last open premise "
                            "(Ramanujan's two primes in (x/2, x]) for $3.22 where cheap had left the run unsolved")
-    runp.add_argument("--premise-weaken", choices=["on", "off"], default="off",
+    runp.add_argument("--premise-weaken", choices=["on", "off"], default="on",
                       help="deductive loop, premise endgame (2026-10-14): a published premise stated with numeric "
                            "constants, rated hard by the plan or already failed in an attack, is first replaced by the "
                            "weakest form the glue needs (one proposal call; free Lean checks that the glue still goes "
                            "through, re-certification of restated steps, and premise -> weakened), then attacked in that "
-                           "form under --premise-attack. Adopted only if the residual improves. OFF until a screen "
-                           "shows it pays; see benchmarks/timesplit/RESULTS.md, 'Premise weakening'")
+                           "form under --premise-attack. Adopted only if the residual improves. ON by default since "
+                           "2026-10-15, the operator's decision: it fires only in the premise endgame, where the money "
+                           "goes to the premise anyway, and on train #678 it adopted 3 of 3 for $7.52. off restores the "
+                           "direct attack; see benchmarks/timesplit/RESULTS.md, 'Premise weakening'")
     runp.add_argument("--hyps-per-cycle", type=int, default=4,
                       help="deductive loop: open conjecture hypotheses attacked per cycle, easiest first (the plan's rating, then complexity)")
     runp.add_argument("--residual-depth", type=int, default=2,
