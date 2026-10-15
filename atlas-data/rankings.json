@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ec0aed6bbd9dc1f86ed4bd6d5e71ff697776240c0763cffb6fbe7852bd2e9bc4",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "3edbf9c5d5cb043a2b7b0c01ae84bd24752accb95d73d00872a9fcf210bdc147"
+    "manual_reviews_sha256": "11b9cf75be0e6e343a119f14704139f853544f7fda6c38a650b3f8e5bac2b388"
   },
   "problems": [
     {
@@ -33014,12 +33014,13 @@
         "binomial coefficients"
       ],
       "score": 17,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
@@ -33085,8 +33086,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -49815,6 +49816,7 @@
         "Open. The negative direction (find n,k,m with m>=n+k and lcm(n+1..n+k)=lcm(m+1..m+k)) is a finite certificate but no counterexample exists in any reachable range: verified none for k<=12 with n,m<=2e5, and k=3 reduces to the single cubic x^3-x=2(y^3-y), exhaustive to y<1e9 with only the degenerate y=4,x=5 (that is n=2,m=3, where m-n=1<k, which the hypothesis allows). The positive direction is Erdos's conjecture and needs new mathematics: k<=2 is elementary, k=3 is already a Thue-Siegel/elliptic-type Diophantine problem.",
         "CORRECTION (2026-09-11): previously scored 7. Lowered because no route to a COMPLETE proof is reachable: the counterexample side is exhausted to 1e9 with only the allowed overlapping case, Thue-Siegel makes any survivor finite-but-unreachable, and the positive side is already deep at k=3. The banked k<=2 proof and 12 lemmas are real value but they are PARTIAL value, now recorded on the partial axis where they belong.",
         "Deductive-loop candidate, rank 3 (2026-09-16; fit 62): the k<=2 case is proved, d_k is periodic (certified), and for each fixed k the statement reduces to a Diophantine equation - k=3 is x^3-x = 2(y^3-y), swept to y<1e9 with only the allowed overlapping pair. The natural skeleton is '#677 <= (for every k>=3 the k-th equation has no admissible solution)', with the k<=2 lemmas discharged and, for k=3, an effective Thue bound (Baker-type) entering as a PUBLISHED premise. The residual is uniform-in-k finiteness, which is research-grade; the loop can make that explicit and certify the reductions.",
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.06, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to refute. Find an explicit triple (m, n, k) with k ≥ 3, m ≥ n + k and `lcmInterval m k = lcmInterval n k`. Then prove the negation of `erdos_677` in Lean by exhibiting the witness and evaluating both lcms. Fallback if the search is exhaustive and fi",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -49828,7 +49830,7 @@
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-09-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -49897,13 +49899,14 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-09-16",
+        "on": "2026-10-15",
         "sources": [
           "scratchpad probes p677_big.py / p677_gaps.py",
           "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/677.lean",
           "experiments/open-atlas-top2/677-notes.md",
           "knowledge/partial/677/",
-          "atlas-data/deductive-candidates.md"
+          "atlas-data/deductive-candidates.md",
+          "resolution/results.jsonl"
         ],
         "searchFloor": 1000000000.0
       },
