@@ -672,7 +672,9 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
   3. Free re-certification of steps it restated under their old names (`_recertify_pieces`). `bridge`: the old
      certificate plus routine tactics. `restate`: the old script under the new statement. Failures are located by error
      line, with the import header taken off (`compose_offset`).
-  4. A free probe (`_weakening_implied`): does P imply W in Lean? `peel`/`apply` tactics, then the proposal's own script.
+  4. A free probe (`_weakening_implied`): does P imply W in Lean? `peel`/`apply` tactics, then the proposal's own
+     script. The script may use the skeleton's certified steps, which `certified_context` brings in with their proofs.
+     Open hypotheses have no proof and stay out.
   5. W is tried free: a Mathlib theorem the proposal names, checked in the declaration index, then the cascade. Then it
      is attacked like any premise under `--premise-attack`. A restated step still open gets one cheap attempt, with its
      old proof as a hint.
@@ -682,8 +684,15 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
        never from a plan's ledger. It is adopted, but it is not a discharge and the stall count still rises.
      - Otherwise nothing in force changes. A certified W is banked in Lemmas.lean. The attempt goes to failures (kind
        `weakening`, which `failure_counts` skips) and to the alternatives.
-- **Replays:** `benchmarks/timesplit/analysis/replay_weaken.py`, train items only. Results are in
-  `benchmarks/timesplit/RESULTS.md`, "Premise weakening".
+- **Train replays, 2026-10-15** ($7.52; `benchmarks/timesplit/analysis/replay_weaken.py`; RESULTS.md, "Premise
+  weakening"): all three #678 runs that ended in the premise endgame were adopted.
+  - Each proposal ($0.17–0.31) stated the premise the glue uses: eventually, a prime in about ((k+1)/2, k−1].
+  - Each attack ($2.21–2.38) certified it from Mathlib's Bertrand machinery. A direct attack on Nagura as stated had
+    failed.
+  - 55963's residual closed and passes the audit; 81727's passes with Nair from an earlier replay
+    (`evidence/678-weakened/`).
+  - That is ONE weakening on ONE problem, three times over. It is strong evidence that the mechanism works, and weak
+    evidence about how often it pays. Keep it off until the operator decides.
 
 **Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
 was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def

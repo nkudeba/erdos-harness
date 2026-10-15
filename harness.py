@@ -10484,7 +10484,8 @@ for the SAT solver instead of enumerating it.
         fwd = holds(weakening_probe_source(context, premise, weakened, unfold), "fwd")
         script = str(script or "").strip()
         if not fwd and script and script.lower() != "null" and not has_banned(script):
-            fwd = holds(weakening_probe_source(context, premise, weakened, script=script), "fwd-script")
+            fwd = holds(certified_context(weakening_probe_source(context, premise, weakened, script=script), cand),
+                        "fwd-script")
         bwd = fwd and holds(weakening_probe_source(context, weakened, premise, unfold), "bwd")
         return fwd, bwd
 
@@ -12518,6 +12519,20 @@ def weakening_probe_source(context: list[str], premise: str, weakened: str, unfo
                      f"({u}; intros; apply hP <;> first | assumption | omega | linarith | positivity | (norm_num; done))"]
         body = "  first\n" + "\n".join(f"  | {t}" for t in alts)
     return "\n\n".join(list(context) + [f"theorem weakening_probe (hP : {premise}) : {weakened} := by\n{body}"]).strip()
+
+
+def certified_context(src: str, skeleton: str) -> str:
+    """`src` with every certified step of `skeleton` that it names put back above its first declaration (its proof
+    namespace and its statement), transitively, by `restore_spliced`. A proposal's derivation of the weakened premise
+    from the original may use the skeleton's certified steps: train #678's blueprint run (alias 86081) derived it from
+    `hyp_choice_q`, and a probe with the definitions alone answered `Unknown identifier`. An OPEN hypothesis has no proof
+    namespace, so it is never put back: a derivation cannot lean on an unproved step."""
+    for _ in range(20):
+        nxt = restore_spliced(src, skeleton)
+        if nxt == src:
+            break
+        src = nxt
+    return src
 
 
 def recertify_variants(cand: str, current: str, names: list[str]) -> dict[str, dict]:

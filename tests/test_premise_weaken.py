@@ -256,6 +256,20 @@ class ProbeSource(unittest.TestCase):
         self.assertIn("(try unfold gap99 at hP)", src)
         self.assertTrue(src.startswith("def gap99"))
 
+    def test_a_certified_step_the_script_names_comes_with_its_proof(self):
+        # train #678's blueprint run derived the weakening from the certified `hyp_choice_q`; with the definitions alone
+        # the probe answered `Unknown identifier`
+        src = H.weakening_probe_source(["def gap99 (n p : ℕ) : Prop := n < p ∧ p ≤ 2 * n ∧ 2 ≤ p"], SHARP, LOOSE,
+                                       script="intro n hn\nhave := erdos_99_hyp_step\nexact hP n hn |>.imp fun p h => ⟨h.1, h.2.1, by omega⟩")
+        out = H.certified_context(src, IN_FORCE)
+        self.assertIn("namespace erdos_99_hyp_step_ns", out)
+        self.assertIn(f"theorem erdos_99_hyp_step : {STEP_OLD} := by\n  exact erdos_99_hyp_step_ns.erdos_99_hyp_step", out)
+        self.assertLess(out.index("namespace erdos_99_hyp_step_ns"), out.index("theorem weakening_probe"))
+
+    def test_an_open_hypothesis_is_never_put_back(self):
+        src = H.weakening_probe_source([], SHARP, LOOSE, script="exact erdos_99_hyp_sharp")
+        self.assertEqual(H.certified_context(src, IN_FORCE), src)
+
     def test_the_proposals_script_is_indented_under_the_probe(self):
         src = H.weakening_probe_source([], SHARP, LOOSE, script="intro n hn\nobtain ⟨p, hp⟩ := hP n hn\nexact ⟨p, hp.1, hp.2.1, by omega⟩")
         self.assertIn(":= by\n  intro n hn\n  obtain", src)
