@@ -651,6 +651,66 @@ class Compute(Base):
         self.assertLess(text.index("the page"), text.index("RESULT: three"))
 
 
+class Persistence(Base):
+    """2026-10-15, operator's direction: pursue the selected problems while passes make progress, and give the screened-out
+    ones another screen with the repaired context."""
+
+    def test_program_passes_scale_their_cycles_and_budget_and_extend_the_last(self):
+        cfg = R.load_cfg()
+        first = R.stage_flags(cfg, "program", {})
+        self.assertIn("--engine-program-cycles 6 ", first)
+        self.assertNotIn("--engine-program-extend", first)
+        third = R.stage_flags(cfg, "program", {"program_passes": 2})
+        self.assertIn("--engine-program-cycles 18 ", third)
+        self.assertIn("--engine-program-budget 240 ", third)
+        self.assertTrue(third.endswith("--engine-program-extend"))
+        self.assertIn("--engine-objective record", R.stage_flags(cfg, "program", {"program_passes": 1, "kind": "record"}))
+
+    def program_pass(self, validated_before, n_new, spend=50.0, passes=0):
+        run = self.engine_run([])
+        R.save_state({"problems": {"9": {"history": [], "next": "program", "run_dir": str(run), "track": "new-math",
+                                         "spend": spend, "validated_seen": validated_before, "program_passes": passes}}})
+        fake = lambda *a, **k: ({"run_dir": str(run.relative_to(self.d)), "spend_run": spend + 60.0}, 0)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "classify", lambda rd: ("traction", {})), patch.object(R, "record_atlas"), \
+                patch.object(R, "commit"), patch.object(R, "validated_summary", lambda rd: (n_new, [1] * n_new, "")):
+            R.step(R.load_cfg())
+        return R.load_state()["problems"]["9"]
+
+    def test_progress_earns_another_pass_and_none_ends_it(self):
+        p = self.program_pass(validated_before=2, n_new=5)
+        self.assertEqual((p["next"], p["status"], p["program_passes"]), ("program", "persist", 1))
+        p = self.program_pass(validated_before=5, n_new=5)
+        self.assertIsNone(p["next"])
+
+    def test_the_caps_end_persistence(self):
+        self.assertIsNone(self.program_pass(validated_before=0, n_new=3, spend=240.0)["next"])     # over max_spend
+        self.assertIsNone(self.program_pass(validated_before=0, n_new=3, passes=2)["next"])        # the third pass
+
+    def test_a_rescreen_is_a_new_screen_under_the_best_objective(self):
+        (self.d / "survey.json").write_text(json.dumps({"records": [], "explicit": [{"problem": 1094, "score": 4.0, "claims": 0}]}))
+        R.save_state({"problems": {"1094": {"status": "screened out", "run_dir": "runs/old", "settle_chance": 0.01,
+                                            "spend": 5.4, "prepped": True, "history": []},
+                                   "32": {"status": "screened out", "run_dir": "runs/o32", "prepped": True, "history": []},
+                                   "655": {"status": "verified", "history": []}}})
+        with patch.object(R, "write_library", lambda n: None):
+            self.assertIn("as explicit", R.rescreen(1094))
+            self.assertIn("as settle", R.rescreen(32))
+            self.assertIn("not a screened-out problem", R.rescreen(655))
+        st = R.load_state()
+        p = st["problems"]["1094"]
+        self.assertEqual((p["kind"], p["next"], p["spend"], p["previous"]["run_dir"]), ("explicit", "screen", 0.0, "runs/old"))
+        self.assertEqual(R.next_action(st, R.load_cfg())[0], "screen")
+
+    def test_persist_respects_the_claims_rule(self):
+        R.save_state({"problems": {"1207": {"status": "done", "run_dir": "runs/r", "history": []},
+                                   "366": {"status": "done", "run_dir": "runs/s", "history": []}}})
+        with patch.object(R, "write_library", lambda n: None), patch.object(R, "site_claims", lambda n: 1 if n == 366 else 0):
+            self.assertIn("research-program pass is next", R.persist(1207))
+            self.assertIn("claims rule", R.persist(366))
+        self.assertEqual(R.load_state()["problems"]["1207"]["next"], "program")
+
+
 ORIGINAL_SITE_CLAIMS = R.site_claims
 ORIGINAL_REFRESH_SOURCES = R.refresh_sources
 ORIGINAL_FRESH_TARGETS = R.fresh_targets

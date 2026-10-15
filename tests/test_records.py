@@ -114,5 +114,37 @@ class Survey(unittest.TestCase):
         self.assertIn("verified up to", text)
 
 
+mspec = importlib.util.spec_from_file_location("methods_build", ROOT / "atlas-data" / "methods" / "build.py")
+M = importlib.util.module_from_spec(mspec)
+mspec.loader.exec_module(M)
+
+
+class Methods(unittest.TestCase):
+    CLAIMS = ("There are 2 proof claims (partial or full) for this problem.\n A full proof \nclaimed by Ann (using GPT-6).\n"
+              " Summary:\n We prove it by a semigroup argument.\n Notes:\n Lean-checked.\n|\n External link to proof\n |\n"
+              " Submitted 2026-07-24 17:04:43 by \n ann\n A partial proof \nclaimed by Bo.\n Summary:\n The odd case.\n"
+              " Submitted 2026-08-05 22:46:47 by \n bo\n")
+
+    def test_every_claim_form_is_read_with_its_scope(self):
+        cs = M.parse_claims(self.CLAIMS)
+        self.assertEqual([(c["by"], c["scope"], c["date"]) for c in cs],
+                         [("Ann (using GPT-6)", "full", "2026-07-24"), ("Bo", "partial", "2026-08-05")])
+        self.assertEqual(cs[0]["summary"], "We prove it by a semigroup argument.")
+        self.assertEqual(cs[0]["notes"], "Lean-checked.")
+
+    def test_the_digest_ranks_neighbours_and_never_the_problem_itself(self):
+        entries = [{"problem": 1, "kind": "claim", "tags": ["geometry"], "words": ["isosceles"], "state": "open",
+                    "statement": "me", "by": "x", "scope": "full", "summary": "own claim"},
+                   {"problem": 2, "kind": "claim", "tags": ["geometry", "distances"], "words": ["isosceles"],
+                    "state": "open", "statement": "near", "by": "y", "scope": "partial", "summary": "a lattice"},
+                   {"problem": 3, "kind": "solution", "tags": ["primes"], "words": [], "state": "proved",
+                    "statement": "far", "summary": "sieve"}]
+        d = M.methods_digest(1, entries)
+        self.assertIn("#2", d)
+        self.assertIn("A partial proof claimed by y", d)
+        self.assertNotIn("own claim", d)
+        self.assertNotIn("#3", d)                              # nothing shared, so not offered
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1204,6 +1204,23 @@ class ResearchProgram(unittest.TestCase):
         self.assertFalse(H.program_better(hard, easy, 0)[0])
         self.assertTrue(H.program_better(hard, easy, 1)[0])                   # a new route after a stalled cycle
 
+    def test_an_extension_clears_a_stopped_program_once(self):
+        # the campaign's persistence pass (2026-10-15): more cycles and budget, and the last pass's stop cleared once
+        ck = {"program": {"cycles": [{"cycle": 1, "finished": True}, {"cycle": 2, "finished": True}], "stall": 2,
+                          "stop": "2 cycles without a discharge", "start_spend": 0.0}}
+        s = self._settings(program_cycles=2, program_extend=True)
+        call = self._call([PLAN])
+        out = H.engine_program(call, FakeSession(lambda l, p: ""), s, "PROBLEM", LEAN, "", "", "", [],
+                               H._DiscoverySpend(50.0), ck=ck)
+        st = ck["program"]
+        self.assertEqual([(e["after_cycles"], e["stall"]) for e in st["extensions"]], [(2, 2)])
+        self.assertEqual(st["stall"], 0)
+        self.assertEqual(out["stop"], "2 cycles")              # this run had no new cycles to give: it stops again
+        H.engine_program(call, FakeSession(lambda l, p: ""), s, "PROBLEM", LEAN, "", "", "", [], H._DiscoverySpend(50.0),
+                         ck=ck)
+        self.assertEqual(len(st["extensions"]), 1)             # never twice at the same point
+        self.assertEqual(call.prompts("engine-program-plan"), [])
+
     def test_a_skeleton_closes_into_one_chain_the_settles_judges_see(self):
         call = self._call([PLAN])
         sess = FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "whatever the session wrote")))

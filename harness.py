@@ -4547,6 +4547,7 @@ class EngineSettings:
     program_turns: int = 150
     program_lemmas: int = 3          # open lemmas attacked per cycle, easiest first
     program_stall: int = 2           # cycles in a row without a discharge before the program stops
+    program_extend: bool = False     # this run extends a finished program: its stall count and stop are cleared once
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -6454,6 +6455,15 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
     for k, dflt in (("cycles", []), ("refused", []), ("refuted", []), ("stall", 0)):
         st.setdefault(k, dflt)
     st.setdefault("start_spend", round(spend.total, 4))
+    if s.program_extend and not st.get("done") and st.get("stop") and st.get("extended_from") != len(st["cycles"]):
+        # A persistence pass (resolution.py): the program stopped on its cycles, its stall rule or its budget, and the
+        # campaign is funding more because the last pass made progress or the context changed. Clear the stop once.
+        st.setdefault("extensions", []).append({"after_cycles": len(st["cycles"]), "stop": st.get("stop"),
+                                                "stall": st["stall"]})
+        st["extended_from"] = len(st["cycles"])
+        st["stall"] = 0
+        st.pop("stop", None)
+        keep()
     lock = threading.RLock()
 
     def room(x: float) -> bool:
@@ -7292,10 +7302,11 @@ class Harness:
         path = Path(p)
         extra = ""
         if path.is_dir():
-            # COMPUTE.md: the campaign's long computations for this problem (resolution.run_long). Last, so the
-            # middle clip keeps it whole.
-            compute = path / "COMPUTE.md"
-            extra = ("\n\n" + compute.read_text().strip()) if compute.is_file() else ""
+            # METHODS.md: how neighbouring problems were recently resolved (atlas-data/methods). COMPUTE.md: the
+            # campaign's long computations for this problem (resolution.run_long), last, so the middle clip keeps it.
+            for name in ("METHODS.md", "COMPUTE.md"):
+                f = path / name
+                extra += ("\n\n" + f.read_text().strip()) if f.is_file() else ""
             path = path / "DIGEST.md"
         try:
             text = path.read_text().strip()
@@ -7318,7 +7329,7 @@ class Harness:
                               gap_round=str(g("discover_gap_round", "on")) == "on",
                               mode=str(g("discover_mode", "independent")), ladder=int(g("discover_ladder", 0)),
                               draws=int(g("discover_draws", 1)))
-        s.library = self._library_text(10000)
+        s.library = self._library_text(16000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
         if block:
@@ -7426,8 +7437,9 @@ class Harness:
                            program_budget=float(g("engine_program_budget", 60.0)),
                            program_session_budget=float(g("engine_program_session_budget", 4.0)),
                            program_lemmas=int(g("engine_program_lemmas", 3)),
-                           program_stall=int(g("engine_program_stall", 2)))
-        s.library = self._library_text(10000)
+                           program_stall=int(g("engine_program_stall", 2)),
+                           program_extend=bool(g("engine_program_extend", False)))
+        s.library = self._library_text(16000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
         if block:
@@ -14293,6 +14305,9 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-program-lemmas", type=int, default=3, help="open lemmas attacked per cycle")
     runp.add_argument("--engine-program-stall", type=int, default=2,
                       help="cycles in a row without a discharge before the program stops")
+    runp.add_argument("--engine-program-extend", action="store_true",
+                      help="this run extends a finished research program (the campaign's persistence pass): clear its "
+                           "stall count and stop reason once, so it plans again with whatever is new since")
     runp.add_argument("--engine-objective", choices=["advance", "resolve", "record", "explicit"], default="advance",
                       help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
                            "as formalised (resolve, the campaign's setting)")

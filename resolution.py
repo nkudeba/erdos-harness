@@ -96,6 +96,8 @@ DEFAULTS = {
     # Recursive children get 3 cycles and one more level: with the default 1, #888's upper-bound child certified 3 of its
     # 4 pieces, planned its next move, and was cut off twice; with 4 cycles and depth 3 it finished (REPORT 3.11).
     # Long computations a record or explicit run's sessions ask for (run_long): no model calls, so hours cost no usage.
+    # More research-program passes for a problem whose last program or deep pass made progress (stage_flags scales them).
+    "persist": {"max_spend": 250.0, "max_passes": 3},
     "compute": {"case_seconds": 7200, "total_seconds": 14400, "max_requests": 2, "followups": 1},
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
@@ -249,10 +251,20 @@ QUEUE_LANE: dict[int, str] = {}                          # filled by queue(): th
 
 
 def stage_flags(cfg: dict, action: str, p: dict) -> str:
-    """A stage's engine flags for this problem's kind: the objective follows the kind."""
+    """A stage's engine flags for this problem's kind: the objective follows the kind. A program pass after the first
+    (persistence) gets the cycles and the program budget of all its passes so far, since the engine counts both
+    cumulatively, and `--engine-program-extend`, which clears the last pass's stop once."""
     flags = cfg[action]["flags"]
     obj = OBJECTIVE_OF.get(p.get("kind") or "settle", "resolve")
-    return flags if obj == "resolve" else flags.replace("--engine-objective resolve", f"--engine-objective {obj}")
+    if obj != "resolve":
+        flags = flags.replace("--engine-objective resolve", f"--engine-objective {obj}")
+    k = int(p.get("program_passes") or 0)
+    if action == "program" and k >= 1:
+        def scale(name, f):
+            m = re.search(rf"--engine-program-{name} (\S+)", f)
+            return f if not m else f.replace(m.group(0), f"--engine-program-{name} {float(m.group(1)) * (k + 1):g}")
+        flags = scale("budget", scale("cycles", flags)) + " --engine-program-extend"
+    return flags
 
 
 def newest_problems_db() -> Path | None:
@@ -311,6 +323,8 @@ def refresh_sources(cfg: dict, every_hours: float = 6.0) -> bool:
     if not SURVEY.exists() or time.time() - SURVEY.stat().st_mtime > 86400:
         subprocess.run([sys.executable, str(ROOT / "atlas-data" / "records" / "survey.py")], cwd=ROOT, capture_output=True,
                        timeout=3600)
+        subprocess.run([sys.executable, str(ROOT / "atlas-data" / "methods" / "build.py")], cwd=ROOT, capture_output=True,
+                       timeout=600)
     stamp.write_text(datetime.now(timezone.utc).isoformat())
     log("sources refreshed: the problems database, formal-conjectures' head, the records survey")
     return True
@@ -407,10 +421,26 @@ def prep(n: int, cfg: dict) -> dict:
     if fc.get("error"):
         return {"ok": False, "why": str(fc["error"])[:200]}
     refresh_forum(n)
+    write_library(n)
+    return {"ok": True, "form": fc.get("form"), "fc_sha": sha}
+
+
+def write_library(n: int) -> None:
+    """The problem's library, which the engine reads: its page, thread and claims (DIGEST.md) and how neighbouring
+    problems were recently resolved (METHODS.md). COMPUTE.md, its long computations, is appended by run_long."""
     lib = CAMP / "library" / str(n)
     lib.mkdir(parents=True, exist_ok=True)
     (lib / "DIGEST.md").write_text(_thread_digest()(str(n)))
-    return {"ok": True, "form": fc.get("form"), "fc_sha": sha}
+    try:
+        spec = importlib.util.spec_from_file_location("methods_build", ROOT / "atlas-data" / "methods" / "build.py")
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        text = m.methods_digest(int(n))
+    except Exception as e:                               # noqa: BLE001 - the library is context, never a reason to stop
+        log(f"#{n}: methods digest failed: {type(e).__name__}: {str(e)[:160]}")
+        text = ""
+    if text:
+        (lib / "METHODS.md").write_text(text)
 
 
 # ---------------------------------------------------------------- running a tier
@@ -857,7 +887,9 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     """lean first, then deep, then a stage cut off part way, then Lean on partial results, then a screened problem's
     scout (the pass arm first, highest settle chance first, then the control arm), then the next problem's screen."""
     probs = state.get("problems", {})
-    for want in ("lean", "program", "deep"):
+    # an operator's re-screen ("screen", from rescreen) costs about $3 and may promote a problem, so it runs before the
+    # $90 program passes; Lean, the payoff, stays first
+    for want in ("lean", "screen", "program", "deep"):
         for n, p in probs.items():
             if p.get("next") == want and p.get("errors", 0) < cfg["max_errors"]:
                 return want, int(n)
@@ -1023,6 +1055,18 @@ def step(cfg: dict) -> bool:
         p.update({"next": "deep", "status": "traction", "traction": info})
     else:
         p.update({"next": None, "status": "done" if outcome == "none" else outcome})
+    if action == "program":
+        p["program_passes"] = int(p.get("program_passes") or 0) + 1
+    # Persistence (2026-10-15, operator's direction: the selected problems should be fully solved). A program or deep
+    # pass that produced new validated results earns another program pass, up to `persist` limits.
+    ps = cfg.get("persist") or {}
+    gained = n_new > int(p.get("validated_seen") or 0)
+    p["validated_seen"] = max(n_new, int(p.get("validated_seen") or 0))
+    if (action in ("program", "deep") and outcome != "complete" and gained and p.get("track") != "statement"
+            and float(p.get("spend") or 0.0) < float(ps.get("max_spend", 250.0))
+            and int(p.get("program_passes") or 0) < int(ps.get("max_passes", 3))):
+        p.update({"next": "program", "status": "persist"})
+        log(f"#{n}: {action} made progress ({n_new} validated new); another research-program pass")
     p["history"].append({"tier": action, "outcome": outcome, "spend": delta})
     skip = set((p.get("claims_done") or {})) | set(p.get("claims_todo") or [])
     if outcome == "complete":
@@ -1308,6 +1352,53 @@ def run_long(n: int, p: dict, run_dir: Path, cfg: dict) -> list[dict]:
     return ran
 
 
+def rescreen(n: int) -> str:
+    """Screen a screened-out problem again, as a new engine run, under its best objective: explicit or record when the
+    records survey lists it, settle otherwise. Every screen before 2026-10-14 read a digest without the page's own
+    notes or the proof claims, and no screen had the methods library. The old attempt stays in `previous`."""
+    state = load_state()
+    p = (state.get("problems") or {}).get(str(n))
+    if not p or p.get("status") != "screened out":
+        return f"#{n}: not a screened-out problem"
+    if p.get("running"):
+        return f"#{n}: a stage is running ({p['running']})"
+    k = site_claims(n)
+    if k:
+        return f"#{n}: {k} proof claim(s) on erdosproblems.com; skipped by the claims rule"
+    kinds = [kd for kd in ("explicit", "record") if n in survey_targets(kd, {})]
+    kind = kinds[0] if kinds else "settle"
+    p["previous"] = {k_: p.get(k_) for k_ in ("status", "run_dir", "settle_chance", "arm", "kind", "spend", "track", "intent")}
+    for k_ in ("status", "run_dir", "settle_chance", "arm", "next", "track", "intent", "lane", "kind"):
+        p.pop(k_, None)
+    p.update({"spend": 0.0, "rescreened": True, "rescreen_at": datetime.now().strftime("%Y%m%d-%H%M%S"),
+              "kind": kind, "lane": "rescreen", "next": "screen", "status": "rescreen"})
+    p.setdefault("history", []).append({"tier": "queue", "outcome": f"rescreen as {kind} (operator)"})
+    save_problem(n, p)
+    write_library(n)
+    return f"#{n}: to be screened again as {kind}"
+
+
+def persist(n: int) -> str:
+    """Give a problem whose scout or deep pass found no complete answer a research-program pass (an operator's call:
+    the operator wants the selected problems pursued). The persistence rule then continues while passes make progress."""
+    p = load_state().get("problems", {}).get(str(n))
+    if not p or not p.get("run_dir"):
+        return f"#{n}: no engine run to continue"
+    if p.get("running") or p.get("next"):
+        return f"#{n}: busy ({p.get('running') or p.get('next')})"
+    k = site_claims(n)
+    if k:
+        return f"#{n}: {k} proof claim(s) on erdosproblems.com; skipped by the claims rule"
+    if (engine_json(ROOT / p["run_dir"]).get("program") or {}).get("cycles"):
+        # the run already holds a program (#1199's stopped at its 6-cycle cap): this pass extends it
+        p["program_passes"] = max(1, int(p.get("program_passes") or 0))
+    p.update({"next": "program", "status": "persist"})
+    p.setdefault("history", []).append({"tier": "queue", "outcome": "persist (operator)"})
+    save_problem(n, p)
+    write_library(n)
+    return f"#{n}: a research-program pass is next"
+
+
 def requeue_lean(n: int) -> str:
     """Send a problem's complete answer back to the Lean stage, for a stage that never reached the mathematics: #655's
     first one ended at its first check, on a frozen statement that could not compile (2026-10-14). The old run stays
@@ -1327,7 +1418,8 @@ def requeue_lean(n: int) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean", "reverify-lean"])
+    ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean", "reverify-lean",
+                                    "rescreen", "persist"])
     ap.add_argument("--problem", type=int, help="requeue-lean, reverify-lean: the problem")
     ap.add_argument("--show", type=int, default=20)
     ap.add_argument("--file", help="import-screens: a jsonl of screen rows (step3/settle_open.jsonl)")
@@ -1342,10 +1434,11 @@ def main() -> int:
             print(f"  #{n}  forum {forum_chars(n)} chars")
     elif a.cmd == "import-screens":
         print("imported to the pass arm:", import_screens(Path(a.file), load_cfg()))
-    elif a.cmd in ("requeue-lean", "reverify-lean"):
+    elif a.cmd in ("requeue-lean", "reverify-lean", "rescreen", "persist"):
         if a.problem is None:
             ap.error(f"{a.cmd} needs --problem")
-        print((requeue_lean if a.cmd == "requeue-lean" else reverify_lean)(a.problem))
+        print({"requeue-lean": requeue_lean, "reverify-lean": reverify_lean, "rescreen": rescreen,
+               "persist": persist}[a.cmd](a.problem))
     elif a.cmd == "once":
         wait_for_lane()
         step(load_cfg())
