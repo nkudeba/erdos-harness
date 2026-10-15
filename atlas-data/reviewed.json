@@ -2016,6 +2016,15 @@
     ],
     "score": 99
   },
+  "1199": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.30, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to establish. Decide whether arXiv:2607.17333 proves `erdos_1199` exactly as written: ∀ χ : ℕ → Fin 2, ∃ infinite A ⊆ ℕ with χ constant on A + A. Here A + A includes the doubles 2a, and ℕ contains 0. The task is to reconstruct its argument into a com"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-15"
+  },
   "1203": {
     "rationale": [
       "Discovery screen 2026-10-02 (crossfed + ladder, no Lean): believed TRUE; the ladder proved informally limsup F = ∞, liminf F ≥ 1 and F → ∞ on a density-one set, but every attempt stops at the same core.",

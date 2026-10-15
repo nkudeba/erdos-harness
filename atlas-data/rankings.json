@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 148,
+    "manually_reviewed": 149,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ec0aed6bbd9dc1f86ed4bd6d5e71ff697776240c0763cffb6fbe7852bd2e9bc4",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "e15ea0111e4f828e09dd41d5f8db0e300210b8828f1cc2b3dcdb1e0f469dcf5b"
+    "manual_reviews_sha256": "a41a1791e7ad9eb17231ca3caec0dfdce7a537455bf988fdd5e2d1eaa9979989"
   },
   "problems": [
     {
@@ -49205,6 +49205,7 @@
       "score": 6,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.30, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to establish. Decide whether arXiv:2607.17333 proves `erdos_1199` exactly as written: ∀ χ : ℕ → Fin 2, ∃ infinite A ⊆ ℕ with χ constant on A + A. Here A + A includes the doubles 2a, and ℕ contains 0. The task is to reconstruct its argument into a com",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
@@ -49216,7 +49217,7 @@
         "Construct and verify a uniform argument or an infinite family."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -49272,13 +49273,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1199",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-15",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 762,
       "tier": "Frontier"
