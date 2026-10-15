@@ -1635,6 +1635,15 @@
     ],
     "assessed": "2026-10-13"
   },
+  "881": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line is a disproof. Find an explicit, base-b automatic set A ∋ 0 and some k ∈ {2, 3, 4} satisfying: (i) kA ⊇ [N₀, ∞), with kA the exact k-fold sumset k • A; (ii) the witness criterion: for every a ∈ A with a ≥ a₀ there is n ≥ a with n ∉ (k+1)(A∖{a}). (i) a"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-15"
+  },
   "885": {
     "rationale": [
       "Forum, 2026-10-06: a Lean proof of the k = 4 case from an explicit witness is in formal-conjectures PR #6509 (not merged). Two further partial constructions on the square-sum side come with rerunnable certificates, and neither resolves k = 5.",

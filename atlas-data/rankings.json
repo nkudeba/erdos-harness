@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 144,
+    "manually_reviewed": 145,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ec0aed6bbd9dc1f86ed4bd6d5e71ff697776240c0763cffb6fbe7852bd2e9bc4",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "f4377b22fb88aebd528ce4c7470f2161690139516442e04c87353fbd6474818e"
+    "manual_reviews_sha256": "3edbf9c5d5cb043a2b7b0c01ae84bd24752accb95d73d00872a9fcf210bdc147"
   },
   "problems": [
     {
@@ -31737,19 +31737,21 @@
         "additive basis"
       ],
       "score": 18,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line is a disproof. Find an explicit, base-b automatic set A ∋ 0 and some k ∈ {2, 3, 4} satisfying: (i) kA ⊇ [N₀, ∞), with kA the exact k-fold sumset k • A; (ii) the witness criterion: for every a ∈ A with a ≥ a₀ there is n ≥ a with n ∉ (k+1)(A∖{a}). (i) a",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it."
+        "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Construct and verify a uniform argument or an infinite family."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -31801,13 +31803,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/881",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-15",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 572,
       "tier": "Research"
@@ -49883,7 +49892,7 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 2,
+        "runs": 3,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
