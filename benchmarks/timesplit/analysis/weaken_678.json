@@ -1,0 +1,35 @@
+[
+ {
+  "tag": "train-678-both-f27eaff",
+  "split": "train",
+  "problem": "678",
+  "alias": 81727,
+  "run_dir": "runs/20260930-194040-857690-timesplit-erdos81727",
+  "program_dir": "programs/erdos_81727",
+  "premise": "erdos_81727_hyp_nagura",
+  "direction": null,
+  "note": "Nagura 1952 (a prime in (x, 6x/5] for x >= 25), rated hard; a full attack on it failed ($1.50). Nair is the other open premise."
+ },
+ {
+  "tag": "train-blueprint-710dfc8",
+  "split": "train",
+  "problem": "678",
+  "alias": 86081,
+  "run_dir": "runs/20261001-050632-537792-timesplit-erdos86081",
+  "program_dir": "programs/erdos_86081/pos",
+  "premise": "erdos_86081_hyp_nagura",
+  "direction": "pos",
+  "note": "Nagura 1952 stated through a definition (e86081Nagura, strict 6x/5), rated hard; certified steps take the definition as an argument. Nair is the other open premise."
+ },
+ {
+  "tag": "train-678-fallback-543fd9d",
+  "split": "train",
+  "problem": "678",
+  "alias": 55963,
+  "run_dir": "runs/20260930-162114-886885-timesplit-erdos55963",
+  "program_dir": "programs/erdos_55963",
+  "premise": "erdos_55963_hyp_ramanujan",
+  "direction": null,
+  "note": "Ramanujan 1919 (primes p < q in (x/2, x] for x >= 11), rated hard; a full attack proved it as stated ($3.22). Its cycle-4 plan proposed a prime in (n+1, 2n] instead."
+ }
+]

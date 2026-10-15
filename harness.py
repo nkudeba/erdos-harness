@@ -42,6 +42,7 @@ import subprocess
 import sys
 import threading
 import tempfile
+import textwrap
 import time
 import urllib.parse
 import urllib.request
@@ -1979,6 +1980,61 @@ COMPILER OUTPUT (first errors):
 
 REPAIRABLE_SKELETON = ("does not compile", "frozen theorem missing", "altered the frozen theorem",
                        "a sorry outside the hypothesis lemmas", "duplicate hypothesis names")
+
+# --premise-weaken on (2026-10-14): the premise endgame's one targeted re-plan. Twice a run ended with every conjecture
+# certified and only published premises open, stated with the published sharp constants that Mathlib cannot prove,
+# where the argument needed only a weaker form. Train #678's third run kept Nagura's prime in (x, 6x/5] although its
+# glue applies it once, at x = 11k/20, and needs only some prime in [(k+2)/2, k-1].
+WEAKEN_PROMPT = """Every conjecture of the residual skeleton below is CERTIFIED in Lean. The frozen target of this deductive
+research program (Erdős problem #{pid}) now rests only on PUBLISHED premises: results from the literature that enter as
+hypotheses and must still be proved in Lean, from Mathlib, before the proof is complete. A premise stated with the sharp
+constants of the published result is often much harder to formalise than the argument needs. A weaker form may be enough:
+a looser constant, a larger threshold, a constant quantified existentially (`∃ C, ...`) when the argument only needs SOME
+constant, or a classical weaker theorem. Such a form may already be in Mathlib, or have a short proof from it.
+
+PREMISE TO WEAKEN: `{name}`, rated `{difficulty}` by the plan
+-- PUBLISHED: {source}
+```lean
+{statement}
+```
+{history}
+FROZEN FORMAL TARGET (verbatim at the end of the skeleton):
+```lean
+{frozen}
+```
+
+CURRENT RESIDUAL SKELETON (certified proofs are elided as one-line comments; keep `exact <name>_ns.<name>` and the harness
+restores them):
+```lean
+{residual}
+```
+
+Replace `{name}` by the WEAKEST statement the argument actually needs, and re-derive the argument around it.
+- Read how the glue and the certified steps use `{name}`: which instances, which constants, which conclusions. Loosen each
+  constant and threshold as far as the argument tolerates, or quantify a constant existentially.
+- Prefer a form that a Mathlib theorem proves, or that has a proof of a page or two from Mathlib. Name that theorem in the
+  JSON; the harness checks the name and tries it first.
+- State the weakened premise under a NEW name `{hyp_prefix}<short_name>`, as a closed proposition with `sorry` as its
+  proof. Never change the body of an existing `def` in place: a weaker definition gets a new name.
+- Re-derive every constant downstream. A certified step whose statement must change keeps its NAME and gets `sorry` with
+  its new statement; the harness re-certifies it from its old proof when it can. Keep every other certified step and every
+  other premise VERBATIM.
+- The frozen theorem stays verbatim at the end, proved from the hypotheses with no `sorry` of its own.
+- If the argument really needs `{name}` exactly as stated, say so: return no skeleton and "weakenings": [].
+
+Produce:
+(1) ONE ```lean block with the WHOLE skeleton: every `def`, every hypothesis, the frozen theorem verbatim at the end.
+(2) ONE ```json block:
+    {{"weakenings": [{{"premise": "{name}", "weakened": "<the new hypothesis name>",
+                       "how": "loosened" | "existential" | "threshold" | "classical",
+                       "mathlib": "<a Mathlib theorem that proves the weakened premise or does most of the work, or null>",
+                       "from_premise": "<Lean tactics proving the weakened statement from a hypothesis `hP` that states {name}, or null when it does not follow routinely>",
+                       "difficulty": "elementary" | "moderate" | "hard",
+                       "why": "what the argument needs from the premise, and why the weakened form gives it"}}],
+     "rederived": ["<names of certified steps whose statements you changed>"],
+     "route": "one or two sentences: how the glue now uses the weakened premise"}}
+
+""" + HOUSE_RULES
 
 ROUTE_JUDGE_PROMPT = """Several residual skeletons for the same frozen target all compile and are admissible. Each proves the
 target from its open hypotheses. Choose the one most likely to become a COMPLETE proof within a few more cycles of a
@@ -6752,11 +6808,11 @@ class Harness:
 
     PROOF_PURPOSES = {"prove", "refine", "decompose", "prove-agentic"}
     # calls that choose or judge a mathematical route: an over-budget retry keeps their effort (see ask)
-    IDEA_PURPOSES = {"plan", "plan-repair", "experiments", "route-judge"}
+    IDEA_PURPOSES = {"plan", "plan-repair", "experiments", "route-judge", "weaken"}
 
     RESEARCH_GUIDANCE_PURPOSES = {
         "assess", "reduce", "experiments", "plan", "prove", "refine",
-        "decompose", "prove-agentic", "critic", "search", "construct", "explore",
+        "decompose", "prove-agentic", "critic", "search", "construct", "explore", "weaken",
     }
 
     # the in-run discovery stage's own calls: they see operator guidance (a human's route hint is worth most here)
@@ -9817,19 +9873,7 @@ for the SAT solver instead of enumerating it.
                          refutations: list[dict], cdir: Path, main: str, skeleton: str,
                          allow_switch: bool = False) -> tuple[dict | None, str | None]:
         """(verdict, candidate) for the first adoptable skeleton in one plan response, else the last rejection."""
-        main_re = rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])"
-        blocks = lean_blocks(resp)
-        # A plan may split its skeleton across several fenced blocks ("continuation: this block concatenates
-        # directly after the previous one"), leaving the `def`s in one block and the theorem in the next. Taking
-        # only the block with the main theorem then loses the definitions and Lean rejects it for an unknown
-        # identifier, which reads as a mathematical failure and is not one (masked #275, cycle 1 after resume).
-        # Try the single block first, then the concatenation of all of them.
-        cands = [b for b in blocks if re.search(main_re, b) and HYP_RE.search("\n" + b)]
-        cands += [b for b in blocks if re.search(main_re, b) and b not in cands]
-        if len(blocks) > 1:
-            joined = "\n\n".join(blocks)
-            if re.search(main_re, joined) and joined not in cands:
-                cands.append(joined)
+        cands = skeleton_candidates(resp, main)
         verdict, last = None, None
         for k, cand in enumerate(cands):
             verdict = self._consider_skeleton(cand, meta, parsed, frozen, cycle, refutations, cdir, main=main,
@@ -9970,6 +10014,9 @@ for the SAT solver instead of enumerating it.
         circ = self._circular_premise(cand, parsed, frozen, cycle)
         if circ:
             return {"adopted": False, "reason": circ, "parsed": parsed}
+        # a premise the weakening move replaced, with Lean deriving the weaker form from it, counts as weakened in any
+        # plan that keeps that form (the registry is the harness's own, never the plan's ledger)
+        annotate_weakenings(parsed, self.state.get("weakenings"))
         improves = residual_improves(parsed, current)
         if not improves and not allow_switch:
             return {"adopted": False, "reason": "no improvement over the skeleton in force", "parsed": parsed}
@@ -10078,9 +10125,10 @@ for the SAT solver instead of enumerating it.
         return "circularity judge returned no verdict, so the premise is not accepted"
 
     def _attack_substatement(self, sub: str, name: str, sdir: Path, cycle: int, module: str | None, remaining: int,
-                             recursive: bool = False, share: float | None = None, cheap: bool = False):
+                             recursive: bool = False, share: float | None = None, cheap: bool = False, hint: str = ""):
         """Attack one closed hypothesis as a child run. Returns (exit_code, child), or (None, None) when the
-        parent's budget is gone; never hands a child more than the parent has left.
+        parent's budget is gone; never hands a child more than the parent has left. `hint` goes first in a new
+        child's literature (the premise-weakening move: what a weakened premise replaces, a restated step's old proof).
 
         `recursive=False`: the standard fast pipeline (prove, agentic, decompose) on the statement.
         `recursive=True`: the child runs the deductive loop itself, at depth+1, in its own program directory,
@@ -10116,6 +10164,8 @@ for the SAT solver instead of enumerating it.
                                         "why": ("it failed a direct attack" if failure_counts(self._program_dir()).get(name)
                                                 else "the plan rated it hard") if recursive else ""}
                 self.log.event("blueprint", "step_to_child", name=name, ids=ids, chars=len(bp), recursive=recursive)
+            if hint.strip():
+                st["literature"] = (hint.strip() + "\n\n" + st["literature"]).strip()
             (sdir / "state.json").write_text(json.dumps(st, indent=2))
         cargs = argparse.Namespace(**vars(self.args))
         cargs.resume, cargs.open, cargs.allow_research, cargs.skip_assess = str(sdir), False, recursive, True
@@ -10198,6 +10248,13 @@ for the SAT solver instead of enumerating it.
             self.state["residual"] = None
         self.save()
 
+    def _bank_lemma(self, lemmas_path: Path, name: str, body: str, origin: str, cycle: int, via: str | None = None) -> None:
+        """Append a certified proof to Lemmas.lean inside its own namespace (one block per name: the newest)."""
+        text = lemmas_path.read_text() if lemmas_path.exists() else ""
+        lemmas_path.write_text(lemma_blocks_deduped(
+            text + f"\n-- certified in {origin} ({now()})\nnamespace {name}_ns\n{body}\nend {name}_ns\n"))
+        self.log.event("program", "lemma_certified", cycle=cycle, name=name, **({"via": via} if via else {}))
+
     def _bank_certified(self, lemmas_path: Path, residual_path: Path, skeleton: str, parsed: dict, meta: dict,
                         pid, main: str | None, name: str, body: str, origin: str, cycle: int, check_tag: str,
                         via: str | None = None) -> dict:
@@ -10206,10 +10263,7 @@ for the SAT solver instead of enumerating it.
         update skeleton/parsed in lockstep. Shared by the depth loop (one full child per hypothesis) and the
         breadth-first sweep (Change A, 2026-09-26), so a hypothesis proved either way is banked identically --
         `via` records which one found it (None for the depth loop, "sweep" for the sweep), for the log only."""
-        text = lemmas_path.read_text() if lemmas_path.exists() else ""
-        lemmas_path.write_text(lemma_blocks_deduped(
-            text + f"\n-- certified in {origin} ({now()})\nnamespace {name}_ns\n{body}\nend {name}_ns\n"))
-        self.log.event("program", "lemma_certified", cycle=cycle, name=name, **({"via": via} if via else {}))
+        self._bank_lemma(lemmas_path, name, body, origin, cycle, via)
         spliced = splice_hypothesis(skeleton, name, body)
         res = self.check(spliced, check_tag) if spliced else {"ok": False, "errors": ["splice failed"], "sorries": []}
         if not res["ok"]:
@@ -10307,6 +10361,372 @@ for the SAT solver instead of enumerating it.
                        spent_usd=round(spent_total, 4), via=via)
         return {"skeleton": skeleton, "parsed": parsed, "progress": progress, "proved": proved,
                 "certified_any": proved_n > 0}
+
+    # -- premise weakening (--premise-weaken on, 2026-10-14) -------------------------------------------------------------
+
+    def _weakening_target(self, parsed: dict, skeleton: str, fails: dict) -> dict | None:
+        """The open published premise the weakening move takes on this cycle, or None.
+
+        Eligible: it states a numeric constant (in its statement or in a definition it names), it was never offered for
+        weakening, it is not itself a weakening, and the plan rated it hard or an attack on it already failed. A premise
+        rated easier gets its direct attack first: on train #678 and #1037 three of four published premises fell to one
+        (Nair, Ramanujan, Erdős 1947), and the one that did not, Nagura, every plan had rated hard."""
+        tried = self.state.get("weaken_tried") or {}
+        made = {alpha_norm(e.get("statement") or "") for e in (self.state.get("weakenings") or []) if isinstance(e, dict)}
+        defs = skeleton_defs(skeleton)
+        cands = [h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published"
+                 and sweep_key(h["statement"]) not in tried and alpha_norm(h["statement"]) not in made
+                 and (fails.get(h["name"], 0) >= 1 or h.get("difficulty") == "hard")
+                 and premise_constants(h["statement"], defs)]
+        if not cands:
+            return None
+        return max(cands, key=lambda h: (fails.get(h["name"], 0), DIFFICULTY_RANK.get(h.get("difficulty", "unrated"), 2),
+                                         h["complexity"]))
+
+    def _weakening_candidate(self, cands: list[str], wname: str, target: dict, skeleton: str, meta: dict, frozen: str,
+                             main: str, cycle: int, tag: str) -> dict:
+        """The first proposed skeleton that passes the free checks of a weakening, compiled. `cand` is None when none
+        does, with the last reason, compiler errors and candidate (for one repair round).
+
+        The checks: the frozen theorem verbatim, no banned construct, every `sorry` inside a hypothesis, no refuted
+        statement, distinct names; the premise gone and its weakening present; no definition of the skeleton in force
+        changed in place (a statement could keep its text and change its meaning); every other open premise kept, none
+        added; and the candidate compiles, i.e. the glue goes through with the weakened premise."""
+        pid, pname = self.problem["id"], target["name"]
+        refutations = load_refutations(pid)
+        cur = parse_residual(skeleton, pid, meta, main=main)
+        cur_defs = {decl_name(d): norm_ws(strip_comment_lines(d)) for d in skeleton_defs(skeleton)}
+        kept = [alpha_norm(h["statement"]) for h in cur["hypotheses"] if h["open"] and h["kind"] == "published" and h["name"] != pname]
+        out = {"cand": None, "wname": wname, "reason": "no skeleton block in the proposal", "errors": [], "last": ""}
+        for k, raw in enumerate(cands):
+            cand = hoist_defs(restore_spliced(raw, skeleton))
+            name = wname
+            if name == pname:
+                # the proposal reused the premise's name: give the weakening its own, so failures and memory stay apart
+                name = next(f"{pname}_weak{i or ''}" for i in range(100)
+                            if not re.search(rf"(?<![\w.']){re.escape(pname)}_weak{i or ''}(?![\w'!?])", cand))
+                cand = re.sub(rf"(?<![\w.']){re.escape(pname)}(?![\w'!?])", name, cand)
+            out.update(wname=name, last=cand, errors=[])
+            if not contains_frozen(cand, frozen):
+                out["reason"] = "altered the frozen theorem"
+                continue
+            bad = has_banned(cand, allow_sorry=True)
+            if bad:
+                out["reason"] = f"banned construct `{bad}`"
+                continue
+            cp = parse_residual(cand, pid, meta, main=main)
+            byname = {h["name"]: h for h in cp["hypotheses"]}
+            names = [h["name"] for h in cp["hypotheses"]]
+            changed = [decl_name(d) for d in skeleton_defs(cand)
+                       if decl_name(d) in cur_defs and norm_ws(strip_comment_lines(d)) != cur_defs[decl_name(d)]]
+            others = [h for h in cp["hypotheses"] if h["open"] and h["kind"] == "published" and h["name"] != name]
+            reason = ("frozen theorem missing" if not cp["main_present"] else
+                      "a sorry outside the hypothesis lemmas: the glue is not glue" if not cp["glue_sorry_free"] else
+                      "duplicate hypothesis names" if len(names) != len(set(names)) else
+                      "re-proposed a refuted statement" if any(statement_refuted(h["statement"], refutations) for h in cp["hypotheses"]) else
+                      f"`{pname}` is still in the skeleton" if pname in byname else
+                      f"no hypothesis `{name}`: the weakened premise is missing" if name not in byname else
+                      f"changed the definition `{changed[0]}` in place; a weaker definition needs a new name" if changed else
+                      "altered or added another published premise" if any(alpha_norm(h["statement"]) not in kept for h in others) else
+                      None)
+            if reason:
+                out["reason"] = reason
+                continue
+            res = self.check(cand, f"{tag}-{k}" if k else tag)
+            if not res["ok"]:
+                out.update(reason="does not compile: " + (res["errors"][:1] or [""])[0][:200], errors=res["errors"][:6])
+                continue
+            out.update(cand=res.get("body", cand), reason="ok", sorries=bool(res.get("sorries")))
+            return out
+        return out
+
+    def _recertify_pieces(self, cand: str, current: str, names: list[str], cycle: int) -> tuple[str, list[str]]:
+        """Win back, without a model call, the certificates of steps a candidate restates under their old names: every
+        `bridge` variant at once, then `restate` for the steps whose bridge failed, each failure located by its line. A
+        step neither variant certifies keeps its `sorry`. Returns the candidate and the steps re-certified. A definition an
+        old certificate needs and the candidate dropped is put back verbatim at the top; it is kept only if a step is."""
+        missing = defs_for_certificates(cand, current, names)
+        base = ("\n\n".join(d.strip() for d in missing) + "\n\n" + cand) if missing else cand
+        variants = recertify_variants(base, current, names)
+        choice = {n: "bridge" for n in variants}
+        for rnd in range(3):
+            plan = {n: (v["span"], v["variants"][choice[n]]) for n, v in variants.items() if choice.get(n)}
+            if not plan:
+                break
+            text, lines = apply_block_variants(base, plan)
+            res = self.check(text, f"weaken-recert-c{cycle}-{rnd}")
+            if res["ok"]:
+                self.log.event("program", "pieces_recertified", cycle=cycle,
+                               pieces={n: choice[n] for n in sorted(plan)})
+                return res.get("body", text), sorted(plan)
+            off = compose_offset(text, self.imports)
+            bad = error_lines(res["errors"], off) if res.get("body", text) == text and not res.get("timeout") else set()
+            failed = {n for n, (a, b) in lines.items() if any(a <= ln <= b for ln in bad)} or set(plan)
+            for n in failed:
+                choice[n] = "restate" if choice[n] == "bridge" and "restate" in variants[n]["variants"] else None
+        if variants:
+            self.log.event("program", "pieces_not_recertified", cycle=cycle, pieces=sorted(variants))
+        return cand, []
+
+    def _weakening_implied(self, cand: str, current: str, premise: str, weakened: str, script, cycle: int) -> tuple[bool, bool]:
+        """(P → W, W → P) by free Lean probes: whether the original premise P implies the weakened W, so that P's citation
+        still covers W, and whether W is only P restated. Generic tactics first, then the proposal's own script."""
+        context = skeleton_context(cand)
+        have = {decl_name(d) for d in skeleton_defs(cand)}
+        context += [d for d in skeleton_defs(current) if decl_name(d) not in have]
+        names = {decl_name(d) for d in context if DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))}
+        unfold = sorted(n for n in names if n != "(unnamed)" and re.search(rf"(?<![\w.']){re.escape(n)}(?![\w'!?])",
+                                                                       premise + "\n" + weakened))
+
+        def holds(src: str, tag: str) -> bool:
+            res = self.check(src, f"weakening-c{cycle}-{tag}")
+            return bool(res.get("ok") and not res.get("sorries"))
+        fwd = holds(weakening_probe_source(context, premise, weakened, unfold), "fwd")
+        script = str(script or "").strip()
+        if not fwd and script and script.lower() != "null" and not has_banned(script):
+            fwd = holds(weakening_probe_source(context, premise, weakened, script=script), "fwd-script")
+        bwd = fwd and holds(weakening_probe_source(context, weakened, premise, unfold), "bwd")
+        return fwd, bwd
+
+    def _free_close(self, sub: str, mathlib, tag: str) -> str | None:
+        """A proof of a one-hole sub-statement found without a model call, or None: the Mathlib theorem a proposal named
+        (verified in the local declaration index), used directly or by routine steps; then the specialist cascade."""
+        name = str(mathlib or "").strip().strip("`")
+        hit = find_decl(name) if name and re.fullmatch(r"[\w.'!?]+", name) else None
+        if name and name.lower() != "null" and not hit:
+            self.log.event("program", "weaken_mathlib_unknown", name=name[:120])
+        if hit:
+            tac = (f"first\n  | exact {name}\n  | simpa using {name}\n"
+                   f"  | (intros; apply {name} <;> first | assumption | omega | linarith | positivity | (norm_num; done))\n"
+                   f"  | (peel {name} <;> {WEAKEN_CLOSE})")
+            attempt = re.sub(r"sorry\s*$", lambda m: tac, sub.rstrip())
+            if needs_import(hit[0]):
+                attempt = f"-- IMPORTS: {hit[0]}\n" + attempt
+            res = self.check(attempt, f"{tag}-mathlib")
+            if res["ok"] and not res["sorries"]:
+                return res.get("body", attempt)
+        try:
+            closed = self._close_holes_without_model(sub, statement_prefix(sub))
+        except Exception:                                   # noqa: BLE001 - the cascade is a bonus, never a gate
+            closed = sub
+        if closed != sub and hole_count(closed) == 0:
+            res = self.check(closed, f"{tag}-cascade")
+            if res["ok"] and not res["sorries"]:
+                return res.get("body", closed)
+        return None
+
+    def _weaken_premise(self, pdir: Path, cdir: Path, cycle: int, skeleton: str, parsed: dict, meta: dict, frozen: str,
+                        main: str, module: str | None, target: dict, premise_pol: str, lemmas_path: Path,
+                        residual_path: Path, ledger: Path) -> dict:
+        """The premise-weakening move, on ONE open published premise P in the premise endgame. A transaction: nothing in
+        force changes unless the result improves the residual.
+
+        1. One proposal call (WEAKEN_PROMPT): the weakest form W of P that the glue needs, with the constants downstream
+           re-derived, and one repair round if it does not compile.
+        2. Free checks (`_weakening_candidate`): the candidate compiles, so the glue goes through with W. Certified steps
+           it restates under their old names get their certificates back from their old proofs (`_recertify_pieces`).
+           Lean tries P → W (`_weakening_implied`).
+        3. W is tried free (`_free_close`), then attacked like a premise (--premise-attack full: one direct child; cheap:
+           nothing more). A restated step still open gets one cheap attempt, its old proof in the child's literature.
+        4. Adopted iff `residual_improves`: W certified (published falls: a discharge), or W open and derived from P in
+           Lean (the tie-break: adopted, not a discharge). Otherwise the skeleton in force stays, a certified W is banked,
+           and the attempt reaches the next plan as a failure and an alternative."""
+        pid, pname = self.problem["id"], target["name"]
+        out = {"skeleton": skeleton, "parsed": parsed, "meta": meta, "progress": False, "proved": False,
+               "certified_any": False, "attacked": set()}
+        key = sweep_key(target["statement"])
+        tried = self.state.setdefault("weaken_tried", {})
+        tried[key] = {"name": pname, "cycle": cycle, "at": now()}
+        self.save()
+        self.log.event("program", "premise_weaken", cycle=cycle, premise=pname, difficulty=target.get("difficulty"),
+                       constants=premise_constants(target["statement"], skeleton_defs(skeleton))[:8])
+
+        def finish(outcome: str, event: str, **kw) -> dict:
+            tried[key]["outcome"] = outcome[:200]
+            self.save()
+            self.log.event("program", event, cycle=cycle, premise=pname, **kw)
+            return out
+
+        hist = [f"- cycle {f.get('cycle')}: {(f.get('stop_reason') or 'not proved')[:300]}"
+                + (f"; diagnosis: {str(f['diagnosis'])[:300]}" if f.get("diagnosis") else "")
+                for f in load_failures(pdir) if f.get("name") == pname and f.get("kind") != "skeleton"]
+        others = [h["name"] for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published" and h["name"] != pname]
+        history = ((("ATTACKS ON IT SO FAR (none proved it):\n" + "\n".join(hist[-3:]) + "\n") if hist else "")
+                   + (("OTHER OPEN PREMISES (keep them verbatim): " + ", ".join(f"`{n}`" for n in others) + "\n") if others else ""))
+        prompt = WEAKEN_PROMPT.format(pid=pid, name=pname, difficulty=target.get("difficulty") or "unrated",
+                                      source=target.get("source") or "(none)", statement=target["statement"],
+                                      history=history, frozen=self.state["statement"], hyp_prefix=f"{main}_hyp_",
+                                      residual=clip_middle(residual_outline(skeleton), 16000))
+        resp = self.ask("weaken", prompt, effort=getattr(self.args, "plan_effort", None),
+                        budget=getattr(self.args, "plan_budget", None))
+        (cdir / "weaken.md").write_text(resp or "")
+        wmeta = json_block(resp) or {}
+        listed = [w for w in (wmeta.get("weakenings") or []) if isinstance(w, dict) and str(w.get("weakened") or "").strip()]
+        # the proposal was asked about ONE premise: a lone entry that names it loosely (backticks, a typo) still counts
+        named = [w for w in listed if str(w.get("premise") or "").strip().strip("`") == pname]
+        ws = named or (listed if len(listed) == 1 else [])
+        cands = skeleton_candidates(resp, main)
+        if not ws or not cands:
+            first = next((w for w in (wmeta.get("weakenings") or []) if isinstance(w, dict)), {})
+            return finish("declined", "premise_weaken_declined",
+                          why=str(first.get("why") or wmeta.get("route") or "no weakening proposed")[:300])
+        w = ws[0]
+        v = self._weakening_candidate(cands, str(w["weakened"]).strip(), target, skeleton, meta, frozen, main, cycle,
+                                      f"weaken-c{cycle}")
+        if v["cand"] is None and v["reason"].startswith(REPAIRABLE_SKELETON) and v["last"] \
+                and int(getattr(self.args, "plan_repairs", 1) or 0) > 0:
+            self.log.event("program", "plan_repair", cycle=cycle, round=1, reason=v["reason"][:200], via="weaken")
+            rep = self.ask("plan-repair", PLAN_REPAIR_PROMPT.format(
+                reason=v["reason"], statement=self.state["statement"], skeleton=clip_middle(residual_outline(v["last"]), 16000),
+                errors="\n".join(str(e)[:500] for e in (v["errors"] or [v["reason"]])[:6])),
+                effort=getattr(self.args, "plan_effort", None), budget=getattr(self.args, "plan_budget", None))
+            v2 = self._weakening_candidate(skeleton_candidates(rep, main), v["wname"], target, skeleton, meta, frozen,
+                                           main, cycle, f"weaken-repair-c{cycle}")
+            if v2["cand"] is not None or not v2["reason"].startswith("no skeleton"):
+                v = v2
+        if v["cand"] is None:
+            (cdir / "weaken.rejected.lean").write_text(v["last"] or "")
+            record_failure(pdir, {"cycle": cycle, "name": pname, "kind": "weakening", "statement": target["statement"],
+                                  "exit": None, "stop_reason": f"weakening rejected: {v['reason']}", "attempts": 1,
+                                  "rejected_attempts": 1, "best_attempts": [{"name": f"weaken-c{cycle}", "compiled": False,
+                                                                             "sorries": None, "errors": [v["reason"][:220]]}],
+                                  "unsolved_goals": [], "decomposition_errors": [], "diagnosis": None, "at": now()})
+            return finish("rejected: " + v["reason"], "premise_weaken_rejected", reason=v["reason"][:300])
+        cand, wname, last_sorries = v["cand"], v["wname"], v.get("sorries", True)
+        (cdir / "weaken.lean").write_text(cand)
+
+        # (2) free: re-certify restated steps, ask Lean whether P implies W
+        cmeta = {**meta, "hypotheses": [x for x in (meta.get("hypotheses") or []) if isinstance(x, dict) and x.get("name") != wname]}
+        cp = parse_residual(cand, pid, cmeta, main=main)
+        certified = {h["name"]: h for h in parsed["hypotheses"] if not h["open"]}
+        restated = [h["name"] for h in cp["hypotheses"] if h["open"] and h["name"] in certified]
+        recert: list[str] = []
+        if restated:
+            cand, recert = self._recertify_pieces(cand, skeleton, restated, cycle)
+            if recert:
+                last_sorries = hole_count(cand) > 0      # that compile succeeded; only holes leave a `sorry`
+        wstmt = next(h["statement"] for h in parse_residual(cand, pid, cmeta, main=main)["hypotheses"] if h["name"] == wname)
+        implied, restatement = self._weakening_implied(cand, skeleton, target["statement"], wstmt, w.get("from_premise"), cycle)
+        entry = {"premise": pname, "premise_statement": target["statement"], "weakened": wname, "statement": wstmt,
+                 "implied": implied, "restatement": restatement, "how": str(w.get("how") or "")[:40],
+                 "cycle": cycle, "at": now()}
+        self.state.setdefault("weakenings", []).append(entry)
+        self.save()
+        self.log.event("program", "weakening_checked", cycle=cycle, premise=pname, weakened=wname, implied=implied,
+                       restatement=restatement, restated=restated, recertified=recert)
+        src = str(target.get("source") or "")
+        cmeta["hypotheses"] = cmeta["hypotheses"] + [{
+            "name": wname, "kind": "published" if implied else "conjecture",
+            "source": f"weakening of {pname}, which implies it in Lean; {pname}: {src}" if implied else None,
+            "derivation": f"weakens the published premise {pname} ({src[:200]}): {str(w.get('why') or '')[:300]}",
+            "difficulty": str(w.get("difficulty") or "unrated").lower()}]
+
+        # (3) W: free first, then the normal premise attack; restated steps still open: one cheap attempt each
+        banked: list[tuple[str, str]] = []
+        rc_w, mathlib = None, find_decl(str(w.get("mathlib") or "").strip().strip("`")) if w.get("mathlib") else None
+        wh = next(h for h in parse_residual(cand, pid, cmeta, main=main)["hypotheses"] if h["name"] == wname)
+        body = None
+        wsub = hypothesis_substatement(cand, wname) if wh["open"] else None
+        if wsub:
+            body = self._free_close(wsub, w.get("mathlib"), f"weaken-free-c{cycle}")
+            left = (self.args.run_budget - self.spent_usd()) if self.args.run_budget else None
+            if body is None and premise_pol == "full" and (left is None or left >= 1.0):
+                n_other = sum(1 for h in cp["hypotheses"] if h["open"] and h["kind"] == "published" and h["name"] != wname)
+                min_child = float(getattr(self.args, "min_child_budget", 2.5) or 0)
+                share = min(1.0, max(min(left, min_child), left / (1 + n_other)) / left) if left else None
+                hint = (f"THIS STATEMENT WEAKENS the published premise `{pname}` ({src or 'no citation'}):\n```lean\n"
+                        f"{target['statement']}\n```\nThe argument needs only the weaker form below. Prove it from Mathlib; "
+                        f"the original premise is not available as a hypothesis.\n"
+                        + (f"Why the weaker form suffices: {str(w.get('why'))[:600]}\n" if w.get("why") else "")
+                        + (f"Mathlib theorem that should prove it or do most of the work: `{str(w.get('mathlib')).strip()}` "
+                           f"({mathlib[0]}): {mathlib[1][:300]}\n" if mathlib else ""))
+                rc_w, child = self._attack_substatement(wsub, wname, cdir / "weaken-0", cycle, module, 1, recursive=False,
+                                                        hint=hint, **({"share": share} if share else {}))
+                out["attacked"].add(wname)
+                if rc_w is not None:
+                    with open(ledger, "a") as f:
+                        f.write(json.dumps({"cycle": cycle, "kind": "hypothesis", "sub": wname, "run": str(cdir / "weaken-0"),
+                                            "exit": rc_w, "verified": rc_w == 0, "recursive": False, "via": "weaken",
+                                            "statement": wstmt[:200], "at": now()}) + "\n")
+                    if rc_w == 0 and child.state.get("proof"):
+                        body = strip_imports(child.state["proof"])
+                    else:
+                        record_failure(pdir, failure_digest(child.state, wname, wstmt, cycle, rc_w))
+            if body is not None:
+                spliced = splice_hypothesis(cand, wname, body)
+                res = self.check(spliced, f"weaken-splice-c{cycle}") if spliced else {"ok": False, "errors": ["splice failed"], "sorries": []}
+                if res["ok"]:
+                    cand, last_sorries = res.get("body", spliced), bool(res.get("sorries"))
+                    banked.append((wname, body))
+                else:
+                    self.log.event("program", "splice_failed", cycle=cycle, name=wname, via="weaken",
+                                   error=(res["errors"][:1] or [""])[0][:200])
+        cp = parse_residual(cand, pid, cmeta, main=main)
+        for i, h in enumerate(attack_order(cp["hypotheses"], {})):
+            if h["name"] == wname or (self.args.run_budget and self.args.run_budget - self.spent_usd() < 0.3):
+                continue
+            sub = hypothesis_substatement(cand, h["name"])
+            old = certified.get(h["name"])
+            if not sub or not old:
+                continue                       # a new step, not a restated one: the transaction does not fund it
+            blk = next((m.group(0) for m in SPLICED_NS_RE.finditer(skeleton) if m.group(1) == f"{h['name']}_ns"), "")
+            hint = (f"THIS STEP WAS CERTIFIED IN LEAN with different constants:\n```lean\n{old['statement']}\n```\n"
+                    f"Its proof, to adapt:\n```lean\n{clip_middle(blk, 4000)}\n```\n")
+            rc, child = self._attack_substatement(sub, h["name"], cdir / f"weaken-step-{i}", cycle, module, 1,
+                                                  recursive=False, cheap=True, hint=hint)
+            if rc is None:
+                break
+            out["attacked"].add(h["name"])
+            if rc == 0 and child.state.get("proof"):
+                pbody = strip_imports(child.state["proof"])
+                spliced = splice_hypothesis(cand, h["name"], pbody)
+                res = self.check(spliced, f"weaken-step-splice-c{cycle}-{i}") if spliced else {"ok": False, "errors": [], "sorries": []}
+                if res["ok"]:
+                    cand, last_sorries = res.get("body", spliced), bool(res.get("sorries"))
+                    banked.append((h["name"], pbody))
+
+        # (4) decide
+        registry = self.state.get("weakenings")
+        cp = annotate_weakenings(parse_residual(cand, pid, cmeta, main=main), registry)
+        cur = annotate_weakenings(parse_residual(skeleton, pid, meta, main=main), registry)
+        w_open = any(h["name"] == wname and h["open"] for h in cp["hypotheses"])
+        reason = None
+        if w_open and implied:
+            reason = self._circular_premise(cand, cp, frozen, cycle)
+        if reason is None and not residual_improves(cp, cur):
+            reason = ("the weakened premise is still open and Lean does not derive it from the original" if w_open and not implied
+                      else "a restated step is still open" if cp["metric"]["open_conjectures"]
+                      else "no improvement over the skeleton in force")
+        entry.update(certified=not w_open, adopted=reason is None)
+        with open(ledger, "a") as f:
+            f.write(json.dumps({"cycle": cycle, "kind": "weakening", "premise": pname, "weakened": wname,
+                                "implied": implied, "certified": not w_open, "recertified": recert,
+                                "adopted": reason is None, "reason": reason, "at": now()}) + "\n")
+        if reason is not None:
+            for n, b in banked:
+                if n == wname:                 # a fresh name: a certified weakening is worth keeping for a later plan
+                    self._bank_lemma(lemmas_path, n, b, f"weaken-c{cycle}", cycle, via="weaken")
+                    out["certified_any"] = True
+            record_failure(pdir, {"cycle": cycle, "name": pname, "kind": "weakening", "statement": target["statement"],
+                                  "exit": rc_w, "stop_reason": f"weakening to {wname} not adopted: {reason}",
+                                  "attempts": 1, "rejected_attempts": 0, "best_attempts": [], "unsolved_goals": [],
+                                  "decomposition_errors": [], "diagnosis": str(w.get("why") or "")[:500] or None, "at": now()})
+            record_alternative(pdir, cycle, cand, cp["metric"], str(wmeta.get("route") or "")[:600])
+            return finish("not adopted: " + reason, "weakening_not_adopted", weakened=wname, reason=reason[:300],
+                          implied=implied, certified=not w_open)
+        for n, b in banked:
+            self._bank_lemma(lemmas_path, n, b, f"weaken-c{cycle}", cycle, via="weaken")
+        residual_path.write_text(cand)
+        out.update(skeleton=cand, parsed=cp, meta=cmeta, progress=not w_open, certified_any=bool(banked))
+        if not w_open:
+            self.log.event("program", "hypothesis_discharged", cycle=cycle, name=wname, via="weaken",
+                           open_left=cp["metric"]["open_conjectures"])
+        if hole_count(cand) == 0 and not last_sorries:
+            self.state["proof"] = cand
+            out["proved"] = True
+        self.log.event("program", "conditional_certified", cycle=cycle, via="weaken", **cp["metric"])
+        return finish("adopted", "premise_weakened", weakened=wname, implied=implied, certified=not w_open,
+                      recertified=recert, metric=cp["metric"])
 
     def _missing_subgoals(self, child, digest: dict, tag: str) -> list[str]:
         """Change D (--extract-subgoals, default off): the best attempt of a failed attack, re-checked with
@@ -10593,7 +11013,27 @@ for the SAT solver instead of enumerating it.
                         # its last budget on 27 attempts at a Maynard-Tao-level published theorem that cannot be
                         # proved here.
                         premise_pol = getattr(self.args, "premise_attack", "full")
-                        published_open = [h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published"]
+                        skip: set = set()
+                        if (premise_pol != "off" and getattr(self.args, "premise_weaken", "off") == "on"
+                                and parsed["metric"]["open_conjectures"] == 0):
+                            # --premise-weaken on: a premise stated with sharp constants, rated hard or already failed,
+                            # is first replaced by the weakest form the glue needs, then attacked in that form.
+                            target = self._weakening_target(parsed, skeleton, fails)
+                            left = (self.args.run_budget - self.spent_usd()) if self.args.run_budget else None
+                            if target is not None and left is not None and left < 1.0:
+                                self.log.event("program", "premise_weaken_skipped", cycle=cycle, premise=target["name"],
+                                               left_usd=round(left, 2))
+                            elif target is not None:
+                                wr = self._weaken_premise(pdir, cdir, cycle, skeleton, parsed, meta, frozen, main, module,
+                                                          target, premise_pol, lemmas_path, residual_path, ledger)
+                                skeleton, parsed, meta = wr["skeleton"], wr["parsed"], wr["meta"]
+                                progress = progress or wr["progress"]
+                                certified_any = certified_any or wr["certified_any"]
+                                proved = proved or wr["proved"]
+                                # what the move attacked is not attacked again this cycle, nor the premise it replaced
+                                skip = wr["attacked"] | ({target["name"]} if wr["attacked"] else set())
+                        published_open = [h for h in parsed["hypotheses"] if h["open"] and h["kind"] == "published"
+                                          and h["name"] not in skip] if not proved else []
                         if premise_pol == "off":
                             if published_open:
                                 self.log.event("program", "premises_not_attacked", cycle=cycle,
@@ -11799,6 +12239,25 @@ REFINEMENT_TACTICS = ("exact hH", "simpa using hH", "(intros; apply hH <;> assum
 CIRCULARITY_TACTICS = ("exact hH", "(intros; apply hH <;> assumption)", "simpa using hH", "aesop")
 
 
+def skeleton_candidates(resp: str, main: str) -> list[str]:
+    """The skeleton candidates in a plan response, in the order to try them.
+
+    A plan may split its skeleton across several fenced blocks ("continuation: this block concatenates directly after
+    the previous one"), leaving the `def`s in one block and the theorem in the next. Taking only the block with the main
+    theorem then loses the definitions and Lean rejects it for an unknown identifier, which reads as a mathematical
+    failure and is not one (masked #275, cycle 1 after resume). Try the single block first, then the concatenation of
+    all of them."""
+    main_re = rf"\btheorem\s+{re.escape(main)}(?![A-Za-z0-9_'!?])"
+    blocks = lean_blocks(resp or "")
+    cands = [b for b in blocks if re.search(main_re, b) and HYP_RE.search("\n" + b)]
+    cands += [b for b in blocks if re.search(main_re, b) and b not in cands]
+    if len(blocks) > 1:
+        joined = "\n\n".join(blocks)
+        if re.search(main_re, joined) and joined not in cands:
+            cands.append(joined)
+    return cands
+
+
 def frozen_theorem(frozen: str) -> tuple[str, str] | None:
     """(name, header) of the LAST theorem in a frozen prefix; the header is its binders and `: conclusion`,
     without the trailing `:=`."""
@@ -11903,14 +12362,246 @@ def residual_improves(new: dict, old: dict | None) -> bool:
     reduced the target to ONE compactness hypothesis -- "some N bounds every witness" -- which is exactly as
     hard as the target and cannot be certified by kernel enumeration (witness-free colourings of [1,45]
     exist), while the reference proof is four elementary lemmas. A count-first rule would have rejected the
-    four-lemma skeleton as "more hypotheses". Progress on a residual is its hard core getting smaller."""
+    four-lemma skeleton as "more hypotheses". Progress on a residual is its hard core getting smaller.
+
+    A published premise ranks below any open conjecture, and premise weakening (--premise-weaken, 2026-10-14) adds two
+    cases. A premise replaced by a weaker one that is now CERTIFIED leaves the open premises, so `published` falls: a
+    discharge like any other. A premise replaced by a weaker one that is still open, but that Lean derives from the
+    original (`weakens`, from the harness's own registry), ties every count. It is adopted because the conditional
+    theorem then rests on less, but it discharges nothing and never resets the stall count."""
     if old is None:
         return True
     a, b = new["metric"], old["metric"]
     for key in ("max_complexity", "open_conjectures", "published", "complexity"):
         if a.get(key, 0) != b.get(key, 0):
             return a.get(key, 0) < b.get(key, 0)
-    return False
+    return premises_weakened(new, old)
+
+
+# -- premise weakening (--premise-weaken on, 2026-10-14) -------------------------------------------------------------
+# In the premise endgame a published premise stated with sharp constants is replaced by the weakest form the glue needs,
+# the restated certified steps are re-certified for free, and the weakened premise is attacked instead of the original.
+# The adoption rule is residual_improves above. See CLAUDE.md, "Premise weakening".
+
+NUMERIC_CONST_RE = re.compile(r"(?<![\w.'])\d+(?:\.\d+)?(?![\w'])")
+LEAN_IDENT_RE = re.compile(r"[^\W\d][\w'!?]*")
+BINDER_KW_RE = re.compile(r"(?:∀|∃!|∃|fun|λ|∑|∏|⋃|⋂|⨆|⨅)")
+
+
+def premise_constants(statement: str, defs: list[str] | None = None) -> list[str]:
+    """The numeric constants a premise commits to: decimals and integers of at least 2 in its statement and in the bodies
+    of the skeleton `def`s it names. A premise stated through a definition keeps its constants there (train #678's
+    blueprint run: `theorem …_hyp_nagura : e86081Nagura`). 0 and 1 are structural (`0 < x`, `1 ≤ n`) and never count."""
+    texts = [strip_comment_lines(statement)]
+    for d in defs or []:
+        name = decl_name(d)
+        if name != "(unnamed)" and re.search(rf"(?<![\w.']){re.escape(name)}(?![\w'])", statement):
+            texts.append(strip_comment_lines(d.split(":=", 1)[1] if ":=" in d else d))
+    out: list[str] = []
+    for t in texts:
+        for m in NUMERIC_CONST_RE.finditer(t):
+            if m.group(0) not in ("0", "1") and m.group(0) not in out:
+                out.append(m.group(0))
+    return out
+
+
+def bound_names(prop: str) -> list[str]:
+    """Variables bound by ∀/∃/fun/λ/∑/∏ in a proposition, in order of first binding. Bare names and parenthesised groups
+    (`∀ (x : ℝ) (hx : 25 ≤ x),`) both count; the scan stops at the first token that is neither."""
+    out: list[str] = []
+    for m in BINDER_KW_RE.finditer(prop):
+        i = m.end()
+        while i < len(prop):
+            while i < len(prop) and prop[i].isspace():
+                i += 1
+            if i < len(prop) and prop[i] in "([{⦃":
+                depth, j = 0, i
+                while j < len(prop):
+                    if prop[j] in "([{⦃":
+                        depth += 1
+                    elif prop[j] in ")]}⦄":
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    j += 1
+                inner = prop[i + 1:j]
+                if ":" not in inner:
+                    break
+                out += [n for n in inner.split(":", 1)[0].split() if LEAN_IDENT_RE.fullmatch(n)]
+                i = j + 1
+                continue
+            mm = LEAN_IDENT_RE.match(prop, i)
+            if not mm:
+                break
+            out.append(mm.group(0))
+            i = mm.end()
+    return list(dict.fromkeys(out))
+
+
+def alpha_norm(prop: str) -> str:
+    """A proposition with whitespace collapsed and its bound variables renamed by order of binding, so a plan that
+    restates a premise as `∀ n …` instead of `∀ k …` (train #678, cycle 4) is recognised as the same premise.
+    Conservative: a renaming it misses only makes two statements compare unequal."""
+    s = " ".join(strip_comment_lines(prop).split())
+    for k, n in enumerate(bound_names(s)):
+        s = re.sub(rf"(?<![\w.']){re.escape(n)}(?![\w'!?])", f"⟪{k}⟫", s)
+    return s
+
+
+def premises_weakened(new: dict, old: dict) -> bool:
+    """The open published premises of `new` are those of `old` with at least one replaced by a weaker premise that Lean
+    derives from it, and nothing else changed among them. `weakens_statement` is set only by `annotate_weakenings`, from
+    the harness's registry of Lean-checked weakenings, never from a plan's own ledger."""
+    old_open = [alpha_norm(h["statement"]) for h in old.get("hypotheses", []) if h["open"] and h["kind"] == "published"]
+    free, weakened = list(old_open), 0
+    for h in new.get("hypotheses", []):
+        if not (h["open"] and h["kind"] == "published"):
+            continue
+        s = alpha_norm(h["statement"])
+        if s in free:
+            free.remove(s)
+            continue
+        src = alpha_norm(h.get("weakens_statement") or "")
+        if h.get("weakens_statement") and src in free:
+            free.remove(src)
+            weakened += 1
+            continue
+        return False
+    return weakened > 0
+
+
+def annotate_weakenings(parsed: dict | None, registry: list[dict] | None) -> dict | None:
+    """Mark each hypothesis of `parsed` that the registry records as a Lean-checked weakening (the original implies it,
+    and it is not merely the original restated) with the premise it weakens. Returns `parsed`, changed in place."""
+    if not parsed:
+        return parsed
+    entries = {alpha_norm(e["statement"]): e for e in (registry or [])
+               if isinstance(e, dict) and e.get("implied") and not e.get("restatement") and e.get("statement")}
+    for h in parsed.get("hypotheses", []):
+        e = entries.get(alpha_norm(h["statement"]))
+        if e:
+            h["weakens"], h["weakens_statement"] = e.get("premise"), e.get("premise_statement")
+    return parsed
+
+
+# Closes the conjunction left after `peel`: split hypotheses and goal, then close each part. No macro, so the same text
+# works inside a probe and inside a skeleton.
+WEAKEN_CLOSE = ("((try casesm* _ ∧ _) <;> (try repeat' apply And.intro) <;> "
+                "(first | assumption | omega | linarith | positivity | (norm_num; done) | (simp_all; done)))")
+# `premise → weakened` by routine steps: the same statement, the same binders with a looser conclusion (`peel`), or
+# stronger hypotheses with the same conclusion (`apply`). Measured in Lean on 2026-10-14: these cover a loosened
+# constant (6/5 to 7/4) and stronger hypotheses; a larger threshold needs the proposal's own script.
+WEAKENING_TACTICS = ("exact hP", f"(peel hP <;> {WEAKEN_CLOSE})",
+                     "(intros; apply hP <;> first | assumption | omega | linarith | positivity | (norm_num; done))")
+
+
+def bridge_tactic(old: str) -> str:
+    """Tactics proving a restated certified step from its old certificate `old` (`<name>_ns.<name>`)."""
+    return (f"first\n  | exact {old}\n"
+            f"  | (intros; apply {old} <;> first | assumption | omega | linarith | positivity | (norm_num; done) | (simp_all; done))\n"
+            f"  | (peel {old} <;> {WEAKEN_CLOSE})")
+
+
+def weakening_probe_source(context: list[str], premise: str, weakened: str, unfold: list[str] | None = None,
+                           script: str | None = None) -> str:
+    """Lean source asking whether `premise` implies `weakened`, under the skeleton's definitions and `open`s: the generic
+    tactics, with the definitions both statements name unfolded as a further alternative, or the proposal's own script
+    (which names the premise `hP`)."""
+    if script and script.strip():
+        lines = textwrap.dedent(script.strip("\n")).splitlines()
+        body = "\n".join("  " + l for l in lines)
+    else:
+        alts = list(WEAKENING_TACTICS)
+        if unfold:
+            u = "; ".join(f"(try unfold {d} at hP)" for d in unfold) + "; " + "; ".join(f"(try unfold {d})" for d in unfold)
+            alts += [f"({u}; exact hP)", f"({u}; peel hP <;> {WEAKEN_CLOSE})",
+                     f"({u}; intros; apply hP <;> first | assumption | omega | linarith | positivity | (norm_num; done))"]
+        body = "  first\n" + "\n".join(f"  | {t}" for t in alts)
+    return "\n\n".join(list(context) + [f"theorem weakening_probe (hP : {premise}) : {weakened} := by\n{body}"]).strip()
+
+
+def recertify_variants(cand: str, current: str, names: list[str]) -> dict[str, dict]:
+    """For each certified step of `current` that `cand` restates under the same name with `sorry`, the replacement blocks
+    that win its certificate back without a model call:
+      `bridge`  the old proof namespace verbatim, then the new statement derived from the old one by routine tactics
+                (an identical statement, stronger hypotheses, a weaker conclusion);
+      `restate` the old proof script under the new statement (a re-derived constant the script never names).
+    Lean decides; the caller compiles them and keeps what compiles."""
+    blocks = {m.group(1): m.group(0) for m in SPLICED_NS_RE.finditer(current or "")}
+    out: dict[str, dict] = {}
+    for name in names:
+        ns = f"{name}_ns"
+        span = hypothesis_span(cand, name)
+        if ns not in blocks or not span:
+            continue
+        blk = cand[span[0]:span[1]]
+        idx = blk.find(":= by")
+        if idx == -1:
+            idx = blk.rfind(":=")
+        if idx == -1:
+            continue
+        header = blk[:idx].rstrip()
+        present = re.search(rf"(?m)^namespace\s+{re.escape(ns)}\s*$", cand) is not None
+        prefix = "" if present else blocks[ns] + "\n\n"
+        variants = {"bridge": prefix + header + " := by\n  " + bridge_tactic(f"{ns}.{name}")}
+        if not present:
+            ms = list(re.finditer(rf"(?m)^\s*(?:theorem|lemma)\s+{re.escape(name)}(?![\w'!?])", blocks[ns]))
+            if ms:
+                start = ms[-1].start()
+                rest = blocks[ns][start:]
+                j = rest.find(":= by")
+                if j == -1:
+                    j = rest.find(":=")
+                if j != -1:
+                    lead = re.match(r"\s*", rest).group(0)
+                    restated = blocks[ns][:start] + lead + header.lstrip() + " " + rest[j:]
+                    variants["restate"] = restated + "\n\n" + header + f" := by\n  exact {ns}.{name}"
+        out[name] = {"span": span, "variants": variants}
+    return out
+
+
+def defs_for_certificates(cand: str, current: str, names: list[str]) -> list[str]:
+    """Definitions of `current` that the old certificates of `names` use, directly or through each other, and that `cand`
+    no longer declares, in `current`'s order. Train #678's cycle-4 plan restated `hyp_size` with `erdos81727_B` unfolded
+    and dropped the definition, so the old certificate, which names it, could not be put back."""
+    blocks = {m.group(1): m.group(0) for m in SPLICED_NS_RE.finditer(current or "")}
+    texts = [strip_comment_lines(blocks[f"{n}_ns"]) for n in names if f"{n}_ns" in blocks]
+    have = {decl_name(d) for d in skeleton_defs(cand)}
+    pool = [(decl_name(d), d) for d in skeleton_defs(current) if decl_name(d) not in have and decl_name(d) != "(unnamed)"]
+    uses = lambda n, t: re.search(rf"(?<![\w.']){re.escape(n)}(?![\w'!?])", t) is not None
+    need: set[str] = set()
+    while True:
+        grown = {n for n, d in pool if n not in need and any(uses(n, t) for t in texts)}
+        if not grown:
+            break
+        need |= grown
+        texts += [strip_comment_lines(d) for n, d in pool if n in grown]
+    return [d for n, d in pool if n in need]
+
+
+def apply_block_variants(cand: str, plan: dict[str, tuple[tuple[int, int], str]]) -> tuple[str, dict[str, tuple[int, int]]]:
+    """`cand` with each named span replaced by its new text; returns the text and each replacement's (first, last) line."""
+    out, last, lines = [], 0, {}
+    for name, (span, text) in sorted(plan.items(), key=lambda kv: kv[1][0][0]):
+        out.append(cand[last:span[0]])
+        first = "".join(out).count("\n") + 1
+        out.append(text)
+        lines[name] = (first, first + text.count("\n"))
+        last = span[1]
+    out.append(cand[last:])
+    return "".join(out), lines
+
+
+def error_lines(errors: list[str], offset: int) -> set[int]:
+    """Body line numbers of compiler errors (`line N:col: …`), with the composed file's import header taken off."""
+    return {int(m.group(1)) - offset for e in errors for m in [re.match(r"line (\d+):", e)] if m}
+
+
+def compose_offset(body: str, imports: list[str]) -> int:
+    """How many lines `compose` puts above `body`: Lean reports positions in the composed file, not in the body."""
+    src, core = compose(body, imports), strip_imports(body)
+    i = src.find(core) if core else -1
+    return src.count("\n", 0, i) if i >= 0 else 0
 
 
 def hypothesis_span(skeleton: str, name: str) -> tuple[int, int] | None:
@@ -12304,10 +12995,11 @@ def failure_counts(pdir: Path) -> dict:
     Excludes `kind == "skeleton"` (the plan's own skeleton was rejected, not a hypothesis) and, since
     2026-09-26, `kind == "sweep"`: a cheap one-shot sweep attempt failing is weak evidence of hardness --
     it must not flip a hypothesis's next depth attack to recursive, or sink it in the attack order, the way
-    a real (depth) failure does."""
+    a real (depth) failure does. Nor `kind == "weakening"` (2026-10-14): a weakening of a premise that was not
+    adopted says nothing about an attack on the premise itself."""
     out: dict[str, int] = {}
     for f in load_failures(pdir):
-        if f.get("kind") in ("skeleton", "sweep"):
+        if f.get("kind") in ("skeleton", "sweep", "weakening"):
             continue
         out[f.get("name", "")] = out.get(f.get("name", ""), 0) + 1
     return out
@@ -12916,6 +13608,13 @@ def build_parser() -> argparse.ArgumentParser:
                            "2026-09-30: premises are attacked only when nothing else is open, so a full attack "
                            "spends money with no better use, and on train #678 it proved the last open premise "
                            "(Ramanujan's two primes in (x/2, x]) for $3.22 where cheap had left the run unsolved")
+    runp.add_argument("--premise-weaken", choices=["on", "off"], default="off",
+                      help="deductive loop, premise endgame (2026-10-14): a published premise stated with numeric "
+                           "constants, rated hard by the plan or already failed in an attack, is first replaced by the "
+                           "weakest form the glue needs (one proposal call; free Lean checks that the glue still goes "
+                           "through, re-certification of restated steps, and premise -> weakened), then attacked in that "
+                           "form under --premise-attack. Adopted only if the residual improves. OFF until a screen "
+                           "shows it pays; see benchmarks/timesplit/RESULTS.md, 'Premise weakening'")
     runp.add_argument("--hyps-per-cycle", type=int, default=4,
                       help="deductive loop: open conjecture hypotheses attacked per cycle, easiest first (the plan's rating, then complexity)")
     runp.add_argument("--residual-depth", type=int, default=2,

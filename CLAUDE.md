@@ -639,7 +639,40 @@ it saved money at no measured cost. **`--premise-attack` is back to `full`** (20
   - `residual_improves` refused that trade, because it ignores premise ratings and ranks any premise below any open
     conjecture.
   - The endgame skips such a re-plan. That is harmless only while the adoption rule refuses the trade.
-  - Two candidate fixes are in `benchmarks/timesplit/RESULTS.md`; neither is implemented.
+  - Two candidate fixes are in `benchmarks/timesplit/RESULTS.md`. Premise weakening, below, is the endgame's targeted
+    re-plan; the adoption rule still ranks any premise below any open conjecture.
+
+**Premise weakening**, `--premise-weaken {on,off}`, **default `off`** (2026-10-14; `tests/test_premise_weaken.py`):
+- **Why.** Twice a run ended with every conjecture certified and only published premises open, stated with the sharp
+  published constants that Mathlib cannot prove, while a weaker constant would have done. Train #678's third run kept
+  Nagura's prime in (x, 6x/5]; its glue applies it once, at x = 11k/20, and needs only a prime in [(k+2)/2, k−1]. The
+  operator saw the same on dev #888. Under the quarantine, nothing from #888 was used to build or tune the move.
+- **When.** In the premise endgame, on ONE open published premise per cycle that:
+  - states a numeric constant, in its statement or in a definition it names;
+  - was never offered before, and is not itself a weakening;
+  - is rated hard, or has failed an attack. A premise rated easier gets its direct attack first: three of the four
+    train premises fell to one.
+- **The move, `_weaken_premise`,** is a transaction:
+  1. One proposal call (`WEAKEN_PROMPT`, purpose `weaken`): the weakest form W the glue needs, with downstream constants
+     re-derived and W under a NEW name. One repair round if it does not compile.
+  2. Free checks (`_weakening_candidate`): the frozen theorem verbatim, every `sorry` in a hypothesis, no `def` changed
+     in place (a statement could keep its text and change its meaning), no other premise altered or added. The
+     candidate must compile, so the glue goes through with W.
+  3. Free re-certification of steps it restated under their old names (`_recertify_pieces`). `bridge`: the old
+     certificate plus routine tactics. `restate`: the old script under the new statement. Failures are located by error
+     line, with the import header taken off (`compose_offset`).
+  4. A free probe (`_weakening_implied`): does P imply W in Lean? `peel`/`apply` tactics, then the proposal's own script.
+  5. W is tried free: a Mathlib theorem the proposal names, checked in the declaration index, then the cascade. Then it
+     is attacked like any premise under `--premise-attack`. A restated step still open gets one cheap attempt, with its
+     old proof as a hint.
+  6. Adopted iff `residual_improves`:
+     - W certified: the open premise count falls, a discharge;
+     - W still open but derived from P in Lean: a tie-break read from the harness's registry `state["weakenings"]`,
+       never from a plan's ledger. It is adopted, but it is not a discharge and the stall count still rises.
+     - Otherwise nothing in force changes. A certified W is banked in Lemmas.lean. The attempt goes to failures (kind
+       `weakening`, which `failure_counts` skips) and to the alternatives.
+- **Replays:** `benchmarks/timesplit/analysis/replay_weaken.py`, train items only. Results are in
+  `benchmarks/timesplit/RESULTS.md`, "Premise weakening".
 
 **Omitted frozen declarations are put back** (`restore_omitted_frozen`, always on). A one-round sweep attempt
 was lost to a formatting slip. Train #283's `hyp_egypt` sub-statement carries the skeleton's unused `def
@@ -703,6 +736,12 @@ found 71 holes read as closed and 0 actually closed; the guarded string closes 3
 shape and, under `DEDUCTIVE_LEAN_TESTS=1`, the Lean behaviour. Time-split pins before 3aaab15 keep the old string,
 so an arm pinned from the live harness differs from `baseline-v2-84f21c5` in the cascade as well as in anything
 else committed since `ce09b11`. Build a candidate on that pin plus patches, or re-run the baseline.
+
+**Two more cascade defects, found 2026-10-15, NOT fixed** (reproduced in Lean; RESULTS.md, "Premise weakening"):
+- Error lines count the composed file's 8-line import header, and the cascade compares them with body lines. So a
+  pass in which some holes close and others do not keeps none of them. `compose_offset` gives the header size.
+- The `exact?` pass never applies anything. This Lean prints "Try this" without a `file:line:col` prefix, so
+  `LeanChecker._parse` drops it: `exact?` closes `Nat.gcd a b = Nat.gcd b a` and the cascade leaves the `sorry`.
 
 ## Discovery fixes and options (2026-09-24)
 

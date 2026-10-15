@@ -1587,3 +1587,94 @@ lucky draw, so main's screen loss is not evidence against main. By the pre-regis
 - **Next, not run:** a verdict on main needs power, not another screen. That means all 17 pairable dev items, with
   two baseline draws per item: about $70 for main on the other 12, plus about $70 for a second baseline draw on them.
   This is a budget decision for the operator.
+
+## Premise weakening (2026-10-14), written before any replay: `replay-weaken-678`
+
+**Why.**
+- Twice a run ended with every conjecture certified and only published premises open, stated with the published sharp
+  constants. A weaker constant would have done, and Mathlib could prove it.
+- Train #678's third run (alias 81727) kept Nagura 1952, a prime in (x, 6x/5] for x ≥ 25.
+  - Its glue applies the premise once, at x = 11k/20.
+  - From that it needs only a prime p with k + 2 ≤ 2p and 2p + 2 ≤ 2k.
+  - A full attack on Nagura failed ($1.50). Its core needs explicit Chebyshev bounds, which Mathlib lacks.
+- The operator reported the same pattern on dev #888 (Rosser–Schoenfeld). Under the quarantine, nothing from #888 was
+  read, used or tuned on here; the work below uses train items only.
+
+**What was built** (`--premise-weaken on`, default OFF; CLAUDE.md, "Premise weakening"; `tests/test_premise_weaken.py`):
+- **When it fires.** In the premise endgame (no open conjecture), on ONE open published premise per cycle. The premise
+  must:
+  - state a numeric constant, in its statement or in a definition it names;
+  - be rated hard by the plan, or have failed an attack already. A premise rated easier gets its direct attack first:
+    three of the four train premises fell to one (Nair, Ramanujan, Erdős 1947);
+  - never have been offered before, and not be a weakening itself.
+- **The move is a transaction** (`_weaken_premise`):
+  1. One proposal call (`weaken`): the weakest form W the glue needs, with constants downstream re-derived and W under
+     a new name. One repair round if it does not compile.
+  2. Free checks: the frozen theorem verbatim, every `sorry` inside a hypothesis, no definition changed in place, no
+     other premise altered or added. The candidate must compile, which is the check that the glue goes through with W.
+  3. Free re-certification of the certified steps the proposal restated: the old certificate plus routine tactics
+     (`bridge`), else the old script under the new statement (`restate`). Failures are located by error line.
+  4. A free probe: does the original premise P imply W in Lean? Generic `peel`/`apply` tactics, then the proposal's own
+     script.
+  5. W is tried free, by a Mathlib theorem the proposal names (checked in the declaration index) and the cascade. Then
+     it is attacked like any premise under `--premise-attack`. A restated step still open gets one cheap attempt, with
+     its old proof as a hint.
+  6. Adopted iff `residual_improves`:
+     - W certified: the open premise count falls, a discharge;
+     - W open but derived from P in Lean: a new tie-break, read from the harness's own registry and never from a plan's
+       ledger. It is adopted, but it discharges nothing and the stall count still rises.
+     - Otherwise nothing in force changes. A certified W is banked, and the attempt goes to failures (kind `weakening`,
+       not counted against P) and to alternatives.
+
+**Protocol.** Train only, with `analysis/replay_weaken.py` on copies of a run's final state and program directory. The
+originals are untouched, and every child logs inside the copy, where its spend is counted.
+- **F (free).** Run 81727's own cycle-4 candidate, through the free stages only: no model call, no child.
+  - That candidate was the plan's Nagura → Ramanujan trade: two primes in (n, 2n] for n ≥ 6.
+  - It was refused at the time as "no improvement": it re-declared two certified steps with `sorry`.
+- **P1–P3 (paid; only after the operator's go-ahead).** One fresh proposal plus the attacks, at $6 a replay, on each
+  train run that ended in the premise endgame:
+  - 81727, Nagura;
+  - 86081, Nagura stated through a definition, which certified steps take as an argument;
+  - 55963, Ramanujan, which a full attack had already proved as stated ($3.22).
+
+**Write-ahead predictions.**
+- F:
+  - the candidate compiles: 0.95;
+  - `hyp_residue` (restated verbatim) is re-certified by the bridge: 0.95;
+  - `hyp_size` (stronger hypotheses, one definition unfolded) is re-certified by the bridge: 0.7;
+  - Lean derives the Ramanujan form from Nagura with the generic tactics: 0.05, since it needs the cases 6 ≤ n < 25;
+  - so after the free stages, 0 open conjectures and 2 open premises (Ramanujan and Nair), and nothing adopted without a
+    certificate for Ramanujan: 0.65.
+- P1–P3, per replay: a valid proposal / W certified / adopted:
+  - 81727: 0.75 / 0.3 / 0.45;
+  - 86081: 0.6 / 0.25 / 0.35;
+  - 55963: 0.7 / 0.45 / 0.5. Since Ramanujan is its only open premise, its residual closes when W is certified: 0.4.
+- Spend about $4 a replay, $12 in all, $18 at most.
+
+**F outcome (2026-10-15): the free stages turn the refused trade into a clean premise swap. No model call, $0.**
+- The candidate compiles (predicted 0.95).
+- **First replay** (`runs/replay-weaken-20261014/81727-erdos_81727_hyp_nagura-free`, 89 s):
+  - `hyp_residue` was re-certified by the bridge (predicted 0.95).
+  - `hyp_size` was not (predicted 0.7). Its old certificate names `erdos81727_B`, a definition the plan dropped when it
+    unfolded it. The old script under the new statement fails too, because the step's hypotheses changed shape.
+- **Fixed:** re-certification now puts back, verbatim, any definition an old certificate needs and the candidate dropped
+  (`defs_for_certificates`). It is kept only if a step is re-certified.
+- **Second replay** (`runs/replay-weaken-20261014b/…`, 234 s): both steps were re-certified by the bridge, in one compile.
+- Lean does not derive the Ramanujan form from Nagura with the generic tactics (predicted 0.05): that needs the cases
+  6 ≤ n < 25.
+- **After the free stages,** the candidate has 0 open conjectures and 2 open premises, Ramanujan's form and Nair.
+  - The move did not adopt it (predicted 0.65): Ramanujan's form is neither certified nor covered by Nagura's
+    citation.
+  - In cycle 4 the same candidate was refused with 2 open conjectures. Now only a certificate for Ramanujan's form
+    stands between it and adoption.
+  - A full attack proved that form, in its (x/2, x] version, for $3.22 (run 55963's replay). That is the paid stage.
+
+**Found in passing: the free cascade keeps less than it finds** (out of scope here, reproduced in Lean, not fixed):
+- `_close_holes_without_model` matches compiler error lines, which count the 8-line import header, against body lines.
+  - So when some holes close and others do not, it keeps none of them.
+  - A skeleton with `n + 0 = n` (omega closes it) and `n ^ 2 ≠ 2` left `sorry` in both.
+- Its `exact?` pass finds nothing at all. In this Lean version the "Try this" suggestion is printed without a
+  `file:line:col` prefix, so `LeanChecker._parse` never records it.
+  - `∀ a b : ℕ, Nat.gcd a b = Nat.gcd b a`: `exact?` closes it, and the cascade leaves the `sorry`.
+- Every plan candidate and the cheap premise policy go through this cascade. The premise-weakening move tries a
+  proposal's named Mathlib theorem directly, so it does not depend on the cascade.
