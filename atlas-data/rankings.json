@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "3572400ac425102653b6bdff594aa9111912993b9d1516424d3a922af40d10b4",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "11d3c7e84504a404c3c45ff6618b1fa9049a1e749cd0c03bfd9d7dd9f4ae1804"
+    "manual_reviews_sha256": "4d7065f947145a2c33a56abfe2d54ef8b6dcee8f68629070862779d4a4e34978"
   },
   "problems": [
     {
@@ -49159,7 +49159,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 1,
+        "runs": 2,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -74945,6 +74945,7 @@
         "Resolution campaign 2026-10-14 ($15.30, informal): the research engine wrote a complete answer (false) that a referee, an adversary and both settles judges accepted: For every c > 0 and every n with n ≥ ⌈2/c⌉+3, the n-gon X_n = {e(ζ^j) : 0 ≤ j < n} (ζ = exp(2πi/n), e: ℂ ≅ ℝ² isometry) satisfies #X_n = n, IsValid X_n, and |{dist p q : p,q ∈ X_n}| ≤ ⌊n/2⌋+1 < (1+c)n/2. Hence ¬erdos_655.. Sent to Lean.",
         "Resolution campaign 2026-10-14 ($0.06): Lean on the engine's complete answer (deep/C1) did not close: RUN-SUMMARY problem=655 exit=2 outcome=running verified=None spend=$0.06 llm_calls=2 lean_checks=2 lemmas=0 fatals=0 wall=1m mode=research dir=runs/20261014-143931-223074-resolve-lean-erdos655",
         "Resolution campaign 2026-10-14 ($2.54): Lean on the engine's complete answer (deep/C1) did not close: RUN-SUMMARY problem=655 exit=3 outcome=partial directions=neg:partial verified=None spend=$2.54 llm_calls=15 lean_checks=43 lemmas=0 fatals=0 wall=33m mode=research dir=runs/20261014-192027-911113-res",
+        "Resolution campaign 2026-10-15: formal-conjectures' statement is settled IN LEAN (false, 20261015-000603-617862-resolve-lean-erdos655, audited), along a line its intent judges call a formalization-gap (erdosproblems.com #655 forum discussion (Hunter, Jan 2026); regular-polygon distance count: Altman, Amer. Math. Monthly 1963). A finding about the formal statement, not a resolution of the problem as posed.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
@@ -74958,7 +74959,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -75022,18 +75023,18 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 3,
+        "runs": 4,
         "benchmarkRuns": 0,
-        "certifiedMax": 0
+        "certifiedMax": 1
       },
       "assessed": {
-        "on": "2026-10-14",
+        "on": "2026-10-15",
         "sources": [
           "resolution/results.jsonl"
         ],
         "searchFloor": null
       },
-      "brief": "---\nproblem: 655\nupdated: 2026-10-14\nrun: 20261014-192027-911113-resolve-lean-erdos655\noutcome: partial\nsolved: false\ncertified: 0\ncost_usd: 2.49\n---\n\n## What the problem asks\n\nTake n points on a flat plane. One rule applies: if you draw a circle centred on any of the points, that circle may pass through at most two of the other points. Now list every distance between pairs of points and count how many different values appear. The question asks whether this count must always be noticeably more than half the number of points. \"Noticeably more\" means at least (1+c) times n/2, for some fixed positive number c, once n is large enough. The list of known problems records this one's status as unknown.\n\n## What we tried\n\nThis run used about $2.49 in research mode. A step-by-step reasoning program ran all 6 of its planned rounds and looked for a \"no\" answer. It also tried to check its steps in Lean, a computer system that verifies proofs line by line. No Lean proof succeeded. No lemma (a small supporting result) was certified, so the count is zero. No computer search was run, so there is no search bound to report. No outside help was recorded.\n\nA separate attempt on 2026-10-14, not part of this run, wrote an informal argument for \"no\". A referee, an adversary and two judges accepted it. Lean did not confirm it.\n\n## What we found\n\nThe most useful finding is a simple observation. If all the points lie on one circle, the rule is satisfied automatically. A circle centred at one of the points is a different circle from the one the points sit on. Two different circles meet in at most two places. The run then proposed a specific candidate: a regular n-gon, meaning n points spaced evenly around a circle. It argued that such a shape has at most n/2 different distances, which would mean the answer is \"no\".\n\nThese arguments passed an informal check. Their Lean versions failed before any checking could start, because of a typing error: Lean did not accept the \"²\" symbol in \"ℝ²\". Nothing is solved. One open assumption remains, labelled erdos_655_neg_hyp_dist.\n\n## What would move it\n\nThe first step is to fix the formal statement so that Lean accepts it, for example by writing the plane in a form Lean understands. Then each step needs a Lean proof:\n\n- the evenly spaced points are n distinct points;\n- they all lie on one circle, so they satisfy the rule;\n- they have at most n/2 different distances;\n- a final arithmetic step.\n\nThat work would close the remaining open assumption. A human reader should also check that the formal statement matches the published question. Until Lean confirms the argument, the problem stays open.\n\n*Written automatically at the end of run `20261014-192027-911113-resolve-lean-erdos655`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
+      "brief": "---\nproblem: 655\nupdated: 2026-10-15\nrun: 20261015-000603-617862-resolve-lean-erdos655\noutcome: proved\nsolved: false\ncertified: 0\ncost_usd: 0.82\n---\n\n## What the problem asks\n\nTake n points on a flat plane. They must follow one rule: if you draw a circle centred on any one of the points, that circle passes through at most two of the other points. Now measure the distance between every pair of points and count how many different lengths appear. The question asks whether that count is always noticeably more than half of n. \"Noticeably more\" means at least (1+c) times n/2, for some fixed positive number c, once n is large enough. In plain terms, the question is whether the rule forces many different distances, beyond a basic minimum.\n\n## What we tried\n\nThis run worked in research mode and cost $0.82. It used Lean, a computer program that checks every step of a proof mechanically. It worked with a fixed formal version of the question written in Lean. It tried to prove that this formal version is false. No computer search over examples was done, and none was needed. Two earlier Lean attempts on 2026-10-14 did not finish. Before that, an informal written argument had been accepted by a referee, an adversary and two judges. An earlier model put the chance of settling the question at 0.88. That figure is an unvalidated estimate made before any work began.\n\n## What we found\n\nLean accepted a complete proof that the formal version, as written, is false. The proof relies on no unproven assumptions. The example is the regular polygon: n points spaced evenly around a circle, for any n of 3 or more. These points obey the rule, because a circle centred at one of them crosses the polygon's circle in at most two places. Yet they produce only about n/2 different distances, since opposite steps around the polygon give equal lengths. A second check shows every set that obeys the rule has at least about (n−1)/2 distances. These two supporting steps were written down in Lean, but they were not proved there separately. This is not a solution of the published problem.\n\n## What would move it\n\nThe formal version may leave out a condition from the original problem. One example is a \"general position\" condition, which would forbid special layouts such as the regular polygon. If a condition like that is missing, our result only shows that the formal version is too weak. It says nothing about the problem Erdős meant. The next step is to compare the formal statement carefully with the original source. If a condition was dropped, the formal version should be corrected and the work restarted. This problem's status in the catalogue is unknown. Any existing claims about it should be checked before treating this result as new.\n\n*Written automatically at the end of run `20261015-000603-617862-resolve-lean-erdos655`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
       "rank": 1030,
       "tier": "Frontier"
     },
