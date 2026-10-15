@@ -428,6 +428,14 @@ Covered by `tests/test_cluster_library.py`.
 - `native_decide` is banned in proofs. Kernel `decide` has timed out at 420 s on a 3,003-case check, so
   finite certificates must be small or Bool-reflected.
 - macOS has no `timeout` binary; use a perl alarm.
+- **A plain check's `infos` is always empty.** Lean prints every info message (`Try this`, `#check`, `#print axioms`)
+  with no `file:line:col` prefix, so `LeanChecker._parse` cannot tell where one starts.
+  - Read the text from `res["raw"]` (`try_this_blocks`, the axiom audit), or pass `positions=True`.
+  - `_negate_statement` reads a `#check` from `infos`, so it has never fired. Every `--open` run on disk (65 of 65)
+    paid for a model-written negation instead.
+  - Do not revive it by switching that check to positions. `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as
+    `∀ (n : ℕ), ↑n - 1 < ↑n`, which elaborates in ℕ, and the negation built from that text is provable (checked in
+    Lean, 2026-10-15).
 - **A killed run takes its model sessions with it.** Every `claude -p` call goes through `run_tracked`. SIGTERM and
   SIGHUP terminate the tracked sessions, then the run (`terminate_children`). Killing a run used to leave its in-flight
   sessions running and billing as orphans (step 3's #120, 2026-10-07). Kill a run with plain `kill <pid>`, never
@@ -748,11 +756,20 @@ shape and, under `DEDUCTIVE_LEAN_TESTS=1`, the Lean behaviour. Time-split pins b
 so an arm pinned from the live harness differs from `baseline-v2-84f21c5` in the cascade as well as in anything
 else committed since `ce09b11`. Build a candidate on that pin plus patches, or re-run the baseline.
 
-**Two more cascade defects, found 2026-10-15, NOT fixed** (reproduced in Lean; RESULTS.md, "Premise weakening"):
-- Error lines count the composed file's 8-line import header, and the cascade compares them with body lines. So a
-  pass in which some holes close and others do not keeps none of them. `compose_offset` gives the header size.
-- The `exact?` pass never applies anything. This Lean prints "Try this" without a `file:line:col` prefix, so
-  `LeanChecker._parse` drops it: `exact?` closes `Nat.gcd a b = Nat.gcd b a` and the cascade leaves the `sorry`.
+**Two more cascade defects, found and fixed 2026-10-15** (RESULTS.md, "Premise weakening"; both repros pinned in
+`tests/test_cascade_guard.py`, real Lean under `DEDUCTIVE_LEAN_TESTS=1`):
+- Error lines count the composed file, import header included, and the cascade compared them with body lines. A pass
+  in which some holes closed and others did not kept none of them.
+  - Errors now reach holes through `compose_line_map`.
+  - That map is exact where `compose_offset` is not: `compose` also drops a body's `set_option maxHeartbeats … in` line,
+    which shifts every line below it.
+- The `exact?` pass applied nothing. Lean's plain output prints an info message with no `file:line:col` prefix, so
+  `LeanChecker._parse` glues it onto the message before it. The pass now compiles with `check(…, positions=True)`
+  (`lean --json`) and gives each `Try this` to the hole at its line and column.
+- `exact?` searches the file as well as Mathlib, and will close a hypothesis by citing another open one, which moves the
+  hole instead of closing it. Such a suggestion is refused (`open_citations`, event `exact_suggestion_refused`).
+- A keep-check that fails now drops the closures on its error lines and compiles the rest once more.
+- This changes every run's cascade. Time-split pins taken before the fix keep the old one.
 
 ## Discovery fixes and options (2026-09-24)
 

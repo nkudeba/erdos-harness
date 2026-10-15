@@ -318,7 +318,7 @@ too small for a $8-per-item dev run to detect.
 `CASCADE`, with `tests/test_cascade_guard.py`. Under real Lean, the old string reads one hole as closed and reverts
 the other, genuine, closure; the new one closes both. The evaluations above ran on pins that keep the old string,
 so their comparisons are unaffected. A future arm pinned from the live harness differs from them in the cascade,
-among other things.
+among other things. Two more cascade defects were fixed on 2026-10-15 ("Premise weakening", "Found in passing").
 
 ## Commit-rule calibration on train, 2026-09-24: `calibration-train-v2r1` (operator's request)
 
@@ -1669,7 +1669,8 @@ originals are untouched, and every child logs inside the copy, where its spend i
     stands between it and adoption.
   - A full attack proved that form, in its (x/2, x] version, for $3.22 (run 55963's replay). That is the paid stage.
 
-**Found in passing: the free cascade keeps less than it finds** (out of scope here, reproduced in Lean, not fixed):
+**Found in passing: the free cascade keeps less than it finds** (out of scope here, reproduced in Lean; fixed
+2026-10-15, below):
 - `_close_holes_without_model` matches compiler error lines, which count the 8-line import header, against body lines.
   - So when some holes close and others do not, it keeps none of them.
   - A skeleton with `n + 0 = n` (omega closes it) and `n ^ 2 ≠ 2` left `sorry` in both.
@@ -1678,3 +1679,28 @@ originals are untouched, and every child logs inside the copy, where its spend i
   - `∀ a b : ℕ, Nat.gcd a b = Nat.gcd b a`: `exact?` closes it, and the cascade leaves the `sorry`.
 - Every plan candidate and the cheap premise policy go through this cascade. The premise-weakening move tries a
   proposal's named Mathlib theorem directly, so it does not depend on the cascade.
+
+**Fixed 2026-10-15** (CLAUDE.md, "Two more cascade defects"; `tests/test_cascade_guard.py`, real Lean under
+`DEDUCTIVE_LEAN_TESTS=1`). Both repros now close in Lean:
+- Errors reach holes through `compose_line_map`, which also follows a body line `compose` drops below the first one it
+  keeps. On the skeleton above, `n + 0 = n` closes and `n ^ 2 ≠ 2` keeps its `sorry`.
+- The `exact?` pass compiles with `lean --json`, so each `Try this` arrives with its line and column. `Nat.gcd a b =
+  Nat.gcd b a` closes with `fun a b => Nat.gcd_comm a b`.
+- Fixing the second defect exposed a third. `exact?` searches the file as well as Mathlib.
+  - On a skeleton stating `n ^ 2 ≠ 2` twice, it closed the second with `fun n => <the first, still open> n`.
+  - That moves the hole instead of closing it, so a suggestion citing a declaration that still rests on a hole is now
+    refused.
+- A keep-check that fails drops the closures on its error lines and compiles the rest once more. It used to keep
+  nothing.
+- The same root cause was found in two more places:
+  - The prove and decompose stages fed `exact?`/`apply?` suggestions to the next round's retrieval from `infos`, which
+    is always empty. They now read the raw output.
+  - `_negate_statement` reads a `#check` from `infos` too, and has never fired: all 65 `--open` runs on disk paid for
+    a model-written negation. It is left as it is. A pretty-printed type does not always re-elaborate to the same
+    statement: `#check` prints the true `∀ n : ℕ, (n : ℤ) - 1 < n` as `∀ (n : ℕ), ↑n - 1 < ↑n`, which elaborates in
+    ℕ, and Lean proves the negation built from that text.
+
+**Every run's cascade changes with this fix, and so does the prove stage's retrieval.** Time-split pins taken before
+it keep the old cascade, `baseline-v2-84f21c5` and every arm in this file included. In those pins a pass kept no
+partial closure and no `exact?` result. An arm pinned from the live harness after 2026-10-15 differs from them here
+too.

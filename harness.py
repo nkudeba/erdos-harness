@@ -524,7 +524,18 @@ class LeanChecker:
         self.project = project
         self.timeout = timeout
 
-    def check(self, source: str, dest: Path) -> dict:
+    @staticmethod
+    def _fmt(m: dict, cap: int) -> str:
+        # Goal states are the most useful part of an error for repair — keep them long.
+        cap = 1800 if ("unsolved goals" in m["msg"] or "⊢" in m["msg"]) else cap
+        return f"line {m['line']}:{m['col']}: {m['msg'][:cap]}"
+
+    def check(self, source: str, dest: Path, positions: bool = False) -> dict:
+        """Compile `source` at `dest`. Lean's plain output prints an info message (`exact?`'s `Try this`, `#check`,
+        `#print axioms`) with no `file:line:col:` prefix, so `_parse` cannot tell where one starts: it is glued onto the
+        message before it, and `infos` stays empty. `positions=True` compiles with `lean --json` instead: every message
+        keeps its line and column, the result adds `messages` (each one whole), and `raw` is the plain text Lean would
+        have printed."""
         # Lean runs with cwd = the Lean project, so a relative dest would not be found there ("no such file",
         # which reads as a failed check). Production passes absolute paths; resolve anyway.
         dest = Path(dest).resolve()
@@ -533,7 +544,8 @@ class LeanChecker:
         # Own process group, killed whole on timeout: `subprocess.run(timeout=)` kills `lake` but not the `lean` it
         # spawned, and orphaned `lean` processes kept running for up to 7 hours after masked #645 finished,
         # competing with every later check (found 2026-09-23).
-        proc = subprocess.Popen(["lake", "env", "lean", str(dest)], cwd=self.project, stdout=subprocess.PIPE,
+        argv = ["lake", "env", "lean"] + (["--json"] if positions else []) + [str(dest)]
+        proc = subprocess.Popen(argv, cwd=self.project, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, text=True, env=clean_env(), start_new_session=True)
         try:
             out, err = proc.communicate(timeout=self.timeout)
@@ -553,29 +565,39 @@ class LeanChecker:
                 if not stream:
                     return ""
                 return stream.decode(errors="replace") if isinstance(stream, bytes) else str(stream)
-            raw = (txt(e.stdout) + "\n" + txt(e.stderr)).strip()[-8000:]
+            if positions:
+                msgs, plain = self._parse_json(txt(e.stdout))
+                out = plain + "\n" + txt(e.stderr)
+            else:
+                out = txt(e.stdout) + "\n" + txt(e.stderr)
+                msgs = self._parse(out)
+            # `_parse` has no "text" key: reading it raised KeyError as soon as the partial output held an error
             return {"ok": False, "timeout": True, "errors": [f"lean check timed out after {self.timeout}s"]
-                    + [m["text"] for m in self._parse(raw) if m["sev"] == "error"][:5],
-                    "warnings": [], "infos": [], "sorries": False, "raw": raw}
-        msgs = self._parse(r.stdout + "\n" + r.stderr)
+                    + [self._fmt(m, 700) for m in msgs if m["sev"] == "error"][:5],
+                    "warnings": [], "infos": [], "sorries": False, "raw": out.strip()[-8000:]}
+        if positions:
+            msgs, plain = self._parse_json(r.stdout)
+            raw = plain + r.stderr
+        else:
+            msgs, raw = self._parse(r.stdout + "\n" + r.stderr), r.stdout + r.stderr
         errors = [m for m in msgs if m["sev"] == "error"]
         warnings = [m for m in msgs if m["sev"] == "warning"]
         infos = [m for m in msgs if m["sev"] == "info"]
         # Lean's quote style around `sorry` varies across versions; match loosely.
         sorries = any("declaration uses" in m["msg"] and "sorry" in m["msg"] for m in warnings)
-        # Goal states are the most useful part of an error for repair — keep them long.
-        def fmt(m, cap):
-            cap = 1800 if ("unsolved goals" in m["msg"] or "⊢" in m["msg"]) else cap
-            return f"line {m['line']}:{m['col']}: {m['msg'][:cap]}"
-        return {
+        res = {
             "ok": r.returncode == 0 and not errors,
             "timeout": False,
-            "errors": list(dict.fromkeys(fmt(m, 700) for m in errors)),
-            "warnings": [fmt(m, 300) for m in warnings],
-            "infos": [fmt(m, 600) for m in infos],
+            "errors": list(dict.fromkeys(self._fmt(m, 700) for m in errors)),
+            "warnings": [self._fmt(m, 300) for m in warnings],
+            "infos": [self._fmt(m, 600) for m in infos],
             "sorries": sorries,
-            "raw": (r.stdout + r.stderr)[:20000],
+            "raw": raw[:20000],
         }
+        if positions:
+            res["messages"] = [{"line": int(m["line"]), "col": int(m["col"]), "sev": m["sev"], "msg": m["msg"]}
+                               for m in msgs]
+        return res
 
     def _parse(self, out: str) -> list[dict]:
         msgs = []
@@ -586,6 +608,31 @@ class LeanChecker:
             elif msgs and line.strip():
                 msgs[-1]["msg"] += "\n" + line
         return msgs
+
+    @staticmethod
+    def _parse_json(out: str) -> tuple[list[dict], str]:
+        """`lean --json` output, one message object per line: the messages, shaped as `_parse` shapes them, and the plain
+        text Lean would have printed for them. A line that is not a message object is kept as text."""
+        msgs, text = [], []
+        for line in out.splitlines():
+            try:
+                d = json.loads(line) if line.lstrip().startswith("{") else None
+            except ValueError:
+                d = None
+            if not (isinstance(d, dict) and isinstance(d.get("pos"), dict) and d.get("severity")):
+                text.append(line)
+                continue
+            sev = "info" if d["severity"] == "information" else str(d["severity"])
+            msg = (f"{d['caption']}:\n" if d.get("caption") else "") + str(d.get("data", "")).rstrip("\n")
+            ln, col = d["pos"].get("line", 0), d["pos"].get("column", 0)
+            msgs.append({"line": str(ln), "col": str(col), "sev": sev, "msg": msg})
+            if sev == "info":                          # plain output gives an info message no position
+                text.append(msg)
+            else:
+                kind = str(d.get("kind") or "")
+                code = f"({kind[:-len('._namedError')]})" if kind.endswith("._namedError") else ""
+                text.append(f"{d.get('fileName', '')}:{ln}:{col}: {sev}{code}: {msg}")
+        return msgs, "".join(t + "\n" for t in text)
 
 
 # --------------------------------------------------------------------------- retrieval
@@ -2600,10 +2647,14 @@ def json_array_after(text: str, key: str) -> list:
     return [text[m.end():].strip()[:1500]]
 
 
+def compose_drops(line: str) -> bool:
+    """A body line `compose` leaves out: the header supplies imports and these two options."""
+    s = line.strip()
+    return s.startswith("import ") or s.startswith("set_option maxHeartbeats") or s.startswith("set_option autoImplicit")
+
+
 def strip_imports(src: str) -> str:
-    return "\n".join(l for l in src.splitlines()
-                     if not (l.strip().startswith("import ") or l.strip().startswith("set_option maxHeartbeats")
-                             or l.strip().startswith("set_option autoImplicit"))).strip()
+    return "\n".join(l for l in src.splitlines() if not compose_drops(l)).strip()
 
 
 def import_lines(src: str) -> list[str]:
@@ -2667,6 +2718,41 @@ def strip_comment_lines(s: str) -> str:
             out.append(" __LEAN_STRING_" + hashlib.sha256(s[start:i].encode()).hexdigest() + " ")
         else:
             out.append(s[i]); i += 1
+    return "".join(out)
+
+
+def blank_comments(s: str) -> str:
+    """`s` with every comment and string literal blanked to spaces, newlines kept. Unlike `strip_comment_lines`, which
+    puts a hash in place of a string, it keeps every character where it was, so an offset into `s` is one into this."""
+    out, i, depth, n = list(s), 0, 0, len(s)
+
+    def blank(a: int, b: int) -> None:
+        for t in range(a, min(b, n)):
+            if s[t] != "\n":
+                out[t] = " "
+    while i < n:
+        if s.startswith("/-", i):
+            depth += 1
+            blank(i, i + 2)
+            i += 2
+        elif depth:
+            step = 2 if s.startswith("-/", i) else 1
+            depth -= step == 2
+            blank(i, i + step)
+            i += step
+        elif s.startswith("--", i):
+            end = s.find("\n", i)
+            end = n if end == -1 else end
+            blank(i, end)
+            i = end
+        elif s[i] == '"':
+            j = i + 1
+            while j < n and s[j] != '"':
+                j += 2 if s[j] == "\\" else 1
+            blank(i, j + 1)
+            i = j + 1
+        else:
+            i += 1
     return "".join(out)
 
 
@@ -6739,16 +6825,18 @@ class Harness:
         pending.replace(self.state_path)
         export_run(self.state_path.parent)
 
-    def check(self, body: str, name: str) -> dict:
+    def check(self, body: str, name: str, positions: bool = False) -> dict:
         """Compile `body` with the current import header. Automatic repairs happen here so the LLM
         never has to spend a round on them:
           1. `-- IMPORTS:` directives naming non-existent modules are dropped (with a note in errors).
           2. `unknown identifier/constant 'X'` errors are resolved by grepping Mathlib for X; if X lives in
              a module we don't import yet, the module is added (for this run) and the file re-checked once.
           3. Outside final verification, narrowly recognized redundant finite-case tactics are repaired.
+        `positions=True` asks Lean for every message's position, info messages included (`LeanChecker.check`).
         """
         with self._lock:
             self.checks += 1
+        kw = {"positions": True} if positions else {}      # a plain check keeps the two-argument call
         bad, notes = [], []
         for mod in explicit_imports(body):
             if not module_exists(mod):
@@ -6761,7 +6849,7 @@ class Harness:
                              if not ((re.match(r"^--\s*IMPORTS?:", l.strip()) or l.strip().startswith("import "))
                                      and any(b in l for b in bad)))
         src = compose(body, self.imports)
-        res = self.lean.check(src, self.run_dir / "attempts" / f"{name}.lean")
+        res = self.lean.check(src, self.run_dir / "attempts" / f"{name}.lean", **kw)
         if not res["ok"] and not res.get("timeout"):
             unknown = unknown_names_from_errors(res["errors"])
             added = []
@@ -6782,7 +6870,7 @@ class Harness:
                     self.state["auto_imports"] = sorted(set(self.state.get("auto_imports", []) + added))
                 self.log.event("lean", "auto_import", name=name, modules=added)
                 src = compose(body, self.imports)
-                res = self.lean.check(src, self.run_dir / "attempts" / f"{name}.lean")
+                res = self.lean.check(src, self.run_dir / "attempts" / f"{name}.lean", **kw)
         # Notes are not compiler errors (they stay out of `errors`), but they are feedback the prover needs
         # ("`Foo` is not a known declaration; similar: ..."), so they travel with the attempt record too.
         # Final verification must check the stored artifact without silently repairing it.
@@ -6791,7 +6879,8 @@ class Harness:
             if repaired == body:
                 break
             self.log.event("lean", "closed_goal_branch_repair", name=name, repair_round=repair_round)
-            retry = self.lean.check(compose(repaired, self.imports), self.run_dir / "attempts" / f"{name}-branch-repair-{repair_round}.lean")
+            retry = self.lean.check(compose(repaired, self.imports),
+                                    self.run_dir / "attempts" / f"{name}-branch-repair-{repair_round}.lean", **kw)
             self.log.event("lean", "closed_goal_branch_repair_result", name=name,
                            ok=retry["ok"], errors=retry["errors"][:8])
             if retry["ok"] or (not retry.get("timeout") and len(retry["errors"]) <= len(res["errors"])):
@@ -7841,8 +7930,9 @@ echo "exit=${{PIPESTATUS[0]}}"
                         return True
                     if not (res["ok"] and not res["sorries"]):
                         self._record(attempts, name, plan, rnd, res.get("body", block), res, sandbox_meta.get(name))
-                        # feed Try-this suggestions from exact?/apply? into next round's retrieval
-                        tries = [x for x in res["infos"] if "Try this" in x]
+                        # feed Try-this suggestions from exact?/apply? into next round's retrieval; plain output gives
+                        # them no position, so they are never in `infos` (try_this_blocks)
+                        tries = try_this_blocks(res.get("raw", ""))
                         if tries:
                             retrieval = (retrieval + [f"suggestion from {name}: {t}" for t in tries])[-20:]
                         # verify any names the failed attempt used that the compiler did not know
@@ -7965,7 +8055,7 @@ echo "exit=${{PIPESTATUS[0]}}"
                 unknown = unknown_names_from_errors(last_errors)
                 if unknown:
                     retrieval = merge_retrieval(retrieval, [verify_names(unknown[:8])])
-                suggestions = [x for x in res.get("infos", []) if "Try this" in x]
+                suggestions = try_this_blocks(res.get("raw", ""))
                 retrieval = merge_retrieval(retrieval, suggestions)
             checkpoint_repair()
         if not hole_count(current) and not has_banned(current):
@@ -8018,8 +8108,16 @@ echo "exit=${{PIPESTATUS[0]}}"
 
     def _close_holes_without_model(self, code: str, frozen: str) -> str:
         """Try the specialist cascade on every hole at once, then `exact?` on the survivors, then the optional
-        external subgoal prover. Each pass is one Lean compile; closed holes are kept, others revert to `sorry`.
-        Logs which component closed each hole."""
+        external subgoal prover. Each pass is one Lean compile, and one more keeps what it closed (`_keep_closures`).
+        Logs which component closed each hole.
+
+        Lean counts lines in the composed file, which puts the import header above the body, so an error is matched to a
+        hole through `compose_line_map`. Until 2026-10-15 errors were matched to body lines as they came, so every one
+        missed its hole by the header's 8 lines: a pass in which some holes closed and others did not read them all as
+        closed, failed its keep-check and kept none. `exact?` gives its suggestion as an info message, which Lean's plain
+        output prints with no position (`LeanChecker.check`), so the pass found nothing at all; it now compiles with
+        `positions=True` and takes each `Try this` at its own hole's line and column. A suggestion that cites a
+        declaration still resting on a hole is refused (`open_citations`): it would move the hole, not close it."""
         spans = self._hole_spans(code)
         if not spans or getattr(self.args, "no_cascade", False):
             return code
@@ -8028,44 +8126,34 @@ echo "exit=${{PIPESTATUS[0]}}"
         texts = {k: (self.CASCADE if tac else f"(by {self.CASCADE})") for k, (_, _, tac) in enumerate(spans)}
         cand = self._substitute(code, spans, texts)
         res = self.check(cand, "cascade")
-        bad_lines = {int(m.group(1)) for e in res["errors"] for m in [re.match(r"line (\d+):", e)] if m}
-        closed = {}
-        if not res.get("timeout"):
-            for k, ln in enumerate(lines_of):
-                if ln not in bad_lines and (res["ok"] or True):
-                    closed[k] = ("cascade", texts[k])
-        # a hole whose line has no error is closed only if the whole file compiled or its line is error-free;
-        # if the file failed for other reasons keep only those and revert the rest
-        keep = {k: v[1] for k, v in closed.items()}
-        code2 = self._substitute(code, spans, keep)
-        if keep:
-            res2 = self.check(code2, "cascade-keep")
-            if not res2["ok"]:
-                keep, code2 = {}, code   # conservative: something interacted badly, revert everything
-                closed = {}
-        for k in closed:
+        bad = self._error_body_lines(res, cand)
+        if bad is None:                     # nothing can be placed (a timeout, or a repaired body): all or nothing
+            closed = texts if res["ok"] else {}
+        else:
+            closed = {k: t for k, t in texts.items() if lines_of[k] not in bad}
+        code2, kept = self._keep_closures(code, spans, closed, "cascade",
+                                          compiled=cand if res["ok"] and bad is not None else None)
+        for k in sorted(kept):
             self.log.event("decompose", "hole_closed", hole=k, line=lines_of[k], by="specialist-cascade")
         # pass 2: exact? on the survivors
         spans2 = self._hole_spans(code2)
         if spans2:
             lines2 = [code2.count("\n", 0, s) + 1 for s, _, _ in spans2]
             texts2 = {k: ("exact?" if tac else "(by exact?)") for k, (_, _, tac) in enumerate(spans2)}
-            res = self.check(self._substitute(code2, spans2, texts2), "cascade-exact")
-            found = {}
-            for info in res["infos"]:
-                m = re.match(r"line (\d+):\d+: Try this: (.*)", info, re.S)
-                if m:
-                    ln = int(m.group(1)); sugg = m.group(2).strip().splitlines()[0].strip()
-                    for k, l2 in enumerate(lines2):
-                        if l2 == ln:
-                            found[k] = sugg if spans2[k][2] else f"(by {sugg})"
-            if found:
-                code3 = self._substitute(code2, spans2, found)
-                res3 = self.check(code3, "cascade-exact-keep")
-                if res3["ok"]:
-                    for k in found:
-                        self.log.event("decompose", "hole_closed", hole=k, line=lines2[k], by="exact?", suggestion=found[k][:120])
-                    code2 = code3
+            src2 = self._substitute(code2, spans2, texts2)
+            found = self._exact_suggestions(self.check(src2, "cascade-exact", positions=True), src2, spans2, texts2)
+            logged = set()
+
+            def admissible(closures: dict) -> dict:
+                refused = open_citations(code2, spans2, closures)
+                for k in sorted(set(refused) - logged):
+                    logged.add(k)
+                    self.log.event("decompose", "exact_suggestion_refused", hole=k, line=lines2[k], cites=refused[k],
+                                   suggestion=closures[k][:120])
+                return {k: t for k, t in closures.items() if k not in refused}
+            code2, kept = self._keep_closures(code2, spans2, found, "cascade-exact", admissible=admissible)
+            for k in sorted(kept):
+                self.log.event("decompose", "hole_closed", hole=k, line=lines2[k], by="exact?", suggestion=kept[k][:120])
         # pass 3: optional external subgoal prover on whatever remains
         spec = getattr(self.args, "subgoal_prover", None)
         spans3 = self._hole_spans(code2)
@@ -8073,15 +8161,74 @@ echo "exit=${{PIPESTATUS[0]}}"
             code2 = self._external_subgoals(code2, spans3, spec)
         return code2
 
+    def _error_body_lines(self, res: dict, src: str) -> set[int] | None:
+        """Body lines of the errors a check of `src` reported, or None when they cannot be placed: the check timed out,
+        or compiled a body other than `src` (`check` drops a nonexistent import and repairs a closed-goal branch)."""
+        lmap = compose_line_map(src, self.imports)
+        if res.get("timeout") or res.get("body", src) != src or not lmap:
+            return None
+        return error_lines(res["errors"], lmap)
+
+    def _keep_closures(self, code: str, spans, closures: dict, tag: str, compiled: str | None = None,
+                       admissible=None) -> tuple[str, dict]:
+        """`code` with the closures (hole index -> text) that compile together, and those closures. When the compile
+        fails, the closures on its error lines are dropped and the rest compiled once more; when that fails too, or no
+        error sits on a closure's line, nothing is kept. `compiled` is a candidate known to compile, so keeping exactly
+        it costs no second compile; `admissible` filters the closures before each compile."""
+        lines = [code.count("\n", 0, s) + 1 for s, _, _ in spans]
+        cur = admissible(closures) if admissible else dict(closures)
+        for attempt in range(2):
+            if not cur:
+                break
+            cand = self._substitute(code, spans, cur)
+            if cand == compiled:
+                return cand, cur
+            res = self.check(cand, f"{tag}-keep" + ("-retry" if attempt else ""))
+            if res["ok"]:
+                return cand, cur
+            bad = self._error_body_lines(res, cand) or set()
+            nxt = {k: t for k, t in cur.items() if lines[k] not in bad}
+            nxt = admissible(nxt) if admissible else nxt
+            if len(nxt) == len(cur):
+                break
+            cur = nxt
+        return code, {}
+
+    def _exact_suggestions(self, res: dict, src: str, spans, texts: dict) -> dict:
+        """hole index -> the closure `exact?` suggested for it, from a `positions=True` check of `src`, which is the code
+        with each hole replaced by its `texts` entry. A `Try this` belongs to the hole whose `exact?` sits at its line and
+        column; a line with one hole needs no column."""
+        lmap = compose_line_map(src, self.imports)
+        if res.get("timeout") or res.get("body", src) != src or not lmap:
+            return {}
+        sites, shift = [], 0
+        for k, (s, e, tac) in enumerate(spans):
+            at = s + shift + (0 if tac else len("(by "))
+            sites.append((src.count("\n", 0, at) + 1, at - src.rfind("\n", 0, at) - 1))
+            shift += len(texts[k]) - (e - s)
+        found = {}
+        for m in res.get("messages", []):
+            sugg = try_this_suggestion(m["msg"]) if m["sev"] == "info" else None
+            if not sugg:
+                continue
+            here = [k for k, (ln, _) in enumerate(sites) if ln == lmap.get(m["line"])]
+            k = next((k for k in here if sites[k][1] == m["col"]), here[0] if len(here) == 1 else None)
+            if k is None or k in found or "⋯" in sugg or has_banned(sugg):
+                continue
+            found[k] = sugg if spans[k][2] else f"(by {sugg})"
+        return found
+
     def _extract_goals(self, code: str, spans) -> dict:
         """Goal text for each hole via `done` substitution (Lean reports `unsolved goals <goal>` at the hole's line)."""
         lines_of = [code.count("\n", 0, s) + 1 for s, _, _ in spans]
-        res = self.check(self._substitute(code, spans, {k: ("done" if tac else "(by done)") for k, (_, _, tac) in enumerate(spans)}), "goals")
+        src = self._substitute(code, spans, {k: ("done" if tac else "(by done)") for k, (_, _, tac) in enumerate(spans)})
+        res = self.check(src, "goals")
+        lmap = compose_line_map(src, self.imports) if res.get("body", src) == src else {}   # composed line -> body line
         goals = {}
         for e in res["errors"]:
             m = re.match(r"line (\d+):\d+: unsolved goals\n(.*)", e, re.S)
             if m:
-                ln = int(m.group(1))
+                ln = lmap.get(int(m.group(1)))
                 for k, l2 in enumerate(lines_of):
                     if l2 == ln:
                         goals[k] = m.group(2).strip()
@@ -12597,9 +12744,11 @@ def apply_block_variants(cand: str, plan: dict[str, tuple[tuple[int, int], str]]
     return "".join(out), lines
 
 
-def error_lines(errors: list[str], offset: int) -> set[int]:
-    """Body line numbers of compiler errors (`line N:col: …`), with the composed file's import header taken off."""
-    return {int(m.group(1)) - offset for e in errors for m in [re.match(r"line (\d+):", e)] if m}
+def error_lines(errors: list[str], offset: int | dict[int, int]) -> set[int]:
+    """Body line numbers of compiler errors (`line N:col: …`), with the composed file's import header taken off:
+    `offset` is `compose_offset`'s count, or `compose_line_map`'s map, which is exact."""
+    ns = {int(m.group(1)) for e in errors for m in [re.match(r"line (\d+):", e)] if m}
+    return {offset[n] for n in ns if n in offset} if isinstance(offset, dict) else {n - offset for n in ns}
 
 
 def compose_offset(body: str, imports: list[str]) -> int:
@@ -12607,6 +12756,102 @@ def compose_offset(body: str, imports: list[str]) -> int:
     src, core = compose(body, imports), strip_imports(body)
     i = src.find(core) if core else -1
     return src.count("\n", 0, i) if i >= 0 else 0
+
+
+def compose_line_map(body: str, imports: list[str]) -> dict[int, int]:
+    """Composed-file line -> body line, for every body line `compose` keeps. `compose` puts the import header above the
+    body and leaves out the body's own `import`/`set_option` lines (`compose_drops`) and its leading blank lines.
+    `compose_offset` assumes none is left out, so one such line, a model's `set_option maxHeartbeats 400000 in` say,
+    moves every error below it. Empty when the two cannot be matched up."""
+    src, core = compose(body, imports), strip_imports(body)
+    kept = [(n, l) for n, l in enumerate(body.splitlines(), 1) if not compose_drops(l)]
+    while kept and not kept[0][1].strip():
+        kept.pop(0)
+    while kept and not kept[-1][1].strip():
+        kept.pop()
+    if not core or not src.endswith(core + "\n") or core.count("\n") + 1 != len(kept):
+        return {}
+    first = src.count("\n", 0, len(src) - len(core) - 1) + 1
+    return {first + t: n for t, (n, _) in enumerate(kept)}
+
+
+TRY_THIS_RE = re.compile(r"\s*Try th(?:is|ese):?[ \t]*(.*)", re.S)
+
+
+def try_this_suggestion(msg: str) -> str | None:
+    """The first suggestion of a `Try this` message, on one line and without its tag. This Lean prints `Try this:` and
+    then `  [apply] exact …` on the next line; older versions printed `Try this: exact …`."""
+    m = TRY_THIS_RE.match(msg or "")
+    if not m:
+        return None
+    items = [p for p in re.split(r"(?:^|\n)[ \t]*\[\w+\][ \t]*", m.group(1).strip()) if p.strip()]
+    return " ".join(items[0].split()) if items else None
+
+
+def try_this_blocks(raw: str) -> list[str]:
+    """Every `Try this` suggestion in Lean's plain output, as `Try this: <suggestion>`. Plain output gives an info message
+    no `file:line:col:` prefix, so `LeanChecker._parse` glues it onto the message before it and `infos` never holds it.
+    A suggestion is its `Try this` line plus the indented lines under it."""
+    out, lines, i = [], (raw or "").splitlines(), 0
+    while i < len(lines):
+        m = re.match(r"(?:\S[^:\n]*:\d+:\d+: info(?:\([^)]*\))?: )?(Try th(?:is|ese):.*)$", lines[i])
+        i += 1
+        if not m:
+            continue
+        block = [m.group(1)]
+        while i < len(lines) and lines[i][:1] in (" ", "\t") and lines[i].strip():
+            block.append(lines[i])
+            i += 1
+        s = try_this_suggestion("\n".join(block))
+        if s:
+            out.append(f"Try this: {s}")
+    return out
+
+
+# A declaration's head, indented ones included: what a hole's block is, and the name the rest of the file cites it by.
+CITABLE_HEAD_RE = re.compile(r"(?m)^[ \t]*(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable|partial|unsafe)\s+)*"
+                             r"(theorem|lemma|def|abbrev|instance|structure|inductive|example)\b[ \t]*([^\s:({\[⦃]*)")
+
+
+def lean_idents(text: str) -> set[str]:
+    """Every component of every dotted identifier in `text` (`h.trans` gives `h` and `trans`)."""
+    return {c for tok in re.findall(r"[\w'!?.]+", text) for c in tok.split(".") if c}
+
+
+def open_citations(code: str, spans, closures: dict) -> dict[int, str]:
+    """{hole index: a name it cites} for the closures (hole index -> replacement text) that cite a declaration of `code`
+    still resting on a hole: a declaration whose block keeps a hole these closures leave open, or whose text cites one.
+    `exact?` searches the file as well as Mathlib: it closes `∀ n, n ^ 2 ≠ 2` with `fun n => h n`, `h` an open hypothesis
+    stating the same thing, which moves the hole instead of closing it. A hole left open in an `instance`, `structure` or
+    `inductive` refuses every closure, since an instance is used without being named. A refused closure leaves its own
+    hole open, so this repeats until nothing more is refused. Comments and strings are masked, and a name matches any
+    component of a dotted identifier (`h.mp` cites `h`), so a refusal can be spurious."""
+    src = blank_comments(code)                         # same length, so the holes' offsets still apply
+    heads = list(CITABLE_HEAD_RE.finditer(src))
+    blocks = [(m.start(), heads[j + 1].start() if j + 1 < len(heads) else len(src), m.group(1),
+               (m.group(2) or "").split(".")[-1]) for j, m in enumerate(heads)]
+    home = {k: next((b for b in blocks if b[0] <= s < b[1]), None) for k, (s, _, _) in enumerate(spans)}
+    refused: dict[int, str] = {}
+    while True:
+        live = {k: t for k, t in closures.items() if k not in refused}
+        open_blocks = {home[k] for k in range(len(spans)) if k not in live and home[k]}
+        if any(b[2] in ("instance", "structure", "inductive") for b in open_blocks):
+            new = {k: "an open instance" for k in live}
+        else:
+            tainted = {b[3] for b in open_blocks if b[3] and b[2] != "example"}
+            grew = True
+            while grew:
+                grew = False
+                for b in blocks:
+                    if b[3] and b[3] not in tainted and b[2] != "example":
+                        text = src[b[0]:b[1]] + "\n" + "\n".join(t for k, t in live.items() if home[k] == b)
+                        if lean_idents(text) & tainted:
+                            tainted.add(b[3])
+                            grew = True
+            new = {k: min(lean_idents(t) & tainted) for k, t in live.items() if lean_idents(t) & tainted}
+        if not new:
+            return refused
+        refused.update(new)
 
 
 def hypothesis_span(skeleton: str, name: str) -> tuple[int, int] | None:
