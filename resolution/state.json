@@ -2690,6 +2690,12 @@
     {
      "tier": "queue",
      "outcome": "persist (operator)"
+    },
+    {
+     "tier": "review",
+     "outcome": "resolved in the literature",
+     "why": "arXiv:2607.17333 (2026-07-19), W.-X. Huang, Z. Lian, S. Shao, R. Xiao, L. Xu, S. Zhang, 'An affirmative answer to Owings's sumset question': every 2-colouring of N has an infinite B with B+B monochromatic. Found by an OpenAlex search on 2026-10-15; erdosproblems.com still lists the problem as open, with no proof claim.",
+     "at": "2026-10-15T16:31:02Z"
     }
    ],
    "prepped": true,
@@ -2699,15 +2705,16 @@
    "limit_waits": 0,
    "settle_chance": 0.3,
    "arm": "pass",
-   "next": "program",
-   "status": "persist",
-   "track": "new-math",
-   "intent": "unclear",
+   "next": null,
+   "status": "known-result",
+   "track": "statement",
+   "intent": "known-result",
    "traction": {
     "settle_chance": 0.15
    },
    "claims_todo": [],
-   "program_passes": 1
+   "program_passes": 1,
+   "resolved_in_literature": "arXiv:2607.17333 (2026-07-19), W.-X. Huang, Z. Lian, S. Shao, R. Xiao, L. Xu, S. Zhang, 'An affirmative answer to Owings's sumset question': every 2-colouring of N has an infinite B with B+B monochromatic. Found by an OpenAlex search on 2026-10-15; erdosproblems.com still lists the problem as open, with no proof claim."
   }
  }
 }
