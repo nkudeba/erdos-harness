@@ -226,6 +226,15 @@
     ],
     "assessed": "2026-10-03"
   },
+  "158": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.03, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausibly settling. Erdős problem 158 has been open since ESS94. The formal statement matches the informal one: ℕ includes 0, translation preserves B2 2, `0^(-1/2) = 0` only affects N = 0, and f ≥ 0 is bounded, so the liminf is genuine rather than a"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-15"
+  },
   "164": {
     "rationale": [
       "The primitive-set maximum theorem is a substantial analytic result even though a simpler proof is now reported."
