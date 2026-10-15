@@ -2020,12 +2020,16 @@
     "rationale": [
       "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.30, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to establish. Decide whether arXiv:2607.17333 proves `erdos_1199` exactly as written: ∀ χ : ℕ → Fin 2, ∃ infinite A ⊆ ℕ with χ constant on A + A. Here A + A includes the doubles 2a, and ℕ contains 0. The task is to reconstruct its argument into a com",
       "Resolution campaign scout 2026-10-15 ($18.95, informal): 2 validated-new claims (significance 1, 1); best: Let χ be a 2-colouring with no infinite A such that A+A is monochromatic. Then for every J≥0 there are Λ and T such that: if t≥T and χ≡c on [t, t+Λ], then χ(2t−2j)=1−c for all 0≤j≤J. Combined with C3 (M=1), the following holds. If χ≡c on [t",
-      "Resolution campaign research program 2026-10-15 ($83.34, informal): 6 cycle(s), stopped: 6 cycles. Skeleton for TRUE: 4 lemma(s) established, 3 open. Open: (Growing sublinear buffers.) Let chain data be given, with e_j, a_j and w_j as in TARGET. Then it is impossible that both w_j → ∞ and liminf_j w_j/2^j = 0. | (Macroscopic buffers.) Let chain data be given, with e_j, a_j and w_j as in TARGET. Then liminf_j w_j/2^j = 0. | Let φ: ℕ → {0,1} be shift-free, and suppose φ_{M,w} has bounded runs for every M ≥ 1 and w ≥ 0. Then d̄(E_φ) < d̲(C_φ)/2."
+      "Resolution campaign research program 2026-10-15 ($83.34, informal): 6 cycle(s), stopped: 6 cycles. Skeleton for TRUE: 4 lemma(s) established, 3 open. Open: (Growing sublinear buffers.) Let chain data be given, with e_j, a_j and w_j as in TARGET. Then it is impossible that both w_j → ∞ and liminf_j w_j/2^j = 0. | (Macroscopic buffers.) Let chain data be given, with e_j, a_j and w_j as in TARGET. Then liminf_j w_j/2^j = 0. | Let φ: ℕ → {0,1} be shift-free, and suppose φ_{M,w} has bounded runs for every M ≥ 1 and w ≥ 0. Then d̄(E_φ) < d̲(C_φ)/2.",
+      "Resolution campaign 2026-10-15: RESOLVED IN THE LITERATURE, affirmatively: arXiv:2607.17333 (2026-07-19), W.-X. Huang, Z. Lian, S. Shao, R. Xiao, L. Xu, S. Zhang, 'An affirmative answer to Owings's sumset question': every 2-colouring of N has an infinite B with B+B monochromatic. Found by an OpenAlex search on 2026-10-15; erdosproblems.com still lists the problem as open, with no proof claim. The campaign's earlier scout and research program ($83.34) treated it as open; their results are not new."
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-15"
+    "assessed": "2026-10-15",
+    "requirements": [
+      "Lean verification of the published proof, if wanted; no settle attempt."
+    ]
   },
   "1203": {
     "rationale": [
