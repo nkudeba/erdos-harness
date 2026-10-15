@@ -266,3 +266,5 @@
 [2026-10-15T06:40:12Z] #1094: screen -> screened out (settle chance 0.01, draws [0.0, 0.02]; $5.39)
 [2026-10-15T06:40:21Z] #1207: screen
 [2026-10-15T06:50:07Z] #1207: screen -> pass (settle chance 0.33, draws [0.35, 0.3]; $1.50); track statement (intent known-result)
+[2026-10-15T06:50:13Z] #1207: scout (resuming runs/20261015-024021-674357-erdos1207)
+[2026-10-15T07:43:42Z] #1207: scout -> none ($14.27; 0 validated new [])
