@@ -2025,6 +2025,15 @@
     ],
     "assessed": "2026-10-02"
   },
+  "1207": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.33, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove. There is an explicit absolute constant c > 0 such that the following holds for every sufficiently large n. There is a set S_n ⊂ ℝ² (EuclideanSpace ℝ (Fin 2)) with |S_n| = n in which every subset A with |A| ≥ n^{1-c} contains three distinct "
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-15"
+  },
   "1213": {
     "score": 90,
     "rationale": [
