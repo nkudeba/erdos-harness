@@ -1130,6 +1130,25 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     claim is already rated 3. #366's own team lead saw no settling line.
 - **Lean on partial results:** every validated-new PROVED claim at significance ≥ 2 gets its own Lean run under a fresh
   id. The harness formalizes the claim, with a crosscheck judge, then proves it from the engine's chain.
+- **Four lanes, three kinds of target (2026-10-15).**
+  - Why: by then, settle attempts were mostly rediscovering AI-assisted claims. 145 of 633 open problems carried
+    one, and the campaign's one complete answer judged new, #769, turned out to be a weaker form of two of them.
+  - The queue interleaves its lanes by weight (`mix`): `fresh`, `record`, `explicit` and `settle`. A problem keeps the
+    kind of the lane that placed it (`kind`), and its stages run the matching engine objective (`stage_flags`).
+  - **`record`:** a new certified result by computation: a value, the next term, a better construction or bound, or a
+    counterexample. The candidates come from `atlas-data/records/survey.py`, which uses OEIS sequences and page
+    phrases, makes no model calls, and is refreshed daily.
+  - **`explicit`:** a result known "for sufficiently large n" is made explicit, and the range below the threshold is
+    checked by computer. That settles the problem outright.
+  - **Certificates:** record and explicit sessions put the explicit object in a checker script, because scripts cannot
+    read files. After each session the harness re-runs every checker in the sandbox (`certificate_checks`), and the
+    referee sees the checker's source and output. A certified claim at significance ≥ 1 goes to Lean
+    (`record_min_significance`).
+  - **`fresh`:** open problems formal-conjectures formalized in the last `fresh_days`, newest first. A problem missing
+    at the campaign's pinned commit is frozen at formal-conjectures' head, and its commit is kept (`p["fc_sha"]`), so
+    the Lean tier checks its inlined declarations at that commit.
+  - **Freshness of everything else:** the loop refreshes the problems database and formal-conjectures' head every 6
+    hours (`refresh_sources`), and the problem's forum and claims before every paid stage (`refresh_forum`).
 - **Restarts are safe:** one loop at a time (an exclusive lock), and a stage records its run at launch, so an
   interrupted stage resumes. A stage writes only its own problem's entry (`save_problem`, under the state file's lock).
   A stage used to save the whole state it read when it started, which erased any entry written meanwhile.

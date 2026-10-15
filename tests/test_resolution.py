@@ -31,9 +31,13 @@ class Base(unittest.TestCase):
             p = patch.object(R, name, val)
             p.start()
             self.addCleanup(p.stop)
-        p = patch.object(R, "site_claims", lambda n: 0)          # the real forum cache must not decide a test
-        p.start()
-        self.addCleanup(p.stop)
+        for name, val in (("site_claims", lambda n: 0),          # the real forum cache must not decide a test
+                          ("refresh_forum", lambda n: None),       # no network in a test
+                          ("refresh_sources", lambda cfg, every_hours=6.0: False),
+                          ("FRESH", d / "fresh"), ("SURVEY", d / "survey.json")):
+            p = patch.object(R, name, val)
+            p.start()
+            self.addCleanup(p.stop)
         self.d = d
 
     def engine_run(self, ledger) -> Path:
@@ -446,7 +450,115 @@ class ClaimedProblems(Base):
             self.assertEqual((p["status"], p["next"], ran), ("skipped", None, []), tier)
 
 
+class LanesAndFreshness(Base):
+    """2026-10-15: record and explicit tracks beside settle, and freshly formalized problems first."""
+
+    def setUp(self):
+        super().setUp()
+        (self.d / "atlas-data").mkdir()
+        (self.d / "atlas-data" / "rankings.json").write_text(json.dumps({"problems": [
+            {"id": i, "status": "Unsolved"} for i in range(1, 30)]}))
+        (self.d / "fresh").mkdir()
+        (self.d / "fresh" / "problems-2026-10-15.yaml").write_text(
+            "- number: '5'\n  status: {state: open}\n  formalized: {state: 'yes', last_update: '2026-10-13'}\n"
+            "- number: '6'\n  status: {state: open}\n  formalized: {state: 'yes', last_update: '2026-10-01'}\n"
+            "- number: '7'\n  status: {state: proved}\n  formalized: {state: 'yes', last_update: '2026-10-14'}\n"
+            "- number: '8'\n  status: {state: open}\n  formalized: {state: 'yes', last_update: '2025-01-01'}\n")
+        (self.d / "survey.json").write_text(json.dumps({
+            "records": [{"problem": 11, "score": 4.0, "claims": 0}, {"problem": 12, "score": 3.0, "claims": 2},
+                        {"problem": 13, "score": 2.5, "claims": 0}],
+            "explicit": [{"problem": 21, "score": 2.0, "claims": 0}, {"problem": 5, "score": 1.0, "claims": 0}]}))
+
+    def queue(self, **cfg):
+        today = R.datetime(2026, 10, 15, tzinfo=R.timezone.utc)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "prescreen", lambda: {}), patch.object(R, "forum_chars", lambda n: n), \
+                patch.object(R, "fresh_targets", lambda c: ORIGINAL_FRESH_TARGETS(c, now=today)), \
+                patch.object(R, "site_claims", lambda n: 2 if n == 12 else 0):      # as the survey says
+            return R.queue({"problems": {"13": {}}}, {"priority": [], **cfg})
+
+    def test_fresh_formalizations_lead_and_the_lanes_interleave(self):
+        q = self.queue()
+        # fresh newest first (#5, then #6 within 30 days; proved #7 and stale #8 never), record (#12 claimed, #13
+        # taken), explicit (#5 already placed), then the rest of the settle lane
+        self.assertEqual(q[:5], [5, 11, 21, 1, 6])
+        self.assertEqual((R.QUEUE_LANE[5], R.QUEUE_LANE[11], R.QUEUE_LANE[21], R.QUEUE_LANE[1]),
+                         ("fresh", "record", "explicit", "settle"))
+        self.assertNotIn(12, q)
+        self.assertNotIn(13, q)
+
+    def test_a_lane_weighted_zero_is_off(self):
+        q = self.queue(mix={"fresh": 0, "record": 2, "explicit": 0, "settle": 1})
+        self.assertEqual(q[:3], [11, 1, 2])                  # record twice per round, but it has only one target left
+        self.assertEqual(R.QUEUE_LANE[21], "settle")         # off as a track, #21 is still an ordinary settle target
+
+    def test_the_objective_follows_the_kind(self):
+        cfg = R.load_cfg()
+        self.assertIn("--engine-objective resolve", R.stage_flags(cfg, "scout", {}))
+        self.assertIn("--engine-objective record", R.stage_flags(cfg, "scout", {"kind": "record"}))
+        self.assertIn("--engine-objective explicit", R.stage_flags(cfg, "deep", {"kind": "explicit"}))
+        self.assertNotIn("resolve", R.stage_flags(cfg, "screen", {"kind": "record"}))
+
+    def test_a_first_screen_takes_its_lanes_kind_and_runs_its_objective(self):
+        R.save_state({"problems": {}})
+        seen = {}
+
+        def fake_screen(n, tag, total, flags, resume=None, on_start=None):
+            seen["flags"] = flags
+            return None, 1
+        R.QUEUE_LANE.clear()
+        R.QUEUE_LANE[11] = "record"
+        with patch.object(R, "queue", lambda s, c: [11]), patch.object(R, "prep", lambda n, c: {"ok": True, "fc_sha": "head"}), \
+                patch.object(R, "run_screen", fake_screen):
+            R.step(R.load_cfg())
+        p = R.load_state()["problems"]["11"]
+        self.assertEqual((p["kind"], p["lane"], p["fc_sha"]), ("record", "record", "head"))
+        self.assertIn("--engine-objective record", seen["flags"])
+
+    def test_a_statement_newer_than_the_pinned_commit_is_frozen_at_the_head(self):
+        import timesplit as T
+        calls = []
+
+        def fake_fetch(url, dest, refresh=False, pause=0.0, tries=4):
+            calls.append(url)
+            return "" if "/pinned/" in url else "theorem erdos_9 : True ↔ answer(True) := by\n  sorry\n"
+        cfg = {**R.load_cfg(), "fc_sha": "pinned", "fc_head_sha": "head"}
+        with patch.object(T, "fetch", fake_fetch), patch.object(R, "_thread_digest", lambda: (lambda n: "digest")), \
+                patch.object(R, "ROOT", self.d):
+            info = R.prep(9, cfg)
+        self.assertEqual((info["ok"], info["fc_sha"]), (True, "head"))
+        self.assertTrue(any("/head/" in u for u in calls))
+
+    def test_a_computational_runs_claims_need_a_passing_certificate(self):
+        def claim(cid, check, sig):
+            c = _claim("r1s1", cid, "validated-new", sig, statement=f"record {cid}")
+            if check:
+                c["certificate_check"] = check
+            return c
+        run = self.engine_run([claim("C1", "CERTIFIED", 1), claim("C2", "FAILED", 2), claim("C3", None, 2)])
+        self.assertEqual(R.claims_for_lean(run, 1, set(), certified=True), ["r1s1/C1"])
+        self.assertEqual(sorted(R.claims_for_lean(run, 2, set())), ["r1s1/C2", "r1s1/C3"])
+
+    def test_sources_refresh_at_most_every_few_hours(self):
+        import timesplit as T
+        R.refresh_sources = ORIGINAL_REFRESH_SOURCES                     # Base stubs it; test the real one here
+        self.addCleanup(setattr, R, "refresh_sources", lambda cfg, every_hours=6.0: False)
+
+        def fake_fetch(url, dest, refresh=False, pause=0.0, tries=4):
+            Path(dest).parent.mkdir(parents=True, exist_ok=True)
+            body = json.dumps({"sha": "abc123"}) if "commits" in url else "- number: '1'\n"
+            Path(dest).write_text(body)
+            return body
+        (self.d / "survey.json").write_text("{}")
+        with patch.object(T, "fetch", fake_fetch):
+            self.assertTrue(R.refresh_sources(R.load_cfg()))
+            self.assertFalse(R.refresh_sources(R.load_cfg()))           # within the window: nothing fetched
+        self.assertEqual(json.loads(R.CONFIG.read_text())["fc_head_sha"], "abc123")
+        self.assertTrue(list((self.d / "fresh").glob("problems-*.yaml")))
+
+
 ORIGINAL_SITE_CLAIMS = R.site_claims
+ORIGINAL_REFRESH_SOURCES = R.refresh_sources
+ORIGINAL_FRESH_TARGETS = R.fresh_targets
 
 
 class Digest(unittest.TestCase):

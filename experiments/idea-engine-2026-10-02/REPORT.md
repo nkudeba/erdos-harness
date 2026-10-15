@@ -1361,6 +1361,35 @@ for x > 1, and π(x) > x/log x for x ≥ 17.
 - **The wider problem.** 6 of the campaign's 16 problems carry proof claims on the site: #295, #366, #488, #520, #769
   and #1110. Until today no stage saw them.
 
+**3.12: record and explicit tracks, and freshness (2026-10-15).** Built on the operator's direction to aim the campaign
+where new results are still to be had. Not yet run on a live problem.
+- **Why.** No campaign result has been new mathematics.
+  - 145 of 633 open problems carry AI-assisted proof claims on erdosproblems.com.
+  - The settle screen's best picks were claimed results or flaws in formal statements.
+  - On hard, unclaimed problems the scouts and the research program produced significance-1 results.
+- **Records survey** (`atlas-data/records/survey.py`, no model calls):
+  - It reads the 317 OEIS sequences linked from open problems, plus phrases on each problem's page.
+  - 79 unclaimed problems score 2.5 or more (sequences that want more terms, few known terms, marked hard); 54 score
+    2 or more on the explicit phrases.
+  - The ranking is crude. #11's sequence (Wieferich primes) scores high for having two known terms, though it is one of
+    the most searched. The model screen is the filter.
+- **Two engine objectives:**
+  - `record`: a new certified value, term, construction or counterexample;
+  - `explicit`: a "sufficiently large" result made explicit, with the finite range checked by computer.
+  - Each has its own DECIDE section in the map, so the deciding computation leads round 1.
+- **Certificates.** Sessions embed the object in a checker script, and the harness re-runs every checker after the
+  session. The referee sees the checker's source and its output, and a certified claim at significance ≥ 1 goes to Lean.
+- **Freshness:**
+  - Newly formalized open problems lead the queue (59 in the last month).
+  - A problem formalized after the pinned formal-conjectures commit is frozen at the head.
+  - The loop refreshes the problems database, formal-conjectures' head and the survey on its own.
+  - Claims are re-checked before every paid stage.
+- **Mix per round:** 1 fresh, 2 record, 1 explicit, 1 settle (`mix`).
+- **Pre-registered predictions** for the first 20 record and explicit screens:
+  - at least 4 pass the 0.3 bar;
+  - at least one certified new record within the first 10 record scouts;
+  - an explicit settle is rarer: under 1 in 10.
+
 **A campaign bug, found 2026-10-14: the Lean tier could not compile #655's statement.**
 - **What happened.**
   - #655's scout settled formal-conjectures' statement: answer false, along a line the intent judges call a

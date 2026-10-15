@@ -4368,6 +4368,23 @@ DEEP_OBJECTIVES = {
                 "line with the best chance of major progress (significance 3), and say so in the GOAL. Begin the GOAL "
                 "section with one line `SETTLE CHANCE: p`, your probability that this line settles the problem within a "
                 "few more days of work like the team's (0 when no settling line is plausible)."),
+    # 2026-10-15. The campaign's settle attempts compete with a wave of AI-assisted proof claims (145 of 633 open
+    # problems carry one), and its one complete answer judged new (#769) was a weaker form of two of them. These two
+    # aims reward patient, checkable computation instead.
+    "record": ("Choose the line with the best chance of a NEW CERTIFIED RESULT obtained by computation: a value, the next "
+               "term, an explicit construction or bound better than any known, or a counterexample, with a certificate "
+               "an independent checker can verify. Look first at the DECIDE section: the known records, how far the "
+               "published computations went, and what a few hours of well-designed search (a SAT instance via pysat, an "
+               "exact search with symmetry breaking, PARI/GP) would reach. A new record is worth having even when the "
+               "problem stays open. Begin the GOAL section with one line `SETTLE CHANCE: p`, your probability that this "
+               "line yields a new certified result within a few days of work like the team's (0 when none is plausible)."),
+    "explicit": ("Choose the line with the best chance of SETTLING the problem by making a known 'sufficiently large' "
+                 "result explicit: extract an explicit threshold N0 from the published argument, sharpen the argument "
+                 "until the range below N0 is small enough for a computer, and check that range completely. Look first "
+                 "at the DECIDE section. If the threshold cannot be made explicit, choose the line with the best chance "
+                 "of the largest explicit range, and say so in the GOAL. Begin the GOAL section with one line "
+                 "`SETTLE CHANCE: p`, your probability that this line settles the problem within a few days of work "
+                 "like the team's (0 when no settling line is plausible)."),
 }
 
 # The map under `--engine-objective resolve`. A disproof by an explicit counterexample is a complete answer, and many
@@ -4380,6 +4397,43 @@ a finite check. Give the search precisely: the objects, the encoding (a SAT inst
 for number theory), the range, and its size in objects. Or write NONE and why no computation can settle it.
 
 TARGET T1 below must be the complete answer itself: the precise statement, or its negation if DIRECTION says FALSE.
+"""
+
+FRONTIER_RECORD_BLOCK = """
+=== DECIDE
+The finite quantity the problem turns on, and its records: every known value, term or bound, with its source and how it
+was obtained (by hand, by a computer search, exhaustive or not). Then the computation that would produce the NEXT record:
+the objects, the encoding (a SAT instance via pysat, an exact search with symmetry breaking, PARI/GP), its size in
+objects, and the CERTIFICATE it would leave: an explicit object that a short checker verifies from scratch, or the exact
+range an exhaustive search covered. Or write NONE and why no computation can produce a new certified result.
+
+TARGET T1 below must be that next record, stated precisely, with its certificate.
+"""
+
+FRONTIER_EXPLICIT_BLOCK = """
+=== DECIDE
+The known result for large n: its precise statement, its source, and whether its threshold is explicit. Then the plan:
+which constants of the published argument must be made explicit, the threshold N0 that gives, how far sharpening could
+lower it, and the computation that checks every case below N0 (the objects, the encoding, the size). Or write NONE and
+why the threshold cannot be made explicit or the range below it is out of reach.
+
+TARGET T1 below must be the complete answer itself: the statement for every n, from the explicit argument and the check.
+"""
+
+OBJECTIVE_BLOCKS = {"resolve": FRONTIER_RESOLVE_BLOCK, "record": FRONTIER_RECORD_BLOCK, "explicit": FRONTIER_EXPLICIT_BLOCK}
+
+# Every session of a record or explicit run gets this after its context. A sandbox script cannot open files, so the
+# certificate lives inside its checker; the harness re-runs every checker after the session (`certificate_checks`).
+CERTIFICATE_ADDENDUM = """
+CERTIFICATES. This team's results are computational, so every claim that rests on a computation carries a certificate
+that anyone can re-check without trusting your session. In the claim block add two fields after AUDIT:
+CERTIFICATE: <what the certificate is: the explicit object (embedded as a literal in the checker, or rebuilt by it
+deterministically), or the exact range and encoding of an exhaustive search>
+CHECK: <the file name of a checker script in the sandbox, e.g. check_c1.py>
+The checker verifies the claim from scratch, independently of the code that found it: it rebuilds or embeds the object,
+tests every required property directly, and prints the single line CERTIFIED only if all of them hold. Scripts cannot
+read files, so embed the object in the checker. The harness re-runs every checker after your session and shows the
+referee its source and its output. A claim whose checker fails is treated as unproved.
 """
 
 
@@ -4636,7 +4690,8 @@ def assignment_text(a: dict) -> str:
 
 # `STATEMENT (method barrier):` and `EVIDENCE/MECHANISM:` occur in practice (the #455 deep dive); EVIDENCE stands in for a
 # conjecture's PROOF.
-CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF|EVIDENCE|AUDIT|CONCERNS)(?:/[A-Z]+)?[*_]*"
+CLAIM_FIELD_RE = re.compile(r"(?m)^[ \t]*[*_]*(STATEMENT|STATUS|TYPE|BEYOND|PROOF|EVIDENCE|AUDIT|CONCERNS|CERTIFICATE|CHECK)"
+                            r"(?:/[A-Z]+)?[*_]*"
                             r"(?:[ \t]*\([^)\n]*\))?[ \t]*[:.][*_]*[ \t]*")
 
 
@@ -4682,7 +4737,10 @@ def parse_claims(notebook: str) -> list[dict]:
                        "status": status if status in ("PROVED", "CONJECTURED", "REFUTED") else "OTHER",
                        "type": ty if ty in ENGINE_TYPES else "OTHER", "beyond": f.get("BEYOND", "")[:1500],
                        "proof": f.get("PROOF") or f.get("EVIDENCE", ""), "audit": f.get("AUDIT", "")[:3000],
-                       "concerns": f.get("CONCERNS", "")[:2000]})
+                       "concerns": f.get("CONCERNS", "")[:2000],
+                       **({"certificate": f["CERTIFICATE"][:2000]} if f.get("CERTIFICATE") else {}),
+                       **({"check": f["CHECK"].split()[0].strip("`'\".,;")[:200]} if f.get("CHECK", "").split() else {})})
+    checks = certificate_check_sections(text)
     seen = set()
     out = []
     for c in claims:                                     # the same claim restated later keeps its first block
@@ -4692,8 +4750,60 @@ def parse_claims(notebook: str) -> list[dict]:
         seen.add(key)
         if proofs.get(c["id"]):
             c["proof"] = (c["proof"] + "\n\n" + proofs[c["id"]]).strip()
+        if checks.get(c["id"]):
+            # the harness's own re-run of the session's checker, so the referee judges the evidence, not the report
+            c["certificate_check"] = checks[c["id"]]["verdict"]
+            c["proof"] = (c["proof"] + "\n\nINDEPENDENT CERTIFICATE CHECK (re-run by the harness after the session):\n"
+                          + checks[c["id"]]["text"]).strip()
         out.append(c)
     return out
+
+
+CERT_SECTION = "## Certificate checks (re-run by the harness)"
+
+
+def certificate_check_sections(notebook: str) -> dict:
+    """{claim id: {verdict, text}} from the section `certificate_checks` appends to a session's notebook."""
+    i = (notebook or "").find(CERT_SECTION)
+    if i < 0:
+        return {}
+    out = {}
+    for m in re.finditer(r"(?ms)^### (C\d+) certificate: (CERTIFIED|FAILED|MISSING)\n(.*?)(?=^### C\d+ certificate: |\Z)",
+                         notebook[i:]):
+        out[m.group(1)] = {"verdict": m.group(2), "text": f"{m.group(2)}\n{m.group(3).strip()}"[:14000]}
+    return out
+
+
+def certificate_checks(sb: Path, notebook: str, timeout: int = 900) -> str:
+    """Re-run every claim's CHECK script in the session's sandbox, independently of the session, and return the
+    section to append to its notebook (empty when no claim names a checker). The checker must print CERTIFIED and
+    exit 0. Its source travels with the verdict, so the referee can see whether it really checks the claim."""
+    blocks = []
+    for c in parse_claims(re.split(re.escape(CERT_SECTION), notebook or "")[0]):
+        name = c.get("check")
+        if not name:
+            continue
+        script = (sb / name).resolve()
+        if sb.resolve() not in script.parents or not script.is_file():
+            blocks.append(f"### {c['id']} certificate: MISSING\nThe claim names `{name}`, which is not a file in the sandbox.")
+            continue
+        src = script.read_text(errors="replace")
+        bad = FORBIDDEN_PY_TOKENS.search(src)
+        if bad:
+            blocks.append(f"### {c['id']} certificate: FAILED\nThe checker uses `{bad.group(0)}`, which the sandbox forbids.")
+            continue
+        t0 = time.time()
+        try:
+            r = subprocess.run(sandbox_argv(script), cwd=sb, capture_output=True, text=True, timeout=timeout,
+                               env=clean_env())
+            out, rc = (r.stdout or "") + (r.stderr or ""), r.returncode
+        except subprocess.TimeoutExpired:
+            out, rc = f"timed out after {timeout} s", -1
+        ok = rc == 0 and any(l.strip() == "CERTIFIED" for l in out.splitlines())
+        blocks.append(f"### {c['id']} certificate: {'CERTIFIED' if ok else 'FAILED'}\n"
+                      f"`{name}`: exit {rc}, {time.time() - t0:.1f} s. Last output:\n```\n{out[-1500:]}\n```\n"
+                      f"Checker source ({len(src)} characters):\n```python\n{clip_middle(src, 9000)}\n```")
+    return ("\n\n" + CERT_SECTION + "\n\n" + "\n\n".join(blocks) + "\n") if blocks else ""
 
 
 def engine_status(v: dict) -> str:
@@ -5103,7 +5213,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         f = ck["frontier"]
     else:
         fprompt = FRONTIER_PROMPT.format(statement=statement, lean=lean, context=context, targets=s.targets, angles=s.angles,
-                                         objective_block=FRONTIER_RESOLVE_BLOCK if s.objective == "resolve" else "")
+                                         objective_block=OBJECTIVE_BLOCKS.get(s.objective, ""))
         ft, fc, ferr = _discovery_call(call, "engine-frontier", fprompt, s.frontier_effort, s.frontier_budget)
         spend.add(fc)
         if ft is None and "budget" in str(ferr) and spend.room(1.5 * s.frontier_budget):
@@ -5121,6 +5231,8 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     fblock = frontier_block(f)
     known = clip_middle(fblock + ("\n\nLITERATURE:\n" + s.library if s.library.strip() else ""), 16000)
     sess_context = ("\n" + clip_middle(context, 12000) + "\n") if context else ""
+    if s.objective in ("record", "explicit"):
+        sess_context += CERTIFICATE_ADDENDUM
     have = ck.get("settle_screen") if isinstance(ck.get("settle_screen"), dict) else None
     if s.settle_draws > 0 and sum(1 for d in (have or {}).get("draws") or []
                                   if isinstance(d.get("chance"), (int, float))) < s.settle_draws:
@@ -5156,7 +5268,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     probes = ck.get("probes") if isinstance(ck.get("probes"), list) else None
     if probes is None and s.probe_items > 0:
         items = probe_candidates(gated, s.probe_items)
-        d = decide_item(f) if s.objective == "resolve" else None
+        d = decide_item(f) if s.objective in OBJECTIVE_BLOCKS else None
         if d and items:
             items = [d] + items[:-1]
         if items:
@@ -5190,7 +5302,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         assignments = ck["next"]
     else:
         assignments = engine_assignments(gated, s.sessions, s.core_share)
-        d = decide_item(f) if s.objective == "resolve" else None
+        d = decide_item(f) if s.objective in OBJECTIVE_BLOCKS else None
         if d and assignments and not any(a.get("kind") == "decide" for a in assignments):
             assignments = [d] + assignments[:-1]          # the deciding computation leads; it can settle the problem
     if (not assignments and rounds and len(rounds) < max(1, s.rounds) and not ck.get("partial")
@@ -5800,7 +5912,7 @@ def engine_settle_screen(call, s: "EngineSettings", statement: str, lean: str, f
     counterexample to the informal wording, which the forum had already posted, and which leaves formal-conjectures'
     "for all large x" open (REPORT 3.9)."""
     prompt = DEEP_PLAN_PROMPT.format(statement=statement, lean=lean, frontier=fblock, results=SETTLE_SCREEN_RESULTS,
-                                     objective=DEEP_OBJECTIVES["resolve"])
+                                     objective=DEEP_OBJECTIVES[s.objective if s.objective in ("record", "explicit") else "resolve"])
     draws = list((have or {}).get("draws") or [])
     need = max(0, s.settle_draws - sum(1 for d in draws if isinstance(d.get("chance"), (int, float))))
     if need:
@@ -7375,6 +7487,13 @@ class Harness:
             self.log.event("llm", "response", purpose=purpose, chars=len(text), secs=round(time.time() - t0, 1),
                            cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"), label=label)
             notebook = (sb / "NOTEBOOK.md").read_text() if (sb / "NOTEBOOK.md").exists() else ""
+            if "CHECK" in notebook:
+                section = certificate_checks(sb, notebook)
+                if section:
+                    notebook = re.split(re.escape(CERT_SECTION), notebook)[0].rstrip() + section
+                    (sb / "NOTEBOOK.md").write_text(notebook)
+                    self.log.event("engine", "certificates_checked", label=label,
+                                   verdicts=dict((k, v["verdict"]) for k, v in certificate_check_sections(notebook).items()))
             if notebook.strip() in ("", "## Result\n(not yet)"):
                 runs = (sb / "runs.log").read_text() if (sb / "runs.log").exists() else ""
                 notebook = "## Result\n(no notebook written)\n\n## Reply\n" + text[-4000:] + "\n\n## Data\n" + runs[-6000:]
@@ -14161,7 +14280,7 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-program-lemmas", type=int, default=3, help="open lemmas attacked per cycle")
     runp.add_argument("--engine-program-stall", type=int, default=2,
                       help="cycles in a row without a discharge before the program stops")
-    runp.add_argument("--engine-objective", choices=["advance", "resolve"], default="advance",
+    runp.add_argument("--engine-objective", choices=["advance", "resolve", "record", "explicit"], default="advance",
                       help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
                            "as formalised (resolve, the campaign's setting)")
     runp.add_argument("--discover-attempts", type=int, default=2, help="parallel attempts per round")

@@ -64,6 +64,11 @@ SETTLE_FLOOR = 0.1
 
 DEFAULTS = {
     "daily_cap_usd": 150.0,
+    # The queue's lanes per round (2026-10-15, operator's direction: records and freshness first). `fresh`: problems
+    # formal-conjectures formalized in the last `fresh_days`; `record` and `explicit`: the records survey's candidates
+    # above their floors (79 and 54 unclaimed on 2026-10-15); `settle`: everything else, as before.
+    "mix": {"fresh": 1, "record": 2, "explicit": 1, "settle": 1},
+    "fresh_days": 30, "record_min_score": 2.5, "explicit_min_score": 2.0,
     # Known lines that PARI/GP may now finish: #366's 5,238 open fibres need Thue solving, #686's odd cases need
     # computational arithmetic geometry; #488 has its next rung; #873 has the step-3 significance-2 result.
     "priority": [366, 686, 488, 873],
@@ -93,7 +98,8 @@ DEFAULTS = {
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
     # (candidates, a crosscheck judge, recorded readings) and proves it with the engine's chain as the blueprint.
-    "lean_claims": {"min_significance": 2, "budget": 15.0, "extend": 5.0, "extend_max": 30.0, "cycles": 4,
+    # A record or explicit run's certified claim needs only significance 1: a new record is a new result.
+    "lean_claims": {"min_significance": 2, "record_min_significance": 1, "budget": 15.0, "extend": 5.0, "extend_max": 30.0, "cycles": 4,
                     "child_cycles": 3, "residual_depth": 3},
     "max_errors": 2,
     "fc_sha": None,
@@ -226,6 +232,94 @@ def skip_claimed(n, p: dict, k: int) -> None:
     log(f"#{n}: skipped ({why})")
 
 
+# ---------------------------------------------------------------- tracks (2026-10-15)
+# What a problem is attacked FOR. `settle` is the original aim (the engine's resolve objective). `record` and `explicit`
+# aim at computation-certified results from the records survey (atlas-data/records/survey.py): a new value, term,
+# construction or counterexample with a certificate, and a "sufficiently large" result made explicit and finished by a
+# finite check. The `fresh` lane feeds `settle` with problems formal-conjectures formalized recently. Why: the settle
+# attempts compete with a wave of AI-assisted proof claims (145 of 633 open problems carry one), and the campaign's one
+# complete answer judged new (#769) was a weaker form of two of them.
+LANE_KIND = {"fresh": "settle", "settle": "settle", "record": "record", "explicit": "explicit"}
+OBJECTIVE_OF = {"settle": "resolve", "record": "record", "explicit": "explicit"}
+SURVEY = ROOT / "atlas-data" / "records" / "survey.json"
+FRESH = CAMP / "fresh"
+QUEUE_LANE: dict[int, str] = {}                          # filled by queue(): the lane that placed each problem
+
+
+def stage_flags(cfg: dict, action: str, p: dict) -> str:
+    """A stage's engine flags for this problem's kind: the objective follows the kind."""
+    flags = cfg[action]["flags"]
+    obj = OBJECTIVE_OF.get(p.get("kind") or "settle", "resolve")
+    return flags if obj == "resolve" else flags.replace("--engine-objective resolve", f"--engine-objective {obj}")
+
+
+def newest_problems_db() -> Path | None:
+    return max(FRESH.glob("problems-*.yaml"), default=None) if FRESH.exists() else None
+
+
+OPENISH = ("open", "open (Lean)", "falsifiable", "decidable", "verifiable")
+
+
+def fresh_targets(cfg: dict, now: datetime | None = None) -> list[int]:
+    """Open problems formal-conjectures formalized in the last `fresh_days`, newest first. A new Lean statement is
+    where Lean-verifying AI efforts look next; the campaign can attack it the day it lands (59 such problems on
+    2026-10-15, none of them reachable at the campaign's old pinned commit)."""
+    db = newest_problems_db()
+    if db is None:
+        return []
+    import yaml
+    cut = ((now or datetime.now(timezone.utc)) - timedelta(days=float(cfg.get("fresh_days", 30)))).strftime("%Y-%m-%d")
+    out = [(((p.get("formalized") or {}).get("last_update") or ""), int(p["number"])) for p in yaml.safe_load(db.read_text())
+           if (p.get("status") or {}).get("state") in OPENISH]
+    return [n for lu, n in sorted(out, reverse=True) if lu >= cut]
+
+
+def survey_targets(kind: str, cfg: dict) -> list[int]:
+    """The records survey's candidates for one kind, best first; a problem with claims on the site is never one."""
+    try:
+        d = json.loads(SURVEY.read_text())
+    except (OSError, ValueError):
+        return []
+    floor = float(cfg.get("record_min_score" if kind == "record" else "explicit_min_score", 0) or 0)
+    return [int(x["problem"]) for x in d.get("records" if kind == "record" else "explicit") or []
+            if not x.get("claims") and float(x.get("score") or 0) >= floor]
+
+
+def refresh_sources(cfg: dict, every_hours: float = 6.0) -> bool:
+    """Every few hours: the problems database (formalization dates, statuses), formal-conjectures' head commit, and
+    once a day the records survey. Runs inside the loop, so it needs no scheduler of its own."""
+    stamp = FRESH / "last-refresh"
+    try:
+        if datetime.now(timezone.utc) - datetime.fromisoformat(stamp.read_text().strip()) < timedelta(hours=every_hours):
+            return False
+    except (OSError, ValueError):
+        pass
+    import timesplit as T
+    FRESH.mkdir(parents=True, exist_ok=True)
+    try:
+        T.fetch(T.SOURCES["teorth"], FRESH / f"problems-{datetime.now(timezone.utc):%Y-%m-%d}.yaml", refresh=True)
+        head = json.loads(T.fetch(T.SOURCES["fc_head"], CAMP / "fc-head.json", True))["sha"]
+        with locked(CONFIG):
+            c = json.loads(CONFIG.read_text()) if CONFIG.exists() else {}
+            c["fc_head_sha"] = head
+            atomic_write_json(CONFIG, c, indent=1)
+    except Exception as e:                               # noqa: BLE001 - a network failure waits for the next refresh
+        log(f"source refresh failed: {type(e).__name__}: {str(e)[:200]}")
+        return False
+    if not SURVEY.exists() or time.time() - SURVEY.stat().st_mtime > 86400:
+        subprocess.run([sys.executable, str(ROOT / "atlas-data" / "records" / "survey.py")], cwd=ROOT, capture_output=True,
+                       timeout=3600)
+    stamp.write_text(datetime.now(timezone.utc).isoformat())
+    log("sources refreshed: the problems database, formal-conjectures' head, the records survey")
+    return True
+
+
+def refresh_forum(n: int) -> None:
+    """The problem's page, thread and proof claims, fetched fresh: a claim posted after the screen must stop the spend."""
+    subprocess.run([sys.executable, str(ROOT / "atlas-data" / "fetch_forum.py"), "--refresh", "--problems", str(n)],
+                   cwd=ROOT, capture_output=True, timeout=300)
+
+
 def queue(state: dict, cfg: dict) -> list[int]:
     """The order problems are tried in. The configured priority list first, then every problem the Atlas lists as
     unsolved, least studied first and higher `partial` breaking ties. A problem openai/math claims, one with proof
@@ -246,7 +340,32 @@ def queue(state: dict, cfg: dict) -> list[int]:
     rest = sorted((n for n in unsolved if n not in first),
                   key=lambda n: (-pre.get(n, 0.0), forum_chars(n),
                                  -float(((unsolved[n].get("partial") or {}).get("score")) or 0), n))
-    return [n for n in first + rest if n not in taken and n not in claimed and not site_claims(n)]
+    ok = lambda n: n not in taken and n not in claimed and not site_claims(n)
+    first = [n for n in first if ok(n)]
+    lanes = {"fresh": [n for n in fresh_targets(cfg) if n in unsolved and ok(n)],
+             "record": [n for n in survey_targets("record", cfg) if n in unsolved and ok(n)],
+             "explicit": [n for n in survey_targets("explicit", cfg) if n in unsolved and ok(n)],
+             "settle": [n for n in rest if ok(n)]}
+    # The lanes interleave by weight (`mix`), so one lane's long list never starves the others.
+    mix = cfg.get("mix") or {}
+    weights = [(k, int(mix.get(k, 1))) for k in ("fresh", "record", "explicit", "settle") if int(mix.get(k, 1)) > 0]
+    QUEUE_LANE.clear()
+    QUEUE_LANE.update({n: "settle" for n in first})
+    order, seen, pos = list(first), set(first), {k: 0 for k in lanes}
+    while True:
+        added = False
+        for k, w in weights:
+            for _ in range(w):
+                while pos[k] < len(lanes[k]) and lanes[k][pos[k]] in seen:
+                    pos[k] += 1
+                if pos[k] < len(lanes[k]):
+                    n = lanes[k][pos[k]]
+                    seen.add(n)
+                    order.append(n)
+                    QUEUE_LANE[n] = k
+                    added = True
+        if not added:
+            return order
 
 
 # ---------------------------------------------------------------- preparing a problem
@@ -269,15 +388,21 @@ def prep(n: int, cfg: dict) -> dict:
         atomic_write_json(CONFIG, {**(json.loads(CONFIG.read_text()) if CONFIG.exists() else {}), "fc_sha": cfg["fc_sha"]},
                           indent=1)
     src = T.fetch(T.SOURCES["fc_file"].format(sha=cfg["fc_sha"], n=n), CAMP / "fc" / f"{n}.lean", pause=0.1)
+    sha = cfg["fc_sha"]
+    head = cfg.get("fc_head_sha")
+    if not src.strip() and head and head != sha:
+        # Formalized after the campaign's pinned commit: freeze it at the newest one and remember which, because the
+        # Lean tier checks every inlined declaration at the commit the statement came from.
+        src = T.fetch(T.SOURCES["fc_file"].format(sha=head, n=n), CAMP / "fc" / f"{n}.lean", refresh=True, pause=0.1)
+        sha = head
     fc = T.parse_fc(src, int(n)) if src.strip() else {"error": "no formal-conjectures file"}
     if fc.get("error"):
         return {"ok": False, "why": str(fc["error"])[:200]}
-    subprocess.run([sys.executable, str(ROOT / "atlas-data" / "fetch_forum.py"), "--refresh", "--problems", str(n)],
-                   cwd=ROOT, capture_output=True, timeout=300)
+    refresh_forum(n)
     lib = CAMP / "library" / str(n)
     lib.mkdir(parents=True, exist_ok=True)
     (lib / "DIGEST.md").write_text(_thread_digest()(str(n)))
-    return {"ok": True, "form": fc.get("form")}
+    return {"ok": True, "form": fc.get("form"), "fc_sha": sha}
 
 
 # ---------------------------------------------------------------- running a tier
@@ -564,7 +689,7 @@ def build_lean_run(n: int, engine_run: Path, claim: str, answer: str, frozen: di
     return run_dir
 
 
-def claims_for_lean(run_dir: Path, min_sig: int, skip: set[str]) -> list[str]:
+def claims_for_lean(run_dir: Path, min_sig: int, skip: set[str], certified: bool = False) -> list[str]:
     """Validated-new PROVED claims at `min_sig` or more, strongest first, minus `skip` (the complete answer, which the
     main Lean stage covers, and claims already sent)."""
     import harness as H
@@ -577,6 +702,8 @@ def claims_for_lean(run_dir: Path, min_sig: int, skip: set[str]) -> list[str]:
         v = c.get("validation") or {}
         sig = int((v.get("novelty") or {}).get("significance") or 0)
         k = H.engine_claim_key(c)
+        if certified and c.get("certificate_check") != "CERTIFIED":
+            continue                                     # a record's evidence is its certificate
         if c.get("status") == "PROVED" and v.get("status") == "validated-new" and sig >= min_sig and k not in skip:
             out.append((sig, k))
     return [k for s, k in sorted(out, reverse=True)]
@@ -756,7 +883,12 @@ def step(cfg: dict) -> bool:
                 log(f"#{n}: skipped ({info['why']})")
                 return True
             p["prepped"] = True
-        k = site_claims(n)                               # prep has just refreshed the forum
+            p["fc_sha"] = info.get("fc_sha") or cfg.get("fc_sha")
+        else:
+            refresh_forum(n)                             # a scout of a problem screened days ago
+        p.setdefault("lane", QUEUE_LANE.get(int(n), "settle"))
+        p.setdefault("kind", LANE_KIND.get(p["lane"], "settle"))
+        k = site_claims(n)                               # the forum was just refreshed
         if k:
             skip_claimed(n, p, k)
             return True
@@ -771,8 +903,9 @@ def step(cfg: dict) -> bool:
             save_problem(key, p)
         # a screened problem's scout resumes the screen's run, so its total counts the screen's spend
         row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
-                             cfg[action]["flags"], p.get("run_dir"), on_start=started)
+                             stage_flags(cfg, action, p), p.get("run_dir"), on_start=started)
     elif action in ("deep", "program"):
+        refresh_forum(n)
         k = site_claims(n)
         if k:                                            # a claim posted after the scout, or a scout run before the rule
             skip_claimed(n, p, k)
@@ -781,7 +914,7 @@ def step(cfg: dict) -> bool:
         save_problem(n, p)
         prior = float(p.get("spend") or 0.0)
         log(f"#{n}: {'research program' if action == 'program' else 'deep pass'} on {p['run_dir']}")
-        row, rc = run_screen(n, f"resolve-{action}", prior + cfg[action]["extra"], cfg[action]["flags"], p["run_dir"])
+        row, rc = run_screen(n, f"resolve-{action}", prior + cfg[action]["extra"], stage_flags(cfg, action, p), p["run_dir"])
     elif action == "lean-claim":
         claim = p["claims_todo"][0]
         engine_run = ROOT / p["run_dir"]
@@ -811,7 +944,7 @@ def step(cfg: dict) -> bool:
         save_problem(n, p)
         engine_run = ROOT / p["run_dir"]
         if not p.get("lean_run"):
-            fz = lean_statement(n, engine_run, cfg)
+            fz = lean_statement(n, engine_run, {**cfg, "fc_sha": p.get("fc_sha") or cfg["fc_sha"]})
             if not fz.get("ok"):
                 # nothing spent: a statement that cannot elaborate would end the stage at its first check
                 why = str(fz.get("why") or "unknown")[:300]
@@ -873,7 +1006,10 @@ def step(cfg: dict) -> bool:
     skip = set((p.get("claims_done") or {})) | set(p.get("claims_todo") or [])
     if outcome == "complete":
         skip.add(info["claim"])
-    p["claims_todo"] = (p.get("claims_todo") or []) + claims_for_lean(run_dir, cfg["lean_claims"]["min_significance"], skip)
+    computational = (p.get("kind") or "settle") in ("record", "explicit")
+    p["claims_todo"] = (p.get("claims_todo") or []) + claims_for_lean(
+        run_dir, cfg["lean_claims"]["record_min_significance" if computational else "min_significance"], skip,
+        certified=computational)
     save_problem(n, p)
     result({"problem": n, "tier": action, "outcome": outcome, "spend": delta, "run_dir": row["run_dir"],
             "validated_new": n_new, "significance": sigs, "arm": p.get("arm"),
@@ -1004,6 +1140,8 @@ def loop() -> None:
     log("resolution campaign loop starting")
     while True:
         cfg = load_cfg()
+        if refresh_sources(cfg):
+            cfg = load_cfg()
         spent = spent_since()
         if spent >= cfg["daily_cap_usd"]:
             log(f"daily cap reached (${spent:.2f} of ${cfg['daily_cap_usd']:.0f}); sleeping 1 h")
