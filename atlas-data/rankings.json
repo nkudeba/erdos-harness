@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 145,
+    "manually_reviewed": 146,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ec0aed6bbd9dc1f86ed4bd6d5e71ff697776240c0763cffb6fbe7852bd2e9bc4",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "11b9cf75be0e6e343a119f14704139f853544f7fda6c38a650b3f8e5bac2b388"
+    "manual_reviews_sha256": "98cf96da5a63892ad4a7856d57bce276ae81f01cbc2e9292514c44d84b62b109"
   },
   "problems": [
     {
@@ -33016,6 +33016,7 @@
       "score": 17,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausible for settling the problem in a few days. The team has no validated results. The CORE rests on \"T2\" and \"T10\", which do not exist in the team's record. Closing the CORE also needs an effective K₀ followed by a search over n up to about √k·2^",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -33027,7 +33028,7 @@
         "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -33083,13 +33084,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/1094",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-15",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 588,
       "tier": "Research"
@@ -92237,13 +92245,14 @@
         "distances"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "An optimal bound or classification is requested; a single construction may cover only one direction.",
-        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate."
+        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Choose exact coordinates or a reusable geometric model before proof search.",
@@ -92314,8 +92323,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
