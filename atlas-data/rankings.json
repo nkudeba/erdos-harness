@@ -15,7 +15,7 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "ec0aed6bbd9dc1f86ed4bd6d5e71ff697776240c0763cffb6fbe7852bd2e9bc4",
+    "harness_sha256": "16764950470e76a8c79388e8e83b62977a5c895d430c6cc07cdab1c437685856",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
     "manual_reviews_sha256": "b56a3e43fc759cd2589fd23470133c9e88085418c07564fc5898c40939e56a3d"
   },
@@ -29148,6 +29148,100 @@
       "tier": "Research"
     },
     {
+      "id": 11,
+      "statement": "Is every large odd integer $n$ the sum of a squarefree number and a power of 2?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "number theory",
+        "additive basis"
+      ],
+      "score": 22,
+      "harness": "Untried",
+      "rationale": [
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        }
+      ],
+      "partial": {
+        "score": 49,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Public formalization artifact (1 kind)",
+            "points": 4
+          },
+          {
+            "label": "Library fit",
+            "points": 5
+          },
+          {
+            "label": "Asymptotic core",
+            "points": -6
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
+          "Reachable partial results still need the relevant Mathlib development.",
+          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/11",
+      "manual": false,
+      "prize": "no",
+      "evidence": {
+        "best": "untried",
+        "runs": 0,
+        "benchmarkRuns": 0,
+        "certifiedMax": 0
+      },
+      "rank": 535,
+      "tier": "Research"
+    },
+    {
       "id": 171,
       "statement": "Is it true that for every $\\epsilon>0$ and integer $t\\geq 1$, if $N$ is sufficiently large and $A$ is a subset of $[t]^N$ of size at least $\\epsilon t^N$ then $A$ must contain a combinatorial line $P$ (a set $P=\\{p_1,\\ldots,p_t\\}$ where for each coordinate $1\\leq j\\leq t$ the $j$th coordinate of $p_i$ is either $i$ or constant).",
       "status": "Solved",
@@ -29204,7 +29298,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 535,
+      "rank": 536,
       "tier": "Research"
     },
     {
@@ -29252,7 +29346,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 536,
+      "rank": 537,
       "tier": "Research"
     },
     {
@@ -29302,7 +29396,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 537,
+      "rank": 538,
       "tier": "Research"
     },
     {
@@ -29352,7 +29446,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 538,
+      "rank": 539,
       "tier": "Research"
     },
     {
@@ -29400,7 +29494,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 539,
+      "rank": 540,
       "tier": "Research"
     },
     {
@@ -29453,7 +29547,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 540,
+      "rank": 541,
       "tier": "Research"
     },
     {
@@ -29502,7 +29596,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 541,
+      "rank": 542,
       "tier": "Research"
     },
     {
@@ -29550,7 +29644,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 542,
+      "rank": 543,
       "tier": "Research"
     },
     {
@@ -29599,7 +29693,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 543,
+      "rank": 544,
       "tier": "Research"
     },
     {
@@ -29648,7 +29742,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 544,
+      "rank": 545,
       "tier": "Research"
     },
     {
@@ -29703,7 +29797,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 545,
+      "rank": 546,
       "tier": "Research"
     },
     {
@@ -29776,7 +29870,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 546,
+      "rank": 547,
       "tier": "Research"
     },
     {
@@ -29834,7 +29928,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 547,
+      "rank": 548,
       "tier": "Research"
     },
     {
@@ -29889,7 +29983,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 548,
+      "rank": 549,
       "tier": "Research"
     },
     {
@@ -29943,7 +30037,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 549,
+      "rank": 550,
       "tier": "Research"
     },
     {
@@ -29996,7 +30090,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 550,
+      "rank": 551,
       "tier": "Research"
     },
     {
@@ -30054,7 +30148,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 551,
+      "rank": 552,
       "tier": "Research"
     },
     {
@@ -30110,7 +30204,7 @@
         "benchmarkRuns": 5,
         "certifiedMax": 1
       },
-      "rank": 552,
+      "rank": 553,
       "tier": "Research"
     },
     {
@@ -30168,7 +30262,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 553,
+      "rank": 554,
       "tier": "Research"
     },
     {
@@ -30223,7 +30317,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 554,
+      "rank": 555,
       "tier": "Research"
     },
     {
@@ -30283,7 +30377,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 555,
+      "rank": 556,
       "tier": "Research"
     },
     {
@@ -30362,7 +30456,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 556,
+      "rank": 557,
       "tier": "Research"
     },
     {
@@ -30538,7 +30632,7 @@
         "searchFloor": 4.17e+19
       },
       "brief": "---\nproblem: 699\nupdated: 2026-09-12\nrun: 20260911-195529-727426-erdos699\noutcome: partial\nsolved: false\ncertified: 10\nsearch_floor: 4.17e+19\ncost_usd: 30.54\n---\n\n## What the problem asks\n\nFor any n and positions 1 ≤ i < j ≤ n/2, must the two binomial coefficients C(n,i) and C(n,j) share a prime factor at least i? A binomial coefficient counts choices of a given size. The prime is allowed to equal i. The full statement remains unproved here.\n\n## What we tried\n\nThe inherited research run ended with a session-limit failure in the positive direction and partial results in the negative direction. Its aggregate records contain 10 certified declaration names, 54 model calls, 83 Lean checks, and $30.54 spend. Those counts describe the harness run, not the later operator-assisted continuation. No additional paid harness calls were launched by Codex; Codex session cost is unavailable. The existing published search floor of roughly 4.17 × 10^19 candidate triples was preserved; it was not rerun.\n\nCodex continued directly in Lean using Mathlib's Lucas theorem. Claude repaired one failed proof tactic and moved the results into a shared binomial-coefficient library. This was assisted work, not an autonomous resolution.\n\n## What we found\n\nThe carry lemma and the stronger reduction are mechanically verified: if any number among n,n−1,…,n−i+1 has a prime factor greater than j, that prime divides both binomial coefficients. Therefore a counterexample would force every prime factor of every number in that block to be at most j. This property is called j-smoothness. It is a necessary condition for a counterexample, not a proof that counterexamples are impossible.\n\nThe proposed next route, Conjecture D, is false at (10,3,5). These binomial coefficients are 120 and 252; the shared prime 3 satisfies #699 but is missed by the proposed units-digit test. The test remains useful as a sufficient condition. It can also find primes between i and j, as p=5 at (16,3,7) demonstrates; only the narrower block-prime argument requires p>j.\n\nA later direct argument for i=3 rules out odd n and gives n ≤ (9/4)·4^r+1 for even n, where r counts factors of two in n. Its intermediate numerical checks passed, but it is a written argument for review, not a new Lean-certified result: the separate formal check timed out. It leaves r unbounded and does not address i≥4. Details are in experiments/699-higher-carries/REPORT.md.\n\n## What would move it\n\nFirst audit and finish formalizing the written i=3 localization argument; the prior Lean check timed out. Next bring n−2 into the simultaneous constraints from n and n−1, retaining higher-digit carries and the prime p=i=3. Seek a contradiction valid for every r=v₂(n), or prove an absolute cutoff with a feasible exhaustive check. If this route fails, record the exact obstruction before another research run. A bounded check of r cannot settle the unbounded argument; completing i=3 still leaves i≥4.\n\nThe harness automatically includes these next steps from atlas-data/research-guidance/699.md in its research and proof prompts, including resumed runs. Reuse the certified BinomialCoefficients library, reject the refuted Conjecture D, and preserve the published search floor. Full details and the distinction between certified results and drafts are in the linked research guidance and experiment reports.\n",
-      "rank": 557,
+      "rank": 558,
       "tier": "Research"
     },
     {
@@ -30627,7 +30721,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 558,
+      "rank": 559,
       "tier": "Research"
     },
     {
@@ -30722,7 +30816,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 559,
+      "rank": 560,
       "tier": "Research"
     },
     {
@@ -30806,7 +30900,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 560,
+      "rank": 561,
       "tier": "Research"
     },
     {
@@ -30863,7 +30957,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 561,
+      "rank": 562,
       "tier": "Research"
     },
     {
@@ -30967,7 +31061,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 562,
+      "rank": 563,
       "tier": "Research"
     },
     {
@@ -31022,7 +31116,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 563,
+      "rank": 564,
       "tier": "Research"
     },
     {
@@ -31076,7 +31170,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 564,
+      "rank": 565,
       "tier": "Research"
     },
     {
@@ -31133,7 +31227,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 565,
+      "rank": 566,
       "tier": "Research"
     },
     {
@@ -31188,7 +31282,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 566,
+      "rank": 567,
       "tier": "Research"
     },
     {
@@ -31251,7 +31345,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 567,
+      "rank": 568,
       "tier": "Research"
     },
     {
@@ -31374,7 +31468,7 @@
         ],
         "searchFloor": 1e+22
       },
-      "rank": 568,
+      "rank": 569,
       "tier": "Research"
     },
     {
@@ -31492,7 +31586,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 569,
+      "rank": 570,
       "tier": "Research"
     },
     {
@@ -31599,7 +31693,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 570,
+      "rank": 571,
       "tier": "Research"
     },
     {
@@ -31724,7 +31818,7 @@
         ],
         "searchFloor": 1e+22
       },
-      "rank": 571,
+      "rank": 572,
       "tier": "Research"
     },
     {
@@ -31818,7 +31912,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 572,
+      "rank": 573,
       "tier": "Research"
     },
     {
@@ -31879,7 +31973,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 573,
+      "rank": 574,
       "tier": "Research"
     },
     {
@@ -31965,7 +32059,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 574,
+      "rank": 575,
       "tier": "Research"
     },
     {
@@ -32028,7 +32122,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 575,
+      "rank": 576,
       "tier": "Research"
     },
     {
@@ -32118,7 +32212,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 576,
+      "rank": 577,
       "tier": "Research"
     },
     {
@@ -32202,7 +32296,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 577,
+      "rank": 578,
       "tier": "Research"
     },
     {
@@ -32286,7 +32380,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 578,
+      "rank": 579,
       "tier": "Research"
     },
     {
@@ -32375,7 +32469,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 579,
+      "rank": 580,
       "tier": "Research"
     },
     {
@@ -32459,7 +32553,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 580,
+      "rank": 581,
       "tier": "Research"
     },
     {
@@ -32548,7 +32642,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 581,
+      "rank": 582,
       "tier": "Research"
     },
     {
@@ -32631,7 +32725,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 582,
+      "rank": 583,
       "tier": "Research"
     },
     {
@@ -32715,7 +32809,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 583,
+      "rank": 584,
       "tier": "Research"
     },
     {
@@ -32803,7 +32897,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 584,
+      "rank": 585,
       "tier": "Research"
     },
     {
@@ -32858,7 +32952,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 585,
+      "rank": 586,
       "tier": "Research"
     },
     {
@@ -32912,7 +33006,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 586,
+      "rank": 587,
       "tier": "Research"
     },
     {
@@ -33001,7 +33095,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 587,
+      "rank": 588,
       "tier": "Research"
     },
     {
@@ -33099,7 +33193,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 588,
+      "rank": 589,
       "tier": "Research"
     },
     {
@@ -33153,7 +33247,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 589,
+      "rank": 590,
       "tier": "Research"
     },
     {
@@ -33207,7 +33301,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 590,
+      "rank": 591,
       "tier": "Research"
     },
     {
@@ -33297,7 +33391,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 591,
+      "rank": 592,
       "tier": "Research"
     },
     {
@@ -33352,7 +33446,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 592,
+      "rank": 593,
       "tier": "Research"
     },
     {
@@ -33441,7 +33535,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 593,
+      "rank": 594,
       "tier": "Research"
     },
     {
@@ -33543,7 +33637,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 594,
+      "rank": 595,
       "tier": "Research"
     },
     {
@@ -33628,7 +33722,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 595,
+      "rank": 596,
       "tier": "Research"
     },
     {
@@ -33713,7 +33807,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 596,
+      "rank": 597,
       "tier": "Research"
     },
     {
@@ -33793,7 +33887,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 597,
+      "rank": 598,
       "tier": "Research"
     },
     {
@@ -33873,7 +33967,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 598,
+      "rank": 599,
       "tier": "Research"
     },
     {
@@ -33952,7 +34046,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 599,
+      "rank": 600,
       "tier": "Research"
     },
     {
@@ -34037,7 +34131,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 600,
+      "rank": 601,
       "tier": "Research"
     },
     {
@@ -34091,7 +34185,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 601,
+      "rank": 602,
       "tier": "Research"
     },
     {
@@ -34155,7 +34249,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 602,
+      "rank": 603,
       "tier": "Research"
     },
     {
@@ -34221,7 +34315,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 603,
+      "rank": 604,
       "tier": "Research"
     },
     {
@@ -34305,7 +34399,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 604,
+      "rank": 605,
       "tier": "Research"
     },
     {
@@ -34390,7 +34484,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 605,
+      "rank": 606,
       "tier": "Research"
     },
     {
@@ -34470,7 +34564,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 606,
+      "rank": 607,
       "tier": "Research"
     },
     {
@@ -34555,108 +34649,8 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 607,
-      "tier": "Research"
-    },
-    {
-      "id": 11,
-      "statement": "Is every large odd integer $n$ the sum of a squarefree number and a power of 2?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "number theory",
-        "additive basis"
-      ],
-      "score": 14,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
-      ],
-      "requirements": [
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
-        "Freeze the corrected statement and record the scope choice."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
-          "label": "Statement-interpretation risk",
-          "points": -3
-        }
-      ],
-      "partial": {
-        "score": 49,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Public formalization artifact (1 kind)",
-            "points": 4
-          },
-          {
-            "label": "Library fit",
-            "points": 5
-          },
-          {
-            "label": "Asymptotic core",
-            "points": -6
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "A public Lean/Mathlib artifact or prover run is reported for this problem, so a faithful encoding already exists to build on.",
-          "Reachable partial results still need the relevant Mathlib development.",
-          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/11",
-      "manual": false,
-      "prize": "no",
-      "evidence": {
-        "best": "untried",
-        "runs": 0,
-        "benchmarkRuns": 0,
-        "certifiedMax": 0
-      },
       "rank": 608,
-      "tier": "Frontier"
+      "tier": "Research"
     },
     {
       "id": 23,
@@ -45450,6 +45444,107 @@
       "tier": "Frontier"
     },
     {
+      "id": 15,
+      "statement": "Is it true that\\[\\sum_{n=1}^\\infty(-1)^n\\frac{n}{p_n}\\]converges, where $p_n$ is the sequence of primes?",
+      "status": "Unsolved",
+      "state": "open",
+      "tags": [
+        "number theory",
+        "primes"
+      ],
+      "score": 7,
+      "harness": "Untried",
+      "rationale": [
+        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
+        "An external formal statement is available; this does not establish a formal solution.",
+        "Arithmetic and divisibility match the existing successful proof corpus.",
+        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
+        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate.",
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+      ],
+      "requirements": [
+        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
+        "Prove the asymptotic statement with its full quantifiers and error control.",
+        "Do not expect a short route; scope the attempt to a partial result.",
+        "Freeze the corrected statement and record the scope choice."
+      ],
+      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Base: unresolved target",
+          "points": 15
+        },
+        {
+          "label": "External formal statement exists",
+          "points": 3
+        },
+        {
+          "label": "Library fit: number theory",
+          "points": 5
+        },
+        {
+          "label": "Asymptotic or density target",
+          "points": -9
+        },
+        {
+          "label": "Compact statement",
+          "points": 2
+        },
+        {
+          "label": "Named expert reports difficulty",
+          "points": -6
+        },
+        {
+          "label": "Statement-interpretation risk",
+          "points": -3
+        }
+      ],
+      "partial": {
+        "score": 45,
+        "signals": [
+          {
+            "label": "Base: certified partial results",
+            "points": 20
+          },
+          {
+            "label": "Proved special case available",
+            "points": 18
+          },
+          {
+            "label": "Faithful formal statement exists",
+            "points": 8
+          },
+          {
+            "label": "Library fit",
+            "points": 5
+          },
+          {
+            "label": "Asymptotic core",
+            "points": -6
+          }
+        ],
+        "rationale": [
+          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
+          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
+          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
+          "Reachable partial results still need the relevant Mathlib development.",
+          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
+        ]
+      },
+      "url": "https://www.erdosproblems.com/15",
+      "manual": false,
+      "prize": "no",
+      "evidence": {
+        "best": "untried",
+        "runs": 0,
+        "benchmarkRuns": 0,
+        "certifiedMax": 0
+      },
+      "rank": 722,
+      "tier": "Frontier"
+    },
+    {
       "id": 44,
       "statement": "Let $N\\geq 1$ and $A\\subset \\{1,\\ldots,N\\}$ be a Sidon set. Is it true that, for any $\\epsilon>0$, there exist $M$ and $B\\subset \\{N+1,\\ldots,M\\}$ (which may depend on $N,A,\\epsilon$) such that $A\\cup B\\subset \\{1,\\ldots,M\\}$ is a Sidon set of size at least $(1-\\epsilon)M^{1/2}$?",
       "status": "Unsolved",
@@ -45532,7 +45627,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 722,
+      "rank": 723,
       "tier": "Frontier"
     },
     {
@@ -45642,7 +45737,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 723,
+      "rank": 724,
       "tier": "Frontier"
     },
     {
@@ -45725,7 +45820,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 724,
+      "rank": 725,
       "tier": "Frontier"
     },
     {
@@ -45809,7 +45904,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 725,
+      "rank": 726,
       "tier": "Frontier"
     },
     {
@@ -45911,7 +46006,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 726,
+      "rank": 727,
       "tier": "Frontier"
     },
     {
@@ -45992,7 +46087,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 727,
+      "rank": 728,
       "tier": "Frontier"
     },
     {
@@ -46087,7 +46182,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 728,
+      "rank": 729,
       "tier": "Frontier"
     },
     {
@@ -46199,7 +46294,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 729,
+      "rank": 730,
       "tier": "Frontier"
     },
     {
@@ -46280,7 +46375,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 730,
+      "rank": 731,
       "tier": "Frontier"
     },
     {
@@ -46381,7 +46476,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 731,
+      "rank": 732,
       "tier": "Frontier"
     },
     {
@@ -46455,7 +46550,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 732,
+      "rank": 733,
       "tier": "Frontier"
     },
     {
@@ -46548,7 +46643,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 733,
+      "rank": 734,
       "tier": "Frontier"
     },
     {
@@ -46659,7 +46754,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 734,
+      "rank": 735,
       "tier": "Frontier"
     },
     {
@@ -46734,7 +46829,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 735,
+      "rank": 736,
       "tier": "Frontier"
     },
     {
@@ -46815,7 +46910,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 736,
+      "rank": 737,
       "tier": "Frontier"
     },
     {
@@ -46916,7 +47011,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 737,
+      "rank": 738,
       "tier": "Frontier"
     },
     {
@@ -46992,7 +47087,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 738,
+      "rank": 739,
       "tier": "Frontier"
     },
     {
@@ -47089,7 +47184,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 739,
+      "rank": 740,
       "tier": "Frontier"
     },
     {
@@ -47191,7 +47286,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 740,
+      "rank": 741,
       "tier": "Frontier"
     },
     {
@@ -47294,7 +47389,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 741,
+      "rank": 742,
       "tier": "Frontier"
     },
     {
@@ -47384,7 +47479,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 742,
+      "rank": 743,
       "tier": "Frontier"
     },
     {
@@ -47474,7 +47569,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 743,
+      "rank": 744,
       "tier": "Frontier"
     },
     {
@@ -47565,7 +47660,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 744,
+      "rank": 745,
       "tier": "Frontier"
     },
     {
@@ -47661,7 +47756,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 745,
+      "rank": 746,
       "tier": "Frontier"
     },
     {
@@ -47757,7 +47852,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 746,
+      "rank": 747,
       "tier": "Frontier"
     },
     {
@@ -47852,7 +47947,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 747,
+      "rank": 748,
       "tier": "Frontier"
     },
     {
@@ -47943,7 +48038,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 748,
+      "rank": 749,
       "tier": "Frontier"
     },
     {
@@ -48033,7 +48128,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 749,
+      "rank": 750,
       "tier": "Frontier"
     },
     {
@@ -48129,7 +48224,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 750,
+      "rank": 751,
       "tier": "Frontier"
     },
     {
@@ -48230,7 +48325,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 751,
+      "rank": 752,
       "tier": "Frontier"
     },
     {
@@ -48334,7 +48429,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 752,
+      "rank": 753,
       "tier": "Frontier"
     },
     {
@@ -48424,7 +48519,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 753,
+      "rank": 754,
       "tier": "Frontier"
     },
     {
@@ -48538,7 +48633,7 @@
         ],
         "searchFloor": 8.0
       },
-      "rank": 754,
+      "rank": 755,
       "tier": "Frontier"
     },
     {
@@ -48628,7 +48723,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 755,
+      "rank": 756,
       "tier": "Frontier"
     },
     {
@@ -48724,7 +48819,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 756,
+      "rank": 757,
       "tier": "Frontier"
     },
     {
@@ -48815,7 +48910,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 757,
+      "rank": 758,
       "tier": "Frontier"
     },
     {
@@ -48913,7 +49008,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 758,
+      "rank": 759,
       "tier": "Frontier"
     },
     {
@@ -49008,7 +49103,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 759,
+      "rank": 760,
       "tier": "Frontier"
     },
     {
@@ -49098,7 +49193,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 760,
+      "rank": 761,
       "tier": "Frontier"
     },
     {
@@ -49190,7 +49285,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 761,
+      "rank": 762,
       "tier": "Frontier"
     },
     {
@@ -49290,7 +49385,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 762,
+      "rank": 763,
       "tier": "Frontier"
     },
     {
@@ -49381,7 +49476,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 763,
+      "rank": 764,
       "tier": "Frontier"
     },
     {
@@ -49511,7 +49606,7 @@
         ],
         "searchFloor": 18500000000.0
       },
-      "rank": 764,
+      "rank": 765,
       "tier": "Frontier"
     },
     {
@@ -49590,7 +49685,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 765,
+      "rank": 766,
       "tier": "Frontier"
     },
     {
@@ -49706,7 +49801,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 766,
+      "rank": 767,
       "tier": "Frontier"
     },
     {
@@ -49811,7 +49906,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 767,
+      "rank": 768,
       "tier": "Frontier"
     },
     {
@@ -49930,7 +50025,7 @@
         "searchFloor": 1000000000.0
       },
       "brief": "---\nproblem: 677\nupdated: 2026-09-11\nrun: 20260910-191150-338872-erdos677\noutcome: not_proved\nsolved: false\ncertified: 12\nsearch_floor: 1000000000.0\ncost_usd: 34.25\n---\n\n## What the problem asks\n\nTake a run of whole numbers, say the k numbers just after n: n+1, n+2, up to n+k. Their \"least common multiple\" is the smallest number that every one of them divides into evenly. Call it M(n,k). The question, from Erdős, is whether this value can ever repeat: if you slide the run far enough along the number line so the new run starts at or beyond n+k (that is, m ≥ n+k, so the two runs do not overlap), must the least common multiple always be different? The problem is listed as open on the problem catalogue, and remains open. Nothing here changes that.\n\n## What we tried\n\nWe ran the harness in research mode on the problem, with some context supplied by the operator. Two directions were pursued: trying to prove the statement, and trying to break it by finding one concrete example of a repeat. The proving direction hit an infrastructure error and produced nothing usable. The disproving direction returned partial progress. Alongside the run, an earlier assessment had already reduced the question to more tractable pieces and swept ranges of numbers by computer looking for a repeat. Twelve small side results were written out and machine-checked in the Lean proof system, which verifies each step mechanically. The run cost $34.25 and recorded four infrastructure failures.\n\n## What we found\n\nNo repeat was found, and no proof was produced. The two easiest cases, k = 1 and k = 2 (runs of one or two numbers), are settled by elementary reasoning: there the least common multiple simply grows as you slide along, so it cannot repeat. The general case is untouched. A computer sweep found no example anywhere it looked; the recorded search bound is 1,000,000,000, and its recorded kind is exhaustive, meaning every case in that range was actually enumerated. For the k = 3 case the whole question collapses to one equation in two unknowns, and the only solution found in the swept range involves overlapping runs, which the statement permits. Repeats do occur, but only for runs that overlap by a small gap.\n\n## What would move it\n\nTwo routes. To break the statement, someone needs one explicit triple of numbers (n, k, m) with the runs not overlapping and the two least common multiples equal. Our evidence says not to look by brute force: the swept ranges are empty and the structure found there suggests a bounded search is close to futile. To prove it, someone needs a general argument that works for every run length k at once. The known number-theory tools give results only for one fixed k at a time, and even k = 3 already turns into a hard equation-solving problem. Worth formalising meanwhile: the k ≤ 2 cases, a periodicity fact, and a smoothness fact. Those are side results, not the problem.\n\n*Written automatically at the end of run `20260910-191150-338872-erdos677`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 768,
+      "rank": 769,
       "tier": "Frontier"
     },
     {
@@ -50014,7 +50109,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 769,
+      "rank": 770,
       "tier": "Frontier"
     },
     {
@@ -50125,7 +50220,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 770,
+      "rank": 771,
       "tier": "Frontier"
     },
     {
@@ -50213,7 +50308,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 771,
+      "rank": 772,
       "tier": "Frontier"
     },
     {
@@ -50314,7 +50409,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 772,
+      "rank": 773,
       "tier": "Frontier"
     },
     {
@@ -50399,7 +50494,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 773,
+      "rank": 774,
       "tier": "Frontier"
     },
     {
@@ -50505,7 +50600,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 774,
+      "rank": 775,
       "tier": "Frontier"
     },
     {
@@ -50605,7 +50700,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 775,
+      "rank": 776,
       "tier": "Frontier"
     },
     {
@@ -50705,7 +50800,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 776,
+      "rank": 777,
       "tier": "Frontier"
     },
     {
@@ -50811,7 +50906,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 777,
+      "rank": 778,
       "tier": "Frontier"
     },
     {
@@ -50904,7 +50999,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 778,
+      "rank": 779,
       "tier": "Frontier"
     },
     {
@@ -50991,7 +51086,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 779,
+      "rank": 780,
       "tier": "Frontier"
     },
     {
@@ -51092,7 +51187,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 780,
+      "rank": 781,
       "tier": "Frontier"
     },
     {
@@ -51191,7 +51286,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 781,
+      "rank": 782,
       "tier": "Frontier"
     },
     {
@@ -51282,7 +51377,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 782,
+      "rank": 783,
       "tier": "Frontier"
     },
     {
@@ -51367,7 +51462,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 783,
+      "rank": 784,
       "tier": "Frontier"
     },
     {
@@ -51461,7 +51556,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 784,
+      "rank": 785,
       "tier": "Frontier"
     },
     {
@@ -51553,7 +51648,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 785,
+      "rank": 786,
       "tier": "Frontier"
     },
     {
@@ -51654,7 +51749,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 786,
+      "rank": 787,
       "tier": "Frontier"
     },
     {
@@ -51733,7 +51828,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 787,
+      "rank": 788,
       "tier": "Frontier"
     },
     {
@@ -51816,7 +51911,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 788,
+      "rank": 789,
       "tier": "Frontier"
     },
     {
@@ -51912,7 +52007,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 789,
+      "rank": 790,
       "tier": "Frontier"
     },
     {
@@ -52001,7 +52096,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 790,
+      "rank": 791,
       "tier": "Frontier"
     },
     {
@@ -52087,7 +52182,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 791,
+      "rank": 792,
       "tier": "Frontier"
     },
     {
@@ -52178,7 +52273,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 792,
+      "rank": 793,
       "tier": "Frontier"
     },
     {
@@ -52281,7 +52376,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 793,
+      "rank": 794,
       "tier": "Frontier"
     },
     {
@@ -52384,7 +52479,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 794,
+      "rank": 795,
       "tier": "Frontier"
     },
     {
@@ -52483,7 +52578,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 795,
+      "rank": 796,
       "tier": "Frontier"
     },
     {
@@ -52572,7 +52667,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 796,
+      "rank": 797,
       "tier": "Frontier"
     },
     {
@@ -52719,7 +52814,7 @@
         "searchFloor": 1e+18
       },
       "brief": "---\nproblem: 242\nupdated: 2026-09-24\nrun: 20260923-113735-833279-erdos242\noutcome: partial\nsolved: false\ncertified: 8\nsearch_floor: 1e+18\ncost_usd: 15.94\n---\n\n## What the problem asks\n\nTake any whole number n larger than 2. The question is whether 4/n can always be written as a sum of three fractions of the form 1/x, where x is a whole number and the three x's are all different. Such a fraction, with 1 on top, is called a unit fraction. For example, 4/3 = 1/1 + 1/4 + 1/12. The catalogue lists the problem as open and \"falsifiable\". That means a single number n with no such sum would disprove it. The claim must hold for every n, and nobody has shown that it does.\n\n## What we tried\n\nWe ran an automated research program in two directions. One direction tried to prove the claim. The other tried to find a number n where it fails. Each direction splits the goal into smaller statements. It tries to settle each one and passes the rest to the next cycle. Both directions stopped after 2 cycles because no further piece could be settled. The small results were checked in Lean. Lean is a computer system that verifies proofs line by line. The formal version reads n as a whole number and treats the equation as exact arithmetic with fractions. These are the standard readings. No outside help was recorded. The run cost $15.94.\n\n## What we found\n\nThis work is partial. The problem is not solved. The most useful reduction is this: if 4/p has a sum for a prime p, then so does 4/n for every multiple n of p. A prime is a number whose only divisors are 1 and itself. Explicit formulas then handle every prime except those leaving remainder 1 when divided by 24. Eight lemmas were certified, meaning checked in Lean. They cover several of these formula families. An earlier note on the same day also records extra families based on remainders when divided by 840 and by 11. One open statement remains. It is the hard core of the problem. The summary reduction statements were written in Lean but not proved there. No counterexample was found.\n\n## What would move it\n\nThe run searched for no new numbers. A published check, which we did not rerun, reports that the claim holds for all n up to 10^18. So a counterexample search within reach is not useful. Notes on the problem suggest certifying more of the known published formula families. That would shrink the remaining open case further. It would still not solve the problem. A full answer needs one of two things. The first is one formula that covers all remaining primes. The second is an actual counterexample beyond the checked range. The counterexample stage failed in every cycle of an earlier run on this problem. It has since been fixed, so later runs should use the working version.\n\n*Written automatically at the end of run `20260923-113735-833279-erdos242`. A machine-checked proof certifies the statement it names, not the problem; nothing here has had independent human review.*\n",
-      "rank": 797,
+      "rank": 798,
       "tier": "Frontier"
     },
     {
@@ -52812,7 +52907,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 798,
+      "rank": 799,
       "tier": "Frontier"
     },
     {
@@ -52898,7 +52993,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 799,
+      "rank": 800,
       "tier": "Frontier"
     },
     {
@@ -52999,7 +53094,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 800,
+      "rank": 801,
       "tier": "Frontier"
     },
     {
@@ -53094,7 +53189,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 801,
+      "rank": 802,
       "tier": "Frontier"
     },
     {
@@ -53175,7 +53270,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 802,
+      "rank": 803,
       "tier": "Frontier"
     },
     {
@@ -53289,7 +53384,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 803,
+      "rank": 804,
       "tier": "Frontier"
     },
     {
@@ -53369,7 +53464,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 804,
+      "rank": 805,
       "tier": "Frontier"
     },
     {
@@ -53489,7 +53584,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 805,
+      "rank": 806,
       "tier": "Frontier"
     },
     {
@@ -53585,7 +53680,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 806,
+      "rank": 807,
       "tier": "Frontier"
     },
     {
@@ -53665,7 +53760,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 807,
+      "rank": 808,
       "tier": "Frontier"
     },
     {
@@ -53762,7 +53857,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 808,
+      "rank": 809,
       "tier": "Frontier"
     },
     {
@@ -53842,7 +53937,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 809,
+      "rank": 810,
       "tier": "Frontier"
     },
     {
@@ -53924,7 +54019,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 810,
+      "rank": 811,
       "tier": "Frontier"
     },
     {
@@ -54019,7 +54114,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 811,
+      "rank": 812,
       "tier": "Frontier"
     },
     {
@@ -54104,7 +54199,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 812,
+      "rank": 813,
       "tier": "Frontier"
     },
     {
@@ -54184,7 +54279,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 813,
+      "rank": 814,
       "tier": "Frontier"
     },
     {
@@ -54298,7 +54393,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 814,
+      "rank": 815,
       "tier": "Frontier"
     },
     {
@@ -54383,7 +54478,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 815,
+      "rank": 816,
       "tier": "Frontier"
     },
     {
@@ -54485,7 +54580,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 816,
+      "rank": 817,
       "tier": "Frontier"
     },
     {
@@ -54581,7 +54676,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 817,
+      "rank": 818,
       "tier": "Frontier"
     },
     {
@@ -54676,7 +54771,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 818,
+      "rank": 819,
       "tier": "Frontier"
     },
     {
@@ -54766,7 +54861,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 819,
+      "rank": 820,
       "tier": "Frontier"
     },
     {
@@ -54861,7 +54956,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 820,
+      "rank": 821,
       "tier": "Frontier"
     },
     {
@@ -54944,7 +55039,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 821,
+      "rank": 822,
       "tier": "Frontier"
     },
     {
@@ -55040,7 +55135,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 822,
+      "rank": 823,
       "tier": "Frontier"
     },
     {
@@ -55136,7 +55231,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 823,
+      "rank": 824,
       "tier": "Frontier"
     },
     {
@@ -55222,7 +55317,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 824,
+      "rank": 825,
       "tier": "Frontier"
     },
     {
@@ -55323,7 +55418,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 825,
+      "rank": 826,
       "tier": "Frontier"
     },
     {
@@ -55403,7 +55498,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 826,
+      "rank": 827,
       "tier": "Frontier"
     },
     {
@@ -55499,7 +55594,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 827,
+      "rank": 828,
       "tier": "Frontier"
     },
     {
@@ -55600,7 +55695,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 828,
+      "rank": 829,
       "tier": "Frontier"
     },
     {
@@ -55706,7 +55801,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 829,
+      "rank": 830,
       "tier": "Frontier"
     },
     {
@@ -55792,7 +55887,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 830,
+      "rank": 831,
       "tier": "Frontier"
     },
     {
@@ -55893,7 +55988,7 @@
         "benchmarkRuns": 3,
         "certifiedMax": 0
       },
-      "rank": 831,
+      "rank": 832,
       "tier": "Frontier"
     },
     {
@@ -55978,7 +56073,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 832,
+      "rank": 833,
       "tier": "Frontier"
     },
     {
@@ -56064,7 +56159,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 833,
+      "rank": 834,
       "tier": "Frontier"
     },
     {
@@ -56149,7 +56244,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 834,
+      "rank": 835,
       "tier": "Frontier"
     },
     {
@@ -56248,7 +56343,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 835,
+      "rank": 836,
       "tier": "Frontier"
     },
     {
@@ -56348,7 +56443,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 836,
+      "rank": 837,
       "tier": "Frontier"
     },
     {
@@ -56435,7 +56530,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 837,
+      "rank": 838,
       "tier": "Frontier"
     },
     {
@@ -56555,7 +56650,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 838,
+      "rank": 839,
       "tier": "Frontier"
     },
     {
@@ -56665,7 +56760,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 839,
+      "rank": 840,
       "tier": "Frontier"
     },
     {
@@ -56786,7 +56881,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 840,
+      "rank": 841,
       "tier": "Frontier"
     },
     {
@@ -56806,13 +56901,11 @@
         "An external formal statement is available; this does not establish a formal solution.",
         "Finite set machinery is available; global additive structure can demand deep theorems.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
-        "The statement or its discussion mentions deep additive or extremal machinery; that is a possible dependency to audit, not an assumed theorem requirement.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "The statement or its discussion mentions deep additive or extremal machinery; that is a possible dependency to audit, not an assumed theorem requirement."
       ],
       "requirements": [
         "Identify whether an explicit finite construction settles the full quantifiers.",
-        "Prove the asymptotic statement with its full quantifiers and error control.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
+        "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
       "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
@@ -56838,12 +56931,8 @@
           "points": -7
         },
         {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
           "label": "Score floor / ceiling",
-          "points": 10
+          "points": 2
         }
       ],
       "partial": {
@@ -56884,117 +56973,6 @@
         ]
       },
       "url": "https://www.erdosproblems.com/14",
-      "manual": false,
-      "prize": "no",
-      "evidence": {
-        "best": "untried",
-        "runs": 0,
-        "benchmarkRuns": 0,
-        "certifiedMax": 0
-      },
-      "rank": 841,
-      "tier": "Frontier"
-    },
-    {
-      "id": 15,
-      "statement": "Is it true that\\[\\sum_{n=1}^\\infty(-1)^n\\frac{n}{p_n}\\]converges, where $p_n$ is the sequence of primes?",
-      "status": "Unsolved",
-      "state": "open",
-      "tags": [
-        "number theory",
-        "primes"
-      ],
-      "score": 1,
-      "harness": "Untried",
-      "rationale": [
-        "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
-        "An external formal statement is available; this does not establish a formal solution.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "A named mathematician states in the discussion that the problem resists the obvious approaches; that is stronger evidence than a text-pattern estimate.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
-      ],
-      "requirements": [
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
-        "Prove the asymptotic statement with its full quantifiers and error control.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
-        "Do not expect a short route; scope the attempt to a partial result.",
-        "Freeze the corrected statement and record the scope choice."
-      ],
-      "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: unresolved target",
-          "points": 15
-        },
-        {
-          "label": "External formal statement exists",
-          "points": 3
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Asymptotic or density target",
-          "points": -9
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        },
-        {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
-          "label": "Named expert reports difficulty",
-          "points": -6
-        },
-        {
-          "label": "Statement-interpretation risk",
-          "points": -3
-        },
-        {
-          "label": "Score floor / ceiling",
-          "points": 2
-        }
-      ],
-      "partial": {
-        "score": 45,
-        "signals": [
-          {
-            "label": "Base: certified partial results",
-            "points": 20
-          },
-          {
-            "label": "Proved special case available",
-            "points": 18
-          },
-          {
-            "label": "Faithful formal statement exists",
-            "points": 8
-          },
-          {
-            "label": "Library fit",
-            "points": 5
-          },
-          {
-            "label": "Asymptotic core",
-            "points": -6
-          }
-        ],
-        "rationale": [
-          "Partial value is judged on lemmas the harness could certify, not on resolving the problem.",
-          "The discussion reports a proved special case or partial result; formalizing one is a complete, checkable contribution that does not overclaim.",
-          "An external formal statement removes the encoding risk, so effort goes into the mathematics rather than the contract.",
-          "Reachable partial results still need the relevant Mathlib development.",
-          "The substance is asymptotic, so finite lemmas stay peripheral to the actual question."
-        ]
-      },
-      "url": "https://www.erdosproblems.com/15",
       "manual": false,
       "prize": "no",
       "evidence": {
