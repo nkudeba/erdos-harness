@@ -297,3 +297,9 @@
 [2026-10-16T02:34:15Z] #1068: screen -> screened out (settle chance 0.17, draws [0.3, 0.05]; $2.81)
 [2026-10-16T02:34:25Z] #197: screen
 [2026-10-16T02:48:11Z] #197: screen -> screened out (settle chance 0.06, draws [0.07, 0.04]; $1.91)
+[2026-10-16T02:48:19Z] #1133: skipped (1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped))
+[2026-10-16T02:48:23Z] #1192: screen
+[2026-10-16T03:07:21Z] resolution campaign loop starting
+[2026-10-16T03:07:21Z] another harness run is live; waiting for the lane
+[2026-10-16T03:26:26Z] #873: screen (resuming runs/20261015-191351-260620-erdos873)
+[2026-10-16T03:27:36Z] #873: screen -> screened out (settle chance 0.01, draws [0.02, 0.01]; $0.56); BUILD TRACK: its line's main target is rated new at significance 2 if proved (P_WEEK 0.375)

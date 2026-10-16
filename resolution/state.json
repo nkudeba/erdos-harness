@@ -77,12 +77,24 @@
      "settle_chance": 0.015,
      "spend": 5.738,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rate the screen's lines (operator)"
+    },
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.015,
+     "spend": 0.5574,
+     "track": "build",
+     "route": "build"
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 5.738016,
+   "spend": 6.295420000000001,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -98,13 +110,23 @@
    "rescreen_at": "20261015-122832",
    "kind": "settle",
    "lane": "rescreen",
-   "next": null,
-   "status": "screened out",
+   "next": "build",
+   "status": "build",
    "run_dir": "runs/20261015-191351-260620-erdos873",
    "settle_chance": 0.015,
    "arm": "screened out",
-   "track": null,
-   "intent": null
+   "track": "build",
+   "intent": null,
+   "build": {
+    "line": "resolution/build/873/line.md",
+    "draw": "D1",
+    "significance": 2,
+    "p_week": 0.375,
+    "reach": "medium",
+    "value": 0.75,
+    "why": "A divisor-cluster bound exp(C(θ)(ω(n)+1)), uniform in the primes, looks obtainable from the quantitative Subspace/S-unit theorems (Evertse–Schlickewei) but I know no published statement; it would force any counterexample to have ω(L)→∞, a solid structural partial result but not the uniform DCC core.",
+    "summary": "=== GOAL No line I can defend is likely to settle the problem. I am therefore choosing a major-progress line, and I say so here. Why no settling line. The formal statement is equivalent to the Divisor Cluster Conjecture (DCC), uniformly in n: - Packing gives D"
+   }
   },
   "655": {
    "history": [
@@ -295,6 +317,10 @@
      "settle_chance": 0.0,
      "spend": 2.4339,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rate the screen's lines (operator)"
     }
    ],
    "prepped": true,
@@ -316,8 +342,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "settle",
    "lane": "rescreen",
-   "next": null,
-   "status": "screened out",
+   "next": "screen",
+   "status": "rating",
    "run_dir": "runs/20261015-195538-196587-erdos32",
    "settle_chance": 0.0,
    "arm": "screened out",
@@ -403,6 +429,10 @@
      "settle_chance": 0.14,
      "spend": 2.1382,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rate the screen's lines (operator)"
     }
    ],
    "prepped": true,
@@ -424,8 +454,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "settle",
    "lane": "rescreen",
-   "next": null,
-   "status": "screened out",
+   "next": "screen",
+   "status": "rating",
    "run_dir": "runs/20261015-205853-418570-erdos517",
    "settle_chance": 0.14,
    "arm": "screened out",
@@ -457,6 +487,10 @@
      "settle_chance": 0.175,
      "spend": 2.8108,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rate the screen's lines (operator)"
     }
    ],
    "prepped": true,
@@ -478,8 +512,8 @@
    "rescreen_at": "20261015-122832",
    "kind": "settle",
    "lane": "rescreen",
-   "next": null,
-   "status": "screened out",
+   "next": "screen",
+   "status": "rating",
    "run_dir": "runs/20261015-221403-908505-erdos1068",
    "settle_chance": 0.175,
    "arm": "screened out",
@@ -550,6 +584,10 @@
      "settle_chance": 0.055,
      "spend": 1.9067,
      "track": null
+    },
+    {
+     "tier": "queue",
+     "outcome": "rate the screen's lines (operator)"
     }
    ],
    "prepped": true,
@@ -571,8 +609,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "settle",
    "lane": "rescreen",
-   "next": null,
-   "status": "screened out",
+   "next": "screen",
+   "status": "rating",
    "run_dir": "runs/20261015-223425-126371-erdos197",
    "settle_chance": 0.055,
    "arm": "screened out",
@@ -590,6 +628,11 @@
     {
      "tier": "queue",
      "outcome": "rescreen as settle (operator)"
+    },
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
     }
    ],
    "prepped": true,
@@ -609,8 +652,9 @@
    "rescreen_at": "20261015-122832",
    "kind": "settle",
    "lane": "rescreen",
-   "next": "screen",
-   "status": "rescreen"
+   "next": null,
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
   },
   "295": {
    "history": [
@@ -2513,7 +2557,7 @@
     }
    ],
    "prepped": true,
-   "running": null,
+   "running": "screen",
    "spend": 0.0,
    "limit_waits": 0,
    "previous": {
@@ -2531,7 +2575,8 @@
    "kind": "explicit",
    "lane": "rescreen",
    "next": "screen",
-   "status": "rescreen"
+   "status": "rescreen",
+   "run_dir": "runs/20261015-224823-203474-erdos1192"
   },
   "1088": {
    "history": [
