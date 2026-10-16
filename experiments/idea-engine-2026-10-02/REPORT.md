@@ -1419,6 +1419,40 @@ where new results are still to be had. Not yet run on a live problem.
   - The gate flags at least one more problem as already settled before any map is bought.
   - A program pass on #686 or #103 raises its validated results.
 
+**3.14: the build track — hard problems get a program that builds toward them (2026-10-16).**
+- **The operator's diagnosis:** the campaign kept screening out the hard problems because they need new mathematics,
+  instead of building that mathematics. The data agree on two counts.
+  - **The screen threw the line away.** When no settling line is plausible, the resolve objective tells the deep plan to
+    choose the line with the best chance of major progress and say so. Both 2026-10-15 re-screens did, and both were
+    screened out on their SETTLE CHANCE alone (0.01, 0.00).
+    - #873: the formal statement is equivalent to a uniform divisor-cluster conjecture. The line is a uniform bound
+      K ≤ exp(C(θ)(ω(n)+1)) on divisors of n in short multiplicative intervals, with a corollary: any counterexample
+      needs window lcms with ω → ∞. A second draw proposed the case of few prime factors.
+    - #32: a covering lemma CL(K) toward Erdős's $50 question (every complement has B(X)/log X → ∞), with the first
+      improvement on Ruzsa 1998 (liminf B(X)/log X ≥ e^γ + δ) as its fallback. The literature gate had found a 2026
+      paper claiming B(X) ≫ log X log log X, and the map called it suspect. A build pass must settle that first.
+  - **The program aimed at the wrong target.** The research program's prompt pinned its skeleton to the formal statement.
+    On a hard problem its hardest lemma is the open core itself, so a program could only bank side results (#1199's
+    program: 5 validated, every one significance 1 or 0).
+- **What changed** (`544451c`):
+  - The screen: below the 0.3 bar, the target-rating judges rate each draw's line as if its main target were proved.
+  - Routing: a screened-out problem whose best line is rated new at significance ≥ 2 goes to the build track, instead
+    of out. The settle arms are unchanged.
+  - The program on a line: its target is the line's main theorem. A closed skeleton is a RUNG, banked under its key;
+    the next plan builds on it by `USE: R1`, toward the line's stretch goal. Each rung at significance ≥ 2 goes to Lean
+    as a partial result.
+  - Pacing: build passes take at most 60% of the daily cap while screens wait. They continue while a pass proves a
+    rung or establishes a lemma, up to 4 passes and $400 a problem.
+- **Also on 3.13's criteria:** #695, re-screened as a record target, passed at 0.55 (draws 0.6, 0.5). That is the first
+  re-screen to pass the bar.
+- **Predictions, recorded before any build pass runs:**
+  - Of the screened-out problems rated (#873, #32, #517 first, then the queued re-screens), at least half have a line
+    rated new at significance ≥ 2.
+  - Across the first three build problems, at most two passes each, P(at least one rung judged new at significance
+    ≥ 2) ≈ 0.4.
+  - P(such a rung passes the Lean audit by the 2026-10-20 usage reset) ≈ 0.15.
+  - A rung is a partial result. A program reaching the full problem this week is not expected.
+
 **A campaign bug, found 2026-10-14: the Lean tier could not compile #655's statement.**
 - **What happened.**
   - #655's scout settled formal-conjectures' statement: answer false, along a line the intent judges call a

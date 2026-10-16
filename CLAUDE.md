@@ -1193,6 +1193,35 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
     sleeping or a battery from running out.
   - A loop started in the Claude app's terminal is a child of the app, so quitting or updating the app ends it.
 
+**The build track (2026-10-16): problems that need new mathematics get a program that builds it.**
+- **Why.** The operator: the campaign kept screening out the hard problems because they need new mathematics, instead
+  of building it.
+  - The screen read only the deep plan's SETTLE CHANCE. With no settling line, the resolve objective tells the plan to
+    choose a major-progress line and say so. Both 2026-10-15 re-screens did (#873, #32), and both were dropped.
+  - The research program pinned its skeleton to the formal statement. On a hard problem its hardest lemma was the open
+    core itself, so a program banked only side results.
+- **The screen** (`--engine-progress-rate`, in the campaign's screen flags): below the pass bar, the target-rating
+  judges rate each draw's line as if its main target were proved (`engine_progress_lines`).
+  - Draws now keep their whole plan (`text`). Older screens' plans come from their transcripts (`screen_plan_text`).
+- **Routing** (`finish_screen`, `build_line`): a screened-out problem whose best line is rated `new` at significance ≥ 2
+  (`progress_best`) goes to the build track, with its line in `resolution/build/<n>/line.md`. The settle arms stay as
+  they were, so the screen's measurement holds.
+- **The program on a line** (`--engine-program-line-file`, `PROGRAM_BUILD`): the skeleton's target is the line's main
+  theorem.
+  - A closed skeleton is a **rung**: assembled and judged in its own notebook (`program-R1`, ...), banked under its key.
+  - The next plan builds on it by `USE: R1`, toward the line's stretch goal.
+  - A target already proved is refused. A rung made only of reused results counts toward the stall.
+  - Each rung at significance ≥ 2 goes to Lean as a partial result.
+  - The settle program's prompts render byte-for-byte as before.
+- **Pacing:**
+  - a build pass resumes the screen's run: no sessions, no deep dive, 8 cycles, $80 of program budget;
+  - build passes take at most 60% of the daily cap while screens wait;
+  - another pass follows while a pass proves a rung or establishes a lemma, up to 4 passes and $400 a problem.
+- `python3 resolution.py build --problem N` sends an old screened-out problem to the track. It rates the lines first,
+  by resuming the problem's screen run (about $1).
+- A rung is informal until its Lean run passes the audit. A partial result on an open problem is never a resolution.
+- Covered by `BuildTrack` in `tests/test_engine.py` and `tests/test_resolution.py`.
+
 **PARI/GP in the research sandbox (2026-10-08).** `cypari2` (PARI 2.15.4) is an allowed module for every model-written
 script, and the session prompt names its Thue, class-group, elliptic-curve and rational-point functions. Both v6 full
 runs had stopped at a significance-2 step with "infeasible without PARI/Magma". Three layers keep scripts contained:
