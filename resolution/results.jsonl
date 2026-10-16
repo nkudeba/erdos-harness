@@ -202,3 +202,4 @@
 {"at": "2026-10-15T23:55:29Z", "problem": 873, "tier": "screen", "outcome": "screened out", "settle_chance": 0.015, "draws": [0.02, 0.01], "spend": 5.738, "run_dir": "runs/20261015-191351-260620-erdos873", "track": null, "intent": null}
 {"at": "2026-10-16T00:12:54Z", "problem": 32, "tier": "screen", "outcome": "screened out", "settle_chance": 0.0, "draws": [0.0, 0.0], "spend": 2.4339, "run_dir": "runs/20261015-195538-196587-erdos32", "track": null, "intent": null}
 {"at": "2026-10-16T00:58:42Z", "problem": 695, "tier": "screen", "outcome": "pass", "settle_chance": 0.55, "draws": [0.6, 0.5], "spend": 5.9045, "run_dir": "runs/20261015-201304-106144-erdos695", "track": "new-math", "intent": "unclear"}
+{"at": "2026-10-16T01:13:54Z", "problem": 517, "tier": "screen", "outcome": "screened out", "settle_chance": 0.14, "draws": [0.03, 0.25], "spend": 2.1382, "run_dir": "runs/20261015-205853-418570-erdos517", "track": null, "intent": null}
