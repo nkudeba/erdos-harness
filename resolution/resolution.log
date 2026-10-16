@@ -315,3 +315,5 @@
 [2026-10-16T03:30:23Z] #1192: screen -> screened out (settle chance 0.01, draws [0.02, 0.01]; $5.24); BUILD TRACK: its line's main target is rated new at significance 3 if proved (P_WEEK 0.03)
 [2026-10-16T03:30:32Z] #1088: screen
 [2026-10-16T04:05:06Z] #1088: screen -> screened out (settle chance 0.04, draws [0.03, 0.04]; $4.83)
+[2026-10-16T04:05:12Z] daily cap reached ($153.88 of $150); sleeping 1 h
+[2026-10-16T04:44:21Z] #32: build held: build target claimed by arXiv:2610.14127 (A. O. Radomskii, 'A lower bound for additive complements to the primes', 9 Oct 2026): B(X) >> log X log log X for every additive complement of the primes, i.e. the line's target B(X)/log X -> infinity and its fallback; unverified

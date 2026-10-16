@@ -329,6 +329,10 @@
      "spend": 0.4331,
      "track": "build",
      "route": "build"
+    },
+    {
+     "tier": "queue",
+     "outcome": "build held (operator session): build target claimed by arXiv:2610.14127 (A. O. Radomskii, 'A lower bound for additive complements to the primes', 9 Oct 2026): B(X) >> log X log log X for every additive complement of the primes, i.e. the line's target B(X)/log X -> infinity and its fallback; unverified"
     }
    ],
    "prepped": true,
@@ -350,8 +354,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "settle",
    "lane": "rescreen",
-   "next": "build",
-   "status": "build",
+   "next": null,
+   "status": "build-held",
    "run_dir": "runs/20261015-195538-196587-erdos32",
    "settle_chance": 0.0,
    "arm": "screened out",
@@ -366,6 +370,11 @@
     "value": 0.075,
     "why": "Proving B(X)/log X -> infinity for every additive complement is Ruzsa's open Conjecture 2 and would negatively answer Erdős's $50 O(log N) question. The route needs a uniform Erdős–Rankin/hypergraph covering lemma for arbitrary sets of size Ky, well beyond current FGKMT-type technology in a week.",
     "summary": "=== GOAL No settling line is plausible. This line aims at major progress (significance 3), not at settling. The formal `erdos_32` asks for a complement with $B(N)=o(\\log^2N)$. It can be settled in only two ways, and both are blocked: - Disproof. This needs $\\l"
+   },
+   "held": {
+    "why": "build target claimed by arXiv:2610.14127 (A. O. Radomskii, 'A lower bound for additive complements to the primes', 9 Oct 2026): B(X) >> log X log log X for every additive complement of the primes, i.e. the line's target B(X)/log X -> infinity and its fallback; unverified",
+    "source": "arXiv:2610.14127",
+    "at": "2026-10-16T04:44:21Z"
    }
   },
   "695": {
