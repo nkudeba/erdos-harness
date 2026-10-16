@@ -1186,8 +1186,12 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   - a daily cap in `resolution/config.json`, default $150;
   - usage limits are waited out.
 - **Running it unattended is the operator's decision.** The permission system refused both a LaunchAgent and a loop
-  started from a session. Run `caffeinate -s python3 resolution.py loop` yourself, or `python3 resolution.py once` for
+  started from a session. Run `caffeinate -is python3 resolution.py loop` yourself, or `python3 resolution.py once` for
   one stage; `python3 resolution.py status` shows where it is.
+  - `-s` alone holds nothing on battery: macOS honours it only on mains power. `-i` blocks idle sleep on battery too
+    (found 2026-10-16, with the loop on 61% battery under a 1-minute sleep timer). Neither flag stops a closed lid from
+    sleeping or a battery from running out.
+  - A loop started in the Claude app's terminal is a child of the app, so quitting or updating the app ends it.
 
 **PARI/GP in the research sandbox (2026-10-08).** `cypari2` (PARI 2.15.4) is an allowed module for every model-written
 script, and the session prompt names its Thue, class-group, elliptic-curve and rational-point functions. Both v6 full
