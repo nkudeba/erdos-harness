@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "3fd09f06dd768115601f35e730110ea26b09b6d33367d147e40017482f3c26f6",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "3e46e827b12eea3a53b73e381e18c4c812c9b053d808afd342e8be70edbccbff"
+    "manual_reviews_sha256": "c415a29470f7bb08ef61fdc430f406bbaf81294c061fe0d05e2087922ce3840f"
   },
   "problems": [
     {
@@ -30392,13 +30392,14 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.05, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (YES direction). Exhibit sliver sequences s_k, s'_k → ∞ with s_k, s'_k = o(a_k), and set - b_k = 2a_k − s_k, - a_{k+1} = 2b_k − s'_k, - A = {small explicit set} ∪ ⋃_k (a_k, b_k], and B = ℕ ∖ A. Then prove that both A and B are permutable. He",
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.06, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (the YES direction, via a restricted family). There exist: - a k-automatic set A ⊆ ℕ, with base 2 or 4 and few states, such that A and B = ℕ∖A are both infinite; - automatic binary relations ≺_A on A and ≺_B on B, each a strict total order i",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -30445,12 +30446,12 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 1,
+        "runs": 2,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-14",
+        "on": "2026-10-15",
         "sources": [
           "resolution/results.jsonl"
         ],
@@ -49275,7 +49276,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 2,
+        "runs": 3,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -87189,6 +87190,7 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.17, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible on the mathematics alone, so the chosen line is aimed at major progress (significance 3). It has a cheap settling check bolted on as Step 0. The 0.04 is almost entirely the chance that Step 0 finds a degenerate convention in the f",
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.17, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line. Audit the exact Lean definitions of `InfinitelyConnected` and `chromaticCardinal`. Then prove `erdos_1068` outright if `InfinitelyConnected` is degenerate on very small induced subgraphs (empty, one vertex, or one edge). Statement to prove (degenerat",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Set-theoretic independence and infinite-cardinal arguments do not fit the current arithmetic-heavy workflow.",
@@ -87202,7 +87204,7 @@
         "Do not expect a short route; scope the attempt to a partial result."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-14 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -87270,7 +87272,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-14",
+        "on": "2026-10-15",
         "sources": [
           "resolution/results.jsonl"
         ],

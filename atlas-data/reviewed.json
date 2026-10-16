@@ -353,12 +353,13 @@
   },
   "197": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.05, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (YES direction). Exhibit sliver sequences s_k, s'_k → ∞ with s_k, s'_k = o(a_k), and set - b_k = 2a_k − s_k, - a_{k+1} = 2b_k − s'_k, - A = {small explicit set} ∪ ⋃_k (a_k, b_k], and B = ℕ ∖ A. Then prove that both A and B are permutable. He"
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.05, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (YES direction). Exhibit sliver sequences s_k, s'_k → ∞ with s_k, s'_k = o(a_k), and set - b_k = 2a_k − s_k, - a_{k+1} = 2b_k − s'_k, - A = {small explicit set} ∪ ⋃_k (a_k, b_k], and B = ℕ ∖ A. Then prove that both A and B are permutable. He",
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.06, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to prove (the YES direction, via a restricted family). There exist: - a k-automatic set A ⊆ ℕ, with base 2 or 4 and few states, such that A and B = ℕ∖A are both infinite; - automatic binary relations ≺_A on A and ≺_B on B, each a strict total order i"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-14"
+    "assessed": "2026-10-15"
   },
   "198": {
     "rationale": [
@@ -1887,12 +1888,13 @@
   },
   "1068": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.17, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible on the mathematics alone, so the chosen line is aimed at major progress (significance 3). It has a cheap settling check bolted on as Step 0. The 0.04 is almost entirely the chance that Step 0 finds a degenerate convention in the f"
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.17, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible on the mathematics alone, so the chosen line is aimed at major progress (significance 3). It has a cheap settling check bolted on as Step 0. The 0.04 is almost entirely the chance that Step 0 finds a degenerate convention in the f",
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.17, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line. Audit the exact Lean definitions of `InfinitelyConnected` and `chromaticCardinal`. Then prove `erdos_1068` outright if `InfinitelyConnected` is degenerate on very small induced subgraphs (empty, one vertex, or one edge). Statement to prove (degenerat"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-14"
+    "assessed": "2026-10-15"
   },
   "1083": {
     "rationale": [
