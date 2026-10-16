@@ -2604,11 +2604,19 @@
     {
      "tier": "queue",
      "outcome": "rescreen as explicit (operator)"
+    },
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.015,
+     "spend": 5.2395,
+     "track": "build",
+     "route": "build"
     }
    ],
    "prepped": true,
-   "running": "screen",
-   "spend": 0.0,
+   "running": null,
+   "spend": 5.239504,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -2624,9 +2632,23 @@
    "rescreen_at": "20261015-122832",
    "kind": "explicit",
    "lane": "rescreen",
-   "next": "screen",
-   "status": "rescreen",
-   "run_dir": "runs/20261015-224823-203474-erdos1192"
+   "next": "build",
+   "status": "build",
+   "run_dir": "runs/20261015-224823-203474-erdos1192",
+   "settle_chance": 0.015,
+   "arm": "screened out",
+   "track": "build",
+   "intent": null,
+   "build": {
+    "line": "resolution/build/1192/line.md",
+    "draw": "D2",
+    "significance": 3,
+    "p_week": 0.03,
+    "reach": "low",
+    "value": 0.09,
+    "why": "A basis of order 3 with sum f_3(n)^2 << x would be the first case beyond Ruzsa's r=2 theorem and would remove Erdős–Tetali's log^2 loss; no such result is known. The required algebraic covering of all S_3 cycle classes with O(m) energy is an unsolved construction problem, unlikely to fall in a week.",
+    "summary": "=== GOAL There is no threshold to make explicit. No known result of the form \"for all r ≥ r₀\" or \"for all n ≥ N₀\" reduces erdos_1192 to a finite check, and the prompt contains no DECIDE section. The formal statement asks, for every r ≥ 2, for an infinite set A"
+   }
   },
   "1088": {
    "history": [
