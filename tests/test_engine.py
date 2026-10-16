@@ -1368,6 +1368,151 @@ class ResearchProgram(unittest.TestCase):
         self.assertEqual(low.prompts("engine-intent"), [])                  # below the bar, not classified
 
 
+PLAN_A = PLAN.replace("Every n satisfies P(n).", "Theorem A: every prime n satisfies Q(n).")
+PLAN_B = """=== TARGET
+ANSWER: TRUE
+Theorem B: every n satisfies Q(n).
+=== LEMMA L1
+USE: R1
+=== LEMMA L2
+STATEMENT: Q is multiplicative.
+DIFFICULTY: moderate
+ROUTE: the Chinese remainder theorem.
+TEST: n below 100.
+=== GLUE
+By L1 every prime satisfies Q, and by L2 so does every product of primes.
+=== CHANGES
+R1 is proved; this is the line's stretch goal, built on it.
+"""
+
+
+class BuildTrack(unittest.TestCase):
+    """2026-10-16, the operator: the campaign was screening out the hard problems because they need new mathematics,
+    instead of building it. The screen's deep plan already names a progress line when no settling line is plausible; the
+    judges now rate that line, and the research program can be committed to it and climb it one proved theorem (rung) at
+    a time."""
+
+    LINE = "SETTLE CHANCE: 0.02\nNo settling line, so major progress: prove Theorem A, then the stretch goal Theorem B."
+
+    def _screen_call(self, chance, verdict="new", sig=2):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-settle-screen":
+                return (f"=== GOAL\nSETTLE CHANCE: {chance}\nNo settling line, so major progress: prove Theorem A.\n"
+                        "=== WHY THIS LINE\nit isolates the core.\n=== PLAN\n1. the prime case\n2. Theorem B, the stretch goal")
+            if purpose == "engine-target-rate":
+                return "```json\n" + json.dumps({"verdict": verdict, "significance": sig, "reach": "medium",
+                                                 "p_week": 0.3, "why": "a solid special case"}) + "\n```"
+            return judge(purpose)
+        return FakeCall(script, cost=0.1)
+
+    def test_the_screen_rates_each_draws_line_below_the_bar_once(self):
+        ck, call = {}, self._screen_call(0.02)
+        s = H.EngineSettings(sessions=0, rounds=1, total_budget=20, settle_draws=2, gap_rounds=0, progress_rate=True)
+        res = H.engine_run(call, FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        scr = res["settle_screen"]
+        self.assertEqual(sorted(x["draw"] for x in scr["progress"]), ["D1", "D2"])
+        self.assertIn("=== PLAN", scr["draws"][0]["text"])          # the whole plan is kept, not only the goal
+        rates = call.prompts("engine-target-rate")
+        self.assertEqual(len(rates), 4)                             # two judges for each of two draws
+        self.assertIn("MAIN TARGET", rates[0])
+        self.assertIn("Theorem B, the stretch goal", rates[0])
+        best = H.progress_best(scr)
+        self.assertEqual((best["significance"], best["p_week"], best["value"]), (2, 0.3, 0.6))
+        self.assertIn("prove Theorem A", best["goal"])
+        again = self._screen_call(0.02)
+        H.engine_run(again, FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        self.assertEqual(again.prompts("engine-target-rate"), [])   # a resume never rates twice
+        ripe = self._screen_call(0.5)
+        res = H.engine_run(ripe, FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s)
+        self.assertEqual(ripe.prompts("engine-target-rate"), [])    # a problem that passes the screen is not rated
+        self.assertNotIn("progress", res["settle_screen"])
+        for verdict, sig in (("known", 3), ("restatement", 3), ("new", 1)):
+            res = H.engine_run(self._screen_call(0.02, verdict, sig), FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s)
+            self.assertIsNone(H.progress_best(res["settle_screen"]), (verdict, sig))
+
+    def _program_call(self, plans, reject_assembled=False):
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-program-plan":
+                return plans[min(n, len(plans) - 1)]
+            if purpose == "engine-referee" and reject_assembled and "a complete argument assembled" in prompt:
+                return judge(purpose, valid=False)
+            if purpose == "engine-settles":
+                return "```json\n" + json.dumps({"settles": False, "answer": None}) + "\n```"
+            return judge(purpose)
+        return FakeCall(script, cost=0.1)
+
+    def _settings(self, **kw):
+        base = dict(sessions=0, rounds=1, total_budget=200, program_cycles=3, program_budget=150, gap_rounds=0,
+                    settles_max=3, program_line=self.LINE)
+        base.update(kw)
+        return H.EngineSettings(**base)
+
+    def test_a_build_program_aims_at_the_line_and_climbs_it_rung_by_rung(self):
+        call = self._program_call([PLAN_A, PLAN_B])
+        sess = FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "whatever the session wrote")))
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, self._settings())
+        prog = res["program"]
+        self.assertEqual([(r["key"], r["valid"], r["significance"]) for r in prog["rungs"]], [("R1", True, 2), ("R2", True, 2)])
+        self.assertFalse(prog["done"])                               # a build program never stops at its first theorem
+        self.assertEqual(prog["stop"], "3 cycles")
+        self.assertEqual(prog["established"], 3)                     # A's two lemmas, then B's open one
+        plans = call.prompts("engine-program-plan")
+        self.assertIn("prove Theorem A, then the stretch goal Theorem B", plans[0])
+        self.assertNotIn("settles the problem as Erdős posed it", plans[0])
+        self.assertIn("(nothing yet: the target is the line's main theorem)", plans[0])
+        self.assertIn("[R1] PROVED in cycle 1", plans[1])
+        self.assertIn("its target, a theorem on the way to the problem", dict(sess.calls)["p1L1"])
+        # the third plan re-proposed Theorem B, which is already proved: refused before any judge was paid
+        self.assertIn("its target is already proved on this line", prog["refused"][-1]["why"])
+        keys = {H.engine_claim_key(c) for c in res["ledger"]}
+        self.assertTrue({"program-R1/C3", "program-R2/C3"} <= keys)  # each rung its own notebook: no key collides
+        r2 = next(c for c in res["ledger"] if H.engine_claim_key(c) == "program-R2/C3")
+        self.assertIn("Theorem A: every prime n satisfies Q(n).", H.engine_chain_text(r2, res["ledger"]))
+        report = H.engine_report(res, "build")
+        self.assertIn("Build track", report)
+        self.assertIn("**R2** (proved", report)
+
+    def test_a_rung_of_reused_results_only_counts_toward_the_stall(self):
+        corollary = ("=== TARGET\nANSWER: TRUE\nTheorem C: Q(p) for every prime p > 2.\n=== LEMMA L1\nUSE: R1\n"
+                     "=== GLUE\nImmediate from L1.\n=== CHANGES\nA corollary of R1.\n")
+        call = self._program_call([PLAN_A, corollary])
+        res = H.engine_run(call, FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                           self._settings(program_cycles=6, program_stall=2))
+        self.assertEqual([r["key"] for r in res["program"]["rungs"]], ["R1", "R2"])
+        self.assertEqual(res["program"]["stop"], "2 cycles without a discharge")   # not six cycles of corollaries
+
+    def test_a_rejected_rung_has_no_key_to_build_on(self):
+        call = self._program_call([PLAN_A, PLAN_B], reject_assembled=True)
+        res = H.engine_run(call, FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                           self._settings(program_cycles=2))
+        self.assertEqual([(r["key"], r["valid"]) for r in res["program"]["rungs"]], [("R1", False)])
+        self.assertIn("NOT PROVED: the assembled argument for this target was rejected", call.prompts("engine-program-plan")[1])
+        self.assertIn("uses R1, which is not an established lemma", res["program"]["refused"][-1]["why"])
+
+    def test_a_rung_left_unassembled_is_assembled_first_on_the_next_pass(self):
+        sk = H.program_resolve_plan(H.parse_program_plan(PLAN_A), None, {}, [])[0]
+        for l in sk["lemmas"]:
+            l.update(status="established", proof="by computation")
+        ck = {"program": {"cycles": [{"cycle": 1, "finished": True}], "stall": 0, "skeleton": sk, "start_spend": 0.0,
+                          "stop": "budget, with every lemma of the rung established"}}
+        call = self._program_call([PLAN_B])
+        out = H.engine_program(call, FakeSession(lambda l, p: ""), self._settings(program_cycles=1, program_extend=True),
+                               "PROBLEM", LEAN, "", "", "", [], H._DiscoverySpend(50.0), ck=ck)
+        self.assertEqual([r["key"] for r in out["rungs"]], ["R1"])
+        self.assertIsNone(ck["program"]["skeleton"])
+        self.assertEqual(call.prompts("engine-program-plan"), [])   # no plan was bought to finish it
+
+    def test_the_settle_program_is_unchanged(self):
+        plan = H.program_plan_prompt("S", "L", "M", "E", "K", "R", "F")
+        self.assertIn("The aim is new mathematics: a skeleton that settles the problem as Erdős posed it.", plan)
+        self.assertIn("ANSWER: TRUE (the formal statement holds) or FALSE (its negation holds)", plan)
+        self.assertNotIn("PROVED ON THIS LINE", plan)
+
+
 class Crash(Exception):
     """A dead battery, a kill, a hung call: anything that is not a failed call and stops the run outright."""
 

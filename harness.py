@@ -4550,6 +4550,9 @@ class EngineSettings:
     program_extend: bool = False     # this run extends a finished program: its stall count and stop are cleared once
     literature_scan: bool = False    # the literature gate before the map (engine_literature); never on a benchmark
     literature_stop: float = 0.7     # the gate's confidence at which a settled verdict ends the run
+    progress_rate: bool = False      # the build track: judges rate each screen draw's line as progress (engine_progress_lines)
+    progress_max: float = 0.3        # ... only when the screen's settle chance is below this, the campaign's pass bar
+    program_line: str = ""           # the build track: the program proves this line's theorems, one rung after another
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4587,7 +4590,7 @@ class EngineSettings:
 
     def as_dict(self) -> dict:
         d = dataclasses.asdict(self)
-        for k in ("library", "blackboard", "context"):
+        for k in ("library", "blackboard", "context", "program_line"):
             d[k] = bool(getattr(self, k))
         return d
 
@@ -5351,6 +5354,11 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
                    key=lambda d: d["chance"], default={})
         ck["intent"] = engine_intent(call, s, statement, lean, fblock, best.get("goal") or "", spend)
         keep()
+    if (s.progress_rate and scr and isinstance(scr.get("mean"), (int, float)) and scr["mean"] < s.progress_max
+            and not any((x.get("panel") or {}).get("verdict") for x in scr.get("progress") or [])):
+        # a resume rates only a screen that has no rated line yet (the campaign's `build` command on an old screen)
+        scr["progress"] = engine_progress_lines(call, s, statement, known, scr, spend)
+        keep()
     dropped = engine_drop_infra(ck)
     if dropped:
         everything = list(_ck_claims(ck))
@@ -6028,11 +6036,57 @@ def engine_settle_screen(call, s: "EngineSettings", statement: str, lean: str, f
         spend.add(sum(cost for _, cost, _ in outs))
         for text, cost, err in outs:
             goal = dict((k.upper(), b) for k, b in delimited_sections(text or "")).get("GOAL") or text or ""
+            # the whole plan too (goal, why, steps, pitfalls): a line the build track adopts needs its fallback and its
+            # stretch goal, which the 1,500-character goal cut off on both of 2026-10-15's re-screens
             draws.append({"chance": settle_chance(text), "cost": round(cost, 4), "goal": goal[:1500],
-                          **({"error": err} if text is None else {})})
+                          **({"text": text[:12000]} if text else {}), **({"error": err} if text is None else {})})
     vals = [d["chance"] for d in draws if isinstance(d.get("chance"), (int, float))]
     return {"draws": draws, "mean": round(sum(vals) / len(vals), 4) if vals else None,
             "cost": round(sum(float(d.get("cost") or 0.0) for d in draws), 4)}
+
+
+# The build track (2026-10-16). The deep plan's resolve objective says: if no settling line is plausible, choose the line
+# with the best chance of major progress and say so. The campaign read only the SETTLE CHANCE and screened such problems
+# out, so the problems that need new mathematics never got the program that could build it. On 2026-10-15 both
+# re-screens wrote a progress line before being dropped: for #873 a uniform bound on clusters of divisors (and the
+# structure any counterexample must have), for #32 a covering lemma toward Erdős's $50 question.
+PROGRESS_LINE_LEAD = ("A LINE OF ATTACK, written because no way to settle the problem looked plausible. Its MAIN TARGET is "
+                      "the theorem it would prove first. Rate that main target as if proved; a fallback or a stretch goal "
+                      "the line also names is not the target.\n\n")
+
+
+def engine_progress_lines(call, s: "EngineSettings", statement: str, known: str, scr: dict,
+                          spend: _DiscoverySpend) -> list[dict]:
+    """The target-rating judges (`engine_rate_targets`, the instrument round 1 uses) rate each screen draw's line as if
+    its main target were proved: verdict, significance, reach and P_WEEK. The campaign sends a problem whose best line is
+    new at significance >= 2 to the build track instead of screening it out (`progress_best`)."""
+    lines = [{"id": f"D{i}", "type": "LINE",
+              "statement": PROGRESS_LINE_LEAD + clip_middle(d.get("text") or d.get("goal") or "", 6000)}
+             for i, d in enumerate(scr.get("draws") or [], 1) if d.get("text") or d.get("goal")]
+    if not lines:
+        return []
+    panels = engine_rate_targets(call, statement, known, lines, s, spend)
+    return [{"draw": t["id"], "panel": panels.get(t["id"]) or {"error": "not rated"}} for t in lines]
+
+
+def progress_best(scr: dict | None, min_sig: int = 2) -> dict | None:
+    """The screen's best progress line: rated `new` at `min_sig` or more if proved, the highest target value
+    (significance times the chance of proving it in a week, `target_value`) first. None when no line qualifies: a line
+    whose target is known, routine or a restatement of the problem is no reason to build."""
+    draws, best = (scr or {}).get("draws") or [], None
+    for x in (scr or {}).get("progress") or []:
+        p = x.get("panel") or {}
+        sig = p.get("significance")
+        if str(p.get("verdict") or "").lower() != "new" or not isinstance(sig, (int, float)) or sig < min_sig:
+            continue
+        m = re.fullmatch(r"D(\d+)", str(x.get("draw") or ""))
+        d = draws[int(m.group(1)) - 1] if m and 0 < int(m.group(1)) <= len(draws) else {}
+        cand = {"draw": x["draw"], "significance": int(sig), "p_week": p.get("p_week"), "reach": p.get("reach"),
+                "value": round(target_value({"significance": sig, "p_week": p.get("p_week"), "reach": p.get("reach")}), 4),
+                "goal": d.get("goal") or "", "text": d.get("text") or "", "why": p.get("why")}
+        if best is None or cand["value"] > best["value"]:
+            best = cand
+    return best
 
 
 def engine_with_lemmas(chosen: list[dict], claims: list[dict], cap: int) -> list[dict]:
@@ -6257,14 +6311,12 @@ PROGRAM_PLAN_PROMPT = """You lead a long research program on an OPEN problem. It
 target, a short list of lemmas, and a GLUE argument that derives the target from the lemmas. A lemma is ESTABLISHED once a
 referee and an adversary have passed its proof; the open lemmas are the program's whole remaining task. You write the
 skeleton; research sessions then attack its open lemmas one at a time, and next cycle you revise it from what they found.
-The aim is new mathematics: a skeleton that settles the problem as Erdős posed it.
+{aim}
 
 PROBLEM:
 {statement}
 
-THE FORMAL STATEMENT (Lean). The target is this statement or its negation, exactly as written: its quantifiers, its
-domain and its conventions decide what counts, not the informal wording above.
-{lean}
+{target_rule}
 
 THE FRONTIER MAP:
 {frontier}
@@ -6293,7 +6345,7 @@ Rules:
 
 Write exactly these sections, each starting with its === line:
 === TARGET
-ANSWER: TRUE (the formal statement holds) or FALSE (its negation holds)
+{answer_rule}
 The exact statement the skeleton proves.
 === LEMMA L1
 USE: <the key of an established lemma or validated result>   (for an established lemma, write only this line)
@@ -6308,7 +6360,7 @@ The derivation of the target from L1, L2, ...
 What changed from the skeleton in force and why it is better, or NONE to keep the skeleton in force."""
 
 PROGRAM_LEMMA_ASSIGNMENT = """PROVE LEMMA {id} OF THE TEAM'S PROOF SKELETON (research program, cycle {cycle}). The skeleton reduces
-the whole problem to its lemmas. The established ones have passed a referee and an adversary; {id} is open. Their
+{whole} to its lemmas. The established ones have passed a referee and an adversary; {id} is open. Their
 statements and proofs are in established/ in your sandbox.
 
 TARGET ({answer}): {target}
@@ -6330,6 +6382,64 @@ Test the lemma on small cases first. Then:
 - If it is false, record C1 with STATEMENT the lemma, STATUS REFUTED, and the counterexample or disproof. If a corrected
   version is true and would still serve the glue, prove it as C2 and say so under CONCERNS.
 - If you cannot finish, record what you did prove as claims, and name the exact missing step under ## Next."""
+
+# The program's target, by track. SETTLE (the default) aims every skeleton at the formal statement; BUILD
+# (`s.program_line`, the build track) aims it at the committed line's theorems, one rung after another. On a hard problem
+# a settle skeleton's hardest lemma is the open core itself, so the program only ever banked side results.
+PROGRAM_SETTLE = {
+    "aim": "The aim is new mathematics: a skeleton that settles the problem as Erdős posed it.",
+    "target_rule": ("THE FORMAL STATEMENT (Lean). The target is this statement or its negation, exactly as written: its "
+                    "quantifiers, its\ndomain and its conventions decide what counts, not the informal wording above.\n{lean}"),
+    "answer_rule": "ANSWER: TRUE (the formal statement holds) or FALSE (its negation holds)",
+    "whole": "the whole problem"}
+
+PROGRAM_BUILD = {
+    "aim": ("The aim is new mathematics on the way to the problem. No line that settles it looks plausible yet, so this "
+            "program\nbuilds toward it: it proves the main theorem of the LINE below, then the next theorem on the line, "
+            "each one\nresting on the ones before. Every theorem it proves is banked as a result of its own."),
+    "target_rule": """THE FORMAL STATEMENT (Lean), for reference. The program does not try to settle it yet, but its theorems are about
+this statement, with its quantifiers, domain and conventions:
+{lean}
+
+THE LINE THE CAMPAIGN COMMITTED TO (written by the team lead before any work, because no settling line looked
+plausible; judges rated its main target significant if proved):
+{line}
+
+PROVED ON THIS LINE SO FAR (each a closed skeleton whose glue and lemmas passed a referee and an adversary; reuse one as
+a lemma by its key, e.g. USE: R1):
+{rungs}
+
+Choosing the TARGET: the line's main theorem, stated precisely, until it is proved. Once it is proved, the next theorem
+toward the problem that builds on what is proved: the line's stretch goal, or a strictly stronger statement. Never a
+statement already proved above. Fall back to a weaker theorem the line names only after two skeletons for the main
+theorem have failed, and say so under CHANGES; a target weaker than that wastes the program.""",
+    "answer_rule": "ANSWER: TRUE (the target holds) or FALSE (the target fails, and the skeleton proves its negation)",
+    "whole": "its target, a theorem on the way to the problem,"}
+
+
+def program_rungs_text(rungs: list[dict], room: int = 6000) -> str:
+    """The build track's proved theorems for the next plan: each closed skeleton with its key and its verdicts. A rung whose
+    assembled argument the judges rejected is listed with why, and has no key to reuse."""
+    out = []
+    for r in rungs or []:
+        if r.get("valid"):
+            out.append(f"[{r['key']}] PROVED in cycle {r.get('cycle')} (novelty {r.get('verdict') or 'unrated'}, "
+                       f"significance {r.get('significance')}): {clip_middle(r.get('target') or '', 1500)}")
+        else:
+            out.append(f"- NOT PROVED: the assembled argument for this target was rejected ({clip_middle(str(r.get('why')), 400)}): "
+                       f"{clip_middle(r.get('target') or '', 800)}")
+    return clip_middle("\n".join(out), room) or "(nothing yet: the target is the line's main theorem)"
+
+
+def program_plan_prompt(statement: str, lean: str, frontier: str, established: str, skeleton: str, refuted: str,
+                        failures: str, line: str = "", rungs: list[dict] | None = None) -> str:
+    parts = dict(PROGRAM_BUILD if line.strip() else PROGRAM_SETTLE)
+    parts["target_rule"] = parts["target_rule"].format(lean=lean, line=clip_middle(line.strip(), 12000),
+                                                       rungs=program_rungs_text(rungs or []))
+    return PROGRAM_PLAN_PROMPT.format(statement=statement, frontier=frontier, established=established, skeleton=skeleton,
+                                      refuted=refuted, failures=failures, aim=parts["aim"],
+                                      target_rule=parts["target_rule"], answer_rule=parts["answer_rule"])
+
 
 DIFFICULTY_RANK = {"elementary": 0, "moderate": 1, "hard": 2}
 
@@ -6518,19 +6628,21 @@ def program_judge_lemma(call, s: "EngineSettings", statement: str, known: str, s
     return {"result": "open", "claim": engine_claim_key(pick), "why": _objection(pick) or f"its proof is {status}"}
 
 
-def program_assemble(call, s: "EngineSettings", statement: str, known: str, sk: dict, spend: _DiscoverySpend) -> list[dict]:
+def program_assemble(call, s: "EngineSettings", statement: str, known: str, sk: dict, spend: _DiscoverySpend,
+                     session: str = "program") -> list[dict]:
     """The complete argument as its own notebook: lemma Lk becomes claim Ck and the theorem cites them, so
     `engine_resolve` makes the theorem valid only while every lemma is, `engine_chain_text` prints it whole, and the
-    theorem itself is judged as one chain, with the novelty panel."""
+    theorem itself is judged as one chain, with the novelty panel. Each build-track rung is its own notebook
+    (`program-R1`, ...), so two rungs' claim numbers never collide."""
     idmap = {l["id"]: f"C{i}" for i, l in enumerate(sk["lemmas"], 1)}
 
     def relabel(text: str) -> str:
         return re.sub(r"\bL(\d+)\b", lambda m: idmap.get(f"L{m.group(1)}", m.group(0)), _neutral_cites(text))
-    out = [{"session": "program", "id": idmap[l["id"]], "statement": l["statement"], "status": "PROVED", "type": "OTHER",
+    out = [{"session": session, "id": idmap[l["id"]], "statement": l["statement"], "status": "PROVED", "type": "OTHER",
             "proof": l.get("proof") or "", "beyond": "", "_kind": "program-lemma",
             "validation": {"status": "valid-unrated", "own_status": "valid-unrated", "program": l.get("by") or l.get("claim")}}
            for l in sk["lemmas"]]
-    thm = {"session": "program", "id": f"C{len(out) + 1}", "statement": sk["target"], "status": "PROVED",
+    thm = {"session": session, "id": f"C{len(out) + 1}", "statement": sk["target"], "status": "PROVED",
            "type": "REDUCTION", "proof": relabel(sk["glue"]), "_kind": "program",
            "beyond": "a complete argument assembled by the research program from lemmas each of which passed a referee "
                      "and an adversary"}
@@ -6545,12 +6657,19 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
     """The research program (`s.program_cycles` cycles, `s.program_budget` dollars; see the section comment above).
     Everything it buys is checkpointed in `ck["program"]`: each plan, glue verdict, attack and lemma verdict, so a resume
     buys none of them twice. Returns its record, with `claims`: the attacks' claims and, when the skeleton closed, the
-    assembled chain, for the ledger."""
+    assembled chain, for the ledger.
+
+    With `s.program_line` (the build track) the skeleton's target is the line's next theorem instead of the formal
+    statement, and a closed skeleton is a RUNG: assembled and judged, banked under its key (R1, R2, ...) for the next
+    plan to build on, and the program goes on to the next theorem until its cycles, budget or stall rule stop it."""
     ck = ck if ck is not None else {}
     keep = keep or (lambda: None)
     st = ck.setdefault("program", {})
     for k, dflt in (("cycles", []), ("refused", []), ("refuted", []), ("stall", 0)):
         st.setdefault(k, dflt)
+    build = bool(s.program_line.strip())
+    if build:
+        st.setdefault("rungs", [])
     st.setdefault("start_spend", round(spend.total, 4))
     if s.program_extend and not st.get("done") and st.get("stop") and st.get("extended_from") != len(st["cycles"]):
         # A persistence pass (resolution.py): the program stopped on its cycles, its stall rule or its budget, and the
@@ -6573,10 +6692,39 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
             if c.get("session") != "program" and c.get("status") == "PROVED" \
                     and _valid_status((c.get("validation") or {}).get("status")):
                 out[engine_claim_key(c)] = {**c, "_chain": engine_chain_text(c, ledger)}
+        if build:                                        # the line's proved theorems, reusable by their keys
+            for r in st["rungs"]:
+                if r.get("valid") and r.get("final"):
+                    out[r["key"]] = {**r["final"][-1], "statement": r["target"],
+                                     "_chain": engine_chain_text(r["final"][-1], r["final"])}
         return out
 
-    def finish() -> None:
+    def closed(sk: dict | None) -> bool:
+        return sk is not None and not program_open(sk) and not any(l.get("status") == "refuted" for l in sk["lemmas"])
+
+    def finish(cycle: int) -> bool:
+        """The skeleton in force closed. Assemble it into one chain and judge it. In the build track it is a rung: banked,
+        the skeleton cleared, and the loop goes on to the line's next theorem (True). Otherwise the program is done."""
         sk = st["skeleton"]
+        if build:
+            if not room(2 * s.judge_budget + 2 * s.novelty_budget):
+                st["stop"] = "budget, with every lemma of the rung established"
+                return False
+            key = f"R{len(st['rungs']) + 1}"
+            final = program_assemble(call, s, statement, known, sk, spend, session=f"program-{key}")
+            engine_resolve(final)
+            v = final[-1].get("validation") or {}
+            ok = _valid_status(v.get("status"))
+            st["rungs"].append({"key": key, "cycle": cycle, "target": sk["target"], "answer": sk.get("answer"),
+                                "skeleton": sk, "final": final, "valid": ok, "status": v.get("status"),
+                                "verdict": (v.get("novelty") or {}).get("verdict"),
+                                "significance": (v.get("novelty") or {}).get("significance"),
+                                **({} if ok else {"why": _objection(final[-1]) or str(v.get("status"))})})
+            st["skeleton"] = None
+            # a rung of reused results only (every lemma a USE) is a corollary, not a discharge: two in a row stall out
+            st["stall"] = 0 if any(not l.get("by") for l in sk["lemmas"]) else st["stall"] + 1
+            keep()
+            return True
         if "final" not in st and room(2 * s.judge_budget + 2 * s.novelty_budget):
             st["final"] = program_assemble(call, s, statement, known, sk, spend)
             st["done"] = True
@@ -6584,8 +6732,16 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
             keep()
         elif "final" not in st:
             st["stop"] = "budget, with every lemma established"
+        return False
 
     while not st.get("done"):
+        if build and closed(st.get("skeleton")):
+            # a rung that closed in a pass that stopped (its budget, a crash) before the rung was assembled
+            if st["cycles"] and not st["cycles"][-1].get("finished"):
+                st["cycles"][-1]["finished"] = True
+            if finish(len(st["cycles"])):
+                continue
+            break
         cyc = st["cycles"][-1] if st["cycles"] and not st["cycles"][-1].get("finished") else None
         if cyc is None:
             if len(st["cycles"]) >= s.program_cycles:
@@ -6605,11 +6761,11 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
         progress = False
         if "plan" not in cyc:
             vc = valid_claims()
-            prompt = PROGRAM_PLAN_PROMPT.format(statement=statement, lean=lean, frontier=fblock,
-                                                established=program_established_text(vc),
-                                                skeleton=program_skeleton_text(before),
-                                                refuted="\n".join(f"- {clip_middle(x, 600)}" for x in st["refuted"][-12:]) or "(none)",
-                                                failures=program_failures_text(before, st))
+            prompt = program_plan_prompt(statement, lean, fblock, established=program_established_text(vc),
+                                         skeleton=program_skeleton_text(before),
+                                         refuted="\n".join(f"- {clip_middle(x, 600)}" for x in st["refuted"][-12:]) or "(none)",
+                                         failures=program_failures_text(before, st), line=s.program_line,
+                                         rungs=st.get("rungs"))
             pt, pc, perr = _discovery_call_capped(call, "engine-program-plan", prompt, s.frontier_effort, s.meta_budget, spend)
             cyc["plan"] = {"text": (pt or "")[:24000], "cost": round(pc, 4), "error": perr}
             keep()
@@ -6621,6 +6777,9 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
                     decision = "kept the skeleton in force"
                 else:
                     new, why = program_resolve_plan(plan, before, vc, st["refuted"])
+                    if new is not None and build and _norm_statement(new["target"]) in {
+                            _norm_statement(r["target"]) for r in st["rungs"] if r.get("valid")}:
+                        new, why = None, "its target is already proved on this line"
                     if new is not None and not room(2 * s.judge_budget):
                         new, why = None, "no budget to check its glue"
                     if new is not None:
@@ -6650,10 +6809,12 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
             st["stall"] += 1
             keep()
             continue
-        if not program_open(sk) and not any(l.get("status") == "refuted" for l in sk["lemmas"]):
+        if closed(sk):
             cyc["finished"] = True
-            finish()
+            go_on = finish(n)
             keep()
+            if go_on:
+                continue
             break
         todo = sorted(program_open(sk), key=lambda l: (DIFFICULTY_RANK.get(l.get("difficulty"), 1), l.get("attempts", 0),
                                                        l["id"]))[: max(1, s.program_lemmas)]
@@ -6664,6 +6825,7 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
             label = f"p{n}{lemma['id']}"
             assign = PROGRAM_LEMMA_ASSIGNMENT.format(
                 id=lemma["id"], cycle=n, answer=str(sk.get("answer")).upper(), target=sk["target"],
+                whole=(PROGRAM_BUILD if build else PROGRAM_SETTLE)["whole"],
                 skeleton=program_skeleton_text(sk), lemma=lemma["statement"],
                 route=lemma.get("route") or "(none suggested)", test=lemma.get("test") or "(none suggested)",
                 failures="\n".join(f"- cycle {f.get('cycle')}: {f.get('why')}" for f in lemma.get("failures") or []) or "(none)")
@@ -6724,14 +6886,23 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
         cyc["progress"] = progress
         st["stall"] = 0 if progress else st["stall"] + 1
         keep()
-        if not program_open(sk) and not any(l.get("status") == "refuted" for l in sk["lemmas"]):
-            finish()
+        if closed(sk):
+            go_on = finish(n)
             keep()
+            if go_on:
+                continue
             break
     claims = [c for cyc in st["cycles"] for att in (cyc.get("attacks") or {}).values() for c in att.get("claims") or []]
+    rungs = st.get("rungs") or []
     return {"cycles": len(st["cycles"]), "stop": st.get("stop"), "done": bool(st.get("done")),
             "skeleton": st.get("skeleton"), "refused": st["refused"], "refuted": st["refuted"],
-            "spend": round(spend.total - st["start_spend"], 4), "claims": claims + list(st.get("final") or [])}
+            "spend": round(spend.total - st["start_spend"], 4),
+            # lemmas the program's own sessions established, over every cycle: the build track's measure of progress
+            "established": sum(1 for c in st["cycles"] for a in (c.get("attacks") or {}).values()
+                               if (a.get("verdict") or {}).get("result") == "established"),
+            **({"rungs": [{k: r.get(k) for k in ("key", "cycle", "target", "answer", "valid", "status", "verdict",
+                                                  "significance", "why")} for r in rungs]} if build else {}),
+            "claims": claims + [c for r in rungs for c in r.get("final") or []] + list(st.get("final") or [])}
 
 
 # ---------------------------------------------------------------- intent: new mathematics, or a finding about the statement
@@ -6910,16 +7081,24 @@ def engine_report(res: dict, title: str) -> str:
         lines.append(f"\n## Intent of the screen's line\n\n{res['intent'].get('class')}"
                      + (f" (source: {res['intent']['source']})" if res["intent"].get("source") else ""))
     prog = res.get("program") or {}
+    if prog.get("skeleton") or prog.get("rungs"):
+        lines.append(f"\n## Research program\n\n{prog.get('cycles')} cycle(s), ${prog.get('spend')}; stopped: "
+                     f"{prog.get('stop') or 'running'}.\n")
+        if prog.get("rungs"):
+            lines.append("Build track: the theorems proved on the committed line, each a closed skeleton:\n")
+            for r in prog["rungs"]:
+                lines.append(f"- **{r.get('key')}** ({'proved' if r.get('valid') else 'assembled, rejected'}; novelty "
+                             f"{r.get('verdict')}, significance {r.get('significance')}): {r.get('target')}")
+            lines.append("")
     if prog.get("skeleton"):
         sk = prog["skeleton"]
-        lines.append(f"\n## Research program\n\n{prog.get('cycles')} cycle(s), ${prog.get('spend')}; stopped: "
-                     f"{prog.get('stop') or 'running'}.\n\nTARGET ({str(sk.get('answer')).upper()}): {sk.get('target')}\n")
+        lines.append(f"TARGET ({str(sk.get('answer')).upper()}): {sk.get('target')}\n")
         for l in sk.get("lemmas") or []:
             lines.append(f"- **{l['id']}** [{l.get('status')}{', ' + l['difficulty'] if l.get('status') == 'open' else ''}]"
                          f" {l.get('statement')}")
         lines.append("\nGLUE:\n\n" + (sk.get("glue") or ""))
-        if prog.get("refuted"):
-            lines.append("\nRefuted lemmas:\n" + "\n".join(f"- {x}" for x in prog["refuted"]))
+    if prog.get("refuted") and (prog.get("skeleton") or prog.get("rungs")):
+        lines.append("\nRefuted lemmas:\n" + "\n".join(f"- {x}" for x in prog["refuted"]))
     return "\n".join(lines) + "\n"
 
 
@@ -7541,7 +7720,13 @@ class Harness:
                            program_stall=int(g("engine_program_stall", 2)),
                            program_extend=bool(g("engine_program_extend", False)),
                            literature_scan=bool(g("engine_literature_scan", False)),
-                           literature_stop=float(g("engine_literature_stop", 0.7)))
+                           literature_stop=float(g("engine_literature_stop", 0.7)),
+                           progress_rate=bool(g("engine_progress_rate", False)),
+                           progress_max=float(g("engine_progress_max", 0.3)))
+        line = g("engine_program_line_file", None)
+        if line:
+            s.program_line = Path(line).read_text()
+            self.log.event("engine", "program_line", path=str(line), sha=hashlib.sha256(s.program_line.encode()).hexdigest()[:12])
         s.library = self._library_text(16000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -14434,6 +14619,13 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--engine-program-extend", action="store_true",
                       help="this run extends a finished research program (the campaign's persistence pass): clear its "
                            "stall count and stop reason once, so it plans again with whatever is new since")
+    runp.add_argument("--engine-progress-rate", action="store_true",
+                      help="the build track: when the screen's settle chance is below --engine-progress-max, judges rate "
+                           "each draw's progress line as if its main target were proved (engine.json settle_screen.progress)")
+    runp.add_argument("--engine-progress-max", type=float, default=0.3)
+    runp.add_argument("--engine-program-line-file", default=None,
+                      help="the build track: the research program proves this line's theorems, one rung after another, "
+                           "instead of aiming its skeleton at the formal statement")
     runp.add_argument("--engine-objective", choices=["advance", "resolve", "record", "explicit"], default="advance",
                       help="what the deep dive aims at: a significant partial result (advance), or settling the problem "
                            "as formalised (resolve, the campaign's setting)")

@@ -75,9 +75,10 @@ DEFAULTS = {
     # --results-library on: other runs' validated results and the openai/math families relevant to the problem, so one
     # run builds on another's (never in a benchmark run; no dev or test item enters it).
     # The ripeness screen (REPORT 3.8): the map and two SETTLE CHANCE draws, no sessions. The scout resumes its run.
+    # --engine-progress-rate: below the pass bar, judges also rate each draw's progress line (the build track, below).
     "screen": {"total": 12.0, "pass": 0.3, "control": 0.25,
                "flags": "--engine-objective resolve --engine-literature-scan --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
-                        "--engine-settle-draws 2 --engine-intent-judges 2 --results-library on"},
+                        "--engine-settle-draws 2 --engine-intent-judges 2 --engine-progress-rate --results-library on"},
     "scout": {"total": 18.0,
               "flags": "--engine-objective resolve --engine-literature-scan --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
                        "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2 "
@@ -98,6 +99,17 @@ DEFAULTS = {
     # Long computations a record or explicit run's sessions ask for (run_long): no model calls, so hours cost no usage.
     # More research-program passes for a problem whose last program or deep pass made progress (stage_flags scales them).
     "persist": {"max_spend": 250.0, "max_passes": 3},
+    # The build track (2026-10-16, operator: the campaign screened out the hard problems because they need new
+    # mathematics, instead of building it). A problem with no settling line whose screen line the judges rate new at
+    # `min_significance` or more if proved gets a research program committed to that line: it proves the line's theorems
+    # one rung after another, each resting on the last (harness --engine-program-line-file). Passes continue while they
+    # establish lemmas or rungs, within `max_passes` and `max_spend`; build passes take at most `share` of the daily cap
+    # while the queue has screens waiting.
+    "build": {"extra": 90.0, "min_significance": 2, "share": 0.6, "max_passes": 4, "max_spend": 400.0,
+              "flags": "--engine-objective resolve --engine-literature-scan --engine-intent-judges 2 --engine-sessions 0 "
+                       "--engine-deep-budget 0 --engine-gap-rounds 1 --engine-gap-max 1 --engine-program-cycles 8 "
+                       "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
+                       "--engine-session-legs 3 --results-library on"},
     "compute": {"case_seconds": 7200, "total_seconds": 14400, "max_requests": 2, "followups": 1},
     "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
@@ -165,14 +177,15 @@ def rows() -> list[dict]:
     return [json.loads(l) for l in RESULTS.read_text().splitlines() if l.strip()]
 
 
-def spent_since(hours: float = 24.0, now: datetime | None = None) -> float:
+def spent_since(hours: float = 24.0, now: datetime | None = None, tier: str | None = None) -> float:
     """What the campaign spent in the window: its stages, plus any prescreen sweep (`prescreen.jsonl`, one row and its
-    `cost` per problem), which runs beside the loop."""
+    `cost` per problem), which runs beside the loop. `tier`: one stage's rows only."""
     now = now or datetime.now(timezone.utc)
     cut = now - timedelta(hours=hours)
     total = 0.0
     pre = [json.loads(l) for l in PRESCREEN.read_text().splitlines() if l.strip()] if PRESCREEN.exists() else []
-    for r in rows() + [{"at": x.get("at"), "spend": x.get("cost")} for x in pre]:
+    for r in (rows() + [{"at": x.get("at"), "spend": x.get("cost")} for x in pre]) if tier is None else \
+            [r for r in rows() if r.get("tier") == tier]:
         try:
             at = datetime.strptime(r["at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         except (KeyError, TypeError, ValueError):
@@ -258,12 +271,14 @@ def stage_flags(cfg: dict, action: str, p: dict) -> str:
     obj = OBJECTIVE_OF.get(p.get("kind") or "settle", "resolve")
     if obj != "resolve":
         flags = flags.replace("--engine-objective resolve", f"--engine-objective {obj}")
-    k = int(p.get("program_passes") or 0)
-    if action == "program" and k >= 1:
+    k = int(p.get("build_passes" if action == "build" else "program_passes") or 0)
+    if action in ("program", "build") and k >= 1:
         def scale(name, f):
             m = re.search(rf"--engine-program-{name} (\S+)", f)
             return f if not m else f.replace(m.group(0), f"--engine-program-{name} {float(m.group(1)) * (k + 1):g}")
         flags = scale("budget", scale("cycles", flags)) + " --engine-program-extend"
+    if action == "build" and (p.get("build") or {}).get("line"):
+        flags += f" --engine-program-line-file {ROOT / p['build']['line']}"
     return flags
 
 
@@ -640,6 +655,47 @@ def literature_finding(n: int, p: dict, run_dir: Path, action: str, delta: float
     return True
 
 
+def screen_plan_text(run_dir: Path, draw: dict) -> str:
+    """A screen draw's whole plan: its own `text` (screens from 2026-10-16), else the transcript whose response holds its
+    goal (older screens kept only the goal's first 1,500 characters, which cut off the fallbacks), else the goal."""
+    if draw.get("text"):
+        return draw["text"]
+    head = " ".join(str(draw.get("goal") or "").split())[:200]
+    for t in sorted((run_dir / "transcripts").glob("*-engine-settle-screen.md")):
+        try:
+            resp = t.read_text().split("\n## response\n", 1)[1]
+        except (OSError, IndexError):
+            continue
+        if head and head in " ".join(resp.split()):
+            return resp.strip()
+    return str(draw.get("goal") or "")
+
+
+def _rel(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def build_line(n: int, run_dir: Path, scr: dict | None, cfg: dict) -> dict | None:
+    """The build track's line for a problem with no settling line, or None: the screen's best progress line
+    (harness `progress_best`: new at `build.min_significance` or more if proved), written whole to
+    resolution/build/<n>/line.md, which every build pass reads."""
+    import harness as H
+    best = H.progress_best(scr, int((cfg.get("build") or {}).get("min_significance", 2)))
+    if best is None:
+        return None
+    draw = (scr.get("draws") or [])[int(best["draw"][1:]) - 1]
+    text = re.sub(r"(?im)^[ \t]*[*_]*SETTLE CHANCE[*_]*\s*:[^\n]*\n?", "", screen_plan_text(run_dir, draw)).strip()
+    path = CAMP / "build" / str(n) / "line.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write(path, text + "\n")
+    return {"line": _rel(path), "draw": best["draw"], "significance": best["significance"], "p_week": best["p_week"],
+            "reach": best["reach"], "value": best["value"], "why": best["why"],
+            "summary": " ".join(text.replace("*", "").split())[:260]}
+
+
 def finish_screen(n: int, p: dict, cfg: dict, run_dir: Path, delta: float) -> bool:
     scr = screen_result(run_dir) or {}
     chance, draws = scr.get("mean"), [d.get("chance") for d in scr.get("draws") or []]
@@ -655,21 +711,34 @@ def finish_screen(n: int, p: dict, cfg: dict, run_dir: Path, delta: float) -> bo
     a = arm(n, chance, cfg)
     intent = (engine_json(run_dir).get("intent") or {}).get("class")
     track = track_for(a, intent)
-    p.update({"settle_chance": chance, "arm": a, "next": None if a == "screened out" else "scout",
-              "status": "screened out" if a == "screened out" else "screened", "track": track, "intent": intent})
-    p["history"].append({"tier": "screen", "outcome": a, "settle_chance": chance, "spend": delta, "track": track})
+    # no settling line is no longer the end: a line the judges rate significant if proved goes to the build track
+    build = build_line(n, run_dir, scr, cfg) if a == "screened out" else None
+    if build:
+        track = "build"
+    p.update({"settle_chance": chance, "arm": a, "track": track, "intent": intent,
+              "next": "build" if build else None if a == "screened out" else "scout",
+              "status": "build" if build else "screened out" if a == "screened out" else "screened"})
+    if build:
+        p["build"] = build
+    p["history"].append({"tier": "screen", "outcome": a, "settle_chance": chance, "spend": delta, "track": track,
+                         **({"route": "build"} if build else {})})
     save_problem(n, p)
     result({"problem": n, "tier": "screen", "outcome": a, "settle_chance": chance, "draws": draws, "spend": delta,
-            "run_dir": p["run_dir"], "track": track, "intent": intent})
+            "run_dir": p["run_dir"], "track": track, "intent": intent, **({"route": "build", "build": build} if build else {})})
     log(f"#{n}: screen -> {a} (settle chance {chance:.2f}, draws {draws}; ${delta:.2f})"
-        + (f"; track {track} (intent {intent})" if track and track != "control" else ""))
+        + (f"; track {track} (intent {intent})" if track and track not in ("control", "build") else "")
+        + (f"; BUILD TRACK: its line's main target is rated new at significance {build['significance']} if proved "
+           f"(P_WEEK {build['p_week']})" if build else ""))
     goal = next((d.get("goal") for d in scr.get("draws") or [] if d.get("goal")), "") or ""
     line = " ".join(re.sub(r"(?i)SETTLE CHANCE\s*:\s*\S+", "", goal).replace("*", "").split())[:260]
     record_atlas(n, f"Resolution campaign ripeness screen {datetime.now().date()}: SETTLE CHANCE {chance:.2f}, the mean of "
                     f"{len(draws)} draws of the research engine's team lead reading only its frontier map, before any work "
                     f"(an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled "
-                    f"first without separating them)." + (f" The line it would take: {line}" if line else ""))
-    commit(["resolution"], f"resolution: #{n} screen -> {a} (settle chance {chance:.2f})")
+                    f"first without separating them)." + (f" The line it would take: {line}" if line else "")
+                    + (f" BUILD TRACK: no settling line, but two judges rated this line's main target new at significance "
+                       f"{build['significance']} if proved (P_WEEK {build['p_week']}), so a research program is committed to "
+                       f"it and proves its theorems one at a time ({build['line']})." if build else ""))
+    commit(["resolution"], f"resolution: #{n} screen -> {'build track' if build else a} (settle chance {chance:.2f})")
     return True
 
 
@@ -906,7 +975,8 @@ def commit(paths: list[str], msg: str) -> None:
 
 def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     """lean first, then deep, then a stage cut off part way, then Lean on partial results, then a screened problem's
-    scout (the pass arm first, highest settle chance first, then the control arm), then the next problem's screen."""
+    scout (the pass arm first, highest settle chance first, then the control arm), then a build pass while build passes
+    are within their share of the daily cap, then the next problem's screen, then any build pass."""
     probs = state.get("problems", {})
     # an operator's re-screen ("screen", from rescreen) costs about $3 and may promote a problem, so it runs before the
     # $90 program passes; Lean, the payoff, stays first
@@ -924,8 +994,18 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
                if p.get("next") == "scout" and p.get("errors", 0) < cfg["max_errors"]]
     if pending:
         return "scout", -max(pending)[2]
+    # The build track: a program already under way first, then the line of highest value (significance times reach). Its
+    # passes take at most `build.share` of the daily cap while the queue has screens waiting, and all of it otherwise.
+    builds = [(int(p.get("build_passes") or 0) > 0, float((p.get("build") or {}).get("value") or 0.0), -int(n))
+              for n, p in probs.items() if p.get("next") == "build" and p.get("errors", 0) < cfg["max_errors"]]
+    b = -max(builds)[2] if builds else None
+    bc = cfg.get("build") or {}
+    if b is not None and spent_since(tier="build") < float(bc.get("share", 0.6)) * float(cfg["daily_cap_usd"]):
+        return "build", b
     q = queue(state, cfg)
-    return ("screen", q[0]) if q else ("idle", None)
+    if q:
+        return "screen", q[0]
+    return ("build", b) if b is not None else ("idle", None)
 
 
 def step(cfg: dict) -> bool:
@@ -978,7 +1058,7 @@ def step(cfg: dict) -> bool:
         # a screened problem's scout resumes the screen's run, so its total counts the screen's spend
         row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
                              stage_flags(cfg, action, p), p.get("run_dir"), on_start=started)
-    elif action in ("deep", "program"):
+    elif action in ("deep", "program", "build"):
         refresh_forum(n)
         k = site_claims(n)
         if k:                                            # a claim posted after the scout, or a scout run before the rule
@@ -987,7 +1067,9 @@ def step(cfg: dict) -> bool:
         p["running"] = action
         save_problem(n, p)
         prior = float(p.get("spend") or 0.0)
-        log(f"#{n}: {'research program' if action == 'program' else 'deep pass'} on {p['run_dir']}")
+        log(f"#{n}: " + {"program": "research program", "deep": "deep pass",
+                         "build": f"build pass {int(p.get('build_passes') or 0) + 1} (the research program on its line)"}[action]
+            + f" on {p['run_dir']}")
         row, rc = run_screen(n, f"resolve-{action}", prior + cfg[action]["extra"], stage_flags(cfg, action, p), p["run_dir"])
     elif action == "lean-claim":
         claim = p["claims_todo"][0]
@@ -1072,6 +1154,8 @@ def step(cfg: dict) -> bool:
     ripe = not (isinstance(chance, (int, float)) and chance < SETTLE_FLOOR)
     if outcome == "complete":
         p.update({"next": "lean", "status": "complete", "complete": info})
+    elif action == "build":                              # the next pass, if any, is the persistence rule's call below
+        p.update({"next": None, "status": "built"})
     elif action == "scout" and p.get("track") == "new-math" and ripe:
         p.update({"next": "program", "status": "program", "traction": info})
     elif outcome == "traction" and action == "scout" and p.get("track") != "statement":
@@ -1080,6 +1164,21 @@ def step(cfg: dict) -> bool:
         p.update({"next": None, "status": "done" if outcome == "none" else outcome})
     if action == "program":
         p["program_passes"] = int(p.get("program_passes") or 0) + 1
+    prog = engine_json(run_dir).get("program") or {}
+    if action == "build":
+        p["build_passes"] = int(p.get("build_passes") or 0) + 1
+        # A build program continues while it moves: a new rung, a newly established lemma, or a new validated result.
+        # Rungs and lemmas count across passes, since every pass resumes the same program.
+        mark = {"rungs": sum(1 for r in prog.get("rungs") or [] if r.get("valid")),
+                "lemmas": int(prog.get("established") or 0), "validated": n_new}
+        seen = p.get("build_seen") or {}
+        moved = [k for k, v in mark.items() if v > int(seen.get(k) or 0)]
+        p["build_seen"] = {k: max(v, int(seen.get(k) or 0)) for k, v in mark.items()}
+        bc = cfg.get("build") or {}
+        if (outcome != "complete" and moved and float(p.get("spend") or 0.0) < float(bc.get("max_spend", 400.0))
+                and p["build_passes"] < int(bc.get("max_passes", 4))):
+            p.update({"next": "build", "status": "build"})
+            log(f"#{n}: build pass {p['build_passes']} moved the line ({', '.join(moved)}); another build pass")
     # Persistence (2026-10-15, operator's direction: the selected problems should be fully solved). A program or deep
     # pass that produced new validated results earns another program pass, up to `persist` limits.
     ps = cfg.get("persist") or {}
@@ -1099,14 +1198,32 @@ def step(cfg: dict) -> bool:
         run_dir, cfg["lean_claims"]["record_min_significance" if computational else "min_significance"], skip,
         certified=computational)
     save_problem(n, p)
+    rungs = prog.get("rungs") or []
     result({"problem": n, "tier": action, "outcome": outcome, "spend": delta, "run_dir": row["run_dir"],
             "validated_new": n_new, "significance": sigs, "arm": p.get("arm"),
-            "settle_screen": (screen_result(run_dir) or {}).get("mean"), **info})
-    log(f"#{n}: {action} -> {outcome} (${delta:.2f}; {n_new} validated new {sigs})")
+            "settle_screen": (screen_result(run_dir) or {}).get("mean"),
+            **({"rungs": [{k: r.get(k) for k in ("key", "valid", "significance", "verdict")} for r in rungs],
+                "lemmas_established": int(prog.get("established") or 0)} if action == "build" else {}), **info})
+    log(f"#{n}: {action} -> {outcome} (${delta:.2f}; {n_new} validated new {sigs})"
+        + (f"; {sum(1 for r in rungs if r.get('valid'))} rung(s) proved, {int(prog.get('established') or 0)} lemma(s) "
+           f"established" if action == "build" else ""))
     if outcome == "complete":
         record_atlas(n, f"Resolution campaign {datetime.now().date()} (${total:.2f}, informal): the research engine wrote a complete "
                         f"answer ({info['answer']}) that a referee, an adversary and both settles judges accepted: "
                         f"{info['statement'][:300]}. Sent to Lean.")
+    elif action == "build":
+        sk = prog.get("skeleton") or {}
+        est = [l for l in sk.get("lemmas") or [] if l.get("status") == "established"]
+        op = [l for l in sk.get("lemmas") or [] if l.get("status") == "open"]
+        record_atlas(n, f"Resolution campaign BUILD pass {p['build_passes']} {datetime.now().date()} (${total:.2f}, informal): "
+                        f"the research program on the line its screen committed to ({(p.get('build') or {}).get('line')}), "
+                        f"{prog.get('cycles')} cycle(s), stopped: {prog.get('stop')}. "
+                        + ("Proved on the line: " + " | ".join(
+                            f"{r['key']} ({'proved' if r.get('valid') else 'assembled, rejected'}; novelty {r.get('verdict')}, "
+                            f"significance {r.get('significance')}): " + " ".join(str(r.get('target')).split())[:200]
+                            for r in rungs) + ". " if rungs else "No theorem of the line proved yet. ")
+                        + (f"Skeleton in force: {len(est)} lemma(s) established, {len(op)} open, for: "
+                           + " ".join(str(sk.get('target')).split())[:200] if sk else ""))
     elif action == "program":
         prog = engine_json(run_dir).get("program") or {}
         sk = prog.get("skeleton") or {}
@@ -1173,7 +1290,7 @@ def status() -> None:
     for k, v in sorted(by.items()):
         print(f"  {k}: {len(v)}  {sorted(v)[:20]}")
     tackled = [int(n) for n, p in st.get("problems", {}).items()
-               if any(h.get("tier") in ("scout", "deep", "program", "lean") for h in p.get("history") or [])]
+               if any(h.get("tier") in ("scout", "deep", "program", "build", "lean") for h in p.get("history") or [])]
     tracks: dict = {}
     for n, p in st.get("problems", {}).items():
         if int(n) not in tackled:
@@ -1189,6 +1306,12 @@ def status() -> None:
             print(f"track {tr}: {x['tackled']} tackled, {x['complete']} complete answer(s)"
                   + (f", {x['new']} judged new mathematics" if tr != "statement" else "")
                   + f", {x['verified']} verified in Lean")
+    for n, p in sorted(((int(n), p) for n, p in st.get("problems", {}).items() if p.get("build")), key=lambda x: x[0]):
+        b, seen = p["build"], p.get("build_seen") or {}
+        print(f"build #{n}: {p.get('status')}, {int(p.get('build_passes') or 0)} pass(es), ${float(p.get('spend') or 0):.2f}; "
+              f"line rated significance {b.get('significance')} if proved (P_WEEK {b.get('p_week')}); "
+              f"{seen.get('rungs', 0)} rung(s) proved, {seen.get('lemmas', 0)} lemma(s) established. "
+              f"{str(b.get('summary') or '')[:140]}")
     sig3 = sorted({int(r["problem"]) for r in rows() if r.get("outcome") in ("complete", "verified")
                    or 3 in (r.get("significance") or [])})
     print(f"significance 3 (a complete answer, or a claim both novelty judges rate 3): {len(sig3)} of {len(tackled)} "
@@ -1422,6 +1545,37 @@ def persist(n: int) -> str:
     return f"#{n}: a research-program pass is next"
 
 
+def build(n: int) -> str:
+    """Send a screened-out problem to the build track (an operator's call). If its screen's lines are already rated, it
+    is routed now at no cost. Otherwise its screen run resumes, which buys only the rating (two judges a draw, about $1;
+    the map and the draws are in its checkpoint), and `finish_screen` routes it. A problem none of whose lines the
+    judges rate new at `build.min_significance` stays screened out."""
+    p = load_state().get("problems", {}).get(str(n))
+    if not p or p.get("status") != "screened out" or not p.get("run_dir"):
+        return f"#{n}: not a screened-out problem with a screen run"
+    if p.get("running"):
+        return f"#{n}: a stage is running ({p['running']})"
+    k = site_claims(n)
+    if k:
+        return f"#{n}: {k} proof claim(s) on erdosproblems.com; skipped by the claims rule"
+    cfg = load_cfg()
+    run_dir = ROOT / p["run_dir"]
+    scr = screen_result(run_dir)
+    if scr and any((x.get("panel") or {}).get("verdict") for x in scr.get("progress") or []):
+        line = build_line(n, run_dir, scr, cfg)
+        if line is None:
+            return (f"#{n}: no line of its screen is rated new at significance "
+                    f">= {(cfg.get('build') or {}).get('min_significance', 2)} if proved; it stays screened out")
+        p.update({"next": "build", "status": "build", "track": "build", "build": line})
+        p.setdefault("history", []).append({"tier": "queue", "outcome": "build track (operator)"})
+        save_problem(n, p)
+        return f"#{n}: build track, on the line in {line['line']}"
+    p.update({"status": "rating", "next": "screen"})
+    p.setdefault("history", []).append({"tier": "queue", "outcome": "rate the screen's lines (operator)"})
+    save_problem(n, p)
+    return f"#{n}: its screen run resumes to rate its lines, then it is routed"
+
+
 def requeue_lean(n: int) -> str:
     """Send a problem's complete answer back to the Lean stage, for a stage that never reached the mathematics: #655's
     first one ended at its first check, on a frozen statement that could not compile (2026-10-14). The old run stays
@@ -1442,7 +1596,7 @@ def requeue_lean(n: int) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean", "reverify-lean",
-                                    "rescreen", "persist"])
+                                    "rescreen", "persist", "build"])
     ap.add_argument("--problem", type=int, help="requeue-lean, reverify-lean: the problem")
     ap.add_argument("--show", type=int, default=20)
     ap.add_argument("--file", help="import-screens: a jsonl of screen rows (step3/settle_open.jsonl)")
@@ -1457,11 +1611,11 @@ def main() -> int:
             print(f"  #{n}  forum {forum_chars(n)} chars")
     elif a.cmd == "import-screens":
         print("imported to the pass arm:", import_screens(Path(a.file), load_cfg()))
-    elif a.cmd in ("requeue-lean", "reverify-lean", "rescreen", "persist"):
+    elif a.cmd in ("requeue-lean", "reverify-lean", "rescreen", "persist", "build"):
         if a.problem is None:
             ap.error(f"{a.cmd} needs --problem")
         print({"requeue-lean": requeue_lean, "reverify-lean": reverify_lean, "rescreen": rescreen,
-               "persist": persist}[a.cmd](a.problem))
+               "persist": persist, "build": build}[a.cmd](a.problem))
     elif a.cmd == "once":
         wait_for_lane()
         step(load_cfg())

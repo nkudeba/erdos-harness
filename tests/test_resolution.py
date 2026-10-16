@@ -711,6 +711,143 @@ class Persistence(Base):
         self.assertEqual(R.load_state()["problems"]["1207"]["next"], "program")
 
 
+class BuildTrack(Base):
+    """2026-10-16, the operator: the campaign kept screening out the hard problems because they need new mathematics,
+    instead of building it. On 2026-10-15 both re-screens (#873, #32) wrote a major-progress line and were dropped on
+    their SETTLE CHANCE alone. A line the judges rate new at significance >= 2 if proved now gets a research program
+    committed to it, which proves the line's theorems one rung at a time."""
+
+    PLAN = ("=== GOAL\nSETTLE CHANCE: 0.01\nNo settling line, so major progress: prove Theorem A, a uniform bound.\n"
+            "=== WHY THIS LINE\nthe polynomial families live inside it\n=== PLAN\n1. the case of few prime factors\n"
+            "2. Theorem B, the stretch goal\n=== PITFALLS\nthe curvature barrier")
+
+    def screened(self, verdict="new", sig=2, text=True, mean=0.01):
+        run = self.engine_run([])
+        goal = self.PLAN.split("=== WHY")[0].replace("=== GOAL\n", "")
+        draw = {"chance": mean, "goal": goal, **({"text": self.PLAN} if text else {})}
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        ej["settle_screen"] = {"mean": mean, "draws": [draw, dict(draw)], "progress": [
+            {"draw": "D1", "panel": {"verdict": verdict, "significance": sig, "p_week": 0.3, "reach": "medium", "why": "w"}},
+            {"draw": "D2", "panel": {"verdict": verdict, "significance": max(0, sig - 1), "p_week": 0.5, "reach": "medium"}}]}
+        (run / "engine" / "engine.json").write_text(json.dumps(ej))
+        return run
+
+    def out_number(self, cfg):
+        return next(n for n in range(1, 999) if R.arm(n, 0.0, cfg) == "screened out")
+
+    def test_a_significant_line_sends_a_screened_out_problem_to_the_build_track(self):
+        cfg = R.load_cfg()
+        n = self.out_number(cfg)
+        with patch.object(R, "record_atlas") as atlas, patch.object(R, "commit"):
+            p = {"history": [], "run_dir": "runs/x", "spend": 3.0}
+            R.finish_screen(n, p, cfg, self.screened(), 3.0)
+            self.assertEqual((p["arm"], p["next"], p["status"], p["track"]), ("screened out", "build", "build", "build"))
+            self.assertEqual((p["build"]["draw"], p["build"]["significance"], p["build"]["value"]), ("D1", 2, 0.6))
+            line = Path(p["build"]["line"]).read_text()
+            self.assertIn("=== PLAN", line)                    # the whole plan, fallbacks and stretch goal included
+            self.assertNotIn("SETTLE CHANCE", line)
+            self.assertIn("BUILD TRACK", atlas.call_args[0][1])
+            for verdict, sig in (("known", 3), ("restatement", 3), ("new", 1)):
+                p = {"history": [], "run_dir": "runs/x", "spend": 3.0}
+                R.finish_screen(n, p, cfg, self.screened(verdict, sig), 3.0)
+                self.assertEqual((p["next"], p["status"]), (None, "screened out"), (verdict, sig))
+            p = {"history": [], "run_dir": "runs/x", "spend": 3.0}
+            R.finish_screen(n, p, cfg, self.screened(mean=0.45), 3.0)
+            self.assertEqual(p["next"], "scout")                # a settling line still goes to its scout
+        self.assertEqual([r.get("route") for r in R.rows()][:2], ["build", None])
+
+    def test_an_old_screen_recovers_the_whole_plan_from_its_transcript(self):
+        run = self.screened(text=False)
+        (run / "transcripts").mkdir()
+        (run / "transcripts" / "004-engine-settle-screen.md").write_text("# engine-settle-screen\n\n## prompt\n\nP\n\n"
+                                                                        "## response\n\n" + self.PLAN + "\n")
+        (run / "transcripts" / "003-engine-frontier.md").write_text("## response\n\nnot this one\n")
+        line = R.build_line(5, run, json.loads((run / "engine" / "engine.json").read_text())["settle_screen"], R.load_cfg())
+        text = Path(line["line"]).read_text()
+        self.assertIn("2. Theorem B, the stretch goal", text)
+        self.assertIn("the curvature barrier", text)
+
+    def test_build_passes_take_their_share_of_the_cap_while_screens_wait(self):
+        cfg = R.load_cfg()
+        st = {"problems": {"4": {"next": "build", "build": {"value": 0.6}},
+                           "5": {"next": "build", "build": {"value": 0.9}}}}
+        with patch.object(R, "queue", lambda s, c: [8]):
+            self.assertEqual(R.next_action(st, cfg), ("build", 5))          # the most valuable line first
+            st["problems"]["4"]["build_passes"] = 1
+            self.assertEqual(R.next_action(st, cfg), ("build", 4))          # a program under way before a new one
+            R.result({"problem": 4, "tier": "build", "outcome": "none", "spend": 95.0})   # over 0.6 of $150
+            self.assertEqual(R.next_action(st, cfg), ("screen", 8))
+        with patch.object(R, "queue", lambda s, c: []):
+            self.assertEqual(R.next_action(st, cfg), ("build", 4))          # nothing else to do: build anyway
+
+    def build_pass(self, program, passes=0, seen=None, spend=40.0):
+        run = self.engine_run([])
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        ej["program"] = program
+        (run / "engine" / "engine.json").write_text(json.dumps(ej))
+        (self.d / "line.md").write_text("prove Theorem A\n")
+        R.save_state({"problems": {"9": {"history": [], "next": "build", "status": "build", "track": "build",
+                                         "run_dir": str(run), "spend": spend, "build_passes": passes,
+                                         "build_seen": seen or {}, "build": {"line": str(self.d / "line.md"), "value": 0.6}}}})
+        seen_flags = {}
+
+        def fake(n, tag, total, flags, resume=None, on_start=None):
+            seen_flags.update(tag=tag, total=total, flags=flags, resume=resume)
+            return {"run_dir": str(run.relative_to(self.d)), "spend_run": spend + 70.0}, 0
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "classify", lambda rd: ("none", {})), patch.object(R, "record_atlas") as atlas, \
+                patch.object(R, "commit"):
+            R.step(R.load_cfg())
+        return R.load_state()["problems"]["9"], seen_flags, atlas
+
+    def test_a_build_pass_runs_the_program_on_its_line_and_continues_while_it_moves(self):
+        program = {"cycles": 4, "stop": "4 cycles", "established": 3, "skeleton": None,
+                   "rungs": [{"key": "R1", "valid": True, "significance": 2, "verdict": "new", "target": "Theorem A"}]}
+        p, flags, atlas = self.build_pass(program)
+        self.assertEqual((flags["tag"], flags["total"]), ("resolve-build", 130.0))
+        for f in ("--engine-sessions 0", "--engine-program-cycles 8 ", f"--engine-program-line-file {self.d / 'line.md'}"):
+            self.assertIn(f, flags["flags"])
+        self.assertEqual((p["next"], p["build_passes"], p["build_seen"]), ("build", 1, {"rungs": 1, "lemmas": 3, "validated": 0}))
+        self.assertIn("R1 (proved; novelty new, significance 2): Theorem A", atlas.call_args[0][1])
+        row = R.rows()[-1]
+        self.assertEqual((row["tier"], row["lemmas_established"], row["rungs"][0]["key"]), ("build", 3, "R1"))
+        # the next pass resumes the same program with the cycles and budget of both passes
+        p, flags, _ = self.build_pass(program, passes=1, seen={"rungs": 1, "lemmas": 3, "validated": 0})
+        self.assertIn("--engine-program-cycles 16 ", flags["flags"])
+        self.assertIn("--engine-program-extend", flags["flags"])
+        self.assertEqual((p["next"], p["status"]), (None, "built"))          # it did not move: the line rests
+        p, _, _ = self.build_pass({**program, "established": 4}, passes=3, seen={"lemmas": 3})
+        self.assertIsNone(p["next"])                                         # the fourth pass is the last
+
+    def test_the_operator_can_send_a_screened_out_problem_to_the_build_track(self):
+        run = self.screened()
+        R.save_state({"problems": {"7": {"status": "screened out", "run_dir": str(run), "history": [], "prepped": True},
+                                   "8": {"status": "done", "history": []}}})
+        with patch.object(R, "ROOT", self.d):
+            self.assertIn("build track, on the line in", R.build(7))
+            self.assertIn("not a screened-out problem", R.build(8))
+        p = R.load_state()["problems"]["7"]
+        self.assertEqual((p["next"], p["track"], p["build"]["significance"]), ("build", "build", 2))
+        # an older screen with no rated lines resumes its own run to rate them
+        old = self.engine_run([])
+        R.save_state({"problems": {"6": {"status": "screened out", "run_dir": str(old), "history": [], "prepped": True,
+                                         "spend": 5.0}}})
+        seen = {}
+
+        def fake(n, tag, total, flags, resume=None, on_start=None):
+            seen.update(resume=resume, flags=flags, total=total)
+            return None, 1
+        with patch.object(R, "ROOT", self.d):
+            self.assertIn("resumes to rate its lines", R.build(6))
+            with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []):
+                R.step(R.load_cfg())
+        self.assertEqual((seen["resume"], seen["total"]), (str(old), 17.0))
+        self.assertIn("--engine-progress-rate", seen["flags"])
+        with patch.object(R, "site_claims", lambda n: 2):
+            R.save_state({"problems": {"7": {"status": "screened out", "run_dir": str(run), "history": []}}})
+            self.assertIn("claims rule", R.build(7))
+
+
 class LiteratureFindings(Base):
     def test_a_run_the_gate_stopped_is_a_known_result_and_never_retried(self):
         run = self.engine_run([])
