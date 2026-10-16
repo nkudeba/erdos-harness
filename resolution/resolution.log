@@ -322,3 +322,6 @@
 [2026-10-16T05:24:45Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
 [2026-10-16T05:24:47Z] #677: screen
 [2026-10-16T05:47:55Z] #677: screen -> screened out (settle chance 0.01, draws [0.01, 0.0]; $3.78)
+[2026-10-16T05:48:01Z] daily cap reached ($151.92 of $150); sleeping 1 h
+[2026-10-16T06:48:04Z] #1094: screen
+[2026-10-16T07:30:23Z] #1094: screen -> screened out (settle chance 0.00, draws [0.0, 0.0]; $5.81)

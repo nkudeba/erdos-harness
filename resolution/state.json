@@ -2823,11 +2823,18 @@
     {
      "tier": "queue",
      "outcome": "rescreen as explicit (operator)"
+    },
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.0,
+     "spend": 5.8093,
+     "track": null
     }
    ],
    "prepped": true,
    "running": null,
-   "spend": 0.0,
+   "spend": 5.8093462,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -2843,8 +2850,13 @@
    "rescreen_at": "20261015-122832",
    "kind": "explicit",
    "lane": "rescreen",
-   "next": "screen",
-   "status": "rescreen"
+   "next": null,
+   "status": "screened out",
+   "run_dir": "runs/20261016-024804-936731-erdos1094",
+   "settle_chance": 0.0,
+   "arm": "screened out",
+   "track": null,
+   "intent": null
   },
   "1207": {
    "history": [
