@@ -288,3 +288,5 @@
 [2026-10-15T23:55:29Z] #873: screen -> screened out (settle chance 0.01, draws [0.02, 0.01]; $5.74)
 [2026-10-15T23:55:38Z] #32: screen
 [2026-10-16T00:12:54Z] #32: screen -> screened out (settle chance 0.00, draws [0.0, 0.0]; $2.43)
+[2026-10-16T00:13:04Z] #695: screen
+[2026-10-16T00:58:42Z] #695: screen -> pass (settle chance 0.55, draws [0.6, 0.5]; $5.90); track new-math (intent unclear)

@@ -342,12 +342,19 @@
     {
      "tier": "queue",
      "outcome": "rescreen as record (operator)"
+    },
+    {
+     "tier": "screen",
+     "outcome": "pass",
+     "settle_chance": 0.55,
+     "spend": 5.9045,
+     "track": "new-math"
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 0.0,
+   "spend": 5.9044799999999995,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -363,8 +370,13 @@
    "rescreen_at": "20261015-122832",
    "kind": "record",
    "lane": "rescreen",
-   "next": "screen",
-   "status": "rescreen"
+   "next": "scout",
+   "status": "screened",
+   "run_dir": "runs/20261015-201304-106144-erdos695",
+   "settle_chance": 0.55,
+   "arm": "pass",
+   "track": "new-math",
+   "intent": "unclear"
   },
   "517": {
    "history": [
