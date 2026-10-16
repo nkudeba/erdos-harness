@@ -1221,6 +1221,21 @@ First use on OPEN problems: `experiments/open-discovery-2026-10-02/REPORT.md`.
   by resuming the problem's screen run (about $1).
 - A rung is informal until its Lean run passes the audit. A partial result on an open problem is never a resolution.
 - Covered by `BuildTrack` in `tests/test_engine.py` and `tests/test_resolution.py`.
+- **The line-rating judges read the literature gate's papers**, and a target a paper claims is known. #32's line was
+  rated new at significance 3 while arXiv:2610.14127 (9 Oct 2026) claimed it; #32's build is held
+  (`status: build-held`).
+
+**OEIS lookups for computed values (2026-10-16).**
+- **Why.** #695's exhaustive search reported P(21) = 64750853277599 as a record. It is the last listed term of A082449
+  and A056637, both marked "more", so the open record is the next term. Nothing in the run looked.
+- `computations_text` turns COMPUTE.md into a compact block, with an OEIS lookup of the values its RESULT lines assert
+  (witness lists and round search bounds are skipped). The block reaches the lead, the sessions and the judges, after
+  the screen, which still reads the map alone.
+- `certificate_checks(oeis=True)` looks up a certified claim's values too, so the judges see a listed value.
+- A failed lookup reads "unchecked", never "not in OEIS". No lookup on a benchmark or masked run. Cache: `tmp/oeis-search/`.
+- **Routing:** a record or explicit problem goes on in the deep tier under its own objective. A queued research-program
+  pass of such a problem runs as a deep pass, ahead of the settle programs; the program aims at the formal statement.
+- Covered by `Oeis` in `tests/test_records.py` and `ComputationalRouting` in `tests/test_resolution.py`.
 
 **PARI/GP in the research sandbox (2026-10-08).** `cypari2` (PARI 2.15.4) is an allowed module for every model-written
 script, and the session prompt names its Thue, class-group, elliptic-curve and rational-point functions. Both v6 full

@@ -1453,6 +1453,27 @@ where new results are still to be had. Not yet run on a live problem.
   - P(such a rung passes the Lean audit by the 2026-10-20 usage reset) ≈ 0.15.
   - A rung is a partial result. A program reaching the full problem this week is not expected.
 
+**3.14, first results (2026-10-16, 10:00 Toronto).**
+- **Ratings.** Of 9 screened-out problems rated, 5 had a line rated new at significance ≥ 2: #873 (2, P_WEEK 0.375),
+  #1192 (3, 0.03), #517 (2, 0.03), #881 (3, 0.04) and #32 (3, 0.025). The prediction (at least half) holds. The other
+  lines were the problem restated (#197, #1068, #1088) or a formalization artifact. Rating cost $0.32–0.56 a problem.
+- **#32 is held.** Its line's target is the claim of arXiv:2610.14127 (A. O. Radomskii, 9 Oct 2026): B(X) ≫
+  log X log log X for every additive complement of the primes. The map had called it suspect, with reason. Applied to
+  B = {0}, the abstract's block construction would give prime gaps ≫ log X log log X in every [X/2, X], beyond the
+  Ford–Green–Konyagin–Maynard–Tao bound log X log log X log₄X / log₃X. The paper may be wrong or the abstract may omit a
+  condition; either way the build would re-derive a claimed result. Fixed: the rating judges now read the gate's
+  papers.
+- **#695: a "record" that OEIS already lists.** The scout's long computation (992 s, exhaustive to 8.96·10¹³, an
+  independent GP run reproducing P(20)) gave P(21) = 64750853277599. That is the last listed term of A082449 and of
+  A056637, both marked "more". The next term is open, with the upper bound 866284735109723 in A082449's comments.
+  - The computation itself was sound; what failed was knowing what was known. The record survey had linked #695 to
+    A061092, a different sequence.
+  - Fixed: computed values are looked up on OEIS, and the lookup reaches the lead, the sessions and the judges.
+  - Also fixed: the campaign had queued a $90 settle program for #695. A computational problem now goes on in the
+    deep tier under its own objective.
+  - The scout's validated claims (C1, C5: no infinite prime chain eventually uses only the multipliers of most pairs
+    {a, b} of even numbers ≤ 64) are rated new at significance 1. C5 is in Lean.
+
 **A campaign bug, found 2026-10-14: the Lean tier could not compile #655's statement.**
 - **What happened.**
   - #655's scout settled formal-conjectures' statement: answer false, along a line the intent judges call a
