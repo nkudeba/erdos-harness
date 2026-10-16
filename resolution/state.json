@@ -442,6 +442,10 @@
    "claims_todo": [
     "r1s1/C5",
     "r1s1/C1"
+   ],
+   "computed": [
+    "deep/long_pyr21.py",
+    "deep/long_gp_p20.py"
    ]
   },
   "517": {

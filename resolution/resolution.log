@@ -329,3 +329,5 @@
 [2026-10-16T07:52:20Z] #158: screen -> pass (settle chance 0.45, draws [0.5, 0.4]; $3.02); track new-math (intent new-math)
 [2026-10-16T07:52:30Z] #695: scout (resuming runs/20261015-201304-106144-erdos695)
 [2026-10-16T09:09:57Z] #695: scout -> none ($16.60; 2 validated new [1, 1])
+[2026-10-16T09:10:04Z] #695: long computation deep/long_pyr21.py for up to 1.5 h (P(21) exactly (exhaustive up to 8.96e13; also re-derives P(20) at 6× scale), with a witness chain an)
+[2026-10-16T09:26:35Z] #695: long computation deep/long_gp_p20.py for up to 1.0 h (independent GP reproduction of min R_20(7.36e12) = P(20) = 7242080052479)
