@@ -1930,12 +1930,13 @@
   },
   "1094": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausible for settling the problem in a few days. The team has no validated results. The CORE rests on \"T2\" and \"T10\", which do not exist in the team's record. Closing the CORE also needs an effective K₀ followed by a search over n up to about √k·2^"
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausible for settling the problem in a few days. The team has no validated results. The CORE rests on \"T2\" and \"T10\", which do not exist in the team's record. Closing the CORE also needs an effective K₀ followed by a search over n up to about √k·2^",
+      "Resolution campaign ripeness screen 2026-10-16: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. The threshold cannot be made explicit, because no published \"sufficiently large\" theorem covers the hard range. - What the known results cover. Konyagin (explicit in principle) and Granville–Ramaré only reach the n < k² half. The"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-15"
+    "assessed": "2026-10-16"
   },
   "1110": {
     "rationale": [
