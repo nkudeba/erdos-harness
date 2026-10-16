@@ -402,12 +402,17 @@
      "settle_chance": 0.55,
      "spend": 5.9045,
      "track": "new-math"
+    },
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 16.5951
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 5.9044799999999995,
+   "spend": 22.499593200000003,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -423,13 +428,21 @@
    "rescreen_at": "20261015-122832",
    "kind": "record",
    "lane": "rescreen",
-   "next": "scout",
-   "status": "screened",
+   "next": "program",
+   "status": "program",
    "run_dir": "runs/20261015-201304-106144-erdos695",
    "settle_chance": 0.55,
    "arm": "pass",
    "track": "new-math",
-   "intent": "unclear"
+   "intent": "unclear",
+   "traction": {
+    "settle_chance": 0.55
+   },
+   "validated_seen": 2,
+   "claims_todo": [
+    "r1s1/C5",
+    "r1s1/C1"
+   ]
   },
   "517": {
    "history": [
