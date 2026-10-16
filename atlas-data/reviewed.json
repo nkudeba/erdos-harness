@@ -1398,13 +1398,14 @@
   "695": {
     "rationale": [
       "v6 random-sample screen 2026-10-08 ($14.07, informal): 2 validated-new claims (significance 1, 0); best: Let S be one of: (a) any pair {a,b} ⊆ {2,4,…,16} except {8,14}; (b) any 3-subset of {2,4,…,16} except the 14 sets {2,6,10},{2,8,14},{4,6,10},{4,6,12},{4,8,14},{4,10,12},{4,12,14},{6,8,10},{6,8,14},{6,10,12},{8,10,14},{8,12,14},{8,14,16},{10,12,16}. Then no inf",
-      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: I do not think any settling line is plausible. The formal statement is the full first question: every chain, of every starting prime, must satisfy (1/k)·log q_k → ∞. - A disproof needs an explicit infinite chain with q_k ≤ C^k infinitely often. No finite compu"
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: I do not think any settling line is plausible. The formal statement is the full first question: every chain, of every starting prime, must satisfy (1/k)·log q_k → ∞. - A disproof needs an explicit infinite chain with q_k ≤ C^k infinitely often. No finite compu",
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.55, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to compute and certify. For k = 1, 2, …, let P(k) be the least prime p that ends a chain of length k, i.e. p_1 < … < p_k = p with p_{i+1} ≡ 1 (mod p_i). Equivalently P(k) = min{p : H(p) ≥ k}, where H(p) is the height of the Pratt tree, counted so tha"
     ],
     "sources": [
       "experiments/idea-engine-2026-10-02/REPORT.md",
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-14"
+    "assessed": "2026-10-15"
   },
   "699": {
     "rationale": [
