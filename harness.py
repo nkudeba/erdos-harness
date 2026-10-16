@@ -1070,7 +1070,11 @@ Rules for all Lean code you produce:
   names, and prefer well-known Mathlib lemma names.
 - Large numerals: never let `decide` evaluate huge terms (n! for n ≥ 10, x^x, ...). Use `norm_num [Nat.factorial]`
   or `decide +kernel` for exhaustive finite checks, and give witnesses in factored form when exponent
-  arithmetic is involved."""
+  arithmetic is involved.
+- A big finite check (a certificate over many cases, a search over residues, a graph of states) is too large for
+  `decide` on the Prop itself, and `native_decide` is banned. Bool-reflect it: write a computable checker
+  `def check ... : Bool` by structural recursion on `Nat`/`List`, prove once `check x = true → P x`, then close
+  `check x = true` by `decide +kernel` or `rfl` (the kernel computes `Nat` arithmetic on binary numerals)."""
 
 
 def imports_note(imports: list[str]) -> str:
