@@ -1151,12 +1151,13 @@
   },
   "517": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Step 0 (the only settling route): audit the Lean definition `HasFabryGaps`. - If it does not force `n` injective (for example it is only `Tendsto (fun k => (n k:ℝ)/k) atTop atTop`), the formal statement is false. A disproof: - Set m_j = (j+1)², n(2j) = n(2j+1)"
+      "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Step 0 (the only settling route): audit the Lean definition `HasFabryGaps`. - If it does not force `n` injective (for example it is only `Tendsto (fun k => (n k:ℝ)/k) atTop atTop`), the formal statement is false. A disproof: - Set m_j = (j+1)², n(2j) = n(2j+1)",
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.14, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is likely to settle the true mathematical question. Erdős #517 is open, and the CORE reduction (no $Pe^g$ with $g$ transcendental has Fabry-gap Taylor support) is exactly the open problem. Almost all of the 0.03 comes from Step 0, a cheap audit of the "
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-14"
+    "assessed": "2026-10-15"
   },
   "520": {
     "rationale": [
