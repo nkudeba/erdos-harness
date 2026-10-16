@@ -1432,6 +1432,16 @@ class BuildTrack(unittest.TestCase):
             res = H.engine_run(self._screen_call(0.02, verdict, sig), FakeSession(lambda l, p: ""), "PROBLEM", LEAN, s)
             self.assertIsNone(H.progress_best(res["settle_screen"]), (verdict, sig))
 
+    def test_the_judges_read_the_papers_the_literature_gate_found(self):
+        # 2026-10-16: #32's line was rated new at significance 3 while arXiv:2610.14127 claimed its target
+        call = self._screen_call(0.02)
+        scr = {"draws": [{"chance": 0.02, "goal": "Prove that B(X)/log X tends to infinity."}]}
+        H.engine_progress_lines(call, H.EngineSettings(), "PROBLEM", "MAP", scr, H._DiscoverySpend(5.0),
+                                lit={"text": "- A lower bound for additive complements to the primes (2026): B(X) >> log X log log X"})
+        prompt = call.prompts("engine-target-rate")[0]
+        self.assertIn("A lower bound for additive complements to the primes", prompt)
+        self.assertIn("is KNOWN even if the claim is unverified or looks suspect", prompt)
+
     def _program_call(self, plans, reject_assembled=False):
         def script(purpose, prompt, n):
             if purpose == "engine-frontier":

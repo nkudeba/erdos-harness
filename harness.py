@@ -5357,7 +5357,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     if (s.progress_rate and scr and isinstance(scr.get("mean"), (int, float)) and scr["mean"] < s.progress_max
             and not any((x.get("panel") or {}).get("verdict") for x in scr.get("progress") or [])):
         # a resume rates only a screen that has no rated line yet (the campaign's `build` command on an old screen)
-        scr["progress"] = engine_progress_lines(call, s, statement, known, scr, spend)
+        scr["progress"] = engine_progress_lines(call, s, statement, known, scr, spend, lit=lit)
         keep()
     dropped = engine_drop_infra(ck)
     if dropped:
@@ -6056,15 +6056,22 @@ PROGRESS_LINE_LEAD = ("A LINE OF ATTACK, written because no way to settle the pr
 
 
 def engine_progress_lines(call, s: "EngineSettings", statement: str, known: str, scr: dict,
-                          spend: _DiscoverySpend) -> list[dict]:
+                          spend: _DiscoverySpend, lit: dict | None = None) -> list[dict]:
     """The target-rating judges (`engine_rate_targets`, the instrument round 1 uses) rate each screen draw's line as if
     its main target were proved: verdict, significance, reach and P_WEEK. The campaign sends a problem whose best line is
-    new at significance >= 2 to the build track instead of screening it out (`progress_best`)."""
+    new at significance >= 2 to the build track instead of screening it out (`progress_best`).
+    The judges also read the papers the literature gate found (`lit`), and a target a paper claims is KNOWN. On
+    2026-10-16 #32's line, B(X)/log X -> infinity for every complement, was rated new at significance 3 from a map that
+    called arXiv:2610.14127 (Radomskii, 9 October 2026), which claims exactly that, "unverified and suspect"."""
     lines = [{"id": f"D{i}", "type": "LINE",
               "statement": PROGRESS_LINE_LEAD + clip_middle(d.get("text") or d.get("goal") or "", 6000)}
              for i, d in enumerate(scr.get("draws") or [], 1) if d.get("text") or d.get("goal")]
     if not lines:
         return []
+    if lit and lit.get("text"):
+        known = (known + "\n\nLITERATURE SEARCH (titles and abstracts found today, unverified). A target that a paper below "
+                 "claims to prove, or something stronger, is KNOWN even if the claim is unverified or looks suspect: cite "
+                 "the paper.\n" + clip_middle(lit["text"], 8000))
     panels = engine_rate_targets(call, statement, known, lines, s, spend)
     return [{"draw": t["id"], "panel": panels.get(t["id"]) or {"error": "not rated"}} for t in lines]
 
