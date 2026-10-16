@@ -331,3 +331,8 @@
 [2026-10-16T09:09:57Z] #695: scout -> none ($16.60; 2 validated new [1, 1])
 [2026-10-16T09:10:04Z] #695: long computation deep/long_pyr21.py for up to 1.5 h (P(21) exactly (exhaustive up to 8.96e13; also re-derives P(20) at 6× scale), with a witness chain an)
 [2026-10-16T09:26:35Z] #695: long computation deep/long_gp_p20.py for up to 1.0 h (independent GP reproduction of min R_20(7.36e12) = P(20) = 7242080052479)
+[2026-10-16T09:33:08Z] #695: Lean on partial result r1s1/C5 in 20261016-053308-123048-resolve-claim-erdos10069501
+[2026-10-16T14:29:27Z] resolution campaign loop starting
+[2026-10-16T14:29:28Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-16T14:29:28Z] another harness run is live; waiting for the lane
+[2026-10-16T17:50:09Z] #695: Lean on r1s1/C1 deferred: deferred: C5's Lean run (resolve-claim-erdos10069501) certified the shared theory (a functional certificate rules out an infinite chain; 14 lemmas) and stalled on the finite certificate checks. C1's o

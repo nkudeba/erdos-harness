@@ -407,6 +407,10 @@
      "tier": "scout",
      "outcome": "none",
      "spend": 16.5951
+    },
+    {
+     "tier": "queue",
+     "outcome": "Lean on r1s1/C1 deferred (operator session)"
     }
    ],
    "prepped": true,
@@ -440,12 +444,23 @@
    },
    "validated_seen": 2,
    "claims_todo": [
-    "r1s1/C5",
-    "r1s1/C1"
+    "r1s1/C5"
    ],
    "computed": [
     "deep/long_pyr21.py",
     "deep/long_gp_p20.py"
+   ],
+   "claims_done": {
+    "r1s1/C5": {
+     "lean_run": "runs/20261016-053308-123048-resolve-claim-erdos10069501"
+    }
+   },
+   "claims_deferred": [
+    {
+     "claim": "r1s1/C1",
+     "why": "deferred: C5's Lean run (resolve-claim-erdos10069501) certified the shared theory (a functional certificate rules out an infinite chain; 14 lemmas) and stalled on the finite certificate checks. C1's open part is the same check (hyp_c1 in that residual), so a fresh run would re-derive the theory and stop at the same place. Re-queue it once certificates are Bool-reflected.",
+     "at": "2026-10-16T17:50:09Z"
+    }
    ]
   },
   "517": {
