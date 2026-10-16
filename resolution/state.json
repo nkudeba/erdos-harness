@@ -451,12 +451,20 @@
     {
      "tier": "queue",
      "outcome": "rate the screen's lines (operator)"
+    },
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.14,
+     "spend": 0.3881,
+     "track": "build",
+     "route": "build"
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 2.1382079999999997,
+   "spend": 2.52628,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -472,13 +480,23 @@
    "rescreen_at": "20261015-122831",
    "kind": "settle",
    "lane": "rescreen",
-   "next": "screen",
-   "status": "rating",
+   "next": "build",
+   "status": "build",
    "run_dir": "runs/20261015-205853-418570-erdos517",
    "settle_chance": 0.14,
    "arm": "screened out",
-   "track": null,
-   "intent": null
+   "track": "build",
+   "intent": null,
+   "build": {
+    "line": "resolution/build/517/line.md",
+    "draw": "D1",
+    "significance": 2,
+    "p_week": 0.03,
+    "reach": "low",
+    "value": 0.06,
+    "why": "Excluding Fabry-gap support for Pe^g with g of finite order is not in the literature (Pólya and Fuchs need f of finite order, and infinite-order results need near-Fejér gaps), but it lies squarely in the infinite-lower-order regime where the single-scale barrier applies. It would be a notable partial result, but no available tool reaches it in a week.",
+    "summary": "=== GOAL No line is likely to settle the true mathematical question. Erdős #517 is open, and the CORE reduction (no $Pe^g$ with $g$ transcendental has Fabry-gap Taylor support) is exactly the open problem. Almost all of the 0.03 comes from Step 0, a cheap audi"
+   }
   },
   "1068": {
    "history": [

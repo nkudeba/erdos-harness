@@ -305,3 +305,5 @@
 [2026-10-16T03:27:36Z] #873: screen -> screened out (settle chance 0.01, draws [0.02, 0.01]; $0.56); BUILD TRACK: its line's main target is rated new at significance 2 if proved (P_WEEK 0.375)
 [2026-10-16T03:27:45Z] #32: screen (resuming runs/20261015-195538-196587-erdos32)
 [2026-10-16T03:28:15Z] #32: screen -> screened out (settle chance 0.00, draws [0.0, 0.0]; $0.43); BUILD TRACK: its line's main target is rated new at significance 3 if proved (P_WEEK 0.025)
+[2026-10-16T03:28:31Z] #517: screen (resuming runs/20261015-205853-418570-erdos517)
+[2026-10-16T03:28:56Z] #517: screen -> screened out (settle chance 0.14, draws [0.03, 0.25]; $0.39); BUILD TRACK: its line's main target is rated new at significance 2 if proved (P_WEEK 0.03)
