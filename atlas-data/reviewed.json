@@ -1914,12 +1914,13 @@
   },
   "1088": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.03, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line aims to settle the formal statement as a proof, since it is uniform in n. It should honestly be read as a major-progress line (significance 3) with a small chance of settling. Target theorem. For every fixed n ≥ 3 there is a constant D_n with f_d(n) ≤"
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.03, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line aims to settle the formal statement as a proof, since it is uniform in n. It should honestly be read as a major-progress line (significance 3) with a small chance of settling. Target theorem. For every fixed n ≥ 3 there is a constant D_n with f_d(n) ≤",
+      "Resolution campaign ripeness screen 2026-10-16: SETTLE CHANCE 0.04, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target theorem (all n ≥ 3 together). For every n ≥ 3 and every ε > 0 there is d₀(n, ε) such that for d ≥ d₀ every rainbow-n-free finite X ⊂ ℝ^d satisfies |X| < 2^{εd}. Here \"rainbow-n-free\" means X has no n-subset whose C(n,2) distances are pairwise distinct. "
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-15"
+    "assessed": "2026-10-16"
   },
   "1094": {
     "rationale": [
