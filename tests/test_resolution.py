@@ -722,6 +722,39 @@ class Persistence(Base):
         self.assertEqual(R.load_state()["problems"]["1207"]["next"], "program")
 
 
+class ComputationalRouting(Base):
+    def test_a_ripe_record_scout_goes_to_the_deep_tier_not_the_settle_program(self):
+        for kind, want in (("record", "deep"), ("explicit", "deep"), ("settle", "program")):
+            run = self.engine_run([])
+            R.save_state({"problems": {"9": {"history": [], "next": "scout", "arm": "pass", "settle_chance": 0.55,
+                                             "prepped": True, "run_dir": str(run), "spend": 5.0, "track": "new-math",
+                                             "kind": kind, "lane": "record"}}})
+            fake = lambda *a, **k: ({"run_dir": str(run.relative_to(self.d)), "spend_run": 21.0}, 0)
+            with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake), \
+                    patch.object(R, "queue", lambda s, c: []), patch.object(R, "classify", lambda rd: ("none", {})), \
+                    patch.object(R, "record_atlas"), patch.object(R, "commit"), patch.object(R, "run_long", lambda *a: []):
+                R.step(R.load_cfg())
+            self.assertEqual(R.load_state()["problems"]["9"]["next"], want, kind)
+
+    def test_a_queued_program_pass_of_a_record_problem_runs_as_a_deep_pass(self):
+        seen = {}
+
+        def fake(n, tag, total, flags, resume=None, on_start=None):
+            seen.update(tag=tag, total=total, flags=flags)
+            return None, 1
+        R.save_state({"problems": {"695": {"history": [], "next": "program", "status": "program", "kind": "record",
+                                           "run_dir": "runs/r695", "spend": 22.0, "track": "new-math"}}})
+        st = R.load_state()
+        st["problems"]["686"] = {"history": [], "next": "program", "kind": "settle"}
+        with patch.object(R, "queue", lambda s, c: []):
+            self.assertEqual(R.next_action(st, R.load_cfg()), ("deep", 695))     # ahead of a settle program, as a deep pass
+        with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []):
+            R.step(R.load_cfg())
+        self.assertEqual((seen["tag"], seen["total"]), ("resolve-deep", 62.0))
+        self.assertIn("--engine-objective record", seen["flags"])
+        self.assertNotIn("--engine-program-cycles", seen["flags"])
+
+
 class BuildTrack(Base):
     """2026-10-16, the operator: the campaign kept screening out the hard problems because they need new mathematics,
     instead of building it. On 2026-10-15 both re-screens (#873, #32) wrote a major-progress line and were dropped on

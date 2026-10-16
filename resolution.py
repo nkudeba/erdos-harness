@@ -983,7 +983,10 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     # stays first
     for want in ("lean", "screen", "deep"):
         for n, p in probs.items():
-            if p.get("next") == want and p.get("errors", 0) < cfg["max_errors"]:
+            nxt = p.get("next")
+            if nxt == "program" and (p.get("kind") or "settle") in ("record", "explicit"):
+                nxt = "deep"                             # step() runs it as one: a computational problem's next pass
+            if nxt == want and p.get("errors", 0) < cfg["max_errors"]:
                 return want, int(n)
     for n, p in probs.items():
         if p.get("running") and p.get("errors", 0) < cfg["max_errors"]:
@@ -1065,6 +1068,12 @@ def step(cfg: dict) -> bool:
         row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
                              stage_flags(cfg, action, p), p.get("run_dir"), on_start=started)
     elif action in ("deep", "program", "build"):
+        if action == "program" and (p.get("kind") or "settle") in ("record", "explicit"):
+            # whatever queued it (a scout before 2026-10-16, persistence, the persist command), a computational problem's
+            # next pass is a deep pass under its own objective, never a program aimed at the formal statement
+            log(f"#{n}: a {p.get('kind')} problem: its research-program pass runs as a deep pass")
+            action = "deep"
+            p["next"] = "deep"
         refresh_forum(n)
         k = site_claims(n)
         if k:                                            # a claim posted after the scout, or a scout run before the rule
@@ -1162,6 +1171,11 @@ def step(cfg: dict) -> bool:
         p.update({"next": "lean", "status": "complete", "complete": info})
     elif action == "build":                              # the next pass, if any, is the persistence rule's call below
         p.update({"next": None, "status": "built"})
+    elif action == "scout" and p.get("track") == "new-math" and ripe and (p.get("kind") or "settle") in ("record", "explicit"):
+        # A computational problem goes on in the deep tier under its own objective, where sessions read and extend the
+        # computations. The research program aims its skeleton at the formal statement: #695's scout (record, 0.55)
+        # was sent to a $90 settle program on its asymptotic question (2026-10-16).
+        p.update({"next": "deep", "status": "traction", "traction": info})
     elif action == "scout" and p.get("track") == "new-math" and ripe:
         p.update({"next": "program", "status": "program", "traction": info})
     elif outcome == "traction" and action == "scout" and p.get("track") != "statement":

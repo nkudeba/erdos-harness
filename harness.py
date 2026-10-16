@@ -4553,6 +4553,8 @@ class EngineSettings:
     progress_rate: bool = False      # the build track: judges rate each screen draw's line as progress (engine_progress_lines)
     progress_max: float = 0.3        # ... only when the screen's settle chance is below this, the campaign's pass bar
     program_line: str = ""           # the build track: the program proves this line's theorems, one rung after another
+    oeis: bool = False               # OEIS lookups of computed values (computations_text, certificate checks); never benchmark
+    computations: str = ""           # the campaign's long computations and their OEIS check, for the lead and the judges
     frontier_budget: float = 8.0     # maps ran $2.32 (#455), $5.13 (#1203) and > $5.25 (#153, cut off): a cut-off map is lost
     frontier_effort: str = "high"
     judge_budget: float = 0.8        # each referee and adversary call
@@ -4590,7 +4592,7 @@ class EngineSettings:
 
     def as_dict(self) -> dict:
         d = dataclasses.asdict(self)
-        for k in ("library", "blackboard", "context", "program_line"):
+        for k in ("library", "blackboard", "context", "program_line", "computations"):
             d[k] = bool(getattr(self, k))
         return d
 
@@ -4788,10 +4790,95 @@ def certificate_check_sections(notebook: str) -> dict:
     return out
 
 
-def certificate_checks(sb: Path, notebook: str, timeout: int = 900) -> str:
+# OEIS lookups (2026-10-16). The record track computes values, and a value OEIS already lists is a known result. #695's
+# exhaustive search found P(21) = 64750853277599 and reported it as a record; it is the last listed term of A082449
+# (and of A056637), while A082449's next term, which OEIS marks as wanted, is open. Nothing in the run knew either fact.
+OEIS_CACHE = Path(__file__).resolve().parent / "tmp" / "oeis-search"
+BIG_INT_RE = re.compile(r"(?<!\d)(?<!\d\.)\d{7,40}(?!\d)(?!\.\d)")   # not a decimal's digits; a full stop may follow
+
+
+def oeis_search(value: int, timeout: float = 20.0) -> list[dict] | None:
+    """The OEIS entries that list `value` (the public search, cached under tmp/): each with its A-number, name, keywords,
+    number of data terms, the value's index a(i) in the data (None when it appears elsewhere in the entry) and whether it
+    is the last listed term. None when the lookup failed, so a failure never reads as "not in OEIS"."""
+    f = OEIS_CACHE / f"{value}.json"
+    if f.is_file():
+        try:
+            return json.loads(f.read_text())
+        except ValueError:
+            pass
+    try:
+        req = urllib.request.Request(f"https://oeis.org/search?q={value}&fmt=json", headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            d = json.loads(r.read().decode() or "null")
+    except Exception:                                    # noqa: BLE001 - network: unchecked, never "not found"
+        return None
+    out = []
+    for e in (d if isinstance(d, list) else ((d or {}).get("results") or []))[:6]:
+        terms = [t.strip() for t in str(e.get("data") or "").split(",") if t.strip()]
+        off = int((str(e.get("offset") or "0").split(",")[0] or "0").strip() or 0)
+        i = terms.index(str(value)) if str(value) in terms else None
+        out.append({"a": f"A{int(e.get('number') or 0):06d}", "name": str(e.get("name") or "")[:200],
+                    "keywords": str(e.get("keyword") or ""), "terms": len(terms), "index": None if i is None else i + off,
+                    "last": i is not None and i == len(terms) - 1})
+    OEIS_CACHE.mkdir(parents=True, exist_ok=True)
+    f.write_text(json.dumps(out))
+    return out
+
+
+def oeis_notes(text: str, limit: int = 8) -> str:
+    """One line for each large integer (7+ digits) in `text`: the OEIS entries that list it, where, and whether the entry
+    wants more terms. Empty when the text has none. Bracketed lists (a witness chain) and round numbers ending in 0000 (a
+    search bound) are skipped, so the values a result asserts come first: #695's witness chains held 40 integers."""
+    clean = re.sub(r"\[[^\]]*\]", " ", text or "")
+    lines = []
+    for v in [x for x in dict.fromkeys(BIG_INT_RE.findall(clean)) if not x.endswith("0000")][:limit]:
+        hits = oeis_search(int(v))
+        if hits is None:
+            lines.append(f"- {v}: the OEIS lookup failed, so this value is unchecked.")
+        elif not hits:
+            lines.append(f"- {v}: in no OEIS entry (searched {datetime.now(timezone.utc).date()}).")
+        else:
+            parts = []
+            for h in hits[:3]:
+                where = (f"its term a({h['index']}), {'the LAST listed term' if h['last'] else 'not its last term'}"
+                         if h["index"] is not None else "mentioned in the entry, not in its data")
+                more = "; the entry is marked 'more' (more terms wanted)" if "more" in h["keywords"].split(",") else ""
+                parts.append(f"{h['a']} ({h['name'][:120]}): {where}{more}")
+            lines.append(f"- {v} is KNOWN to OEIS: " + " | ".join(parts))
+    return "\n".join(lines)
+
+
+def computations_text(library: Path | None, oeis: bool = False) -> str:
+    """The campaign's long computations for this problem (COMPUTE.md, written by resolution.run_long), compact: what each
+    decides, how it ended, and its RESULT lines, then the OEIS lookup of the values they report. Empty without them."""
+    f = (library / "COMPUTE.md") if library else None
+    if f is None or not f.is_file():
+        return ""
+    out, results = [], []
+    for sec in re.split(r"(?m)^## Long computation ", f.read_text())[1:]:
+        head = sec.split("\n", 1)[0].strip()
+        decides = re.search(r"(?m)^What it decides[^:]*:\s*(.+)$", sec)
+        proc = re.search(r"(?m)^Process:\s*([^.\n]+(?:\.[^.\n]*)?)", sec)
+        res = [l.strip() for l in sec.splitlines() if l.strip().startswith("RESULT")]
+        out.append(f"- {head}: {decides.group(1).strip()[:300] if decides else '(no description)'}. "
+                   f"Process: {proc.group(1).strip()[:120] if proc else 'unknown'}"
+                   + "".join(f"\n  {clip_middle(r, 700)}" for r in res))
+        results += res
+    if not out:
+        return ""
+    notes = oeis_notes("\n".join(results)) if (oeis and results) else ""
+    return ("COMPUTATIONS THE CAMPAIGN RAN FOR THIS PROBLEM (no model calls; a completed process is evidence, not a "
+            "result):\n" + "\n".join(out)
+            + (("\nOEIS LOOKUP of the values they report (automatic). A value OEIS lists is a KNOWN result, not a "
+                "record; where an entry wants more terms, its next term is the open record:\n" + notes) if notes else ""))
+
+
+def certificate_checks(sb: Path, notebook: str, timeout: int = 900, oeis: bool = False) -> str:
     """Re-run every claim's CHECK script in the session's sandbox, independently of the session, and return the
     section to append to its notebook (empty when no claim names a checker). The checker must print CERTIFIED and
-    exit 0. Its source travels with the verdict, so the referee can see whether it really checks the claim."""
+    exit 0. Its source travels with the verdict, so the referee can see whether it really checks the claim. With
+    `oeis`, each such claim's large values are looked up there too, so the judges see a value OEIS already lists."""
     blocks = []
     for c in parse_claims(re.split(re.escape(CERT_SECTION), notebook or "")[0]):
         name = c.get("check")
@@ -4814,9 +4901,12 @@ def certificate_checks(sb: Path, notebook: str, timeout: int = 900) -> str:
         except subprocess.TimeoutExpired:
             out, rc = f"timed out after {timeout} s", -1
         ok = rc == 0 and any(l.strip() == "CERTIFIED" for l in out.splitlines())
+        notes = oeis_notes(c.get("statement") or "") if oeis else ""
         blocks.append(f"### {c['id']} certificate: {'CERTIFIED' if ok else 'FAILED'}\n"
                       f"`{name}`: exit {rc}, {time.time() - t0:.1f} s. Last output:\n```\n{out[-1500:]}\n```\n"
-                      f"Checker source ({len(src)} characters):\n```python\n{clip_middle(src, 9000)}\n```")
+                      f"Checker source ({len(src)} characters):\n```python\n{clip_middle(src, 9000)}\n```"
+                      + (f"\nOEIS LOOKUP of the claim's values (automatic; a value OEIS lists is known, not a record):\n"
+                         f"{notes}" if notes else ""))
     return ("\n\n" + CERT_SECTION + "\n\n" + "\n\n".join(blocks) + "\n") if blocks else ""
 
 
@@ -5359,6 +5449,12 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         # a resume rates only a screen that has no rated line yet (the campaign's `build` command on an old screen)
         scr["progress"] = engine_progress_lines(call, s, statement, known, scr, spend, lit=lit)
         keep()
+    if s.computations.strip():
+        # After the screen, which reads the map alone: the campaign's long computations and their OEIS check reach the
+        # lead, every session and the judges, not only the sessions' library. #695's follow-up pass must know that the
+        # value its computation found is already listed, and which term is still open.
+        fblock = fblock + "\n\n" + s.computations.strip()
+        known = known + "\n\n" + s.computations.strip()
     dropped = engine_drop_infra(ck)
     if dropped:
         everything = list(_ck_claims(ck))
@@ -7734,6 +7830,14 @@ class Harness:
         if line:
             s.program_line = Path(line).read_text()
             self.log.event("engine", "program_line", path=str(line), sha=hashlib.sha256(s.program_line.encode()).hexdigest()[:12])
+        # OEIS could reveal a benchmark item's answer, as a paper could (`_literature_search`)
+        s.oeis = not (getattr(a, "benchmark", False) or getattr(a, "masked", False) or self.state.get("benchmark"))
+        lib = getattr(a, "library", None)
+        if lib and Path(lib).is_dir():
+            s.computations = computations_text(Path(lib), oeis=s.oeis)
+            if s.computations:
+                self.log.event("engine", "computations", chars=len(s.computations), oeis=s.oeis,
+                               known=s.computations.count("is KNOWN to OEIS"))
         s.library = self._library_text(16000)
         s.blackboard = self._read_blackboard(8000)
         block = self._results_library_block()
@@ -7808,7 +7912,8 @@ class Harness:
                            cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"), label=label)
             notebook = (sb / "NOTEBOOK.md").read_text() if (sb / "NOTEBOOK.md").exists() else ""
             if "CHECK" in notebook:
-                section = certificate_checks(sb, notebook)
+                section = certificate_checks(sb, notebook, oeis=not (getattr(self.args, "benchmark", False)
+                                                                     or getattr(self.args, "masked", False)))
                 if section:
                     notebook = re.split(re.escape(CERT_SECTION), notebook)[0].rstrip() + section
                     (sb / "NOTEBOOK.md").write_text(notebook)
