@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "00d38a96ec4e895d46209b706db8843f0a7f7c59ac023a3e56913d587f5d1e3d",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "65c5b8621a51ed7fc199806f4e36d593e5fb14aaeb32f36f1f92593843fe5a47"
+    "manual_reviews_sha256": "3c069b0fda08e3bc2c3c9e2b909219aa9986ac75c8067dcf15da4ac7f456fed8"
   },
   "problems": [
     {
@@ -49941,6 +49941,7 @@
         "CORRECTION (2026-09-11): previously scored 7. Lowered because no route to a COMPLETE proof is reachable: the counterexample side is exhausted to 1e9 with only the allowed overlapping case, Thue-Siegel makes any survivor finite-but-unreachable, and the positive side is already deep at k=3. The banked k<=2 proof and 12 lemmas are real value but they are PARTIAL value, now recorded on the partial axis where they belong.",
         "Deductive-loop candidate, rank 3 (2026-09-16; fit 62): the k<=2 case is proved, d_k is periodic (certified), and for each fixed k the statement reduces to a Diophantine equation - k=3 is x^3-x = 2(y^3-y), swept to y<1e9 with only the allowed overlapping pair. The natural skeleton is '#677 <= (for every k>=3 the k-th equation has no admissible solution)', with the k<=2 lemmas discharged and, for k=3, an effective Thue bound (Baker-type) entering as a PUBLISHED premise. The residual is uniform-in-k finiteness, which is research-grade; the loop can make that explicit and certify the reductions.",
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.06, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to refute. Find an explicit triple (m, n, k) with k ≥ 3, m ≥ n + k and `lcmInterval m k = lcmInterval n k`. Then prove the negation of `erdos_677` in Lean by exhibiting the witness and evaluating both lcms. Fallback if the search is exhaustive and fi",
+        "Resolution campaign ripeness screen 2026-10-16: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible, so this line aims at the largest explicit range instead. The only known \"sufficiently large\" result is Erdős's finiteness for each fixed k. It comes from Siegel's theorem and is ineffective, so no threshold N0 can be extracted fr",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -49954,7 +49955,7 @@
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -50023,7 +50024,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-15",
+        "on": "2026-10-16",
         "sources": [
           "scratchpad probes p677_big.py / p677_gaps.py",
           "https://raw.githubusercontent.com/google-deepmind/formal-conjectures/main/FormalConjectures/ErdosProblems/677.lean",
