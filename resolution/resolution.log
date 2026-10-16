@@ -295,3 +295,5 @@
 [2026-10-16T01:14:00Z] daily cap reached ($150.28 of $150); sleeping 1 h
 [2026-10-16T02:14:03Z] #1068: screen
 [2026-10-16T02:34:15Z] #1068: screen -> screened out (settle chance 0.17, draws [0.3, 0.05]; $2.81)
+[2026-10-16T02:34:25Z] #197: screen
+[2026-10-16T02:48:11Z] #197: screen -> screened out (settle chance 0.06, draws [0.07, 0.04]; $1.91)
