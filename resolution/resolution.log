@@ -319,3 +319,6 @@
 [2026-10-16T04:44:21Z] #32: build held: build target claimed by arXiv:2610.14127 (A. O. Radomskii, 'A lower bound for additive complements to the primes', 9 Oct 2026): B(X) >> log X log log X for every additive complement of the primes, i.e. the line's target B(X)/log X -> infinity and its fallback; unverified
 [2026-10-16T05:05:15Z] #881: screen
 [2026-10-16T05:24:37Z] #881: screen -> screened out (settle chance 0.10, draws [0.1, 0.1]; $3.05); BUILD TRACK: its line's main target is rated new at significance 3 if proved (P_WEEK 0.04)
+[2026-10-16T05:24:45Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-16T05:24:47Z] #677: screen
+[2026-10-16T05:47:55Z] #677: screen -> screened out (settle chance 0.01, draws [0.01, 0.0]; $3.78)
