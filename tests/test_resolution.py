@@ -96,6 +96,17 @@ class Tiers(Base):
             st["problems"]["7"].update({"running": "scout", "errors": cfg["max_errors"]})   # gave up on it
             self.assertEqual(R.next_action(st, cfg), ("screen", 8))
 
+    def test_a_scout_and_the_builds_share_come_before_a_research_program_pass(self):
+        # 2026-10-16: three $90 persistence passes ahead of #695's $18 scout (settle chance 0.55) would have held it two days
+        cfg = R.load_cfg()
+        st = {"problems": {"686": {"next": "program"}, "695": {"next": "scout", "arm": "pass", "settle_chance": 0.55},
+                           "873": {"next": "build", "build": {"value": 0.6}}, "158": {"next": "screen"}}}
+        with patch.object(R, "queue", lambda s, c: [8]):
+            for want in (("screen", 158), ("scout", 695), ("build", 873), ("program", 686)):
+                self.assertEqual(R.next_action(st, cfg), want)
+                st["problems"][str(want[1])]["next"] = None
+            self.assertEqual(R.next_action(st, cfg), ("screen", 8))
+
     def test_the_daily_cap_counts_the_last_24_hours(self):
         now = datetime(2026, 10, 8, 12, tzinfo=timezone.utc)
         for hours, spend in ((1, 10.0), (23, 5.0), (25, 100.0)):

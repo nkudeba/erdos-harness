@@ -974,13 +974,14 @@ def commit(paths: list[str], msg: str) -> None:
 # ---------------------------------------------------------------- one step
 
 def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
-    """lean first, then deep, then a stage cut off part way, then Lean on partial results, then a screened problem's
-    scout (the pass arm first, highest settle chance first, then the control arm), then a build pass while build passes
-    are within their share of the daily cap, then the next problem's screen, then any build pass."""
+    """lean first, then an operator's re-screen, then deep, then a stage cut off part way, then Lean on partial results,
+    then a screened problem's scout (the pass arm first, highest settle chance first, then the control arm), then a build
+    pass while build passes are within their share of the daily cap, then a research-program pass, then the next
+    problem's screen, then any build pass."""
     probs = state.get("problems", {})
-    # an operator's re-screen ("screen", from rescreen) costs about $3 and may promote a problem, so it runs before the
-    # $90 program passes; Lean, the payoff, stays first
-    for want in ("lean", "screen", "program", "deep"):
+    # an operator's re-screen ("screen", from rescreen or build) costs $1-6 and may promote a problem; Lean, the payoff,
+    # stays first
+    for want in ("lean", "screen", "deep"):
         for n, p in probs.items():
             if p.get("next") == want and p.get("errors", 0) < cfg["max_errors"]:
                 return want, int(n)
@@ -1002,6 +1003,11 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     bc = cfg.get("build") or {}
     if b is not None and spent_since(tier="build") < float(bc.get("share", 0.6)) * float(cfg["daily_cap_usd"]):
         return "build", b
+    # Research-program passes ($90 each) come after the scouts and the build track's share (2026-10-16). Ahead of every
+    # scout, three persistence passes would have kept #695's $18 scout, at settle chance 0.55, waiting two days of caps.
+    for n, p in probs.items():
+        if p.get("next") == "program" and p.get("errors", 0) < cfg["max_errors"]:
+            return "program", int(n)
     q = queue(state, cfg)
     if q:
         return "screen", q[0]
