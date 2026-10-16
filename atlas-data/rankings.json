@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "5fdbc88fecd3065d8aaafc32f81d3588b5dded05d239943f31c6fc6b0d62283d",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "478b362e65b73c8819472d3959cb8887b5bbef79e8d7541fc26c3c7e0152ed0c"
+    "manual_reviews_sha256": "693cbad31d868d5615882dfb157cd873a988c41821d7f13e0e117761fc0a8ec9"
   },
   "problems": [
     {
@@ -39252,7 +39252,7 @@
       "prize": "no",
       "evidence": {
         "best": "attempted",
-        "runs": 1,
+        "runs": 2,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -81862,6 +81862,7 @@
       "rationale": [
         "Step-3 engine run 2026-10-07 ($21.10, informal): a model referee, an adversary and two novelty judges passed r1s1/C1 as new at significance 2: F(A,X,4) << X^(1/3-1/700) for every strictly increasing A, below the Erdos-Szemeredi X^(1/3) log X for k=4 and 5. Not Lean-checked and not human-reviewed.",
         "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is likely to settle `erdos_873` within a few days of work. The statement has the form ∀ε ∃k, so no finite computation (PARI or SAT) can decide it. Why the formal statement is no easier than the informal one. - The strict bound \"for all X > 0\" is equiva",
+        "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line I can defend is likely to settle the problem. I am therefore choosing a major-progress line, and I say so here. Why no settling line. The formal statement is equivalent to the Divisor Cluster Conjecture (DCC), uniformly in n: - Packing gives DCC ⇒ the ",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -81874,7 +81875,7 @@
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-13 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -81943,7 +81944,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-13",
+        "on": "2026-10-15",
         "sources": [
           "experiments/idea-engine-2026-10-02/REPORT.md",
           "resolution/results.jsonl"
