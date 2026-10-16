@@ -1,52 +1,52 @@
 {
-  "sha": "a2b973d982ddeeeb28c47222a505c8b616c8ebc6",
-  "node_id": "C_kwDOOogmB9oAKGEyYjk3M2Q5ODJkZGVlZWIyOGM0NzIyMmE1MDVjOGI2MTZjOGViYzY",
+  "sha": "c77fdd446d23539302aa73bcfae4a9fa962b8382",
+  "node_id": "C_kwDOOogmB9oAKGM3N2ZkZDQ0NmQyMzUzOTMwMmFhNzNiY2ZhZTRhOWZhOTYyYjgzODI",
   "commit": {
     "author": {
-      "name": "AItoBit",
-      "email": "321732397+AItoBit@users.noreply.github.com",
-      "date": "2026-10-16T08:56:48Z"
+      "name": "Paul Lezeau",
+      "email": "paul.lezeau@gmail.com",
+      "date": "2026-10-16T16:07:58Z"
     },
     "committer": {
       "name": "GitHub",
       "email": "noreply@github.com",
-      "date": "2026-10-16T08:56:48Z"
+      "date": "2026-10-16T16:07:58Z"
     },
-    "message": "feat(ErdosProblems): formalize problem 561 (#7124)\n\nFormalize Erdős Problem 561, the size Ramsey formula for two star\nforests with nonincreasing positive star sizes.\n\nUse the existing `SimpleGraph.sizeRamsey`. Problem-local notation\nconstructs the vertex-disjoint stars from a relation on tagged finite\nvertex sets; vertex 0 is each component's center. The right-hand side\nsums finite maxima over one-based index diagonals. Positive sizes make\nnatural subtraction safe, and every diagonal is nonempty.\n\nThe statement was independently audited against all four pages of the\nsupplied PDF and https://www.erdosproblems.com/latex/561. The current\nsource uses the summation endpoint `s + t`, correcting the older issue\ntext's `s + 2`. The general conjecture remains tagged `research open`:\nhttps://arxiv.org/html/2606.04439v3 treats uniform forests and still\nstates the general formula as Conjecture 1.1. The original\ngeneral-solution claim is not used as evidence of a solution.\n\nValidation: `lake --wfail build 'FormalConjectures.ErdosProblems.«561»'`\n(Lean 4.33.1; Mathlib `0df444a360eaa60ab8c11dca51a86af692955474`).\nSeparate Lean checks cover center-to-leaf edges, absence of loops,\nleaf-to-leaf and cross-component edges, and the one-star diagonal\nmaximum.\n\nThis is a conjecture statement with an intentional `sorry` proof, not a\nformal proof. Supplementary solved cases and forum proof claims are\noutside this change.\n\nPrepared with Codex using the Erdős Research Lab skills.\n\nFixes #791.",
+    "message": "Add Team page to the website (#7414)\n\nAdd a Team page at `/team/` with Maintainers and Reviewers sections.\nEach section shows “In construction”. Add Team to the navigation on all\npages.\n\nPreview: https://paul-lez.github.io/formal-conjectures/team/",
     "tree": {
-      "sha": "c16c0b5980a0848795d504a8fc8d84498cf8d9d6",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/c16c0b5980a0848795d504a8fc8d84498cf8d9d6"
+      "sha": "9a868bc9beee398e4c5c4531954c85b7b57cdf3c",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/9a868bc9beee398e4c5c4531954c85b7b57cdf3c"
     },
-    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/a2b973d982ddeeeb28c47222a505c8b616c8ebc6",
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/c77fdd446d23539302aa73bcfae4a9fa962b8382",
     "comment_count": 0,
     "verification": {
       "verified": true,
       "reason": "valid",
-      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq0ebgCRC1aQ7uu5UhlAAAFj8QAJVGh3oTt5e+quNEo+RRDmTT\ngtBnWamcJqo8a77ZBBZzTl/MpEdhbaFtwUnqj+yXE5jry7AEXgh9vLzxYQZDHqJm\nlZy8CpptpvjI/L0+D/pv+6BuOGJhHFkshPk/+1wyQp4/BQG/8kZE5gCJIQC5IP3A\nqBPwCr5UE6zLlqjLAjQlHrAWwR55Js+peUeweZ3ktVRTSULhuIpjYyjo/LnyFGC5\nOE7kGflJHHU3xdiVpxF6y/ZTg0WJs0IKDdr+qLUCJJ/l+Emvg/8w4pZ9WZ7P7bUm\nvmdJu5ouPeXG/EvvF476Dls0Gj0rSWHDIkwbF7KfAZvXJqEHEfJL+s9Dyxt/5Lt4\ngHE8zbbOnYfVwiL6Q6ca4VyTbhHyv/2OvN8lR7vpSQh9FXf+++q47W1WF9bb4pCJ\nixKGp+EwCCfM1RdgmJU1jdjtpCXZw1ebOiJaE3X6oF1qEuC0zMYn9xAKwswOGL33\n6MNeyhETmZwV7pObKxokrvGagX0QKbqi8PrBcJzRrJ3ScnipRcj49Y8lapOp+J5i\nuQJDjeWdYKjs/wmjNpOsX/kz0PphDQLsIGtVVVilS9y07ASxpOOyGFG2p7mph+pu\n3eO+REio0nVGmdwi6MErFpa4aWUtk3q829n+5qqEaEXz3whdwonQjA/SvyqoQMrr\nns41zFHG1yMjQKqiyzfN\n=Tyfz\n-----END PGP SIGNATURE-----\n",
-      "payload": "tree c16c0b5980a0848795d504a8fc8d84498cf8d9d6\nparent e750f777b32aeae464c01809e0d223dd62e99fab\nauthor AItoBit <321732397+AItoBit@users.noreply.github.com> 1792141008 +0000\ncommitter GitHub <noreply@github.com> 1792141008 +0000\n\nfeat(ErdosProblems): formalize problem 561 (#7124)\n\nFormalize Erdős Problem 561, the size Ramsey formula for two star\nforests with nonincreasing positive star sizes.\n\nUse the existing `SimpleGraph.sizeRamsey`. Problem-local notation\nconstructs the vertex-disjoint stars from a relation on tagged finite\nvertex sets; vertex 0 is each component's center. The right-hand side\nsums finite maxima over one-based index diagonals. Positive sizes make\nnatural subtraction safe, and every diagonal is nonempty.\n\nThe statement was independently audited against all four pages of the\nsupplied PDF and https://www.erdosproblems.com/latex/561. The current\nsource uses the summation endpoint `s + t`, correcting the older issue\ntext's `s + 2`. The general conjecture remains tagged `research open`:\nhttps://arxiv.org/html/2606.04439v3 treats uniform forests and still\nstates the general formula as Conjecture 1.1. The original\ngeneral-solution claim is not used as evidence of a solution.\n\nValidation: `lake --wfail build 'FormalConjectures.ErdosProblems.«561»'`\n(Lean 4.33.1; Mathlib `0df444a360eaa60ab8c11dca51a86af692955474`).\nSeparate Lean checks cover center-to-leaf edges, absence of loops,\nleaf-to-leaf and cross-component edges, and the one-star diagonal\nmaximum.\n\nThis is a conjecture statement with an intentional `sorry` proof, not a\nformal proof. Supplementary solved cases and forum proof claims are\noutside this change.\n\nPrepared with Codex using the Erdős Research Lab skills.\n\nFixes #791.",
-      "verified_at": "2026-10-16T08:57:05Z"
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq0kvuCRC1aQ7uu5UhlAAA8QwQACCeYB273cSjNCiGynBY+9tL\nZIN5ycwRA7RrPW7S9TweS1KOEi4sZeXZgja9BjI5HYCFTkHO8lkPW5bzHcWbn9Lq\n/Tf21QYAGmUe58V4RQ9DXTMIpuHi9AohoWlJCvdUR6wWyVwdgrhnbGhvu5+YvQVY\nw/ywNciUrzgSJH/SP03elpYhoGgNzcBQ5Hm5vplIIzbZSXC0Sar3cJ3DMh6uejAf\nMP4f5XwIHlQWUN9gyg4HZFK1W356mz79PsEtiqpSoHLilnhlW2Mkzn9GuzEAu8Op\nLGsYq4ykI6c9nYl2QCaMYOcnn1OQcMvq0cQKLgU0OZFaqigc500GsOBRCNBsPWSi\nWYXPZaD1oE0XkI6a5RfR7howejkoNUpwzyZnROEcGjklhUA7XEVQt225Mws//VeS\nDOgZ3eof4P57WkmMbdX3dQfcqzgD0E4ziPj74OKJ1x/vt2/FPoo3E4Kj5sGbKn13\nrEkgaAJEQUg+iEPN59mXmL6+LCvCbLUUilWW+kRTupfx/TBBtmFPlyPRCcz4Vm57\nfA24wMp9DEXvoRq1+PZcSCkVrp5m92U9q2O2X/FxMFYYT6Q6VE1jLsOpHgFBQUlm\nlkzd5Emppw+RWegzvGwbHSBWEX11Mr+h/auCUcdfb/Wzp1z3YzLprQdvyvvhZ7C1\ntZbkqizB5XmHadz5uD2C\n=soPK\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 9a868bc9beee398e4c5c4531954c85b7b57cdf3c\nparent 5a81b1d423f1ec00be12ef7c765558deef0d06f6\nauthor Paul Lezeau <paul.lezeau@gmail.com> 1792166878 +0000\ncommitter GitHub <noreply@github.com> 1792166878 +0000\n\nAdd Team page to the website (#7414)\n\nAdd a Team page at `/team/` with Maintainers and Reviewers sections.\nEach section shows “In construction”. Add Team to the navigation on all\npages.\n\nPreview: https://paul-lez.github.io/formal-conjectures/team/",
+      "verified_at": "2026-10-16T16:08:15Z"
     }
   },
-  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/a2b973d982ddeeeb28c47222a505c8b616c8ebc6",
-  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/a2b973d982ddeeeb28c47222a505c8b616c8ebc6",
-  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/a2b973d982ddeeeb28c47222a505c8b616c8ebc6/comments",
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/c77fdd446d23539302aa73bcfae4a9fa962b8382",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/c77fdd446d23539302aa73bcfae4a9fa962b8382",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/c77fdd446d23539302aa73bcfae4a9fa962b8382/comments",
   "author": {
-    "login": "AItoBit",
-    "id": 321732397,
-    "node_id": "U_kgDOEy0_LQ",
-    "avatar_url": "https://avatars.githubusercontent.com/u/321732397?v=4",
+    "login": "Paul-Lez",
+    "id": 72892199,
+    "node_id": "MDQ6VXNlcjcyODkyMTk5",
+    "avatar_url": "https://avatars.githubusercontent.com/u/72892199?v=4",
     "gravatar_id": "",
-    "url": "https://api.github.com/users/AItoBit",
-    "html_url": "https://github.com/AItoBit",
-    "followers_url": "https://api.github.com/users/AItoBit/followers",
-    "following_url": "https://api.github.com/users/AItoBit/following{/other_user}",
-    "gists_url": "https://api.github.com/users/AItoBit/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/AItoBit/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/AItoBit/subscriptions",
-    "organizations_url": "https://api.github.com/users/AItoBit/orgs",
-    "repos_url": "https://api.github.com/users/AItoBit/repos",
-    "events_url": "https://api.github.com/users/AItoBit/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/AItoBit/received_events",
+    "url": "https://api.github.com/users/Paul-Lez",
+    "html_url": "https://github.com/Paul-Lez",
+    "followers_url": "https://api.github.com/users/Paul-Lez/followers",
+    "following_url": "https://api.github.com/users/Paul-Lez/following{/other_user}",
+    "gists_url": "https://api.github.com/users/Paul-Lez/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/Paul-Lez/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/Paul-Lez/subscriptions",
+    "organizations_url": "https://api.github.com/users/Paul-Lez/orgs",
+    "repos_url": "https://api.github.com/users/Paul-Lez/repos",
+    "events_url": "https://api.github.com/users/Paul-Lez/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/Paul-Lez/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false
@@ -74,28 +74,136 @@
   },
   "parents": [
     {
-      "sha": "e750f777b32aeae464c01809e0d223dd62e99fab",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/e750f777b32aeae464c01809e0d223dd62e99fab",
-      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/e750f777b32aeae464c01809e0d223dd62e99fab"
+      "sha": "5a81b1d423f1ec00be12ef7c765558deef0d06f6",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/5a81b1d423f1ec00be12ef7c765558deef0d06f6",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/5a81b1d423f1ec00be12ef7c765558deef0d06f6"
     }
   ],
   "stats": {
-    "total": 69,
-    "additions": 69,
+    "total": 76,
+    "additions": 76,
     "deletions": 0
   },
   "files": [
     {
-      "sha": "bcbe9076d196a61f5fcca447d67b32e263a907f6",
-      "filename": "FormalConjectures/ErdosProblems/561.lean",
-      "status": "added",
-      "additions": 69,
+      "sha": "0e4eef1be99f8b4a4176b380b9a6e4c9ff6f7ac0",
+      "filename": "site/README.md",
+      "status": "modified",
+      "additions": 2,
       "deletions": 0,
-      "changes": 69,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/a2b973d982ddeeeb28c47222a505c8b616c8ebc6/FormalConjectures%2FErdosProblems%2F561.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/a2b973d982ddeeeb28c47222a505c8b616c8ebc6/FormalConjectures%2FErdosProblems%2F561.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F561.lean?ref=a2b973d982ddeeeb28c47222a505c8b616c8ebc6",
-      "patch": "@@ -0,0 +1,69 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import FormalConjecturesUtil\n+\n+/-!\n+# Erdős Problem 561\n+\n+*References:*\n+- [erdosproblems.com/561](https://www.erdosproblems.com/561)\n+- [BEFRS78] Burr, S. A. and Erdős, P. and Faudree, R. J. and Rousseau, C. C. and Schelp, R. H.,\n+  Ramsey-minimal graphs for multiple copies. Nederl. Akad. Wetensch. Indag. Math. (1978), 187-195.\n+-/\n+\n+@[expose] public section\n+\n+namespace Erdos561\n+\n+open SimpleGraph\n+\n+/-- `F(s,n)` is the disjoint union of the stars $K_{1,n_i}$. The vertex $(i,0)$ is the center\n+of component $i$; its other $n_i$ vertices are leaves. -/\n+local notation \"F(\" s \", \" n \")\" =>\n+  fromRel (fun (u v : Σ i : Fin s, Fin (n i + 1)) ↦\n+    Sigma.fst u = Sigma.fst v ∧\n+      (Fin.val (Sigma.snd u) = 0 ∨ Fin.val (Sigma.snd v) = 0))\n+\n+/--\n+Let $\\hat{R}(G)$ denote the size Ramsey number, the minimal number of edges $m$ such that there\n+is a graph $H$ with $m$ edges such that in any $2$-colouring of the edges of $H$ there is a\n+monochromatic copy of $G$.\n+\n+Let $F_1$ and $F_2$ be the union of stars. More precisely, let\n+$F_1=\\cup_{i\\leq s}K_{1,n_i}$ and $F_2=\\cup_{j\\leq t}K_{1,m_j}$ with\n+$n_1\\geq\\cdots\\geq n_s\\geq1$ and $m_1\\geq\\cdots\\geq m_t\\geq1$. Prove that\n+$$\\hat{R}(F_1,F_2)=\\sum_{2\\leq k\\leq s+t}l_k$$\n+where\n+$$l_k=\\max\\{n_i+m_j-1:i+j=k\\}.$$\n+\n+The unions are vertex-disjoint, and $s,t\\geq1$. Lean indices start at zero, so the condition\n+$i+j=k$ is represented by $(i+1)+(j+1)=k$.\n+-/\n+@[category research open, AMS 5]\n+theorem erdos_561 :\n+    ∀ (s t : ℕ), 1 ≤ s → 1 ≤ t →\n+    ∀ (n : Fin s → ℕ) (m : Fin t → ℕ),\n+      Antitone n → Antitone m → (∀ i, 1 ≤ n i) → (∀ j, 1 ≤ m j) →\n+      sizeRamsey F(s, n) F(t, m) =\n+        ∑ k ∈ Finset.Icc 2 (s + t),\n+          ((Finset.univ : Finset (Fin s × Fin t)).filter\n+            (fun p ↦ (p.1.val + 1) + (p.2.val + 1) = k)).sup\n+              (fun p ↦ n p.1 + m p.2 - 1) := by\n+  sorry\n+\n+end Erdos561"
+      "changes": 2,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2FREADME.md",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2FREADME.md",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2FREADME.md?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -50,6 +50,7 @@ src/\n     theorem.html          # Theorem detail page (client-side, reads ?name= param)\n     contribute.html       # How-to-contribute page (static)\n     about.html            # About page (static)\n+    team.html             # Team page (static)\n build.js                  # Build script — reads data/, writes site/\n package.json\n .github/workflows/\n@@ -67,6 +68,7 @@ The `site/` output directory is generated by the build script and is not committ\n | `/theorem/?name=<full.lean.name>` | Detail page for an individual theorem                  |\n | `/contribute/`                    | Contribution guide                                     |\n | `/about/`                         | About the project                                      |\n+| `/team/`                          | Maintainers and reviewers                              |\n \n Individual theorem pages are rendered client-side from `data/conjectures.json` — no separate HTML file is generated per theorem.\n "
+    },
+    {
+      "sha": "1b278ebce4c1fa8ac6ca72b880d9ab15d5b15a67",
+      "filename": "site/build.js",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "changes": 3,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fbuild.js",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fbuild.js",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fbuild.js?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -840,6 +840,9 @@ async function main() {\n   // ---- About page ----\n   copyStaticTemplate('about.html', 'site/about/index.html');\n \n+  // ---- Team page ----\n+  copyStaticTemplate('team.html', 'site/team/index.html');\n+\n   // ---- Stats page ----\n   let growthPlot = '';\n   if (fs.existsSync(whitePlotPath) && fs.existsSync(darkPlotPath)) {"
+    },
+    {
+      "sha": "2e1fd847f6d1b3a8a3d494f9e91bba3b3bdc0156",
+      "filename": "site/src/templates/about.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fabout.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fabout.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fabout.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+    },
+    {
+      "sha": "67b4a6400d6882294129777bbadc18a9687c4aff",
+      "filename": "site/src/templates/browse.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fbrowse.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fbrowse.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fbrowse.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -26,6 +26,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+    },
+    {
+      "sha": "855e16dc3613d802adb482aada80556d16b7923f",
+      "filename": "site/src/templates/contribute.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fcontribute.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fcontribute.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fcontribute.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+    },
+    {
+      "sha": "ada42a7278a4d4c8fa3c52a1f230fc25b31e05af",
+      "filename": "site/src/templates/index.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Findex.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Findex.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Findex.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+    },
+    {
+      "sha": "60afda7dd0e0c229625c9f88ac12786c54f0796a",
+      "filename": "site/src/templates/modules.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fmodules.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fmodules.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fmodules.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+    },
+    {
+      "sha": "1f391bde7f0496a3da3f03b3a8892f564a4d77d1",
+      "filename": "site/src/templates/stats.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fstats.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fstats.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fstats.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+    },
+    {
+      "sha": "104033b51d732d69cbd06ae7639ef03df81ee695",
+      "filename": "site/src/templates/team.html",
+      "status": "added",
+      "additions": 64,
+      "deletions": 0,
+      "changes": 64,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fteam.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fteam.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fteam.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -0,0 +1,64 @@\n+<!DOCTYPE html>\n+<html lang=\"en\" data-base=\"\">\n+<head>\n+  <meta charset=\"UTF-8\">\n+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n+  <title>Team — Formal Conjectures</title>\n+  <meta name=\"description\" content=\"Maintainers and reviewers of the Formal Conjectures project.\">\n+  <link rel=\"preload\" href=\"/assets/fonts/LibertinusSans-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n+  <link rel=\"stylesheet\" href=\"/assets/css/style.css\">\n+  <link rel=\"icon\" href=\"/assets/img/formal_conjectures_logo.svg\" type=\"image/svg+xml\">\n+</head>\n+<body>\n+\n+<nav class=\"site-nav\" aria-label=\"Site navigation\">\n+  <div class=\"container site-nav__inner\">\n+    <a href=\"/\" class=\"site-nav__brand\"><img src=\"/assets/img/formal_conjectures_logo.svg\" alt=\"\"\n+        class=\"site-nav__logo\">Formal Conjectures</a>\n+    <button class=\"nav-toggle\" id=\"nav-toggle\" aria-label=\"Toggle navigation\" aria-expanded=\"false\">&#9776;</button>\n+    <ul class=\"site-nav__links\" id=\"nav-links\" role=\"list\">\n+      <li><a href=\"/browse/\">Browse</a></li>\n+      <li><a href=\"/stats/\">Stats</a></li>\n+      <li><a href=\"/modules/\">Modules</a></li>\n+      <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n+      <li><a href=\"/contribute/\">Contribute</a></li>\n+      <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n+    </ul>\n+  </div>\n+</nav>\n+\n+<header class=\"page-header\">\n+  <div class=\"container\">\n+    <h1 class=\"page-header__title\">Team</h1>\n+  </div>\n+</header>\n+\n+<main>\n+  <div class=\"container section\">\n+    <div class=\"prose\">\n+\n+      <h2>Maintainers</h2>\n+      <p>In construction</p>\n+\n+      <h2>Reviewers</h2>\n+      <p>In construction</p>\n+\n+    </div>\n+  </div>\n+</main>\n+\n+<footer class=\"site-footer\">\n+  <div class=\"container site-footer__inner\">\n+    <span>Formal Conjectures &mdash; Apache 2.0 / CC-BY 4.0</span>\n+    <span>\n+      <a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a>\n+      &middot;\n+      <a href=\"https://leanprover.zulipchat.com/#narrow/channel/524981-Formal-conjectures\" target=\"_blank\" rel=\"noopener\">Zulip</a>\n+    </span>\n+  </div>\n+</footer>\n+\n+<script src=\"/assets/js/main.js\"></script>\n+</body>\n+</html>"
+    },
+    {
+      "sha": "6d56f374780a042896f26c6f9dfa6ae84bde3382",
+      "filename": "site/src/templates/theorem.html",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Ftheorem.html",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Ftheorem.html",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Ftheorem.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
+      "patch": "@@ -31,6 +31,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
     }
   ]
 }

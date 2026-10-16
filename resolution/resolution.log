@@ -336,3 +336,8 @@
 [2026-10-16T14:29:28Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
 [2026-10-16T14:29:28Z] another harness run is live; waiting for the lane
 [2026-10-16T17:50:09Z] #695: Lean on r1s1/C1 deferred: deferred: C5's Lean run (resolve-claim-erdos10069501) certified the shared theory (a functional certificate rules out an infinite chain; 14 lemmas) and stalled on the finite certificate checks. C1's o
+[2026-10-16T21:34:48Z] resolution campaign loop starting
+[2026-10-16T21:34:51Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-16T21:34:55Z] #695: deep pass on runs/20261015-201304-106144-erdos695
+[2026-10-16T23:19:58Z] #695: deep made progress (3 validated new); another research-program pass
+[2026-10-16T23:19:58Z] #695: deep -> none ($24.97; 3 validated new [1, 1, 1])

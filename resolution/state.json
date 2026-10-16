@@ -411,12 +411,17 @@
     {
      "tier": "queue",
      "outcome": "Lean on r1s1/C1 deferred (operator session)"
+    },
+    {
+     "tier": "deep",
+     "outcome": "none",
+     "spend": 24.9713
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 22.499593200000003,
+   "spend": 47.470923000000006,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -433,7 +438,7 @@
    "kind": "record",
    "lane": "rescreen",
    "next": "program",
-   "status": "program",
+   "status": "persist",
    "run_dir": "runs/20261015-201304-106144-erdos695",
    "settle_chance": 0.55,
    "arm": "pass",
@@ -442,9 +447,11 @@
    "traction": {
     "settle_chance": 0.55
    },
-   "validated_seen": 2,
+   "validated_seen": 3,
    "claims_todo": [
-    "r1s1/C5"
+    "r1s1/C5",
+    "r2s2/C3",
+    "r1s1/C1"
    ],
    "computed": [
     "deep/long_pyr21.py",
