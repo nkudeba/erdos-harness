@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "3fd09f06dd768115601f35e730110ea26b09b6d33367d147e40017482f3c26f6",
+    "harness_sha256": "00d38a96ec4e895d46209b706db8843f0a7f7c59ac023a3e56913d587f5d1e3d",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "f5f5c31e274ccd0e3e7ddda323105c12e6e63264a523800c54222485ce132005"
+    "manual_reviews_sha256": "e4a14b253886cb8c22336bedcc0432ab174f161a0c27f846e113b76a3dd6bd70"
   },
   "problems": [
     {
@@ -39183,6 +39183,7 @@
         "Resolution campaign ripeness screen 2026-10-14: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line can plausibly settle `erdos_32` as written, so this line aims at major progress instead. - Why proving it (TRUE) is out of reach. A proof would need a complement with A(N) = o((log N)²). By the random-model barrier, any construction that uses only prop",
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. This line aims at major progress (significance 3), not at settling. The formal `erdos_32` asks for a complement with $B(N)=o(\\log^2N)$. It can be settled in only two ways, and both are blocked: - Disproof. This needs $\\limsup B/\\",
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. This line aims at major progress (significance 3), not at settling. The formal `erdos_32` asks for a complement with $B(N)=o(\\log^2N)$. It can be settled in only two ways, and both are blocked: - Disproof. This needs $\\limsup B/\\ BUILD TRACK: no settling line, but two judges rated this line's main target new at significance 3 if proved (P_WEEK 0.025), so a research program is committed to it and proves its theorems one at a time (resolution/build/32/line.md).",
+        "Third-party claim, unverified (found 2026-10-16 by the literature gate): arXiv:2610.14127, A. O. Radomskii, 'A lower bound for additive complements to the primes' (9 Oct 2026), claims B(X) >> log X log log X for every B with P+B containing all large integers, which would answer the O(log N) part of #32 negatively (Ruzsa's Conjecture 2, quantitatively). Red flag, from the engine's map: the abstract's block construction at B = {0} would give prime gaps >> log X log log X in every [X/2, X], beyond the Ford-Green-Konyagin-Maynard-Tao bound log X log log X log_4 X / log_3 X; so the paper is wrong, or the abstract omits a condition. The formal statement's o(log^2 N) question is untouched. The campaign's build line targeted the claimed statement, so its build pass is held.",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -39191,12 +39192,13 @@
         "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
+        "Check arXiv:2610.14127's argument (especially the B = {0} case against FGKMT) before any attempt on the O(log N) part; a line toward o(log^2 N) itself would need new constructions.",
         "Use Mathlib arithmetic/factorization lemmas and exact certificates.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -39261,7 +39263,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-15",
+        "on": "2026-10-16",
         "sources": [
           "resolution/results.jsonl"
         ],
