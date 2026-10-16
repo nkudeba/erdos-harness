@@ -1660,12 +1660,13 @@
   },
   "881": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line is a disproof. Find an explicit, base-b automatic set A ∋ 0 and some k ∈ {2, 3, 4} satisfying: (i) kA ⊇ [N₀, ∞), with kA the exact k-fold sumset k • A; (ii) the witness criterion: for every a ∈ A with a ≥ a₀ there is n ≥ a with n ∉ (k+1)(A∖{a}). (i) a"
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: The line is a disproof. Find an explicit, base-b automatic set A ∋ 0 and some k ∈ {2, 3, 4} satisfying: (i) kA ⊇ [N₀, ∞), with kA the exact k-fold sumset k • A; (ii) the witness criterion: for every a ∈ A with a ≥ a₀ there is n ≥ a with n ∉ (k+1)(A∖{a}). (i) a",
+      "Resolution campaign ripeness screen 2026-10-16: SETTLE CHANCE 0.10, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Settle the formal statement by disproof. The statement quantifies over all k, so one counterexample at any single k ≥ 2 refutes it. I choose k = 3, and k ≥ 4 is also acceptable. Target (single-deletion strengthening, \"DECIDE\"). Construct an explicit set A ⊆ ℕ  BUILD TRACK: no settling line, but two judges rated this line's main target new at significance 3 if proved (P_WEEK 0.04), so a research program is committed to it and proves its theorems one at a time (resolution/build/881/line.md)."
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-15"
+    "assessed": "2026-10-16"
   },
   "885": {
     "rationale": [
