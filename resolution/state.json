@@ -450,12 +450,19 @@
     {
      "tier": "queue",
      "outcome": "rescreen as settle (operator)"
+    },
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.175,
+     "spend": 2.8108,
+     "track": null
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 0.0,
+   "spend": 2.8107839999999995,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -471,8 +478,13 @@
    "rescreen_at": "20261015-122832",
    "kind": "settle",
    "lane": "rescreen",
-   "next": "screen",
-   "status": "rescreen"
+   "next": null,
+   "status": "screened out",
+   "run_dir": "runs/20261015-221403-908505-erdos1068",
+   "settle_chance": 0.175,
+   "arm": "screened out",
+   "track": null,
+   "intent": null
   },
   "103": {
    "history": [

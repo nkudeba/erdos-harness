@@ -292,3 +292,6 @@
 [2026-10-16T00:58:42Z] #695: screen -> pass (settle chance 0.55, draws [0.6, 0.5]; $5.90); track new-math (intent unclear)
 [2026-10-16T00:58:53Z] #517: screen
 [2026-10-16T01:13:54Z] #517: screen -> screened out (settle chance 0.14, draws [0.03, 0.25]; $2.14)
+[2026-10-16T01:14:00Z] daily cap reached ($150.28 of $150); sleeping 1 h
+[2026-10-16T02:14:03Z] #1068: screen
+[2026-10-16T02:34:15Z] #1068: screen -> screened out (settle chance 0.17, draws [0.3, 0.05]; $2.81)
