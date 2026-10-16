@@ -303,3 +303,5 @@
 [2026-10-16T03:07:21Z] another harness run is live; waiting for the lane
 [2026-10-16T03:26:26Z] #873: screen (resuming runs/20261015-191351-260620-erdos873)
 [2026-10-16T03:27:36Z] #873: screen -> screened out (settle chance 0.01, draws [0.02, 0.01]; $0.56); BUILD TRACK: its line's main target is rated new at significance 2 if proved (P_WEEK 0.375)
+[2026-10-16T03:27:45Z] #32: screen (resuming runs/20261015-195538-196587-erdos32)
+[2026-10-16T03:28:15Z] #32: screen -> screened out (settle chance 0.00, draws [0.0, 0.0]; $0.43); BUILD TRACK: its line's main target is rated new at significance 3 if proved (P_WEEK 0.025)
