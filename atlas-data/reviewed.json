@@ -234,12 +234,13 @@
   },
   "158": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.03, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausibly settling. Erdős problem 158 has been open since ESS94. The formal statement matches the informal one: ℕ includes 0, translation preserves B2 2, `0^(-1/2) = 0` only affects N = 0, and f ≥ 0 is bounded, so the liminf is genuine rather than a"
+      "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.03, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausibly settling. Erdős problem 158 has been open since ESS94. The formal statement matches the informal one: ℕ includes 0, translation preserves B2 2, `0^(-1/2) = 0` only affects N = 0, and f ≥ 0 is bounded, so the liminf is genuine rather than a",
+      "Resolution campaign ripeness screen 2026-10-16: SETTLE CHANCE 0.45, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: This is the probability of a new certified computational result. The chance of settling erdos_158 itself is about 0, and the Finiteness barrier explains why. Target. Compute exact, certified values of the compactness quantity c(N) (from the frontier map) for e"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-15"
+    "assessed": "2026-10-16"
   },
   "164": {
     "rationale": [

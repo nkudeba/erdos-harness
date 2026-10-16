@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "00d38a96ec4e895d46209b706db8843f0a7f7c59ac023a3e56913d587f5d1e3d",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "9357bea0e0d47bcdbbaf8f196e3f517e80c291817eeccab18166d9f0949effea"
+    "manual_reviews_sha256": "fa089ce153bd6e92b424b1c837005fc33f423cf6462b4e2e546211de1fb2b8c2"
   },
   "problems": [
     {
@@ -50933,6 +50933,7 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.03, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is plausibly settling. Erdős problem 158 has been open since ESS94. The formal statement matches the informal one: ℕ includes 0, translation preserves B2 2, `0^(-1/2) = 0` only affects N = 0, and f ≥ 0 is bounded, so the liminf is genuine rather than a",
+        "Resolution campaign ripeness screen 2026-10-16: SETTLE CHANCE 0.45, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: This is the probability of a new certified computational result. The chance of settling erdos_158 itself is about 0, and the Finiteness barrier explains why. Target. Compute exact, certified values of the compactness quantity c(N) (from the frontier map) for e",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
@@ -50944,7 +50945,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-16 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -51005,7 +51006,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-15",
+        "on": "2026-10-16",
         "sources": [
           "resolution/results.jsonl"
         ],
