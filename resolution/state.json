@@ -2987,11 +2987,16 @@
      "settle_chance": 0.45,
      "spend": 3.0199,
      "track": "new-math"
+    },
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 15.5782
     }
    ],
    "prepped": true,
-   "running": "scout",
-   "spend": 3.0199279999999993,
+   "running": null,
+   "spend": 18.5981124,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -3007,13 +3012,18 @@
    "rescreen_at": "20261015-122831",
    "kind": "record",
    "lane": "rescreen",
-   "next": "scout",
-   "status": "screened",
+   "next": "deep",
+   "status": "traction",
    "run_dir": "runs/20261016-033033-593840-erdos158",
    "settle_chance": 0.45,
    "arm": "pass",
    "track": "new-math",
-   "intent": "new-math"
+   "intent": "new-math",
+   "traction": {
+    "settle_chance": 0.35
+   },
+   "validated_seen": 1,
+   "claims_todo": []
   },
   "1199": {
    "history": [

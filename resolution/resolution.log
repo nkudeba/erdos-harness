@@ -365,3 +365,5 @@
 [2026-10-17T18:49:17Z] #695: deep -> none ($19.08; 3 validated new [1, 1, 1])
 [2026-10-17T18:49:22Z] #695: long computation marathon-3/long_p23i.py for up to 2.0 h (independent (leg-3 code) exhaustive refined pyramid T=23, Y=3465138940438892. It decides R_23 ∩ (0,Y)
 [2026-10-17T19:37:11Z] #695: long computation marathon-3/long_p24.py for up to 2.0 h (same code, T=24, Y=9e15. It gives P(24) exactly if ≤ 9e15, else P(24) > 9e15. It also re-checks P(14)
+[2026-10-17T20:54:02Z] #158: scout (resuming runs/20261016-033033-593840-erdos158)
+[2026-10-17T20:54:07Z] #158: scout -> none ($15.58; 1 validated new [0])
