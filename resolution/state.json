@@ -3023,7 +3023,10 @@
     "settle_chance": 0.35
    },
    "validated_seen": 1,
-   "claims_todo": []
+   "claims_todo": [],
+   "computed": [
+    "deep/long_chain.py"
+   ]
   },
   "1199": {
    "history": [
