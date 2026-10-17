@@ -459,7 +459,6 @@
    },
    "validated_seen": 3,
    "claims_todo": [
-    "r1s1/C5",
     "r2s2/C3",
     "r1s1/C1"
    ],
@@ -475,7 +474,10 @@
    ],
    "claims_done": {
     "r1s1/C5": {
-     "lean_run": "runs/20261016-053308-123048-resolve-claim-erdos10069501"
+     "lean_run": "runs/20261016-053308-123048-resolve-claim-erdos10069501",
+     "rc": 3,
+     "summary": "RUN-SUMMARY problem=10069501 exit=3 outcome=partial verified=None spend=$15.06 llm_calls=52 lean_checks=159 lemmas=15 residual=open:2,published:0,certified:6 fatals=0 wall=1067m mode=research dir=runs/20261016-053308-123048-resolve-claim-erdos10069501 stop=\"deductive research program ran 2 of 4 cycle(s); residual: 2 open conjecture(s), \"",
+     "verified": false
     }
    },
    "claims_deferred": [
