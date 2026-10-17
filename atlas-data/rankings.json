@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "b103ee2f6a03c8b382528d04a36c4f12438004e0f2cd21a9b9aba9c5bbbe1743",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "9f25529caf044eff4fbbcaeeee875b9ca3b75c2000fc63c31513ce5b69b6158f"
+    "manual_reviews_sha256": "7ebb8ff4120f4c2b428f4a0f3301b9b04a577b0aead19f22bd75cbc97bbf726a"
   },
   "problems": [
     {
@@ -35349,6 +35349,7 @@
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.55, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Statement to compute and certify. For k = 1, 2, …, let P(k) be the least prime p that ends a chain of length k, i.e. p_1 < … < p_k = p with p_{i+1} ≡ 1 (mod p_i). Equivalently P(k) = min{p : H(p) ≥ k}, where H(p) is the height of the Pratt tree, counted so tha",
         "Resolution campaign scout 2026-10-16 ($22.50, informal): 2 validated-new claims (significance 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
         "Resolution campaign deep 2026-10-16 ($47.47, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
+        "Resolution campaign deep 2026-10-16 ($47.62, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
