@@ -350,3 +350,5 @@
 [2026-10-17T01:50:40Z] #695: a long computation reported a RESULT; one follow-up pass to certify it
 [2026-10-17T01:50:45Z] #695: deep pass on runs/20261015-201304-106144-erdos695
 [2026-10-17T01:51:05Z] #695: deep -> none ($0.14; 3 validated new [1, 1, 1])
+[2026-10-17T01:51:10Z] #695: long computation marathon-2/long_p23.py for up to 2.0 h (P(23) if P(23) ≤ 3465138940438892, else the lower bound P(23) > 3.465e15. Refined pyramid T=23 with )
+[2026-10-17T02:51:50Z] #695: long computation marathon-2/long_p22b.py for up to 1.5 h (lowest priority cross-check: plain pyramid (Lemma 1 only), different SEG, LQ and threshold, over R_2)
