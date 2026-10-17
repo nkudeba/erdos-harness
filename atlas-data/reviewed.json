@@ -1416,7 +1416,8 @@
       "Resolution campaign deep 2026-10-16 ($47.62, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
       "Resolution campaign deep 2026-10-16 ($47.76, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
       "Campaign computation, 2026-10-17 (no model calls; NOT yet certified by the engine's judges or Lean). P(k) = the least prime ending a chain of k primes, each 1 mod the one before (Pratt-tree height k). Two runs of an exhaustive 'refined pyramid' search over all primes <= 866284735109723 found P(22) = 866284735109723; a third, plainer search found none <= 433142367554861. Its witness chain is a greatest-prime-factor chain, so this is A082449's a(21), which OEIS lists only as an upper bound (a comment by D. A. Corneth). A further exhaustive run over primes <= 3465138940438892 found P(23) = 2957807053316399, i.e. A082449's a(22), well below that comment's bound 11407852252734739 and in no OEIS entry. P(21) = 64750853277599 reproduces A082449's last listed term.",
-      "Resolution campaign deep 2026-10-17 ($66.84, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−"
+      "Resolution campaign deep 2026-10-17 ($66.84, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
+      "Campaign computations, 2026-10-17 update (computed and checked, NOT yet reviewed by a person or Lean-checked; evidence in knowledge/records/695/). P(k) = the least prime ending a chain of k primes, each 1 mod the one before. P(22) = 866284735109723 and P(23) = 2957807053316399, each by two independent exhaustive searches that agree. Both witness chains follow the greatest prime factor at every step (checked independently), so these are A082449(21), which OEIS gives only as an upper bound, and A082449(22), which no OEIS entry lists (the entry's bound was 11407852252734739). Also 9e15 < P(24) <= 94649825706124769 (one exhaustive run, plus an explicit chain)."
     ],
     "sources": [
       "experiments/idea-engine-2026-10-02/REPORT.md",
@@ -1424,7 +1425,8 @@
     ],
     "assessed": "2026-10-17",
     "requirements": [
-      "Certify before claiming: verify both witness chains (primality certificates, each step 1 mod the last) and re-derive both minima with an independent exhaustive method over the full ranges."
+      "Certify before claiming: verify both witness chains (primality certificates, each step 1 mod the last) and re-derive both minima with an independent exhaustive method over the full ranges.",
+      "Human review of the searches (the refined pyramid and its pruning Lemma R), then an OEIS submission if it holds up; a Lean proof of the witness chains via Pratt certificates would certify the upper bounds."
     ]
   },
   "699": {
