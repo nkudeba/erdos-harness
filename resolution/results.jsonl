@@ -226,3 +226,5 @@
 {"at": "2026-10-17T00:10:40Z", "problem": 695, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "deep/long_beam.py", "elapsed": 3036, "result": true}
 {"at": "2026-10-17T00:51:05Z", "problem": 695, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-1/long_beam.py", "elapsed": 2425, "result": true}
 {"at": "2026-10-17T00:51:40Z", "problem": 695, "tier": "deep", "outcome": "none", "spend": 0.1516, "run_dir": "runs/20261015-201304-106144-erdos695", "validated_new": 3, "significance": [1, 1, 1], "arm": "pass", "settle_screen": 0.55, "settle_chance": 0.55}
+{"at": "2026-10-17T01:21:05Z", "problem": 695, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-1/long_p22.py", "elapsed": 1760, "result": true}
+{"at": "2026-10-17T01:50:40Z", "problem": 695, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-2/long_p22.py", "elapsed": 1775, "result": true}

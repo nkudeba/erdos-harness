@@ -345,3 +345,6 @@
 [2026-10-17T00:10:40Z] #695: long computation marathon-1/long_beam.py for up to 2.0 h (wide GP beam (B=16000; TEST mode B=400 reproduces deep/C3 exactly): Pocklington-proved chains for k )
 [2026-10-17T00:51:10Z] #695: deep pass on runs/20261015-201304-106144-erdos695
 [2026-10-17T00:51:40Z] #695: deep -> none ($0.15; 3 validated new [1, 1, 1])
+[2026-10-17T00:51:45Z] #695: long computation marathon-1/long_p22.py for up to 1.5 h (P(22) exactly: exhaustive refined pyramid over (0, 866284735109723] (the upper bound is the certifie)
+[2026-10-17T01:21:05Z] #695: long computation marathon-2/long_p22.py for up to 2.0 h (P(22) exactly: refined pyramid (Lemma R), exhaustive over (0, 866284735109723], where the bound is t)
+[2026-10-17T01:50:40Z] #695: a long computation reported a RESULT; one follow-up pass to certify it
