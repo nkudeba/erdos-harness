@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "b103ee2f6a03c8b382528d04a36c4f12438004e0f2cd21a9b9aba9c5bbbe1743",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "db8ade141fdc675594f6bb9ec18a921ceb9d95f4650d8aa7991cecaebdbb3b95"
+    "manual_reviews_sha256": "8d94dd963609fe4a16e7e46558f24e6476212a5a09f7cecc3909d78dc9b1ae31"
   },
   "problems": [
     {
@@ -35352,6 +35352,7 @@
         "Resolution campaign deep 2026-10-16 ($47.62, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
         "Resolution campaign deep 2026-10-16 ($47.76, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
         "Campaign computation, 2026-10-17 (no model calls; NOT yet certified by the engine's judges or Lean). P(k) = the least prime ending a chain of k primes, each 1 mod the one before (Pratt-tree height k). Two runs of an exhaustive 'refined pyramid' search over all primes <= 866284735109723 found P(22) = 866284735109723; a third, plainer search found none <= 433142367554861. Its witness chain is a greatest-prime-factor chain, so this is A082449's a(21), which OEIS lists only as an upper bound (a comment by D. A. Corneth). A further exhaustive run over primes <= 3465138940438892 found P(23) = 2957807053316399, i.e. A082449's a(22), well below that comment's bound 11407852252734739 and in no OEIS entry. P(21) = 64750853277599 reproduces A082449's last listed term.",
+        "Resolution campaign deep 2026-10-17 ($66.84, informal): 3 validated-new claims (significance 1, 1, 1); best: Let S be one of the 109 pairs of even numbers in [2,32] other than (2,20),(2,32),(6,30),(8,14),(8,20),(12,22),(12,30),(14,26),(16,30),(20,26),(20,32). Then no infinite sequence of primes p_1<p_2<… with p_{i+1}≡1 (mod p_i) has m_i:=(p_{i+1}−",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
