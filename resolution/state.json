@@ -476,7 +476,9 @@
     "marathon-1/long_p22.py",
     "marathon-2/long_p22.py",
     "marathon-2/long_p23.py",
-    "marathon-2/long_p22b.py"
+    "marathon-2/long_p22b.py",
+    "marathon-3/long_p23i.py",
+    "marathon-3/long_p24.py"
    ],
    "claims_done": {
     "r1s1/C5": {
