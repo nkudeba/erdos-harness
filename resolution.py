@@ -279,6 +279,17 @@ def stage_flags(cfg: dict, action: str, p: dict) -> str:
         flags = scale("budget", scale("cycles", flags)) + " --engine-program-extend"
     if action == "build" and (p.get("build") or {}).get("line"):
         flags += f" --engine-program-line-file {ROOT / p['build']['line']}"
+    if action == "deep" and p.get("run_dir"):
+        # A deep pass resumes the same engine run, whose rounds and marathon legs count cumulatively. Once a pass has
+        # used them all, the same flags buy nothing: #695's two follow-up passes (2026-10-17) cost $0.15 and $0.14 and
+        # never read the P(22) result they were queued to certify. Every deep pass now adds one round and one leg.
+        ej = engine_json(ROOT / p["run_dir"])
+        done = {"rounds": len(ej.get("rounds") or []),
+                "marathon-legs": len((ej.get("marathon") or {}).get("legs") or [])}
+        for name, have in done.items():
+            m = re.search(rf"--engine-{name} (\d+)", flags)
+            if m and have >= int(m.group(1)):
+                flags = flags.replace(m.group(0), f"--engine-{name} {have + 1}")
     return flags
 
 
@@ -1210,7 +1221,8 @@ def step(cfg: dict) -> bool:
         p.update({"next": "program", "status": "persist"})
         log(f"#{n}: {action} made progress ({n_new} validated new); another research-program pass")
     p["history"].append({"tier": action, "outcome": outcome, "spend": delta})
-    skip = set((p.get("claims_done") or {})) | set(p.get("claims_todo") or [])
+    skip = (set((p.get("claims_done") or {})) | set(p.get("claims_todo") or [])
+            | {d.get("claim") for d in p.get("claims_deferred") or []})   # #695's C1 came back after a deferral
     if outcome == "complete":
         skip.add(info["claim"])
     computational = (p.get("kind") or "settle") in ("record", "explicit")

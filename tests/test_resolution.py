@@ -755,6 +755,42 @@ class ComputationalRouting(Base):
         self.assertNotIn("--engine-program-cycles", seen["flags"])
 
 
+class FollowUpPasses(Base):
+    """2026-10-17: #695's two follow-up deep passes resumed a run whose rounds and marathon legs were all done, so they
+    cost $0.15 and $0.14 and never read the P(22) result they were queued to certify. And a deferred Lean claim came
+    back with the next pass's new claims."""
+
+    def test_a_deep_pass_after_the_run_is_spent_adds_a_round_and_a_leg(self):
+        cfg = R.load_cfg()
+        run = self.engine_run([])
+        ej = json.loads((run / "engine" / "engine.json").read_text())
+        with patch.object(R, "ROOT", self.d):
+            first = R.stage_flags(cfg, "deep", {"run_dir": str(run.relative_to(self.d))})
+            self.assertIn("--engine-rounds 2 ", first)              # a scout's one round: the default adds one
+            self.assertIn("--engine-marathon-legs 2 ", first)
+            ej.update(rounds=[{}, {}], marathon={"legs": [{}, {}]})
+            (run / "engine" / "engine.json").write_text(json.dumps(ej))
+            again = R.stage_flags(cfg, "deep", {"run_dir": str(run.relative_to(self.d))})
+        self.assertIn("--engine-rounds 3 ", again)
+        self.assertIn("--engine-marathon-legs 3 ", again)
+        self.assertIn("--engine-marathon-leg-budget 8 ", again)      # a neighbouring flag is left alone
+
+    def test_a_deferred_claim_stays_out_of_the_lean_queue(self):
+        claims = [_claim("r1s1", "C1", "validated-new", sig=1), _claim("r2s2", "C3", "validated-new", sig=1)]
+        for c in claims:
+            c["certificate_check"] = "CERTIFIED"             # a record problem's claims need their certificate
+        run = self.engine_run(claims)
+        R.save_state({"problems": {"9": {"history": [], "next": "deep", "run_dir": str(run), "spend": 30.0,
+                                         "track": "new-math", "kind": "record",
+                                         "claims_deferred": [{"claim": "r1s1/C1", "why": "same wall"}]}}})
+        fake = lambda *a, **k: ({"run_dir": str(run.relative_to(self.d)), "spend_run": 40.0}, 0)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "classify", lambda rd: ("none", {})), patch.object(R, "record_atlas"), \
+                patch.object(R, "commit"), patch.object(R, "run_long", lambda *a: []):
+            R.step(R.load_cfg())
+        self.assertEqual(R.load_state()["problems"]["9"]["claims_todo"], ["r2s2/C3"])
+
+
 class BuildTrack(Base):
     """2026-10-16, the operator: the campaign kept screening out the hard problems because they need new mathematics,
     instead of building it. On 2026-10-15 both re-screens (#873, #32) wrote a major-progress line and were dropped on
