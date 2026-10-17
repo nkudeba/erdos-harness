@@ -1,0 +1,14 @@
+{
+  "attempts": [
+    {
+      "case": "case-0001",
+      "status": "completed",
+      "allowed_seconds": 7200.0,
+      "started_at": 1792195840.557868,
+      "output": "case-0001/attempt-1.log",
+      "pid": 12124,
+      "exit_code": 0,
+      "elapsed": 2425.255
+    }
+  ]
+}

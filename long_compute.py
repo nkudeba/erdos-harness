@@ -28,8 +28,13 @@ def digest(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
 
+OPERATOR_SELECTED = 'Operator selected scripts and attack order for the long computation tier.'
+
+
 def prepare(folder: Path, scripts: list[Path], problem: str, scope: str,
-            order_by: str, seconds: float = 7200, total_seconds: float = 14400):
+            order_by: str, seconds: float = 7200, total_seconds: float = 14400, assistance: str = OPERATOR_SELECTED):
+    """`assistance` records who chose the scripts: the operator by default, the engine session that asked for them when
+    the campaign runs a session's LONG request (resolution.run_long)."""
     if not all(math.isfinite(x) and x > 0 for x in (seconds, total_seconds)) or not scripts:
         raise ValueError('Positive time budgets and at least one case are required')
     sources = []
@@ -49,7 +54,7 @@ def prepare(folder: Path, scripts: list[Path], problem: str, scope: str,
         jobs.append({'id': case.name, 'source': str(source), 'sha256': digest(code)})
     manifest = {'version': 1, 'problem': problem, 'scope': scope, 'order_by': order_by,
                 'seconds': seconds, 'total_seconds': total_seconds, 'jobs': jobs,
-                'assistance': 'Operator selected scripts and attack order for the long computation tier.',
+                'assistance': assistance,
                 'claimEligible': False}
     atomic_write_json(folder / 'manifest.json', manifest, indent=2)
     return manifest

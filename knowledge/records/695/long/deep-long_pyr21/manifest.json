@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "P(21) exactly (exhaustive up to 8.96e13; also re-derives P(20) at 6× scale), with a witness chain and exact H via the Pratt recursion",
+  "order_by": "the session's own request",
+  "seconds": 5400.0,
+  "total_seconds": 5400.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/deep/long_pyr21.py",
+      "sha256": "3ad1945d5589d26d29b9c241dcfdf9ceed038ad406cd90bc280d56ea7632046a"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "P(23) if P(23) ≤ 3465138940438892, else the lower bound P(23) > 3.465e15. Refined pyramid T=23 with Y = 4·866284735109723, so A_22 = 866284735109723 and the same run also gives Full_22 = R_22 ∩ (0, 8.66e14], i.e. P(22) again, as an independent determination at a different scale. Est. ~75 min, ≈ 10 G",
+  "order_by": "the session's own request",
+  "seconds": 7200.0,
+  "total_seconds": 7200.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/marathon-2/long_p23.py",
+      "sha256": "b8a803ee0eeef46f912c4b8415c1f038c8a3e0c58e57b92d6199ad1b0d4dc2a3"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

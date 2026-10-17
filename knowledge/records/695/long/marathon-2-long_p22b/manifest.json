@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "lowest priority cross-check: plain pyramid (Lemma 1 only), different SEG, LQ and threshold, over R_22 ∩ (0, 433142367554861]. Its Full_t (t<22) must equal long_p22's exactly (same A_t). TEST mode (T=19) reproduces leg-1/C1 in 37 s.",
+  "order_by": "the session's own request",
+  "seconds": 5400.0,
+  "total_seconds": 5400.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/marathon-2/long_p22b.py",
+      "sha256": "4f5130d1767cef6f12b2ca03045b060bf8328bb8522248259e9fd70166341a3f"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "wider beam (B=20000): Pocklington-proved chains of every length k ≤ 100, printing the multiplier words, which can sharpen the C3 bounds",
+  "order_by": "the session's own request",
+  "seconds": 5400.0,
+  "total_seconds": 5400.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/deep/long_beam.py",
+      "sha256": "9e934be9fb253fc4a2aca39bb1cd1da57be3b76938b52b81538949c7d259931f"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "P(22) exactly: refined pyramid (Lemma R), exhaustive over (0, 866284735109723], where the bound is the endpoint of the certified deep/C3 chain. It prints the checkpoint triples for t=2..22, the level sets R_18..R_22 (truncated), and the witness chain with exact H via the Pratt recursion. It also pri",
+  "order_by": "the session's own request",
+  "seconds": 7200.0,
+  "total_seconds": 7200.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/marathon-2/long_p22.py",
+      "sha256": "0d0251e8e699c3fac035f1ccc887cfa361c17f9b0b6616a3d236331151894e6b"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "wide GP beam (B=16000; TEST mode B=400 reproduces deep/C3 exactly): Pocklington-proved chains for k ≤ 100. It prints the multiplier words (as m/2) for every improved k ≤ 40 and k ≡ 0 mod 10, plus the full log10 table. Next leg: embed the words in a checker to sharpen C3 (part b)",
+  "order_by": "the session's own request",
+  "seconds": 7200.0,
+  "total_seconds": 7200.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/marathon-1/long_beam.py",
+      "sha256": "20674ba323e1fe3d13f185af15484de1fcbae3b06dccc42fb8d062f1924d8e4a"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

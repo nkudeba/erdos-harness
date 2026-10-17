@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "independent GP reproduction of min R_20(7.36e12) = P(20) = 7242080052479",
+  "order_by": "the session's own request",
+  "seconds": 3600.0,
+  "total_seconds": 3600.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/deep/long_gp_p20.py",
+      "sha256": "7ca0ca5ef7dfcc0a89e488c90b358438c4561ff46380e0a16e414f763ba5ebc3"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

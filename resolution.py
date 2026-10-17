@@ -1501,7 +1501,8 @@ def run_long(n: int, p: dict, run_dir: Path, cfg: dict) -> list[dict]:
         try:
             if not (job / "manifest.json").exists():
                 LC.prepare(job, [r["script"]], str(n), r["purpose"], "the session's own request", seconds=secs,
-                           total_seconds=secs)
+                           total_seconds=secs, assistance=f"Requested by the engine session's LONG line ({r['key']}) and run "
+                                                          "by the campaign; no operator selected the script.")
             st = LC.run(job)
         except Exception as e:                           # noqa: BLE001 - a refused or broken script is skipped, not retried
             log(f"#{n}: long computation {r['key']} not run: {type(e).__name__}: {str(e)[:200]}")

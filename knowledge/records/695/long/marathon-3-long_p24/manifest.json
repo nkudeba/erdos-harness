@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "same code, T=24, Y=9e15. It gives P(24) exactly if ≤ 9e15, else P(24) > 9e15. It also re-checks P(14..23) for consistency. Estimated 45–90 min, ≈ 8 GB.",
+  "order_by": "the session's own request",
+  "seconds": 7200.0,
+  "total_seconds": 7200.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/marathon-3/long_p24.py",
+      "sha256": "c67e3b316a051b86c286e9df1bf2144b18a0252cb68a18770d30f7fa8bc52aed"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}

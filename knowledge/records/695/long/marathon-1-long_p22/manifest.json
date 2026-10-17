@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "problem": "695",
+  "scope": "P(22) exactly: exhaustive refined pyramid over (0, 866284735109723] (the upper bound is the certified deep/C3 chain), with exact Pratt-recursion witness, plus R_21 ∩ (0,2.16e14] (independent re-derivation of P(21)) and checkpoint counts",
+  "order_by": "the session's own request",
+  "seconds": 5400.0,
+  "total_seconds": 5400.0,
+  "jobs": [
+    {
+      "id": "case-0001",
+      "source": "/Users/nicolas.kudeba/workspace/erdos-harness/runs/20261015-201304-106144-erdos695/engine/sessions/marathon-1/long_p22.py",
+      "sha256": "cd4a3c3fe23cc0f7346bfe59296f3e49f07ba550e9dfbb5a6e22c221f5c59a42"
+    }
+  ],
+  "assistance": "Operator selected scripts and attack order for the long computation tier.",
+  "claimEligible": false
+}
