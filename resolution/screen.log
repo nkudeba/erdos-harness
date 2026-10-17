@@ -165,3 +165,4 @@ KeyboardInterrupt
 #158 [resolve-screen]: 0 validated new of 0 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $3.0199279999999993
 #695 [resolve-scout]: 2 validated new of 16 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $22.499593200000003
 #695 [resolve-deep]: 3 validated new of 32 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $47.470923000000006
+#695 [resolve-deep]: 3 validated new of 32 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $47.622483

@@ -343,3 +343,5 @@
 [2026-10-16T23:19:58Z] #695: deep -> none ($24.97; 3 validated new [1, 1, 1])
 [2026-10-16T23:20:04Z] #695: long computation deep/long_beam.py for up to 1.5 h (wider beam (B=20000): Pocklington-proved chains of every length k ≤ 100, printing the multiplier wor)
 [2026-10-17T00:10:40Z] #695: long computation marathon-1/long_beam.py for up to 2.0 h (wide GP beam (B=16000; TEST mode B=400 reproduces deep/C3 exactly): Pocklington-proved chains for k )
+[2026-10-17T00:51:10Z] #695: deep pass on runs/20261015-201304-106144-erdos695
+[2026-10-17T00:51:40Z] #695: deep -> none ($0.15; 3 validated new [1, 1, 1])

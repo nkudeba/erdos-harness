@@ -416,12 +416,17 @@
      "tier": "deep",
      "outcome": "none",
      "spend": 24.9713
+    },
+    {
+     "tier": "deep",
+     "outcome": "none",
+     "spend": 0.1516
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 47.470923000000006,
+   "spend": 47.622483,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -437,8 +442,8 @@
    "rescreen_at": "20261015-122832",
    "kind": "record",
    "lane": "rescreen",
-   "next": "program",
-   "status": "persist",
+   "next": null,
+   "status": "done",
    "run_dir": "runs/20261015-201304-106144-erdos695",
    "settle_chance": 0.55,
    "arm": "pass",
