@@ -455,7 +455,9 @@
    ],
    "computed": [
     "deep/long_pyr21.py",
-    "deep/long_gp_p20.py"
+    "deep/long_gp_p20.py",
+    "deep/long_beam.py",
+    "marathon-1/long_beam.py"
    ],
    "claims_done": {
     "r1s1/C5": {
