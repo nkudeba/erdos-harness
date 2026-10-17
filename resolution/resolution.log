@@ -353,3 +353,4 @@
 [2026-10-17T01:51:10Z] #695: long computation marathon-2/long_p23.py for up to 2.0 h (P(23) if P(23) ≤ 3465138940438892, else the lower bound P(23) > 3.465e15. Refined pyramid T=23 with )
 [2026-10-17T02:51:50Z] #695: long computation marathon-2/long_p22b.py for up to 1.5 h (lowest priority cross-check: plain pyramid (Lemma 1 only), different SEG, LQ and threshold, over R_2)
 [2026-10-17T03:16:41Z] #695: Lean on partial result r1s1/C5 in 20261016-053308-123048-resolve-claim-erdos10069501
+[2026-10-17T03:20:27Z] #695: Lean on partial result r2s2/C3 in 20261016-232027-882724-resolve-claim-erdos10069502
