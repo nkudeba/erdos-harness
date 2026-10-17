@@ -458,9 +458,7 @@
     "settle_chance": 0.55
    },
    "validated_seen": 3,
-   "claims_todo": [
-    "r1s1/C1"
-   ],
+   "claims_todo": [],
    "computed": [
     "deep/long_pyr21.py",
     "deep/long_gp_p20.py",
@@ -482,6 +480,12 @@
      "lean_run": "runs/20261016-232027-882724-resolve-claim-erdos10069502",
      "rc": 3,
      "summary": "RUN-SUMMARY problem=10069502 exit=3 outcome=partial verified=None spend=$26.45 llm_calls=80 lean_checks=245 lemmas=14 residual=open:1,published:0,certified:10 fatals=0 wall=130m mode=research dir=runs/20261016-232027-882724-resolve-claim-erdos10069502 stop=\"deductive research program ran 4 of 4 cycle(s); residual: 1 open conjecture(s), \"",
+     "verified": false
+    },
+    "r1s1/C1": {
+     "lean_run": "runs/20261017-013053-502634-resolve-claim-erdos10069503",
+     "rc": -15,
+     "summary": "",
      "verified": false
     }
    },
