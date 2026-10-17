@@ -426,12 +426,21 @@
      "tier": "deep",
      "outcome": "none",
      "spend": 0.1373
+    },
+    {
+     "tier": "queue",
+     "outcome": "certification pass for P(22) and P(23) (operator session): the two automatic follow-ups found the run spent and did nothing"
+    },
+    {
+     "tier": "deep",
+     "outcome": "none",
+     "spend": 19.0793
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 47.75982700000001,
+   "spend": 66.83908700000002,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -2979,7 +2988,7 @@
     }
    ],
    "prepped": true,
-   "running": null,
+   "running": "scout",
    "spend": 3.0199279999999993,
    "limit_waits": 0,
    "previous": {

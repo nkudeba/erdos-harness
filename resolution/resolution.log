@@ -356,3 +356,10 @@
 [2026-10-17T03:20:27Z] #695: Lean on partial result r2s2/C3 in 20261016-232027-882724-resolve-claim-erdos10069502
 [2026-10-17T05:30:53Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
 [2026-10-17T05:30:53Z] #695: Lean on partial result r1s1/C1 in 20261017-013053-502634-resolve-claim-erdos10069503
+[2026-10-17T15:18:15Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-17T15:18:18Z] #158: scout (resuming runs/20261016-033033-593840-erdos158)
+[2026-10-17T15:18:28Z] #695: a certification deep pass is queued for the P(22) and P(23) computations; the two automatic follow-ups resumed a spent run and did nothing ($0.15, $0.14)
+[2026-10-17T15:20:03Z] resolution campaign loop starting
+[2026-10-17T15:20:03Z] another harness run is live; waiting for the lane
+[2026-10-17T17:26:12Z] #695: deep pass on runs/20261015-201304-106144-erdos695
+[2026-10-17T18:49:17Z] #695: deep -> none ($19.08; 3 validated new [1, 1, 1])
