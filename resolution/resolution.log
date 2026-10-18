@@ -394,3 +394,12 @@
 [2026-10-18T12:32:47Z] #873: build pass 2 (the research program on its line) on runs/20261015-191351-260620-erdos873
 [2026-10-18T14:46:12Z] #873: build pass 2 moved the line (rungs, lemmas, validated); another build pass
 [2026-10-18T14:46:12Z] #873: build -> traction ($30.78; 4 validated new [2, 1, 1, 1]); 6 rung(s) proved, 14 lemma(s) established
+[2026-10-18T14:46:17Z] daily cap reached ($180.50 of $150); sleeping 1 h
+[2026-10-18T15:46:17Z] daily cap reached ($180.50 of $150); sleeping 1 h
+[2026-10-18T16:51:22Z] daily cap reached ($180.50 of $150); sleeping 1 h
+[2026-10-18T17:51:22Z] daily cap reached ($180.50 of $150); sleeping 1 h
+[2026-10-18T18:51:23Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-18T18:51:23Z] daily cap reached ($161.42 of $150); sleeping 1 h
+[2026-10-18T19:51:23Z] daily cap reached ($161.42 of $150); sleeping 1 h
+[2026-10-18T20:51:23Z] daily cap reached ($161.42 of $150); sleeping 1 h
+[2026-10-18T21:51:23Z] #873: Lean on partial result program-R5/C4 in 20261018-175123-431630-resolve-claim-erdos10087301

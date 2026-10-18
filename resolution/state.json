@@ -144,9 +144,15 @@
     "validated": 4
    },
    "validated_seen": 4,
-   "claims_todo": [
-    "program-R5/C4"
-   ]
+   "claims_todo": [],
+   "claims_done": {
+    "program-R5/C4": {
+     "lean_run": "runs/20261018-175123-431630-resolve-claim-erdos10087301",
+     "rc": 3,
+     "summary": "RUN-SUMMARY problem=10087301 exit=3 outcome=partial verified=None spend=$25.55 llm_calls=47 lean_checks=142 lemmas=7 residual=open:9,published:1,certified:7 fatals=0 wall=85m mode=research dir=runs/20261018-175123-431630-resolve-claim-erdos10087301 stop=\"deductive research program ran 5 of 5 cycle(s); residual: 9 open conjecture(s), \"",
+     "verified": false
+    }
+   }
   },
   "655": {
    "history": [
