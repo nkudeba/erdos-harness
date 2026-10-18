@@ -3039,7 +3039,8 @@
    "computed": [
     "deep/long_chain.py",
     "marathon-1/long_profile.py",
-    "marathon-2/long_profile56.py"
+    "marathon-2/long_profile56.py",
+    "marathon-3/long_profile61.py"
    ],
    "followups": 1
   },

@@ -377,3 +377,4 @@
 [2026-10-18T02:38:01Z] #158: deep pass on runs/20261016-033033-593840-erdos158
 [2026-10-18T04:08:48Z] #158: deep made progress (2 validated new); another research-program pass
 [2026-10-18T04:08:48Z] #158: deep -> none ($16.38; 2 validated new [1, 0])
+[2026-10-18T04:08:53Z] #158: long computation marathon-3/long_profile61.py for up to 2.0 h (exact CaDiCaL search with the checker CNF for N = 61 then N = 62 (k = 17, 256 cubes each, b = 8), wi)
