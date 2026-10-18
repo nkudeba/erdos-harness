@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "b103ee2f6a03c8b382528d04a36c4f12438004e0f2cd21a9b9aba9c5bbbe1743",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "10444cf554098058d8fc6fb57ae155a36aeee559b7e46103f17d83564e60d703"
+    "manual_reviews_sha256": "b417d9552f5a25a131feec9bb5b340157d9d8c4398bcf61f8eaecd4815509888"
   },
   "problems": [
     {
@@ -81890,6 +81890,7 @@
         "Resolution campaign ripeness screen 2026-10-13: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line is likely to settle `erdos_873` within a few days of work. The statement has the form ∀ε ∃k, so no finite computation (PARI or SAT) can decide it. Why the formal statement is no easier than the informal one. - The strict bound \"for all X > 0\" is equiva",
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line I can defend is likely to settle the problem. I am therefore choosing a major-progress line, and I say so here. Why no settling line. The formal statement is equivalent to the Divisor Cluster Conjecture (DCC), uniformly in n: - Packing gives DCC ⇒ the ",
         "Resolution campaign ripeness screen 2026-10-15: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line I can defend is likely to settle the problem. I am therefore choosing a major-progress line, and I say so here. Why no settling line. The formal statement is equivalent to the Divisor Cluster Conjecture (DCC), uniformly in n: - Packing gives DCC ⇒ the  BUILD TRACK: no settling line, but two judges rated this line's main target new at significance 2 if proved (P_WEEK 0.375), so a research program is committed to it and proves its theorems one at a time (resolution/build/873/line.md).",
+        "Resolution campaign BUILD pass 1 2026-10-18 ($15.39, informal): the research program on the line its screen committed to (resolution/build/873/line.md), 3 cycle(s), stopped: 2 cycles without a discharge. Proved on the line: R1 (proved; novelty routine, significance 1): **Theorem A (uniform in the primes).** For every real θ < 1/2 there is a constant C(θ) < ∞, depending only on θ, with the following property. For every integer n ≥ 1 and every real y > 0, #{d ∈ ℕ : d . ",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "An external formal statement is available; this does not establish a formal solution.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
@@ -81902,7 +81903,7 @@
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "External formal statement reported; no completed external Lean resolution recorded.",
-      "review": "Reviewed on 2026-10-15 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-18 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -81971,7 +81972,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-15",
+        "on": "2026-10-18",
         "sources": [
           "experiments/idea-engine-2026-10-02/REPORT.md",
           "resolution/results.jsonl"
