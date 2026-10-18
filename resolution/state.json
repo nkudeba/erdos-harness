@@ -3038,9 +3038,7 @@
     "settle_chance": 0.35
    },
    "validated_seen": 2,
-   "claims_todo": [
-    "r3s1/C1"
-   ],
+   "claims_todo": [],
    "computed": [
     "deep/long_chain.py",
     "marathon-1/long_profile.py",
@@ -3049,7 +3047,15 @@
     "marathon-4/long_chain63.py",
     "marathon-5/long_cert63.py"
    ],
-   "followups": 1
+   "followups": 1,
+   "claims_done": {
+    "r3s1/C1": {
+     "lean_run": "runs/20261018-055518-741791-resolve-claim-erdos10015801",
+     "rc": 3,
+     "summary": "RUN-SUMMARY problem=10015801 exit=3 outcome=partial verified=None spend=$25.52 llm_calls=53 lean_checks=227 lemmas=7 residual=open:9,published:0,certified:3 fatals=0 wall=119m mode=research dir=runs/20261018-055518-741791-resolve-claim-erdos10015801 stop=\"deductive research program ran 4 of 4 cycle(s); residual: 9 open conjecture(s), \"",
+     "verified": false
+    }
+   }
   },
   "1199": {
    "history": [
