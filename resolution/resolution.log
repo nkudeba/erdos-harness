@@ -384,3 +384,5 @@
 [2026-10-18T05:43:17Z] another harness run is live; waiting for the lane
 [2026-10-18T06:05:21Z] #158: deep pass on runs/20261016-033033-593840-erdos158
 [2026-10-18T07:12:17Z] #158: deep -> none ($35.19; 2 validated new [1, 0])
+[2026-10-18T07:12:22Z] #158: long computation marathon-4/long_chain63.py for up to 2.0 h (continues the exact chain N = 63, 64, … from the certified F(1..62) (k = F(N−1)+1, 256 cubes b = 8, )
+[2026-10-18T09:09:10Z] #158: long computation marathon-5/long_cert63.py for up to 2.0 h (all 256 b=8 cubes of N = 63, k = 17 with the same CNF and per-cube times. Decides (as evidence, not )

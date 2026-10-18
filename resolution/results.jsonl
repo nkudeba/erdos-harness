@@ -245,3 +245,5 @@
 {"at": "2026-10-18T04:08:48Z", "problem": 158, "tier": "deep", "outcome": "none", "spend": 16.3751, "run_dir": "runs/20261016-033033-593840-erdos158", "validated_new": 2, "significance": [1, 0], "arm": "pass", "settle_screen": 0.45, "settle_chance": 0.35}
 {"at": "2026-10-18T04:45:47Z", "problem": 158, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-3/long_profile61.py", "elapsed": 2213, "result": true}
 {"at": "2026-10-18T07:12:17Z", "problem": 158, "tier": "deep", "outcome": "none", "spend": 35.1917, "run_dir": "runs/20261016-033033-593840-erdos158", "validated_new": 2, "significance": [1, 0], "arm": "pass", "settle_screen": 0.45, "settle_chance": 0.35}
+{"at": "2026-10-18T09:09:10Z", "problem": 158, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-4/long_chain63.py", "elapsed": 7007, "result": true}
+{"at": "2026-10-18T09:55:16Z", "problem": 158, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-5/long_cert63.py", "elapsed": 2767, "result": true}

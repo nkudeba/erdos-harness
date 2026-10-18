@@ -3045,7 +3045,9 @@
     "deep/long_chain.py",
     "marathon-1/long_profile.py",
     "marathon-2/long_profile56.py",
-    "marathon-3/long_profile61.py"
+    "marathon-3/long_profile61.py",
+    "marathon-4/long_chain63.py",
+    "marathon-5/long_cert63.py"
    ],
    "followups": 1
   },
