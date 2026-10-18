@@ -746,12 +746,28 @@ class ComputationalRouting(Base):
                                            "run_dir": "runs/r695", "spend": 22.0, "track": "new-math"}}})
         st = R.load_state()
         st["problems"]["686"] = {"history": [], "next": "program", "kind": "settle"}
+        st["problems"]["873"] = {"history": [], "next": "build", "build": {"value": 0.6}}
         with patch.object(R, "queue", lambda s, c: []):
-            self.assertEqual(R.next_action(st, R.load_cfg()), ("deep", 695))     # ahead of a settle program, as a deep pass
+            # in the program pass's place: after the build track's share (#158 held #873 back a whole evening)
+            self.assertEqual(R.next_action(st, R.load_cfg()), ("build", 873))
+            st["problems"]["873"]["next"] = None
+            self.assertEqual(R.next_action(st, R.load_cfg()), ("program", 695))
         with patch.object(R, "run_screen", fake), patch.object(R, "queue", lambda s, c: []):
             R.step(R.load_cfg())
         self.assertEqual((seen["tag"], seen["total"]), ("resolve-deep", 62.0))
         self.assertIn("--engine-objective record", seen["flags"])
+        # and it counts as a program pass, so persistence stops at max_passes instead of running to max_spend
+        run = self.engine_run([_claim("r1s1", "C1", "validated-new", sig=1)])
+        R.save_state({"problems": {"158": {"history": [], "next": "program", "status": "persist", "kind": "record",
+                                           "run_dir": str(run), "spend": 60.0, "track": "new-math", "program_passes": 2,
+                                           "validated_seen": 0}}})
+        fake2 = lambda *a, **k: ({"run_dir": str(run.relative_to(self.d)), "spend_run": 80.0}, 0)
+        with patch.object(R, "ROOT", self.d), patch.object(R, "run_screen", fake2), patch.object(R, "queue", lambda s, c: []), \
+                patch.object(R, "classify", lambda rd: ("none", {})), patch.object(R, "record_atlas"), \
+                patch.object(R, "commit"), patch.object(R, "run_long", lambda *a: []):
+            R.step(R.load_cfg())
+        p = R.load_state()["problems"]["158"]
+        self.assertEqual((p["program_passes"], p["next"]), (3, None))
         self.assertNotIn("--engine-program-cycles", seen["flags"])
 
 

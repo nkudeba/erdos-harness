@@ -992,12 +992,12 @@ def next_action(state: dict, cfg: dict) -> tuple[str, int | None]:
     probs = state.get("problems", {})
     # an operator's re-screen ("screen", from rescreen or build) costs $1-6 and may promote a problem; Lean, the payoff,
     # stays first
+    # A computational problem's queued program pass runs as a deep pass (step), but it keeps the program pass's place in
+    # this order: promoted to the deep tier's place, #158's persistence passes held the build track back for a whole
+    # evening (2026-10-17).
     for want in ("lean", "screen", "deep"):
         for n, p in probs.items():
-            nxt = p.get("next")
-            if nxt == "program" and (p.get("kind") or "settle") in ("record", "explicit"):
-                nxt = "deep"                             # step() runs it as one: a computational problem's next pass
-            if nxt == want and p.get("errors", 0) < cfg["max_errors"]:
+            if p.get("next") == want and p.get("errors", 0) < cfg["max_errors"]:
                 return want, int(n)
     for n, p in probs.items():
         if p.get("running") and p.get("errors", 0) < cfg["max_errors"]:
@@ -1038,6 +1038,7 @@ def step(cfg: dict) -> bool:
     p = state["problems"].setdefault(str(n), {"history": []})
     key = str(n)
     lane = QUEUE_LANE.get(int(n))
+    program_pass = False
     if action == "screen" and p.get("status") == "screened out" and lane in ("record", "explicit"):
         # a re-screen under another objective is a new engine run; the settle attempt stays in `previous`
         p["previous"] = {k: p.get(k) for k in ("status", "run_dir", "settle_chance", "arm", "kind", "spend", "track",
@@ -1079,6 +1080,7 @@ def step(cfg: dict) -> bool:
         row, rc = run_screen(n, f"resolve-{action}", float(p.get("spend") or 0.0) + cfg[action]["total"],
                              stage_flags(cfg, action, p), p.get("run_dir"), on_start=started)
     elif action in ("deep", "program", "build"):
+        program_pass = action == "program"               # counted as one below even when it runs as a deep pass
         if action == "program" and (p.get("kind") or "settle") in ("record", "explicit"):
             # whatever queued it (a scout before 2026-10-16, persistence, the persist command), a computational problem's
             # next pass is a deep pass under its own objective, never a program aimed at the formal statement
@@ -1193,7 +1195,7 @@ def step(cfg: dict) -> bool:
         p.update({"next": "deep", "status": "traction", "traction": info})
     else:
         p.update({"next": None, "status": "done" if outcome == "none" else outcome})
-    if action == "program":
+    if action == "program" or program_pass:
         p["program_passes"] = int(p.get("program_passes") or 0) + 1
     prog = engine_json(run_dir).get("program") or {}
     if action == "build":
