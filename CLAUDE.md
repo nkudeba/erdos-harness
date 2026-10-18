@@ -10,6 +10,25 @@ feasibility ranking of the whole 1,217-problem catalogue.
 `atlas-data/`, and puts the Atlas live (`atlas_refresh.py`, `docs/live-results.md`). Benchmark runs are attributed to
 their catalogue number through `atlas_ids.py`, as status only. What still needs you is the qualitative half below.
 
+**When origin moves ahead of the main checkout's `main`, the publisher merges it in if that is safe** (2026-10-18).
+- **Why.** On 2026-10-15 a session pushed its branch straight to `origin main`. Every publisher push was then refused,
+  and four commits sat unpushed for about 2.5 hours until a session merged by hand.
+- **What happens now.** A push refused as not a fast-forward makes `atlas_refresh.reconcile` fetch, merge `origin/main`
+  into local `main` (a merge, never a rebase) and push once more. It does so only when:
+  - nothing is mid-merge, rebase, cherry-pick or revert, the index is not locked and nothing is staged;
+  - every commit that origin lacks is automatic: the publisher's own Atlas commits or the campaign's `resolution: #`
+    commits, each confined to its own paths, or an earlier such merge;
+  - the merge would not conflict, and it writes no uncommitted, untracked or ignored file and nothing under
+    `.result-feed/`. A merge overwrites an ignored file without a word, and the Pages passphrase is one.
+- Replayed on the incident's own commits (local `d1f1ad0`, origin `d54ba7b`), it merged and pushed in about a second
+  and left the checkout's uncommitted files as they were.
+- **Otherwise** the checkout is left alone, and the push stays on record until one gets through: `push_stuck` in
+  `.result-feed/atlas-refresh.json` (since, tries, why), plus a line in `.result-feed/publisher-error.log` for each
+  failed try. Reconcile by hand then: merge `origin/main` into `main` in the main checkout and push. Nothing is ever
+  force-pushed.
+- Sessions still fast-forward local `main` and push it. Pushing a branch straight to origin is what this repairs, not
+  a workflow. Covered by `Reconcile` in `tests/test_atlas_refresh.py`.
+
 **The live Atlas is the encrypted GitHub Pages site** (2026-10-01): https://nkudeba.github.io/erdos-atlas-site/.
 - The passphrase is in `.result-feed/pages-passphrase`, and nothing should ever print or commit it.
 - `atlas_pages.py` rebuilds, encrypts and pushes it at most every 10 minutes when anything changed.

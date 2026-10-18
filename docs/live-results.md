@@ -56,11 +56,20 @@ watch loop (the LaunchAgent above) now also runs `atlas_refresh.maybe_refresh()`
   (Demonstrated). An assembled proof (`<n>-assembled`) does not.
 - Diagnostic replays (`runs/replay-*`) are neither ranked nor published.
 
-**Git safety.** A repository is committed to only on `main`, with no merge, rebase or index lock in progress, and
-only the listed paths are staged (`git commit -- <paths>`). A rejected push is recorded and retried, never forced.
-The per-alias research-guidance files are never committed.
+**Git safety.** A repository is committed to only on `main`, with no merge, rebase, cherry-pick, revert or index lock
+in progress, and only the listed paths are staged (`git commit -- <paths>`). Nothing is ever force-pushed. The
+per-alias research-guidance files are never committed.
 
-**Status.** `.result-feed/atlas-refresh.json` holds the last re-rank, commits and pushes, with any error.
+**When origin moves** (2026-10-18). A session that pushes its branch straight to `origin main` leaves the main
+checkout's `main` behind, and the publisher's push is refused. `atlas_refresh.reconcile` then fetches, merges
+`origin/main` into local `main` and pushes once more. It does this only when nothing is in progress or staged, every
+commit that origin lacks is automatic (the publisher's or the campaign's `resolution: #` commits, each confined to its
+own paths, or an earlier such merge), and the merge would neither conflict nor write any uncommitted, untracked or
+ignored file, or anything under `.result-feed/`. Otherwise it leaves the checkout alone.
+
+**Status.** `.result-feed/atlas-refresh.json` holds the last re-rank, commits and pushes, with any error. A push that
+has not got through stays under `push_stuck` (since, tries, why) until one does, and each failed try also writes a
+line to `.result-feed/publisher-error.log`.
 `python3 atlas_refresh.py --force` does it all now. The publisher restarts itself when `result_feed.py`,
 `atlas_ids.py` or `atlas_refresh.py` changes.
 
