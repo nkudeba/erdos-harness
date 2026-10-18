@@ -239,3 +239,4 @@
 {"at": "2026-10-17T20:53:58Z", "problem": 695, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "marathon-3/long_p24.py", "elapsed": 4606, "result": true}
 {"at": "2026-10-17T20:54:07Z", "problem": 158, "tier": "scout", "outcome": "none", "spend": 15.5782, "run_dir": "runs/20261016-033033-593840-erdos158", "validated_new": 1, "significance": [0], "arm": "pass", "settle_screen": 0.45, "settle_chance": 0.35}
 {"at": "2026-10-17T22:49:20Z", "problem": 158, "tier": "compute", "outcome": "completed", "spend": 0.0, "key": "deep/long_chain.py", "elapsed": 6907, "result": true}
+{"at": "2026-10-18T01:18:55Z", "problem": 158, "tier": "deep", "outcome": "none", "spend": 28.8783, "run_dir": "runs/20261016-033033-593840-erdos158", "validated_new": 1, "significance": [0], "arm": "pass", "settle_screen": 0.45, "settle_chance": 0.35}

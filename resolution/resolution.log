@@ -368,3 +368,6 @@
 [2026-10-17T20:54:02Z] #158: scout (resuming runs/20261016-033033-593840-erdos158)
 [2026-10-17T20:54:07Z] #158: scout -> none ($15.58; 1 validated new [0])
 [2026-10-17T20:54:13Z] #158: long computation deep/long_chain.py for up to 2.0 h (continues the exact F(N) chain from the certified F(1..53), at N = 54, 55, … with Kissat on 16 cubes)
+[2026-10-17T22:49:40Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-17T22:49:43Z] #158: deep pass on runs/20261016-033033-593840-erdos158
+[2026-10-18T01:18:55Z] #158: deep -> none ($28.88; 1 validated new [0])

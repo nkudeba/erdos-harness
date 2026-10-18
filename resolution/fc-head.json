@@ -1,52 +1,52 @@
 {
-  "sha": "c77fdd446d23539302aa73bcfae4a9fa962b8382",
-  "node_id": "C_kwDOOogmB9oAKGM3N2ZkZDQ0NmQyMzUzOTMwMmFhNzNiY2ZhZTRhOWZhOTYyYjgzODI",
+  "sha": "e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
+  "node_id": "C_kwDOOogmB9oAKGU3NTRhNzhjNzRhM2YyYmJjMzhlNGYyMDYzYjVmNmVlZDUxYmRlMzk",
   "commit": {
     "author": {
-      "name": "Paul Lezeau",
-      "email": "paul.lezeau@gmail.com",
-      "date": "2026-10-16T16:07:58Z"
+      "name": "AItoBit",
+      "email": "321732397+AItoBit@users.noreply.github.com",
+      "date": "2026-10-17T16:09:25Z"
     },
     "committer": {
       "name": "GitHub",
       "email": "noreply@github.com",
-      "date": "2026-10-16T16:07:58Z"
+      "date": "2026-10-17T16:09:25Z"
     },
-    "message": "Add Team page to the website (#7414)\n\nAdd a Team page at `/team/` with Maintainers and Reviewers sections.\nEach section shows “In construction”. Add Team to the navigation on all\npages.\n\nPreview: https://paul-lez.github.io/formal-conjectures/team/",
+    "message": "test(ErdosProblems/676): prove residue criterion and finite exceptions (#7428)\n\nProves that the representation in Erdős Problem 676 is equivalent to the\nexistence of a prime `p` with `p^2 ≤ n` and `n % p^2 < p`. The lower\nbound retains the source's requirement `a ≥ 1`. Adds kernel-checked\ntests showing that 35 and 899 have no such representation.\n\nThis is a partial contribution. The eventual representation question\nremains open, and its statement and placeholder proof are unchanged.\n\nValidation: the exact three new theorem bodies compile with Lean 4.33.1\nand `-DwarningAsError=true` using the pinned Mathlib. All three axiom\nreports contain only `propext`, `Classical.choice`, and `Quot.sound`.\nThe finite checks use `decide`, not `native_decide`.\n\nGitHub CI passed the project build and script tests for commit\n833da2e20d8f6306ddc57d8c9f641f6f82c4638e. The local repository build\nexhausted memory in unchanged dependencies; the standalone proof checks\nabove completed successfully. The PR remains a draft because this is a\npartial contribution to the requested full solution.\n\nAI-assisted contribution using Codex. The source correspondence and\nfinite statements received a separate automated mathematical audit.",
     "tree": {
-      "sha": "9a868bc9beee398e4c5c4531954c85b7b57cdf3c",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/9a868bc9beee398e4c5c4531954c85b7b57cdf3c"
+      "sha": "99f24d439831d509126c70fb78a7e868049af708",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/99f24d439831d509126c70fb78a7e868049af708"
     },
-    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/c77fdd446d23539302aa73bcfae4a9fa962b8382",
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
     "comment_count": 0,
     "verification": {
       "verified": true,
       "reason": "valid",
-      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq0kvuCRC1aQ7uu5UhlAAA8QwQACCeYB273cSjNCiGynBY+9tL\nZIN5ycwRA7RrPW7S9TweS1KOEi4sZeXZgja9BjI5HYCFTkHO8lkPW5bzHcWbn9Lq\n/Tf21QYAGmUe58V4RQ9DXTMIpuHi9AohoWlJCvdUR6wWyVwdgrhnbGhvu5+YvQVY\nw/ywNciUrzgSJH/SP03elpYhoGgNzcBQ5Hm5vplIIzbZSXC0Sar3cJ3DMh6uejAf\nMP4f5XwIHlQWUN9gyg4HZFK1W356mz79PsEtiqpSoHLilnhlW2Mkzn9GuzEAu8Op\nLGsYq4ykI6c9nYl2QCaMYOcnn1OQcMvq0cQKLgU0OZFaqigc500GsOBRCNBsPWSi\nWYXPZaD1oE0XkI6a5RfR7howejkoNUpwzyZnROEcGjklhUA7XEVQt225Mws//VeS\nDOgZ3eof4P57WkmMbdX3dQfcqzgD0E4ziPj74OKJ1x/vt2/FPoo3E4Kj5sGbKn13\nrEkgaAJEQUg+iEPN59mXmL6+LCvCbLUUilWW+kRTupfx/TBBtmFPlyPRCcz4Vm57\nfA24wMp9DEXvoRq1+PZcSCkVrp5m92U9q2O2X/FxMFYYT6Q6VE1jLsOpHgFBQUlm\nlkzd5Emppw+RWegzvGwbHSBWEX11Mr+h/auCUcdfb/Wzp1z3YzLprQdvyvvhZ7C1\ntZbkqizB5XmHadz5uD2C\n=soPK\n-----END PGP SIGNATURE-----\n",
-      "payload": "tree 9a868bc9beee398e4c5c4531954c85b7b57cdf3c\nparent 5a81b1d423f1ec00be12ef7c765558deef0d06f6\nauthor Paul Lezeau <paul.lezeau@gmail.com> 1792166878 +0000\ncommitter GitHub <noreply@github.com> 1792166878 +0000\n\nAdd Team page to the website (#7414)\n\nAdd a Team page at `/team/` with Maintainers and Reviewers sections.\nEach section shows “In construction”. Add Team to the navigation on all\npages.\n\nPreview: https://paul-lez.github.io/formal-conjectures/team/",
-      "verified_at": "2026-10-16T16:08:15Z"
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq053GCRC1aQ7uu5UhlAAAmTUQAEboKh+y2hxl6XYEmNYHL7pA\n2B4i+fgfk6FoqkmnI8WuroBRnWuxkBrwk+v+la3v6xOxZ4g6EiHri0siJKAr5fP5\nSwkmw0oIUAN1J2Ng5VTbuRUiVwe72kDGeXLc+yy5ENk0N4fiL5XcAHgQc9TJaVcc\nBILORchGy9qx9zzYDTmyn1KTRP8EJ9QKorAoOot6G6qNJ7EOxnP9xczt+T545zGc\nGDM2kVfVvy1y+/UAP5ssqYpen8axxpSe9qeIMfwl4gNG3tUXRyYbhuqCHnL0/WLY\nPFUIao4IHH/x4M2L3g3FzEmn3YhFyIw5kWedVFg9BTPsbWsWOE25oWJjfOm5JyfF\nRjKKVYEkhNF7vvLiblS0wtpsgRJ/Y7jygwgBBPjQkIMNlhAXAgWKXjrgIYywNJNZ\ngb3wcQzTkLzei2m6tKs6S/1N0wz/zUKCrwZAxNs19xCAyuWfloWVXr3WdtSbVAqe\nLJxdZ2L72kblQ7Cct2Daa3AVZt7zFTD64Y/mo4rfkQEr7LHDFveZ51e+3JKi03NY\n7yu7I+FBw3uOyJGBqwwn4TAtgyseaMoBzM+dSmLPuudmisUeMguVYMOBsr1pG73s\nz3r352Iul/0O4OAOF2Q0qidQarulLL9AQzDYDUnZgqc+U9jkDoJ38MFwHCBvwAz1\nsBVXF/khyuBAHWJbm28g\n=ipTH\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 99f24d439831d509126c70fb78a7e868049af708\nparent 5a5a31f84084d58d853be65895e725da32ba6a69\nauthor AItoBit <321732397+AItoBit@users.noreply.github.com> 1792253365 +0000\ncommitter GitHub <noreply@github.com> 1792253365 +0000\n\ntest(ErdosProblems/676): prove residue criterion and finite exceptions (#7428)\n\nProves that the representation in Erdős Problem 676 is equivalent to the\nexistence of a prime `p` with `p^2 ≤ n` and `n % p^2 < p`. The lower\nbound retains the source's requirement `a ≥ 1`. Adds kernel-checked\ntests showing that 35 and 899 have no such representation.\n\nThis is a partial contribution. The eventual representation question\nremains open, and its statement and placeholder proof are unchanged.\n\nValidation: the exact three new theorem bodies compile with Lean 4.33.1\nand `-DwarningAsError=true` using the pinned Mathlib. All three axiom\nreports contain only `propext`, `Classical.choice`, and `Quot.sound`.\nThe finite checks use `decide`, not `native_decide`.\n\nGitHub CI passed the project build and script tests for commit\n833da2e20d8f6306ddc57d8c9f641f6f82c4638e. The local repository build\nexhausted memory in unchanged dependencies; the standalone proof checks\nabove completed successfully. The PR remains a draft because this is a\npartial contribution to the requested full solution.\n\nAI-assisted contribution using Codex. The source correspondence and\nfinite statements received a separate automated mathematical audit.",
+      "verified_at": "2026-10-17T16:09:42Z"
     }
   },
-  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/c77fdd446d23539302aa73bcfae4a9fa962b8382",
-  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/c77fdd446d23539302aa73bcfae4a9fa962b8382",
-  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/c77fdd446d23539302aa73bcfae4a9fa962b8382/comments",
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39/comments",
   "author": {
-    "login": "Paul-Lez",
-    "id": 72892199,
-    "node_id": "MDQ6VXNlcjcyODkyMTk5",
-    "avatar_url": "https://avatars.githubusercontent.com/u/72892199?v=4",
+    "login": "AItoBit",
+    "id": 321732397,
+    "node_id": "U_kgDOEy0_LQ",
+    "avatar_url": "https://avatars.githubusercontent.com/u/321732397?v=4",
     "gravatar_id": "",
-    "url": "https://api.github.com/users/Paul-Lez",
-    "html_url": "https://github.com/Paul-Lez",
-    "followers_url": "https://api.github.com/users/Paul-Lez/followers",
-    "following_url": "https://api.github.com/users/Paul-Lez/following{/other_user}",
-    "gists_url": "https://api.github.com/users/Paul-Lez/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/Paul-Lez/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/Paul-Lez/subscriptions",
-    "organizations_url": "https://api.github.com/users/Paul-Lez/orgs",
-    "repos_url": "https://api.github.com/users/Paul-Lez/repos",
-    "events_url": "https://api.github.com/users/Paul-Lez/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/Paul-Lez/received_events",
+    "url": "https://api.github.com/users/AItoBit",
+    "html_url": "https://github.com/AItoBit",
+    "followers_url": "https://api.github.com/users/AItoBit/followers",
+    "following_url": "https://api.github.com/users/AItoBit/following{/other_user}",
+    "gists_url": "https://api.github.com/users/AItoBit/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/AItoBit/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/AItoBit/subscriptions",
+    "organizations_url": "https://api.github.com/users/AItoBit/orgs",
+    "repos_url": "https://api.github.com/users/AItoBit/repos",
+    "events_url": "https://api.github.com/users/AItoBit/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/AItoBit/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false
@@ -74,136 +74,28 @@
   },
   "parents": [
     {
-      "sha": "5a81b1d423f1ec00be12ef7c765558deef0d06f6",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/5a81b1d423f1ec00be12ef7c765558deef0d06f6",
-      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/5a81b1d423f1ec00be12ef7c765558deef0d06f6"
+      "sha": "5a5a31f84084d58d853be65895e725da32ba6a69",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/5a5a31f84084d58d853be65895e725da32ba6a69",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/5a5a31f84084d58d853be65895e725da32ba6a69"
     }
   ],
   "stats": {
-    "total": 76,
-    "additions": 76,
+    "total": 41,
+    "additions": 41,
     "deletions": 0
   },
   "files": [
     {
-      "sha": "0e4eef1be99f8b4a4176b380b9a6e4c9ff6f7ac0",
-      "filename": "site/README.md",
+      "sha": "2b54282693e89c15c715427e12b2bea385473c68",
+      "filename": "FormalConjectures/ErdosProblems/676.lean",
       "status": "modified",
-      "additions": 2,
+      "additions": 41,
       "deletions": 0,
-      "changes": 2,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2FREADME.md",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2FREADME.md",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2FREADME.md?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -50,6 +50,7 @@ src/\n     theorem.html          # Theorem detail page (client-side, reads ?name= param)\n     contribute.html       # How-to-contribute page (static)\n     about.html            # About page (static)\n+    team.html             # Team page (static)\n build.js                  # Build script — reads data/, writes site/\n package.json\n .github/workflows/\n@@ -67,6 +68,7 @@ The `site/` output directory is generated by the build script and is not committ\n | `/theorem/?name=<full.lean.name>` | Detail page for an individual theorem                  |\n | `/contribute/`                    | Contribution guide                                     |\n | `/about/`                         | About the project                                      |\n+| `/team/`                          | Maintainers and reviewers                              |\n \n Individual theorem pages are rendered client-side from `data/conjectures.json` — no separate HTML file is generated per theorem.\n "
-    },
-    {
-      "sha": "1b278ebce4c1fa8ac6ca72b880d9ab15d5b15a67",
-      "filename": "site/build.js",
-      "status": "modified",
-      "additions": 3,
-      "deletions": 0,
-      "changes": 3,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fbuild.js",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fbuild.js",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fbuild.js?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -840,6 +840,9 @@ async function main() {\n   // ---- About page ----\n   copyStaticTemplate('about.html', 'site/about/index.html');\n \n+  // ---- Team page ----\n+  copyStaticTemplate('team.html', 'site/team/index.html');\n+\n   // ---- Stats page ----\n   let growthPlot = '';\n   if (fs.existsSync(whitePlotPath) && fs.existsSync(darkPlotPath)) {"
-    },
-    {
-      "sha": "2e1fd847f6d1b3a8a3d494f9e91bba3b3bdc0156",
-      "filename": "site/src/templates/about.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fabout.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fabout.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fabout.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
-    },
-    {
-      "sha": "67b4a6400d6882294129777bbadc18a9687c4aff",
-      "filename": "site/src/templates/browse.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fbrowse.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fbrowse.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fbrowse.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -26,6 +26,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
-    },
-    {
-      "sha": "855e16dc3613d802adb482aada80556d16b7923f",
-      "filename": "site/src/templates/contribute.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fcontribute.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fcontribute.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fcontribute.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
-    },
-    {
-      "sha": "ada42a7278a4d4c8fa3c52a1f230fc25b31e05af",
-      "filename": "site/src/templates/index.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Findex.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Findex.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Findex.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
-    },
-    {
-      "sha": "60afda7dd0e0c229625c9f88ac12786c54f0796a",
-      "filename": "site/src/templates/modules.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fmodules.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fmodules.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fmodules.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
-    },
-    {
-      "sha": "1f391bde7f0496a3da3f03b3a8892f564a4d77d1",
-      "filename": "site/src/templates/stats.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fstats.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fstats.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fstats.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -21,6 +21,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
-    },
-    {
-      "sha": "104033b51d732d69cbd06ae7639ef03df81ee695",
-      "filename": "site/src/templates/team.html",
-      "status": "added",
-      "additions": 64,
-      "deletions": 0,
-      "changes": 64,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fteam.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Fteam.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Fteam.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -0,0 +1,64 @@\n+<!DOCTYPE html>\n+<html lang=\"en\" data-base=\"\">\n+<head>\n+  <meta charset=\"UTF-8\">\n+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n+  <title>Team — Formal Conjectures</title>\n+  <meta name=\"description\" content=\"Maintainers and reviewers of the Formal Conjectures project.\">\n+  <link rel=\"preload\" href=\"/assets/fonts/LibertinusSans-Regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n+  <link rel=\"stylesheet\" href=\"/assets/css/style.css\">\n+  <link rel=\"icon\" href=\"/assets/img/formal_conjectures_logo.svg\" type=\"image/svg+xml\">\n+</head>\n+<body>\n+\n+<nav class=\"site-nav\" aria-label=\"Site navigation\">\n+  <div class=\"container site-nav__inner\">\n+    <a href=\"/\" class=\"site-nav__brand\"><img src=\"/assets/img/formal_conjectures_logo.svg\" alt=\"\"\n+        class=\"site-nav__logo\">Formal Conjectures</a>\n+    <button class=\"nav-toggle\" id=\"nav-toggle\" aria-label=\"Toggle navigation\" aria-expanded=\"false\">&#9776;</button>\n+    <ul class=\"site-nav__links\" id=\"nav-links\" role=\"list\">\n+      <li><a href=\"/browse/\">Browse</a></li>\n+      <li><a href=\"/stats/\">Stats</a></li>\n+      <li><a href=\"/modules/\">Modules</a></li>\n+      <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n+      <li><a href=\"/contribute/\">Contribute</a></li>\n+      <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n+    </ul>\n+  </div>\n+</nav>\n+\n+<header class=\"page-header\">\n+  <div class=\"container\">\n+    <h1 class=\"page-header__title\">Team</h1>\n+  </div>\n+</header>\n+\n+<main>\n+  <div class=\"container section\">\n+    <div class=\"prose\">\n+\n+      <h2>Maintainers</h2>\n+      <p>In construction</p>\n+\n+      <h2>Reviewers</h2>\n+      <p>In construction</p>\n+\n+    </div>\n+  </div>\n+</main>\n+\n+<footer class=\"site-footer\">\n+  <div class=\"container site-footer__inner\">\n+    <span>Formal Conjectures &mdash; Apache 2.0 / CC-BY 4.0</span>\n+    <span>\n+      <a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a>\n+      &middot;\n+      <a href=\"https://leanprover.zulipchat.com/#narrow/channel/524981-Formal-conjectures\" target=\"_blank\" rel=\"noopener\">Zulip</a>\n+    </span>\n+  </div>\n+</footer>\n+\n+<script src=\"/assets/js/main.js\"></script>\n+</body>\n+</html>"
-    },
-    {
-      "sha": "6d56f374780a042896f26c6f9dfa6ae84bde3382",
-      "filename": "site/src/templates/theorem.html",
-      "status": "modified",
-      "additions": 1,
-      "deletions": 0,
-      "changes": 1,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Ftheorem.html",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c77fdd446d23539302aa73bcfae4a9fa962b8382/site%2Fsrc%2Ftemplates%2Ftheorem.html",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/site%2Fsrc%2Ftemplates%2Ftheorem.html?ref=c77fdd446d23539302aa73bcfae4a9fa962b8382",
-      "patch": "@@ -31,6 +31,7 @@\n       <li><a href=\"/stats/\">Stats</a></li>\n       <li><a href=\"/modules/\">Modules</a></li>\n       <li><a href=\"/about/\">About</a></li>\n+      <li><a href=\"/team/\">Team</a></li>\n       <li><a href=\"/contribute/\">Contribute</a></li>\n       <li><a href=\"https://github.com/google-deepmind/formal-conjectures\" target=\"_blank\" rel=\"noopener\">GitHub</a></li>\n     </ul>"
+      "changes": 41,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39/FormalConjectures%2FErdosProblems%2F676.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39/FormalConjectures%2FErdosProblems%2F676.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F676.lean?ref=e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
+      "patch": "@@ -37,6 +37,47 @@ namespace Erdos676\n \n open Filter\n \n+/-- An integer has a representation $ap^2+b$ with $p$ prime, $a \\geq 1$, and $b < p$\n+if and only if $p^2 \\leq n$ and $n \\bmod p^2 < p$ for some prime $p$. -/\n+@[category test, AMS 11]\n+theorem representation_iff_mod (n : ℕ) :\n+    (∃ a p b : ℕ, p.Prime ∧ 1 ≤ a ∧ b < p ∧ n = a * p ^ 2 + b) ↔\n+      ∃ p : ℕ, p.Prime ∧ p ^ 2 ≤ n ∧ n % p ^ 2 < p := by\n+  constructor\n+  · rintro ⟨a, p, b, hp, ha, hb, rfl⟩\n+    refine ⟨p, hp, ?_, ?_⟩\n+    · nlinarith\n+    · have hb' : b < p ^ 2 := by\n+        have := hp.two_le\n+        nlinarith\n+      simpa [Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt hb'] using hb\n+  · rintro ⟨p, hp, hn, hr⟩\n+    refine ⟨n / p ^ 2, p, n % p ^ 2, hp, ?_, hr, ?_⟩\n+    · exact Nat.div_pos hn (pow_pos hp.pos _)\n+    · simpa [Nat.mul_comm, Nat.add_comm] using (Nat.mod_add_div n (p ^ 2)).symm\n+\n+/-- The integer $35$ has no representation $ap^2+b$ of the required form. -/\n+@[category test, AMS 11]\n+theorem not_representable_35 :\n+    ¬ ∃ a p b : ℕ, p.Prime ∧ 1 ≤ a ∧ b < p ∧ 35 = a * p ^ 2 + b := by\n+  rw [representation_iff_mod]\n+  rintro ⟨p, hp, hn, hr⟩\n+  have hp6 : p < 6 := by nlinarith\n+  have hc : ∀ q : Fin 6, ¬ (q.val.Prime ∧ q.val ^ 2 ≤ 35 ∧ 35 % q.val ^ 2 < q.val) :=\n+    by decide\n+  exact hc ⟨p, hp6⟩ ⟨hp, hn, hr⟩\n+\n+/-- The integer $899$ has no representation $ap^2+b$ of the required form. -/\n+@[category test, AMS 11]\n+theorem not_representable_899 :\n+    ¬ ∃ a p b : ℕ, p.Prime ∧ 1 ≤ a ∧ b < p ∧ 899 = a * p ^ 2 + b := by\n+  rw [representation_iff_mod]\n+  rintro ⟨p, hp, hn, hr⟩\n+  have hp30 : p < 30 := by nlinarith\n+  have hc : ∀ q : Fin 30, ¬ (q.val.Prime ∧ q.val ^ 2 ≤ 899 ∧ 899 % q.val ^ 2 < q.val) :=\n+    by decide\n+  exact hc ⟨p, hp30⟩ ⟨hp, hn, hr⟩\n+\n /-- Is every sufficiently large integer of the form $ap^2+b$ for some prime $p$ and integers\n $a \\geq 1$ and $0 \\leq b < p$? -/\n @[category research open, question, AMS 11]"
     }
   ]
 }

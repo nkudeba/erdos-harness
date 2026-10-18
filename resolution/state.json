@@ -2992,11 +2992,16 @@
      "tier": "scout",
      "outcome": "none",
      "spend": 15.5782
+    },
+    {
+     "tier": "deep",
+     "outcome": "none",
+     "spend": 28.8783
     }
    ],
    "prepped": true,
    "running": null,
-   "spend": 18.5981124,
+   "spend": 47.476363400000004,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -3012,8 +3017,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "record",
    "lane": "rescreen",
-   "next": "deep",
-   "status": "traction",
+   "next": null,
+   "status": "done",
    "run_dir": "runs/20261016-033033-593840-erdos158",
    "settle_chance": 0.45,
    "arm": "pass",
