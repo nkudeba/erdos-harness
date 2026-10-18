@@ -2997,11 +2997,16 @@
      "tier": "deep",
      "outcome": "none",
      "spend": 28.8783
+    },
+    {
+     "tier": "deep",
+     "outcome": "none",
+     "spend": 16.3751
     }
    ],
    "prepped": true,
    "running": null,
-   "spend": 47.476363400000004,
+   "spend": 63.85149359999999,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -3017,8 +3022,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "record",
    "lane": "rescreen",
-   "next": "deep",
-   "status": "compute-followup",
+   "next": "program",
+   "status": "persist",
    "run_dir": "runs/20261016-033033-593840-erdos158",
    "settle_chance": 0.45,
    "arm": "pass",
@@ -3027,8 +3032,10 @@
    "traction": {
     "settle_chance": 0.35
    },
-   "validated_seen": 1,
-   "claims_todo": [],
+   "validated_seen": 2,
+   "claims_todo": [
+    "r3s1/C1"
+   ],
    "computed": [
     "deep/long_chain.py",
     "marathon-1/long_profile.py",

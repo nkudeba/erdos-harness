@@ -374,3 +374,6 @@
 [2026-10-18T01:19:01Z] #158: long computation marathon-1/long_profile.py for up to 2.0 h (per-cube kissat times for N = 55, 56, 57 at b = 8 cube bits (k = 16), evidence (not certificate) for)
 [2026-10-18T02:08:32Z] #158: long computation marathon-2/long_profile56.py for up to 2.0 h (exact CaDiCaL search with the checker CNF for N = 56 then N = 57 (k = 16, 256 cubes each), with per-)
 [2026-10-18T02:37:56Z] #158: a long computation reported a RESULT; one follow-up pass to certify it
+[2026-10-18T02:38:01Z] #158: deep pass on runs/20261016-033033-593840-erdos158
+[2026-10-18T04:08:48Z] #158: deep made progress (2 validated new); another research-program pass
+[2026-10-18T04:08:48Z] #158: deep -> none ($16.38; 2 validated new [1, 0])
