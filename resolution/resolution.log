@@ -391,3 +391,6 @@
 [2026-10-18T11:54:26Z] #873: build pass 1 (the research program on its line) on runs/20261015-191351-260620-erdos873
 [2026-10-18T12:32:38Z] #873: build pass 1 moved the line (rungs, lemmas); another build pass
 [2026-10-18T12:32:38Z] #873: build -> none ($9.09; 0 validated new []); 1 rung(s) proved, 3 lemma(s) established
+[2026-10-18T12:32:47Z] #873: build pass 2 (the research program on its line) on runs/20261015-191351-260620-erdos873
+[2026-10-18T14:46:12Z] #873: build pass 2 moved the line (rungs, lemmas, validated); another build pass
+[2026-10-18T14:46:12Z] #873: build -> traction ($30.78; 4 validated new [2, 1, 1, 1]); 6 rung(s) proved, 14 lemma(s) established
