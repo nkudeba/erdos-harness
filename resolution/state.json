@@ -3017,8 +3017,8 @@
    "rescreen_at": "20261015-122831",
    "kind": "record",
    "lane": "rescreen",
-   "next": null,
-   "status": "done",
+   "next": "deep",
+   "status": "compute-followup",
    "run_dir": "runs/20261016-033033-593840-erdos158",
    "settle_chance": 0.45,
    "arm": "pass",
@@ -3030,8 +3030,11 @@
    "validated_seen": 1,
    "claims_todo": [],
    "computed": [
-    "deep/long_chain.py"
-   ]
+    "deep/long_chain.py",
+    "marathon-1/long_profile.py",
+    "marathon-2/long_profile56.py"
+   ],
+   "followups": 1
   },
   "1199": {
    "history": [

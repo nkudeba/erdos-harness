@@ -371,3 +371,6 @@
 [2026-10-17T22:49:40Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
 [2026-10-17T22:49:43Z] #158: deep pass on runs/20261016-033033-593840-erdos158
 [2026-10-18T01:18:55Z] #158: deep -> none ($28.88; 1 validated new [0])
+[2026-10-18T01:19:01Z] #158: long computation marathon-1/long_profile.py for up to 2.0 h (per-cube kissat times for N = 55, 56, 57 at b = 8 cube bits (k = 16), evidence (not certificate) for)
+[2026-10-18T02:08:32Z] #158: long computation marathon-2/long_profile56.py for up to 2.0 h (exact CaDiCaL search with the checker CNF for N = 56 then N = 57 (k = 16, 256 cubes each), with per-)
+[2026-10-18T02:37:56Z] #158: a long computation reported a RESULT; one follow-up pass to certify it
