@@ -1495,6 +1495,40 @@ class BuildTrack(unittest.TestCase):
         self.assertEqual([r["key"] for r in res["program"]["rungs"]], ["R1", "R2"])
         self.assertEqual(res["program"]["stop"], "2 cycles without a discharge")   # not six cycles of corollaries
 
+    def test_a_rung_judged_new_gets_the_literature_check(self):
+        # 2026-10-18: #873's significance-2 rung had only the judges' memory behind "new"
+        def script(purpose, prompt, n):
+            if purpose == "engine-litq":
+                return "1. divisor clusters short intervals\n2. close divisors subspace theorem"
+            if purpose == "engine-novelty-lit":
+                return "```json\n" + json.dumps({"verdict": "known", "cite": "Some 2025 paper", "nearest": "it"}) + "\n```"
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-program-plan":
+                return [PLAN_A, PLAN_B][min(n, 1)]
+            if purpose == "engine-settles":
+                return "```json\n" + json.dumps({"settles": False, "answer": None}) + "\n```"
+            return judge(purpose)
+        call = FakeCall(script, cost=0.1)
+        searched = []
+        search = lambda q: searched.append(q) or [{"title": "Clusters of divisors", "year": "2025", "abstract": "We bound them."}]
+        ck = {}
+        res = H.engine_run(call, FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,
+                           self._settings(program_cycles=1), search=search, checkpoint=ck, save=lambda c: None)
+        r1 = res["program"]["rungs"][0]
+        self.assertEqual((r1["key"], r1["valid"], r1["status"]), ("R1", True, "valid-known"))
+        self.assertTrue(searched)
+        thm = next(c for c in res["ledger"] if H.engine_claim_key(c) == "program-R1/C3")
+        self.assertEqual(thm["validation"]["literature"]["cite"], "Some 2025 paper")
+        # a rung judged before the check existed is checked on the next pass, once
+        del ck["program"]["rungs"][0]["final"][-1]["validation"]["literature"]
+        ck["program"]["rungs"][0]["final"][-1]["validation"]["status"] = "validated-new"
+        again = FakeCall(script, cost=0.1)
+        H.engine_program(again, FakeSession(lambda l, p: ""), self._settings(program_cycles=1), "PROBLEM", LEAN, "", "", "",
+                         [], H._DiscoverySpend(50.0), ck=ck, search=search)
+        self.assertEqual(len(again.prompts("engine-novelty-lit")), 1)
+        self.assertEqual(ck["program"]["rungs"][0]["status"], "valid-known")
+
     def test_a_rejected_rung_has_no_key_to_build_on(self):
         call = self._program_call([PLAN_A, PLAN_B], reject_assembled=True)
         res = H.engine_run(call, FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))), "PROBLEM", LEAN,

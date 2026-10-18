@@ -5647,7 +5647,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     program = None
     if s.program_cycles > 0:
         program = engine_program(call, session, s, statement, lean, fblock, sess_context, known, ledger, spend, ck=ck,
-                                 keep=keep, workers=workers)
+                                 keep=keep, workers=workers, search=search)
         ledger = ledger + [c for c in program.pop("claims") if not any(c is x for x in ledger)]
     repairs = ck.setdefault("repairs", {})
     fixable = [c for c in ledger if engine_fixable(c) and engine_claim_key(c) not in repairs]
@@ -6760,7 +6760,7 @@ def program_assemble(call, s: "EngineSettings", statement: str, known: str, sk: 
 
 def engine_program(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
                    known: str, ledger: list, spend: _DiscoverySpend, ck: dict | None = None, keep=None,
-                   workers: int = 4) -> dict:
+                   workers: int = 4, search=None) -> dict:
     """The research program (`s.program_cycles` cycles, `s.program_budget` dollars; see the section comment above).
     Everything it buys is checkpointed in `ck["program"]`: each plan, glue verdict, attack and lemma verdict, so a resume
     buys none of them twice. Returns its record, with `claims`: the attacks' claims and, when the skeleton closed, the
@@ -6806,6 +6806,19 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
                                      "_chain": engine_chain_text(r["final"][-1], r["final"])}
         return out
 
+    def literature_check(thm: dict) -> None:
+        """A rung judged new gets the literature check a round's claim gets (outside benchmarks): until 2026-10-18 only
+        the judges' memory stood behind #873's significance-2 Theorem D."""
+        v = thm.get("validation") or {}
+        if (search is None or v.get("status") != "validated-new" or "literature" in v
+                or not spend.room(s.novelty_budget + 0.3)):
+            return
+        lit = engine_literature_check(call, search, s, statement, thm)
+        spend.add(lit.get("cost"))
+        v["literature"] = lit
+        if lit.get("verdict") in ("known", "routine"):
+            v["status"] = f"valid-{lit['verdict']}"
+
     def closed(sk: dict | None) -> bool:
         return sk is not None and not program_open(sk) and not any(l.get("status") == "refuted" for l in sk["lemmas"])
 
@@ -6819,6 +6832,7 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
                 return False
             key = f"R{len(st['rungs']) + 1}"
             final = program_assemble(call, s, statement, known, sk, spend, session=f"program-{key}")
+            literature_check(final[-1])
             engine_resolve(final)
             v = final[-1].get("validation") or {}
             ok = _valid_status(v.get("status"))
@@ -6841,6 +6855,14 @@ def engine_program(call, session, s: "EngineSettings", statement: str, lean: str
             st["stop"] = "budget, with every lemma established"
         return False
 
+    if build:
+        for r in st["rungs"]:                             # rungs judged before the literature check existed
+            if r.get("final") and "literature" not in ((r["final"][-1].get("validation") or {})):
+                literature_check(r["final"][-1])
+                v = r["final"][-1].get("validation") or {}
+                if "literature" in v:
+                    r["status"] = v.get("status")
+                    keep()
     while not st.get("done"):
         if build and closed(st.get("skeleton")):
             # a rung that closed in a pass that stopped (its budget, a crash) before the rung was assembled
