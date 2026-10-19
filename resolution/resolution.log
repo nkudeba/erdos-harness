@@ -403,3 +403,10 @@
 [2026-10-18T19:51:23Z] daily cap reached ($161.42 of $150); sleeping 1 h
 [2026-10-18T20:51:23Z] daily cap reached ($161.42 of $150); sleeping 1 h
 [2026-10-18T21:51:23Z] #873: Lean on partial result program-R5/C4 in 20261018-175123-431630-resolve-claim-erdos10087301
+[2026-10-18T23:16:30Z] daily cap reached ($171.39 of $150); sleeping 1 h
+[2026-10-19T00:16:30Z] daily cap reached ($171.39 of $150); sleeping 1 h
+[2026-10-19T01:16:34Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-19T01:16:34Z] daily cap reached ($171.39 of $150); sleeping 1 h
+[2026-10-19T02:16:37Z] #873: build pass 3 (the research program on its line) on runs/20261015-191351-260620-erdos873
+[2026-10-19T02:52:09Z] #873: build pass 3 moved the line (rungs, lemmas, validated); another build pass
+[2026-10-19T02:52:09Z] #873: build -> traction ($10.07; 7 validated new [2, 1, 1, 1, 1, 1, 1]); 9 rung(s) proved, 17 lemma(s) established
