@@ -3236,6 +3236,37 @@
    "intent": null,
    "next": null,
    "status": "screened out"
+  },
+  "626": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, variants.erdos_upper, variants.h_even_conjecture, variants.h_lower, variants.h_odd_conjecture)",
+   "next": null
+  },
+  "588": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.02,
+     "spend": 3.275,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "5922bfcbaf0b3e479cbf989d81510c30aa647742",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261019-175215-839812-erdos588",
+   "spend": 3.274976,
+   "limit_waits": 0,
+   "settle_chance": 0.02,
+   "arm": "screened out",
+   "track": null,
+   "intent": null,
+   "next": null,
+   "status": "screened out"
   }
  }
 }

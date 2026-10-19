@@ -259,3 +259,5 @@
 {"at": "2026-10-19T18:06:04Z", "problem": 338, "tier": "queue", "outcome": "skipped", "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)", "spend": 0.0}
 {"at": "2026-10-19T18:06:05Z", "problem": 687, "tier": "prep", "outcome": "skipped", "why": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.fgkmt, variants.iwaniec, variants.maier_pomerance)", "spend": 0.0}
 {"at": "2026-10-19T21:52:05Z", "problem": 657, "tier": "screen", "outcome": "screened out", "settle_chance": 0.02, "draws": [0.01, 0.03], "spend": 8.5728, "run_dir": "runs/20261019-140610-305247-erdos657", "track": null, "intent": null}
+{"at": "2026-10-19T21:52:11Z", "problem": 626, "tier": "prep", "outcome": "skipped", "why": "no main theorem (parts: parts.i, parts.ii, variants.erdos_upper, variants.h_even_conjecture, variants.h_lower, variants.h_odd_conjecture)", "spend": 0.0}
+{"at": "2026-10-19T22:11:52Z", "problem": 588, "tier": "screen", "outcome": "screened out", "settle_chance": 0.02, "draws": [0.02, 0.02], "spend": 3.275, "run_dir": "runs/20261019-175215-839812-erdos588", "track": null, "intent": null}
