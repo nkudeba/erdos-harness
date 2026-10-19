@@ -410,3 +410,13 @@
 [2026-10-19T02:16:37Z] #873: build pass 3 (the research program on its line) on runs/20261015-191351-260620-erdos873
 [2026-10-19T02:52:09Z] #873: build pass 3 moved the line (rungs, lemmas, validated); another build pass
 [2026-10-19T02:52:09Z] #873: build -> traction ($10.07; 7 validated new [2, 1, 1, 1, 1, 1, 1]); 9 rung(s) proved, 17 lemma(s) established
+[2026-10-19T02:52:16Z] daily cap reached ($152.58 of $150); sleeping 1 h
+[2026-10-19T03:52:16Z] daily cap reached ($152.58 of $150); sleeping 1 h
+[2026-10-19T04:52:18Z] #873: build pass 4 (the research program on its line) on runs/20261015-191351-260620-erdos873
+[2026-10-19T16:14:39Z] resolution campaign loop starting
+[2026-10-19T16:14:40Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-19T16:14:43Z] #873: build pass 4 (the research program on its line) on runs/20261015-191351-260620-erdos873
+[2026-10-19T16:18:01Z] sprint toward a full solve until the weekly usage reset: records lane off, build share 0, program passes paused (#686, #103, #1207), daily cap $300; #873's last build pass finishes first (operator)
+[2026-10-19T16:47:31Z] resolution campaign loop starting
+[2026-10-19T16:47:34Z] #873: build pass 4 (the research program on its line) on runs/20261015-191351-260620-erdos873
+[2026-10-19T18:05:44Z] #873: build -> traction ($47.67; 11 validated new [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]); 19 rung(s) proved, 34 lemma(s) established

@@ -25,15 +25,25 @@
     {
      "tier": "queue",
      "outcome": "persist (operator)"
+    },
+    {
+     "tier": "queue",
+     "outcome": "paused for the sprint (operator)"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261008-133931-530035-erdos686",
    "spend": 16.619813799999996,
-   "next": "program",
-   "status": "persist",
-   "claims_todo": []
+   "next": null,
+   "status": "paused",
+   "claims_todo": [],
+   "paused": {
+    "at": "2026-10-19T16:18:01Z",
+    "why": "sprint toward a full solve (operator)",
+    "next": "program",
+    "status": "persist"
+   }
   },
   "488": {
    "history": [
@@ -104,12 +114,17 @@
      "tier": "build",
      "outcome": "traction",
      "spend": 10.0684
+    },
+    {
+     "tier": "build",
+     "outcome": "traction",
+     "spend": 47.6652
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 56.238628200000015,
+   "spend": 103.90381100000006,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -125,8 +140,8 @@
    "rescreen_at": "20261015-122832",
    "kind": "settle",
    "lane": "rescreen",
-   "next": "build",
-   "status": "build",
+   "next": null,
+   "status": "built",
    "run_dir": "runs/20261015-191351-260620-erdos873",
    "settle_chance": 0.015,
    "arm": "screened out",
@@ -142,13 +157,13 @@
     "why": "A divisor-cluster bound exp(C(θ)(ω(n)+1)), uniform in the primes, looks obtainable from the quantitative Subspace/S-unit theorems (Evertse–Schlickewei) but I know no published statement; it would force any counterexample to have ω(L)→∞, a solid structural partial result but not the uniform DCC core.",
     "summary": "=== GOAL No line I can defend is likely to settle the problem. I am therefore choosing a major-progress line, and I say so here. Why no settling line. The formal statement is equivalent to the Divisor Cluster Conjecture (DCC), uniformly in n: - Packing gives D"
    },
-   "build_passes": 3,
+   "build_passes": 4,
    "build_seen": {
-    "rungs": 9,
-    "lemmas": 17,
-    "validated": 7
+    "rungs": 19,
+    "lemmas": 34,
+    "validated": 11
    },
-   "validated_seen": 7,
+   "validated_seen": 11,
    "claims_todo": [],
    "claims_done": {
     "program-R5/C4": {
@@ -704,21 +719,31 @@
     {
      "tier": "queue",
      "outcome": "persist (operator)"
+    },
+    {
+     "tier": "queue",
+     "outcome": "paused for the sprint (operator)"
     }
    ],
    "prepped": true,
    "running": null,
    "run_dir": "runs/20261011-134723-544082-erdos103",
    "errors": 0,
-   "status": "persist",
+   "status": "paused",
    "spend": 17.817843600000007,
    "limit_waits": 0,
    "settle_chance": 0.25,
    "arm": "control",
-   "next": "program",
+   "next": null,
    "track": "control",
    "intent": null,
-   "claims_todo": []
+   "claims_todo": [],
+   "paused": {
+    "at": "2026-10-19T16:18:01Z",
+    "why": "sprint toward a full solve (operator)",
+    "next": "program",
+    "status": "persist"
+   }
   },
   "197": {
    "history": [
@@ -2984,6 +3009,10 @@
     {
      "tier": "queue",
      "outcome": "persist (operator)"
+    },
+    {
+     "tier": "queue",
+     "outcome": "paused for the sprint (operator)"
     }
    ],
    "prepped": true,
@@ -2993,11 +3022,17 @@
    "limit_waits": 0,
    "settle_chance": 0.325,
    "arm": "pass",
-   "next": "program",
-   "status": "persist",
+   "next": null,
+   "status": "paused",
    "track": "statement",
    "intent": "known-result",
-   "claims_todo": []
+   "claims_todo": [],
+   "paused": {
+    "at": "2026-10-19T16:18:01Z",
+    "why": "sprint toward a full solve (operator)",
+    "next": "program",
+    "status": "persist"
+   }
   },
   "158": {
    "history": [

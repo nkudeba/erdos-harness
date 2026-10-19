@@ -1,52 +1,52 @@
 {
-  "sha": "197f7f8dcc457f556754f826389d2ec7a0d85b92",
-  "node_id": "C_kwDOOogmB9oAKDE5N2Y3ZjhkY2M0NTdmNTU2NzU0ZjgyNjM4OWQyZWM3YTBkODViOTI",
+  "sha": "5922bfcbaf0b3e479cbf989d81510c30aa647742",
+  "node_id": "C_kwDOOogmB9oAKDU5MjJiZmNiYWYwYjNlNDc5Y2JmOTg5ZDgxNTEwYzMwYWE2NDc3NDI",
   "commit": {
     "author": {
-      "name": "Bolton Bailey",
-      "email": "bolton.bailey@gmail.com",
-      "date": "2026-10-18T07:16:08Z"
+      "name": "Philippe Emile Christian KEVORKIAN",
+      "email": "259356740+KevorkianPhilippe@users.noreply.github.com",
+      "date": "2026-10-19T14:57:31Z"
     },
     "committer": {
       "name": "GitHub",
       "email": "noreply@github.com",
-      "date": "2026-10-18T07:16:08Z"
+      "date": "2026-10-19T14:57:31Z"
     },
-    "message": "refactor: extract optimization constants for tagging (#7431)\n\nAnother follow on to #4950\n\nThis PR refactors some files so that the constant from the Optimization\nConstants tracking page has its own definition, so we can tag it and\nbetter link the two definitions.\n\nI used Claude Code to assist in identifying candidates for which this\ncould be done easily.",
+    "message": "fix(Wikipedia/SurjunctiveGroup): `gottschalk_surjunctivity_conjecture` is false (#7440)\n\nGottschalk's surjunctivity conjecture is false: two preprints of the\nOpenAI math release (github.com/openai/math, commit adc7f124) construct\na group that is not surjunctive. This restates the declaration as\nsuggested in #6919.\n\n**What changed** (one file,\n`FormalConjectures/Wikipedia/SurjunctiveGroup.lean`)\n\n- `gottschalk_surjunctivity_conjecture` is restated as `¬ ∀ (G : Type)\n[Group G], IsSurjunctive G` and goes from `research open` to `research\nsolved`.\n- New `counter_gottschalk_surjunctivity : ∃ (G : Type) (_ : Group G), ¬\nIsSurjunctive G`, also `research solved`.\n- Both carry `formal_proof using lean4`, pointing to\n[`OAI.OddKaplansky.main_theorem`](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Algebra/OddKaplansky/Main.lean#L81).\n- The module docstring cites the two preprints, with the URLs given in\nthe issue.\n\n**Reviewer notes**\n\n- The link differs from the repository statement by a transport that is\nnot in the linked proof. `main_theorem` proves that the linear automaton\n`cellular b` over a finite field is injective and not surjective, as a\nplain map. `IsSurjunctive` also asks for continuity and\nshift-equivariance. That step is the short bridge in [my comment on\n#6919](https://github.com/google-deepmind/formal-conjectures/issues/6919#issuecomment-6056115862);\nit is not in this repository. The `OddKaplansky` directory of the\nrelease has no occurrence of `Continuous` or `TopologicalSpace`; it\nproves a finite local rule (`Cellular.IsCellular`), outside `MainClaim`.\nThe docstring of `counter_gottschalk_surjunctivity` states the gap. I\nwill drop the link if you prefer none here, as for the Sidorenko graphon\nform in #6898.\n- The linked theorem gives a finitely generated group. The finitely\npresented group is in the characteristic-two preprint. The release's\nLean statements for that preprint (`KaplanskyDirectFiniteness` and\n`KaplanskyFinitelyPresented` in `lean/ComparatorChallenges`) have no\nautomaton clause. I did not add a finitely generated or finitely\npresented variant.\n- The docstrings follow the abstract, Theorem 1.1 and Corollary 7.3 of\nthe characteristic-two preprint, and the abstract, Theorem 1.1 and\nSection 8 of the odd-characteristic preprint. The proofs in the\npreprints were not read.\n- On 2026-10-10 the Wikipedia article cited by the file (last revised\n2023-11-13) still described the question as open.\n\n**Checks**\n\n- `lake --wfail build FormalConjectures.Wikipedia.SurjunctiveGroup`\npasses with Lean 4.33.1, on this branch rebased onto `main` at e754a78\n(2026-10-18). No other module imports this file.\n- The link resolves to `theorem main_theorem : MainClaim` at the pinned\ncommit (source inspection).\n- The linked statement implies both repository statements. A scratch\nfile, not part of this PR, compiles in Lean 4.33.1 against the modified\nmodule: it copies `MainClaim` verbatim from\n`lean/ComparatorChallenges/OddKaplansky.lean`, takes it as a hypothesis,\nand derives both statements. `#print axioms` reports `propext`,\n`Classical.choice`, `Quot.sound`. I can post the file.\n- Reported in #6919 and not rerun for this PR:\n`OAI.Algebra.OddKaplansky.Main` and its import closure build at\n`openai/math@adc7f124` with Lean 4.34.1, and the bridge compiles on top\nof them with the same three axioms.\n\nNot done: a full `lake build` of the repository, `lake test`, Comparator\nor any independent kernel replay of the release proof.\n\nCloses #6919.\n\nAI assistance: Claude Code (Claude Opus 5.5) drafted the restatement,\nthe docstrings and this description, and ran the checks above on my\nmachine; I reviewed and validated them.",
     "tree": {
-      "sha": "13beb12de0ca69f8169c0297e913019f86cc2660",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/13beb12de0ca69f8169c0297e913019f86cc2660"
+      "sha": "c2501164c72bd74f6124349ae28dc45a17eff38f",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/c2501164c72bd74f6124349ae28dc45a17eff38f"
     },
-    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/197f7f8dcc457f556754f826389d2ec7a0d85b92",
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/5922bfcbaf0b3e479cbf989d81510c30aa647742",
     "comment_count": 0,
     "verification": {
       "verified": true,
       "reason": "valid",
-      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq1HJICRC1aQ7uu5UhlAAACXgQAGGAO9UiZqWM0BYRwoviLAxN\nHIk5K+uh6ZcUDfj1MjccCazYyzeVHWUchBTWz8lgV4LPgy6RDNk3wgxknOWxi0v7\npJZY1ESYRE06diKuKavsX/5JYRsyDf1Q99r9Wen96iYY7ZRLvMSBSxcpQ5yttyco\nSIbEvNzuRcB0eo8DxRf4WMXPxNq3jj5wLmvS13t2zP0YInuL8ld42sba0XBS3sVa\nGMS30Yfud71F8jxT6cYENrqOpD/Lu5S8KG0vRpz7U2vzHB0gkO8T/aRrI6UlLjHD\nAZoHEp5q3G7Jat6S64PZoX6Bm5/HRnch0zxna7DCHFq6gsmq4ESUa9bjVR17WtvO\nQVh+/Tj/Y/vOmOoxnj7syxV+PoDC9klV6TFW6Y0ONW1gdjVch1F70wfZjhdKZ7z3\nFDK7tBGa+AhvNi5Gu2kVg+NNX++T32oqO5QLRESUI8D8/wmM0ThTVhWzEZaVOtDg\nhMBzb5hzT4cBLG9TbJqUJbCcOfbg/UdTyZDcvq/xxOkEnv5Cul00xSp+ElGB7Cp3\nmJaGAM6TojDBEjDIOPi255hZmKG5PzE41b1jNvuedsQFPAjRnS18tCcPt6FK0vam\nWlFnnVXDZXp2hfx0DuBxWFRdaFqiurwBKiMPUIh0FfzmrdcZ+H1fXNhayBVJfTY1\nxmzmgahowvwffeYFiHQG\n=syQ/\n-----END PGP SIGNATURE-----\n",
-      "payload": "tree 13beb12de0ca69f8169c0297e913019f86cc2660\nparent e754a78c74a3f2bbc38e4f2063b5f6eed51bde39\nauthor Bolton Bailey <bolton.bailey@gmail.com> 1792307768 +0000\ncommitter GitHub <noreply@github.com> 1792307768 +0000\n\nrefactor: extract optimization constants for tagging (#7431)\n\nAnother follow on to #4950\n\nThis PR refactors some files so that the constant from the Optimization\nConstants tracking page has its own definition, so we can tag it and\nbetter link the two definitions.\n\nI used Claude Code to assist in identifying candidates for which this\ncould be done easily.",
-      "verified_at": "2026-10-18T07:16:25Z"
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq1jAlCRC1aQ7uu5UhlAAAzKQQABMi7UdLtFmviXPb6BkG6OIT\npSd5nlOrWfwFfXAX8vpZSjqfeXKpEGUAYlZlRhlCYsMoJO0OSRs4gbhmfaeqDQRm\nbce4S51ZzVhzRKPKGh5iZzrq2GTe4yLvl1Xk4BaXOoChVtfGJbyukMdppz8JCcFx\nykF3kfe7t/90ECNFdxgqEXCvvNV70ZAC9uLXKlilTe9x4MEvxgwR7iNv/BxqTJqK\ns9PPezECp26acd1m6JXUrjNa+RBDdgcuOVXxNE8Ah3rdYfr0/Ymh329fm29NQjaf\nzbzOiAUmSDr1lRb61hCGQypp1/0wfrnTwGbbSsConTdjsoJoqUveToXBaCUS2OiQ\nh94MQvEgSbTlxnuLPuhyJGWwuE7ieFiSnBT2OXhY2cJ2PPyQuTPCdGjLHq1dCykV\nV26BsHtSIlxnW6nAKA+//Gpm5/YmXCOcOoC8u28JpzgMayMZYhYyCiZKMuqHh1Ho\nVcHmPORh6V6MbYA6JQGSDRHqvjQEtb1zkoOQ9jQkK6WfTfMonZ1ZU7kSIlIBdT4y\nG8GHeQzE8sFUCyQXYGuQCzaAjc8wnsVYyCSzQqHFyRxhCr/6R4BsPSFH5z9vK2T2\n8wXLiVpRvGeBw0eOaAlESGfOT91NuZLVbWg0D3XsQPok232DLOvg8JxLsvyDbKsV\nixboI3qQlEDBuGX0itII\n=O95R\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree c2501164c72bd74f6124349ae28dc45a17eff38f\nparent 7869b3e0f90ed85ac90ad7f956e0e927a481e0ff\nauthor Philippe Emile Christian KEVORKIAN <259356740+KevorkianPhilippe@users.noreply.github.com> 1792421851 +0000\ncommitter GitHub <noreply@github.com> 1792421851 +0000\n\nfix(Wikipedia/SurjunctiveGroup): `gottschalk_surjunctivity_conjecture` is false (#7440)\n\nGottschalk's surjunctivity conjecture is false: two preprints of the\nOpenAI math release (github.com/openai/math, commit adc7f124) construct\na group that is not surjunctive. This restates the declaration as\nsuggested in #6919.\n\n**What changed** (one file,\n`FormalConjectures/Wikipedia/SurjunctiveGroup.lean`)\n\n- `gottschalk_surjunctivity_conjecture` is restated as `¬ ∀ (G : Type)\n[Group G], IsSurjunctive G` and goes from `research open` to `research\nsolved`.\n- New `counter_gottschalk_surjunctivity : ∃ (G : Type) (_ : Group G), ¬\nIsSurjunctive G`, also `research solved`.\n- Both carry `formal_proof using lean4`, pointing to\n[`OAI.OddKaplansky.main_theorem`](https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Algebra/OddKaplansky/Main.lean#L81).\n- The module docstring cites the two preprints, with the URLs given in\nthe issue.\n\n**Reviewer notes**\n\n- The link differs from the repository statement by a transport that is\nnot in the linked proof. `main_theorem` proves that the linear automaton\n`cellular b` over a finite field is injective and not surjective, as a\nplain map. `IsSurjunctive` also asks for continuity and\nshift-equivariance. That step is the short bridge in [my comment on\n#6919](https://github.com/google-deepmind/formal-conjectures/issues/6919#issuecomment-6056115862);\nit is not in this repository. The `OddKaplansky` directory of the\nrelease has no occurrence of `Continuous` or `TopologicalSpace`; it\nproves a finite local rule (`Cellular.IsCellular`), outside `MainClaim`.\nThe docstring of `counter_gottschalk_surjunctivity` states the gap. I\nwill drop the link if you prefer none here, as for the Sidorenko graphon\nform in #6898.\n- The linked theorem gives a finitely generated group. The finitely\npresented group is in the characteristic-two preprint. The release's\nLean statements for that preprint (`KaplanskyDirectFiniteness` and\n`KaplanskyFinitelyPresented` in `lean/ComparatorChallenges`) have no\nautomaton clause. I did not add a finitely generated or finitely\npresented variant.\n- The docstrings follow the abstract, Theorem 1.1 and Corollary 7.3 of\nthe characteristic-two preprint, and the abstract, Theorem 1.1 and\nSection 8 of the odd-characteristic preprint. The proofs in the\npreprints were not read.\n- On 2026-10-10 the Wikipedia article cited by the file (last revised\n2023-11-13) still described the question as open.\n\n**Checks**\n\n- `lake --wfail build FormalConjectures.Wikipedia.SurjunctiveGroup`\npasses with Lean 4.33.1, on this branch rebased onto `main` at e754a78\n(2026-10-18). No other module imports this file.\n- The link resolves to `theorem main_theorem : MainClaim` at the pinned\ncommit (source inspection).\n- The linked statement implies both repository statements. A scratch\nfile, not part of this PR, compiles in Lean 4.33.1 against the modified\nmodule: it copies `MainClaim` verbatim from\n`lean/ComparatorChallenges/OddKaplansky.lean`, takes it as a hypothesis,\nand derives both statements. `#print axioms` reports `propext`,\n`Classical.choice`, `Quot.sound`. I can post the file.\n- Reported in #6919 and not rerun for this PR:\n`OAI.Algebra.OddKaplansky.Main` and its import closure build at\n`openai/math@adc7f124` with Lean 4.34.1, and the bridge compiles on top\nof them with the same three axioms.\n\nNot done: a full `lake build` of the repository, `lake test`, Comparator\nor any independent kernel replay of the release proof.\n\nCloses #6919.\n\nAI assistance: Claude Code (Claude Opus 5.5) drafted the restatement,\nthe docstrings and this description, and ran the checks above on my\nmachine; I reviewed and validated them.",
+      "verified_at": "2026-10-19T14:58:45Z"
     }
   },
-  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/197f7f8dcc457f556754f826389d2ec7a0d85b92",
-  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/197f7f8dcc457f556754f826389d2ec7a0d85b92",
-  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/197f7f8dcc457f556754f826389d2ec7a0d85b92/comments",
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/5922bfcbaf0b3e479cbf989d81510c30aa647742",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/5922bfcbaf0b3e479cbf989d81510c30aa647742",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/5922bfcbaf0b3e479cbf989d81510c30aa647742/comments",
   "author": {
-    "login": "BoltonBailey",
-    "id": 8030599,
-    "node_id": "MDQ6VXNlcjgwMzA1OTk=",
-    "avatar_url": "https://avatars.githubusercontent.com/u/8030599?v=4",
+    "login": "KevorkianPhilippe",
+    "id": 259356740,
+    "node_id": "U_kgDOD3V4RA",
+    "avatar_url": "https://avatars.githubusercontent.com/u/259356740?v=4",
     "gravatar_id": "",
-    "url": "https://api.github.com/users/BoltonBailey",
-    "html_url": "https://github.com/BoltonBailey",
-    "followers_url": "https://api.github.com/users/BoltonBailey/followers",
-    "following_url": "https://api.github.com/users/BoltonBailey/following{/other_user}",
-    "gists_url": "https://api.github.com/users/BoltonBailey/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/BoltonBailey/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/BoltonBailey/subscriptions",
-    "organizations_url": "https://api.github.com/users/BoltonBailey/orgs",
-    "repos_url": "https://api.github.com/users/BoltonBailey/repos",
-    "events_url": "https://api.github.com/users/BoltonBailey/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/BoltonBailey/received_events",
+    "url": "https://api.github.com/users/KevorkianPhilippe",
+    "html_url": "https://github.com/KevorkianPhilippe",
+    "followers_url": "https://api.github.com/users/KevorkianPhilippe/followers",
+    "following_url": "https://api.github.com/users/KevorkianPhilippe/following{/other_user}",
+    "gists_url": "https://api.github.com/users/KevorkianPhilippe/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/KevorkianPhilippe/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/KevorkianPhilippe/subscriptions",
+    "organizations_url": "https://api.github.com/users/KevorkianPhilippe/orgs",
+    "repos_url": "https://api.github.com/users/KevorkianPhilippe/repos",
+    "events_url": "https://api.github.com/users/KevorkianPhilippe/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/KevorkianPhilippe/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false
@@ -74,64 +74,28 @@
   },
   "parents": [
     {
-      "sha": "e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39",
-      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/e754a78c74a3f2bbc38e4f2063b5f6eed51bde39"
+      "sha": "7869b3e0f90ed85ac90ad7f956e0e927a481e0ff",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/7869b3e0f90ed85ac90ad7f956e0e927a481e0ff",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/7869b3e0f90ed85ac90ad7f956e0e927a481e0ff"
     }
   ],
   "stats": {
-    "total": 84,
-    "additions": 56,
-    "deletions": 28
+    "total": 41,
+    "additions": 36,
+    "deletions": 5
   },
   "files": [
     {
-      "sha": "2b9caed3361ab1997dc7349c275f0483408a0ef9",
-      "filename": "FormalConjectures/ErdosProblems/513.lean",
+      "sha": "b981d1dc123e1b5c2fd9b902cb7a3cbfc5806087",
+      "filename": "FormalConjectures/Wikipedia/SurjunctiveGroup.lean",
       "status": "modified",
-      "additions": 15,
-      "deletions": 13,
-      "changes": 28,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FErdosProblems%2F513.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FErdosProblems%2F513.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F513.lean?ref=197f7f8dcc457f556754f826389d2ec7a0d85b92",
-      "patch": "@@ -24,6 +24,7 @@ public import FormalConjecturesUtil\n  - [erdosproblems.com/513](https://www.erdosproblems.com/513)\n  - [ClHa64] Clunie, J. and Hayman, W. K., The maximum term of a power series. J. Analyse Math.\n   (1964), 143-186.\n+ - [Tao's optimization constant 51a](https://teorth.github.io/optimizationproblems/constants/51a.html)\n -/\n \n @[expose] public section\n@@ -36,32 +37,33 @@ namespace Erdos513\n noncomputable def ratio (r : ℝ) (f : ℂ → ℂ) : ℝ :=\n   (⨆ n, ‖iteratedDeriv n f 0 * (n ! : ℝ)⁻¹ * r ^ n‖) / (⨆ z : {z : ℂ // ‖z‖ = r}, ‖f z‖)\n \n+/-- The **Erdős maximum term constant** $B$: the supremum, over all transcendental entire\n+functions $f$, of $\\liminf_{r \\to \\infty} \\mu(r, f) / M(r, f)$. Here $\\mu(r, f)$ is the maximum\n+term of the power series of $f$ on $|z| = r$, and $M(r, f) = \\max_{|z| = r} |f(z)|$. -/\n+@[optimization_constant \"51a\"]\n+noncomputable def maxTermConstant : ℝ :=\n+  ⨆ f : {f : ℂ → ℂ // Transcendental ℂ[X] f ∧ Differentiable ℂ f},\n+    liminf (fun r : ℝ => ratio r f) atTop\n+\n def erdos_513.answer : ℝ := sorry\n \n /-- Let `f` be a transcendental entire function. What is the greatest possible value of\n `liminf (fun r : ℝ => ratio r f) atTop`? -/\n @[category research open, question value, AMS 30]\n-theorem erdos_513 : erdos_513.answer =\n-    ⨆ f : {f : ℂ → ℂ // Transcendental ℂ[X] f ∧ Differentiable ℂ f},\n-    (liminf (fun r : ℝ => ratio r f) atTop) := by\n+theorem erdos_513 : maxTermConstant = erdos_513.answer := by\n   sorry\n \n-/-- For all transcendental entire function `f`, `liminf (fun r : ℝ => ratio r f) atTop ≤ 2 / π - c`\n-for some `c > 0`. This is proved in [ClHa64]. -/\n+/-- There is `c > 0` such that `maxTermConstant ≤ 2 / π - c`. This is proved in [ClHa64]. -/\n @[category research solved, AMS 30]\n-theorem erdos_513.variants.upper_bound : ∃ c > 0,\n-    ⨆ f : {f : ℂ → ℂ // Transcendental ℂ[X] f ∧ Differentiable ℂ f},\n-    (liminf (fun r : ℝ => ratio r f) atTop) ≤ 2 / π - c := by\n+theorem erdos_513.variants.upper_bound : ∃ c > 0, maxTermConstant ≤ 2 / π - c := by\n   sorry\n \n-/-- The supremum $B$ over all transcendental entire $f$ satisfies $B > 1/2$: there is such an $f$\n-with `liminf (fun r : ℝ => ratio r f) atTop > 1 / 2`. This was observed by Kövári (unpublished), and\n+/-- `maxTermConstant > 1 / 2`: there is a transcendental entire `f` with\n+`liminf (fun r : ℝ => ratio r f) atTop > 1 / 2`. This was observed by Kövári (unpublished), and\n [ClHa64] proves the stronger bound `> 4 / 7`. It does not hold for every `f`: for `f = exp` the\n `liminf` is `0`. -/\n @[category research solved, AMS 30]\n-theorem erdos_513.variants.lower_bound :\n-    ⨆ f : {f : ℂ → ℂ // Transcendental ℂ[X] f ∧ Differentiable ℂ f},\n-    (liminf (fun r : ℝ => ratio r f) atTop) > 1 / 2 := by\n+theorem erdos_513.variants.lower_bound : maxTermConstant > 1 / 2 := by\n   sorry\n \n end Erdos513"
-    },
-    {
-      "sha": "5e43976e361ecdb33e2ce17ede93972493d27307",
-      "filename": "FormalConjectures/Wikipedia/Hadamard.lean",
-      "status": "modified",
-      "additions": 13,
-      "deletions": 3,
-      "changes": 16,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FWikipedia%2FHadamard.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FWikipedia%2FHadamard.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FWikipedia%2FHadamard.lean?ref=197f7f8dcc457f556754f826389d2ec7a0d85b92",
-      "patch": "@@ -22,6 +22,7 @@ public import FormalConjecturesUtil\n \n *References:*\n  - [Wikipedia](https://en.wikipedia.org/wiki/Hadamard_matrix#Hadamard_conjecture)\n+ - [Tao's optimization constant 23a](https://teorth.github.io/optimizationproblems/constants/23a.html)\n  - [Résolution d'une question relative aux déterminants](https://gallica.bnf.fr/ark:/12148/bpt6k486252g/f400.image.r) by *Jacques Hadamard*,  Bull. des sciences math., p.245, 1893\n -/\n \n@@ -90,6 +91,14 @@ There exists a Hadamard matrix for all $n = 4k$.\n theorem HadamardConjecture (k : ℕ) : ∃ M, IsHadamard (n := 4 * k) M := by\n   sorry\n \n+/--\n+The **smallest unsolved order** of the Hadamard conjecture: the smallest $n = 4k$ such that there\n+is no Hadamard matrix of order $n$, or $\\infty$ if there is none.\n+-/\n+@[optimization_constant \"23a\"]\n+noncomputable def hadamardConstant : ℕ∞ :=\n+  ⨅ (k : ℕ) (_ : ¬ ∃ M, IsHadamard (n := 4 * k) M), (4 * k : ℕ∞)\n+\n @[category test, AMS 15]\n theorem exists_hadamard_zero : ∃ M, IsHadamard (n := 0) M := by\n   use 0\n@@ -127,17 +136,18 @@ theorem isHadamard_H12 : IsHadamard H12 := by\n \n /--\n For all $k ≤ 166$, it is known there that there is a Hadamard matrix of size $4 * k$.\n+So `hadamardConstant` is at least $668$.\n -/\n @[category research solved, AMS 15]\n-theorem HadamardConjecture.variants.first_cases (k : ℕ) (h : k ≤ 166) :\n-    ∃ M, IsHadamard (n := 4 * k) M := by\n+theorem HadamardConjecture.variants.first_cases : 668 ≤ hadamardConstant := by\n   sorry\n \n /--\n The smallest order for which no Hadamard matrix is presently known is $668 = 4 * 167$.\n+Is `hadamardConstant` larger than $668$?\n -/\n @[category research open, AMS 15]\n-theorem HadamardConjecture.variants.«167» : ∃ M, IsHadamard (n := 4 * 167) M := by\n+theorem HadamardConjecture.variants.«167» : 668 < hadamardConstant := by\n   sorry\n \n end Hadamard"
-    },
-    {
-      "sha": "2714fcf1a40a8f740bd5c660b7d1db9b806e32a9",
-      "filename": "FormalConjectures/Wikipedia/LehmerMahlerMeasureProblem.lean",
-      "status": "modified",
-      "additions": 15,
-      "deletions": 6,
-      "changes": 21,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FWikipedia%2FLehmerMahlerMeasureProblem.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FWikipedia%2FLehmerMahlerMeasureProblem.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FWikipedia%2FLehmerMahlerMeasureProblem.lean?ref=197f7f8dcc457f556754f826389d2ec7a0d85b92",
-      "patch": "@@ -20,7 +20,9 @@ public import FormalConjecturesUtil\n /-!\n # Lehmer's Mahler measure problem\n \n-*Reference:* [Wikipedia](https://en.wikipedia.org/wiki/Lehmer%27s_conjecture)\n+*References:*\n+- [Wikipedia](https://en.wikipedia.org/wiki/Lehmer%27s_conjecture)\n+- [Tao's optimization constant 40a](https://teorth.github.io/optimizationproblems/constants/40a.html)\n -/\n \n @[expose] public section\n@@ -39,14 +41,21 @@ noncomputable def mahlerMeasure (f : ℂ[X]) : ℝ :=\n noncomputable def mahlerMeasureZ (f : ℤ[X]) : ℝ :=\n   mahlerMeasure (f.map (algebraMap ℤ ℂ))\n \n+/--\n+**Lehmer's Mahler measure constant**: the infimum of $M(f)$ over all $f \\in \\mathbb{Z}[x]$ with\n+$M(f) > 1$.\n+-/\n+@[optimization_constant \"40a\"]\n+noncomputable def lehmerConstant : ℝ :=\n+  sInf {m | ∃ f : ℤ[X], 1 < mahlerMeasureZ f ∧ mahlerMeasureZ f = m}\n+\n /--\n Let `M(f)` denote the Mahler measure of `f`.\n There exists a constant `μ>1` such that for any `f(x)∈ℤ[x], M(f)>1 → M(f)≥μ`.\n+That is, `lehmerConstant > 1`.\n -/\n @[category research open, AMS 11]\n-theorem lehmer_mahler_measure_problem :\n-    ∃ μ : ℝ, ∀ f : ℤ[X],\n-      μ > 1 ∧ (mahlerMeasureZ f > 1 → mahlerMeasureZ f ≥ μ) := by\n+theorem lehmer_mahler_measure_problem : 1 < lehmerConstant := by\n   sorry\n \n noncomputable def lehmerPolynomial : ℤ[X] := X^10 + X^9 - X^7 - X^6 - X^5 - X^4 - X^3 + X + 1\n@@ -55,8 +64,8 @@ noncomputable def lehmerPolynomial : ℤ[X] := X^10 + X^9 - X^7 - X^6 - X^5 - X^\n `μ=M(X^10 + X^9 - X^7 - X^6 - X^5 - X^4 - X^3 + X + 1)` is the best value for `lehmer_mahler_measure_problem`.\n -/\n @[category research open, AMS 11]\n-theorem lehmer_mahler_measure_problem.variants.best (f : ℤ[X])\n-    (hf : mahlerMeasureZ f > 1) : mahlerMeasureZ f ≥ mahlerMeasureZ lehmerPolynomial := by\n+theorem lehmer_mahler_measure_problem.variants.best :\n+    mahlerMeasureZ lehmerPolynomial ≤ lehmerConstant := by\n   sorry\n \n /--"
-    },
-    {
-      "sha": "dde1095202a8b98d82984e3f695a3aa4e9cde1db",
-      "filename": "FormalConjectures/Wikipedia/MoserWorm.lean",
-      "status": "modified",
-      "additions": 13,
-      "deletions": 6,
-      "changes": 19,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FWikipedia%2FMoserWorm.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/197f7f8dcc457f556754f826389d2ec7a0d85b92/FormalConjectures%2FWikipedia%2FMoserWorm.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FWikipedia%2FMoserWorm.lean?ref=197f7f8dcc457f556754f826389d2ec7a0d85b92",
-      "patch": "@@ -20,7 +20,9 @@ public import FormalConjecturesUtil\n /-!\n # Moser's Worm\n \n-*Reference:* [Wikipedia](https://en.wikipedia.org/wiki/Moser%27s_worm_problem)\n+*References:*\n+- [Wikipedia](https://en.wikipedia.org/wiki/Moser%27s_worm_problem)\n+- [Tao's optimization constant 13a](https://teorth.github.io/optimizationproblems/constants/13a.html)\n -/\n \n @[expose] public section\n@@ -91,6 +93,12 @@ theorem mosers_worm_problem_upper_bound :\n     ∃ X ∈ WormCovers, volume X = 0.260437 := by\n   sorry\n \n+/-- **Moser's convex worm cover constant**: the infimal area of a convex set that covers every\n+worm by a translation and a rotation. -/\n+@[optimization_constant \"13a\"]\n+noncomputable def convexWormCoverConstant : ENNReal :=\n+  sInf {v | ∃ X ∈ WormCovers, Convex ℝ X ∧ volume X = v}\n+\n def convex_mosers_worm_problem.answer : ENNReal := sorry\n \n /--\n@@ -100,7 +108,7 @@ of a *convex* shape that can cover every unit-length curve?\n -/\n @[category research open, question value, AMS 52]\n theorem convex_mosers_worm_problem :\n-    IsGLB {v | ∃ X ∈ WormCovers, Convex ℝ X ∧ volume X = v} convex_mosers_worm_problem.answer := by\n+    convexWormCoverConstant = convex_mosers_worm_problem.answer := by\n   sorry\n \n /--\n@@ -109,7 +117,7 @@ This follows from the Blaschke selection theorem.\n -/\n @[category research solved, AMS 52]\n theorem convex_mosers_worm_problem_bound_attained :\n-    ∃ bound, IsLeast {v | ∃ X ∈ WormCovers, Convex ℝ X ∧ volume X = v} bound := by\n+    ∃ X ∈ WormCovers, Convex ℝ X ∧ volume X = convexWormCoverConstant := by\n   sorry\n \n /--\n@@ -121,8 +129,7 @@ Acta Mathematica Sinica, 49 (4): 835–846, MR 2264090.\n -/\n @[category research solved, AMS 52]\n theorem convex_mosers_worm_problem_upper_bound :\n-    ∃ X : Set ℝ², MeasurableSet X ∧ Convex ℝ X ∧ volume X = 0.270911861 ∧\n-      ∀ w ∈ Worms, ∃ (e : ℝ² ≃ₗᵢ[ℝ] ℝ²) (v : ℝ²), e.toLinearEquiv.det = 1 ∧ w ⊆ (fun x => e x + v) '' X := by\n+    ∃ X ∈ WormCovers, Convex ℝ X ∧ volume X = 0.270911861 := by\n   sorry\n \n /--\n@@ -136,7 +143,7 @@ International Journal of Computational Geometry & Applications,\n -/\n @[category research solved, AMS 52]\n theorem convex_mosers_worm_problem_lower_bound :\n-    0.232239 ∈ lowerBounds {v | ∃ X ∈ WormCovers, Convex ℝ X ∧ volume X = v} := by\n+    0.232239 ≤ convexWormCoverConstant := by\n   sorry\n \n end MoserWorm"
+      "additions": 36,
+      "deletions": 5,
+      "changes": 41,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/5922bfcbaf0b3e479cbf989d81510c30aa647742/FormalConjectures%2FWikipedia%2FSurjunctiveGroup.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/5922bfcbaf0b3e479cbf989d81510c30aa647742/FormalConjectures%2FWikipedia%2FSurjunctiveGroup.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FWikipedia%2FSurjunctiveGroup.lean?ref=5922bfcbaf0b3e479cbf989d81510c30aa647742",
+      "patch": "@@ -27,11 +27,18 @@ Here equivariance is with respect to the left shift action of $G$ on $A^G$,\n defined by $(g \\cdot x)(h) = x(g^{-1} h)$, and continuity is with respect to\n the product topology on $A^G$ (where $A$ carries the discrete topology).\n \n-Gottschalk's conjecture (1973) states that every group is surjunctive.\n+Gottschalk's conjecture (1973) states that every group is surjunctive. It is false: an\n+internal OpenAI model gave counterexamples in September 2026 [OAI26a], [OAI26b].\n \n *References:*\n - [Wikipedia](https://en.wikipedia.org/wiki/Surjunctive_group)\n - Gottschalk, W. H. (1973), \"Some general dynamical notions\"\n+- [OAI26a] OpenAI, *A Counterexample to Kaplansky's Direct-Finiteness Conjecture in\n+  Characteristic Two*. OpenAI Math Release preprint (2026).\n+  https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/A-Counterexample-to-Kaplanskys-Direct-Finiteness-Conjecture-in-Characteristic-Two-September-23-2026/paper.pdf\n+- [OAI26b] OpenAI, *A Counterexample to Kaplansky's Direct-Finiteness Conjecture in Odd\n+  Characteristic*. OpenAI Math Release preprint (2026).\n+  https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/A-Counterexample-to-Kaplanskys-Direct-Finiteness-Conjecture-in-Odd-Characteristic-September-26-2026/paper.pdf\n -/\n \n @[expose] public section\n@@ -80,10 +87,34 @@ def IsSurjunctive : Prop :=\n \n /-- **Gottschalk's surjunctivity conjecture** (1973): every group is surjunctive.\n That is, for every group `G` and every finite alphabet `A`, every injective cellular\n-automaton on `A^G` is surjective. -/\n-@[category research open, AMS 20 37]\n-theorem gottschalk_surjunctivity_conjecture (G : Type) [Group G] :\n-    IsSurjunctive G := by\n+automaton on `A^G` is surjective.\n+\n+This is false. It was disproved by an internal OpenAI model in September 2026 [OAI26a],\n+[OAI26b]; see `counter_gottschalk_surjunctivity` for the counterexample and for what the\n+linked Lean proof covers. -/\n+@[category research solved, AMS 20 37, formal_proof using lean4 at\n+  \"https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Algebra/OddKaplansky/Main.lean#L81\"]\n+theorem gottschalk_surjunctivity_conjecture :\n+    ¬ ∀ (G : Type) [Group G], IsSurjunctive G := by\n+  sorry\n+\n+/-- **Gottschalk's surjunctivity conjecture** is false: there is a group that is not\n+surjunctive.\n+\n+There are a finite field $K$, a group $G$ and $a, b \\in K[G]$ with $ab = 1$ and\n+$ba \\neq 1$. The linear cellular automaton $x \\mapsto (g \\mapsto \\sum_u b_u x(gu))$ on\n+$K^G$ is then injective but not surjective. In [OAI26a], $K$ has characteristic two and $G$\n+is finitely presented. In [OAI26b], $K$ has odd characteristic and $G$ is finitely\n+generated.\n+\n+This was proved by an internal OpenAI model in September 2026. The linked Lean proof is for\n+[OAI26b]. It shows that the map above is injective and not surjective. That the map is\n+continuous and shift-equivariant, as `IsSurjunctive` requires, is not part of the linked\n+proof. -/\n+@[category research solved, AMS 20 37, formal_proof using lean4 at\n+  \"https://github.com/openai/math/blob/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Algebra/OddKaplansky/Main.lean#L81\"]\n+theorem counter_gottschalk_surjunctivity :\n+    ∃ (G : Type) (_ : Group G), ¬ IsSurjunctive G := by\n   sorry\n \n /-- Every finite group is surjunctive. This is a classical result: an injective"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
- "daily_cap_usd": 150.0,
+ "daily_cap_usd": 300.0,
  "fc_sha": "9d259649abe0b02d7a25f7589b872db679b35e21",
  "priority": [
   655,
@@ -15,5 +15,24 @@
   295
  ],
  "priority_source": "prescreen sweep, 156 problems, mean >= 0.1 (REPORT 3.10; step3/prescreen_priority.py)",
- "fc_head_sha": "197f7f8dcc457f556754f826389d2ec7a0d85b92"
+ "fc_head_sha": "5922bfcbaf0b3e479cbf989d81510c30aa647742",
+ "sprint": {
+  "since": "2026-10-19T16:18:01Z",
+  "until": "2026-10-20T13:00:00Z",
+  "goal": "a full solve before the weekly usage reset",
+  "before": {
+   "daily_cap_usd": 150.0,
+   "mix": null,
+   "build": null
+  }
+ },
+ "mix": {
+  "fresh": 1,
+  "record": 0,
+  "explicit": 1,
+  "settle": 2
+ },
+ "build": {
+  "share": 0.0
+ }
 }
