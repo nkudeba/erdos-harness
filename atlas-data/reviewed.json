@@ -1238,6 +1238,15 @@
     "search_floor_kind": "published",
     "assessed": "2026-09-11"
   },
+  "588": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.02, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible within a few days, so this is chosen as a major-progress line (significance 3). It settles `erdos_588` only in its best outcome. Precise question. Call a family of $N$ pseudolines (a Euclidean wiring diagram) admissible if every p"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-19"
+  },
   "617": {
     "assessed": "2026-09-11",
     "partial": 62,
