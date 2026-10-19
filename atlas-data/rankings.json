@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 149,
+    "manually_reviewed": 150,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "3282576d8757ab88622febeb654d6bb4750b69eea3e25e494a190dafcdd97280",
+    "harness_sha256": "20a146201f4a59bb3335d16d4957887ed6fdf6e1752f19c0e37680bfc913d706",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "d7dbd3ec30417b5912d9903107f52e99a1696218e833a0321cd2901dbdea8e45"
+    "manual_reviews_sha256": "fd0a17fb0b65f362d580ab1ee8c5580dc3a6dd691e375a22516dcc97682a9f73"
   },
   "problems": [
     {
@@ -72289,13 +72289,14 @@
         "geometry"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
         "An unresolved prize problem receives a conservative difficulty prior.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Choose exact coordinates or a reusable geometric model before proof search.",
@@ -72361,8 +72362,8 @@
       "manual": false,
       "prize": "$100",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
@@ -75098,6 +75099,7 @@
       "score": 1,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.02, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line can plausibly settle Erdős #657 in a few days. The CORE needs a Roth-type tool that controls rotations, and the team has no validated result reducing the problem to a finite or computable statement. The 0.01 comes only from Step 0, a check that the Lea",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
@@ -75110,7 +75112,7 @@
         "Separate upper and lower bounds and check that they meet the requested precision."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-19 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -75161,13 +75163,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/657",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-19",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 1031,
       "tier": "Frontier"

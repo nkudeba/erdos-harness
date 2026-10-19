@@ -1318,6 +1318,15 @@
     ],
     "assessed": "2026-10-15"
   },
+  "657": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.02, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line can plausibly settle Erdős #657 in a few days. The CORE needs a Roth-type tool that controls rotations, and the team has no validated result reducing the problem to a finite or computable statement. The 0.01 comes only from Step 0, a check that the Lea"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-19"
+  },
   "672": {
     "rationale": [
       "Many low lengths are already excluded by deep Diophantine results. A negative-integer example does not satisfy the positive-integer contract."
