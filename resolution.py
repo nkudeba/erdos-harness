@@ -476,8 +476,14 @@ def write_library(n: int) -> None:
 LANE_PATTERN = r"harness\.py run|idea-engine-2026-10-02/screen\.py|hardsteps_lean\.py|timesplit\.py (run|discover-screen)"
 
 
+# A time-split benchmark run is a second lane by the operator's choice (2026-10-19: the improvement loop beside the
+# sprint), so it never holds the campaign back. Every benchmark run passes --benchmark; its drivers are timesplit.py.
+BENCHMARK_LANE = re.compile(r"--benchmark\b|timesplit\.py|/benchmarks/timesplit/")
+
+
 def harness_live() -> bool:
-    return subprocess.run(["pgrep", "-f", LANE_PATTERN], capture_output=True).returncode == 0
+    r = subprocess.run(["pgrep", "-fl", LANE_PATTERN], capture_output=True, text=True)
+    return any(l.strip() and not BENCHMARK_LANE.search(l) for l in (r.stdout or "").splitlines())
 
 
 def wait_for_lane(poll: int = 60) -> None:

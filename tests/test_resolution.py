@@ -771,6 +771,22 @@ class ComputationalRouting(Base):
         self.assertNotIn("--engine-program-cycles", seen["flags"])
 
 
+class Lanes(unittest.TestCase):
+    def test_a_benchmark_run_is_its_own_lane_and_never_holds_the_campaign(self):
+        # 2026-10-19: the improvement loop runs time-split items beside the sprint, by the operator's choice
+        def ps(lines):
+            return lambda *a, **k: type("P", (), {"stdout": "\n".join(lines), "returncode": 0 if lines else 1})()
+        bench = "4242 /usr/bin/python3 pin_ab12_harness.py run --problem p.json --benchmark --open"
+        driver = "4243 /usr/bin/python3 benchmarks/timesplit/timesplit.py run --tag x --allow-concurrent"
+        campaign = "4244 /usr/bin/python3 /Users/x/erdos-harness/harness.py run --problem runs/r/problem.json --resume runs/r"
+        with patch.object(R.subprocess, "run", ps([bench, driver])):
+            self.assertFalse(R.harness_live())
+        with patch.object(R.subprocess, "run", ps([bench, campaign])):
+            self.assertTrue(R.harness_live())
+        with patch.object(R.subprocess, "run", ps([])):
+            self.assertFalse(R.harness_live())
+
+
 class FollowUpPasses(Base):
     """2026-10-17: #695's two follow-up deep passes resumed a run whose rounds and marathon legs were all done, so they
     cost $0.15 and $0.14 and never read the P(22) result they were queued to certify. And a deferred Lean claim came
