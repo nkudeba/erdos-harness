@@ -430,3 +430,5 @@
 [2026-10-19T21:52:11Z] #626: skipped (no main theorem (parts: parts.i, parts.ii, variants.erdos_upper, variants.h_even_conjecture, variants.h_lower, variants.h_odd_conjecture))
 [2026-10-19T21:52:15Z] #588: screen
 [2026-10-19T22:11:52Z] #588: screen -> screened out (settle chance 0.02, draws [0.02, 0.02]; $3.27)
+[2026-10-19T22:12:08Z] #573: screen
+[2026-10-19T22:34:40Z] #573: screen -> screened out (settle chance 0.01, draws [0.0, 0.01]; $3.41)

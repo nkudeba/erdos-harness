@@ -3267,6 +3267,31 @@
    "intent": null,
    "next": null,
    "status": "screened out"
+  },
+  "573": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.005,
+     "spend": 3.4124,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "5922bfcbaf0b3e479cbf989d81510c30aa647742",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261019-181208-451206-erdos573",
+   "spend": 3.4124489999999996,
+   "limit_waits": 0,
+   "settle_chance": 0.005,
+   "arm": "screened out",
+   "track": null,
+   "intent": null,
+   "next": null,
+   "status": "screened out"
   }
  }
 }
