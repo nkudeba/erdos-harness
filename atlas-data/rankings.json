@@ -75096,19 +75096,18 @@
         "distances"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Geometric incidence and configuration reasoning needs substantial formal setup.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
         "An optimal bound or classification is requested; a single construction may cover only one direction.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness."
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Choose exact coordinates or a reusable geometric model before proof search.",
         "Prove the asymptotic statement with its full quantifiers and error control.",
-        "Separate upper and lower bounds and check that they meet the requested precision.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target."
+        "Separate upper and lower bounds and check that they meet the requested precision."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
       "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
@@ -75130,12 +75129,8 @@
           "points": -5
         },
         {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
           "label": "Score floor / ceiling",
-          "points": 19
+          "points": 11
         }
       ],
       "partial": {
@@ -75169,8 +75164,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
