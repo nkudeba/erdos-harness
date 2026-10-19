@@ -1224,6 +1224,15 @@
     "partial": 10,
     "assessed": "2026-10-07"
   },
+  "573": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line can plausibly settle the statement within days. - Why no proof is in reach. Proving `erdos_573` requires lim e/n^{3/2} = 2^{−3/2}. That needs at least limsup < 1/2, which rules out asymptotic Moore graphs, a notorious open problem. - Why no disproof is"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-19"
+  },
   "583": {
     "rationale": [
       "The 31 August forum report claims exhaustive verification of all connected graphs through 11 vertices, including 1,006,700,565 at n=11; not independently rerun. At n=12 the sweep leaves 35,633,639 undecided graphs and establishes no floor there. Small generic enumeration is therefore not a promising route to a full solution."
