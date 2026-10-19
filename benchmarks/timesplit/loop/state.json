@@ -1,10 +1,10 @@
 {
  "goal": "a verified TRUE-direction solve of a time-split Erdős item (dev or test), replicated once on a fresh alias; or a verified proof on a real open problem, handed to the operator for review",
- "budget_usd": 200.0,
+ "budget_usd": 221.71,
  "started": "2026-09-25T03:58:48Z",
- "iteration": 3,
+ "iteration": 4,
  "phase": "stopped",
- "candidate": "alloc (pin 00e9304): discovery round 1 with commit floor 0.6, --attack-order core-first, --refute changed, --premise-attack cheap",
+ "candidate": "scout settings + --engine-deep-lines 2 (pin 3282576)",
  "baseline": {
   "tag": "train-fixes-conv",
   "pin": "pin_ea6d9878462aac38_harness.py",
@@ -12,7 +12,7 @@
   "note": "iteration 2's fixed harness; alloc's pin differs only by default-off options"
  },
  "next": [
-  "stopped: the operator reviews the #1213 proofs, decides on merging harness-loop, and on the baseline for v2's 6 unpaired dev items"
+  "diagnose iteration 4: what blocks complete answers on open problems and on time-split items since 2026-09-26"
  ],
  "pre_loop": [
   "discover-v2-84f21c5: dev lane started by the operator before the loop, on pin 84f21c5; not counted",
@@ -108,6 +108,36 @@
    "in_flight": false,
    "registered": "2026-09-25T18:57:10Z",
    "finished": "2026-09-25T19:45:20Z"
+  },
+  {
+   "kind": "run",
+   "name": "dev-scout-lines-3282576-570",
+   "estimate": 25.0,
+   "usd": 0.0,
+   "note": "",
+   "in_flight": false,
+   "registered": "2026-10-19T16:29:21Z",
+   "finished": "2026-10-19T21:47:46Z"
+  },
+  {
+   "kind": "run",
+   "name": "dev-scout-lines-3282576-865",
+   "estimate": 25.0,
+   "usd": 0.0,
+   "note": "",
+   "in_flight": false,
+   "registered": "2026-10-19T16:29:21Z",
+   "finished": "2026-10-19T21:47:46Z"
+  },
+  {
+   "kind": "run",
+   "name": "dev-scout-lines-3282576-888",
+   "estimate": 25.0,
+   "usd": 0.0,
+   "note": "",
+   "in_flight": false,
+   "registered": "2026-10-19T16:29:21Z",
+   "finished": "2026-10-19T21:47:46Z"
   }
  ],
  "notes": [
@@ -190,11 +220,22 @@
   {
    "at": "2026-09-25T19:46:19Z",
    "text": "loop stopped: goal met; spent $121.71 of $200; baseline v2 on #1213 not solved ($7.48), so discovery made the difference on this item"
+  },
+  {
+   "at": "2026-10-19T16:21:14Z",
+   "text": "renewed 2026-10-19: +$100 (operator), until the 2026-10-20 09:00 usage reset; iteration 4 opens; the resolution campaign's sprint keeps its own lane"
+  },
+  {
+   "at": "2026-10-19T21:47:46Z",
+   "text": "iteration 4 rejected: dev-scout-lines-3282576 completed 0 of 3 (#570 $25.23, #865 $25.07, #888 $23.94; all direction-correct, none recognized, refereed complete proofs 0); prediction (>=1 of 3) wrong; the sprint keeps one deep line"
+  },
+  {
+   "at": "2026-10-19T21:54:48Z",
+   "text": "loop paused until the 2026-10-20 09:00 reset: $25.76 left pays for one item, too few to gate a change of method, and the loop's runs share the session limit with the sprint (it stopped every lane 18:13-21:13Z today); #888's second line never ran (resume bug, fixed: deep_dive_room)"
   }
  ],
- "stop": "stopping condition 1 met 2026-09-25: dev #1213 TRUE direction verified (discover-v2-84f21c5) and replicated (replicate-1213-84f21c5); baseline v2 did not solve it; human review pending",
- "updated": "2026-09-25T19:46:19Z",
- "rejected_streak": 3,
+ "updated": "2026-10-19T21:54:48Z",
+ "rejected_streak": 0,
  "acknowledged": [
   {
    "tag": "discover-v2-84f21c5",
@@ -207,6 +248,20 @@
    "problem": "1213",
    "at": "2026-09-25T18:59:01Z",
    "note": "the replication itself; re-checked mechanically; stopping condition 1 met"
+  },
+  {
+   "tag": "engine-v5-dev-lean",
+   "problem": "1125",
+   "at": "2026-10-19T16:20:53Z",
+   "note": "handled outside the loop on 2026-10-06: dev #1125 proved in Lean from the engine's step-2 chain; audit 13/13; evidence in benchmarks/timesplit/evidence/1125/ (CLAUDE.md, engine step 2)"
+  }
+ ],
+ "renewals": [
+  {
+   "at": "2026-10-19T16:21:14Z",
+   "added_usd": 100.0,
+   "until": "2026-10-20T13:00:00Z",
+   "by": "operator, 'Both, $100 for iterations', beside the resolution campaign's sprint"
   }
  ]
 }

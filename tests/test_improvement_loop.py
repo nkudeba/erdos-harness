@@ -29,6 +29,27 @@ class Budget(unittest.TestCase):
                 self.assertTrue(L.can_spend(state, 170))
                 self.assertFalse(L.can_spend(state, 180))
 
+    def test_an_entry_per_item_reads_its_rows_and_a_missing_result_is_never_free(self):
+        # 2026-10-19: entries named <tag>-<problem> read $0 against $74.24 actually spent, so the cap went unenforced
+        with tempfile.TemporaryDirectory() as d:
+            res = Path(d)
+            (res / "dev-x.jsonl").write_text(json.dumps({"problem": "570", "spend": 25.23}) + "\n"
+                                             + json.dumps({"problem": "865", "spend": 25.07}) + "\n")
+            (res / "dev-x.infra.jsonl").write_text(json.dumps({"problem": "865", "spend": 0.5}) + "\n")
+            state = {"budget_usd": 100, "ledger": [
+                {"kind": "run", "name": "dev-x-570", "estimate": 25, "in_flight": False},
+                {"kind": "run", "name": "dev-x-865", "estimate": 25, "in_flight": False},
+                {"kind": "run", "name": "dev-x-888", "estimate": 25, "in_flight": False},     # crashed, no row
+                {"kind": "run", "name": "dev-y", "estimate": 10, "in_flight": True}]}         # not started yet
+            with patch.object(L, "RESULTS", res):
+                b = L.budget(state)
+            spent = {e["name"]: (e["spent"], e["reserved"], e.get("spend_unavailable", False)) for e in b["entries"]}
+            self.assertEqual(spent["dev-x-570"], (25.23, 0.0, False))
+            self.assertEqual(spent["dev-x-865"], (25.57, 0.0, False))
+            self.assertEqual(spent["dev-x-888"], (25.0, 0.0, True))          # its estimate counts, flagged
+            self.assertEqual(spent["dev-y"], (0.0, 10.0, False))              # in flight: reserved, not spent
+            self.assertAlmostEqual(b["left"], 100 - 25.23 - 25.57 - 25.0 - 10.0)
+
 
 class StopSignals(unittest.TestCase):
     def test_every_results_file_is_read_and_acks_are_honoured(self):

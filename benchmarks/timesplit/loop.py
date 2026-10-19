@@ -57,12 +57,19 @@ def _jsonl(path: Path) -> list[dict]:
         return []
 
 
-def entry_spend(e: dict) -> float:
-    """Actual recorded spend of one ledger entry."""
+def entry_spend(e: dict) -> float | None:
+    """Actual recorded spend of one ledger entry, or None when a run's results cannot be found. A run is found by its
+    tag, or, for an entry per item named `<tag>-<problem>`, by that item's rows in the tag's file. On 2026-10-19 three
+    entries named that way read $0 while their runs had spent $74.24, and the cap was no longer enforced."""
     kind, name = e.get("kind"), e.get("name")
     if kind in ("run", "explore-screen"):
-        rows = _jsonl(RESULTS / f"{name}.jsonl") + _jsonl(RESULTS / f"{name}.infra.jsonl")
-        return sum(float(r.get("spend") or 0) for r in rows)
+        files = [RESULTS / f"{name}.jsonl", RESULTS / f"{name}.infra.jsonl"]
+        if any(f.exists() for f in files):
+            return sum(float(r.get("spend") or 0) for f in files for r in _jsonl(f))
+        m = re.fullmatch(r"(.+)-(\d+)", name or "")
+        rows = [r for f in ((RESULTS / f"{m[1]}.jsonl", RESULTS / f"{m[1]}.infra.jsonl") if m else ())
+                for r in _jsonl(f) if str(r.get("problem")) == m[2]]
+        return sum(float(r.get("spend") or 0) for r in rows) if rows else None
     if kind == "calibration":
         return sum(float(r.get("spend") or 0) for r in _jsonl(RESULTS / f"calibration-{name}.jsonl"))
     if kind == "ideas":
@@ -75,9 +82,13 @@ def budget(state: dict) -> dict:
     rows = []
     for e in state.get("ledger") or []:
         spent = entry_spend(e)
+        # a finished run with no results found counts its whole estimate: an unavailable cost is never $0
+        missing = spent is None and not e.get("in_flight")
+        spent = (float(e.get("estimate") or 0) if missing else 0.0) if spent is None else spent
         # while an entry is in flight its remaining estimate stays reserved, so two launches cannot both fit
         reserve = max(0.0, float(e.get("estimate") or 0) - spent) if e.get("in_flight") else 0.0
-        rows.append({**e, "spent": round(spent, 2), "reserved": round(reserve, 2)})
+        rows.append({**e, "spent": round(spent, 2), "reserved": round(reserve, 2),
+                     **({"spend_unavailable": True} if missing else {})})
     spent = sum(r["spent"] for r in rows)
     reserved = sum(r["reserved"] for r in rows)
     return {"cap": cap, "spent": round(spent, 2), "reserved": round(reserved, 2),
@@ -315,7 +326,8 @@ def main() -> int:
         print(f"budget: ${b['spent']} spent, ${b['reserved']} reserved, ${b['left']} left of ${b['cap']}")
         for e in b["entries"]:
             print(f"  {e['kind']:14} {e['name']:32} spent ${e['spent']:<7} reserved ${e['reserved']:<6}"
-                  + (" IN FLIGHT" if e.get("in_flight") else ""))
+                  + (" IN FLIGHT" if e.get("in_flight") else "")
+                  + (" SPEND UNAVAILABLE (no results found; its estimate is counted)" if e.get("spend_unavailable") else ""))
         for n in (state.get("notes") or [])[-5:]:
             print(f"  note {n.get('at')}: {n.get('text')}")
         return 0

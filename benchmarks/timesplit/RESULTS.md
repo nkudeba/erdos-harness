@@ -1821,3 +1821,37 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - No paired baseline re-run: the $100 cap does not cover one.
   - No regression item: #401 is left out to save money.
 - **Budget:** $75 estimated, of the loop's $100.
+
+## Improvement-loop iteration 4: result (2026-10-19), rejected
+
+- **0 of 3 complete.** The prediction (at least 1 of 3) was wrong. The gate rejects the candidate, and the sprint's
+  scouts keep one deep line.
+
+  | item | spend | direction | complete | refereed complete proofs | validated new | significance ≥ 2 | recognized |
+  |------|-------|-----------|----------|--------------------------|---------------|------------------|------------|
+  | #570 | $25.23 | right | no | 0 | 3 | 0 | no |
+  | #865 | $25.07 | right | no | 0 | 6 | 0 | no |
+  | #888 | $23.94 | right | no | 0 | 2 | 1 | no |
+
+  $74.24 in all, against $75 estimated.
+- **#888 never ran its second line**, so the second line was tested on 2 of the 3 items.
+  - At about 18:13Z the account's session limit stopped all three runs, and they resumed at 21:13Z.
+  - #888's second line had bought its plan and was in its first session. The resume required room for plan + dive ($7)
+    and had $6.89, so it skipped the line.
+  - The cause is a resume bug, fixed the same day (`deep_dive_room`, `tests/test_engine.py`). A dive cut off after its
+    plan now needs room for its sessions only. The test fails on the old condition. Line 1 had the same flaw, so a
+    campaign run resumed after a usage limit could lose its deep dive.
+  - The other two lines ran in full: #570's before the limit, #865's again after the resume.
+- **What it says.**
+  - On the two items that got both lines, two lines at 1.6–2.1× step 2's spend ($12.19 and $15.58 then) produced no
+    refereed complete proof.
+  - Gap closing rated 4–6 gaps per item and closed none.
+  - This is weak evidence. At the 0.29 per-draw rate of crossfed draws on never-complete train items, 0 of 2 would
+    happen about half the time (0.71² ≈ 0.50).
+- **Not done.** The loop has $25.76 left. That pays for one item, too few to accept or reject a change of method.
+  - The loop's runs also share the session limit with the sprint, and today's limit stopped every lane for three hours.
+  - So the loop launches nothing more before the 2026-10-20 reset, and #888's second line is not re-run.
+- **Accounting bug, fixed.**
+  - The ledger read entries named per item (`<tag>-<problem>`) as $0, and the loop showed $100 left when $25.76 was.
+  - `entry_spend` now finds an item's rows in its tag's file. A finished run whose results cannot be found counts its
+    whole estimate, flagged `SPEND UNAVAILABLE`, never $0 (`tests/test_improvement_loop.py`).
