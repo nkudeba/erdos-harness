@@ -3170,6 +3170,72 @@
    "claims_todo": [],
    "program_passes": 1,
    "resolved_in_literature": "arXiv:2607.17333 (2026-07-19), W.-X. Huang, Z. Lian, S. Shao, R. Xiao, L. Xu, S. Zhang, 'An affirmative answer to Owings's sumset question': every 2-colouring of N has an infinite B with B+B monochromatic. Found by an OpenAlex search on 2026-10-15; erdosproblems.com still lists the problem as open, with no proof claim."
+  },
+  "766": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, variants.dirac_erdos, variants.minExtremalNumber_estimate, variants.minExtremalNumber_strictMonoOn)",
+   "next": null
+  },
+  "704": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, variants.cube_colouring, variants.davies_lower, variants.davies_upper, variants.frankl_wilson)",
+   "next": null
+  },
+  "436": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, variants.even_three, variants.five_two, variants.four_two, variants.ge_four)",
+   "next": null
+  },
+  "338": {
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "skipped",
+     "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)"
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "5922bfcbaf0b3e479cbf989d81510c30aa647742",
+   "lane": "fresh",
+   "kind": "settle",
+   "status": "skipped",
+   "why": "1 proof claim(s) on erdosproblems.com (the operator's rule: claimed problems are skipped)",
+   "next": null,
+   "running": null
+  },
+  "687": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.fgkmt, variants.iwaniec, variants.maier_pomerance)",
+   "next": null
+  },
+  "657": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.02,
+     "spend": 8.5728,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "5922bfcbaf0b3e479cbf989d81510c30aa647742",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261019-140610-305247-erdos657",
+   "spend": 8.572759999999999,
+   "limit_waits": 0,
+   "settle_chance": 0.02,
+   "arm": "screened out",
+   "track": null,
+   "intent": null,
+   "next": null,
+   "status": "screened out"
   }
  }
 }
