@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 152,
+    "manually_reviewed": 153,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "20a146201f4a59bb3335d16d4957887ed6fdf6e1752f19c0e37680bfc913d706",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "5c83a9b049443232a5665b3f79f517878f93106f705c46b96391a924767d1700"
+    "manual_reviews_sha256": "812e22e7d72f5d597aac2cc9cf8c6fdb92badad9a2e4e908b65d43ee661024d0"
   },
   "problems": [
     {
@@ -54901,6 +54901,7 @@
       "score": 3,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.02, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. The Lean statement is an asymptotic Θ-claim, so no finite computation (PARI/GP, SAT, f(4), f(5)) can decide it. Settling it means closing the factor-k gap, (L) or (U), which has been open since 1965, with the same gap open for n-",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Graph encodings and extremal arguments are less represented in the harness’s verified corpus.",
         "An optimal bound or classification is requested; a single construction may cover only one direction.",
@@ -54911,7 +54912,7 @@
         "Separate upper and lower bounds and check that they meet the requested precision."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-19 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -54954,13 +54955,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/902",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-19",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 821,
       "tier": "Frontier"
