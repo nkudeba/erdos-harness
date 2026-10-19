@@ -745,6 +745,36 @@ class DeepDive(unittest.TestCase):
                            "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=80, deep_budget=8.0))
         self.assertIsNone(one["deep_lines"])                                # the default is one line, as before
 
+    def test_a_line_cut_off_after_its_plan_resumes_with_room_for_its_sessions_only(self):
+        # 2026-10-19, improvement-loop iteration 4: a usage limit cut a dev run's second line off after its plan, with
+        # $6.89 left. The resume asked for plan + dive ($7) and skipped the line, which never ran.
+        second = DEEP_PLAN.replace("Prove liminf q_n/n^2 >= 1 + delta (beyond the profinite cap)",
+                                   "Disprove the coupling by an explicit family")
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-deep-plan":
+                return DEEP_PLAN if n == 0 else second
+            return judge(purpose)
+        ck = {}
+        cut = FakeSession(lambda label, prompt: RuntimeError("You've hit your session limit") if label == "deep2"
+                          else notebook(("PROVED", "QUANT", f"claim from {label}")))
+        s = H.EngineSettings(sessions=1, rounds=1, total_budget=80, deep_budget=8.0, deep_lines=2)
+        with self.assertRaises(RuntimeError):
+            H.engine_run(FakeCall(script, cost=0.1), cut, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        self.assertIn("plan_text", ck["deep2_legs"])
+        self.assertNotIn("deep2_partial", ck)
+        tight = H.EngineSettings(sessions=1, rounds=1, total_budget=ck["spend"] + 9.0, deep_budget=8.0, deep_lines=2)
+        self.assertLess(9.0, tight.meta_budget + tight.deep_budget)          # room for the dive, not for plan + dive
+        again, sess = FakeCall(script, cost=0.1), FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x")))
+        res = H.engine_run(again, sess, "PROBLEM", LEAN, tight, checkpoint=ck, save=lambda c: None)
+        self.assertEqual(again.prompts("engine-deep-plan"), [])             # the plan is not bought again
+        self.assertIn("deep2", [label for label, p in sess.calls])
+        self.assertEqual(len(res["deep_lines"]), 1)
+        fresh = {"spend": 0.0}
+        self.assertFalse(H.deep_dive_room(fresh, "deep2", tight, H._DiscoverySpend(9.0)))   # unplanned: plan + dive
+
     def test_a_plan_cut_off_by_its_cap_is_retried_once(self):
         """#152's hard step: the deep dive's plan spent $2.62 against its $2 cap, wrote nothing, and the deep dive never
         ran. The plan, like the map, now gets one retry at 1.5x its cap."""

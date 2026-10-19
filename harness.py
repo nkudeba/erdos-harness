@@ -5633,7 +5633,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         # The plan call failed (a cut-off cap on #152's hard step) and the session never started. That was an
         # infrastructure failure, not a verdict, so a resume tries the deep dive again instead of keeping the error.
         deep = None
-    if deep is None and s.deep_budget > 0 and ledger and (ck.get("deep_partial") or spend.room(s.meta_budget + s.deep_budget)):
+    if deep is None and s.deep_budget > 0 and ledger and deep_dive_room(ck, "deep", s, spend):
         deep = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend,
                                 search, ck=ck, keep=keep)
         ck["deep"] = deep
@@ -5648,7 +5648,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         key = f"deep{k}"
         dk = ck.get(key)
         if (dk is None and s.deep_budget > 0 and isinstance(deep, dict) and deep.get("goal")
-                and (ck.get(f"{key}_partial") or spend.room(s.meta_budget + s.deep_budget))):
+                and deep_dive_room(ck, key, s, spend)):
             avoid = [deep.get("goal")] + [x.get("goal") for x in deep_lines if x.get("goal")]
             dk = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend,
                                   search, ck=ck, keep=keep, line=k, avoid=avoid)
@@ -6050,6 +6050,18 @@ DEEP_OTHER_LINES = ("\n\nOTHER LINES ALREADY TAKEN: another researcher with the 
                     "line below. Choose the best line that is clearly DIFFERENT from all of them: a different method, a "
                     "different intermediate statement, or the other direction. Do not take the same route under a new "
                     "name.\n{lines}")
+
+
+def deep_dive_room(ck: dict, tag: str, s: "EngineSettings", spend: _DiscoverySpend) -> bool:
+    """Whether the deep dive `tag` may start, or resume, with what is left. A dive whose sessions are done only needs
+    judging. One cut off after its plan was bought needs room for its sessions only, because a resume never buys the plan
+    again. Until 2026-10-19 the resume read only `<tag>_partial`, which is written once every leg is done. A usage limit
+    then cut a dev benchmark run's second line off after its plan, with $6.89 left. The resume required plan + dive
+    ($7) and skipped the line, so it never ran."""
+    if ck.get(f"{tag}_partial"):
+        return True
+    planned = bool((ck.get(f"{tag}_legs") or {}).get("plan_text"))
+    return spend.room(s.deep_budget + (0.0 if planned else s.meta_budget))
 
 
 def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
