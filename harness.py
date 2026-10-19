@@ -4570,6 +4570,7 @@ class EngineSettings:
     repair_max: int = 3              # broken claims the judges call fixable, repaired once and re-judged (v4)
     repair_budget: float = 1.5
     deep_budget: float = 0.0         # > 0: after the rounds, ONE long session on the line most likely to matter (v3)
+    deep_lines: int = 1              # > 1: that many deep dives, each told to take a line the earlier ones did not
     deep_turns: int = 200
     deep_effort: str = "high"
     gap_rounds: int = 2              # high-value broken claims get gap-closing sessions, this many rounds each (v5; 0 = off)
@@ -5639,6 +5640,24 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
         ck.pop("deep_partial", None)
         keep()
     ledger = ledger + list((deep or {}).get("claims_list") or [])
+    deep_lines = []
+    for k in range(2, max(1, s.deep_lines) + 1):
+        # `--engine-deep-lines K`: one try on one line is not a problem's rate (a crossfed draw found a refereed proof
+        # on never-complete train items about 0.29 of the time, against 0 in 24 baseline rounds), so later lines are
+        # independent tries, each told which lines are taken. Their sandboxes get no other line's notebook.
+        key = f"deep{k}"
+        dk = ck.get(key)
+        if (dk is None and s.deep_budget > 0 and isinstance(deep, dict) and deep.get("goal")
+                and (ck.get(f"{key}_partial") or spend.room(s.meta_budget + s.deep_budget))):
+            avoid = [deep.get("goal")] + [x.get("goal") for x in deep_lines if x.get("goal")]
+            dk = engine_deep_dive(call, session, s, statement, lean, fblock, sess_context, known, ledger, rounds, spend,
+                                  search, ck=ck, keep=keep, line=k, avoid=avoid)
+            ck[key] = dk
+            ck.pop(f"{key}_partial", None)
+            keep()
+        if isinstance(dk, dict):
+            deep_lines.append(dk)
+            ledger = ledger + list(dk.get("claims_list") or [])
     marathon = None
     if s.marathon_legs > 0 and isinstance(deep, dict) and deep.get("goal") and not deep.get("error"):
         marathon = engine_marathon(call, session, s, statement, lean, fblock, sess_context, known, ledger, deep, spend,
@@ -5687,6 +5706,7 @@ def engine_run(call, session, statement: str, lean: str, s: EngineSettings | Non
     rounds = [{k: v for k, v in r.items() if k != "_sessions"} for r in rounds]   # the notebooks live in the sandboxes
     return {"frontier": {k: v for k, v in f.items()}, "rounds": rounds, "ledger": ledger, "validated": validated,
             "meta": meta, "deep": {k: v for k, v in (deep or {}).items() if k not in ("claims_list", "notebook")} if deep else None,
+            "deep_lines": [{k: v for k, v in x.items() if k not in ("claims_list", "notebook")} for x in deep_lines] or None,
             "probes": [{"label": x.get("label"), "item": {k: (x.get("item") or {}).get(k) for k in ("kind", "id", "type", "significance")},
                         "score": x.get("score"), "verdict": x.get("verdict"), "cost": x.get("cost"), "error": x.get("error"),
                         "claims": [{"id": c.get("id"), "status": c.get("status"),
@@ -5713,7 +5733,7 @@ def _ck_claims(ck: dict):
         yield from x.get("claims") or []
     for x in ck.get("probes") or []:
         yield from x.get("claims") or []
-    for key in ("deep", "deep_partial"):
+    for key in [k for k in ck if re.fullmatch(r"deep\d*(?:_partial)?", k)]:     # every deep line, finished or cut off
         yield from (ck.get(key) or {}).get("claims_list") or [] if isinstance(ck.get(key), dict) else []
     for leg in (ck.get("marathon") or {}).get("legs") or [] if isinstance(ck.get("marathon"), dict) else []:
         yield from leg.get("claims_list") or []
@@ -6026,9 +6046,15 @@ def engine_marathon(call, session, s: "EngineSettings", statement: str, lean: st
     return mar
 
 
+DEEP_OTHER_LINES = ("\n\nOTHER LINES ALREADY TAKEN: another researcher with the same budget is already working on each "
+                    "line below. Choose the best line that is clearly DIFFERENT from all of them: a different method, a "
+                    "different intermediate statement, or the other direction. Do not take the same route under a new "
+                    "name.\n{lines}")
+
+
 def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: str, fblock: str, sess_context: str,
                      known: str, ledger: list, rounds: list, spend: _DiscoverySpend, search=None, ck: dict | None = None,
-                     keep=None) -> dict:
+                     keep=None, line: int = 1, avoid: list[str] | None = None) -> dict:
     """v3: one long session on the single line most likely to produce a result an expert would rate 2 or more. Every
     round's notebook goes into its sandbox under prior/. Its claims (`claims_list`) join the ledger and are validated
     like any other. The session's output is checkpointed (`ck["deep_partial"]`) before it is judged: it is the most
@@ -6037,16 +6063,20 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
     significance-1 constant inside its method's ceiling; the lines that might matter never got real depth."""
     ck = ck if ck is not None else {}
     keep = keep or (lambda: None)
-    dp = ck.get("deep_partial") if isinstance(ck.get("deep_partial"), dict) else None
+    tag = "deep" if line == 1 else f"deep{line}"         # line k's own checkpoint, sandbox and claim keys
+    pkey, lkey = f"{tag}_partial", f"{tag}_legs"
+    dp = ck.get(pkey) if isinstance(ck.get(pkey), dict) else None
     if dp is None:
-        slot = ck.setdefault("deep_legs", {})            # the plan and any finished legs: a resume buys neither again
+        slot = ck.setdefault(lkey, {})                   # the plan and any finished legs: a resume buys neither again
         if slot.get("plan_text"):
             plan, pc, goal = slot["plan_text"], float(slot.get("plan_cost") or 0.0), slot.get("goal") or ""
         else:
+            objective = DEEP_OBJECTIVES.get(s.objective, DEEP_OBJECTIVES["advance"])
+            if avoid:
+                objective += DEEP_OTHER_LINES.format(lines="\n".join(f"- {clip_middle(g, 800)}" for g in avoid if g))
             pt, pc, perr = _discovery_call_capped(call, "engine-deep-plan", DEEP_PLAN_PROMPT.format(
                 statement=statement, lean=lean, frontier=fblock, results=engine_results_digest(ledger),
-                objective=DEEP_OBJECTIVES.get(s.objective, DEEP_OBJECTIVES["advance"])), s.frontier_effort,
-                s.meta_budget, spend)
+                objective=objective), s.frontier_effort, s.meta_budget, spend)
             if not pt:
                 return {"plan_cost": round(pc, 4), "error": perr}
             secs = dict((t.upper(), b) for t, b in delimited_sections(pt))
@@ -6067,7 +6097,7 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
                                          teammates="", modules=", ".join(sorted(EXPLORE_MODULES)), seconds=EXPLORE_SECONDS)
         dp = {"plan_cost": round(pc, 4), "goal": goal, "plan_text": plan[:9000], "settle_chance": settle_chance(plan)}
         try:
-            reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", "deep", prompt, cont,
+            reply, notebook, cost, legs = engine_session_legs(session, s, spend, "engine-session", tag, prompt, cont,
                                                               s.deep_turns, s.deep_budget, s.deep_effort, files=files,
                                                               slot=slot, keep=keep)
         except DiscoveryCallFailed as e:
@@ -6076,11 +6106,11 @@ def engine_deep_dive(call, session, s: "EngineSettings", statement: str, lean: s
         spend.add(cost)
         claims = parse_claims(notebook)
         for c in claims:
-            c["session"], c["_kind"] = "deep", "deep"
+            c["session"], c["_kind"] = tag, "deep"
         dp.update({"cost": round(float(cost or 0.0), 4), "reply": (reply or "")[-3000:], "claims_list": claims,
-                   "notebook": (notebook or "")[-60000:], "routes": parse_routes(notebook), "legs": legs})
-        ck["deep_partial"] = dp
-        ck.pop("deep_legs", None)
+                   "notebook": (notebook or "")[-60000:], "routes": parse_routes(notebook), "legs": legs, "line": line})
+        ck[pkey] = dp
+        ck.pop(lkey, None)
         keep()
     claims = dp.get("claims_list") or []
     engine_resolve(claims)
@@ -7851,7 +7881,8 @@ class Harness:
                            literature_scan=bool(g("engine_literature_scan", False)),
                            literature_stop=float(g("engine_literature_stop", 0.7)),
                            progress_rate=bool(g("engine_progress_rate", False)),
-                           progress_max=float(g("engine_progress_max", 0.3)))
+                           progress_max=float(g("engine_progress_max", 0.3)),
+                           deep_lines=int(g("engine_deep_lines", 1)))
         line = g("engine_program_line_file", None)
         if line:
             s.program_line = Path(line).read_text()
@@ -14761,6 +14792,8 @@ def build_parser() -> argparse.ArgumentParser:
                       help="the build track: when the screen's settle chance is below --engine-progress-max, judges rate "
                            "each draw's progress line as if its main target were proved (engine.json settle_screen.progress)")
     runp.add_argument("--engine-progress-max", type=float, default=0.3)
+    runp.add_argument("--engine-deep-lines", type=int, default=1,
+                      help="that many deep dives, each told which lines the earlier ones took (1 = one, as before)")
     runp.add_argument("--engine-program-line-file", default=None,
                       help="the build track: the research program proves this line's theorems, one rung after another, "
                            "instead of aiming its skeleton at the formal statement")

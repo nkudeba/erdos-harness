@@ -711,6 +711,40 @@ class DeepDive(unittest.TestCase):
         self.assertIn("deep", {c["session"] for c in res["validated"]})
         self.assertTrue(all("_sessions" not in r for r in res["rounds"]))      # notebooks are not copied into engine.json
 
+    def test_more_lines_are_independent_tries_each_told_the_lines_taken(self):
+        # 2026-10-19, improvement-loop iteration 4: one try on one line is not a problem's rate
+        second = DEEP_PLAN.replace("Prove liminf q_n/n^2 >= 1 + delta (beyond the profinite cap)",
+                                   "Disprove the coupling by an explicit family")
+
+        def script(purpose, prompt, n):
+            if purpose == "engine-frontier":
+                return FRONTIER
+            if purpose == "engine-deep-plan":
+                return DEEP_PLAN if n == 0 else second
+            return judge(purpose)
+        call, ck = FakeCall(script, cost=0.1), {}
+        sess = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", f"claim from {label}")))
+        s = H.EngineSettings(sessions=1, rounds=1, total_budget=80, deep_budget=8.0, deep_lines=2)
+        res = H.engine_run(call, sess, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        self.assertEqual([label for label, p in sess.calls][-2:], ["deep", "deep2"])
+        plans = call.prompts("engine-deep-plan")
+        self.assertNotIn("OTHER LINES ALREADY TAKEN", plans[0])
+        self.assertIn("OTHER LINES ALREADY TAKEN", plans[1])
+        self.assertIn("beyond the profinite cap", plans[1])                 # the first line, named as taken
+        self.assertIn("explicit family", dict(sess.calls)["deep2"])
+        self.assertEqual(sorted(sess.files["deep2"]), ["prior/r1s1.md"])    # no other line's notebook
+        self.assertTrue({"deep", "deep2"} <= {c["session"] for c in res["ledger"]})
+        self.assertEqual(len(res["deep_lines"]), 1)
+        self.assertTrue(any(H.engine_claim_key(c) == "deep2/C1" for c in H._ck_claims(ck)))
+        again = FakeCall(script, cost=0.1)
+        sess2 = FakeSession(lambda label, prompt: notebook(("PROVED", "QUANT", "x")))
+        H.engine_run(again, sess2, "PROBLEM", LEAN, s, checkpoint=ck, save=lambda c: None)
+        self.assertEqual(again.prompts("engine-deep-plan"), [])             # a resume buys neither line again
+        self.assertNotIn("deep2", [label for label, p in sess2.calls])
+        one = H.engine_run(FakeCall(script, cost=0.1), FakeSession(lambda l, p: notebook(("PROVED", "QUANT", "x"))),
+                           "PROBLEM", LEAN, H.EngineSettings(sessions=1, rounds=1, total_budget=80, deep_budget=8.0))
+        self.assertIsNone(one["deep_lines"])                                # the default is one line, as before
+
     def test_a_plan_cut_off_by_its_cap_is_retried_once(self):
         """#152's hard step: the deep dive's plan spent $2.62 against its $2 cap, wrote nothing, and the deep dive never
         ran. The plan, like the map, now gets one retry at 1.5x its cap."""
