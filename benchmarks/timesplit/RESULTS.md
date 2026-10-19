@@ -1796,3 +1796,28 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
     `baseline-v2-84f21c5` and every arm in this file.
   - An arm pinned after it weakens premises in the endgame. Compare such arms only with each other, or record the
     difference.
+
+## Improvement-loop iteration 4 (2026-10-19), written before launch: `dev-scout-lines-3282576`
+
+- **Why.**
+  - The campaign's scout settings have never been measured on dev. The resolve objective, session legs and the scout's
+    gap closing all postdate step 2 (`engine-v5-dev`), which ran the default objective.
+  - One deep dive per problem is one draw. On never-complete train items a crossfed draw found a refereed proof about
+    0.29 of the time, against 0 in 24 baseline rounds.
+- **Candidate** (pin `3282576d8757ab88`): the scout's engine flags plus `--engine-deep-lines 2`:
+  `--engine-objective resolve --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1
+  --engine-core-share 0.67 --engine-deep-budget 5 --engine-deep-lines 2 --engine-gap-rounds 1 --engine-gap-max 1
+  --engine-session-legs 2`, total $28 per item (step 2's cap).
+- **Items:** dev #570, #865 and #888, the three unrecognized items `engine-v5-dev` left incomplete. Each had one draw
+  ($12.19, $15.58, $22.66). The re-recorded rows are the same runs.
+- **Prediction:** a complete answer (a valid claim both settles judges accept, the true direction, problem not
+  recognized) on at least 1 of the 3.
+- **Gate:**
+  - Kept for the sprint's scouts if at least 1 of 3 completes and none is recognized.
+  - Otherwise rejected, and iteration 5 changes the engine's method rather than its settings.
+- **Confounds, stated now:**
+  - A new pin, new settings and a second line against one old draw. A completion cannot be split between the settings,
+    the second line and luck.
+  - No paired baseline re-run: the $100 cap does not cover one.
+  - No regression item: #401 is left out to save money.
+- **Budget:** $75 estimated, of the loop's $100.
