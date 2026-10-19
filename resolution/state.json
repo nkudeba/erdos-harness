@@ -3292,6 +3292,37 @@
    "intent": null,
    "next": null,
    "status": "screened out"
+  },
+  "1191": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, variants.liminf_le)",
+   "next": null
+  },
+  "902": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "control",
+     "settle_chance": 0.02,
+     "spend": 2.8076,
+     "track": "control"
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261019-183451-443275-erdos902",
+   "spend": 2.807584,
+   "limit_waits": 0,
+   "settle_chance": 0.02,
+   "arm": "control",
+   "track": "control",
+   "intent": null,
+   "next": "scout",
+   "status": "screened"
   }
  }
 }

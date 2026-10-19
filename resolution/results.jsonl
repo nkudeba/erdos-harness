@@ -262,3 +262,5 @@
 {"at": "2026-10-19T21:52:11Z", "problem": 626, "tier": "prep", "outcome": "skipped", "why": "no main theorem (parts: parts.i, parts.ii, variants.erdos_upper, variants.h_even_conjecture, variants.h_lower, variants.h_odd_conjecture)", "spend": 0.0}
 {"at": "2026-10-19T22:11:52Z", "problem": 588, "tier": "screen", "outcome": "screened out", "settle_chance": 0.02, "draws": [0.02, 0.02], "spend": 3.275, "run_dir": "runs/20261019-175215-839812-erdos588", "track": null, "intent": null}
 {"at": "2026-10-19T22:34:40Z", "problem": 573, "tier": "screen", "outcome": "screened out", "settle_chance": 0.005, "draws": [0.0, 0.01], "spend": 3.4124, "run_dir": "runs/20261019-181208-451206-erdos573", "track": null, "intent": null}
+{"at": "2026-10-19T22:34:47Z", "problem": 1191, "tier": "prep", "outcome": "skipped", "why": "no main theorem (parts: parts.i, parts.ii, variants.liminf_le)", "spend": 0.0}
+{"at": "2026-10-19T22:51:02Z", "problem": 902, "tier": "screen", "outcome": "control", "settle_chance": 0.02, "draws": [0.02, 0.02], "spend": 2.8076, "run_dir": "runs/20261019-183451-443275-erdos902", "track": "control", "intent": null}
