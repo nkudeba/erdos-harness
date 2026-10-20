@@ -13831,9 +13831,20 @@ def skeleton_context(skeleton: str, pos: int = -1) -> list[str]:
     Pointwise` dropped, so `A + A` on sets failed with `failed to synthesize instance HAdd (Set ℕ) (Set ℕ)`."""
     blocks = split_decls(visible_text(skeleton, pos))
     is_def = [bool(DEF_HEAD_RE.match(strip_comment_lines(d).lstrip("\n"))) for d in blocks]
+    # Spliced blocks nested around `pos` can each carry a copy of one definition. In Lean they are different constants
+    # (`a_ns.f`, `a_ns.b_ns.f`), but this context is flat, so the copies collide. A dev item's last open step was
+    # rejected unattempted in four cycles on "`ee95799` has already been declared" (2026-10-20), and so were 8 of
+    # the 10 hypotheses rejected this way on disk. A copy identical to a later one is dropped. Copies that differ
+    # are both kept, so the sub-statement never changes meaning.
+    norm = [" ".join(strip_comment_lines(d).split()) for d in blocks]
+    dup = {k for k in range(len(blocks)) if is_def[k]
+           and any(is_def[j] and norm[j] == norm[k] for j in range(k + 1, len(blocks)))}
+    is_def = [v and k not in dup for k, v in enumerate(is_def)]
     out = []
     for k, d in enumerate(blocks):
         s = strip_comment_lines(d).strip()
+        if k in dup:
+            continue
         if is_def[k] or NOTATION_HEAD_RE.match(s):
             # A notation or `variable` block too: a statement inlined from formal-conjectures opens with
             # `scoped[EuclideanGeometry] notation "ℝ²"`, and without it every hypothesis attack on #655's negation

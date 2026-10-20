@@ -1654,6 +1654,22 @@ class DefsVisibleFromTheHypothesis(unittest.TestCase):
     def test_a_top_level_hypothesis_sees_only_top_level_defs(self):
         self.assertEqual([d.split()[1] for d in H.skeleton_defs(self.SKEL)], ["es"])
 
+    def test_identical_copies_in_nested_blocks_appear_once_and_different_ones_both(self):
+        # 2026-10-20: a dev item's last open step sat inside two nested spliced blocks, each with its own copy of
+        # `ee95799`. Flattened, the copies collided ("has already been declared"), and the step was rejected
+        # unattempted in four cycles.
+        nested = ("namespace erdos_99_hyp_count_ns\nnoncomputable def ee (x : ℝ) : ℂ := Complex.exp (x : ℂ)\n\n"
+                  "namespace erdos_99_hyp_count_hyp_lower_ns\nnoncomputable def ee (x : ℝ) : ℂ := Complex.exp (x : ℂ)\n\n"
+                  "theorem erdos_99_hyp_count_hyp_lower_hyp_single : ee 0 = 1 := by\n  sorry\n"
+                  "end erdos_99_hyp_count_hyp_lower_ns\nend erdos_99_hyp_count_ns\n\ntheorem erdos_99 : True := trivial")
+        sub = H.hypothesis_substatement(nested, "erdos_99_hyp_count_hyp_lower_hyp_single")
+        self.assertEqual(sub.count("def ee "), 1)
+        differ = nested.replace("namespace erdos_99_hyp_count_hyp_lower_ns\nnoncomputable def ee (x : ℝ) : ℂ := "
+                                "Complex.exp (x : ℂ)",
+                                "namespace erdos_99_hyp_count_hyp_lower_ns\nnoncomputable def ee (x : ℝ) : ℂ := "
+                                "Complex.exp (2 * x : ℂ)")
+        self.assertEqual(H.hypothesis_substatement(differ, "erdos_99_hyp_count_hyp_lower_hyp_single").count("def ee "), 2)
+
 
 
 class RefinementMustBeEasier(unittest.TestCase):
