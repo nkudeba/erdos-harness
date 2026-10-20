@@ -1975,3 +1975,14 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
     a new one. Across both program runs it is 2 of 6 draws, both on #888.
   - #570 and #865 have now resisted four engine configurations: v5, the v6 program, iteration 4's scout with two
     lines, and this program pass. Crossfed failed on them too.
+- **#457's Lean re-run, 2026-10-20 07:30Z, written before launch.**
+  - The 07:14Z retry ran 2 of 4 cycles ($2.55) and stopped on stall. It never adopted a skeleton, for mechanical reasons
+    only.
+    - Both cycles' skeletons failed to compile: a helper definition needed `noncomputable`.
+    - Cycle 1's repair added the keyword, then cited a namespaced lemma that did not exist.
+    - Cycle 2's repair left a `sorry` in the glue.
+  - Fixed in `8b00676`: `Harness.check` marks the definition itself, as Lean's message says (`mark_noncomputable`).
+    - Seven skeletons on disk had died the same way.
+    - The fix was found on this dev run. It is a generic Lean compile repair and carries no content from the item.
+  - The same command re-runs on main at `8b00676`. The engine stage stays as pinned (`20a1462`).
+  - Prediction: verified and audit-clean, P = 0.4; $3–20.
