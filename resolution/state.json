@@ -3372,6 +3372,37 @@
     "why": "Exact n(4) is open (known bounds 23 ≤ n(4) ≤ 40) and would be the first exact value since HMT96, a solid but single-value result. The matching exhaustive lower-bound search over 4-uniform multifamilies is far larger than Östergård's m(4)=23 computation, so it is unlikely to finish in a week, though upper-bound improvements might.",
     "summary": "=== GOAL Why no settling line exists. The formal statement `n = TSMain.answer` asks for one explicit function ℕ → ℕ equal to n(k) for every k. That would pin down m(k) within a factor of 2 for all k, and so would resolve the property‑B gap (√(k/log k) versus k"
    }
+  },
+  "420": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.log_frequently_lt_two, variants.pow_four_ninths, variants.rankin_frequently_lt_two)",
+   "next": null
+  },
+  "393": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "control",
+     "settle_chance": 0.0,
+     "spend": 2.9674,
+     "track": "control"
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261019-195439-874199-erdos393",
+   "spend": 2.9673920000000003,
+   "limit_waits": 0,
+   "settle_chance": 0.0,
+   "arm": "control",
+   "track": "control",
+   "intent": null,
+   "next": "scout",
+   "status": "screened"
   }
  }
 }

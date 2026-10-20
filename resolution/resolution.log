@@ -441,3 +441,6 @@
 [2026-10-19T23:46:34Z] #679: skipped (no main theorem (parts: parts.i, parts.ii))
 [2026-10-19T23:46:38Z] #629: screen
 [2026-10-19T23:54:29Z] #629: screen -> screened out (settle chance 0.01, draws [0.0, 0.01]; $1.67); BUILD TRACK: its line's main target is rated new at significance 2 if proved (P_WEEK 0.05)
+[2026-10-19T23:54:35Z] #420: skipped (no main theorem (parts: parts.i, parts.ii, parts.iii, variants.log_frequently_lt_two, variants.pow_four_ninths, variants.rankin_frequently_lt_two))
+[2026-10-19T23:54:39Z] #393: screen
+[2026-10-20T00:12:21Z] #393: screen -> control (settle chance 0.00, draws [0.0, 0.0]; $2.97)
