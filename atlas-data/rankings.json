@@ -7704,7 +7704,7 @@
         "best": "partial",
         "runs": 4,
         "benchmarkRuns": 4,
-        "certifiedMax": 2
+        "certifiedMax": 8
       },
       "rank": 140,
       "tier": "Plausible"
@@ -21280,7 +21280,7 @@
         "best": "partial",
         "runs": 10,
         "benchmarkRuns": 10,
-        "certifiedMax": 3
+        "certifiedMax": 7
       },
       "rank": 389,
       "tier": "Difficult"
