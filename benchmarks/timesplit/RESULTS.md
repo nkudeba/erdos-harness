@@ -2045,3 +2045,22 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
 - **Next, not launched** (the loop's authority ended at the 2026-10-20 09:00 reset): Lean conversion of the six
   complete chains not yet converted, unassisted, on the harness with both Lean fixes, with `hardsteps_lean.py`
   defaults, then `audit.py`. About $3–20 each.
+
+### Iteration 5, Lean conversion of Arm C's six other complete chains (2026-10-20T19:21:29Z), written before launch
+
+- **Operator's go-ahead** (2026-10-20): "Go ahead with the next step". The loop was renewed by $100 for it.
+- **Items and claims:** #150 `deep/C1`, #419 `r1s1/C1`, #537 `r1s2/C1` (FALSE, so the target is the
+  benchmark's negation), #729 `r1s1/C1`, #871 `r1s1/C1` (FALSE, the negation) and #1180 `r1s1/C4`.
+- **Protocol, unassisted:**
+  - `hardsteps_lean.py --full-run <engine run> --chain --budget 15 --extend 5 --extend-max 25 --cycles 8` on main
+    `c52bedd`. That includes the noncomputable repair, the duplicate-definition fix and the FALSE-answer path.
+  - `--cycles 8` is set before launch, from #457's lesson, so it is protocol, not assistance. No resume of any of
+    these runs may count.
+  - Then `audit.py` on each. Two lanes of three, for memory.
+- **Predictions:**
+  - all Lean checks pass on 3 of 6 (range 1–5); P(at least 1) = 0.85;
+  - a full audit PASS, blindness checks included, on 2 of 6;
+  - $5–25 an item, about $90.
+- **Reading:** a full audit PASS on an item the intent judges call new-math (#150, #537, #871) is a time-split solve
+  by the campaign's own pipeline. On #729 and #1180, which the judges call known results, and on #419 (unclear), a
+  PASS is a solve of formal-conjectures' statement, reported with that caveat.
