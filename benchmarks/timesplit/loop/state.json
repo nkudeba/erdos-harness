@@ -286,6 +286,15 @@
    "note": "",
    "in_flight": true,
    "registered": "2026-10-20T00:33:45Z"
+  },
+  {
+   "kind": "run",
+   "name": "dev-scout-baseline-20a1462-lean",
+   "estimate": 20.0,
+   "usd": 0.0,
+   "note": "",
+   "in_flight": true,
+   "registered": "2026-10-20T03:38:47Z"
   }
  ],
  "notes": [
@@ -382,7 +391,7 @@
    "text": "loop paused until the 2026-10-20 09:00 reset: $25.76 left pays for one item, too few to gate a change of method, and the loop's runs share the session limit with the sprint (it stopped every lane 18:13-21:13Z today); #888's second line never ran (resume bug, fixed: deep_dive_room)"
   }
  ],
- "updated": "2026-10-20T00:33:45Z",
+ "updated": "2026-10-20T03:38:47Z",
  "rejected_streak": 0,
  "acknowledged": [
   {

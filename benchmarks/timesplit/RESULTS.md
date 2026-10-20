@@ -1934,3 +1934,25 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - An item it completes is a candidate for Lean conversion, which alone makes a solve, by a separate decision.
 - **Budget:** the loop is renewed by another $100 for it, at the operator's direction to use the week's remaining
   usage. That direction is in the renewal above.
+
+### Iteration 5, first results and #457's Lean conversion (2026-10-20 03:45Z), written before the Lean launch
+
+- **Arm B, 2 of 3 in:**
+  - #888 complete again: true side, unrecognized, claim `program/C6`, $22.32 added. This repeats `program-v1-dev`'s
+    settle, so it is a replication, not a new item.
+  - #570 not complete ($23.68 added).
+  - #865 was waiting out the session limit.
+  - The gate (at least 1 of 3 unrecognized) is met on #888. Arm B keeps the program's place in the campaign.
+- **Arm C, 2 of 9 in:**
+  - #457 complete: true side, unrecognized, claim `r1s2/C1`, $15.31. This is a round-1 session's claim on an item the
+    engine had never seen.
+  - The novelty verdict is "restatement". The intent judges say "unclear": one judge notes that a few lines of
+    Dirichlet pigeonhole give the same conclusion, which suggests the catalogue statement may be easier than the
+    intended problem.
+  - #825 not complete ($14.49).
+- **#457 goes to Lean** (`hardsteps_lean.py --engine-run <its run> --claim r1s2/C1 --full-run <its run> --chain`). The
+  target is the frozen statement, not the step. Budget $15, extensible by $5 to $25. This is the same route as #1125
+  ($2.79, verified).
+  - Prediction: verified and audit-clean, P = 0.45; $3–20.
+  - Even when verified, the intent judges' doubt means the result is filed as a proof of formal-conjectures'
+    statement. Whether that statement is the problem as intended is a separate question.
