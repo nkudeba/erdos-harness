@@ -1956,3 +1956,6 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - Prediction: verified and audit-clean, P = 0.45; $3–20.
   - Even when verified, the intent judges' doubt means the result is filed as a proof of formal-conjectures'
     statement. Whether that statement is the problem as intended is a separate question.
+- **#457's Lean run hit the session limit** (2026-10-20 03:50Z, $1.50, `runs/20261019-233911-580678-hardlean-erdos95799`).
+  This is an infrastructure stop, not a verdict. The same command re-runs automatically at 07:14Z, after the 03:10
+  Toronto reset.
