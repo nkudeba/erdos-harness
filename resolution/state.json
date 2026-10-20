@@ -3486,6 +3486,11 @@
      "settle_chance": 0.0,
      "spend": 7.8682,
      "track": "control"
+    },
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 17.3422
     }
    ],
    "prepped": true,
@@ -3494,14 +3499,16 @@
    "kind": "settle",
    "running": null,
    "run_dir": "runs/20261020-045126-922501-erdos663",
-   "spend": 7.868239,
+   "spend": 25.210476000000007,
    "limit_waits": 0,
    "settle_chance": 0.0,
    "arm": "control",
    "track": "control",
    "intent": null,
-   "next": "scout",
-   "status": "screened"
+   "next": null,
+   "status": "done",
+   "validated_seen": 5,
+   "claims_todo": []
   }
  }
 }
