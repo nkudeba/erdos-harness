@@ -1688,7 +1688,7 @@
         "best": "partial",
         "runs": 5,
         "benchmarkRuns": 5,
-        "certifiedMax": 5
+        "certifiedMax": 9
       },
       "rank": 33,
       "tier": "Plausible"
@@ -10769,8 +10769,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 3,
-        "benchmarkRuns": 3,
+        "runs": 4,
+        "benchmarkRuns": 4,
         "certifiedMax": 5
       },
       "rank": 196,
@@ -15375,8 +15375,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 3,
-        "benchmarkRuns": 3,
+        "runs": 4,
+        "benchmarkRuns": 4,
         "certifiedMax": 1
       },
       "assessed": {
