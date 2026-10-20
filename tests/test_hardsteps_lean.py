@@ -53,8 +53,11 @@ class LeanStageRecord(unittest.TestCase):
         (L.RESULTS / "engine-x.jsonl").write_text(json.dumps(
             {"problem": "537", "alias": 77933, "run_dir": "runs/eng", "answer": False, "truth": "false", "split": "dev",
              "spend": 12.19}) + "\n")
-        (self.lean / "state.json").write_text(json.dumps({"benchmark": True, "verify": {"all_clear": True},
-                                                          "benchmark_direction": "neg"}))
+        # an --open run committed to `neg`: its verification is the neg direction's own
+        (self.lean / "state.json").write_text(json.dumps({"benchmark": True, "benchmark_direction": "neg",
+                                                          "open_results": {"neg": 0}}))
+        (self.lean / "neg").mkdir()
+        (self.lean / "neg" / "state.json").write_text(json.dumps({"verify": {"all_clear": True}}))
         row = L.record_result(self.eng, self.lean, "r1s2/C1", "877933", 0)
         self.assertTrue(row["solved"])
         self.assertFalse(row["contradiction"])

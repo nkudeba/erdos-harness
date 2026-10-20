@@ -62,9 +62,13 @@ def record_result(engine_run: Path, lean_run: Path, claim: str, sid: str, rc: in
         return None
     st = json.loads((lean_run / "state.json").read_text()) if (lean_run / "state.json").exists() else {}
     done = json.loads((lean_run / "DONE").read_text()) if (lean_run / "DONE").exists() else {}
-    verified = done.get("exit") == 0 and bool((st.get("verify") or {}).get("all_clear"))
-    # the direction proved, relative to the benchmark's statement: a FALSE item's stage proves its negation
+    # the direction proved, relative to the benchmark's statement: a FALSE item's stage proves its negation, in an
+    # --open run committed to `neg`, whose verification lives in that direction's own state
     committed = st.get("benchmark_direction") or "pos"
+    vst = st
+    if st.get("open_results") is not None and (lean_run / committed / "state.json").exists():
+        vst = json.loads((lean_run / committed / "state.json").read_text())
+    verified = done.get("exit") == 0 and bool((vst.get("verify") or {}).get("all_clear"))
     right = (committed == "pos") == (er.get("truth") == "true")
     line = (lean_run / "SUMMARY.line").read_text() if (lean_run / "SUMMARY.line").exists() else ""
     m = re.search(r"spend=\$([0-9.]+)", line)
@@ -133,16 +137,13 @@ def main() -> int:
     if thms and thms[-1] != f"erdos_{sid}":
         lean = re.sub(rf"\b{re.escape(thms[-1])}(?![\w'!?])", f"erdos_{sid}", lean)
     answer = "true" if c["status"] == "PROVED" else "false"
-    # A whole time-split problem settled FALSE: the target is the benchmark's own negation, which the refutation
-    # proves. Inside the run that negation IS the frozen statement, so the run proves it ("true"); the record keeps
-    # the benchmark's direction. Until 2026-10-20 a FALSE answer was recorded and never run, so dev #537's and
-    # #871's complete refutations could not reach Lean.
+    # A whole time-split problem settled FALSE: the run attacks the negation as an --open run committed to `neg`. The
+    # harness builds the negation itself (`erdos_<id>_neg`, Lean-checked), and every prompt of that direction knows
+    # it is the negation. Until 2026-10-20 a FALSE answer was recorded and never run. Then, for one launch, the negated
+    # text was the frozen statement of a plain run: its plans read the original statement, called "the target" false
+    # and stopped (`target_believed_false`) on dev #537 and #871 within a cycle.
     negate = answer == "false" and timesplit
-    if negate:
-        sys.path.insert(0, str(ROOT / "benchmarks" / "timesplit"))
-        import timesplit as TS
-        lean = TS.negated_statement(lean)
-    run_answer = "true" if negate else answer
+    run_answer = answer
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-hardlean-erdos{sid}"
     run_dir.mkdir(parents=True)
     if timesplit:
@@ -175,7 +176,7 @@ def main() -> int:
            str(run_dir), "--mode", "research", "--allow-research", "--benchmark", "--masked", "--no-brief",
            "--skip-literature", "--blueprint", "on", "--residual-view", "outline", "--research-cycles", str(args.cycles),
            "--run-budget", str(args.budget), "--lean-timeout", "1800", "--llm-timeout", "5400",
-           "--backend", "claude-cli", "--model", "claude-opus-5-5",
+           "--backend", "claude-cli", "--model", "claude-opus-5-5", *(["--open", "--discover", "on"] if negate else []),
            *(["--budget-extend", str(args.extend), "--budget-extend-max", str(args.extend_max)] if args.extend > 0 else [])]
     with (run_dir / "lane.log").open("w") as log:
         rc = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
