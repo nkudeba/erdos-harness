@@ -1986,3 +1986,11 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
     - The fix was found on this dev run. It is a generic Lean compile repair and carries no content from the item.
   - The same command re-runs on main at `8b00676`. The engine stage stays as pinned (`20a1462`).
   - Prediction: verified and audit-clean, P = 0.4; $3–20.
+- **#457's Lean re-run result (08:39Z): partial.** 13 steps certified and 1 open
+  (`hyp_count_hyp_lower_hyp_single`, a finite Fourier nonnegativity fact). $12.01. It stopped at its 4-cycle cap while
+  still discharging steps. The noncomputable repair let it adopt a skeleton in cycle 1. The unassisted verdict for
+  #457 is **not verified**.
+- **Assisted resume (08:50Z), written before launch.**
+  - The same Lean run, `--research-cycles 8 --child-cycles 3`, budget $25.
+  - Recorded in the run's `assistance`. A proof from it is an operator-assisted reconstruction, never a solve.
+  - Prediction: verified, P = 0.5; up to $13.
