@@ -1994,3 +1994,12 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - The same Lean run, `--research-cycles 8 --child-cycles 3`, budget $25.
   - Recorded in the run's `assistance`. A proof from it is an operator-assisted reconstruction, never a solve.
   - Prediction: verified, P = 0.5; up to $13.
+- **The assisted resume ran 1 cycle ($0.42) and stopped on stall.** The last open step had never been attacked.
+  - In every cycle (2, 3, 4 and the resume), its sub-statement was rejected before any attempt with "`ee95799` has
+    already been declared".
+  - Two nested spliced blocks around it each carried a copy of one definition, and the flat sub-statement collided.
+  - This was 8 of the 10 such rejections on disk. Fixed in `057328b`: identical copies appear once. The real
+    sub-statement now compiles in Lean.
+- **Second assisted resume (09:05Z), written before launch.**
+  - On main `057328b`, with the stall counter reset and 4 cycles. Recorded in the run's `assistance`.
+  - Prediction: the open step proved and the whole statement verified, P = 0.4; up to $8.
