@@ -3187,7 +3187,7 @@
         "best": "partial",
         "runs": 7,
         "benchmarkRuns": 7,
-        "certifiedMax": 9
+        "certifiedMax": 13
       },
       "rank": 60,
       "tier": "Plausible"
