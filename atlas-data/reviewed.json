@@ -1455,6 +1455,15 @@
     ],
     "assessed": "2026-10-08"
   },
+  "691": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: This line settles the Lean statement only on the condition that the grader accepts a known, non-tautological reformulation as `answer`. If the harness demands an \"intrinsic\" criterion in the CORE's sense, the chance is about 0. I found no plausible settling li BUILD TRACK: no settling line, but two judges rated this line's main target new at significance 2 if proved (P_WEEK 0.4), so a research program is committed to it and proves its theorems one at a time (resolution/build/691/line.md)."
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-20"
+  },
   "695": {
     "rationale": [
       "v6 random-sample screen 2026-10-08 ($14.07, informal): 2 validated-new claims (significance 1, 0); best: Let S be one of: (a) any pair {a,b} ⊆ {2,4,…,16} except {8,14}; (b) any 3-subset of {2,4,…,16} except the 14 sets {2,6,10},{2,8,14},{4,6,10},{4,6,12},{4,8,14},{4,10,12},{4,12,14},{6,8,10},{6,8,14},{6,10,12},{8,10,14},{8,12,14},{8,14,16},{10,12,16}. Then no inf",
