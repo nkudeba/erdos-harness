@@ -3362,8 +3362,8 @@
       "prize": "no",
       "evidence": {
         "best": "closed apart from published premises",
-        "runs": 11,
-        "benchmarkRuns": 11,
+        "runs": 12,
+        "benchmarkRuns": 12,
         "certifiedMax": 17
       },
       "rank": 63,
@@ -10626,8 +10626,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 9,
-        "benchmarkRuns": 9,
+        "runs": 10,
+        "benchmarkRuns": 10,
         "certifiedMax": 3
       },
       "rank": 193,
@@ -20119,8 +20119,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 10,
-        "benchmarkRuns": 10,
+        "runs": 11,
+        "benchmarkRuns": 11,
         "certifiedMax": 1
       },
       "rank": 366,
