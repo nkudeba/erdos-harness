@@ -457,3 +457,7 @@
 [2026-10-20T12:39:36Z] #663: screen -> control (settle chance 0.00, draws [0.0, 0.0]; $7.87)
 [2026-10-20T12:39:51Z] #663: scout (resuming runs/20261020-045126-922501-erdos663)
 [2026-10-20T13:39:36Z] #663: scout -> none ($17.34; 5 validated new [1, 1, 1, 1, 0])
+[2026-10-20T13:39:48Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-20T13:39:50Z] #709: skipped (no main theorem (parts: variants.singleton))
+[2026-10-20T13:39:54Z] #555: screen
+[2026-10-20T13:47:19Z] #555: screen -> control (settle chance 0.25, draws [0.0, 0.5]; $1.77)

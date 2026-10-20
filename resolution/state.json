@@ -3509,6 +3509,37 @@
    "status": "done",
    "validated_seen": 5,
    "claims_todo": []
+  },
+  "709": {
+   "history": [],
+   "status": "skipped",
+   "why": "no main theorem (parts: variants.singleton)",
+   "next": null
+  },
+  "555": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "control",
+     "settle_chance": 0.25,
+     "spend": 1.7725,
+     "track": "control"
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "d573b686298f40690dd94441c9e1abc3cda7cd61",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261020-093954-410945-erdos555",
+   "spend": 1.7724600000000004,
+   "limit_waits": 0,
+   "settle_chance": 0.25,
+   "arm": "control",
+   "track": "control",
+   "intent": null,
+   "next": "scout",
+   "status": "screened"
   }
  }
 }

@@ -1,52 +1,52 @@
 {
-  "sha": "c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
-  "node_id": "C_kwDOOogmB9oAKGM2ZjRiNGJkYWI4ZmRhYmIxOTE5MWE4YTE2NDhiZTIxYjgxMjUzYjA",
+  "sha": "d573b686298f40690dd94441c9e1abc3cda7cd61",
+  "node_id": "C_kwDOOogmB9oAKGQ1NzNiNjg2Mjk4ZjQwNjkwZGQ5NDQ0MWM5ZTFhYmMzY2RhN2NkNjE",
   "commit": {
     "author": {
-      "name": "Manan G.",
-      "email": "76737208+mnn31@users.noreply.github.com",
-      "date": "2026-10-19T21:07:11Z"
+      "name": "AItoBit",
+      "email": "321732397+AItoBit@users.noreply.github.com",
+      "date": "2026-10-20T13:08:08Z"
     },
     "committer": {
       "name": "GitHub",
       "email": "noreply@github.com",
-      "date": "2026-10-19T21:07:11Z"
+      "date": "2026-10-20T13:08:08Z"
     },
-    "message": "feat(ErdosProblems/1191): add Erdős Problem 1191 (#7167)\n\nAdds [Erdős Problem 1191](https://www.erdosproblems.com/1191) ([Er80, p.\n98]), the $1000 problem on the lower growth of infinite Sidon sets. The\npage asks two questions and both are open:\n\n- `parts.i`: for every infinite Sidon set A, is liminf |A ∩ [1, x]| /\nx^(1/2) · (log x)^(1/2) = 0?\n- `parts.ii`: is there an infinite Sidon set A and some c > 0 with\nliminf |A ∩ [1, x]| / x^(1/2) · (log x)^c > 0?\n\nIt also adds the result the page attributes to Erdős (see Halberstam and\nRoth, Sequences, 1966) as `variants.liminf_le`: for every infinite Sidon\nset the same liminf with exponent 1/2 is at most some constant c > 0.\n\nFormalisation choices:\n\n- The liminf is taken in `ℝ≥0∞` through `ENNReal.ofReal`, as in\n`erdos_158.variants.isSidon'`. In `ℝ`, `liminf` of a sequence that tends\nto infinity is 0, which would make `parts.i` easier to satisfy than\nintended. In `ℝ≥0∞` that case gives ⊤, and in `parts.ii` a liminf of ⊤\ncorrectly counts as positive.\n- x runs over ℕ instead of ℝ. Between consecutive integers the count is\nconstant and x^(-1/2) (log x)^c changes by a factor tending to 1, so the\nliminf is the same.\n- The count is `(A ∩ Set.Icc 1 x).ncard` to match A ∩ [1, x] on the\npage, as in 39.lean. Sidon uses `IsSidon` from ForMathlib.\n- In `variants.liminf_le` the constant may depend on A, so the statement\nis equivalent to the liminf being finite. This is the weaker reading of\n\"for some constant c > 0\". It is the same result as\n`erdos_158.variants.isSidon'`, restated with this problem's count A ∩\n[1, x], and the docstring points there. I kept the `∃ c` form because it\nis how the page states it. I could not check in Halberstam and Roth\nwhether Erdős's constant is absolute. If it is, the `∃ c` can move in\nfront of the `∀ A`.\n\nNot included: the remark that Erdős may have meant the optimal f with\nliminf |A ∩ [1, x]| / x^(1/2) · f(x) = 0 for all infinite Sidon sets,\nsince the page only guesses at it. The page also says \"See also [729]\nfor the behaviour of the limsup\", but problem 729 is about prime factors\nof n!/(a!b!). The limsup question for Sidon sets is problem 329, so this\nlooks like a typo on the site and I left it out of the docstring.\n\nI searched for an existing issue or PR for this problem and did not find\none.\n\n`lake --wfail build 'FormalConjectures.ErdosProblems.«1191»'` passes\nwith no warnings.\n\nUpdate: main has dropped `answer(...)`, so I merged main and rewrote the\nstatements in the new form, tagged `question`, with `¬` in front where\nthe answer is no.\n\nAI-usage disclosure: Claude (Anthropic) was minorly used to assist in\ndrafting the Lean statement.",
+    "message": "feat(ErdosProblems/709): formalize the singleton case (#7474)\n\nAdds the interval and matching definitions from Erdős Problem 709,\nproves monotonicity and a multiple-in-every-window lemma, and\nestablishes the exact singleton case Works 1 1.\\n\\nThe source asks for\ngood bounds or an asymptotic formula for the optimum multiplier. Those\nquantitative bounds remain open and are not claimed here. This\ncontribution records a verified boundary case and reusable elementary\nsetup.\\n\\nValidation: Lean elaboration with warnings treated as errors\nagainst the repository environment; git diff --check.\\n\\nRefs #909",
     "tree": {
-      "sha": "e749d28be2a0a0a25fc1a1a1b42c4e6b126853f2",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/e749d28be2a0a0a25fc1a1a1b42c4e6b126853f2"
+      "sha": "c516256b9abc33d5a660e5a1dd9cf46f8cc04629",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/c516256b9abc33d5a660e5a1dd9cf46f8cc04629"
     },
-    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/d573b686298f40690dd94441c9e1abc3cda7cd61",
     "comment_count": 0,
     "verification": {
       "verified": true,
       "reason": "valid",
-      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq1oaPCRC1aQ7uu5UhlAAAvXgQAKTlZrrQIMWLxcqPYtp69LmE\nM1SbM0WdhKLywtHjTyzI4IDkORJ430ruMRaAhh8aWQ5jXHEQ8BtCW+7bvfjrP6oS\n8oydXQR75axJBJmSkquMOHB1IMgcHklbxvcGZ9PT2GKSpD4KTN40wHw7tI6D+u9F\nxSZ/bwQhEu0wUv95WmHpAZKn7FvWRWDfVMLRJ2CUxbUCBwXJaDW0sxxy9eWZL4jO\nuIyef6ZGvUjyPSdiIJhv8pmCp5QAqd/G2yt2alj7NHcAGknDslJAtJsv471D/3yZ\n89K+y2OfDgH85/uhyAaB1careYKqdaQ4nsBMJOEhDIkZl02OMdbeJmzL1fRrA8ZH\nkinuhSqXC9zVuzT2SWNJRlt5z0sZj8GLkBTync0wfy6IxUklvj+Sl4dwmmTQtnrR\nYXGy5xyEowcNmU/b2LDilYxctxTzoaer9l3AkEv+Wty76iSJGYu2kba4JAzdJ3UR\nJgoUi2qjLMmGTSvIrOIyn2qbNRWP11IVMIEEHVUDzhXVi6R4RV001HGevFPhmgw4\nV18lHIqNcDrsQn7YlXpzu6xbXjTUzBOQ5cMvimLbKpYv+wAg9HY2WnNXcSvrOL4x\nXuEKtELvB7yti04z5SzxsbctOdpxfavrVJbtDKCrXn/sBc13K2YEJcl6f0YHzxwv\nxWD0oHzblemV4u3AwvBm\n=GdY/\n-----END PGP SIGNATURE-----\n",
-      "payload": "tree e749d28be2a0a0a25fc1a1a1b42c4e6b126853f2\nparent 572bd287122d356ed18b67315541ba087b3086aa\nauthor Manan G. <76737208+mnn31@users.noreply.github.com> 1792444031 +0000\ncommitter GitHub <noreply@github.com> 1792444031 +0000\n\nfeat(ErdosProblems/1191): add Erdős Problem 1191 (#7167)\n\nAdds [Erdős Problem 1191](https://www.erdosproblems.com/1191) ([Er80, p.\n98]), the $1000 problem on the lower growth of infinite Sidon sets. The\npage asks two questions and both are open:\n\n- `parts.i`: for every infinite Sidon set A, is liminf |A ∩ [1, x]| /\nx^(1/2) · (log x)^(1/2) = 0?\n- `parts.ii`: is there an infinite Sidon set A and some c > 0 with\nliminf |A ∩ [1, x]| / x^(1/2) · (log x)^c > 0?\n\nIt also adds the result the page attributes to Erdős (see Halberstam and\nRoth, Sequences, 1966) as `variants.liminf_le`: for every infinite Sidon\nset the same liminf with exponent 1/2 is at most some constant c > 0.\n\nFormalisation choices:\n\n- The liminf is taken in `ℝ≥0∞` through `ENNReal.ofReal`, as in\n`erdos_158.variants.isSidon'`. In `ℝ`, `liminf` of a sequence that tends\nto infinity is 0, which would make `parts.i` easier to satisfy than\nintended. In `ℝ≥0∞` that case gives ⊤, and in `parts.ii` a liminf of ⊤\ncorrectly counts as positive.\n- x runs over ℕ instead of ℝ. Between consecutive integers the count is\nconstant and x^(-1/2) (log x)^c changes by a factor tending to 1, so the\nliminf is the same.\n- The count is `(A ∩ Set.Icc 1 x).ncard` to match A ∩ [1, x] on the\npage, as in 39.lean. Sidon uses `IsSidon` from ForMathlib.\n- In `variants.liminf_le` the constant may depend on A, so the statement\nis equivalent to the liminf being finite. This is the weaker reading of\n\"for some constant c > 0\". It is the same result as\n`erdos_158.variants.isSidon'`, restated with this problem's count A ∩\n[1, x], and the docstring points there. I kept the `∃ c` form because it\nis how the page states it. I could not check in Halberstam and Roth\nwhether Erdős's constant is absolute. If it is, the `∃ c` can move in\nfront of the `∀ A`.\n\nNot included: the remark that Erdős may have meant the optimal f with\nliminf |A ∩ [1, x]| / x^(1/2) · f(x) = 0 for all infinite Sidon sets,\nsince the page only guesses at it. The page also says \"See also [729]\nfor the behaviour of the limsup\", but problem 729 is about prime factors\nof n!/(a!b!). The limsup question for Sidon sets is problem 329, so this\nlooks like a typo on the site and I left it out of the docstring.\n\nI searched for an existing issue or PR for this problem and did not find\none.\n\n`lake --wfail build 'FormalConjectures.ErdosProblems.«1191»'` passes\nwith no warnings.\n\nUpdate: main has dropped `answer(...)`, so I merged main and rewrote the\nstatements in the new form, tagged `question`, with `¬` in front where\nthe answer is no.\n\nAI-usage disclosure: Claude (Anthropic) was minorly used to assist in\ndrafting the Lean statement.",
-      "verified_at": "2026-10-19T21:07:27Z"
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq12fICRC1aQ7uu5UhlAAAwbEQABu6TxoDYLNn4LgWZg8GfUO1\nz+tD60BruSOKNyArvHGQL8bXdYfPdGgWNxkJtSGgoCCDciY2zD2/gWrPsMnOgAoQ\n4/zCdhIB8SB6ArpgA2PvGp/RYA2wePKi3nbukNyZCMxWjSZqjbsyDx8XBxwgWUoT\noj4dCa4ekX1HnvdfKJ037K+fjbjEsTYCo7GOePcmepE0xzcDFcxB2j8lA8ZtwtAS\nRWrmCeFLCCSETa1+IjH8pQ8FF22sjN64UcD0EMPT57crXvkP9gBfCxBIbckJzQgF\nToEe+zHQHfk5X0LwvmztT7g967iQuW064kFYJa5GykRMdX83ESsZqnr/0kWjWjRR\nuPBeUUu7TtqmaXAY3JCi0ka+JCPgeoOWO6+8iENFUsIxxWNNucVNGgcTSlkg0xMv\nfFyfCvMN5Snzi06KMZ8abkD4Ki4vZbraNcyp5541b95jAA98ZdwhAuwSLPMifAH3\nr5vePfBvEK/+0kGYy9sb0KE/AILef5YCKfMZr+s0iK/2Pt0GCysZph9v6SkSmRmj\n8ghB7w8Kvra1tiQCzGXJ+jbhRWaA+REij4EbgdxPO+pJQvnsRFqZdRPm+veeImFx\neHiPpWZ9pBHh9cAKlnl0pw/nX3rJfnboXIcQGgfRG7oVyi6/FAtAEkWVSUySHEjP\nzpoU+foMqAooeh5FiaHA\n=1C2k\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree c516256b9abc33d5a660e5a1dd9cf46f8cc04629\nparent b4c227464a4dcf3005281f0b63e6c541ed0a6fc0\nauthor AItoBit <321732397+AItoBit@users.noreply.github.com> 1792501688 +0000\ncommitter GitHub <noreply@github.com> 1792501688 +0000\n\nfeat(ErdosProblems/709): formalize the singleton case (#7474)\n\nAdds the interval and matching definitions from Erdős Problem 709,\nproves monotonicity and a multiple-in-every-window lemma, and\nestablishes the exact singleton case Works 1 1.\\n\\nThe source asks for\ngood bounds or an asymptotic formula for the optimum multiplier. Those\nquantitative bounds remain open and are not claimed here. This\ncontribution records a verified boundary case and reusable elementary\nsetup.\\n\\nValidation: Lean elaboration with warnings treated as errors\nagainst the repository environment; git diff --check.\\n\\nRefs #909",
+      "verified_at": "2026-10-20T13:08:24Z"
     }
   },
-  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
-  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
-  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/c6f4b4bdab8fdabb19191a8a1648be21b81253b0/comments",
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/d573b686298f40690dd94441c9e1abc3cda7cd61",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/d573b686298f40690dd94441c9e1abc3cda7cd61",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/d573b686298f40690dd94441c9e1abc3cda7cd61/comments",
   "author": {
-    "login": "mnn31",
-    "id": 76737208,
-    "node_id": "MDQ6VXNlcjc2NzM3MjA4",
-    "avatar_url": "https://avatars.githubusercontent.com/u/76737208?v=4",
+    "login": "AItoBit",
+    "id": 321732397,
+    "node_id": "U_kgDOEy0_LQ",
+    "avatar_url": "https://avatars.githubusercontent.com/u/321732397?v=4",
     "gravatar_id": "",
-    "url": "https://api.github.com/users/mnn31",
-    "html_url": "https://github.com/mnn31",
-    "followers_url": "https://api.github.com/users/mnn31/followers",
-    "following_url": "https://api.github.com/users/mnn31/following{/other_user}",
-    "gists_url": "https://api.github.com/users/mnn31/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/mnn31/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/mnn31/subscriptions",
-    "organizations_url": "https://api.github.com/users/mnn31/orgs",
-    "repos_url": "https://api.github.com/users/mnn31/repos",
-    "events_url": "https://api.github.com/users/mnn31/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/mnn31/received_events",
+    "url": "https://api.github.com/users/AItoBit",
+    "html_url": "https://github.com/AItoBit",
+    "followers_url": "https://api.github.com/users/AItoBit/followers",
+    "following_url": "https://api.github.com/users/AItoBit/following{/other_user}",
+    "gists_url": "https://api.github.com/users/AItoBit/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/AItoBit/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/AItoBit/subscriptions",
+    "organizations_url": "https://api.github.com/users/AItoBit/orgs",
+    "repos_url": "https://api.github.com/users/AItoBit/repos",
+    "events_url": "https://api.github.com/users/AItoBit/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/AItoBit/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false
@@ -74,28 +74,28 @@
   },
   "parents": [
     {
-      "sha": "572bd287122d356ed18b67315541ba087b3086aa",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/572bd287122d356ed18b67315541ba087b3086aa",
-      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/572bd287122d356ed18b67315541ba087b3086aa"
+      "sha": "b4c227464a4dcf3005281f0b63e6c541ed0a6fc0",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/b4c227464a4dcf3005281f0b63e6c541ed0a6fc0",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/b4c227464a4dcf3005281f0b63e6c541ed0a6fc0"
     }
   ],
   "stats": {
-    "total": 74,
-    "additions": 74,
+    "total": 131,
+    "additions": 131,
     "deletions": 0
   },
   "files": [
     {
-      "sha": "c002268d4c063de2b87241da695809ef3fa805b7",
-      "filename": "FormalConjectures/ErdosProblems/1191.lean",
+      "sha": "1bd9cb2eb84971a4a56b1e3a2742b0ef333138c5",
+      "filename": "FormalConjectures/ErdosProblems/709.lean",
       "status": "added",
-      "additions": 74,
+      "additions": 131,
       "deletions": 0,
-      "changes": 74,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/c6f4b4bdab8fdabb19191a8a1648be21b81253b0/FormalConjectures%2FErdosProblems%2F1191.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/c6f4b4bdab8fdabb19191a8a1648be21b81253b0/FormalConjectures%2FErdosProblems%2F1191.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F1191.lean?ref=c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
-      "patch": "@@ -0,0 +1,74 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import FormalConjecturesUtil\n+\n+/-!\n+# Erdős Problem 1191\n+\n+*References:*\n+- [erdosproblems.com/1191](https://www.erdosproblems.com/1191)\n+- [Er80] Erdős, Paul, *A survey of problems in combinatorial number theory*. Ann. Discrete Math.\n+  (1980), 89-115.\n+- [HaRo66] Halberstam, H. and Roth, K. F., *Sequences. Vol. I*. (1966), xx+291.\n+-/\n+\n+@[expose] public section\n+\n+open Filter Real\n+\n+namespace Erdos1191\n+\n+/--\n+Let $A\\subset\\mathbb{N}$ be an infinite Sidon set. Is it true that\n+$$\\liminf_{x\\to \\infty} \\frac{\\lvert A\\cap [1,x]\\rvert}{x^{1/2}}(\\log x)^{1/2}=0?$$\n+\n+Here $x$ runs over $\\mathbb{N}$ and the $\\liminf$ is taken in `ℝ≥0∞`, so that it is $\\infty$\n+rather than $0$ when the sequence tends to infinity.\n+-/\n+@[category research open, question, AMS 5 11]\n+theorem erdos_1191.parts.i : ∀ A : Set ℕ, A.Infinite → IsSidon A →\n+    liminf (fun x : ℕ ↦ ENNReal.ofReal\n+      ((A ∩ .Icc 1 x).ncard / (x : ℝ) ^ (1 / 2 : ℝ) * log x ^ (1 / 2 : ℝ))) atTop = 0 := by\n+  sorry\n+\n+/--\n+Does there exist an infinite Sidon set $A$ such that\n+$$\\liminf_{x\\to \\infty} \\frac{\\lvert A\\cap [1,x]\\rvert}{x^{1/2}}(\\log x)^c>0$$\n+for some $c>0$?\n+\n+A positive answer would also give a positive answer to Erdős Problem 39.\n+-/\n+@[category research open, question, AMS 5 11]\n+theorem erdos_1191.parts.ii : ∃ A : Set ℕ, A.Infinite ∧ IsSidon A ∧\n+    ∃ c > (0 : ℝ), 0 < liminf (fun x : ℕ ↦ ENNReal.ofReal\n+      ((A ∩ .Icc 1 x).ncard / (x : ℝ) ^ (1 / 2 : ℝ) * log x ^ c)) atTop := by\n+  sorry\n+\n+/--\n+Erdős proved (see for example [HaRo66]) that if $A$ is an infinite Sidon set then\n+$$\\liminf_{x\\to \\infty} \\frac{\\lvert A\\cap [1,x]\\rvert}{x^{1/2}}(\\log x)^{1/2}\\leq c$$\n+for some constant $c>0$. See also `erdos_158.variants.isSidon'`.\n+-/\n+@[category research solved, AMS 5 11]\n+theorem erdos_1191.variants.liminf_le {A : Set ℕ} (hAinf : A.Infinite) (hAsid : IsSidon A) :\n+    ∃ c > (0 : ℝ), liminf (fun x : ℕ ↦ ENNReal.ofReal\n+      ((A ∩ .Icc 1 x).ncard / (x : ℝ) ^ (1 / 2 : ℝ) * log x ^ (1 / 2 : ℝ))) atTop ≤\n+        ENNReal.ofReal c := by\n+  sorry\n+\n+end Erdos1191"
+      "changes": 131,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/d573b686298f40690dd94441c9e1abc3cda7cd61/FormalConjectures%2FErdosProblems%2F709.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/d573b686298f40690dd94441c9e1abc3cda7cd61/FormalConjectures%2FErdosProblems%2F709.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F709.lean?ref=d573b686298f40690dd94441c9e1abc3cda7cd61",
+      "patch": "@@ -0,0 +1,131 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import FormalConjecturesUtil\n+\n+/-!\n+# Erdős Problem 709\n+\n+*References:*\n+- [erdosproblems.com/709](https://www.erdosproblems.com/709)\n+- [ErSu59] P. Erdős and J. Surányi, Bemerkungen zu einer Aufgabe eines mathematischen\n+  Wettbewerbs, Mat. Lapok 10 (1959), 39–48.\n+- [Er92c] P. Erdős, Some of my forgotten problems in number theory, Hardy–Ramanujan J. 15\n+  (1992), 34–50.\n+- [vD26] W. van Doorn, On the length of an interval that contains distinct multiples of the\n+  first $n$ positive integers, Integers (2026), #A7.\n+-/\n+\n+@[expose] public section\n+\n+namespace Erdos709\n+\n+/-- The block of `length` consecutive positive integers immediately after `start`. -/\n+def window (start length : ℕ) : Finset ℕ := Finset.Icc (start + 1) (start + length)\n+\n+/-- A block contains distinct multiples of all elements of `A`. -/\n+def HasDistinctMultiples (A : Finset ℕ) (start length : ℕ) : Prop :=\n+  ∃ choice : ℕ → ℕ,\n+    Set.InjOn choice (A : Set ℕ) ∧\n+    ∀ a ∈ A, choice a ∈ window start length ∧ a ∣ choice a\n+\n+/-- The multiplier `k` works for all `n`-element inputs and all starting points.\n+`M` is required to be the largest element of `A`. -/\n+def Works (n k : ℕ) : Prop :=\n+  ∀ (A : Finset ℕ) (M : ℕ),\n+    A.card = n → M ∈ A → (∀ a ∈ A, a ≤ M) → (∀ a ∈ A, 2 ≤ a) →\n+    ∀ start : ℕ, HasDistinctMultiples A start (k * M)\n+\n+/-- `k` is the least multiplier that works for inputs of size `n`. -/\n+def IsOptimal (n k : ℕ) : Prop := Works n k ∧ ∀ j < k, ¬ Works n j\n+\n+/-- A matching in a shorter block remains a matching in any longer block. -/\n+@[category API, AMS 5 11]\n+theorem matching_mono_length\n+    (A : Finset ℕ) (start small large : ℕ) (hsmall : small ≤ large)\n+    (h : HasDistinctMultiples A start small) : HasDistinctMultiples A start large := by\n+  obtain ⟨choice, hinj, hchoice⟩ := h\n+  refine ⟨choice, hinj, ?_⟩\n+  intro a ha\n+  obtain ⟨hmem, hdvd⟩ := hchoice a ha\n+  refine ⟨?_, hdvd⟩\n+  simp only [window, Finset.mem_Icc] at hmem ⊢\n+  constructor\n+  · exact hmem.1\n+  · omega\n+\n+/-- If multiplier `k` works, every larger multiplier also works. -/\n+@[category API, AMS 5 11]\n+theorem works_mono (n k l : ℕ) (hkl : k ≤ l) (h : Works n k) : Works n l := by\n+  intro A M hcard hmax hbound htwo start\n+  exact matching_mono_length A start (k * M) (l * M) (Nat.mul_le_mul_right M hkl)\n+    (h A M hcard hmax hbound htwo start)\n+\n+/-- Every interval of `M` consecutive positive integers contains a multiple of `a` when\n+`0 < a ≤ M`. -/\n+@[category API, AMS 5 11]\n+theorem exists_multiple_in_window\n+    (a M start : ℕ) (ha : 0 < a) (haM : a ≤ M) :\n+    ∃ b ∈ window start M, a ∣ b := by\n+  let r := start % a\n+  let b := start + (a - r)\n+  have hr : r < a := Nat.mod_lt start ha\n+  have heq : start % a + a * (start / a) = start := by\n+    simpa [Nat.mul_comm] using Nat.mod_add_div start a\n+  have hbdiv : b = a * (start / a + 1) := by\n+    have haux : b = a * (start / a) + a := by\n+      dsimp [b, r]\n+      omega\n+    calc\n+      b = a * (start / a) + a := haux\n+      _ = a * (start / a + 1) := by ring\n+  refine ⟨b, ?_, ?_⟩\n+  · simp only [window, Finset.mem_Icc]\n+    constructor\n+    · dsimp [b]\n+      omega\n+    · dsimp [b]\n+      omega\n+  · exact ⟨start / a + 1, hbdiv⟩\n+\n+/-- Erdős Problem 709 holds for a singleton input: the multiplier `1` suffices. -/\n+@[category textbook, AMS 5 11]\n+theorem erdos_709.variants.singleton : Works 1 1 := by\n+  intro A M hcard hM hbound htwo start\n+  have hA : A = {M} := by\n+    obtain ⟨z, hz⟩ := Finset.card_eq_one.mp hcard\n+    have hMz : M = z := Finset.mem_singleton.mp (hz ▸ hM)\n+    simpa [hMz] using hz\n+  obtain ⟨b, hb, hd⟩ :=\n+    exists_multiple_in_window M M start (by have := htwo M hM; omega) le_rfl\n+  refine ⟨fun _ => b, ?_, ?_⟩\n+  · intro u hu v hv _\n+    rw [hA] at hu hv\n+    simp only [Finset.coe_singleton, Set.mem_singleton_iff] at hu hv\n+    exact hu.trans hv.symm\n+  · intro a ha\n+    rw [hA] at ha\n+    have hEq : a = M := Finset.mem_singleton.mp ha\n+    subst a\n+    simpa using And.intro hb hd\n+\n+/-- For singleton inputs, every multiplier at least `1` works. -/\n+@[category API, AMS 5 11]\n+theorem works_one_of_one_le (k : ℕ) (hk : 1 ≤ k) : Works 1 k :=\n+  works_mono 1 1 k hk erdos_709.variants.singleton\n+\n+end Erdos709"
     }
   ]
 }
