@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ce8fe83fce474843da16b988bd97699071064b2117c724620ac7478635564115",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "70c0bc8ccaaa710d951e119c383e459f7a82aa58af4621bb0f24b18c2e0b74a2"
+    "manual_reviews_sha256": "b4a7cd9d6e45c8cf5036a2358984a8ac31bc89f888803e6318592c7592e59eab"
   },
   "problems": [
     {
@@ -39706,6 +39706,7 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Why no settling line is plausible. - The Lean statement has no loophole. Since `error` only has to be o(1), it is exactly equivalent to limsup_{n→∞} q(n,k)/log n ≤ 1 for every fixed k ≥ 2. - A proof must contain CORE(k), which contains Brocard-type problems: t",
+        "Resolution campaign scout 2026-10-20 ($25.21, informal): 5 validated-new claims (significance 1, 1, 1, 1, 0); best: Let d ≥ 3. Let Π ∈ F_2[t] be the product of all monic irreducibles of degree ≤ d, with D = deg Π. Write Π = Π₀² + tΠ₁². Let e* = min{e ≤ d : M(⌊d/e⌋) odd}, where M is the Mertens function. Let A(d) = max_{i≥1} deg a_i, where Π₀/Π₁ = [a₀; a₁",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",

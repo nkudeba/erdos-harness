@@ -1366,7 +1366,8 @@
   },
   "663": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Why no settling line is plausible. - The Lean statement has no loophole. Since `error` only has to be o(1), it is exactly equivalent to limsup_{n→∞} q(n,k)/log n ≤ 1 for every fixed k ≥ 2. - A proof must contain CORE(k), which contains Brocard-type problems: t"
+      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Why no settling line is plausible. - The Lean statement has no loophole. Since `error` only has to be o(1), it is exactly equivalent to limsup_{n→∞} q(n,k)/log n ≤ 1 for every fixed k ≥ 2. - A proof must contain CORE(k), which contains Brocard-type problems: t",
+      "Resolution campaign scout 2026-10-20 ($25.21, informal): 5 validated-new claims (significance 1, 1, 1, 1, 0); best: Let d ≥ 3. Let Π ∈ F_2[t] be the product of all monic irreducibles of degree ≤ d, with D = deg Π. Write Π = Π₀² + tΠ₁². Let e* = min{e ≤ d : M(⌊d/e⌋) odd}, where M is the Mertens function. Let A(d) = max_{i≥1} deg a_i, where Π₀/Π₁ = [a₀; a₁"
     ],
     "sources": [
       "resolution/results.jsonl"
