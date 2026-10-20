@@ -185,8 +185,9 @@
    "estimate": 30.0,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T00:15:49Z"
+   "in_flight": false,
+   "registered": "2026-10-20T00:15:49Z",
+   "finished": "2026-10-20T03:39:01Z"
   },
   {
    "kind": "run",
@@ -194,8 +195,9 @@
    "estimate": 30.0,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T00:15:49Z"
+   "in_flight": false,
+   "registered": "2026-10-20T00:15:49Z",
+   "finished": "2026-10-20T07:25:07Z"
   },
   {
    "kind": "run",
@@ -203,8 +205,9 @@
    "estimate": 30.0,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T00:15:49Z"
+   "in_flight": false,
+   "registered": "2026-10-20T00:15:49Z",
+   "finished": "2026-10-20T03:39:01Z"
   },
   {
    "kind": "run",
@@ -239,8 +242,9 @@
    "estimate": 18.0,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T00:33:45Z"
+   "in_flight": false,
+   "registered": "2026-10-20T00:33:45Z",
+   "finished": "2026-10-20T03:39:01Z"
   },
   {
    "kind": "run",
@@ -266,8 +270,9 @@
    "estimate": 18.0,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T00:33:45Z"
+   "in_flight": false,
+   "registered": "2026-10-20T00:33:45Z",
+   "finished": "2026-10-20T03:39:01Z"
   },
   {
    "kind": "run",
@@ -391,7 +396,7 @@
    "text": "loop paused until the 2026-10-20 09:00 reset: $25.76 left pays for one item, too few to gate a change of method, and the loop's runs share the session limit with the sprint (it stopped every lane 18:13-21:13Z today); #888's second line never ran (resume bug, fixed: deep_dive_room)"
   }
  ],
- "updated": "2026-10-20T03:38:47Z",
+ "updated": "2026-10-20T07:25:07Z",
  "rejected_streak": 0,
  "acknowledged": [
   {

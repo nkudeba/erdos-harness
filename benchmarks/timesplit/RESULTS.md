@@ -1959,3 +1959,19 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
 - **#457's Lean run hit the session limit** (2026-10-20 03:50Z, $1.50, `runs/20261019-233911-580678-hardlean-erdos95799`).
   This is an infrastructure stop, not a verdict. The same command re-runs automatically at 07:14Z, after the 03:10
   Toronto reset.
+
+### Iteration 5, Arm B final (2026-10-20 07:25Z): 1 of 3, a replication
+
+| item | complete | recognized | validated new (significance ≥ 2) | spend added |
+|------|----------|------------|----------------------------------|-------------|
+| #570 | no | no | 3 (0) | $23.68 |
+| #865 | no | no | 6 (0) | $19.63 |
+| #888 | **yes, true side**, `program/C6` | no | 3 (2) | $22.32 |
+
+- $65.63 added in all, against $90 estimated. The prediction (P = 0.25 for at least 1 of 3) came true, and the gate is
+  met. The program keeps its place in the campaign.
+- **Read with care:**
+  - #888 is the item the program settled on 2026-10-13 (`program-v1-dev`), so this is a second settle of one item, not
+    a new one. Across both program runs it is 2 of 6 draws, both on #888.
+  - #570 and #865 have now resisted four engine configurations: v5, the v6 program, iteration 4's scout with two
+    lines, and this program pass. Crossfed failed on them too.
