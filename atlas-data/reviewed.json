@@ -1617,6 +1617,15 @@
     "partial": 10,
     "assessed": "2026-10-07"
   },
+  "810": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target: prove the Lean statement TRUE. The plan is to construct, for an infinite family of degrees d with bounded consecutive ratios d_{k+1}/d_k ≤ C, perfect witnesses with N ≤ K·d for a fixed K. A perfect witness is a d-regular bipartite graph on X ⊔ Y with |"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-20"
+  },
   "821": {
     "rationale": [
       "openai/math, released 2026-10-06, family 011 ('Prime-factor statistics of $`p-1`$'), claims to resolve this problem: infinitely many n have more than n^{1−ε} totient preimages, for every ε > 0. The repository's catalogue has no Lean formalization for this family. Unverified by us; the repository itself says unformalized results 'could have issues'. erdosproblems.com still listed the problem as open on 2026-10-07."

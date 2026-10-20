@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 155,
+    "manually_reviewed": 156,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "cd3d3f9e030450ce4eadf7d3efb7d7cf7865074450f0ed1b092d66f42b5e1289",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "c485640bfc1fec4f14a6d70e912bce929d070970766264be44031562daecf429"
+    "manual_reviews_sha256": "5260434e48e71186711f1dd77afd4459aaa15e14ca3eb967aa664189e20afa54"
   },
   "problems": [
     {
@@ -3187,7 +3187,7 @@
         "best": "partial",
         "runs": 7,
         "benchmarkRuns": 7,
-        "certifiedMax": 1
+        "certifiedMax": 9
       },
       "rank": 60,
       "tier": "Plausible"
@@ -80031,6 +80031,7 @@
       "score": 1,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Target: prove the Lean statement TRUE. The plan is to construct, for an infinite family of degrees d with bounded consecutive ratios d_{k+1}/d_k ≤ C, perfect witnesses with N ≤ K·d for a fixed K. A perfect witness is a d-regular bipartite graph on X ⊔ Y with |",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
         "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
@@ -80044,7 +80045,7 @@
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-20 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -80104,13 +80105,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/810",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-20",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 1084,
       "tier": "Frontier"
