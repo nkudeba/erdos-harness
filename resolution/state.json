@@ -3410,6 +3410,31 @@
    "status": "done",
    "validated_seen": 1,
    "claims_todo": []
+  },
+  "810": {
+   "history": [
+    {
+     "tier": "screen",
+     "outcome": "screened out",
+     "settle_chance": 0.01,
+     "spend": 5.4718,
+     "track": null
+    }
+   ],
+   "prepped": true,
+   "fc_sha": "c6f4b4bdab8fdabb19191a8a1648be21b81253b0",
+   "lane": "fresh",
+   "kind": "settle",
+   "running": null,
+   "run_dir": "runs/20261020-033112-322978-erdos810",
+   "spend": 5.471842,
+   "limit_waits": 0,
+   "settle_chance": 0.01,
+   "arm": "screened out",
+   "track": null,
+   "intent": null,
+   "next": null,
+   "status": "screened out"
   }
  }
 }

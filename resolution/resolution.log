@@ -446,3 +446,6 @@
 [2026-10-20T00:12:21Z] #393: screen -> control (settle chance 0.00, draws [0.0, 0.0]; $2.97)
 [2026-10-20T00:12:30Z] #393: scout (resuming runs/20261019-195439-874199-erdos393)
 [2026-10-20T07:30:59Z] #393: scout -> none ($16.46; 1 validated new [1])
+[2026-10-20T07:31:08Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-20T07:31:12Z] #810: screen
+[2026-10-20T08:01:50Z] #810: screen -> screened out (settle chance 0.01, draws [0.02, 0.0]; $5.47)

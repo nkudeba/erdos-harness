@@ -189,3 +189,4 @@ KeyboardInterrupt
 #393: usage limit; waiting 87 min, then resuming
 #393: usage limit; waiting 204 min, then resuming
 #393 [resolve-scout]: 1 validated new of 22 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $19.422764999999988
+#810 [resolve-screen]: 0 validated new of 0 claims; targets 10 (new 0, sig>=2 0, open 0); best None; probes: measured 0, traction 0, best None; $5.471842
