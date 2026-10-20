@@ -1855,3 +1855,37 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - The ledger read entries named per item (`<tag>-<problem>`) as $0, and the loop showed $100 left when $25.76 was.
   - `entry_spend` now finds an item's rows in its tag's file. A finished run whose results cannot be found counts its
     whole estimate, flagged `SPEND UNAVAILABLE`, never $0 (`tests/test_improvement_loop.py`).
+
+## Improvement-loop iteration 5 (2026-10-20), written before launch: a different method on the same three dev items
+
+- **Why.**
+  - Iteration 4's gate said the next iteration changes the engine's METHOD, not its settings.
+  - The operator wants the week's remaining usage used before the 2026-10-20 09:00 reset. The loop was renewed by $150
+    (2026-10-20T00:08Z), and each five-hour window takes roughly $90–100 of runs.
+- **Pin:** `20a146201f4a59bb` (main at `b1cfa9e`, with the deep-dive resume fix).
+- **Items:** dev #570, #865, #888, which the engine failed twice (step 2, then iteration 4).
+- **Arm A: crossfed rounds plus a ladder of easier variants,** Screen A's exact protocol (`--discover-mode crossfed
+  --discover-rounds 2 --discover-ladder 3 --discover-total-budget 6`, medium effort). Four independent draws per item,
+  tags `dev-crossfed-20a1462-d1` … `-d4`.
+  - Why this method: on train items that never had a complete proof, it found refereed proofs of the true side on 3 of
+    8 (Screen A), and draws vary (Screen D: 1 of 4 on re-draws).
+  - Measured per draw: `refereed_true`, `refereed_false`, the decided direction, and spend.
+  - **Recognition check:** before any refereed proof counts, its transcript is searched for the problem's identity
+    (its number, or the 2026 resolution).
+- **Arm B: the engine's research program on the finished scouts.** Iteration 4's three runs are copied and resumed
+  with `--engine-program-cycles 4`, and the program gets about $30 each (tag `dev-program-20a1462`). This is the
+  campaign's own program tier, never measured on dev. #888's missed second line runs first under the fix, so a
+  completion on #888 cannot be split between the line and the program.
+- **Predictions:**
+  - Arm A: a refereed true-side proof on at least 1 of the 3 items, P = 0.5. A refereed false-side proof on any item,
+    P = 0.15. About $2.50 a draw, $30 in all.
+  - Arm B: a complete answer (both settles judges, true direction, not recognized) on at least 1 of 3, P = 0.25.
+    About $90 in all.
+- **Gates:**
+  - Arm A goes to a Lean conversion check, and is built as a campaign pass for unsettled problems if that check holds,
+    when at least 1 item gets a refereed true-side proof that passes the recognition check and no item gets a refereed
+    false-side proof.
+  - Arm B keeps its place in the campaign if at least 1 of 3 completes unrecognized. Otherwise the program tier's $90
+    a problem has no dev evidence behind it, and that is reported to the operator.
+- **Confounds, stated now:** no paired baseline draw; the items were chosen because the engine failed on them; a
+  medium-effort referee's verdict is a candidate, not a proof. Only Lean conversion counts.
