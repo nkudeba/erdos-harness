@@ -15090,8 +15090,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 2,
-        "benchmarkRuns": 2,
+        "runs": 3,
+        "benchmarkRuns": 3,
         "certifiedMax": 1
       },
       "assessed": {
@@ -15375,8 +15375,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 2,
-        "benchmarkRuns": 2,
+        "runs": 3,
+        "benchmarkRuns": 3,
         "certifiedMax": 1
       },
       "assessed": {
