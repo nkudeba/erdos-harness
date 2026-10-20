@@ -2003,3 +2003,15 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
 - **Second assisted resume (08:48Z), written before launch.**
   - On main `057328b`, with the stall counter reset and 4 cycles. Recorded in the run's `assistance`.
   - Prediction: the open step proved and the whole statement verified, P = 0.4; up to $8.
+- **Second assisted resume, result (09:06Z): #457's formal statement is proved in Lean. It is assisted, and the audit
+  FAILS one blindness check, so it is not a solve.**
+  - The last step was certified 13 minutes after the duplicate-definition fix let it be attacked. 14 of 14 steps
+    certified, $21.07 for the Lean stage in all.
+  - `audit.py` passes 14 of 15 checks: Comparator, nanoda, statement identity, provenance, faithfulness judges and
+    the probe among them.
+  - It fails `no_identity_in_prompts`. One engine deep-dive prompt carried the model's own note to "check
+    erdosproblems.com", from an earlier session's notebook. No problem number appears. This is the same failure as
+    #888's.
+  - Evidence: `benchmarks/timesplit/evidence/457/`. The results row is `solved: false`, with `lean_verified`,
+    `assisted` and `audit_verdict`.
+  - To count, it needs a fresh alias run end to end on a harness with both fixes, no resume, and a clean audit.
