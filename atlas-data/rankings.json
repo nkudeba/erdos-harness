@@ -21280,7 +21280,7 @@
         "best": "partial",
         "runs": 10,
         "benchmarkRuns": 10,
-        "certifiedMax": 7
+        "certifiedMax": 10
       },
       "rank": 389,
       "tier": "Difficult"
