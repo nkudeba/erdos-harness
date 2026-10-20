@@ -2015,3 +2015,33 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - Evidence: `benchmarks/timesplit/evidence/457/`. The results row is `solved: false`, with `lean_verified`,
     `assisted` and `audit_verdict`.
   - To count, it needs a fresh alias run end to end on a harness with both fixes, no resume, and a clean audit.
+
+### Iteration 5, Arm C final (2026-10-20 13:20Z): the campaign's scout settles 7 of 9 fresh dev items informally
+
+| item | truth | complete | recognized | intent (judges) | novelty | spend |
+|------|-------|----------|------------|-----------------|---------|-------|
+| #150 | true | **yes** | no | new-math, new-math | restatement, sig 3 | $10.57 |
+| #202 | true | no | **yes, itself** | | | $14.53 |
+| #419 | true | **yes** | no | unclear, unclear | known, sig 0 | $15.43 |
+| #457 | true | **yes** | no | unclear, new-math | restatement, sig 3 | $15.31 |
+| #537 | **false** | **yes, false side** | no | new-math, new-math | new, sig 1 | $12.19 |
+| #729 | true | **yes** | #728 only | known-result, known-result | known, sig 1 | $15.77 |
+| #825 | true | no | no | | | $14.49 |
+| #871 | **false** | **yes, false side** | no | new-math, new-math | restatement, sig 3 | $10.89 |
+| #1180 | true | **yes** | no | known-result, known-result | routine, sig 1 | $13.46 |
+
+- **Complete, right side and unrecognized on 7 of 9**, against a prediction of 2 (range 0–4). That includes both FALSE
+  items. The direction was right on all 9. $122.64 in all, $10.57–15.77 an item.
+- **Read with care:**
+  - "Complete" means both settles judges agree. It is informal until Lean. Only #457 has been through Lean so far:
+    verified, but operator-assisted and audit FAIL (see above).
+  - The intent judges call two of the seven known results (#729, #1180) and one unclear (#419). Those may be formal
+    statements easier than the problem as intended, or results the judges recall.
+  - With these nine, the scout settings have now run on 12 dev items: 7 complete here, 0 of the 3 hard items in
+    iteration 4. Step 2's v5 engine had 3 of 6 unrecognized complete.
+- **What it says for the campaign:** on problems that were open until 2026 and are new to the model, the campaign's
+  own scout usually reaches a complete informal answer. On the catalogue's open problems it has reached none in about
+  61 attempts. Those problems are mostly much harder, and the gap is the measure of that.
+- **Next, not launched** (the loop's authority ended at the 2026-10-20 09:00 reset): Lean conversion of the six
+  complete chains not yet converted, unassisted, on the harness with both Lean fixes, with `hardsteps_lean.py`
+  defaults, then `audit.py`. About $3–20 each.
