@@ -15,9 +15,9 @@
         "sha256": "a4b0a0a29d15ec22bc613ed33078cff72fbe6719a746abe7c3be5ad9894f08d1"
       }
     ],
-    "harness_sha256": "20a146201f4a59bb3335d16d4957887ed6fdf6e1752f19c0e37680bfc913d706",
+    "harness_sha256": "cd3d3f9e030450ce4eadf7d3efb7d7cf7865074450f0ed1b092d66f42b5e1289",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "3f929b2491de49d43b9b160304e59eea17e2dc94ad0db7b64bb5fc2ac16b6bf8"
+    "manual_reviews_sha256": "c485640bfc1fec4f14a6d70e912bce929d070970766264be44031562daecf429"
   },
   "problems": [
     {
@@ -3185,8 +3185,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 6,
-        "benchmarkRuns": 6,
+        "runs": 7,
+        "benchmarkRuns": 7,
         "certifiedMax": 1
       },
       "rank": 60,
@@ -42076,6 +42076,7 @@
       "harness": "Attempted",
       "rationale": [
         "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible, so this line aims at major progress (significance 3), not at settling the problem. Why nothing settles it: - `Tendsto f atTop atTop` means: for every m, only finitely many n have f(n) ≤ m. With S = {0, 2} this contains Brocard's ",
+        "Resolution campaign scout 2026-10-20 ($19.42, informal): 1 validated-new claims (significance 1); best: There are absolute constants c > 0 and n_0 with the following property. Let n_1 ≥ n_0, ℓ = log n_1, let S ⊆ {0..m} with 0, m ∈ S, d = |S| ≥ 2, m ≤ ℓ, and H = ⌊c·ℓ/log ℓ⌋. Then there are no n_1 < n_2 < n_3 ≤ n_1 + H with d | n_2 − n_1, d | n",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The statement or its discussion mentions abc-related dependency; that is a possible dependency to audit, not an assumed theorem requirement.",
@@ -42085,7 +42086,7 @@
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Reviewed on 2026-10-19 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
+      "review": "Reviewed on 2026-10-20 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -42141,7 +42142,7 @@
         "certifiedMax": 0
       },
       "assessed": {
-        "on": "2026-10-19",
+        "on": "2026-10-20",
         "sources": [
           "resolution/results.jsonl"
         ],
@@ -80028,19 +80029,18 @@
         "ramsey theory"
       ],
       "score": 1,
-      "harness": "Untried",
+      "harness": "Attempted",
       "rationale": [
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Ramsey statements often need nontrivial infinitary or extremal infrastructure.",
         "The statement involves an unbounded family or eventual behavior; finitely many checks cannot settle it.",
         "The statement or its discussion mentions deep additive or extremal machinery; that is a possible dependency to audit, not an assumed theorem requirement.",
-        "The problem carries a proof claim on its site claims page. The catalogue has not accepted it, but the target may already be settled, and the site warns that appearing there is no guarantee of correctness.",
-        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing."
+        "The discussion contains an ambiguity or correction signal; resolve the intended formulation before testing.",
+        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
       ],
       "requirements": [
         "Check for a matching Mathlib theorem before constructing a long combinatorial proof.",
         "Construct and verify a uniform argument or an infinite family.",
-        "Read and judge the existing claim before spending a run; if it stands, this is not an open target.",
         "Freeze the corrected statement and record the scope choice."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
@@ -80063,16 +80063,12 @@
           "points": -7
         },
         {
-          "label": "Unverified resolution claim on the site",
-          "points": -8
-        },
-        {
           "label": "Statement-interpretation risk",
           "points": -3
         },
         {
           "label": "Score floor / ceiling",
-          "points": 18
+          "points": 10
         }
       ],
       "partial": {
@@ -80111,8 +80107,8 @@
       "manual": false,
       "prize": "no",
       "evidence": {
-        "best": "untried",
-        "runs": 0,
+        "best": "attempted",
+        "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },

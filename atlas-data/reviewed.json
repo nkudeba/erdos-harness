@@ -837,12 +837,13 @@
   },
   "393": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible, so this line aims at major progress (significance 3), not at settling the problem. Why nothing settles it: - `Tendsto f atTop atTop` means: for every m, only finitely many n have f(n) ≤ m. With S = {0, 2} this contains Brocard's "
+      "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible, so this line aims at major progress (significance 3), not at settling the problem. Why nothing settles it: - `Tendsto f atTop atTop` means: for every m, only finitely many n have f(n) ≤ m. With S = {0, 2} this contains Brocard's ",
+      "Resolution campaign scout 2026-10-20 ($19.42, informal): 1 validated-new claims (significance 1); best: There are absolute constants c > 0 and n_0 with the following property. Let n_1 ≥ n_0, ℓ = log n_1, let S ⊆ {0..m} with 0, m ∈ S, d = |S| ≥ 2, m ≤ ℓ, and H = ⌊c·ℓ/log ℓ⌋. Then there are no n_1 < n_2 < n_3 ≤ n_1 + H with d | n_2 − n_1, d | n"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-19"
+    "assessed": "2026-10-20"
   },
   "396": {
     "rationale": [
