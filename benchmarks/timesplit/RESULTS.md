@@ -2000,6 +2000,6 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - Two nested spliced blocks around it each carried a copy of one definition, and the flat sub-statement collided.
   - This was 8 of the 10 such rejections on disk. Fixed in `057328b`: identical copies appear once. The real
     sub-statement now compiles in Lean.
-- **Second assisted resume (09:05Z), written before launch.**
+- **Second assisted resume (08:48Z), written before launch.**
   - On main `057328b`, with the stall counter reset and 4 cycles. Recorded in the run's `assistance`.
   - Prediction: the open step proved and the whole statement verified, P = 0.4; up to $8.
