@@ -1234,6 +1234,15 @@
     "partial": 10,
     "assessed": "2026-10-07"
   },
+  "555": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.25, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible. The Lean statement requires one explicit function `TSMain.answer k n` that is exact for every k ≥ 1 and n ≥ 2. By the CORE, this contains three open problems: - the Erdős–Simonovits C_8 exponent problem, item (c); - the existence"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-20"
+  },
   "573": {
     "rationale": [
       "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.01, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No line can plausibly settle the statement within days. - Why no proof is in reach. Proving `erdos_573` requires lim e/n^{3/2} = 2^{−3/2}. That needs at least limsup < 1/2, which rules out asymptotic Moore graphs, a notorious open problem. - Why no disproof is"
