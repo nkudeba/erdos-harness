@@ -837,3 +837,42 @@ class EngineScreenRecord(unittest.TestCase):
         self.assertFalse(rec["solved"])                     # only Lean makes it a solve
         self.assertEqual(rec["claims"]["unvalidated-conjectured"], 1)
         self.assertFalse(rec["recognized_true"])
+
+
+class ResumeFrom(unittest.TestCase):
+    def test_a_later_tier_continues_a_copy_and_counts_only_what_it_adds(self):
+        # 2026-10-20, improvement-loop iteration 5: the research program on iteration 4's scouts, without buying them
+        # again and without touching the runs iteration 4 recorded
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d); res = root / "results"; res.mkdir()
+            old = root / "runs" / "20261019-122941-1-discover-erdos82133"
+            (old / "engine").mkdir(parents=True)
+            (old / "engine" / "checkpoint.json").write_text(json.dumps({"spend": 24.0}))
+            (old / "DONE").write_text("{}")
+            (res / "scout.aliases.jsonl").write_text(json.dumps({"alias": 82133, "problem": "570",
+                                                                 "run_dir": str(old.relative_to(root))}) + "\n")
+            (res / "scout.jsonl").write_text(json.dumps({"problem": "570", "run_dir": str(old.relative_to(root)),
+                                                         "spend": 25.23}) + "\n")
+            new_aliases = res / "program.aliases.jsonl"
+            with patch.object(T, "ROOT", root), patch.object(T, "RESULTS", res):
+                T.seed_from_tag("scout", new_aliases, [{"problem": "570"}, {"problem": "865"}])
+                T.seed_from_tag("scout", new_aliases, [{"problem": "570"}])          # seeded once, never twice
+            rows = [json.loads(l) for l in new_aliases.read_text().splitlines()]
+            self.assertEqual(len(rows), 1)
+            r = rows[0]
+            self.assertEqual((r["alias"], r["problem"], r["resumed_from"], r["spend_prior"]),
+                             (82133, "570", str(old.relative_to(root)), 25.23))
+            copy = root / r["run_dir"]
+            self.assertNotEqual(copy, old)
+            self.assertTrue((copy / "engine" / "checkpoint.json").exists())
+            self.assertFalse((copy / "DONE").exists())                               # the copy is not finished
+            self.assertTrue((old / "DONE").exists())                                 # the source stays as recorded
+        spec_l = importlib.util.spec_from_file_location("loop", ROOT / "benchmarks" / "timesplit" / "loop.py")
+        L = importlib.util.module_from_spec(spec_l); spec_l.loader.exec_module(L)
+        with tempfile.TemporaryDirectory() as d:
+            res = Path(d)
+            (res / "program.jsonl").write_text(json.dumps({"problem": "570", "spend": 51.0, "spend_prior": 25.23,
+                                                           "spend_added": 25.77}) + "\n")
+            with patch.object(L, "RESULTS", res):
+                self.assertEqual(L.entry_spend({"kind": "run", "name": "program", "in_flight": False}), 25.77)

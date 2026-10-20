@@ -64,12 +64,13 @@ def entry_spend(e: dict) -> float | None:
     kind, name = e.get("kind"), e.get("name")
     if kind in ("run", "explore-screen"):
         files = [RESULTS / f"{name}.jsonl", RESULTS / f"{name}.infra.jsonl"]
+        # a tier resumed from another tag's run (`--resume-from`) counts only what it added: the source paid the rest
         if any(f.exists() for f in files):
-            return sum(float(r.get("spend") or 0) for f in files for r in _jsonl(f))
+            return sum(float(r.get("spend_added", r.get("spend")) or 0) for f in files for r in _jsonl(f))
         m = re.fullmatch(r"(.+)-(\d+)", name or "")
         rows = [r for f in ((RESULTS / f"{m[1]}.jsonl", RESULTS / f"{m[1]}.infra.jsonl") if m else ())
                 for r in _jsonl(f) if str(r.get("problem")) == m[2]]
-        return sum(float(r.get("spend") or 0) for r in rows) if rows else None
+        return sum(float(r.get("spend_added", r.get("spend")) or 0) for r in rows) if rows else None
     if kind == "calibration":
         return sum(float(r.get("spend") or 0) for r in _jsonl(RESULTS / f"calibration-{name}.jsonl"))
     if kind == "ideas":

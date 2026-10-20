@@ -2346,6 +2346,36 @@ def run_harness_lane(cmd: list[str], log, env: dict, timeout: float) -> int:
             return proc.wait()
 
 
+def seed_from_tag(src_tag: str, aliases_file: Path, items: list[dict]) -> None:
+    """`--resume-from`: a later tier on the same scout, as the campaign runs one, measured on time-split items. Each
+    item's latest engine run under `src_tag` is COPIED to a new run dir under the same alias, and the copy is listed in
+    this tag's aliases, so the resume path below continues it and the source run stays as it was recorded. On
+    2026-10-20 the engine's research program ran on iteration 4's three scouts this way, without buying them again."""
+    import shutil
+    src = RESULTS / f"{src_tag}.aliases.jsonl"
+    rows = [json.loads(l) for l in src.read_text().splitlines() if l.strip()] if src.exists() else []
+    have = {json.loads(l)["problem"] for l in aliases_file.read_text().splitlines() if l.strip()} if aliases_file.exists() else set()
+    for item in items:
+        if item["problem"] in have:
+            continue
+        mine = [r for r in rows if r["problem"] == item["problem"] and (ROOT / r["run_dir"] / "engine/checkpoint.json").exists()]
+        if not mine:
+            print(f"#{item['problem']}: no engine run under {src_tag}; starting afresh", flush=True)
+            continue
+        old = ROOT / mine[-1]["run_dir"]
+        new = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-discover-erdos{mine[-1]['alias']}"
+        shutil.copytree(old, new, ignore=shutil.ignore_patterns("DONE", "SUMMARY.line"))
+        # the copy's log carries the source's spend: the row records it, so a budget counts only what this tier adds
+        rows_src = RESULTS / f"{src_tag}.jsonl"
+        prior = [r for r in (json.loads(l) for l in (rows_src.read_text().splitlines() if rows_src.exists() else [])
+                             if l.strip()) if r.get("run_dir") == mine[-1]["run_dir"]]
+        with aliases_file.open("a") as f:
+            f.write(json.dumps({"alias": mine[-1]["alias"], "problem": item["problem"],
+                                "run_dir": str(new.relative_to(ROOT)), "resumed_from": mine[-1]["run_dir"],
+                                "spend_prior": float(prior[-1].get("spend") or 0.0) if prior else None}) + "\n")
+        print(f"#{item['problem']}: continuing a copy of {mine[-1]['run_dir']}", flush=True)
+
+
 def discover_screen(args) -> int:
     """The no-Lean screen for changes to discovery: the in-run stage alone (`harness.py --stop-after discover`) on
     each item, recorded in the result-record shape so `ideas --tag <tag>` grades it, plus what decides conversion
@@ -2386,6 +2416,8 @@ def discover_screen(args) -> int:
     print(f"discover-screen {args.tag}: {len([i for i in items if i['problem'] not in done])} item(s); {' '.join(flags)}",
           flush=True)
     aliases_file = RESULTS / f"{args.tag}.aliases.jsonl"
+    if engine and getattr(args, "resume_from", None):
+        seed_from_tag(args.resume_from, aliases_file, [i for i in items if i["problem"] not in done])
     for item in items:
         if item["problem"] in done:
             continue
@@ -2451,6 +2483,10 @@ def discover_screen(args) -> int:
         facts = H.collect_run_facts(run_dir, str(alias))
         if engine:
             rec = engine_screen_record(run_dir, item, alias, rc, facts, args, flags)
+            seeded = [a for a in earlier if a["run_dir"] == str(run_dir.relative_to(ROOT)) and a.get("resumed_from")]
+            if seeded and seeded[-1].get("spend_prior") is not None:
+                rec.update({"resumed_from": seeded[-1]["resumed_from"], "spend_prior": seeded[-1]["spend_prior"],
+                            "spend_added": round(rec["spend"] - seeded[-1]["spend_prior"], 2)})
             with out.open("a") as f:
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             print(f"#{item['problem']}: truth={rec['truth']} complete={rec['complete']} answer={rec['complete_answer']} "
@@ -2887,6 +2923,7 @@ def main() -> int:
     ds.add_argument("--discover-mode", default="independent", choices=["independent", "crossfed", "engine"])
     ds.add_argument("--engine-flags", default="", help="with --discover-mode engine: extra harness flags, one string")
     ds.add_argument("--record", help="with --discover-mode engine: only write the results row for this finished run dir")
+    ds.add_argument("--resume-from", help="with --discover-mode engine: continue a copy of each item's finished run under this tag (another tier on the same scout, as the campaign does), never the run itself")
     ds.add_argument("--discover-attempts", type=int, default=2)
     ds.add_argument("--discover-effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"])
     ds.add_argument("--discover-budget", type=float, default=0.8)
