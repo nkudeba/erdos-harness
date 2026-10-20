@@ -1889,3 +1889,48 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
     a problem has no dev evidence behind it, and that is reported to the operator.
 - **Confounds, stated now:** no paired baseline draw; the items were chosen because the engine failed on them; a
   medium-effort referee's verdict is a candidate, not a proof. Only Lean conversion counts.
+
+### Iteration 5: Arm A's result and a correction (2026-10-20 00:35Z, written before Arm B's result)
+
+- **Arm A: 0 of 3 items, 0 of 12 draws.**
+  - Every draw decided the true direction and committed to it. None produced a refereed complete proof of either side.
+  - $21.30 in all, $1.19–2.58 a draw.
+  - The prediction (at least 1 of 3, P = 0.5) was wrong, and the gate fails. Crossfed with the ladder does not go to a
+    Lean check on this evidence.
+- **Correction to the pre-registration above and to iteration 4's.** Both missed `program-v1-dev`
+  (experiments/idea-engine-2026-10-02/REPORT.md, section 3.11). That was the engine's research program on these same
+  three items, on 2026-10-13, at $37–62 an item:
+  - It settled #888: a complete chain of the TRUE side, unrecognized. That chain went to Lean, and the operator
+    finished it there (`benchmarks/timesplit/evidence/888/`). It was assisted, so it is not a solve.
+  - #570 and #865 were not settled.
+  - So Arm B is not "never measured on dev". It re-runs that tier with a smaller program budget ($28 against $50) and
+    4 cycles against 6, on scouts that settled nothing.
+  - "The engine failed twice" is wrong for #888. Iteration 4's "each had one draw" is wrong for all three: each had
+    a second, the program run.
+  - Arm B's prediction (P = 0.25 for at least 1 of 3) stands as written, though it was made without that evidence.
+    #888's earlier settle argues for a higher number.
+
+### Iteration 5, Arm C (2026-10-20 00:45Z), written before launch: the campaign's scout on the nine dev items the engine never ran
+
+- **Why.**
+  - Every iteration since step 2 has used the same three hard items. The campaign's current scout has never been
+    measured on fresh problems.
+  - So there is no honest rate for the sprint's method on problems known to be solvable, and no new target set for
+    method changes.
+- **Items:** #150, #202, #419, #457, #537, #729, #825, #871 and #1180. These are the dev items the engine never ran on:
+  step 2's eight were a random sample of the 18 (experiments/idea-engine-2026-10-02/REPORT.md, "Step 2",
+  `random.Random(20261006).sample`), and #1213 is solved.
+- **Protocol:** the campaign's scout flags (`resolve` objective, 2 settle draws, 2 intent judges, 3 sessions, 1 round,
+  core share 0.67, a $5 deep dive, 1 gap round, 2 session legs), $18 an item as in the campaign, pin `20a146201f4a59bb`.
+  The scout's literature scan and results library are off in benchmark runs anyway. Tag `dev-scout-baseline-20a1462`,
+  three lanes of three items.
+- **Prediction:**
+  - complete, true side and unrecognized on 2 of 9 (range 0–4); P(at least 1) = 0.75;
+  - recognized on at least one item: 0.4;
+  - $15–19 an item, about $160.
+- **Use.**
+  - This is a baseline, not a gate.
+  - Items it fails become the target set for the next change of method.
+  - An item it completes is a candidate for Lean conversion, which alone makes a solve, by a separate decision.
+- **Budget:** the loop is renewed by another $100 for it, at the operator's direction to use the week's remaining
+  usage. That direction is in the renewal above.
