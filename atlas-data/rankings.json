@@ -7702,8 +7702,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 3,
-        "benchmarkRuns": 3,
+        "runs": 4,
+        "benchmarkRuns": 4,
         "certifiedMax": 2
       },
       "rank": 140,
@@ -21278,8 +21278,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 9,
-        "benchmarkRuns": 9,
+        "runs": 10,
+        "benchmarkRuns": 10,
         "certifiedMax": 3
       },
       "rank": 389,
