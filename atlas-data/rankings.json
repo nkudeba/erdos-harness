@@ -10771,7 +10771,7 @@
         "best": "partial",
         "runs": 4,
         "benchmarkRuns": 4,
-        "certifiedMax": 5
+        "certifiedMax": 6
       },
       "rank": 196,
       "tier": "Difficult"
