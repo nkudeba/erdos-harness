@@ -1992,8 +1992,8 @@
       "prize": "$25",
       "evidence": {
         "best": "partial",
-        "runs": 2,
-        "benchmarkRuns": 2,
+        "runs": 3,
+        "benchmarkRuns": 3,
         "certifiedMax": 3
       },
       "rank": 38,
@@ -3185,8 +3185,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 3,
-        "benchmarkRuns": 3,
+        "runs": 4,
+        "benchmarkRuns": 4,
         "certifiedMax": 1
       },
       "rank": 60,
@@ -21278,8 +21278,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 8,
-        "benchmarkRuns": 8,
+        "runs": 9,
+        "benchmarkRuns": 9,
         "certifiedMax": 3
       },
       "rank": 389,
