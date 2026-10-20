@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 154,
+    "manually_reviewed": 155,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "20a146201f4a59bb3335d16d4957887ed6fdf6e1752f19c0e37680bfc913d706",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "02975a0a8cfc581108b4bcf9ba6146c13d1b73e7e53fdf2167e157e1a23363c9"
+    "manual_reviews_sha256": "3f929b2491de49d43b9b160304e59eea17e2dc94ad0db7b64bb5fc2ac16b6bf8"
   },
   "problems": [
     {
@@ -3362,8 +3362,8 @@
       "prize": "no",
       "evidence": {
         "best": "closed apart from published premises",
-        "runs": 7,
-        "benchmarkRuns": 7,
+        "runs": 11,
+        "benchmarkRuns": 11,
         "certifiedMax": 17
       },
       "rank": 63,
@@ -10626,8 +10626,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 5,
-        "benchmarkRuns": 5,
+        "runs": 9,
+        "benchmarkRuns": 9,
         "certifiedMax": 3
       },
       "rank": 193,
@@ -20119,8 +20119,8 @@
       "prize": "no",
       "evidence": {
         "best": "partial",
-        "runs": 6,
-        "benchmarkRuns": 6,
+        "runs": 10,
+        "benchmarkRuns": 10,
         "certifiedMax": 1
       },
       "rank": 366,
@@ -42075,6 +42075,7 @@
       "score": 9,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible, so this line aims at major progress (significance 3), not at settling the problem. Why nothing settles it: - `Tendsto f atTop atTop` means: for every m, only finitely many n have f(n) ≤ m. With S = {0, 2} this contains Brocard's ",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The statement or its discussion mentions abc-related dependency; that is a possible dependency to audit, not an assumed theorem requirement.",
@@ -42084,7 +42085,7 @@
         "Use Mathlib arithmetic/factorization lemmas and exact certificates."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-19 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -42131,13 +42132,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/393",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-19",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 689,
       "tier": "Frontier"

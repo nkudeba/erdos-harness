@@ -835,6 +835,15 @@
     ],
     "score": 7
   },
+  "393": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-19: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: No settling line is plausible, so this line aims at major progress (significance 3), not at settling the problem. Why nothing settles it: - `Tendsto f atTop atTop` means: for every m, only finitely many n have f(n) ≤ m. With S = {0, 2} this contains Brocard's "
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-19"
+  },
   "396": {
     "rationale": [
       "Forum, 2026-10-06: an exhaustive search extends OEIS A375077, the least n with prod_{0<=i<=k}(n-i) dividing C(2n,n), through k = 13. It comes with validation certificates, independent verifiers, and a Lean-verified small-prime barrier lemma that justifies the search's completeness. The problem stays open."
