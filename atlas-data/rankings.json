@@ -4,7 +4,7 @@
     "snapshot": "2026-09-09",
     "preview": false,
     "method": "v1: evidence-aware heuristic; scores are NOT probabilities; ties ordered by problem number.",
-    "manually_reviewed": 157,
+    "manually_reviewed": 158,
     "sources": [
       {
         "url": "https://www.erdosproblems.com/range/1-1217",
@@ -17,7 +17,7 @@
     ],
     "harness_sha256": "ce8fe83fce474843da16b988bd97699071064b2117c724620ac7478635564115",
     "scorer_sha256": "c12edbf4e9ebe300c53486683fd7166a9d0d9678fa61f11969b4ccd8299a8b98",
-    "manual_reviews_sha256": "c41a4608b7aee41988c80219490c2707ffda950721587a657c23d5782ef7b1a6"
+    "manual_reviews_sha256": "70c0bc8ccaaa710d951e119c383e459f7a82aa58af4621bb0f24b18c2e0b74a2"
   },
   "problems": [
     {
@@ -39705,6 +39705,7 @@
       "score": 11,
       "harness": "Attempted",
       "rationale": [
+        "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Why no settling line is plausible. - The Lean statement has no loophole. Since `error` only has to be o(1), it is exactly equivalent to limsup_{n→∞} q(n,k)/log n ≤ 1 for every fixed k ≥ 2. - A proof must contain CORE(k), which contains Brocard-type problems: t",
         "The full target remains unresolved in the catalogue; solving it requires new mathematics, not just translation.",
         "Arithmetic and divisibility match the existing successful proof corpus.",
         "The target is an asymptotic/density claim; isolated examples or improved finite bounds are only partial results.",
@@ -39715,7 +39716,7 @@
         "Prove the asymptotic statement with its full quantifiers and error control."
       ],
       "formal": "No external Lean statement recorded in this metadata snapshot.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "review": "Reviewed on 2026-10-20 against the problem statement, source discussion and recorded evidence; this remains a tractability estimate, not a solve attempt.",
       "signals": [
         {
           "label": "Base: unresolved target",
@@ -39758,13 +39759,20 @@
         ]
       },
       "url": "https://www.erdosproblems.com/663",
-      "manual": false,
+      "manual": true,
       "prize": "no",
       "evidence": {
         "best": "attempted",
         "runs": 1,
         "benchmarkRuns": 0,
         "certifiedMax": 0
+      },
+      "assessed": {
+        "on": "2026-10-20",
+        "sources": [
+          "resolution/results.jsonl"
+        ],
+        "searchFloor": null
       },
       "rank": 664,
       "tier": "Frontier"

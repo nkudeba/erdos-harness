@@ -1364,6 +1364,15 @@
     ],
     "assessed": "2026-10-19"
   },
+  "663": {
+    "rationale": [
+      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.00, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: Why no settling line is plausible. - The Lean statement has no loophole. Since `error` only has to be o(1), it is exactly equivalent to limsup_{n→∞} q(n,k)/log n ≤ 1 for every fixed k ≥ 2. - A proof must contain CORE(k), which contains Brocard-type problems: t"
+    ],
+    "sources": [
+      "resolution/results.jsonl"
+    ],
+    "assessed": "2026-10-20"
+  },
   "672": {
     "rationale": [
       "Many low lengths are already excluded by deep Diophantine results. A negative-integer example does not satisfy the positive-integer contract."
