@@ -3044,6 +3044,38 @@ def restore_omitted_frozen(attempt: str, frozen: str) -> str:
     return candidate if contains_frozen(candidate, frozen) else attempt
 
 
+NONCOMPUTABLE_ERR_RE = re.compile(r"line (\d+):\d+: failed to compile definition, consider marking it as 'noncomputable'")
+DEF_KEYWORD_RE = re.compile(r"^(\s*(?:@\[[^\]]*\]\s*)*(?:(?:private|protected)\s+)?)(def|abbrev|instance)\b")
+
+
+def mark_noncomputable(body: str, errors: list[str], imports: list[str]) -> str:
+    """Mark `noncomputable` each definition Lean says needs it, at the line its error names. Lean's message names the
+    fix, so it is applied without a model call. Seven skeletons on disk were rejected for this alone, six of them after
+    spending a repair round on it. A dev item's Lean stage (2026-10-20) ended on it twice: the plan's repair added the
+    keyword, broke something else, and the next plan dropped the keyword again. A definition already marked is left
+    alone, and so is an error whose line is not a definition's."""
+    lines = body.splitlines()
+    lmap, off = compose_line_map(body, imports), compose_offset(body, imports)
+    marked = set()
+    for e in errors:
+        m = NONCOMPUTABLE_ERR_RE.search(e or "")
+        if not m:
+            continue
+        n = int(m.group(1))
+        b = lmap.get(n, n - off)                         # 1-based body line
+        for i in range(min(b, len(lines)) - 1, -1, -1):  # up to the head of the declaration the error is in
+            if DEF_KEYWORD_RE.match(lines[i]):
+                marked.add(i)
+                break
+            if DECL_RE.match(lines[i].strip()) or (i < b - 1 and not lines[i].strip()):
+                break
+    for i in marked:
+        if "noncomputable" not in lines[i]:
+            lines[i] = DEF_KEYWORD_RE.sub(lambda mm: mm.group(1) + "noncomputable " + mm.group(2), lines[i], count=1)
+    out = "\n".join(lines)
+    return out + "\n" if body.endswith("\n") and out else out
+
+
 def repair_closed_goal_branches(body: str, errors: list[str]) -> str:
     """Narrow syntax repair: run branch tactics on remaining goals, allowing zero goals."""
     harmless = ("No goals to be solved", "`simp` made no progress")
@@ -7543,6 +7575,14 @@ class Harness:
         # Notes are not compiler errors (they stay out of `errors`), but they are feedback the prover needs
         # ("`Foo` is not a known declaration; similar: ..."), so they travel with the attempt record too.
         # Final verification must check the stored artifact without silently repairing it.
+        if not res["ok"] and not res.get("timeout") and name != "final-verify":
+            marked = mark_noncomputable(body, res["errors"], self.imports)
+            if marked != body:
+                retry = self.lean.check(compose(marked, self.imports),
+                                        self.run_dir / "attempts" / f"{name}-noncomputable.lean", **kw)
+                self.log.event("lean", "noncomputable_repair", name=name, ok=retry["ok"], errors=retry["errors"][:4])
+                if retry["ok"] or (not retry.get("timeout") and len(retry["errors"]) < len(res["errors"])):
+                    body, res = marked, retry
         for repair_round in range(2):
             repaired = repair_closed_goal_branches(body, res["errors"]) if not res["ok"] and name != "final-verify" else body
             if repaired == body:
@@ -10870,6 +10910,8 @@ for the SAT solver instead of enumerating it.
             return {"adopted": False, "reason": "does not compile: " + (res["errors"][:1] or [""])[0][:200],
                     "errors": res["errors"][:6], "candidate": cand}
         cand = res.get("body", cand)
+        if not contains_frozen(cand, frozen):            # a compile-time repair may never reach a frozen declaration
+            return {"adopted": False, "reason": "altered the frozen theorem", "candidate": cand}
         try:
             closed = self._close_holes_without_model(cand, frozen)
         except Exception:                                   # noqa: BLE001 - the cascade is a bonus, never a gate
