@@ -48,6 +48,22 @@ class LeanStageRecord(unittest.TestCase):
         self.assertEqual(row["spend"], 2.79)
         self.assertTrue(row["protocol"]["masked"] and row["protocol"]["benchmark"])
 
+    def test_a_verified_negation_of_a_false_item_is_solved_and_says_so(self):
+        # 2026-10-20: dev #537 and #871 were settled FALSE; their Lean stage proves the benchmark's negation
+        (L.RESULTS / "engine-x.jsonl").write_text(json.dumps(
+            {"problem": "537", "alias": 77933, "run_dir": "runs/eng", "answer": False, "truth": "false", "split": "dev",
+             "spend": 12.19}) + "\n")
+        (self.lean / "state.json").write_text(json.dumps({"benchmark": True, "verify": {"all_clear": True},
+                                                          "benchmark_direction": "neg"}))
+        row = L.record_result(self.eng, self.lean, "r1s2/C1", "877933", 0)
+        self.assertTrue(row["solved"])
+        self.assertFalse(row["contradiction"])
+        self.assertEqual(row["committed"], "neg")
+        (self.lean / "state.json").write_text(json.dumps({"benchmark": True, "verify": {"all_clear": True}}))
+        wrong = L.record_result(self.eng, self.lean, "r1s2/C1", "877933", 0)      # the statement itself, proved
+        self.assertFalse(wrong["solved"])
+        self.assertTrue(wrong["contradiction"])
+
     def test_an_unverified_stage_is_not_solved(self):
         (self.lean / "DONE").write_text(json.dumps({"exit": 3}))
         self.assertFalse(L.record_result(self.eng, self.lean, "deep/C1", "877933", 3)["solved"])

@@ -63,12 +63,15 @@ def record_result(engine_run: Path, lean_run: Path, claim: str, sid: str, rc: in
     st = json.loads((lean_run / "state.json").read_text()) if (lean_run / "state.json").exists() else {}
     done = json.loads((lean_run / "DONE").read_text()) if (lean_run / "DONE").exists() else {}
     verified = done.get("exit") == 0 and bool((st.get("verify") or {}).get("all_clear"))
+    # the direction proved, relative to the benchmark's statement: a FALSE item's stage proves its negation
+    committed = st.get("benchmark_direction") or "pos"
+    right = (committed == "pos") == (er.get("truth") == "true")
     line = (lean_run / "SUMMARY.line").read_text() if (lean_run / "SUMMARY.line").exists() else ""
     m = re.search(r"spend=\$([0-9.]+)", line)
     row = {"problem": er["problem"], "tag": f"{tag}-lean", "alias": int(sid),
            "run_dir": str(lean_run.resolve().relative_to(ROOT)), "answer": er.get("answer"), "truth": er.get("truth"),
            "split": er.get("split"), "returncode": done.get("exit", rc),
-           "solved": verified and er.get("truth") == "true", "contradiction": verified and er.get("truth") != "true",
+           "solved": verified and right, "contradiction": verified and not right, "committed": committed,
            "spend": float(m.group(1)) if m else None, "stage": "lean",
            "engine_run": er["run_dir"], "engine_alias": er.get("alias"), "engine_claim": claim,
            "engine_spend": er.get("spend"),
@@ -130,6 +133,16 @@ def main() -> int:
     if thms and thms[-1] != f"erdos_{sid}":
         lean = re.sub(rf"\b{re.escape(thms[-1])}(?![\w'!?])", f"erdos_{sid}", lean)
     answer = "true" if c["status"] == "PROVED" else "false"
+    # A whole time-split problem settled FALSE: the target is the benchmark's own negation, which the refutation
+    # proves. Inside the run that negation IS the frozen statement, so the run proves it ("true"); the record keeps
+    # the benchmark's direction. Until 2026-10-20 a FALSE answer was recorded and never run, so dev #537's and
+    # #871's complete refutations could not reach Lean.
+    negate = answer == "false" and timesplit
+    if negate:
+        sys.path.insert(0, str(ROOT / "benchmarks" / "timesplit"))
+        import timesplit as TS
+        lean = TS.negated_statement(lean)
+    run_answer = "true" if negate else answer
     run_dir = ROOT / "runs" / f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-hardlean-erdos{sid}"
     run_dir.mkdir(parents=True)
     if timesplit:
@@ -141,18 +154,21 @@ def main() -> int:
         proof = H.engine_chain_text(c, ej["ledger"])     # the claim with every lemma under it, gap-closed versions in place
     else:
         proof = f"CLAIM: {c['statement']}\n\nPROOF:\n{c.get('proof') or ''}"
-    disc = {"decision": {"commit": "pos" if answer == "true" else "neg", "answer": answer, "share": 1.0},
-            "best_proof": {"text": proof, "answer": answer, "complete": True},
+    disc = {"decision": {"commit": "pos" if run_answer == "true" else "neg", "answer": run_answer, "share": 1.0},
+            "best_proof": {"text": proof, "answer": run_answer, "complete": True},
             "guidance": f"An informal proof{' of the whole problem' if args.full_run else ' of this step'}, refereed but "
                         f"unverified, from a research-engine run ({er.name}, {args.claim}"
-                        f"{', with every lemma under it' if args.chain else ''}):\n{proof[:24000]}",
+                        f"{', with every lemma under it' if args.chain else ''})"
+                        f"{'. It REFUTES the original statement; the target here is that statement negated, which this argument proves' if negate else ''}"
+                        f":\n{proof[:24000]}",
             "refereed_complete": True, "mode": "engine-hardstep"}
     (run_dir / "state.json").write_text(json.dumps({
         "statement": lean, "problem_input": prob, "mode": "research", "invocations": [], "benchmark": True,
         "discovery": disc, "statement_source": f"{'the whole problem' if args.full_run else 'hard step'} from {st.get('statement_source')}, ids renamed erdos_{old_id} -> erdos_{sid}",
-        "assistance": [f"the informal proof came from the research engine run {er.name} ({args.claim}); no operator proof"]},
+        "assistance": [f"the informal proof came from the research engine run {er.name} ({args.claim}); no operator proof"],
+        **({"benchmark_direction": "neg"} if negate else {})},
         indent=2, ensure_ascii=False))
-    if answer == "false":
+    if answer == "false" and not negate:
         print("a refuted step: the deductive loop would need the negation; recorded, not run")
         return 0
     cmd = [sys.executable, str(ROOT / "harness.py"), "run", "--problem", str(run_dir / "problem.json"), "--resume",
