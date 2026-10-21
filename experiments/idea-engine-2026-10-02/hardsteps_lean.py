@@ -88,6 +88,18 @@ def record_result(engine_run: Path, lean_run: Path, claim: str, sid: str, rc: in
     return row
 
 
+def claim_answer(c: dict, whole: bool) -> str:
+    """Which way a claim settles its target: "true" or "false". For a whole problem it is the settles judges' answer.
+    A disproof of the statement is a PROVED claim ("the statement fails"), so its status alone reads as "true". Until
+    2026-10-20, dev #537's and #871's complete disproofs ran against the original statement with the disproof as
+    their blueprint, and their plans rightly called that target false within a cycle. A step's claim keeps the status
+    rule."""
+    settled = ((c.get("validation") or {}).get("settles") or {}).get("answer")
+    if whole and settled in ("true", "false"):
+        return settled
+    return "true" if c.get("status") == "PROVED" else "false"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine-run", required=True)
@@ -136,7 +148,7 @@ def main() -> int:
     thms = re.findall(rf"(?m)^\s*theorem\s+(erdos_{sid}\w*)", lean)
     if thms and thms[-1] != f"erdos_{sid}":
         lean = re.sub(rf"\b{re.escape(thms[-1])}(?![\w'!?])", f"erdos_{sid}", lean)
-    answer = "true" if c["status"] == "PROVED" else "false"
+    answer = claim_answer(c, whole=timesplit)
     # A whole time-split problem settled FALSE: the run attacks the negation as an --open run committed to `neg`. The
     # harness builds the negation itself (`erdos_<id>_neg`, Lean-checked), and every prompt of that direction knows
     # it is the negation. Until 2026-10-20 a FALSE answer was recorded and never run. Then, for one launch, the negated

@@ -67,6 +67,13 @@ class LeanStageRecord(unittest.TestCase):
         self.assertFalse(wrong["solved"])
         self.assertTrue(wrong["contradiction"])
 
+    def test_a_whole_problem_disproof_is_a_false_answer_though_its_claim_is_proved(self):
+        disproof = {"status": "PROVED", "validation": {"settles": {"settles": True, "answer": "false"}}}
+        self.assertEqual(L.claim_answer(disproof, whole=True), "false")
+        self.assertEqual(L.claim_answer(disproof, whole=False), "true")      # a step keeps its status
+        self.assertEqual(L.claim_answer({"status": "REFUTED"}, whole=True), "false")
+        self.assertEqual(L.claim_answer({"status": "PROVED", "validation": {}}, whole=True), "true")
+
     def test_an_unverified_stage_is_not_solved(self):
         (self.lean / "DONE").write_text(json.dumps({"exit": 3}))
         self.assertFalse(L.record_result(self.eng, self.lean, "deep/C1", "877933", 3)["solved"])
