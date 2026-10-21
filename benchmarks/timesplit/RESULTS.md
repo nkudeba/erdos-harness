@@ -2106,3 +2106,21 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
     the negation is the one taken.
   - The first re-run launch inherited the same bug and was stopped within 2 minutes ($0.39, in the ledger). The
     re-runs start again on `2692ddd`, with the same protocol and prediction.
+
+### Stop signal: dev #419 solved and replicated by the campaign's own pipeline (2026-10-21T01:22:08Z)
+
+- **Solve:** alias 42884. Scout settings on pin `20a1462` ($15.43), then the Lean stage on main `c52bedd` ($7.00).
+  Audit PASS, 15 of 15.
+- **Replication:** fresh alias 37099. The same scout settled it again ($11.46, claim `r1s2/C1`), and the Lean stage
+  on main `2692ddd` verified it again ($5.44, 31 minutes, 10 steps certified). Audit PASS, 15 of 15, every blindness
+  check included. Evidence: `benchmarks/timesplit/evidence/419/replication/`.
+- **Neither had any assistance:** no resume and no operator proof text or route. The settings were fixed before
+  launch.
+- **What it is:** the first time-split solve, replicated, by the harness's campaign pipeline (screen, scout, Lean,
+  audit), as distinct from discover-v2's #1213 in September. It reconstructs a result published in 2026 and is not
+  new mathematics. The intent judges called the answer "unclear" and its novelty "known".
+- **Against the predictions:** replication complete again (P = 0.75) and verified again (P = 0.6). Both came true.
+- **#537 and #871, re-run on the negation:** partial at their $15 caps ($15.05, 5 lemmas; $13.56, 13 lemmas). These
+  runs started before the Lean stages got `--cycle-extend-max`.
+- **The loop stops here,** as its procedure requires (docs/improvement-loop.md, stopping condition 1). $555.63 of
+  $571.71 was spent.

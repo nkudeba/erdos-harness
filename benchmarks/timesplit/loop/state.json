@@ -3,7 +3,7 @@
  "budget_usd": 571.71,
  "started": "2026-09-25T03:58:48Z",
  "iteration": 5,
- "phase": "screen",
+ "phase": "stopped",
  "candidate": "Lean conversion of Arm C's six complete chains (main c52bedd)",
  "baseline": {
   "tag": "train-fixes-conv",
@@ -335,8 +335,9 @@
    "estimate": 15.52,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T19:21:30Z"
+   "in_flight": false,
+   "registered": "2026-10-20T19:21:30Z",
+   "finished": "2026-10-21T01:22:08Z"
   },
   {
    "kind": "run",
@@ -354,8 +355,9 @@
    "estimate": 15.75,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-20T19:21:30Z"
+   "in_flight": false,
+   "registered": "2026-10-20T19:21:30Z",
+   "finished": "2026-10-21T01:22:08Z"
   },
   {
    "kind": "run",
@@ -373,8 +375,9 @@
    "estimate": 18.0,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-21T00:00:23Z"
+   "in_flight": false,
+   "registered": "2026-10-21T00:00:23Z",
+   "finished": "2026-10-21T01:22:08Z"
   },
   {
    "kind": "run",
@@ -382,8 +385,9 @@
    "estimate": 13.9,
    "usd": 0.0,
    "note": "",
-   "in_flight": true,
-   "registered": "2026-10-21T00:00:23Z"
+   "in_flight": false,
+   "registered": "2026-10-21T00:00:23Z",
+   "finished": "2026-10-21T01:22:08Z"
   },
   {
    "kind": "manual",
@@ -491,9 +495,13 @@
   {
    "at": "2026-10-20T13:21:28Z",
    "text": "iteration 5 done: A crossfed 0/12 draws; B program 1/3 (#888, replication); C scout baseline 7/9 complete unrecognized (+#457 Lean-verified, assisted, audit FAIL); loop authority ended at the 2026-10-20 09:00 reset"
+  },
+  {
+   "at": "2026-10-21T01:22:08Z",
+   "text": "loop stopped 2026-10-21T01:22:08Z: #419 solved and replicated; $555.63 of $571.71"
   }
  ],
- "updated": "2026-10-21T00:04:40Z",
+ "updated": "2026-10-21T01:22:08Z",
  "rejected_streak": 0,
  "acknowledged": [
   {
@@ -513,6 +521,18 @@
    "problem": "1125",
    "at": "2026-10-19T16:20:53Z",
    "note": "handled outside the loop on 2026-10-06: dev #1125 proved in Lean from the engine's step-2 chain; audit 13/13; evidence in benchmarks/timesplit/evidence/1125/ (CLAUDE.md, engine step 2)"
+  },
+  {
+   "tag": "dev-scout-baseline-20a1462-lean",
+   "problem": "419",
+   "at": "2026-10-21T01:22:08Z",
+   "note": "solve, then replicated on alias 37099 (audit PASS 15/15 both); evidence/419"
+  },
+  {
+   "tag": "dev-scout-replicate-20a1462-lean",
+   "problem": "419",
+   "at": "2026-10-21T01:22:08Z",
+   "note": "the replication of the #419 solve (audit PASS 15/15)"
   }
  ],
  "renewals": [
@@ -540,5 +560,6 @@
    "until": "2026-10-21T13:00:00Z",
    "by": "operator, 'Go ahead with the next step': unassisted Lean conversion of six complete chains"
   }
- ]
+ ],
+ "stop": "stopping condition 1: dev #419 solved by the campaign pipeline (scout + Lean) and replicated on a fresh alias, audit PASS both"
 }

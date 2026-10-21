@@ -1,0 +1,90 @@
+{
+ "run": "runs/20261020-204857-869249-hardlean-erdos37099",
+ "at": "2026-10-21T01:20:50Z",
+ "direction": null,
+ "proof": {
+  "file": "runs/20261020-204857-869249-hardlean-erdos37099/final/Erdos37099.lean",
+  "sha256": "e84a761928448251d0b215841f71206330087d2aa4d4960362e2253c036e0236"
+ },
+ "benchmark": {
+  "tag": "dev-scout-replicate-20a1462-lean",
+  "problem": "419",
+  "split": "dev",
+  "alias": 37099,
+  "engine_run": "runs/20261020-200101-060261-discover-erdos37099",
+  "responses_naming_the_problem": {
+   "problem number with context": 1,
+   "Erdős by name": 11
+  },
+  "other_verified_runs": [
+   {
+    "tag": "dev-scout-baseline-20a1462-lean",
+    "alias": 42884,
+    "run_dir": "runs/20261020-172154-145563-hardlean-erdos42884"
+   }
+  ]
+ },
+ "checks": {
+  "source_scan": {
+   "ok": true,
+   "detail": "no sorry, kernel bypass or elaboration-time code"
+  },
+  "imports": {
+   "ok": true,
+   "detail": "4 import(s), all Mathlib, Formal.Library or the statement's own"
+  },
+  "compiles": {
+   "ok": true,
+   "detail": "no errors"
+  },
+  "no_sorry_warning": {
+   "ok": true,
+   "detail": "0 sorry warning(s)"
+  },
+  "axioms": {
+   "ok": true,
+   "detail": "[Classical.choice, Quot.sound, propext]"
+  },
+  "statement_identity": {
+   "ok": true,
+   "detail": "the proved `erdos_37099` and 2 frozen definition(s) are structurally identical to a clean elaboration of the frozen statement (3 constant(s) compared)"
+  },
+  "kernel_replay": {
+   "ok": true,
+   "detail": "all declarations replayed"
+  },
+  "comparator": {
+   "ok": true,
+   "detail": "the proof matches the challenge statement (2 definition(s) compared), on the permitted axioms, through the Lean kernel; sandbox: none (fake-landrun shim)"
+  },
+  "nanoda": {
+   "ok": true,
+   "detail": "the independent nanoda kernel accepts the proof"
+  },
+  "provenance": {
+   "ok": true,
+   "detail": "the pos direction of the benchmark's statement (google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/419.lean (main theorem; answer stripped; comments removed; identity renamed))"
+  },
+  "direction_matches_answer": {
+   "ok": true,
+   "detail": "proved pos, recorded answer True (formal-conjectures assertion, category 'research solved')"
+  },
+  "faithfulness_judges": {
+   "ok": true,
+   "detail": "at build: True; at verification: True"
+  },
+  "probe": {
+   "ok": true,
+   "detail": "probe verdict: unaware"
+  },
+  "masked_benchmark_run": {
+   "ok": true,
+   "detail": "masked=True, --benchmark=True, knowledge=lemma store excluded (--benchmark)"
+  },
+  "no_identity_in_prompts": {
+   "ok": true,
+   "detail": "102 prompt(s) scanned; matches: {'problem number with context': 0, 'Erdős by name': 0}"
+  }
+ },
+ "verdict": "PASS"
+}
