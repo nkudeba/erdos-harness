@@ -461,3 +461,11 @@
 [2026-10-20T13:39:50Z] #709: skipped (no main theorem (parts: variants.singleton))
 [2026-10-20T13:39:54Z] #555: screen
 [2026-10-20T13:47:19Z] #555: screen -> control (settle chance 0.25, draws [0.0, 0.5]; $1.77)
+[2026-10-20T13:47:53Z] #555: scout (resuming runs/20261020-093954-410945-erdos555)
+[2026-10-20T19:37:31Z] operator: go deep on #873 and #691 with long programs; build track gets the whole daily cap (share 1.0), up to 10 passes and $900 a problem; the sprint (2026-10-19 to the reset) ended; #873 re-queued for build pass 5
+[2026-10-21T00:16:53Z] re-queued for their open parts: [420, 436, 626, 679, 687, 704, 711, 766, 1191]
+[2026-10-21T00:16:53Z] #687 and #766 stay skipped: their open parts do not compile yet
+[2026-10-21T02:09:03Z] resolution campaign loop starting
+[2026-10-21T02:09:04Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-21T02:09:07Z] #555: scout (resuming runs/20261020-093954-410945-erdos555)
+[2026-10-21T02:36:50Z] #555: scout -> none ($16.29; 2 validated new [1, 1])

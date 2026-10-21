@@ -15,24 +15,24 @@
   295
  ],
  "priority_source": "prescreen sweep, 156 problems, mean >= 0.1 (REPORT 3.10; step3/prescreen_priority.py)",
- "fc_head_sha": "d573b686298f40690dd94441c9e1abc3cda7cd61",
- "sprint": {
-  "since": "2026-10-19T16:18:01Z",
-  "until": "2026-10-20T13:00:00Z",
-  "goal": "a full solve before the weekly usage reset",
-  "before": {
-   "daily_cap_usd": 150.0,
-   "mix": null,
-   "build": null
-  }
- },
- "mix": {
-  "fresh": 1,
-  "record": 0,
-  "explicit": 1,
-  "settle": 2
- },
+ "fc_head_sha": "90d18f666eb98adec4eee4d12f1d37e30b4eb204",
  "build": {
-  "share": 0.0
- }
+  "share": 1.0,
+  "max_passes": 10,
+  "max_spend": 900.0,
+  "why": "2026-10-20T19:37:31Z: operator's direction, go deep on #873 and #691 with long programs"
+ },
+ "sprints_done": [
+  {
+   "since": "2026-10-19T16:18:01Z",
+   "until": "2026-10-20T13:00:00Z",
+   "goal": "a full solve before the weekly usage reset",
+   "before": {
+    "daily_cap_usd": 150.0,
+    "mix": null,
+    "build": null
+   },
+   "ended": "2026-10-20T19:37:31Z"
+  }
+ ]
 }

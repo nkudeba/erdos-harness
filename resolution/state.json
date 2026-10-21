@@ -140,8 +140,8 @@
    "rescreen_at": "20261015-122832",
    "kind": "settle",
    "lane": "rescreen",
-   "next": null,
-   "status": "built",
+   "next": "build",
+   "status": "build",
    "run_dir": "runs/20261015-191351-260620-erdos873",
    "settle_chance": 0.015,
    "arm": "screened out",
@@ -3172,22 +3172,47 @@
    "resolved_in_literature": "arXiv:2607.17333 (2026-07-19), W.-X. Huang, Z. Lian, S. Shao, R. Xiao, L. Xu, S. Zhang, 'An affirmative answer to Owings's sumset question': every 2-colouring of N has an infinite B with B+B monochromatic. Found by an OpenAlex search on 2026-10-15; erdosproblems.com still lists the problem as open, with no proof claim."
   },
   "766": {
-   "history": [],
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i",
+      "parts.ii"
+     ]
+    },
+    {
+     "tier": "queue",
+     "outcome": "kept skipped",
+     "why": "open parts do not compile yet: a parse error at the statement ('expected token')"
+    }
+   ],
    "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, variants.dirac_erdos, variants.minExtremalNumber_estimate, variants.minExtremalNumber_strictMonoOn)",
-   "next": null
+   "why": "open parts do not compile yet: a parse error at the statement ('expected token')"
   },
   "704": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, variants.cube_colouring, variants.davies_lower, variants.davies_upper, variants.frankl_wilson)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.ii"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "436": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, variants.even_three, variants.five_two, variants.four_two, variants.ge_four)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.ii"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "338": {
    "history": [
@@ -3207,10 +3232,23 @@
    "running": null
   },
   "687": {
-   "history": [],
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i",
+      "parts.iii"
+     ]
+    },
+    {
+     "tier": "queue",
+     "outcome": "kept skipped",
+     "why": "open parts do not compile yet: `Green46.IsCoveredByResidues` (another formal-conjectures file) is not inlined"
+    }
+   ],
    "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.fgkmt, variants.iwaniec, variants.maier_pomerance)",
-   "next": null
+   "why": "open parts do not compile yet: `Green46.IsCoveredByResidues` (another formal-conjectures file) is not inlined"
   },
   "657": {
    "history": [
@@ -3238,10 +3276,17 @@
    "status": "screened out"
   },
   "626": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, variants.erdos_upper, variants.h_even_conjecture, variants.h_lower, variants.h_odd_conjecture)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i",
+      "parts.ii"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "588": {
    "history": [
@@ -3294,10 +3339,17 @@
    "status": "screened out"
   },
   "1191": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, variants.liminf_le)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i",
+      "parts.ii"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "902": {
    "history": [
@@ -3332,10 +3384,16 @@
    "claims_todo": []
   },
   "679": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "629": {
    "history": [
@@ -3374,10 +3432,18 @@
    }
   },
   "420": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii, parts.iii, variants.log_frequently_lt_two, variants.pow_four_ninths, variants.rankin_frequently_lt_two)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i",
+      "parts.ii",
+      "parts.iii"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "393": {
    "history": [
@@ -3437,10 +3503,16 @@
    "status": "screened out"
   },
   "711": {
-   "history": [],
-   "status": "skipped",
-   "why": "no main theorem (parts: parts.i, parts.ii)",
-   "next": null
+   "history": [
+    {
+     "tier": "queue",
+     "outcome": "re-queued for its open parts",
+     "parts": [
+      "parts.i"
+     ]
+    }
+   ],
+   "status": "requeued-parts"
   },
   "691": {
    "history": [
@@ -3524,6 +3596,11 @@
      "settle_chance": 0.25,
      "spend": 1.7725,
      "track": "control"
+    },
+    {
+     "tier": "scout",
+     "outcome": "none",
+     "spend": 16.2932
     }
    ],
    "prepped": true,
@@ -3532,14 +3609,16 @@
    "kind": "settle",
    "running": null,
    "run_dir": "runs/20261020-093954-410945-erdos555",
-   "spend": 1.7724600000000004,
+   "spend": 18.065669,
    "limit_waits": 0,
    "settle_chance": 0.25,
    "arm": "control",
    "track": "control",
    "intent": null,
-   "next": "scout",
-   "status": "screened"
+   "next": null,
+   "status": "done",
+   "validated_seen": 2,
+   "claims_todo": []
   }
  }
 }

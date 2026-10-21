@@ -277,3 +277,4 @@
 {"at": "2026-10-20T13:39:36Z", "problem": 663, "tier": "scout", "outcome": "none", "spend": 17.3422, "run_dir": "runs/20261020-045126-922501-erdos663", "validated_new": 5, "significance": [1, 1, 1, 1, 0], "arm": "control", "settle_screen": 0.0, "settle_chance": 0.0}
 {"at": "2026-10-20T13:39:50Z", "problem": 709, "tier": "prep", "outcome": "skipped", "why": "no main theorem (parts: variants.singleton)", "spend": 0.0}
 {"at": "2026-10-20T13:47:19Z", "problem": 555, "tier": "screen", "outcome": "control", "settle_chance": 0.25, "draws": [0.0, 0.5], "spend": 1.7725, "run_dir": "runs/20261020-093954-410945-erdos555", "track": "control", "intent": null}
+{"at": "2026-10-21T02:36:50Z", "problem": 555, "tier": "scout", "outcome": "none", "spend": 16.2932, "run_dir": "runs/20261020-093954-410945-erdos555", "validated_new": 2, "significance": [1, 1], "arm": "control", "settle_screen": 0.25, "settle_chance": 0.0}
