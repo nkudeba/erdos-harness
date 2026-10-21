@@ -110,7 +110,10 @@ def main() -> int:
         src = Path(args.src).resolve()
         lib = src / "library" / (f"{n}-full" if (src / "library" / f"{n}-full").exists() else n)
         if run_dir is None:
-            fc = T.parse_fc((src / "fc" / f"{n}.lean").read_text(), int(n))
+            # a file split into parts: the campaign names the one open part it attacks (fc/<n>.part)
+            pf = src / "fc" / f"{n}.part"
+            part = pf.read_text().strip() if pf.exists() else None
+            fc = T.parse_fc((src / "fc" / f"{n}.lean").read_text(), int(n), part)
             if fc.get("error"):
                 print(f"#{n}: formal-conjectures parse failed: {fc['error']}", flush=True)
                 continue
@@ -119,8 +122,10 @@ def main() -> int:
             run_dir.mkdir(parents=True)
             prob = {"id": n, "statement": ranks[n]["statement"], "tags": ranks[n].get("tags") or [],
                     "url": f"https://www.erdosproblems.com/{n}",
-                    "notes": "OPEN problem on erdosproblems.com. Frozen statement: formal-conjectures main theorem, answer "
-                             f"stripped ({fc.get('form')}). Research engine screen {args.tag} (no Lean)."}
+                    "notes": "OPEN problem on erdosproblems.com. Frozen statement: formal-conjectures "
+                             + (f"`{part}` only, one open part of a problem split into separate questions"
+                                if part else "main theorem") + f", answer stripped ({fc.get('form')}). "
+                             f"Research engine screen {args.tag} (no Lean)."}
             (run_dir / "problem.json").write_text(json.dumps(prob, indent=2, ensure_ascii=False))
             (run_dir / "state.json").write_text(json.dumps({"statement": statement, "problem_input": prob, "mode": "research",
                                                             "invocations": [], "statement_source": "formal-conjectures main "

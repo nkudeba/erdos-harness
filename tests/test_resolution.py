@@ -1122,3 +1122,33 @@ class Lean(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpenParts(Base):
+    """2026-10-20: nine skipped problems had no main theorem but open parts. Each open part is a target of its own."""
+    SRC = ("open Filter\n\nnoncomputable def runLimsup (k m : ℕ) : ℕ∞ := ⊤\n\n"
+           "@[inherit_doc] local notation \"Λ\" => runLimsup\n\n"
+           "@[category research solved, AMS 11]\ntheorem erdos_436.parts.i : ∀ k ≥ 2, Λ k 2 < ⊤ := by\n  sorry\n\n"
+           "@[category research open, question, AMS 11]\ntheorem erdos_436.parts.ii : ∀ k ≥ 3, Odd k → Λ k 3 < ⊤ := by\n  sorry\n")
+
+    def test_prep_freezes_the_first_open_part_and_says_which(self):
+        import timesplit as T
+        cfg = {**R.load_cfg(), "fc_sha": "pinned"}
+        (self.d / "fc").mkdir(exist_ok=True)
+        with patch.object(T, "fetch", lambda url, dest, refresh=False, pause=0.0, tries=4: self.SRC), \
+                patch.object(R, "_thread_digest", lambda: (lambda n: "digest")), patch.object(R, "ROOT", self.d):
+            info = R.prep(436, cfg)
+        self.assertEqual((info["ok"], info["part"], info["parts_open"]), (True, "parts.ii", ["parts.ii"]))
+        self.assertEqual((self.d / "fc" / "436.part").read_text().strip(), "parts.ii")
+
+    def test_a_skipped_problem_with_an_open_part_is_requeued_after_the_builds(self):
+        (self.d / "fc").mkdir(exist_ok=True)
+        (self.d / "fc" / "436.lean").write_text(self.SRC)
+        (self.d / "fc" / "709.lean").write_text("@[category research open]\ntheorem erdos_709.variants.x : True := by\n  sorry\n")
+        R.save_problem(436, {"status": "skipped", "why": "no main theorem (parts: parts.i, parts.ii)", "history": []})
+        R.save_problem(709, {"status": "skipped", "why": "no main theorem (parts: variants.x)", "history": []})
+        self.assertEqual(R.requeue_parts(R.load_cfg()), [436])           # #709 has no open part
+        st = R.load_state()
+        self.assertEqual(st["problems"]["436"]["status"], "requeued-parts")
+        self.assertNotIn("why", st["problems"]["436"])
+        self.assertEqual(st["problems"]["709"]["status"], "skipped")

@@ -377,7 +377,7 @@ def queue(state: dict, cfg: dict) -> list[int]:
         claimed = {int(r["problem"]) for kind in ("claimed_resolved", "claimed_partial") for r in om.get(kind) or []}
     except (OSError, ValueError):
         claimed = set()
-    taken = {int(k) for k in state.get("problems", {})}
+    taken = {int(k) for k, p in state.get("problems", {}).items() if p.get("status") != "requeued-parts"}
     first = [int(n) for n in cfg.get("priority") or [] if int(n) in unsolved]
     # Forum size is a weak proxy: 98 queued problems have an empty thread, the Littlewood conjecture (#495) among them.
     # A prescreen's chance, where one exists, comes first.
@@ -447,11 +447,27 @@ def prep(n: int, cfg: dict) -> dict:
         src = T.fetch(T.SOURCES["fc_file"].format(sha=head, n=n), CAMP / "fc" / f"{n}.lean", refresh=True, pause=0.1)
         sha = head
     fc = T.parse_fc(src, int(n)) if src.strip() else {"error": "no formal-conjectures file"}
+    # A file split into parts has no main theorem. Each part is a question of its own, tagged open or solved, so the
+    # first OPEN part is the target (2026-10-20, operator: "why isn't the campaign smart enough to put parts
+    # together?"); the others wait in `parts_open`. Joined with "and", the parts would drag in a solved one.
+    part, parts = None, []
+    if str(fc.get("error") or "").startswith("no main theorem"):
+        parts = T.open_parts(src, int(n))
+        if parts:
+            part = parts[0]
+            fc = T.parse_fc(src, int(n), part)
+        else:
+            fc = {"error": str(fc["error"]) + "; no part is open"}
     if fc.get("error"):
         return {"ok": False, "why": str(fc["error"])[:200]}
+    part_file = CAMP / "fc" / f"{n}.part"                # screen.py and lean_statement freeze this part
+    if part:
+        part_file.write_text(part + "\n")
+    elif part_file.exists():
+        part_file.unlink()
     refresh_forum(n)
     write_library(n)
-    return {"ok": True, "form": fc.get("form"), "fc_sha": sha}
+    return {"ok": True, "form": fc.get("form"), "fc_sha": sha, **({"part": part, "parts_open": parts} if part else {})}
 
 
 def write_library(n: int) -> None:
@@ -782,7 +798,9 @@ def lean_statement(n: int, engine_run: Path, cfg: dict) -> dict:
     st = json.loads((engine_run / "state.json").read_text())
     path = CAMP / "fc" / f"{n}.lean"
     src = path.read_text() if path.exists() else ""
-    fc = T.parse_fc(src, int(n)) if src.strip() else {"error": "no formal-conjectures file"}
+    pf = CAMP / "fc" / f"{n}.part"
+    part = pf.read_text().strip() if pf.exists() else None
+    fc = T.parse_fc(src, int(n), part) if src.strip() else {"error": "no formal-conjectures file"}
     if fc.get("error"):
         return {"ok": False, "why": f"formal-conjectures parse: {fc['error']}"[:300]}
     if T.frozen_statement(fc, int(n)).strip() != (st.get("statement") or "").strip():
@@ -1069,6 +1087,9 @@ def step(cfg: dict) -> bool:
                 return True
             p["prepped"] = True
             p["fc_sha"] = info.get("fc_sha") or cfg.get("fc_sha")
+            if info.get("part"):
+                p.update({"part": info["part"], "parts_open": info["parts_open"]})
+                log(f"#{n}: no main theorem; attacking its open part `{info['part']}` (open: {', '.join(info['parts_open'])})")
         else:
             refresh_forum(n)                             # a scout of a problem screened days ago
         p.setdefault("lane", QUEUE_LANE.get(int(n), "settle"))
@@ -1639,10 +1660,38 @@ def requeue_lean(n: int) -> str:
     return f"#{n}: back to the Lean stage (previous run {old})"
 
 
+def requeue_parts(cfg: dict) -> list[int]:
+    """Problems skipped as "no main theorem" go back to the queue when an open part can be frozen. They return as
+    `requeued-parts`, which the queue does not count as taken, so they come in queue order, after the build passes
+    (2026-10-20)."""
+    import timesplit as T
+    done = []
+    with locked(STATE):
+        st = load_state()
+    for n, p in sorted(st.get("problems", {}).items(), key=lambda x: int(x[0])):
+        if p.get("status") != "skipped" or not str(p.get("why") or "").startswith("no main theorem"):
+            continue
+        path = CAMP / "fc" / f"{n}.lean"
+        src = path.read_text() if path.exists() else ""
+        parts = T.open_parts(src, int(n)) if src.strip() else []
+        if not parts:
+            continue
+        p["history"] = p.get("history") or []
+        p["history"].append({"tier": "queue", "outcome": "re-queued for its open parts", "parts": parts})
+        for k in ("why", "next", "prepped", "running"):
+            p.pop(k, None)
+        p["status"] = "requeued-parts"
+        save_problem(n, p)
+        done.append(int(n))
+    if done:
+        log(f"re-queued for their open parts: {done}")
+    return done
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["status", "queue", "once", "loop", "import-screens", "requeue-lean", "reverify-lean",
-                                    "rescreen", "persist", "build"])
+                                    "rescreen", "persist", "build", "requeue-parts"])
     ap.add_argument("--problem", type=int, help="requeue-lean, reverify-lean: the problem")
     ap.add_argument("--show", type=int, default=20)
     ap.add_argument("--file", help="import-screens: a jsonl of screen rows (step3/settle_open.jsonl)")
@@ -1655,6 +1704,8 @@ def main() -> int:
         print(f"{len(q)} problems queued; first {a.show}:")
         for n in q[: a.show]:
             print(f"  #{n}  forum {forum_chars(n)} chars")
+    elif a.cmd == "requeue-parts":
+        print("re-queued for their open parts:", requeue_parts(load_cfg()))
     elif a.cmd == "import-screens":
         print("imported to the pass arm:", import_screens(Path(a.file), load_cfg()))
     elif a.cmd in ("requeue-lean", "reverify-lean", "rescreen", "persist", "build"):

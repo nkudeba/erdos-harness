@@ -242,8 +242,27 @@ BLOCK_END = re.compile(r"(?m)^(?=(?:@\[|/--|/-|theorem\b|lemma\b|example\b|def\b
                        r"variable\b|notation\b|local\b|scoped\b|set_option\b|attribute\b|#))")
 
 
-def parse_fc(src: str, n: int) -> dict:
-    """The main theorem of a formal-conjectures Erdős file, answer-free.
+def open_parts(src: str, n: int) -> list[str]:
+    """The `parts.*` theorems of a formal-conjectures file that are still open (`@[category research open ...]`), in
+    file order. A file split into parts has no main theorem. Its parts are separate questions, each tagged open or
+    solved (#436: (i) solved, (ii) open; #687: (ii) solved with a Lean proof, (i) and (iii) open), so each open part
+    is a target of its own. Joined with "and", they would drag in a solved part or make two open questions one
+    harder one."""
+    out = []
+    for name in dict.fromkeys(re.findall(rf"(?m)^theorem\s+erdos_{n}\.(parts\.[^\s:({{\[]+)", src)):
+        fc = parse_fc(src, n, name)
+        if not fc.get("error") and fc.get("category") == "research open":
+            out.append(name)
+    return out
+
+
+# `local notation "Λ" => runLimsup`, with any attribute dropped: (whole command, symbol, right-hand side)
+NOTATION_LINE = re.compile(r'(?m)^(?:@\[[^\]\n]*\]\s*)?((?:local\s+|scoped(?:\[[^\]\n]*\])?\s+)?notation(?::\w+)?\s+"([^"]+)"\s*=>\s*([^\n]+))$')
+
+
+def parse_fc(src: str, n: int, part: str | None = None) -> dict:
+    """The main theorem of a formal-conjectures Erdős file, answer-free; with `part` (e.g. "parts.ii"), that part's
+    theorem `erdos_<n>.<part>` instead.
 
     Returns the proposition P (the question's YES reading), its truth where the file records it, the file-local
     definitions P depends on (transitively), the `open`s it needs, and the references. Every docstring and
@@ -253,7 +272,13 @@ def parse_fc(src: str, n: int) -> dict:
         return {"error": "no formal-conjectures file"}
     mod = re.search(r"/-!(.*?)-/", src, re.S)
     out: dict = {"refs": parse_refs(mod.group(1) if mod else "")}
-    m = re.search(rf"(?m)^theorem\s+erdos_{n}(?:_statement)?(?=[\s:({{\[])", src)     # #330 names it erdos_330_statement
+    if part:
+        m = re.search(rf"(?m)^theorem\s+erdos_{n}\.{re.escape(part)}(?=[\s:({{\[])", src)
+        if not m:
+            return {**out, "error": f"no theorem erdos_{n}.{part}"}
+        out["part"] = part
+    else:
+        m = re.search(rf"(?m)^theorem\s+erdos_{n}(?:_statement)?(?=[\s:({{\[])", src)  # #330 names it erdos_330_statement
     if not m:
         parts = sorted(set(re.findall(rf"(?m)^theorem\s+erdos_{n}\.(\S+)", src)))
         return {**out, "error": "no main theorem" + (f" (parts: {', '.join(parts[:6])})" if parts else "")}
@@ -266,6 +291,9 @@ def parse_fc(src: str, n: int) -> dict:
         if re.fullmatch(r"\s*(?:(?:@\[.*?\]|open\s[^\n]*\bin)\s*)*", between, re.S):
             doc, lead = before[k + 3: e], between
     out["doc"] = " ".join(doc.split())
+    if not lead:                                         # no docstring: the attributes directly above the theorem
+        att = re.search(r"((?:@\[[^\]]*\]\s*|open\s[^\n]*\bin\s*)+)$", before)
+        lead = att.group(1) if att else ""
     cat = re.search(r"category\s+([\w ]+?)\s*(?:,|\])", lead)
     out["category"] = cat.group(1).strip() if cat else None
     inline_opens = [l.strip() for l in lead.splitlines() if re.match(r"\s*open\s.*\bin\s*$", l)]
@@ -298,19 +326,27 @@ def parse_fc(src: str, n: int) -> dict:
     decls = []
     for d in DECL_HEAD.finditer(before):
         end = BLOCK_END.search(before, d.end())
-        decls.append({"kind": d.group(1), "name": d.group(2).split(".")[-1], "text": before[d.start(): end.start() if end else len(before)]})
+        decls.append({"kind": d.group(1), "name": d.group(2).split(".")[-1], "pos": d.start(),
+                      "text": before[d.start(): end.start() if end else len(before)]})
     names = {d["name"] for d in decls if d["name"]}
-    need, frontier = set(), binders + " " + prop
+    # A local notation is a dependency too: #436's parts use `Λ` (`local notation "Λ" => runLimsup`), and with only
+    # defs followed, their frozen statements dropped Λ and everything under it (2026-10-20).
+    nots = [(mm.start(), mm.group(1).strip(), mm.group(2), mm.group(3)) for mm in NOTATION_LINE.finditer(before)]
+    need, used, frontier = set(), set(), binders + " " + prop
     while True:
         plain = re.sub(rf"\bErdos{n}\.", "", frontier)          # `Erdos884.foo` is the local `foo`
         # a preceding dot is allowed: `n.IsSumDivisors` is dot notation for the local `Nat.IsSumDivisors` (#469)
         hit = {x for x in names - need if re.search(rf"(?<![\w]){re.escape(x)}(?![\w'])", plain)}
-        if not hit:
+        hit_n = {i for i, nt in enumerate(nots) if i not in used and nt[2] in plain}
+        if not hit and not hit_n:
             break
         need |= hit
-        frontier = " ".join(d["text"] for d in decls if d["name"] in hit)
-    out["defs"] = [neutralize(d["text"], n).strip() for d in decls if d["name"] in need or d["kind"] == "instance"
-                   and any(re.search(rf"\b{re.escape(x)}\b", d["text"]) for x in need)]
+        used |= hit_n
+        frontier = " ".join([d["text"] for d in decls if d["name"] in hit] + [nots[i][3] for i in hit_n])
+    blocks = [(d["pos"], neutralize(d["text"], n).strip()) for d in decls if d["name"] in need or d["kind"] == "instance"
+              and any(re.search(rf"\b{re.escape(x)}\b", d["text"]) for x in need)]
+    blocks += [(nots[i][0], neutralize(nots[i][1], n).strip()) for i in used]
+    out["defs"] = [t for _, t in sorted(blocks)]
     out["variables"] = [l.strip() for l in before.splitlines() if l.startswith("variable")]
     out["opens"] = [l.strip() for l in before.splitlines() if re.match(r"open\s", l) and not l.rstrip().endswith(" in")]
     out["inline_opens"] = inline_opens

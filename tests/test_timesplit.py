@@ -876,3 +876,52 @@ class ResumeFrom(unittest.TestCase):
                                                            "spend_added": 25.77}) + "\n")
             with patch.object(L, "RESULTS", res):
                 self.assertEqual(L.entry_spend({"kind": "run", "name": "program", "in_flight": False}), 25.77)
+
+
+PARTS_FC = '''import FormalConjectures.Util.ProblemImports
+
+open Filter
+
+namespace Erdos436
+
+noncomputable def runLimsup (k m : ℕ) : ℕ∞ := ⊤
+
+@[inherit_doc] local notation "Λ" => runLimsup
+
+/-- Part (i), solved. -/
+@[category research solved, AMS 11]
+theorem erdos_436.parts.i : ∀ k ≥ 2, Λ k 2 < ⊤ := by
+  sorry
+
+/-- Part (ii), open. -/
+@[category research open, question, AMS 11]
+theorem erdos_436.parts.ii : ∀ k ≥ 3, Odd k → Λ k 3 < ⊤ := by
+  sorry
+
+@[category research open, AMS 11]
+theorem erdos_436.variants.other : Λ 2 2 = 9 := by
+  sorry
+
+end Erdos436
+'''
+
+
+class Parts(unittest.TestCase):
+    """2026-10-20: a file split into parts has no main theorem. Each part is a question of its own, tagged open or
+    solved, so each OPEN part is a target; and a part's statement can rest on a local notation."""
+
+    def test_no_main_theorem_lists_the_parts(self):
+        self.assertTrue(T.parse_fc(PARTS_FC, 436)["error"].startswith("no main theorem"))
+
+    def test_only_open_parts_are_targets(self):
+        self.assertEqual(T.open_parts(PARTS_FC, 436), ["parts.ii"])       # variants are not parts
+
+    def test_a_part_freezes_with_the_notation_and_what_it_names(self):
+        fc = T.parse_fc(PARTS_FC, 436, "parts.ii")
+        self.assertEqual((fc["part"], fc["category"]), ("parts.ii", "research open"))
+        frozen = T.frozen_statement(fc, 436)
+        self.assertIn('local notation "Λ" => runLimsup', frozen)
+        self.assertNotIn("inherit_doc", frozen)
+        self.assertLess(frozen.index("def runLimsup"), frozen.index('notation "Λ"'))
+        self.assertIn("theorem erdos_436 :\n    ∀ k ≥ 3, Odd k → Λ k 3 < ⊤ := by\n  sorry", frozen)
+        self.assertEqual(T.parse_fc(PARTS_FC, 436, "parts.v")["error"], "no theorem erdos_436.parts.v")
