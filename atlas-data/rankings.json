@@ -543,8 +543,8 @@
       "prize": "no",
       "evidence": {
         "best": "verified",
-        "runs": 6,
-        "benchmarkRuns": 6,
+        "runs": 7,
+        "benchmarkRuns": 7,
         "certifiedMax": 18
       },
       "rank": 12,
@@ -15362,7 +15362,7 @@
         "best": "partial",
         "runs": 6,
         "benchmarkRuns": 6,
-        "certifiedMax": 1
+        "certifiedMax": 8
       },
       "assessed": {
         "on": null,
