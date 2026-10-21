@@ -139,12 +139,17 @@
      "tier": "build",
      "outcome": "traction",
      "spend": 28.4374
+    },
+    {
+     "tier": "build",
+     "outcome": "traction",
+     "spend": 16.3396
     }
    ],
    "prepped": true,
    "running": null,
    "errors": 0,
-   "spend": 210.02744140000004,
+   "spend": 226.36700420000014,
    "limit_waits": 0,
    "previous": {
     "status": "screened out",
@@ -177,14 +182,16 @@
     "why": "A divisor-cluster bound exp(C(θ)(ω(n)+1)), uniform in the primes, looks obtainable from the quantitative Subspace/S-unit theorems (Evertse–Schlickewei) but I know no published statement; it would force any counterexample to have ω(L)→∞, a solid structural partial result but not the uniform DCC core.",
     "summary": "=== GOAL No line I can defend is likely to settle the problem. I am therefore choosing a major-progress line, and I say so here. Why no settling line. The formal statement is equivalent to the Divisor Cluster Conjecture (DCC), uniformly in n: - Packing gives D"
    },
-   "build_passes": 8,
+   "build_passes": 9,
    "build_seen": {
-    "rungs": 41,
-    "lemmas": 80,
-    "validated": 24
+    "rungs": 48,
+    "lemmas": 89,
+    "validated": 29
    },
-   "validated_seen": 24,
-   "claims_todo": [],
+   "validated_seen": 29,
+   "claims_todo": [
+    "program-R46/C4"
+   ],
    "claims_done": {
     "program-R5/C4": {
      "lean_run": "runs/20261018-175123-431630-resolve-claim-erdos10087301",

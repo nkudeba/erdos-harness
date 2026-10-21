@@ -481,3 +481,7 @@
 [2026-10-21T07:34:17Z] #873: build pass 8 (the research program on its line) on runs/20261015-191351-260620-erdos873
 [2026-10-21T09:19:46Z] #873: build pass 8 moved the line (rungs, lemmas, validated); another build pass
 [2026-10-21T09:19:47Z] #873: build -> traction ($28.44; 24 validated new [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]); 41 rung(s) proved, 80 lemma(s) established
+[2026-10-21T09:20:01Z] sources refreshed: the problems database, formal-conjectures' head, the records survey
+[2026-10-21T09:20:04Z] #873: build pass 9 (the research program on its line) on runs/20261015-191351-260620-erdos873
+[2026-10-21T10:11:23Z] #873: build pass 9 moved the line (rungs, lemmas, validated); another build pass
+[2026-10-21T10:11:23Z] #873: build -> traction ($16.34; 29 validated new [2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]); 48 rung(s) proved, 89 lemma(s) established
