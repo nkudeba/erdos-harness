@@ -382,13 +382,24 @@ class ClaudeCliBackend:
         "in the requested format."
     )
 
-    def complete_web(self, purpose: str, prompt: str, budget_usd: float = 3.0, max_turns: int = 10) -> str:
+    # The novelty check reads the literature itself: an author's page or a journal can hold the one paper that decides
+    # it (#691's check, 2026-10-21, could not open Hall-Tenenbaum 1992 under WEB_SYSTEM_PROMPT's three domains).
+    NOVELTY_WEB_SYSTEM_PROMPT = (
+        "You check whether a mathematical result is already known. You may use WebSearch freely and WebFetch on any "
+        "mathematics source: arXiv, journals and publishers, authors' pages, MathOverflow, erdosproblems.com and its forum "
+        "and proof-claims pages. NEVER open a Lean proof repository (github.com/plby/lean-proofs, google-deepmind/"
+        "formal-conjectures or any other), and never quote Lean code. At most 8 fetches. Answer in the requested format."
+    )
+
+    def complete_web(self, purpose: str, prompt: str, budget_usd: float = 3.0, max_turns: int = 10,
+                     system: str | None = None) -> str:
         """Web-enabled literature call (opt-in): WebSearch/WebFetch only, own budget, medium effort."""
         old = self.aux_budget_usd
         self.aux_budget_usd = budget_usd
         try:
             return self._run(purpose, prompt, ["--tools", "WebSearch", "WebFetch", "--allowedTools", "WebSearch", "WebFetch",
-                                               "--max-turns", str(max_turns), "--system-prompt", self.WEB_SYSTEM_PROMPT], None)
+                                               "--max-turns", str(max_turns), "--system-prompt",
+                                               system or self.WEB_SYSTEM_PROMPT], None)
         finally:
             self.aux_budget_usd = old
 
@@ -3440,6 +3451,24 @@ def json_tail_any(text: str) -> dict:
     return {}
 
 
+def json_last_object(text: str) -> dict:
+    """The last ```json block, else the last bare top-level JSON object in the text. A web-enabled call answered with a
+    bare object after its notes (2026-10-21), and `json_tail_any` read nothing: five searches, recorded as unchecked."""
+    j = json_tail_any(text)
+    if j:
+        return j
+    text = text or ""
+    dec = json.JSONDecoder()
+    for i in reversed([m.start() for m in re.finditer(r"\{", text)]):
+        try:
+            obj, end = dec.raw_decode(text, i)
+        except ValueError:
+            continue
+        if isinstance(obj, dict) and not text[end:].strip():
+            return obj
+    return {}
+
+
 def clip_middle(text: str, room: int) -> str:
     """Keep a text whole when it fits; otherwise its head and its tail, with the cut marked. A proof's opening lemma
     and its conclusion both matter, so cutting only one end (as `text[-N:]` does) loses half the argument."""
@@ -4378,7 +4407,7 @@ def engine_literature_check(call, search, s: "EngineSettings", statement: str, c
     if web is not None and rec["verdict"] not in ("known", "routine") and sig >= 2:
         wt, wc = web("engine-novelty-web", LIT_WEB_PROMPT.format(statement=clip_middle(statement, 4000), claim=claim), 1.5)
         rec["cost"] = round(rec["cost"] + float(wc or 0.0), 4)
-        w = json_tail_any(wt) if wt else {}
+        w = json_last_object(wt) if wt else {}
         searched = [str(q) for q in (w.get("searched") or []) if str(q).strip()]
         rec["web"] = {"verdict": w.get("verdict") if searched else "unchecked", "cite": w.get("cite"),
                       "nearest": w.get("nearest"), "searched": searched[:8], "fetched": (w.get("fetched") or [])[:8]}
@@ -4397,7 +4426,7 @@ THE PROBLEM'S FORMAL STATEMENT:
 THE RESULT TO CHECK:
 {claim}
 
-Answer with ONE json object and nothing after it:
+Answer with ONE ```json block and nothing after it:
 {{"verdict": "known" | "routine" | "new" | "unchecked", "cite": "<the source that states it or something stronger, with its URL>" or null,
  "nearest": "<the closest result you found, with its URL>" or null, "searched": ["<every query you ran>"],
  "fetched": ["<every URL you opened>"]}}
@@ -8124,7 +8153,8 @@ class Harness:
             self.log.event("llm", "request", purpose=purpose, chars=len(prompt), budget=budget, web=True)
             t0 = time.time()
             try:
-                text = backend.complete_web(purpose, prompt, budget_usd=budget, max_turns=14)
+                text = backend.complete_web(purpose, prompt, budget_usd=budget, max_turns=16,
+                                            system=ClaudeCliBackend.NOVELTY_WEB_SYSTEM_PROMPT)
             except RuntimeError as e:
                 meta = dict(getattr(backend, "last_meta", {}) or {})
                 self.log.event("llm", "response_failed", purpose=purpose, cost_usd=meta.get("cost_usd"), web=True)

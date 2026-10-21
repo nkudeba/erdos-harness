@@ -1948,3 +1948,23 @@ class WebCheckWiring(unittest.TestCase):
         self.assertIsNone(self._h()._engine_search().web)
         self.assertIsNone(self._h(engine_web_check="on", masked=True)._engine_search().web)
         self.assertIsNone(self._h(engine_web_check="on", benchmark=True)._engine_search())
+
+
+class WebAnswers(unittest.TestCase):
+    """2026-10-21: #691's web check ran five searches and answered with a bare JSON object; `json_tail_any` read nothing,
+    and its one decisive source (an author's page) was outside the three domains the literature prompt allows."""
+    def test_a_bare_trailing_object_is_read_and_a_fenced_one_wins(self):
+        self.assertEqual(H.json_last_object('notes first\n{"verdict": "new", "searched": ["q"]}')["verdict"], "new")
+        self.assertEqual(H.json_last_object('```json\n{"verdict": "known"}\n```\n{"verdict": "new"}')["verdict"], "known")
+        self.assertEqual(H.json_last_object('{"verdict": "new"} and then prose'), {})
+
+    def test_the_novelty_check_reads_any_mathematics_source_but_never_lean_proofs(self):
+        b = H.ClaudeCliBackend(H.DEFAULT_CLAUDE_MODEL, 60, 1.0)
+        seen = {}
+        b._run = lambda purpose, prompt, argv, *a, **k: seen.update(argv=argv) or "ok"
+        b.complete_web("engine-novelty-web", "p", budget_usd=1.0, system=H.ClaudeCliBackend.NOVELTY_WEB_SYSTEM_PROMPT)
+        system = seen["argv"][seen["argv"].index("--system-prompt") + 1]
+        self.assertIn("authors' pages", system)
+        self.assertIn("NEVER open a Lean proof repository", system)
+        b.complete_web("literature", "p")                               # the literature stage keeps its own rules
+        self.assertIn("ONLY on", seen["argv"][seen["argv"].index("--system-prompt") + 1])
