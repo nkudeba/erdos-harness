@@ -1477,12 +1477,13 @@
   },
   "691": {
     "rationale": [
-      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: This line settles the Lean statement only on the condition that the grader accepts a known, non-tautological reformulation as `answer`. If the harness demands an \"intrinsic\" criterion in the CORE's sense, the chance is about 0. I found no plausible settling li BUILD TRACK: no settling line, but two judges rated this line's main target new at significance 2 if proved (P_WEEK 0.4), so a research program is committed to it and proves its theorems one at a time (resolution/build/691/line.md)."
+      "Resolution campaign ripeness screen 2026-10-20: SETTLE CHANCE 0.11, the mean of 2 draws of the research engine's team lead reading only its frontier map, before any work (an unvalidated model estimate; on step 2's dev items it ranked the problems the engine settled first without separating them). The line it would take: This line settles the Lean statement only on the condition that the grader accepts a known, non-tautological reformulation as `answer`. If the harness demands an \"intrinsic\" criterion in the CORE's sense, the chance is about 0. I found no plausible settling li BUILD TRACK: no settling line, but two judges rated this line's main target new at significance 2 if proved (P_WEEK 0.4), so a research program is committed to it and proves its theorems one at a time (resolution/build/691/line.md).",
+      "Resolution campaign BUILD pass 1 2026-10-21 ($24.26, informal): the research program on the line its screen committed to (resolution/build/691/line.md), 8 cycle(s), stopped: 8 cycles. Proved on the line: R1 (proved; novelty new, significance 2): Fix r ≥ 1. Let A ⊆ ℕ≥2 satisfy Ω(a) ≤ r for every a ∈ A. A set G ⊆ ℕ≥2 is a *cover* of A if every a ∈ A has a divisor g ∈ G. The cost of G is cost(G) = ∑_{g∈G} 1/g. Then: M_A has natural density 1 ⇔ e | R2 (proved; novelty new, significance 1): **Rank-graded cover theorem (extension and sharpness of R1).** *Notation.* - For B ⊆ ℕ≥2, a *cover* of B is a set G ⊆ ℕ≥2 such that every b ∈ B has a divisor g ∈ G. - cost(G) = ∑_{g∈G} 1/g, and C(B) = | R3 (proved; novelty new, significance 1): **Exponential threshold for the rank-graded cover condition.** This is the line's step-8 goal, and it is strictly stronger than R2(iii). *Notation (as in R2).* - A *cover* of B ⊆ ℕ≥2 is a set G ⊆ ℕ≥2 . Skeleton in force: 3 lemma(s) established, 2 open, for: **Theorem (two-sided exponential cover bound; strengthens R1).** *Notation.* - For finite F ⊆ ℕ≥2, C(F) = min{cost(G) : G ⊆ ℕ≥2 a cover of F}, where cost(G) = ∑_{g∈G} 1/g. Set C(∅) = 0. - d(M_F) exist"
     ],
     "sources": [
       "resolution/results.jsonl"
     ],
-    "assessed": "2026-10-20"
+    "assessed": "2026-10-21"
   },
   "695": {
     "rationale": [
