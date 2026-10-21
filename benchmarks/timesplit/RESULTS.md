@@ -2096,3 +2096,13 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
   - #419 replication on a fresh alias: the same scout flags on pin `20a1462` (tag `dev-scout-replicate-20a1462`,
     $18 cap), then the Lean stage on main with `--budget 14 --cycles 8`. Prediction: complete again, P = 0.75;
     verified again, P = 0.6.
+- **Correction (written before the re-runs' results).** The diagnosis above, and the commit messages of `c52bedd`
+  and `f95cac2`, were wrong.
+  - Neither first run of #537 or #871 had a negated statement.
+  - `hardsteps_lean.py` took the answer from the claim's status. A disproof of the whole statement is a PROVED claim,
+    so the answer read "true", and the runs attacked the original statement with the disproof as their blueprint.
+  - Their plans were right to call that target false.
+  - Fixed in `2692ddd`: a whole problem's answer is the settles judges' answer. With it, `f95cac2`'s `--open` route to
+    the negation is the one taken.
+  - The first re-run launch inherited the same bug and was stopped within 2 minutes ($0.39, in the ledger). The
+    re-runs start again on `2692ddd`, with the same protocol and prediction.
