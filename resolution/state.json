@@ -3559,6 +3559,11 @@
      "spend": 2.2846,
      "track": "build",
      "route": "build"
+    },
+    {
+     "tier": "build",
+     "outcome": "traction",
+     "spend": 21.9711
     }
    ],
    "prepped": true,
@@ -3567,7 +3572,7 @@
    "kind": "settle",
    "running": null,
    "run_dir": "runs/20261020-043909-680811-erdos691",
-   "spend": 2.284612,
+   "spend": 24.25571100000002,
    "limit_waits": 0,
    "settle_chance": 0.11,
    "arm": "screened out",
@@ -3584,7 +3589,17 @@
     "value": 0.8,
     "why": "A bounded-Ω cover criterion for Behrend sequences is not a result I know in the literature, though Hall's 'Sets of Multiples' (ch. 2), Hall–Tenenbaum 1992 and Ruzsa–Tenenbaum 1996 must be checked. With bounded rank, the Park–Pham log-ℓ loss is a constant that scaling absorbs, so it looks provable but needs careful heterogeneous-weight and ε-regime transfers.",
     "summary": "=== GOAL About the literal Lean statement. It is discharged by `TSMain.answer := fun A ↦ (multiples A).HasDensity 1` followed by `rfl`. That is the tautology barrier. Under the convention for `answer`-style statements this should not count, and I count it as 0"
-   }
+   },
+   "build_passes": 1,
+   "build_seen": {
+    "rungs": 3,
+    "lemmas": 14,
+    "validated": 3
+   },
+   "validated_seen": 3,
+   "claims_todo": [
+    "program-R1/C5"
+   ]
   },
   "663": {
    "history": [
