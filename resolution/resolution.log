@@ -491,3 +491,4 @@
 [2026-10-21T13:23:53Z] #691: build pass 1 (the research program on its line) on runs/20261020-043909-680811-erdos691
 [2026-10-21T14:53:21Z] #691: build pass 1 moved the line (rungs, lemmas, validated); another build pass
 [2026-10-21T14:53:21Z] #691: build -> traction ($21.97; 3 validated new [2, 1, 1]); 3 rung(s) proved, 14 lemma(s) established
+[2026-10-21T14:53:29Z] #691: Lean on partial result program-R1/C5 in 20261021-105329-721048-resolve-claim-erdos10069101
