@@ -1747,3 +1747,62 @@ class RefinementMustBeEasier(unittest.TestCase):
     def test_no_verdict_is_no_splice(self):
         h, asked = self._run("It looks like progress to me.")
         self.assertTrue(any(e[1] == "refinement_not_easier" and "no verdict" in e[2]["why"] for e in h.log.events))
+
+
+class CycleExtensionAndReplan(unittest.TestCase):
+    """2026-10-20, from the Lean stages on disk: 7 of 16 finished ones ended at a fixed cycle cap with steps still
+    open, and 35 skeletons were rejected as "no improvement over the skeleton in force". A productive cycle at the
+    cap earns another (--cycle-extend-max), and a clean productive cycle skips the next re-plan (--replan on-failure)."""
+    TWO = ("def foo (n : ℕ) : Prop := n = n\n\n"
+           "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  sorry\n\n"
+           "theorem erdos_99_hyp_b : foo 0 := by\n  sorry\n\n"
+           "theorem erdos_99 : ∀ n : ℕ, foo n := by\n  intro n\n  have := erdos_99_hyp_b\n  exact erdos_99_hyp_a n")
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self._root, self._know = H.ROOT, H.KNOWLEDGE
+        H.ROOT, H.KNOWLEDGE = self.root, self.root / "knowledge"
+        (self.root / "run").mkdir()
+    def tearDown(self):
+        H.ROOT, H.KNOWLEDGE = self._root, self._know
+        self.tmp.cleanup()
+
+    def _run(self, **args):
+        h = _stub(self.root / "run")
+        h.args.hyps_per_cycle = 1                               # one step attacked per cycle
+        for k, v in args.items():
+            setattr(h.args, k, v)
+        plan = ("```lean\n" + self.TWO + "\n```\n```json\n"
+                + json.dumps({"hypotheses": [{"name": "erdos_99_hyp_a", "kind": "conjecture", "difficulty": "elementary"},
+                                             {"name": "erdos_99_hyp_b", "kind": "conjecture", "difficulty": "elementary"}],
+                              "route": "glue"}) + "\n```\n")
+        asked = []
+        h.ask = _judged(lambda purpose, prompt, **kw: asked.append(purpose) or plan)
+        h._install_lemmas_module = lambda pdir: None
+        proofs = {"erdos_99_hyp_a": "theorem erdos_99_hyp_a : ∀ n : ℕ, foo n := by\n  intro n\n  rfl",
+                  "erdos_99_hyp_b": "theorem erdos_99_hyp_b : foo 0 := by\n  rfl"}
+        h._attack_substatement = lambda sub, name, *a, **k: (0, argparse.Namespace(state={"proof": proofs[name]}))
+        def verify():
+            h.state["verify"] = {"all_clear": True}
+            return h.state["verify"]
+        h.stage_verify = verify
+        return h, h.run_program(), asked
+
+    def test_the_cap_stops_a_productive_run_without_the_extension(self):
+        h, rc, asked = self._run()
+        self.assertEqual(rc, 3)                                  # one step proved, one left at the cap
+        self.assertFalse(any(e[1] == "cycles_extended" for e in h.log.events))
+
+    def test_a_productive_cycle_at_the_cap_earns_another(self):
+        h, rc, asked = self._run(cycle_extend_max=4)
+        self.assertEqual(rc, 0)
+        ext = [e[2] for e in h.log.events if e[1] == "cycles_extended"]
+        self.assertEqual([(e["cycle"], e["cycles"]) for e in ext], [(1, 2)])
+        self.assertEqual(asked.count("plan"), 2)                 # the default still re-plans every cycle
+
+    def test_a_clean_productive_cycle_skips_the_next_plan(self):
+        h, rc, asked = self._run(cycle_extend_max=4, replan="on-failure")
+        self.assertEqual(rc, 0)
+        self.assertEqual(asked.count("plan"), 1)
+        self.assertTrue(any(e[1] == "replan_skipped" and e[2]["cycle"] == 2 for e in h.log.events))

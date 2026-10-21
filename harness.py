@@ -11717,11 +11717,14 @@ for the SAT solver instead of enumerating it.
             self.log.event("program", "stopped_on_budget", cycle=0, detail=str(e))
         ran = 0                          # cycles actually run; `cycles` is only the cap (#455 stopped at 3 of 6)
         cycle, prev_progress = 0, False
+        replan = getattr(self.args, "replan", "always") or "always"
+        cycle_cap = int(getattr(self.args, "cycle_extend_max", 0) or 0)
         while cycle < cycles:
             cycle += 1
             ran = cycle
             progress = False             # Step 2: did this cycle DISCHARGE anything (not merely split)?
             pending = False              # a child came back with certified work the parent has not banked yet
+            fails_before = len(load_failures(pdir))
             try:
                 cdir = pdir / "cycles" / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-c{cycle}"
                 cdir.mkdir(parents=True, exist_ok=True)
@@ -11739,9 +11742,18 @@ for the SAT solver instead of enumerating it.
                            and parsed["metric"]["open_conjectures"] == 0 and parsed["metric"]["published"] > 0)
                 if endgame:
                     self.log.event("program", "premise_endgame", cycle=cycle, published=parsed["metric"]["published"])
+                # --replan on-failure (2026-10-20): after a cycle that discharged a step and recorded no failure, the
+                # skeleton in force is working, so this cycle goes straight to its open steps. 35 skeletons on disk
+                # were rejected as "no improvement over the skeleton in force", each one a plan call (and a refutation
+                # script) that the open steps could have used.
+                steady = (replan == "on-failure" and not endgame and bool(parsed) and prev_progress
+                          and parsed["metric"]["open_conjectures"] > 0 and bool(self.state.get("last_cycle_clean")))
+                if steady:
+                    self.log.event("program", "replan_skipped", cycle=cycle,
+                                   open_conjectures=parsed["metric"]["open_conjectures"])
                 # (a) refute first; a witness against an open hypothesis kills the skeleton in force
                 exp_out, rf = "", {"refuted": [], "clear": [], "invariants": []}
-                if refute_pol != "off" and not endgame:
+                if refute_pol != "off" and not endgame and not steady:
                     open_h = [h for h in (parsed or {}).get("hypotheses", []) if h["open"] and h["kind"] == "conjecture"]
                     claims = self.state.get("false_claims") or {}
                     hyp_txt = ("\n".join(f"- {h['name']} : {h['statement']}"
@@ -11793,7 +11805,7 @@ for the SAT solver instead of enumerating it.
                     ledger=ledger_txt[-3000:] or "(empty)", cycle=cycle)
                 stalled = int(self.state.get("stall_cycles") or 0) >= 1
                 allow_switch = bool(parsed) and stalled and int(getattr(self.args, "routes", 1) or 1) > 1
-                responses = [] if endgame else self._plan_calls(pdir, plan_prompt, cycle, stalled=stalled)
+                responses = [] if endgame or steady else self._plan_calls(pdir, plan_prompt, cycle, stalled=stalled)
                 new_meta = (json_block(responses[0]) or {}) if responses else {}
                 # The plan's ratings, derivations and failure moves for hypotheses ALREADY in force are kept even
                 # when its skeleton is not adopted: a rating is information about the argument, not about the
@@ -11853,7 +11865,8 @@ for the SAT solver instead of enumerating it.
                 if verdict is None:
                     self.log.event("program", "skeleton", cycle=cycle, adopted=False,
                                    reason=("premise endgame: only published premises are open, not re-planned" if endgame
-                                           else "no skeleton block in the plan"))
+                                           else "steady: the last cycle discharged a step and nothing failed; not re-planned"
+                                           if steady else "no skeleton block in the plan"))
                 else:
                     self.log.event("program", "skeleton", cycle=cycle, adopted=bool(verdict.get("adopted")),
                                    reason=verdict.get("reason"), candidates=verdict.get("n_candidates"),
@@ -12180,6 +12193,7 @@ for the SAT solver instead of enumerating it.
                 # Step 2: two consecutive cycles without a discharge mean the descent has stalled; record the
                 # obstruction and stop instead of refining forever. The count survives resumes.
                 self.state["stall_cycles"] = 0 if progress else int(self.state.get("stall_cycles") or 0) + 1
+                self.state["last_cycle_clean"] = bool(progress) and len(load_failures(pdir)) == fails_before
                 self.save()
                 if self.state["stall_cycles"] >= STALL_LIMIT:
                     open_now = [x["name"] for x in (parsed or {}).get("hypotheses", []) if x["open"]]
@@ -12189,6 +12203,15 @@ for the SAT solver instead of enumerating it.
                                    open=open_now)
                     break
                 prev_progress = progress
+                # --cycle-extend-max N (2026-10-20): a cycle cap set before the run stops a descent that is still
+                # discharging steps. 7 of the 16 finished Lean stages on disk ended at their cap with steps open, four
+                # with three or fewer, and #457's last step closed 13 minutes after it could first be attacked. A cycle
+                # that discharged something earns one more, up to N in all; the stall rule still ends a dead descent.
+                open_left = [x["name"] for x in (parsed or {}).get("hypotheses", []) if x["open"]]
+                if progress and cycle >= cycles and cycles < cycle_cap and open_left:
+                    cycles += 1
+                    self.log.event("program", "cycles_extended", cycle=cycle, cycles=cycles, cap=cycle_cap,
+                                   open=len(open_left))
             except Harness.BudgetExhausted as e:
                 self.log.event("program", "stopped_on_budget", cycle=cycle, detail=str(e))
                 # Work a child certified counts even when the money ran out before the parent could bank it. #152's
@@ -14702,6 +14725,12 @@ def build_parser() -> argparse.ArgumentParser:
     runp.add_argument("--construct-wall", type=int, default=1800, help="construction search: total wall-clock cap (s)")
     runp.add_argument("--allow-research", action="store_true", help="enable the persistent research program for open research-depth targets (needs --run-budget)")
     runp.add_argument("--research-cycles", type=int, default=2, help="research program: cycles per invocation")
+    runp.add_argument("--cycle-extend-max", type=int, default=0,
+                      help="deductive loop: a cycle that discharged a step earns one more past --research-cycles, up to "
+                           "this many cycles in all, while steps remain open (0 = off)")
+    runp.add_argument("--replan", choices=["always", "on-failure"], default="always",
+                      help="deductive loop: on-failure skips a cycle's refutation and plan when the last cycle discharged "
+                           "a step and recorded no failure")
     runp.add_argument("--review-every", type=int, default=2, help="research program: write REVIEW.md every k cycles")
     runp.add_argument("--review-wait", type=int, default=0, help="research program: seconds to wait for human direction via the file backend (0 = stop)")
     runp.add_argument("--masked", action="store_true",

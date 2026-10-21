@@ -111,12 +111,15 @@ DEFAULTS = {
                        "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
                        "--engine-session-legs 3 --results-library on"},
     "compute": {"case_seconds": 7200, "total_seconds": 14400, "max_requests": 2, "followups": 1},
-    "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3},
+    # A Lean stage keeps going while each cycle discharges a step (up to `cycle_extend_max` cycles), and re-plans only
+    # after a failure: of 16 finished Lean stages on disk (2026-10-20), 7 ended at a fixed cycle cap with steps open.
+    "lean": {"budget": 25.0, "extend": 10.0, "extend_max": 60.0, "cycles": 6, "child_cycles": 3, "residual_depth": 3,
+             "cycle_extend_max": 16, "replan": "on-failure"},
     # A validated-new claim at this significance or more gets a Lean run of its own: the harness formalizes its statement
     # (candidates, a crosscheck judge, recorded readings) and proves it with the engine's chain as the blueprint.
     # A record or explicit run's certified claim needs only significance 1: a new record is a new result.
     "lean_claims": {"min_significance": 2, "record_min_significance": 1, "budget": 15.0, "extend": 5.0, "extend_max": 30.0, "cycles": 4,
-                    "child_cycles": 3, "residual_depth": 3},
+                    "child_cycles": 3, "residual_depth": 3, "cycle_extend_max": 16, "replan": "on-failure"},
     "max_errors": 2,
     "fc_sha": None,
 }
@@ -892,6 +895,7 @@ def claim_lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
             "--residual-view", "outline", "--research-cycles", str(lc["cycles"]), "--run-budget", str(lc["budget"]),
             "--budget-extend", str(lc["extend"]), "--budget-extend-max", str(lc["extend_max"]), "--skip-literature",
             "--child-cycles", str(lc.get("child_cycles", 3)), "--residual-depth", str(lc.get("residual_depth", 3)),
+            "--cycle-extend-max", str(lc.get("cycle_extend_max", 16)), "--replan", lc.get("replan", "on-failure"),
             "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
 
 
@@ -902,6 +906,7 @@ def lean_cmd(run_dir: Path, cfg: dict) -> list[str]:
             "--residual-view", "outline", "--research-cycles", str(lc["cycles"]), "--run-budget", str(lc["budget"]),
             "--budget-extend", str(lc["extend"]), "--budget-extend-max", str(lc["extend_max"]), "--skip-literature",
             "--child-cycles", str(lc.get("child_cycles", 3)), "--residual-depth", str(lc.get("residual_depth", 3)),
+            "--cycle-extend-max", str(lc.get("cycle_extend_max", 16)), "--replan", lc.get("replan", "on-failure"),
             "--lean-timeout", "1800", "--llm-timeout", "5400", "--backend", "claude-cli", "--model", "claude-opus-5-5"]
 
 

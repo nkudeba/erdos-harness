@@ -820,6 +820,28 @@ else committed since `ce09b11`. Build a candidate on that pin plus patches, or r
 - A keep-check that fails now drops the closures on its error lines and compiles the rest once more.
 - This changes every run's cascade. Time-split pins taken before the fix keep the old one.
 
+## Lean conversion fixes (2026-10-20)
+
+Measured on every Lean stage on disk: of 16 finished, 5 verified, 7 ended at a fixed cycle cap with steps open (four
+with three or fewer), and 3 never adopted a skeleton for mechanical reasons. 35 skeletons were rejected as "no
+improvement over the skeleton in force".
+- **Free repairs in `Harness.check`:**
+  - a definition Lean says needs `noncomputable` is marked (`mark_noncomputable`), never in final verification;
+  - a skeleton is re-checked against the frozen text after any compile-time repair.
+- **A step's sub-statement keeps one copy of a definition that nested spliced blocks repeat** (`skeleton_context`).
+  - Identical copies collided ("has already been declared"). That was 8 of the 10 such rejections on disk.
+  - Copies that differ are both kept.
+- **`--cycle-extend-max N` and `--replan on-failure`** (harness options, off by default; on for every campaign Lean
+  stage and in `hardsteps_lean.py`, N = 16).
+  - A cycle that discharged a step earns another past `--research-cycles` while steps remain open.
+  - After a clean productive cycle, the refutation and the plan are skipped.
+  - The stall rule still ends a dead descent.
+- **`hardsteps_lean.py`** takes a whole problem's answer from the settles judges. A disproof is a PROVED claim, so its
+  status read "true", and dev #537's and #871's disproofs ran against the original statement. A FALSE answer runs as
+  `--open` committed to `neg`, as the campaign's own Lean stage does.
+- First end-to-end time-split solve by the campaign's pipeline: dev #419 (scout, then Lean, audit PASS, unassisted;
+  `benchmarks/timesplit/evidence/419/`).
+
 ## Discovery fixes and options (2026-09-24)
 
 `docs/discovery-limits-2026-09-24.md` is the audit behind these. The **fixes are on by default** and change

@@ -1034,6 +1034,16 @@ class Lean(Base):
         self.assertNotIn("--benchmark", cmd)
         self.assertEqual(cmd[cmd.index("--discover") + 1], "on")      # open mode reads the seeded decision
 
+    def test_lean_stages_keep_going_while_they_discharge_and_replan_only_after_a_failure(self):
+        # 2026-10-20: of 16 finished Lean stages on disk, 7 ended at a fixed cycle cap with steps open
+        both = {"settles": True, "answer": "true", "judges": [{"settles": True}, {"settles": True}]}
+        run = self.engine_run([_claim("deep", "C1", "validated-new", 3, settles=both, statement="it holds")])
+        with patch.object(R, "ROOT", self.d):
+            lean = R.build_lean_run(99, run, "deep/C1", "true")
+            for cmd in (R.lean_cmd(lean, R.load_cfg()), R.claim_lean_cmd(lean, R.load_cfg())):
+                self.assertEqual(cmd[cmd.index("--cycle-extend-max") + 1], "16")
+                self.assertEqual(cmd[cmd.index("--replan") + 1], "on-failure")
+
     def fc_and_run(self):
         """A formal-conjectures file at the pinned commit and an engine run frozen from it, as the screen freezes."""
         import timesplit as T

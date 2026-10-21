@@ -106,6 +106,9 @@ def main() -> int:
     ap.add_argument("--claim", required=True, help="session/claim id of the proof to use, e.g. r1s2/C1")
     ap.add_argument("--budget", type=float, default=15.0)
     ap.add_argument("--cycles", type=int, default=4)
+    ap.add_argument("--cycle-extend-max", type=int, default=16,
+                    help="a cycle that discharged a step earns one more, up to this many in all (harness --cycle-extend-max)")
+    ap.add_argument("--replan", choices=["always", "on-failure"], default="on-failure")
     ap.add_argument("--extend", type=float, default=0.0, help="--budget-extend: USD added while the residual still shrinks")
     ap.add_argument("--extend-max", type=float, default=0.0, help="--budget-extend-max: the hard cap, USD")
     ap.add_argument("--full-run", help="target the WHOLE problem: this original run's frozen statement, not the step")
@@ -187,6 +190,7 @@ def main() -> int:
     cmd = [sys.executable, str(ROOT / "harness.py"), "run", "--problem", str(run_dir / "problem.json"), "--resume",
            str(run_dir), "--mode", "research", "--allow-research", "--benchmark", "--masked", "--no-brief",
            "--skip-literature", "--blueprint", "on", "--residual-view", "outline", "--research-cycles", str(args.cycles),
+           "--cycle-extend-max", str(args.cycle_extend_max), "--replan", args.replan,
            "--run-budget", str(args.budget), "--lean-timeout", "1800", "--llm-timeout", "5400",
            "--backend", "claude-cli", "--model", "claude-opus-5-5", *(["--open", "--discover", "on"] if negate else []),
            *(["--budget-extend", str(args.extend), "--budget-extend-max", str(args.extend_max)] if args.extend > 0 else [])]
