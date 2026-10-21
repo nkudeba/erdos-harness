@@ -2064,3 +2064,35 @@ Harness `b1762b5`, `--premise-weaken on`, $6 cap per replay, run one at a time. 
 - **Reading:** a full audit PASS on an item the intent judges call new-math (#150, #537, #871) is a time-split solve
   by the campaign's own pipeline. On #729 and #1180, which the judges call known results, and on #419 (unclear), a
   PASS is a solve of formal-conjectures' statement, reported with that caveat.
+
+### Iteration 5, the six Lean conversions: results (2026-10-21T00:00:24Z)
+
+| item | claim | outcome | certified / open | spend | audit |
+|------|-------|---------|------------------|-------|-------|
+| #419 | `r1s1/C1` | **verified** | 18 / 0 | $7.00 | **PASS, all 15 checks** |
+| #1180 | `r1s1/C4` | partial, budget | 23 / 1 + 2 published premises | $24.17 | |
+| #150 | `deep/C1` | partial, budget | 15 / 3 | $25.14 | |
+| #729 | `r1s1/C1` | partial, budget | 14 / 5 | $25.16 | |
+| #537 (FALSE) | `r1s2/C1` | stopped in cycle 1, a driver bug | 0 / 4 | $0.72 | |
+| #871 (FALSE) | `r1s1/C1` | stopped in cycle 1, a driver bug | 0 / 2 | $0.95 | |
+
+- **#419 is a time-split dev solve by the campaign's own pipeline, unassisted.**
+  - The scout settings (pin `20a1462`, $15.43) gave a complete informal answer. The Lean stage (`hardsteps_lean.py`
+    defaults, `--cycles 8`, main `c52bedd`) closed the residual in 45 minutes.
+  - The audit passes all 15 checks: Comparator, nanoda, statement identity, provenance, the faithfulness judges, the
+    probe, masking and no identity in any of 136 prompts.
+  - It is a reconstruction of a result published in 2026, not new mathematics. The intent judges called the answer
+    "unclear" and its novelty "known".
+  - Evidence: `benchmarks/timesplit/evidence/419/`. Per the loop's procedure it is replicated once on a fresh alias,
+    below.
+- **Against the predictions:** all Lean checks on 1 of 6 (predicted 3) and a full PASS on 1 (predicted 2). The three
+  budget stops had 1–5 steps open at $25.
+- **#537 and #871 were not real attempts.** `c52bedd` made the negated text the frozen statement of a plain run. Its
+  plans read the original statement, called "the target" false, and stopped (`target_believed_false`). Fixed in
+  `f95cac2`: a FALSE item runs as `--open` committed to the negation, so every prompt knows it.
+- **Next, written before launch:**
+  - #537 and #871 re-run on `f95cac2`: `--budget 15 --cycles 8`, no extension. Prediction: at least one verified,
+    P = 0.4.
+  - #419 replication on a fresh alias: the same scout flags on pin `20a1462` (tag `dev-scout-replicate-20a1462`,
+    $18 cap), then the Lean stage on main with `--budget 14 --cycles 8`. Prediction: complete again, P = 0.75;
+    verified again, P = 0.6.

@@ -1,0 +1,84 @@
+{
+ "run": "runs/20261020-172154-145563-hardlean-erdos42884",
+ "at": "2026-10-20T23:55:41Z",
+ "direction": null,
+ "proof": {
+  "file": "runs/20261020-172154-145563-hardlean-erdos42884/final/Erdos42884.lean",
+  "sha256": "819f2a16a85bd1bf197d1e6bb5c7eef60d6d80e268039a04006a39b794cebb66"
+ },
+ "benchmark": {
+  "tag": "dev-scout-baseline-20a1462-lean",
+  "problem": "419",
+  "split": "dev",
+  "alias": 42884,
+  "engine_run": "runs/20261020-081838-906104-discover-erdos42884",
+  "responses_naming_the_problem": {
+   "problem number with context": 0,
+   "Erdős by name": 18
+  },
+  "other_verified_runs": []
+ },
+ "checks": {
+  "source_scan": {
+   "ok": true,
+   "detail": "no sorry, kernel bypass or elaboration-time code"
+  },
+  "imports": {
+   "ok": true,
+   "detail": "4 import(s), all Mathlib, Formal.Library or the statement's own"
+  },
+  "compiles": {
+   "ok": true,
+   "detail": "no errors"
+  },
+  "no_sorry_warning": {
+   "ok": true,
+   "detail": "0 sorry warning(s)"
+  },
+  "axioms": {
+   "ok": true,
+   "detail": "[Classical.choice, Quot.sound, propext]"
+  },
+  "statement_identity": {
+   "ok": true,
+   "detail": "the proved `erdos_42884` and 2 frozen definition(s) are structurally identical to a clean elaboration of the frozen statement (3 constant(s) compared)"
+  },
+  "kernel_replay": {
+   "ok": true,
+   "detail": "all declarations replayed"
+  },
+  "comparator": {
+   "ok": true,
+   "detail": "the proof matches the challenge statement (2 definition(s) compared), on the permitted axioms, through the Lean kernel; sandbox: none (fake-landrun shim)"
+  },
+  "nanoda": {
+   "ok": true,
+   "detail": "the independent nanoda kernel accepts the proof"
+  },
+  "provenance": {
+   "ok": true,
+   "detail": "the pos direction of the benchmark's statement (google-deepmind/formal-conjectures@077138338750 FormalConjectures/ErdosProblems/419.lean (main theorem; answer stripped; comments removed; identity renamed))"
+  },
+  "direction_matches_answer": {
+   "ok": true,
+   "detail": "proved pos, recorded answer True (formal-conjectures assertion, category 'research solved')"
+  },
+  "faithfulness_judges": {
+   "ok": true,
+   "detail": "at build: True; at verification: True"
+  },
+  "probe": {
+   "ok": true,
+   "detail": "probe verdict: unaware"
+  },
+  "masked_benchmark_run": {
+   "ok": true,
+   "detail": "masked=True, --benchmark=True, knowledge=lemma store excluded (--benchmark)"
+  },
+  "no_identity_in_prompts": {
+   "ok": true,
+   "detail": "136 prompt(s) scanned; matches: {'problem number with context': 0, 'Erdős by name': 0}"
+  }
+ },
+ "verdict": "PASS"
+}
