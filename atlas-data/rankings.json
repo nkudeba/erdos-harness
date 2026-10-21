@@ -15077,7 +15077,7 @@
         "best": "partial",
         "runs": 6,
         "benchmarkRuns": 6,
-        "certifiedMax": 1
+        "certifiedMax": 2
       },
       "assessed": {
         "on": null,
