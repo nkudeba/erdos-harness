@@ -1,52 +1,52 @@
 {
-  "sha": "6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-  "node_id": "C_kwDOOogmB9oAKDZjZTE0MjcxYmEyNzQ4OGE4MTNmZjhhMTQ4NWUxMjVlMWU4YWIyOGM",
+  "sha": "2a315101d438a68c0ebdf22b7485ac731624efed",
+  "node_id": "C_kwDOOogmB9oAKDJhMzE1MTAxZDQzOGE2OGMwZWJkZjIyYjc0ODVhYzczMTYyNGVmZWQ",
   "commit": {
     "author": {
-      "name": "Seewoo Lee",
-      "email": "49933279+seewoo5@users.noreply.github.com",
-      "date": "2026-10-21T08:12:49Z"
+      "name": "Ilia Pauzner",
+      "email": "ilpauzner@gmail.com",
+      "date": "2026-10-21T11:11:53Z"
     },
     "committer": {
       "name": "GitHub",
       "email": "noreply@github.com",
-      "date": "2026-10-21T08:12:49Z"
+      "date": "2026-10-21T11:11:53Z"
     },
-    "message": "Conjectures on parity of partition numbers (#6518)\n\nThis PR defines `partitionNumber` under `FormalConjecturesForMathlib`,\nand use it to state various results and conjectures related to parity of\npartition numbers. The main motivation was Parkin-Shanks conjecture, but\nI also added some weaker known results. Also, partition numbers were\ndefined twice in two different files (Erdos 1106 and OEIS 41), and I\nreplaced both. Claude were used to find references and write some\ninitial formalizations.",
+    "message": "feat(ErdosProblems/878): link formal refutation of `parts.iii_eventually` (#7418)\n\nDepends on #7424.\nUPD: After creation of this pull request,\nhttps://github.com/google-deepmind/formal-conjectures/pull/7424 was\ncreated. I rebased this Pull Request on top of it and made the necessary\nchanges in the description.\n\nMarks `erdos_878.parts.iii_eventually` as `research solved`, and links\nthe verified Lean 4 proof disproving eventual equality $\\max_{n \\le x}\nf(n) = \\max_{n \\le x} F(n)$.\n\nThe refutation of `parts.iii_eventually`, its Lean 4 formalization, and\nthis PR were prepared by Ilia Pauzner using Gemini 4 Argon.",
     "tree": {
-      "sha": "38f561d3bd3cdd5a0cc212f3c91c46e61c2fcd6e",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/38f561d3bd3cdd5a0cc212f3c91c46e61c2fcd6e"
+      "sha": "7c3f55c552d617b57e6a2aa80e3bfea723e085a1",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/trees/7c3f55c552d617b57e6a2aa80e3bfea723e085a1"
     },
-    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/6ce14271ba27488a813ff8a1485e125e1e8ab28c",
+    "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/git/commits/2a315101d438a68c0ebdf22b7485ac731624efed",
     "comment_count": 0,
     "verification": {
       "verified": true,
       "reason": "valid",
-      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2HQSCRC1aQ7uu5UhlAAA2VQQADOfrFa9R0/k5gnsHKSSeUma\nu+ydtFlGX//kCbTir1eeAKPn0mSZDzdnYhfEuQytiZGGVLCC1UQMdlzkckA1fn1H\nWmunKMPtQrrCNOaMIQvPxUye2ysG/tEvAWC8Ts+TLgyWbmCIVYgFZTC452rAYwNU\nD9nfjfbeWpglX40WfCGcP00X0ObWtub8rXNpmvTc4h2zK+5v2rAZ/a4mGEPLc/4S\nQJn/8fXsF0t2Thln0KAXwc3Gm6R37ccxOUBj/4uqvz6a7AeFsA8DH67lDkDGQpU5\nYk3eVtQiZ64YxXzi5Qd1VoasPwECddGzkJA5XzgdlpU3E0p6u7YfkaTyrnGJQrNK\ntWM0XDXk9qivUz/ZfHmr0Y3j2dVWYsUJ1ImZLc9aGBg04P37FqZnMvUR+ShLVqTq\nE4vDEDQez5wvCoOBlBjCIDu7Qlxy+l6rY1YLrBI9zDmdtf1HJNSr6BEcb1igBJkY\nk4K+HxEjZDktabinuMwr0QG3gSkpZQ1oZjOMf5nhYz0TjlWXB/sDbme7RGVWknYD\nQHoXN0JOiwJuGUWCtfQcCJAIQxp59rmu2o9jMHf7QYIstMtwH20GDAyojGfbFN0/\n44TikLFDx2Nn82rXGWktJJ+hYTe2z1Xx6IlF6frcmW5GVdICeUvT9hMvlQokq0KH\nxAAzJlP6odbSi7G7olkF\n=qXYi\n-----END PGP SIGNATURE-----\n",
-      "payload": "tree 38f561d3bd3cdd5a0cc212f3c91c46e61c2fcd6e\nparent 94d2dc5cb8a0eabdefc1a41124ecc4639c1e100a\nauthor Seewoo Lee <49933279+seewoo5@users.noreply.github.com> 1792570369 +0000\ncommitter GitHub <noreply@github.com> 1792570369 +0000\n\nConjectures on parity of partition numbers (#6518)\n\nThis PR defines `partitionNumber` under `FormalConjecturesForMathlib`,\nand use it to state various results and conjectures related to parity of\npartition numbers. The main motivation was Parkin-Shanks conjecture, but\nI also added some weaker known results. Also, partition numbers were\ndefined twice in two different files (Erdos 1106 and OEIS 41), and I\nreplaced both. Claude were used to find references and write some\ninitial formalizations.",
-      "verified_at": "2026-10-21T08:13:06Z"
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2J4JCRC1aQ7uu5UhlAAAWzwQABZ9AFhhQVNy3URgk4ht1o4F\n6cAWF15puvj1SRJYMm3FdO94B4c8S8DQ87KiawfE9SfWqiEk7Xo/xKZBAztlHKcD\n63Qqy83TCjVcv7bjrt91TwE8SWPnQA0I1NP+8KM1NFNjHBX8m8tFj5tEPwJLukCS\no7fLl9SB3XZk4B98Hhr56/Yd3lJC/9XTACppO9qLTnKblyxKcFgDA74nbswEYHYL\nD+puighvQGypuY1UcFcoqieyqif6/lWsmWl1Gqb+Wg/iNdJZFjXnmaVOflGvT2+w\n+uxVi28VNE5ij5NmLDOFCnfqPMNjce20TekNiSbnY5tBj2IOnhPdG6PWWipFCIwS\nk2sefYOTyvzDpJ1+/r3Y6RuD1ifsigA2BfNXyYRodIvHMTIa946GWhxdBli6dSJd\nsF5qhML8XeU8gs916tGJvBFQ3SWhRiJ42ljRb13t38XDDplpLLOPOP+agsuQiFPQ\nWOR+NfIZhWuV0DSB8RHh/HZVBtvIWv8AzgtYcxYQPHfnjtxNmW4jzu4mxUMZbh7X\n6NwUIkpH/QBlKs9zZbKPQHW51p7SwEsyMtmbeM9qbkFf2ALIzTJ+f9zf2KW67x12\nehNIPXALnmdzN26v6bbNtDJiuMrSCMgUVB/8YvQ5vm9v4GeU/Z8WTCtOjOLoB57D\n0TgrPyWnqdtIaDEnqxcT\n=0j3U\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 7c3f55c552d617b57e6a2aa80e3bfea723e085a1\nparent 6a06779e6397574d7adae7416a6390ad32f074f1\nauthor Ilia Pauzner <ilpauzner@gmail.com> 1792581113 +0000\ncommitter GitHub <noreply@github.com> 1792581113 +0000\n\nfeat(ErdosProblems/878): link formal refutation of `parts.iii_eventually` (#7418)\n\nDepends on #7424.\nUPD: After creation of this pull request,\nhttps://github.com/google-deepmind/formal-conjectures/pull/7424 was\ncreated. I rebased this Pull Request on top of it and made the necessary\nchanges in the description.\n\nMarks `erdos_878.parts.iii_eventually` as `research solved`, and links\nthe verified Lean 4 proof disproving eventual equality $\\max_{n \\le x}\nf(n) = \\max_{n \\le x} F(n)$.\n\nThe refutation of `parts.iii_eventually`, its Lean 4 formalization, and\nthis PR were prepared by Ilia Pauzner using Gemini 4 Argon.",
+      "verified_at": "2026-10-21T11:12:09Z"
     }
   },
-  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/6ce14271ba27488a813ff8a1485e125e1e8ab28c/comments",
+  "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/2a315101d438a68c0ebdf22b7485ac731624efed",
+  "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/2a315101d438a68c0ebdf22b7485ac731624efed",
+  "comments_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/2a315101d438a68c0ebdf22b7485ac731624efed/comments",
   "author": {
-    "login": "seewoo5",
-    "id": 49933279,
-    "node_id": "MDQ6VXNlcjQ5OTMzMjc5",
-    "avatar_url": "https://avatars.githubusercontent.com/u/49933279?v=4",
+    "login": "ilpauzner",
+    "id": 17953681,
+    "node_id": "MDQ6VXNlcjE3OTUzNjgx",
+    "avatar_url": "https://avatars.githubusercontent.com/u/17953681?v=4",
     "gravatar_id": "",
-    "url": "https://api.github.com/users/seewoo5",
-    "html_url": "https://github.com/seewoo5",
-    "followers_url": "https://api.github.com/users/seewoo5/followers",
-    "following_url": "https://api.github.com/users/seewoo5/following{/other_user}",
-    "gists_url": "https://api.github.com/users/seewoo5/gists{/gist_id}",
-    "starred_url": "https://api.github.com/users/seewoo5/starred{/owner}{/repo}",
-    "subscriptions_url": "https://api.github.com/users/seewoo5/subscriptions",
-    "organizations_url": "https://api.github.com/users/seewoo5/orgs",
-    "repos_url": "https://api.github.com/users/seewoo5/repos",
-    "events_url": "https://api.github.com/users/seewoo5/events{/privacy}",
-    "received_events_url": "https://api.github.com/users/seewoo5/received_events",
+    "url": "https://api.github.com/users/ilpauzner",
+    "html_url": "https://github.com/ilpauzner",
+    "followers_url": "https://api.github.com/users/ilpauzner/followers",
+    "following_url": "https://api.github.com/users/ilpauzner/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ilpauzner/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ilpauzner/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ilpauzner/subscriptions",
+    "organizations_url": "https://api.github.com/users/ilpauzner/orgs",
+    "repos_url": "https://api.github.com/users/ilpauzner/repos",
+    "events_url": "https://api.github.com/users/ilpauzner/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ilpauzner/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false
@@ -74,88 +74,28 @@
   },
   "parents": [
     {
-      "sha": "94d2dc5cb8a0eabdefc1a41124ecc4639c1e100a",
-      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/94d2dc5cb8a0eabdefc1a41124ecc4639c1e100a",
-      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/94d2dc5cb8a0eabdefc1a41124ecc4639c1e100a"
+      "sha": "6a06779e6397574d7adae7416a6390ad32f074f1",
+      "url": "https://api.github.com/repos/google-deepmind/formal-conjectures/commits/6a06779e6397574d7adae7416a6390ad32f074f1",
+      "html_url": "https://github.com/google-deepmind/formal-conjectures/commit/6a06779e6397574d7adae7416a6390ad32f074f1"
     }
   ],
   "stats": {
-    "total": 333,
-    "additions": 308,
-    "deletions": 25
+    "total": 8,
+    "additions": 5,
+    "deletions": 3
   },
   "files": [
     {
-      "sha": "935467538c1b292e0ab9150433836cf0c876d07a",
-      "filename": "FormalConjectures/ErdosProblems/1106.lean",
-      "status": "modified",
-      "additions": 4,
-      "deletions": 8,
-      "changes": 12,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjectures%2FErdosProblems%2F1106.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjectures%2FErdosProblems%2F1106.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F1106.lean?ref=6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-      "patch": "@@ -32,28 +32,24 @@ open Nat Finset Filter Topology\n \n namespace Erdos1106\n \n-/-- The partition function p(n) is the number of ways to write n as a sum of positive\n-integers (where the order of the summands does not matter). -/\n-def p : ℕ → ℕ := fun n => Fintype.card (Nat.Partition n)\n-\n /--\n Let $p(n)$ be the partition number of $n$ and $F(n)$ be the number of distinct prime factors of\n-$∏_{i= 1} ^ {n} p(n)$, then $F(n)$ tends to infinity when $n$ tends to infinity.\n+$\\prod_{i= 1} ^ {n} p(n)$, then $F(n)$ tends to infinity when $n$ tends to infinity.\n \n The answer is yes: Schinzel and Wirsing [ScWi87] proved $F(n) \\gg \\log n$.\n -/\n @[category research solved, question, AMS 11]\n theorem erdos_1106.parts.i :\n-    Tendsto (fun n => #(∏ i ∈ Icc 1 n, p i).primeFactors) atTop atTop := by\n+    Tendsto (fun n ↦ #(∏ i ∈ Icc 1 n, partitionNumber i).primeFactors) atTop atTop := by\n   sorry\n \n /--\n Let $p(n)$ be the partition number of $n$ and $F(n)$ be the number of distinct prime factors of\n-$∏_{i= 1} ^ {n} p(n)$, $F(n)>n$ for sufficiently large $n$.\n+$\\prod_{i= 1} ^ {n} p(n)$, $F(n)>n$ for sufficiently large $n$.\n -/\n @[category research open, question, AMS 11]\n theorem erdos_1106.parts.ii :\n-    ∀ᶠ n in atTop, #(∏ i ∈ Icc 1 n, p i).primeFactors > n := by\n+    ∀ᶠ n in atTop, #(∏ i ∈ Icc 1 n, partitionNumber i).primeFactors > n := by\n   sorry\n \n end Erdos1106"
-    },
-    {
-      "sha": "0468227873335ae651d14846b05b53249a229fd3",
-      "filename": "FormalConjectures/OEIS/41.lean",
+      "sha": "02dda400a8a26fc1d2a9b95aaed03a7854efd676",
+      "filename": "FormalConjectures/ErdosProblems/878.lean",
       "status": "modified",
       "additions": 5,
-      "deletions": 17,
-      "changes": 22,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjectures%2FOEIS%2F41.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjectures%2FOEIS%2F41.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FOEIS%2F41.lean?ref=6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-      "patch": "@@ -16,7 +16,7 @@ limitations under the License.\n module\n \n public import FormalConjecturesUtil\n-meta import Mathlib.Combinatorics.Enumerative.Partition.Basic\n+meta import FormalConjecturesForMathlib.Combinatorics.Enumerative.Partition.Basic\n \n \n /-!\n@@ -33,33 +33,21 @@ namespace OeisA41\n \n open Nat\n \n-/-- The `n`-th partition number. -/\n-def a (n : ℕ) : ℕ := Fintype.card (Nat.Partition n)\n-\n-@[category test, AMS 11]\n-theorem a_0 : a 0 = 1 := by decide\n-\n-@[category test, AMS 11]\n-theorem a_1 : a 1 = 1 := by decide\n-\n-@[category test, AMS 11]\n-theorem a_2 : a 2 = 2 := by decide +native\n-\n @[category test, AMS 11]\n-theorem a_3 : a 3 = 3 := by decide +native\n+theorem partitionNumber_3 : partitionNumber 3 = 3 := by decide +native\n \n @[category test, AMS 11]\n-theorem a_4 : a 4 = 5 := by decide +native\n+theorem partitionNumber_4 : partitionNumber 4 = 5 := by decide +native\n \n @[category test, AMS 11]\n-theorem a_5 : a 5 = 7 := by decide +native\n+theorem partitionNumber_5 : partitionNumber 5 = 7 := by decide +native\n \n /--\n There are no partition numbers $a(k)$ of the form $x^m$, with $x,m$ integers $>1$.\n See comment by Zhi-Wei Sun (Dec 02 2013).\n -/\n @[category research open, question, AMS 11]\n-theorem noPowerPartitionNumber : ∀ k, ¬IsPerfectPower (a k) := by\n+theorem noPowerPartitionNumber : ∀ k, ¬IsPerfectPower (partitionNumber k) := by\n   sorry\n \n end OeisA41"
-    },
-    {
-      "sha": "11d0a193739addadc7589603186d59fda2757f0a",
-      "filename": "FormalConjectures/Paper/PartitionParity.lean",
-      "status": "added",
-      "additions": 211,
-      "deletions": 0,
-      "changes": 211,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjectures%2FPaper%2FPartitionParity.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjectures%2FPaper%2FPartitionParity.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FPaper%2FPartitionParity.lean?ref=6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-      "patch": "@@ -0,0 +1,211 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import FormalConjecturesUtil\n+\n+/-!\n+# Parities of partition numbers\n+\n+There are several conjectures on parities of partition numbers. The most famous conjecture is the\n+Parkin-Shanks conjecture, which states that the natural density of `n` where the partition number\n+`p(n)` is even (resp. odd) exists and equals `1/2`.\n+\n+There are several related (weaker) results toward the conjecture. Kolberg showed that `p(n)` takes\n+each parity infinitely often. Subbarao conjectured that every arithmetic progression `r (mod t)`\n+contains infinitely many `n` with `p(n)` even and infinitely many `n` with `p(n)` odd; the even\n+case was proved by Ono and the odd case by Radu. Quantitative lower bounds for the number of\n+`n ≤ X` with `p(n)` even (resp. odd) have also been studied. The best known bounds are\n+`≫ √X log log X` for even values (Bellaïche–Nicolas) and `≫ √X` for odd values (Zheng, in an\n+appendix to Ono–Swaminathan). Ono–Swaminathan also proved that both parities occur infinitely often\n+along the quadratic progressions `(D m² + 1) / 24`, and Ono conjectured the same for every nonconstant\n+integer-valued polynomial that is eventually positive.\n+\n+*References:*\n+* [On the distribution of parity in the partition function](https://www.jstor.org/stable/2003251),\n+  T. R. Parkin, D. Shanks, Math. Comp. 21 (1967), 466–480.\n+* [Note on the parity of the partition function](https://doi.org/10.7146/math.scand.a-10584),\n+  O. Kolberg, Math. Scand. 7 (1959), 377–378.\n+* Some remarks on the partition function, M. V. Subbarao, Amer. Math. Monthly 73 (1966), 851–854.\n+* [Parity of the partition function in arithmetic progressions](https://doi.org/10.1515/crll.1996.472.1),\n+  K. Ono, J. Reine Angew. Math. 472 (1996), 1–16.\n+* [Distribution of parity of the partition function in arithmetic progressions](https://doi.org/10.1016/S0019-3577(99)80014-7),\n+  S. Ahlgren, Indag. Math. (N.S.) 10 (1999), 173–181.\n+* [Parity of the partition function](https://doi.org/10.1016/j.aim.2010.02.023), K. Ono,\n+  Adv. Math. 225 (2010), 349–366.\n+* [A proof of Subbarao's conjecture](https://doi.org/10.1515/CRELLE.2011.165), C.-S. Radu,\n+  J. Reine Angew. Math. 672 (2012), 161–175.\n+* [Parité des coefficients de formes modulaires](https://doi.org/10.1007/s11139-014-9645-9),\n+  J. Bellaïche, J.-L. Nicolas, Ramanujan J. 40 (2016), 1–44.\n+* [Nonzero coefficients of half-integral weight modular forms mod ℓ](https://arxiv.org/abs/1704.07440),\n+  J. Bellaïche, B. Green, K. Soundararajan, Res. Math. Sci. 5 (2018), Paper No. 6.\n+* [Parity of the partition function in quadratic progressions](https://arxiv.org/abs/2509.09553)\n+  (with an appendix by Q.-Y. Zheng), K. Ono, A. Swaminathan, arXiv:2509.09553.\n+* [Cox] D. A. Cox, Primes of the Form $x^2 + ny^2$, 2nd ed., Wiley, 2013.\n+-/\n+\n+@[expose] public section\n+\n+namespace PartitionParity\n+\n+open Nat Real Filter Topology Asymptotics Polynomial\n+\n+/-- `p(n)` is even for infinitely many `n` and odd for infinitely many `n`. (Kolberg) -/\n+@[category research solved, AMS 11]\n+theorem kolberg :\n+    {n : ℕ | Even (partitionNumber n)}.Infinite ∧ {n : ℕ | Odd (partitionNumber n)}.Infinite := by\n+  sorry\n+\n+/-- The natural density of `n` where the partition number `p(n)` is even (resp. odd) exists and\n+equals `1/2`. -/\n+@[category research open, AMS 11]\n+theorem parkin_shanks :\n+    {n : ℕ | Even (partitionNumber n)}.HasDensity (1 / 2) ∧\n+    {n : ℕ | Odd (partitionNumber n)}.HasDensity (1 / 2) := by\n+  sorry\n+\n+/-- Every arithmetic progression contains infinitely many `n` where `p(n)` is even.\n+Conjectured by Subbarao and proved by Ono. -/\n+@[category research solved, AMS 11]\n+theorem subbarao.even : ∀ r t, 0 < t →\n+    {n : ℕ | n ≡ r [MOD t] ∧ Even (partitionNumber n)}.Infinite := by\n+  sorry\n+\n+/-- Every arithmetic progression contains infinitely many `n` where `p(n)` is odd.\n+Conjectured by Subbarao; Ono proved it for every progression containing at least one `n` with\n+`p(n)` odd, and Radu showed that every progression contains such an `n`. -/\n+@[category research solved, AMS 11]\n+theorem subbarao.odd : ∀ r t, 0 < t →\n+    {n : ℕ | n ≡ r [MOD t] ∧ Odd (partitionNumber n)}.Infinite := by\n+  sorry\n+\n+/-- For every arithmetic progression `r (mod t)`, the number of `n ≤ X` with `n ≡ r (mod t)` and\n+`p(n)` even is `≫ √X`. (Ahlgren) -/\n+@[category research solved, AMS 11]\n+theorem ahlgren.even : ∀ r t, 0 < t →\n+    (fun X : ℝ ↦ √X) =O[atTop]\n+      fun X : ℝ ↦ ({n : ℕ | n ≤ X ∧ n ≡ r [MOD t] ∧ Even (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- For every arithmetic progression `r (mod t)`, the number of `n ≤ X` with `n ≡ r (mod t)` and\n+`p(n)` odd is `≫ √X / log X`. Ahlgren proved this for every progression containing at least one\n+`n` with `p(n)` odd; by Radu's theorem every progression does. -/\n+@[category research solved, AMS 11]\n+theorem ahlgren.odd : ∀ r t, 0 < t →\n+    (fun X : ℝ ↦ √X / X.log) =O[atTop]\n+      fun X : ℝ ↦ ({n : ℕ | n ≤ X ∧ n ≡ r [MOD t] ∧ Odd (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- The number of `n ≤ X` with `p(n)` even is `≫ √X log log X`. (Bellaïche–Nicolas) -/\n+@[category research solved, AMS 11]\n+theorem bellaiche_nicolas.even :\n+    (fun X : ℝ ↦ √X * X.log.log) =O[atTop]\n+      fun X : ℝ ↦ ({n : ℕ | n ≤ X ∧ Even (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- The number of `n ≤ x` with `p(n)` even is at least `0.069 √x log log x` for every `x > 1`.\n+(Bellaïche–Nicolas) -/\n+@[category research solved, AMS 11]\n+theorem bellaiche_nicolas.even_explicit : ∀ x : ℝ, 1 < x →\n+    0.069 * √x * x.log.log ≤ ({n : ℕ | n ≤ x ∧ Even (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- The number of `n ≤ x` with `p(n)` odd is at least `0.037 √x / (log x)^(7/8)` for every `x ≥ 2`.\n+(Bellaïche–Nicolas) -/\n+@[category research solved, AMS 11]\n+theorem bellaiche_nicolas.odd_explicit : ∀ x : ℝ, 2 ≤ x →\n+    0.037 * √x / (x.log) ^ (7 / 8 : ℝ) ≤ ({n : ℕ | n ≤ x ∧ Odd (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- The number of `n ≤ X` with `p(n)` odd is `≫ √X / log log X`.\n+(Bellaïche–Green–Soundararajan) -/\n+@[category research solved, AMS 11]\n+theorem bellaiche_green_soundararajan.odd :\n+    (fun X : ℝ ↦ √X / X.log.log) =O[atTop]\n+      fun X : ℝ ↦ ({n : ℕ | n ≤ X ∧ Odd (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- For square-free `D > 1` with `D ≡ 23 (mod 24)`, both parities occur infinitely often among\n+`p((D m² + 1) / 24)` as `m` ranges over the positive integers coprime to `6`. Note that\n+`24 ∣ D m² + 1` for such `m`. Conjectured by Ono and proved by Ono–Swaminathan. -/\n+@[category research solved, AMS 11]\n+theorem ono_swaminathan.quadratic : ∀ D : ℕ, 1 < D → Squarefree D → D % 24 = 23 →\n+    {m : ℕ | m.Coprime 6 ∧ Even (partitionNumber ((D * m ^ 2 + 1) / 24))}.Infinite ∧\n+    {m : ℕ | m.Coprime 6 ∧ Odd (partitionNumber ((D * m ^ 2 + 1) / 24))}.Infinite := by\n+  sorry\n+\n+/-- The odd half of Theorem 1 of Ono–Swaminathan, with its effective bound: for square-free `D > 1`\n+with `D ≡ 23 (mod 24)` there is an `m` coprime to `6` with `m ≤ 12 h(-D) + 2` such that\n+`p((D m² + 1) / 24)` is odd, where `h(-D)` is the class number of `ℚ(√-D)`. Here `ℚ(√-D)` is\n+`AdjoinRoot (X ^ 2 + D)`, a number field since `X ^ 2 + D` is irreducible over `ℚ` for `D > 0`. -/\n+@[category research solved, AMS 11]\n+theorem ono_swaminathan.odd_bound (D : ℕ) (hD : 1 < D) (hsq : Squarefree D) (h23 : D % 24 = 23) :\n+    haveI : Fact (Irreducible (X ^ 2 + C (D : ℚ))) :=\n+      ⟨irreducible_X_sq_add_C_of_pos (Nat.cast_pos.2 (by lia))⟩\n+    ∃ m : ℕ, m.Coprime 6 ∧\n+      m ≤ 12 * NumberField.classNumber (AdjoinRoot (X ^ 2 + C (D : ℚ))) + 2 ∧\n+      Odd (partitionNumber ((D * m ^ 2 + 1) / 24)) := by\n+  sorry\n+\n+/-- `[a, b, c]` is a reduced primitive positive-definite binary quadratic form of discriminant\n+`-D`: `b² - 4ac = -D`, `|b| ≤ a ≤ c`, `gcd(a, b, c) = 1`, and `b ≥ 0` if `|b| = a` or `a = c`. -/\n+def IsReducedForm (D : ℕ) (a b c : ℤ) : Prop :=\n+  b ^ 2 - 4 * a * c = -D ∧ |b| ≤ a ∧ a ≤ c ∧ Int.gcd (Int.gcd a b) c = 1 ∧\n+    (|b| = a ∨ a = c → 0 ≤ b)\n+\n+/-- For square-free `D ≡ 3 (mod 4)`, the discriminant `-D` is fundamental and the class number of\n+`ℚ(√-D)` equals the number of reduced primitive positive-definite binary quadratic forms of\n+discriminant `-D` [Cox, Theorem 2.8].\n+This identification is used in Zheng's appendix to Ono–Swaminathan. -/\n+@[category textbook, AMS 11]\n+theorem classNumber_eq_ncard_reducedForms (D : ℕ) (hsq : Squarefree D) (h3 : D % 4 = 3) :\n+    haveI : Fact (Irreducible (X ^ 2 + C (D : ℚ))) :=\n+      ⟨irreducible_X_sq_add_C_of_pos (Nat.cast_pos.2 (by lia))⟩\n+    NumberField.classNumber (AdjoinRoot (X ^ 2 + C (D : ℚ))) =\n+      {⟨a, b, c⟩ : ℤ × ℤ × ℤ | IsReducedForm D a b c}.ncard := by\n+  sorry\n+\n+/-- Zheng's explicit lower bound: `liminf_{X → ∞} N_odd(X) / √X ≥ 243 / (64 √6 π⁵)`, where\n+`N_odd(X)` is the number of `n ≤ X` with `p(n)` odd [Ono-Swaminathan, Appendix A, Corollary 2]. -/\n+@[category research solved, AMS 11,\n+  conditional formal_proof using lean4 at\n+    \"https://github.com/AxiomMath/PartitionZheng/blob/9bfb4326c4ea1e00016a842d7cc145e5c4e0684a/Solution/Basic.lean#L17\"\n+    assuming ono_swaminathan.odd_bound classNumber_eq_ncard_reducedForms]\n+theorem zheng.liminf :\n+    ((243 / (64 * √6 * π ^ 5) : ℝ) : EReal) ≤\n+      liminf (fun X : ℝ ↦\n+        ((({n : ℕ | n ≤ X ∧ Odd (partitionNumber n)}.ncard : ℝ) / √X : ℝ) : EReal)) atTop := by\n+  sorry\n+\n+/-- The number of `n ≤ X` with `p(n)` odd is `≫ √X`. -/\n+@[category research solved, AMS 11]\n+theorem zheng.odd :\n+    (fun X : ℝ ↦ √X) =O[atTop]\n+      fun X : ℝ ↦ ({n : ℕ | n ≤ X ∧ Odd (partitionNumber n)}.ncard : ℝ) := by\n+  sorry\n+\n+/-- Ono's conjecture, as stated in Section 1 of Ono–Swaminathan: if `g` is a nonconstant\n+integer-valued polynomial that is eventually positive, then `p(g(n))` is even for infinitely many\n+`n` and odd for infinitely many `n`. -/\n+@[category research open, AMS 11]\n+theorem ono.polynomial (g : ℚ[X]) (hg : 0 < g.natDegree)\n+    (hint : ∀ n : ℕ, ∃ k : ℤ, g.eval (n : ℚ) = k)\n+    (hpos : ∀ᶠ n : ℕ in atTop, 0 < g.eval (n : ℚ)) :\n+    {n : ℕ | Even (partitionNumber ⌊g.eval (n : ℚ)⌋₊)}.Infinite ∧\n+    {n : ℕ | Odd (partitionNumber ⌊g.eval (n : ℚ)⌋₊)}.Infinite := by\n+  sorry\n+\n+end PartitionParity"
-    },
-    {
-      "sha": "64aef088349e5c22b5d4902d0b9e37ce35ec7531",
-      "filename": "FormalConjecturesForMathlib.lean",
-      "status": "modified",
-      "additions": 2,
-      "deletions": 0,
-      "changes": 2,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjecturesForMathlib.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjecturesForMathlib.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib.lean?ref=6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-      "patch": "@@ -28,6 +28,7 @@ public import FormalConjecturesForMathlib.Algebra.Order.Group.Pointwise.Interval\n public import FormalConjecturesForMathlib.Algebra.Polynomial.Algebra\n public import FormalConjecturesForMathlib.Algebra.Polynomial.Basic\n public import FormalConjecturesForMathlib.Algebra.Polynomial.HasseDeriv\n+public import FormalConjecturesForMathlib.Algebra.Polynomial.Irreducible\n public import FormalConjecturesForMathlib.Algebra.Powerfree\n public import FormalConjecturesForMathlib.Algebra.QuadraticAlgebra.Instances\n public import FormalConjecturesForMathlib.Algebra.Ring.PythagorasNumber\n@@ -57,6 +58,7 @@ public import FormalConjecturesForMathlib.Combinatorics.Additive.RestrictedSumse\n public import FormalConjecturesForMathlib.Combinatorics.Additive.VCDim\n public import FormalConjecturesForMathlib.Combinatorics.Basic\n public import FormalConjecturesForMathlib.Combinatorics.Digraph.Tournament\n+public import FormalConjecturesForMathlib.Combinatorics.Enumerative.Partition.Basic\n public import FormalConjecturesForMathlib.Combinatorics.Hypergraph.Basic\n public import FormalConjecturesForMathlib.Combinatorics.Hypergraph.Extremal\n public import FormalConjecturesForMathlib.Combinatorics.Hypergraph.Finite"
-    },
-    {
-      "sha": "5a8ec9444cab7150eb434354b07e0b48b03e6165",
-      "filename": "FormalConjecturesForMathlib/Algebra/Polynomial/Irreducible.lean",
-      "status": "added",
-      "additions": 34,
-      "deletions": 0,
-      "changes": 34,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjecturesForMathlib%2FAlgebra%2FPolynomial%2FIrreducible.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjecturesForMathlib%2FAlgebra%2FPolynomial%2FIrreducible.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FAlgebra%2FPolynomial%2FIrreducible.lean?ref=6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-      "patch": "@@ -0,0 +1,34 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Algebra.Polynomial.SpecificDegree\n+public import Mathlib.Tactic.Linarith\n+\n+@[expose] public section\n+\n+namespace Polynomial\n+\n+variable {K : Type*} [Field K] [LinearOrder K] [IsStrictOrderedRing K]\n+\n+/-- Over a linearly ordered field, `X ^ 2 + a` is irreducible for every `0 < a`, since it has no\n+root. -/\n+theorem irreducible_X_sq_add_C_of_pos {a : K} (ha : 0 < a) : Irreducible (X ^ 2 + C a) :=\n+  irreducible_of_degree_le_three_of_not_isRoot (by simp) fun x hx ↦ by\n+    simp only [IsRoot.def, eval_add, eval_pow, eval_X, eval_C] at hx\n+    nlinarith [sq_nonneg x]\n+\n+end Polynomial"
-    },
-    {
-      "sha": "64f1c6e559da6b86493b24010f811828d8c35bb9",
-      "filename": "FormalConjecturesForMathlib/Combinatorics/Enumerative/Partition/Basic.lean",
-      "status": "added",
-      "additions": 52,
-      "deletions": 0,
-      "changes": 52,
-      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjecturesForMathlib%2FCombinatorics%2FEnumerative%2FPartition%2FBasic.lean",
-      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/6ce14271ba27488a813ff8a1485e125e1e8ab28c/FormalConjecturesForMathlib%2FCombinatorics%2FEnumerative%2FPartition%2FBasic.lean",
-      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjecturesForMathlib%2FCombinatorics%2FEnumerative%2FPartition%2FBasic.lean?ref=6ce14271ba27488a813ff8a1485e125e1e8ab28c",
-      "patch": "@@ -0,0 +1,52 @@\n+/-\n+Copyright 2026 The Formal Conjectures Authors.\n+\n+Licensed under the Apache License, Version 2.0 (the \"License\");\n+you may not use this file except in compliance with the License.\n+You may obtain a copy of the License at\n+\n+    https://www.apache.org/licenses/LICENSE-2.0\n+\n+Unless required by applicable law or agreed to in writing, software\n+distributed under the License is distributed on an \"AS IS\" BASIS,\n+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+See the License for the specific language governing permissions and\n+limitations under the License.\n+-/\n+module\n+\n+public import Mathlib.Combinatorics.Enumerative.Partition.Basic\n+\n+@[expose] public section\n+\n+namespace Nat\n+\n+def partitionNumber : ℕ → ℕ := fun n ↦ Fintype.card (Nat.Partition n)\n+\n+theorem partitionNumber_zero : partitionNumber 0 = 1 := by decide\n+\n+theorem partitionNumber_one : partitionNumber 1 = 1 := by decide\n+\n+-- TODO: shorter/faster proofs\n+/-- The only partitions of `2` are `2` and `1 + 1`. -/\n+lemma Partition.partition_two_parts (p : Partition 2) : p.parts = {2} ∨ p.parts = {1, 1} := by\n+  obtain ⟨s, hpos, hsum⟩ := p\n+  induction s using Multiset.induction_on with\n+  | empty => simp at hsum\n+  | cons a s _ =>\n+    have hs : ∀ {i}, i ∈ s → 0 < i := fun hi ↦ hpos (Multiset.mem_cons_of_mem hi)\n+    have ha : 0 < a := hpos (Multiset.mem_cons_self a s)\n+    rw [Multiset.sum_cons] at hsum\n+    obtain rfl | rfl : a = 1 ∨ a = 2 := by lia\n+    · obtain rfl : s = {1} := partition_one_parts ⟨s, hs, by lia⟩\n+      exact .inr rfl\n+    · obtain rfl : s = 0 := partition_zero_parts ⟨s, hs, by lia⟩\n+      exact .inl rfl\n+\n+theorem partitionNumber_two : partitionNumber 2 = 2 := by\n+  rw [partitionNumber, Fintype.card, Finset.card_eq_two]\n+  refine ⟨⟨{2}, by simp, rfl⟩, ⟨{1, 1}, by simp, rfl⟩, by simp [Partition.ext_iff], ?_⟩\n+  ext p\n+  simpa [Partition.ext_iff] using p.partition_two_parts\n+\n+end Nat"
+      "deletions": 3,
+      "changes": 8,
+      "blob_url": "https://github.com/google-deepmind/formal-conjectures/blob/2a315101d438a68c0ebdf22b7485ac731624efed/FormalConjectures%2FErdosProblems%2F878.lean",
+      "raw_url": "https://github.com/google-deepmind/formal-conjectures/raw/2a315101d438a68c0ebdf22b7485ac731624efed/FormalConjectures%2FErdosProblems%2F878.lean",
+      "contents_url": "https://api.github.com/repos/google-deepmind/formal-conjectures/contents/FormalConjectures%2FErdosProblems%2F878.lean?ref=2a315101d438a68c0ebdf22b7485ac731624efed",
+      "patch": "@@ -89,10 +89,12 @@ theorem erdos_878.parts.iii_all :\n     ¬ ∀ x : ℕ, maxUpTo f x = maxUpTo F x := by\n   sorry\n \n-/-- Is it true that, for all large $x$, $\\max_{n\\le x}f(n)=\\max_{n\\le x}F(n)$? -/\n-@[category research open, question, AMS 11]\n+/-- Is it true that, for all large $x$, $\\max_{n\\le x}f(n)=\\max_{n\\le x}F(n)$?\n+\n+This is false, as formalized in Lean 4 by Ilia Pauzner using Gemini 4 Argon. -/\n+@[category research solved, question, AMS 11, formal_proof using formal_conjectures at \"https://github.com/ilpauzner/formal-conjectures/blob/b7742e7d900ca30503c0dd4c940625a6d9cf0a0c/FormalConjectures/ErdosProblems/878.lean#L435\"]\n theorem erdos_878.parts.iii_eventually :\n-    ∀ᶠ x : ℕ in atTop, maxUpTo f x = maxUpTo F x := by\n+    ¬ ∀ᶠ x : ℕ in atTop, maxUpTo f x = maxUpTo F x := by\n   sorry\n \n def erdos_878.parts.iv.answer : ℕ → ℝ := by sorry"
     }
   ]
 }
