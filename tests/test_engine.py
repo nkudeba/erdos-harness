@@ -1933,3 +1933,18 @@ class Stage(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WebCheckWiring(unittest.TestCase):
+    """2026-10-21: the web caller was attached to the literature gate's search, which claim checks never see."""
+    def _h(self, **args):
+        h = H.Harness.__new__(H.Harness)
+        h.args = __import__("argparse").Namespace(**{"benchmark": False, "masked": False, "engine_web_check": "off", **args})
+        h._web_caller = lambda: "WEB"
+        return h
+
+    def test_the_claim_checks_search_carries_the_web_caller_when_on(self):
+        self.assertEqual(self._h(engine_web_check="on")._engine_search().web, "WEB")
+        self.assertIsNone(self._h()._engine_search().web)
+        self.assertIsNone(self._h(engine_web_check="on", masked=True)._engine_search().web)
+        self.assertIsNone(self._h(engine_web_check="on", benchmark=True)._engine_search())

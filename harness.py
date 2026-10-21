@@ -8091,12 +8091,15 @@ class Harness:
             hits = L.search(query, datetime.now(timezone.utc).date() + timedelta(days=1), per_page=8)
             return [{"title": w.get("title"), "year": (w.get("publication_date") or "")[:4], "abstract": L.abstract_of(w)}
                     for w in hits]
-        return search
+        # --engine-web-check on: the claim checks' search also carries a web-enabled caller (`.web`), used on claims
+        # worth significance 2 or more. It was first attached to the literature GATE's search, which the claim checks
+        # never see, so #691's significance-2 rung was checked against OpenAlex alone (2026-10-21).
+        on = getattr(self.args, "engine_web_check", "off") == "on" and not getattr(self.args, "masked", False)
+        return LiteratureSearch(search, self._web_caller() if on else None)
 
     def _literature_search(self):
         """OpenAlex, mathematics papers only, for the literature gate; None on a benchmark or masked run, where a paper
-        could reveal the published answer to the item. With --engine-web-check on it also carries a web-enabled
-        caller (`.web`), which the literature check uses on claims worth significance 2 or more."""
+        could reveal the published answer to the item."""
         if getattr(self.args, "benchmark", False) or getattr(self.args, "masked", False):
             return None
         import library as L
@@ -8106,8 +8109,7 @@ class Harness:
                             extra_filter="primary_topic.field.id:26")
             return [{"title": w.get("title"), "year": (w.get("publication_date") or "")[:4], "abstract": L.abstract_of(w)}
                     for w in hits]
-        web = self._web_caller() if getattr(self.args, "engine_web_check", "off") == "on" else None
-        return LiteratureSearch(search, web)
+        return search
 
     def _web_caller(self):
         """`web(purpose, prompt, budget) -> (text, cost)`: one WebSearch/WebFetch call (ClaudeCliBackend.complete_web),
