@@ -512,6 +512,45 @@
       "tier": "Demonstrated"
     },
     {
+      "id": 419,
+      "statement": "If $\\tau(n)$ counts the number of divisors of $n$, then what is the set of limit points of\\[\\frac{\\tau((n+1)!)}{\\tau(n!)}?\\]",
+      "status": "Solved",
+      "state": "solved (lean)",
+      "tags": [
+        "number theory",
+        "factorials"
+      ],
+      "score": 99,
+      "harness": "Verified",
+      "rationale": [
+        "A saved full proof passed the local Lean regression and standard-axiom audit (or a blind benchmark run's proof passed audit.py and is kept in benchmarks/timesplit/evidence).",
+        "This is demonstrated harness capability on its frozen formulation, not a calibrated probability of a fresh run."
+      ],
+      "requirements": [
+        "Replay the verified proof and preserve statement faithfulness when testing future harness changes."
+      ],
+      "formal": "External Lean-verified resolution reported.",
+      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
+      "signals": [
+        {
+          "label": "Saved, regression-checked full harness proof",
+          "points": 99
+        }
+      ],
+      "partial": null,
+      "url": "https://www.erdosproblems.com/419",
+      "manual": false,
+      "prize": "no",
+      "evidence": {
+        "best": "verified",
+        "runs": 5,
+        "benchmarkRuns": 5,
+        "certifiedMax": 18
+      },
+      "rank": 12,
+      "tier": "Demonstrated"
+    },
+    {
       "id": 476,
       "statement": "Let $A\\subseteq \\mathbb{F}_p$. Let\\[A\\hat{+}A = \\{ a+b : a\\neq b \\in A\\}.\\]Is it true that\\[\\lvert A\\hat{+}A\\rvert \\geq \\min(2\\lvert A\\rvert-3,p)?\\]",
       "status": "Solved",
@@ -547,7 +586,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 12,
+      "rank": 13,
       "tier": "Demonstrated"
     },
     {
@@ -592,7 +631,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 13,
+      "rank": 14,
       "tier": "Demonstrated"
     },
     {
@@ -630,7 +669,7 @@
         "benchmarkRuns": 1,
         "certifiedMax": 3
       },
-      "rank": 14,
+      "rank": 15,
       "tier": "Demonstrated"
     },
     {
@@ -676,7 +715,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 15,
+      "rank": 16,
       "tier": "Demonstrated"
     },
     {
@@ -724,7 +763,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 16,
+      "rank": 17,
       "tier": "Demonstrated"
     },
     {
@@ -776,7 +815,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 17,
+      "rank": 18,
       "tier": "Demonstrated"
     },
     {
@@ -821,7 +860,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 18,
+      "rank": 19,
       "tier": "Demonstrated"
     },
     {
@@ -859,7 +898,7 @@
         "benchmarkRuns": 4,
         "certifiedMax": 10
       },
-      "rank": 19,
+      "rank": 20,
       "tier": "Demonstrated"
     },
     {
@@ -904,7 +943,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 20,
+      "rank": 21,
       "tier": "Demonstrated"
     },
     {
@@ -952,7 +991,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 21,
+      "rank": 22,
       "tier": "Demonstrated"
     },
     {
@@ -1042,7 +1081,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 22,
+      "rank": 23,
       "tier": "Promising"
     },
     {
@@ -1113,7 +1152,7 @@
         ],
         "searchFloor": null
       },
-      "rank": 23,
+      "rank": 24,
       "tier": "Promising"
     },
     {
@@ -1183,7 +1222,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 24,
+      "rank": 25,
       "tier": "Plausible"
     },
     {
@@ -1261,7 +1300,7 @@
         "sources": [],
         "searchFloor": null
       },
-      "rank": 25,
+      "rank": 26,
       "tier": "Plausible"
     },
     {
@@ -1322,7 +1361,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 26,
+      "rank": 27,
       "tier": "Plausible"
     },
     {
@@ -1370,7 +1409,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 27,
+      "rank": 28,
       "tier": "Plausible"
     },
     {
@@ -1424,7 +1463,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 28,
+      "rank": 29,
       "tier": "Plausible"
     },
     {
@@ -1476,7 +1515,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 29,
+      "rank": 30,
       "tier": "Plausible"
     },
     {
@@ -1529,7 +1568,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 30,
+      "rank": 31,
       "tier": "Plausible"
     },
     {
@@ -1582,7 +1621,7 @@
         "benchmarkRuns": 0,
         "certifiedMax": 0
       },
-      "rank": 31,
+      "rank": 32,
       "tier": "Plausible"
     },
     {
@@ -1635,60 +1674,6 @@
         "runs": 1,
         "benchmarkRuns": 1,
         "certifiedMax": 0
-      },
-      "rank": 32,
-      "tier": "Plausible"
-    },
-    {
-      "id": 419,
-      "statement": "If $\\tau(n)$ counts the number of divisors of $n$, then what is the set of limit points of\\[\\frac{\\tau((n+1)!)}{\\tau(n!)}?\\]",
-      "status": "Solved",
-      "state": "solved (lean)",
-      "tags": [
-        "number theory",
-        "factorials"
-      ],
-      "score": 66,
-      "harness": "Partial result",
-      "rationale": [
-        "A resolution is known; the task is to reconstruct a complete faithful formal proof.",
-        "The catalogue reports a Lean-verified resolution; this is external evidence, not a harness success.",
-        "Arithmetic and divisibility match the existing successful proof corpus.",
-        "Local activity exists, but no saved verified full solution is recorded. Triage, partial work and credit interruptions are not mathematical impossibility evidence."
-      ],
-      "requirements": [
-        "Identify the reusable prerequisites without treating an external proof as an autonomous solve.",
-        "Use Mathlib arithmetic/factorization lemmas and exact certificates."
-      ],
-      "formal": "External Lean-verified resolution reported.",
-      "review": "Automated assessment from the complete statement, solution-context signals, catalogue metadata and available local results. Confidence is low for untested problems.",
-      "signals": [
-        {
-          "label": "Base: known resolution",
-          "points": 44
-        },
-        {
-          "label": "External Lean proof exists",
-          "points": 15
-        },
-        {
-          "label": "Library fit: number theory",
-          "points": 5
-        },
-        {
-          "label": "Compact statement",
-          "points": 2
-        }
-      ],
-      "partial": null,
-      "url": "https://www.erdosproblems.com/419",
-      "manual": false,
-      "prize": "no",
-      "evidence": {
-        "best": "partial",
-        "runs": 5,
-        "benchmarkRuns": 5,
-        "certifiedMax": 18
       },
       "rank": 33,
       "tier": "Plausible"
@@ -10771,7 +10756,7 @@
         "best": "partial",
         "runs": 4,
         "benchmarkRuns": 4,
-        "certifiedMax": 12
+        "certifiedMax": 23
       },
       "rank": 196,
       "tier": "Difficult"
