@@ -842,6 +842,26 @@ improvement over the skeleton in force".
 - First end-to-end time-split solve by the campaign's pipeline: dev #419 (scout, then Lean, audit PASS, unassisted;
   `benchmarks/timesplit/evidence/419/`).
 
+## Campaign targets and novelty (2026-10-20)
+
+- **A problem split into parts is attacked part by part.**
+  - A formal-conjectures file with no main theorem used to be skipped. Its `parts.*` are separate questions, each
+    tagged open or solved.
+  - `prep` freezes the first OPEN part (`timesplit.open_parts`, `parse_fc(part=...)`). `screen.py` and
+    `lean_statement` read it from `resolution/fc/<n>.part`.
+  - `resolution.py requeue-parts` returns skipped problems with an open part to the queue, after the builds.
+  - Of nine such problems, 13 of 17 open parts compile. #687 (a definition from another file) and #766 (a parse
+    error) stay skipped.
+  - `parse_fc` follows local notations as dependencies (#436's `Λ`). It reads a theorem's category from the attributes
+    above it when there is no docstring.
+- **`--engine-web-check on`** (on for every campaign tier; never on a benchmark or masked run, where
+  `_literature_search` is None):
+  - A claim the judges call new at significance 2 or more gets one web-enabled search: arXiv, MathOverflow, the site's
+    forum and claims pages.
+  - The search must list its queries. A source it finds makes the claim `valid-known`.
+  - About $0.07–1.50 a claim. OpenAlex alone saw titles and abstracts and never the site's claims, where AI-assisted
+    results appear first.
+
 ## Discovery fixes and options (2026-09-24)
 
 `docs/discovery-limits-2026-09-24.md` is the audit behind these. The **fixes are on by default** and change

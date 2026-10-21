@@ -77,20 +77,20 @@ DEFAULTS = {
     # The ripeness screen (REPORT 3.8): the map and two SETTLE CHANCE draws, no sessions. The scout resumes its run.
     # --engine-progress-rate: below the pass bar, judges also rate each draw's progress line (the build track, below).
     "screen": {"total": 12.0, "pass": 0.3, "control": 0.25,
-               "flags": "--engine-objective resolve --engine-literature-scan --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
+               "flags": "--engine-objective resolve --engine-literature-scan --engine-web-check on --engine-sessions 0 --engine-deep-budget 0 --engine-gap-rounds 0 "
                         "--engine-settle-draws 2 --engine-intent-judges 2 --engine-progress-rate --results-library on"},
     "scout": {"total": 18.0,
-              "flags": "--engine-objective resolve --engine-literature-scan --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
+              "flags": "--engine-objective resolve --engine-literature-scan --engine-web-check on --engine-settle-draws 2 --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 --engine-core-share 0.67 "
                        "--engine-deep-budget 5 --engine-gap-rounds 1 --engine-gap-max 1 --engine-session-legs 2 "
                        "--results-library on"},
     "deep": {"extra": 40.0,
-             "flags": "--engine-objective resolve --engine-literature-scan --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 2 "
+             "flags": "--engine-objective resolve --engine-literature-scan --engine-web-check on --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 2 "
                       "--engine-core-share 0.67 --engine-deep-budget 5 --engine-marathon-legs 2 --engine-marathon-leg-budget 8 "
                       "--engine-gap-rounds 2 --engine-gap-max 2 --engine-session-legs 3 --results-library on"},
     # The analytical deep tier for the new-mathematics track: the research program (harness `engine_program`), a proof
     # skeleton whose glue is refereed and whose lemmas are attacked and judged one by one, resuming the scout's run.
     "program": {"extra": 90.0,
-                "flags": "--engine-objective resolve --engine-literature-scan --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 "
+                "flags": "--engine-objective resolve --engine-literature-scan --engine-web-check on --engine-intent-judges 2 --engine-sessions 3 --engine-rounds 1 "
                          "--engine-core-share 0.67 --engine-deep-budget 5 --engine-program-cycles 6 "
                          "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
                          "--engine-session-legs 3 --engine-gap-rounds 2 --engine-gap-max 2 --results-library on"},
@@ -106,7 +106,7 @@ DEFAULTS = {
     # establish lemmas or rungs, within `max_passes` and `max_spend`; build passes take at most `share` of the daily cap
     # while the queue has screens waiting.
     "build": {"extra": 90.0, "min_significance": 2, "share": 0.6, "max_passes": 4, "max_spend": 400.0,
-              "flags": "--engine-objective resolve --engine-literature-scan --engine-intent-judges 2 --engine-sessions 0 "
+              "flags": "--engine-objective resolve --engine-literature-scan --engine-web-check on --engine-intent-judges 2 --engine-sessions 0 "
                        "--engine-deep-budget 0 --engine-gap-rounds 1 --engine-gap-max 1 --engine-program-cycles 8 "
                        "--engine-program-budget 80 --engine-program-session-budget 4 --engine-program-lemmas 3 "
                        "--engine-session-legs 3 --results-library on"},

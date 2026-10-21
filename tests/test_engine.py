@@ -1837,6 +1837,37 @@ class Literature(unittest.TestCase):
         self.assertEqual(len(rec["search_errors"]), 3)
 
 
+    def _web(self, answer):
+        calls = []
+
+        def web(purpose, prompt, budget):
+            calls.append((purpose, budget))
+            return "```json\n" + json.dumps(answer) + "\n```", 0.4
+        return web, calls
+
+    def test_the_web_demotes_a_significant_claim_it_finds_published(self):
+        # 2026-10-20, operator: the judges call recalled results "known" and miss the site's AI-assisted claims
+        web, calls = self._web({"verdict": "known", "cite": "erdosproblems.com/forum/thread/455, claim of 2026-08-01",
+                                "searched": ["convex prime chains liminf q_n/n^2"], "fetched": []})
+        search = H.LiteratureSearch(lambda q: [], web)
+        claim = {"statement": "liminf >= 0.54", "type": "QUANT", "validation": {"novelty": {"significance": 2}}}
+        rec = H.engine_literature_check(self._call("new"), search, H.EngineSettings(), "PROBLEM", claim)
+        self.assertEqual((rec["verdict"], rec["source"]), ("known", "web"))
+        self.assertIn("forum/thread/455", rec["cite"])
+        self.assertEqual(calls, [("engine-novelty-web", 1.5)])
+        self.assertAlmostEqual(rec["cost"], 0.1 + 0.4)
+
+    def test_the_web_decides_nothing_without_a_search_and_skips_minor_claims(self):
+        web, calls = self._web({"verdict": "known", "cite": "memory", "searched": []})
+        search = H.LiteratureSearch(lambda q: [], web)
+        major = {"statement": "x", "type": "QUANT", "validation": {"novelty": {"significance": 3}}}
+        rec = H.engine_literature_check(self._call("new"), search, H.EngineSettings(), "PROBLEM", major)
+        self.assertEqual((rec["verdict"], rec["web"]["verdict"]), ("unchecked", "unchecked"))   # nothing searched
+        minor = {"statement": "x", "type": "QUANT", "validation": {"novelty": {"significance": 1}}}
+        H.engine_literature_check(self._call("new"), search, H.EngineSettings(), "PROBLEM", minor)
+        self.assertEqual(len(calls), 1)                                  # significance 1: no web call
+
+
 class Stage(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

@@ -4327,6 +4327,15 @@ End with exactly one ```json block:
 {{"verdict": "new" | "known" | "routine", "cite": "<title and year, or null>", "nearest": "<the closest paper and why it falls short, or null>"}}"""
 
 
+class LiteratureSearch:
+    """The engine's literature search: OpenAlex when called, plus `.web`, a web-enabled caller or None."""
+    def __init__(self, search, web=None):
+        self.search, self.web = search, web
+
+    def __call__(self, query):
+        return self.search(query)
+
+
 def engine_literature_check(call, search, s: "EngineSettings", statement: str, c: dict) -> dict:
     """For a claim the judges called new: search the literature for it, then ask whether a paper found contains it.
     `search(query) -> [{"title", "year", "abstract"}]` (OpenAlex in the Harness). A search that fails leaves the claim
@@ -4351,18 +4360,49 @@ def engine_literature_check(call, search, s: "EngineSettings", statement: str, c
                 seen.add(key)
                 papers.append(w)
     rec["papers"] = [{"title": w.get("title"), "year": w.get("year")} for w in papers][:24]
-    if not papers:
-        rec["verdict"] = "unchecked"
-        return rec
-    body = "\n\n".join(f"[{i}] {w.get('title')} ({w.get('year')})\n{clip_middle(w.get('abstract') or '(no abstract)', 1500)}"
-                       for i, w in enumerate(papers[:24], 1))
-    jt, jc, jerr = _discovery_call(call, "engine-novelty-lit", LIT_NOVELTY_PROMPT.format(claim=claim, papers=body),
-                                   s.judge_effort, s.novelty_budget)
-    rec["cost"] = round(rec["cost"] + jc, 4)
-    j = json_tail_any(jt) if jt else {"error": jerr}
-    rec.update({k: j.get(k) for k in ("verdict", "cite", "nearest", "error") if j.get(k) is not None})
+    if papers:
+        body = "\n\n".join(f"[{i}] {w.get('title')} ({w.get('year')})\n{clip_middle(w.get('abstract') or '(no abstract)', 1500)}"
+                           for i, w in enumerate(papers[:24], 1))
+        jt, jc, jerr = _discovery_call(call, "engine-novelty-lit", LIT_NOVELTY_PROMPT.format(claim=claim, papers=body),
+                                       s.judge_effort, s.novelty_budget)
+        rec["cost"] = round(rec["cost"] + jc, 4)
+        j = json_tail_any(jt) if jt else {"error": jerr}
+        rec.update({k: j.get(k) for k in ("verdict", "cite", "nearest", "error") if j.get(k) is not None})
     rec.setdefault("verdict", "unchecked")
+    # The web (2026-10-20, operator: the judges call recalled results "known" and miss claims; "there's a pretty easy
+    # way to fix that, no?"). OpenAlex gives titles and abstracts only, and nothing of the site's forum and claims
+    # pages, where AI-assisted results appear first. A claim worth significance 2 or more gets one web-enabled search,
+    # which must list what it searched; with nothing searched, it decides nothing.
+    web = getattr(search, "web", None)
+    sig = ((c.get("validation") or {}).get("novelty") or {}).get("significance") or 0
+    if web is not None and rec["verdict"] not in ("known", "routine") and sig >= 2:
+        wt, wc = web("engine-novelty-web", LIT_WEB_PROMPT.format(statement=clip_middle(statement, 4000), claim=claim), 1.5)
+        rec["cost"] = round(rec["cost"] + float(wc or 0.0), 4)
+        w = json_tail_any(wt) if wt else {}
+        searched = [str(q) for q in (w.get("searched") or []) if str(q).strip()]
+        rec["web"] = {"verdict": w.get("verdict") if searched else "unchecked", "cite": w.get("cite"),
+                      "nearest": w.get("nearest"), "searched": searched[:8], "fetched": (w.get("fetched") or [])[:8]}
+        if searched and w.get("verdict") in ("known", "routine"):
+            rec.update({"verdict": w["verdict"], "cite": w.get("cite"), "source": "web"})
     return rec
+
+
+LIT_WEB_PROMPT = """You check whether a mathematical result is already known. Search the web: arXiv, MathOverflow, the
+problem's erdosproblems.com page, its forum thread and its proof-claims page (where AI-assisted results often appear
+first), and journals as web search finds them. Use at most 6 searches and 6 fetches.
+
+THE PROBLEM'S FORMAL STATEMENT:
+{statement}
+
+THE RESULT TO CHECK:
+{claim}
+
+Answer with ONE json object and nothing after it:
+{{"verdict": "known" | "routine" | "new" | "unchecked", "cite": "<the source that states it or something stronger, with its URL>" or null,
+ "nearest": "<the closest result you found, with its URL>" or null, "searched": ["<every query you ran>"],
+ "fetched": ["<every URL you opened>"]}}
+"known": a paper, preprint, forum post or proof claim states this result or a stronger one. "routine": it follows in a
+few lines from a stated result. "new": you searched and found neither. "unchecked": the search failed."""
 
 
 DEEP_PLAN_PROMPT = """You lead a research team on an OPEN problem. The team has finished its rounds. One researcher now gets a much larger
@@ -8055,7 +8095,8 @@ class Harness:
 
     def _literature_search(self):
         """OpenAlex, mathematics papers only, for the literature gate; None on a benchmark or masked run, where a paper
-        could reveal the published answer to the item."""
+        could reveal the published answer to the item. With --engine-web-check on it also carries a web-enabled
+        caller (`.web`), which the literature check uses on claims worth significance 2 or more."""
         if getattr(self.args, "benchmark", False) or getattr(self.args, "masked", False):
             return None
         import library as L
@@ -8065,7 +8106,38 @@ class Harness:
                             extra_filter="primary_topic.field.id:26")
             return [{"title": w.get("title"), "year": (w.get("publication_date") or "")[:4], "abstract": L.abstract_of(w)}
                     for w in hits]
-        return search
+        web = self._web_caller() if getattr(self.args, "engine_web_check", "off") == "on" else None
+        return LiteratureSearch(search, web)
+
+    def _web_caller(self):
+        """`web(purpose, prompt, budget) -> (text, cost)`: one WebSearch/WebFetch call (ClaudeCliBackend.complete_web),
+        checked against the run budget, logged with its own cost and kept as a transcript, like `_discovery_caller`.
+        A failure returns no text: the check it serves stays unchecked. Never on a benchmark or masked run."""
+        def web(purpose, prompt, budget):
+            self._check_run_budget(purpose)
+            backend = self._fresh_backend()
+            if backend is None or isinstance(backend, MaskedBackend):
+                return "", 0.0
+            prompt = self._with_research_guidance(purpose, prompt)
+            self.log.event("llm", "request", purpose=purpose, chars=len(prompt), budget=budget, web=True)
+            t0 = time.time()
+            try:
+                text = backend.complete_web(purpose, prompt, budget_usd=budget, max_turns=14)
+            except RuntimeError as e:
+                meta = dict(getattr(backend, "last_meta", {}) or {})
+                self.log.event("llm", "response_failed", purpose=purpose, cost_usd=meta.get("cost_usd"), web=True)
+                if ClaudeCliBackend.HARD_RE.search(str(e)):
+                    raise
+                return "", float(meta.get("cost_usd") or 0.0)
+            meta = dict(getattr(backend, "last_meta", {}) or {})
+            self.log.event("llm", "response", purpose=purpose, chars=len(text), secs=round(time.time() - t0, 1),
+                           cost_usd=meta.get("cost_usd"), turns=meta.get("turns"), tokens=meta.get("tokens"), web=True)
+            (self.run_dir / "transcripts").mkdir(exist_ok=True)
+            n = len(list((self.run_dir / "transcripts").glob("*.md"))) + 1
+            (self.run_dir / "transcripts" / f"{n:03d}-{purpose}.md").write_text(
+                f"# {purpose}\n\n## prompt\n\n{prompt}\n\n## response\n\n{text}\n")
+            return text, float(meta.get("cost_usd") or 0.0)
+        return web
 
     def _stage_engine(self) -> dict:
         """--discover-mode engine: the research engine in place of the discovery rounds. It writes engine.json and
@@ -14974,6 +15046,10 @@ def build_parser() -> argparse.ArgumentParser:
                            "sent back once); 0 restores the old behaviour, where the cycle's plan was simply lost")
     runp.add_argument("--models", default=None, help="comma-separated model ids rotated across agentic attempts from round 2 (ensembles)")
     runp.add_argument("--literature-web", action="store_true", help="give the literature stage WebSearch/WebFetch (erdosproblems.com, forum, arXiv)")
+    runp.add_argument("--engine-web-check", choices=["on", "off"], default="off",
+                      help="engine: a claim the judges call new at significance 2 or more gets one web-enabled search "
+                           "(arXiv, MathOverflow, the site's forum and claims) before it stays new; never on a benchmark or "
+                           "masked run")
     runp.add_argument("--web-budget", type=float, default=3.0, help="USD cap for the web-enabled literature call")
     runp.add_argument("--subgoal-prover", default=None, help="module:function implementing prove(goal, timeout) -> proof|None for isolated sorry goals")
     runp.add_argument("--no-cascade", action="store_true", help="disable the free specialist tactic cascade on sorry holes (ablation)")
