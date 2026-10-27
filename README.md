@@ -3,6 +3,9 @@
 An LLM + Lean 4 harness for attempting [Erdős problems](https://www.erdosproblems.com), built
 around one principle: **the LLM is sampled, never trusted — Lean is the ground truth.**
 
+Its rankings and run evidence feed the [Erdős Atlas](https://github.com/nkudeba/erdos-atlas), a searchable
+ranking of all 1,217 problems in the catalogue. A personal project by Nick Kudeba, built with Claude Code.
+
 ```
                  ┌─────────────┐
    problem.json  │  literature │  what's already known? proof route? witnesses?
@@ -261,3 +264,14 @@ A resumed run rechecks complete `sandbox/*/Attempt.lean` artifacts before spendi
 Mechanical verification is saved before the language audit. A provider outage therefore preserves that milestone while leaving semantic verification incomplete. Account-credit failures stop immediately. Failed-call costs are counted when the provider reports them; unavailable costs remain labelled unavailable. A bounded literature lookup can fall back to supplied source notes, but authentication and account-limit failures do not trigger that fallback.
 
 `--informal-context notes.md` attaches explicitly attributed informal guidance to a run; this makes the run assisted. External Lean files and Lean code fences are rejected. `geometry_witness.affine_blocking_witness` converts exact projective point configurations into rational affine coordinates and checks their incidence certificate; it is a precheck, and Lean must still prove the target. Neither option was used to seed the three proof-generation runs in [the September candidate experiment](experiments/atlas-top3/REPORT.md).
+
+## Sources and credits
+
+- Problem statements, statuses and discussion come from [erdosproblems.com](https://www.erdosproblems.com),
+  maintained by T. F. Bloom, and the open-problem metadata from
+  [teorth/erdosproblems](https://github.com/teorth/erdosproblems). `atlas-data/forum/` keeps snapshots of the
+  site's problem pages and forum threads, which the Atlas and the literature stage read. Their text and
+  comments belong to the site and to the people who wrote them.
+- `experiments/atlas-top3/275-paper.pdf` and its text are P. Balister, B. Bollobás, R. Morris,
+  J. Sahasrabudhe and M. Tiba, "Covering intervals with arithmetic progressions", the paper that experiment
+  worked from. Copyright belongs to its authors.
